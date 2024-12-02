@@ -1,3 +1,18 @@
+## 2.0.5 (2024-12-02)
+
+### 🚀 Features
+
+- **api:** fix framework workflow payload preview ([#7137](https://github.com/novuhq/novu/pull/7137))
+
+### 🩹 Fixes
+
+- **node:** Allow setting includeInactiveChannels to false ([129355e269](https://github.com/novuhq/novu/commit/129355e269))
+
+### ❤️  Thank You
+
+- George Djabarov @djabarovgeorge
+- Sokratis Vidros @SokratisVidros
+
 ## 2.0.4 (2024-11-29)
 
 ### 🚀 Features
