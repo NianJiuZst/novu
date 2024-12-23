@@ -1,3 +1,7 @@
+## 2.5.2 (2024-12-23)
+
+This was a version bump only for @novu/stateless to align it with other projects, there were no code changes.
+
 ## 2.5.3 (2024-12-23)
 
 ### 🚀 Features
