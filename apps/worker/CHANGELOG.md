@@ -30,19 +30,21 @@
 - **api-service,dashboard:** Crate of fixes for variable suggestions ([#7360](https://github.com/novuhq/novu/pull/7360))
 - **api:** @novu/api -> @novu/api-service ([#7348](https://github.com/novuhq/novu/pull/7348))
 - **framework:** Remove @novu/shared dependency temporarily ([#7337](https://github.com/novuhq/novu/pull/7337))
+- **api, worker, ws:** reintroduce New Relic import in instrument files ([#7275](https://github.com/novuhq/novu/pull/7275))
 - **root:** update newrelic and @types/newrelic to latest versions ([#7269](https://github.com/novuhq/novu/pull/7269))
+- **api, webhook, worker, ws:** remove duplicate New Relic import in bootstrap file ([#7161](https://github.com/novuhq/novu/pull/7161))
 - **js:** Remove @novu/shared dependency" ([#7206](https://github.com/novuhq/novu/pull/7206))
 - **js:** Remove @novu/shared dependency ([#6906](https://github.com/novuhq/novu/pull/6906))
 
 ### ❤️  Thank You
 
 - Adam Chmara @ChmaraX
-- Biswajeet Das
-- Dima Grossman
+- Biswajeet Das @BiswaViraj
+- Dima Grossman @scopsy
 - GalTidhar @tatarco
 - George Desipris @desiprisg
 - George Djabarov @djabarovgeorge
-- Himanshu Garg
+- Himanshu Garg @merrcury
 - Pawan Jain
 - Paweł Tymczuk @LetItRock
 - Sokratis Vidros @SokratisVidros
@@ -79,7 +81,9 @@
 - **api-service,dashboard:** Crate of fixes for variable suggestions ([#7360](https://github.com/novuhq/novu/pull/7360))
 - **api:** @novu/api -> @novu/api-service ([#7348](https://github.com/novuhq/novu/pull/7348))
 - **framework:** Remove @novu/shared dependency temporarily ([#7337](https://github.com/novuhq/novu/pull/7337))
+- **api, worker, ws:** reintroduce New Relic import in instrument files ([#7275](https://github.com/novuhq/novu/pull/7275))
 - **root:** update newrelic and @types/newrelic to latest versions ([#7269](https://github.com/novuhq/novu/pull/7269))
+- **api, webhook, worker, ws:** remove duplicate New Relic import in bootstrap file ([#7161](https://github.com/novuhq/novu/pull/7161))
 - **js:** Remove @novu/shared dependency" ([#7206](https://github.com/novuhq/novu/pull/7206))
 - **js:** Remove @novu/shared dependency ([#6906](https://github.com/novuhq/novu/pull/6906))
 
@@ -94,43 +98,4 @@
 - Himanshu Garg
 - Pawan Jain
 - Paweł Tymczuk @LetItRock
-- Sokratis Vidros @SokratisVidros
-
-## 2.3.3 (2024-11-26)
-
-### 🚀 Features
-
-- **dashboard:** Codemirror liquid filter support ([#7122](https://github.com/novuhq/novu/pull/7122))
-- **root:** add support chat app ID to environment variables in d… ([#7120](https://github.com/novuhq/novu/pull/7120))
-- **root:** Add base Dockerfile for GHCR with Node.js and dependencies ([#7100](https://github.com/novuhq/novu/pull/7100))
-
-### 🩹 Fixes
-
-- **api:** Migrate subscriber global preferences before workflow preferences ([#7118](https://github.com/novuhq/novu/pull/7118))
-- **api, dal, framework:** fix the uneven and unused dependencies ([#7103](https://github.com/novuhq/novu/pull/7103))
-
-### 🧱 Updated Dependencies
-
-- Updated @novu/react to 2.6.2
-
-### ❤️  Thank You
-
-- George Desipris @desiprisg
-- Himanshu Garg @merrcury
-- Richard Fontein @rifont
-
-## 2.0.2 (2024-11-19)
-
-### 🚀 Features
-
-- **framework:** CJS/ESM for framework ([#6707](https://github.com/novuhq/novu/pull/6707))
-- **react-native:** Add a react native npm package for hooks ([#6556](https://github.com/novuhq/novu/pull/6556))
-
-### 🩹 Fixes
-
-- **react-native:** Do not create a tarball locally during build ([0cea280c1](https://github.com/novuhq/novu/commit/0cea280c1))
-
-### ❤️  Thank You
-
-- Dima Grossman
 - Sokratis Vidros @SokratisVidros
