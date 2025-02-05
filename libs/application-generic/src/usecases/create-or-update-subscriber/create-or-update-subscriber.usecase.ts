@@ -36,6 +36,12 @@ export class CreateOrUpdateSubscriberUseCase {
   ) {}
 
   async execute(command: CreateOrUpdateSubscriberCommand) {
+    const existingSubscriber = await this.getExistingSubscriber(command);
+
+    if (existingSubscriber) {
+      return await this.updateSubscriber(command, existingSubscriber);
+    }
+
     return await this.eventsDistributedLockService.applyLock<SubscriberEntity>(
       {
         resource: buildDedupSubscriberKey({
