@@ -84,7 +84,7 @@ type VariableSelectProps = {
   value?: string;
   options: Array<{ label: string; value: string }>;
   onChange: (value: string) => void;
-  onSelect: () => void;
+  onSelect?: () => void;
   leftIcon?: React.ReactNode;
   title?: string;
   placeholder?: string;
