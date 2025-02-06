@@ -9,6 +9,7 @@ import { ApiServiceLevelEnum } from '@novu/shared';
 import { HoverCard, HoverCardPortal, HoverCardContent, HoverCardTrigger } from '@/components/primitives/hover-card';
 import { ROUTES } from '@/utils/routes';
 import { Link } from 'react-router-dom';
+import { CopyButton } from '@/components/primitives/copy-button';
 
 type IntegrationFormData = {
   name: string;
@@ -166,7 +167,13 @@ export function GeneralSettings({
               Identifier
             </FormLabel>
             <FormControl>
-              <Input id="identifier" {...field} readOnly={mode === 'update'} hasError={!!fieldState.error} />
+              <Input
+                id="identifier"
+                trailingNode={mode === 'update' ? <CopyButton valueToCopy={field.value} /> : undefined}
+                {...field}
+                disabled={mode === 'update'}
+                hasError={!!fieldState.error}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
