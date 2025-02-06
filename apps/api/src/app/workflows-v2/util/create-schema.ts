@@ -1,4 +1,5 @@
 import { JSONSchemaDto } from '@novu/shared';
+import { add } from 'date-fns';
 
 function determineSchemaType(value: unknown): JSONSchemaDto {
   if (value === null) {
@@ -38,18 +39,30 @@ function determineSchemaType(value: unknown): JSONSchemaDto {
   }
 }
 
-export function buildVariablesSchema(object: unknown) {
+type BuildVariablesSchemaOptions = Partial<{
+  additionalProperties: boolean;
+  required: string[];
+}>;
+
+export function buildVariablesSchema(
+  object: unknown,
+  options: BuildVariablesSchemaOptions = {
+    additionalProperties: true,
+    required: [],
+  }
+) {
   const schema: JSONSchemaDto = {
+    ...options,
     type: 'object',
     properties: {},
-    required: [],
-    additionalProperties: true,
   };
 
   if (object) {
     for (const [key, value] of Object.entries(object)) {
-      if (schema.properties && schema.required) {
+      if (schema.properties) {
         schema.properties[key] = determineSchemaType(value);
+      }
+      if (schema.required) {
         schema.required.push(key);
       }
     }
