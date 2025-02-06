@@ -111,8 +111,8 @@ export function mockSchemaDefaults(schema: JSONSchemaDto, parentPath = 'payload'
  *   }
  * }
  */
-export function keysToObject(paths: string[], showIfVariablesPath?: string[]): Record<string, unknown> {
-  const result = {};
+export function keysToObject<T extends Record<string, unknown>>(paths: string[], showIfVariablesPath?: string[]) {
+  const result = {} as T;
 
   const validPaths = paths
     .filter(hasNamespace)
