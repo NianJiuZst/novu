@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ControlValuesRepository } from '@novu/dal';
-import { ControlValuesLevelEnum } from '@novu/shared';
+import { ControlValuesLevelEnum, Variables } from '@novu/shared';
 import { Instrument, InstrumentUsecase } from '@novu/application-generic';
 
 import { keysToObject } from '../../util/utils';
@@ -12,11 +12,11 @@ export class ExtractVariables {
   constructor(private readonly controlValuesRepository: ControlValuesRepository) {}
 
   @InstrumentUsecase()
-  async execute(command: ExtractVariablesCommand): Promise<Record<string, unknown>> {
+  async execute(command: ExtractVariablesCommand) {
     const controlValues = await this.getControlValues(command);
     const extractedVariables = await this.extractAllVariables(controlValues);
 
-    return keysToObject(extractedVariables);
+    return keysToObject<Variables>(extractedVariables);
   }
 
   private async getControlValues(command: ExtractVariablesCommand) {

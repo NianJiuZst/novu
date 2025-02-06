@@ -37,13 +37,14 @@ export class BuildVariableSchemaUsecase {
           type: 'object',
           description: 'Schema representing the subscriber entity',
           properties: {
+            subscriberId: { type: 'string', description: 'Unique identifier for the subscriber' },
             firstName: { type: 'string', description: "Subscriber's first name" },
             lastName: { type: 'string', description: "Subscriber's last name" },
             email: { type: 'string', description: "Subscriber's email address" },
             phone: { type: 'string', description: "Subscriber's phone number (optional)" },
             avatar: { type: 'string', description: "URL to the subscriber's avatar image (optional)" },
             locale: { type: 'string', description: 'Locale for the subscriber (optional)' },
-            subscriberId: { type: 'string', description: 'Unique identifier for the subscriber' },
+            timezone: { type: 'string', description: 'Timezone for the subscriber (optional)' },
             isOnline: { type: 'boolean', description: 'Indicates if the subscriber is online (optional)' },
             lastOnlineAt: {
               type: 'string',

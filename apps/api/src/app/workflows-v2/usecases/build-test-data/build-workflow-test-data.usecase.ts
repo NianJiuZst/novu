@@ -6,6 +6,7 @@ import {
   StepTypeEnum,
   UserSessionData,
   WorkflowTestDataResponseDto,
+  Variables,
 } from '@novu/shared';
 import {
   GetWorkflowByIdsCommand,
@@ -30,7 +31,16 @@ export class BuildWorkflowTestDataUseCase {
   @InstrumentUsecase()
   async execute(command: WorkflowTestDataCommand): Promise<WorkflowTestDataResponseDto> {
     const workflow = await this.fetchWorkflow(command);
-    const toSchema = this.buildToFieldSchema({ user: command.user, steps: workflow.steps });
+    const variables = await this.extractVariables.execute(
+      ExtractVariablesCommand.create({
+        environmentId: command.user.environmentId,
+        organizationId: command.user.organizationId,
+        userId: command.user._id,
+        workflowId: workflow._id,
+      })
+    );
+    const toSchema = this.buildToFieldSchema({ user: command.user, steps: workflow.steps, variables });
+
     const payloadSchema = await this.resolvePayloadSchema(workflow, command);
     const payloadSchemaMock = this.generatePayloadMock(payloadSchema);
 
@@ -84,38 +94,58 @@ export class BuildWorkflowTestDataUseCase {
   private buildToFieldSchema({
     user,
     steps,
+    variables,
   }: {
     user: UserSessionData;
     steps: NotificationStepEntity[];
+    variables: Variables;
   }): JSONSchemaDto {
-    const hasEmailStep = this.hasStepType(steps, StepTypeEnum.EMAIL);
-    const hasSmsStep = this.hasStepType(steps, StepTypeEnum.SMS);
-
-    const properties: { [key: string]: JSONSchemaDto } = {
-      subscriberId: { type: 'string', default: user._id },
-    };
+    // TODO: add subscriber schema
+    const toSchema = buildVariablesSchema({});
 
     const required: string[] = ['subscriberId'];
+    toSchema.properties!.subscriberId = { type: 'string', default: user._id };
 
-    if (hasEmailStep) {
-      properties.email = { type: 'string', default: user.email ?? '', format: 'email' };
+    if (this.hasStep(steps, StepTypeEnum.EMAIL)) {
+      toSchema.properties!.email = { type: 'string', default: user.email ?? '', format: 'email' };
       required.push('email');
     }
 
-    if (hasSmsStep) {
-      properties.phone = { type: 'string', default: '' };
+    if (this.hasStep(steps, StepTypeEnum.SMS)) {
+      toSchema.properties!.phone = { type: 'string', default: '' };
       required.push('phone');
     }
 
-    return {
-      type: 'object',
-      properties,
-      required,
-      additionalProperties: false,
-    } satisfies JSONSchemaDto;
+    if (variables.subscriber.firstName) {
+      toSchema.properties!.firstName = { type: 'string', default: user.firstName || '' };
+    }
+
+    if (variables.subscriber.lastName) {
+      toSchema.properties!.lastName = { type: 'string', default: user.lastName || '' };
+    }
+
+    if (variables.subscriber.isOnline) {
+      toSchema.properties!.avatar = { type: 'boolean', default: true };
+    }
+
+    if (variables.subscriber.isLastOnline) {
+      toSchema.properties!.avatar = { type: 'string', format: 'date-time', default: new Date().toISOString() };
+    }
+
+    // TODO: add locale as an enum
+    if (variables.subscriber.locale) {
+      toSchema.properties!.locale = { type: 'string', default: '' };
+    }
+
+    // TODO: add timezone as an enum
+    if (variables.subscriber.timezone) {
+      toSchema.properties!.timezone = { type: 'string', default: '' };
+    }
+
+    return toSchema;
   }
 
-  private hasStepType(steps: NotificationStepEntity[], type: StepTypeEnum): boolean {
+  private hasStep(steps: NotificationStepEntity[], type: StepTypeEnum): boolean {
     return steps.some((step) => step.template?.type === type);
   }
 }
