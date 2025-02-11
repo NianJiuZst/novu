@@ -1,13 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ControlValuesRepository, NotificationStepEntity, NotificationTemplateEntity } from '@novu/dal';
-import {
-  ControlValuesLevelEnum,
-  JSONSchemaDto,
-  StepTypeEnum,
-  UserSessionData,
-  WorkflowTestDataResponseDto,
-  Variables,
-} from '@novu/shared';
+import { NotificationStepEntity, NotificationTemplateEntity } from '@novu/dal';
+import { JSONSchemaDto, StepTypeEnum, UserSessionData, WorkflowTestDataResponseDto, Variables } from '@novu/shared';
 import {
   GetWorkflowByIdsCommand,
   GetWorkflowByIdsUseCase,
@@ -128,8 +121,8 @@ export class BuildWorkflowTestDataUseCase {
       toSchema.properties!.avatar = { type: 'boolean', default: true };
     }
 
-    if (variables.subscriber.isLastOnline) {
-      toSchema.properties!.avatar = { type: 'string', format: 'date-time', default: new Date().toISOString() };
+    if (variables.subscriber.lastOnlineAt) {
+      toSchema.properties!.lastOnlineAt = { type: 'string', format: 'date-time', default: new Date().toISOString() };
     }
 
     // TODO: add locale as an enum
