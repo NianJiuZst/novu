@@ -39,10 +39,21 @@ import {
   BuildStepDataCommand,
   BuildStepDataUsecase,
   BuildWorkflowTestDataUseCase,
+  GeneratePreviewCommand,
   GeneratePreviewUsecase,
+  GetWorkflowCommand,
+  GetWorkflowUseCase,
+  ListWorkflowsCommand,
+  ListWorkflowsUseCase,
+  SyncToEnvironmentCommand,
   WorkflowTestDataCommand,
 } from './usecases';
-import { GeneratePreviewCommand } from './usecases/generate-preview/generate-preview.command';
+import { PatchStepCommand, PatchStepUsecase } from './usecases/patch-step-data';
+import { PatchWorkflowCommand, PatchWorkflowUsecase } from './usecases/patch-workflow';
+import { SyncToEnvironmentUseCase } from './usecases/sync-to-environment/sync-to-environment.usecase';
+import { UpsertWorkflowCommand } from './usecases/upsert-workflow/upsert-workflow.command';
+import { UpsertWorkflowUseCase } from './usecases/upsert-workflow/upsert-workflow.usecase';
+import { SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 
 @ApiCommonResponses()
 @Controller({ path: `/workflows`, version: '2' })
