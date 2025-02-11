@@ -6,10 +6,10 @@ import { workflowsCreate } from "../funcs/workflowsCreate.js";
 import { workflowsDelete } from "../funcs/workflowsDelete.js";
 import { workflowsGetStepData } from "../funcs/workflowsGetStepData.js";
 import { workflowsGetWorkflowTestData } from "../funcs/workflowsGetWorkflowTestData.js";
+import { workflowsPatch } from "../funcs/workflowsPatch.js";
 import { workflowsRetrieve } from "../funcs/workflowsRetrieve.js";
 import { workflowsUpdate } from "../funcs/workflowsUpdate.js";
 import { workflowsWorkflowControllerGeneratePreview } from "../funcs/workflowsWorkflowControllerGeneratePreview.js";
-import { workflowsWorkflowControllerPatchWorkflow } from "../funcs/workflowsWorkflowControllerPatchWorkflow.js";
 import { workflowsWorkflowControllerPatchWorkflowStepData } from "../funcs/workflowsWorkflowControllerPatchWorkflowStepData.js";
 import { workflowsWorkflowControllerSearchWorkflows } from "../funcs/workflowsWorkflowControllerSearchWorkflows.js";
 import { workflowsWorkflowControllerSync } from "../funcs/workflowsWorkflowControllerSync.js";
@@ -119,13 +119,19 @@ export class Workflows extends ClientSDK {
     ));
   }
 
-  async workflowControllerPatchWorkflow(
+  /**
+   * Patch subscriber
+   *
+   * @remarks
+   * Patch subscriber by your internal id used to identify the subscriber
+   */
+  async patch(
     patchWorkflowDto: components.PatchWorkflowDto,
     workflowId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
   ): Promise<operations.WorkflowControllerPatchWorkflowResponse> {
-    return unwrapAsync(workflowsWorkflowControllerPatchWorkflow(
+    return unwrapAsync(workflowsPatch(
       this,
       patchWorkflowDto,
       workflowId,

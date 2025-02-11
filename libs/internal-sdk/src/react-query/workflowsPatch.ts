@@ -8,7 +8,7 @@ import {
   UseMutationResult,
 } from "@tanstack/react-query";
 import { NovuCore } from "../core.js";
-import { workflowsWorkflowControllerPatchWorkflow } from "../funcs/workflowsWorkflowControllerPatchWorkflow.js";
+import { workflowsPatch } from "../funcs/workflowsPatch.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
 import * as components from "../models/components/index.js";
@@ -17,55 +17,55 @@ import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
-export type WorkflowsWorkflowControllerPatchWorkflowMutationVariables = {
+export type WorkflowsPatchMutationVariables = {
   patchWorkflowDto: components.PatchWorkflowDto;
   workflowId: string;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
-export type WorkflowsWorkflowControllerPatchWorkflowMutationData =
+export type WorkflowsPatchMutationData =
   operations.WorkflowControllerPatchWorkflowResponse;
 
-export function useWorkflowsWorkflowControllerPatchWorkflowMutation(
+export function useWorkflowsPatchMutation(
   options?: MutationHookOptions<
-    WorkflowsWorkflowControllerPatchWorkflowMutationData,
+    WorkflowsPatchMutationData,
     Error,
-    WorkflowsWorkflowControllerPatchWorkflowMutationVariables
+    WorkflowsPatchMutationVariables
   >,
 ): UseMutationResult<
-  WorkflowsWorkflowControllerPatchWorkflowMutationData,
+  WorkflowsPatchMutationData,
   Error,
-  WorkflowsWorkflowControllerPatchWorkflowMutationVariables
+  WorkflowsPatchMutationVariables
 > {
   const client = useNovuContext();
   return useMutation({
-    ...buildWorkflowsWorkflowControllerPatchWorkflowMutation(client, options),
+    ...buildWorkflowsPatchMutation(client, options),
     ...options,
   });
 }
 
-export function mutationKeyWorkflowsWorkflowControllerPatchWorkflow(): MutationKey {
-  return ["@novu/api", "Workflows", "workflowControllerPatchWorkflow"];
+export function mutationKeyWorkflowsPatch(): MutationKey {
+  return ["@novu/api", "Workflows", "patch"];
 }
 
-export function buildWorkflowsWorkflowControllerPatchWorkflowMutation(
+export function buildWorkflowsPatchMutation(
   client$: NovuCore,
   hookOptions?: RequestOptions,
 ): {
   mutationKey: MutationKey;
   mutationFn: (
-    variables: WorkflowsWorkflowControllerPatchWorkflowMutationVariables,
-  ) => Promise<WorkflowsWorkflowControllerPatchWorkflowMutationData>;
+    variables: WorkflowsPatchMutationVariables,
+  ) => Promise<WorkflowsPatchMutationData>;
 } {
   return {
-    mutationKey: mutationKeyWorkflowsWorkflowControllerPatchWorkflow(),
-    mutationFn: function workflowsWorkflowControllerPatchWorkflowMutationFn({
+    mutationKey: mutationKeyWorkflowsPatch(),
+    mutationFn: function workflowsPatchMutationFn({
       patchWorkflowDto,
       workflowId,
       idempotencyKey,
       options,
-    }): Promise<WorkflowsWorkflowControllerPatchWorkflowMutationData> {
+    }): Promise<WorkflowsPatchMutationData> {
       const mergedOptions = {
         ...hookOptions,
         ...options,
@@ -78,7 +78,7 @@ export function buildWorkflowsWorkflowControllerPatchWorkflowMutation(
           ),
         },
       };
-      return unwrapAsync(workflowsWorkflowControllerPatchWorkflow(
+      return unwrapAsync(workflowsPatch(
         client$,
         patchWorkflowDto,
         workflowId,
