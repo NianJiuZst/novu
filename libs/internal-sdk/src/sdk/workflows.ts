@@ -14,6 +14,7 @@ import { workflowsWorkflowControllerPatchWorkflowStepData } from "../funcs/workf
 import { workflowsWorkflowControllerSearchWorkflows } from "../funcs/workflowsWorkflowControllerSearchWorkflows.js";
 import { workflowsWorkflowControllerSync } from "../funcs/workflowsWorkflowControllerSync.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
+import * as components from "../models/components/index.js";
 import * as operations from "../models/operations/index.js";
 import { unwrapAsync } from "../types/fp.js";
 
@@ -119,12 +120,14 @@ export class Workflows extends ClientSDK {
   }
 
   async workflowControllerPatchWorkflow(
+    patchWorkflowDto: components.PatchWorkflowDto,
     workflowId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
   ): Promise<operations.WorkflowControllerPatchWorkflowResponse> {
     return unwrapAsync(workflowsWorkflowControllerPatchWorkflow(
       this,
+      patchWorkflowDto,
       workflowId,
       idempotencyKey,
       options,

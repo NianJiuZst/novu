@@ -8,13 +8,6 @@ export class ControlsSchema {
   schema: JSONSchemaDto;
 }
 
-export type PatchWorkflowDto = {
-  active?: boolean;
-  name?: string;
-  description?: string;
-  tags?: string[];
-};
-
 export type ListWorkflowResponse = {
   workflows: WorkflowListResponseDto[];
   totalCount: number;

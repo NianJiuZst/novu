@@ -2,13 +2,13 @@ import type {
   CreateWorkflowDto,
   IEnvironment,
   ListWorkflowResponse,
-  PatchWorkflowDto,
   SyncWorkflowDto,
   UpdateWorkflowDto,
   WorkflowResponseDto,
   WorkflowTestDataResponseDto,
 } from '@novu/shared';
 import { delV2, getV2, patchV2, post, postV2, putV2 } from './api.client';
+import { PatchWorkflowDto } from '@novu/api/models/components';
 
 export const getWorkflow = async ({
   environment,

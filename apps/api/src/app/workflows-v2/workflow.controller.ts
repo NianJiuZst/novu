@@ -9,7 +9,6 @@ import {
   Post,
   Put,
   Query,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common/decorators';
 import { ApiTags } from '@nestjs/swagger';
@@ -22,7 +21,6 @@ import {
   GetListQueryParams,
   ListWorkflowResponse,
   PatchStepDataDto,
-  PatchWorkflowDto,
   StepResponseDto,
   SyncWorkflowDto,
   UpdateWorkflowDto,
@@ -31,6 +29,8 @@ import {
   WorkflowResponseDto,
   WorkflowTestDataResponseDto,
 } from '@novu/shared';
+import { PatchWorkflowDto } from './dto/patch-workflow.dto';
+
 import { ApiCommonResponses } from '../shared/framework/response.decorator';
 import { UserAuthentication } from '../shared/framework/swagger/api.key.security';
 import { ParseSlugEnvironmentIdPipe } from './pipes/parse-slug-env-id.pipe';
@@ -39,22 +39,10 @@ import {
   BuildStepDataCommand,
   BuildStepDataUsecase,
   BuildWorkflowTestDataUseCase,
+  GeneratePreviewUsecase,
   WorkflowTestDataCommand,
 } from './usecases';
 import { GeneratePreviewCommand } from './usecases/generate-preview/generate-preview.command';
-import { GeneratePreviewUsecase } from './usecases/generate-preview/generate-preview.usecase';
-import { GetWorkflowCommand } from './usecases/get-workflow/get-workflow.command';
-import { GetWorkflowUseCase } from './usecases/get-workflow/get-workflow.usecase';
-import { ListWorkflowsUseCase } from './usecases/list-workflows/list-workflow.usecase';
-import { ListWorkflowsCommand } from './usecases/list-workflows/list-workflows.command';
-import { PatchStepCommand } from './usecases/patch-step-data';
-import { PatchStepUsecase } from './usecases/patch-step-data/patch-step.usecase';
-import { PatchWorkflowCommand, PatchWorkflowUsecase } from './usecases/patch-workflow';
-import { SyncToEnvironmentCommand } from './usecases/sync-to-environment/sync-to-environment.command';
-import { SyncToEnvironmentUseCase } from './usecases/sync-to-environment/sync-to-environment.usecase';
-import { UpsertWorkflowCommand } from './usecases/upsert-workflow/upsert-workflow.command';
-import { UpsertWorkflowUseCase } from './usecases/upsert-workflow/upsert-workflow.usecase';
-import { SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 
 @ApiCommonResponses()
 @Controller({ path: `/workflows`, version: '2' })
@@ -215,6 +203,7 @@ export class WorkflowController {
   }
 
   @Patch('/:workflowId')
+  @SdkMethodName('patch')
   async patchWorkflow(
     @UserSession(ParseSlugEnvironmentIdPipe) user: UserSessionData,
     @Param('workflowId', ParseSlugIdPipe) workflowIdOrInternalId: string,

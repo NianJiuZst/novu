@@ -1,4 +1,4 @@
-import { PatchWorkflowDto, StepResponseDto, UpdateWorkflowDto, WorkflowResponseDto } from '@novu/shared';
+import { StepResponseDto, UpdateWorkflowDto, WorkflowResponseDto } from '@novu/shared';
 import { createContext, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useBlocker, useNavigate, useParams } from 'react-router-dom';
 
@@ -22,6 +22,7 @@ import { CheckCircleIcon } from 'lucide-react';
 import { RiAlertFill, RiCloseFill } from 'react-icons/ri';
 import { toast } from 'sonner';
 import { showErrorToast, showSavingToast, showSuccessToast } from './toasts';
+import { PatchWorkflowDto } from '@novu/api/models/components';
 
 export type UpdateWorkflowFn = (
   data: UpdateWorkflowDto,

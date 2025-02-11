@@ -3,13 +3,14 @@
  */
 
 import { NovuCore } from "../core.js";
-import { encodeSimple } from "../lib/encodings.js";
+import { encodeJSON, encodeSimple } from "../lib/encodings.js";
 import * as M from "../lib/matchers.js";
 import { compactMap } from "../lib/primitives.js";
 import { safeParse } from "../lib/schemas.js";
 import { RequestOptions } from "../lib/sdks.js";
 import { extractSecurity, resolveGlobalSecurity } from "../lib/security.js";
 import { pathToFunc } from "../lib/url.js";
+import * as components from "../models/components/index.js";
 import {
   ConnectionError,
   InvalidRequestError,
@@ -25,6 +26,7 @@ import { Result } from "../types/fp.js";
 
 export async function workflowsWorkflowControllerPatchWorkflow(
   client: NovuCore,
+  patchWorkflowDto: components.PatchWorkflowDto,
   workflowId: string,
   idempotencyKey?: string | undefined,
   options?: RequestOptions,
@@ -45,6 +47,7 @@ export async function workflowsWorkflowControllerPatchWorkflow(
   >
 > {
   const input: operations.WorkflowControllerPatchWorkflowRequest = {
+    patchWorkflowDto: patchWorkflowDto,
     workflowId: workflowId,
     idempotencyKey: idempotencyKey,
   };
@@ -61,7 +64,7 @@ export async function workflowsWorkflowControllerPatchWorkflow(
     return parsed;
   }
   const payload = parsed.value;
-  const body = null;
+  const body = encodeJSON("body", payload.PatchWorkflowDto, { explode: true });
 
   const pathParams = {
     workflowId: encodeSimple("workflowId", payload.workflowId, {
@@ -73,6 +76,7 @@ export async function workflowsWorkflowControllerPatchWorkflow(
   const path = pathToFunc("/v2/workflows/{workflowId}")(pathParams);
 
   const headers = new Headers(compactMap({
+    "Content-Type": "application/json",
     Accept: "application/json",
     "idempotency-key": encodeSimple(
       "idempotency-key",

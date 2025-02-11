@@ -6,6 +6,7 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
+import * as components from "../components/index.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type WorkflowControllerPatchWorkflowRequest = {
@@ -14,6 +15,7 @@ export type WorkflowControllerPatchWorkflowRequest = {
    * A header for idempotency purposes
    */
   idempotencyKey?: string | undefined;
+  patchWorkflowDto: components.PatchWorkflowDto;
 };
 
 export type WorkflowControllerPatchWorkflowResponseBody = {};
@@ -31,9 +33,11 @@ export const WorkflowControllerPatchWorkflowRequest$inboundSchema: z.ZodType<
 > = z.object({
   workflowId: z.string(),
   "idempotency-key": z.string().optional(),
+  PatchWorkflowDto: components.PatchWorkflowDto$inboundSchema,
 }).transform((v) => {
   return remap$(v, {
     "idempotency-key": "idempotencyKey",
+    "PatchWorkflowDto": "patchWorkflowDto",
   });
 });
 
@@ -41,6 +45,7 @@ export const WorkflowControllerPatchWorkflowRequest$inboundSchema: z.ZodType<
 export type WorkflowControllerPatchWorkflowRequest$Outbound = {
   workflowId: string;
   "idempotency-key"?: string | undefined;
+  PatchWorkflowDto: components.PatchWorkflowDto$Outbound;
 };
 
 /** @internal */
@@ -51,9 +56,11 @@ export const WorkflowControllerPatchWorkflowRequest$outboundSchema: z.ZodType<
 > = z.object({
   workflowId: z.string(),
   idempotencyKey: z.string().optional(),
+  patchWorkflowDto: components.PatchWorkflowDto$outboundSchema,
 }).transform((v) => {
   return remap$(v, {
     idempotencyKey: "idempotency-key",
+    patchWorkflowDto: "PatchWorkflowDto",
   });
 });
 

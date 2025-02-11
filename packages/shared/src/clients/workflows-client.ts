@@ -5,7 +5,6 @@ import {
   GetListQueryParams,
   ListWorkflowResponse,
   PatchStepDataDto,
-  PatchWorkflowDto,
   StepResponseDto,
   SyncWorkflowDto,
   UpdateWorkflowDto,
@@ -54,13 +53,6 @@ export const createWorkflowClient = (baseUrl: string, headers: HeadersInit = {})
     patchStepDataDto: PatchStepDataDto
   ): Promise<NovuRestResult<StepResponseDto, HttpError>> => {
     return await baseClient.safePatch<StepResponseDto>(`/v2/workflows/${workflowId}/steps/${stepId}`, patchStepDataDto);
-  };
-
-  const patchWorkflow = async (
-    workflowId: string,
-    patchWorkflowDto: PatchWorkflowDto
-  ): Promise<NovuRestResult<WorkflowResponseDto, HttpError>> => {
-    return await baseClient.safePatch<WorkflowResponseDto>(`/v2/workflows/${workflowId}`, patchWorkflowDto);
   };
 
   const deleteWorkflow = async (workflowId: string): Promise<NovuRestResult<void, HttpError>> => {
@@ -148,7 +140,6 @@ export const createWorkflowClient = (baseUrl: string, headers: HeadersInit = {})
     getWorkflowTestData,
     getWorkflowStepData,
     patchWorkflowStepData,
-    patchWorkflow,
     searchWorkflowsV1,
     createWorkflowsV1,
   };

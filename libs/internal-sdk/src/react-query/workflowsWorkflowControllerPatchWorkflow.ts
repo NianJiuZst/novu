@@ -11,12 +11,14 @@ import { NovuCore } from "../core.js";
 import { workflowsWorkflowControllerPatchWorkflow } from "../funcs/workflowsWorkflowControllerPatchWorkflow.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
+import * as components from "../models/components/index.js";
 import * as operations from "../models/operations/index.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type WorkflowsWorkflowControllerPatchWorkflowMutationVariables = {
+  patchWorkflowDto: components.PatchWorkflowDto;
   workflowId: string;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
@@ -59,6 +61,7 @@ export function buildWorkflowsWorkflowControllerPatchWorkflowMutation(
   return {
     mutationKey: mutationKeyWorkflowsWorkflowControllerPatchWorkflow(),
     mutationFn: function workflowsWorkflowControllerPatchWorkflowMutationFn({
+      patchWorkflowDto,
       workflowId,
       idempotencyKey,
       options,
@@ -77,6 +80,7 @@ export function buildWorkflowsWorkflowControllerPatchWorkflowMutation(
       };
       return unwrapAsync(workflowsWorkflowControllerPatchWorkflow(
         client$,
+        patchWorkflowDto,
         workflowId,
         idempotencyKey,
         mergedOptions,
