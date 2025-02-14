@@ -40,7 +40,6 @@
     "ng-intercom": "^8.0.2",
     "reflect-metadata": "0.2.2",
     "rimraf": "^3.0.2",
-    "shortid": "^2.2.16",
     "superagent-defaults": "^0.1.14",
     "supertest": "^7.0.0",
     "uuid": "^8.3.0"
