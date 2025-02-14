@@ -15,6 +15,10 @@ export class ExtractVariables {
   async execute(command: ExtractVariablesCommand) {
     const controlValues = await this.getControlValues(command);
     const extractedVariables = await this.extractAllVariables(controlValues);
+    console.log({
+      controlValues,
+      extractedVariables,
+    });
 
     return keysToObject<Variables>(extractedVariables);
   }

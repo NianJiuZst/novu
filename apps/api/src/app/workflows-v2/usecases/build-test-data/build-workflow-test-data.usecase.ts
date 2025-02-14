@@ -108,17 +108,19 @@ export class BuildWorkflowTestDataUseCase {
       toSchema.properties!.phone = { type: 'string', default: '' };
       required.push('phone');
     }
-
+    console.log({
+      variables,
+    });
     if (variables.subscriber.firstName) {
-      toSchema.properties!.firstName = { type: 'string', default: user.firstName || '' };
+      toSchema.properties!.firstName = { type: 'string', default: user?.firstName || '' };
     }
 
     if (variables.subscriber.lastName) {
-      toSchema.properties!.lastName = { type: 'string', default: user.lastName || '' };
+      toSchema.properties!.lastName = { type: 'string', default: user?.lastName || '' };
     }
 
     if (variables.subscriber.isOnline) {
-      toSchema.properties!.avatar = { type: 'boolean', default: true };
+      toSchema.properties!.isOnline = { type: 'boolean', default: true };
     }
 
     if (variables.subscriber.lastOnlineAt) {
@@ -141,4 +143,9 @@ export class BuildWorkflowTestDataUseCase {
   private hasStep(steps: NotificationStepEntity[], type: StepTypeEnum): boolean {
     return steps.some((step) => step.template?.type === type);
   }
+}
+
+enum Test {
+  a = 'a',
+  b = 'b',
 }
