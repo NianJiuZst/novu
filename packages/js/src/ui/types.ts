@@ -45,8 +45,11 @@ export type AppearanceKey = (typeof appearanceKeys)[number];
 export type Elements = Partial<Record<AppearanceKey, ElementStyles>>;
 
 export type Theme = {
+  /** Modify the default style variables applied to the different elements of the Inbox */
   variables?: Variables;
+  /** Modify the default style of each element of the Inbox */
   elements?: Elements;
+  /** Disable default animations */
   animations?: boolean;
 };
 export type Appearance = Theme & { baseTheme?: Theme | Theme[] };
