@@ -1,3 +1,5 @@
+import { ApiServiceLevelEnum } from './organization';
+
 export enum SignUpOriginEnum {
   WEB = 'web',
   CLI = 'cli',
@@ -17,7 +19,11 @@ export interface IJwtClaims {
   scheme: ApiAuthSchemeEnum.BEARER | ApiAuthSchemeEnum.API_KEY;
 }
 
-export type UserSessionData = IJwtClaims & { environmentId: string };
+export type UserSessionData = IJwtClaims & {
+  environmentId: string;
+  // This is only applicable to Novu Cloud
+  apiServiceLevel?: ApiServiceLevelEnum;
+};
 
 export enum ApiAuthSchemeEnum {
   BEARER = 'Bearer',

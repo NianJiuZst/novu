@@ -1,6 +1,7 @@
 import { NestInterceptor, RequestMethod } from '@nestjs/common';
 import { getLoggerToken, Logger, LoggerErrorInterceptor, LoggerModule, Params, PinoLogger } from 'nestjs-pino';
 import { storage, Store } from 'nestjs-pino/storage';
+import { ApiServiceLevelEnum } from '@novu/shared';
 import { sensitiveFields } from './masking';
 
 export * from './LogDecorator';
@@ -120,6 +121,7 @@ export function createNestLoggingModuleOptions(settings: ILoggerSettings): Param
           userId: req?.user?._id || null,
           environmentId: req?.user?.environmentId || null,
           organizationId: req?.user?.organizationId || null,
+          apiServiceLevel: req?.user?.apiServiceLevel || null,
         },
         authScheme: req?.authScheme,
         rateLimitPolicy: res?.rateLimitPolicy,
