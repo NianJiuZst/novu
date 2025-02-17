@@ -142,8 +142,3 @@ export class BuildWorkflowTestDataUseCase {
     return steps.some((step) => step.template?.type === type);
   }
 }
-
-enum Test {
-  a = 'a',
-  b = 'b',
-}
