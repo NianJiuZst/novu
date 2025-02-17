@@ -108,9 +108,7 @@ export class BuildWorkflowTestDataUseCase {
       toSchema.properties!.phone = { type: 'string', default: '' };
       required.push('phone');
     }
-    console.log({
-      variables,
-    });
+
     if (variables.subscriber.firstName) {
       toSchema.properties!.firstName = { type: 'string', default: user?.firstName || '' };
     }
