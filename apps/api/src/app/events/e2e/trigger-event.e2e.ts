@@ -1424,9 +1424,6 @@ describe('Trigger event - /v1/events/trigger (POST) #novu-v2', function () {
       const newSubscriberIdInAppNotification = SubscriberRepository.createObjectId();
       const channelType = ChannelTypeEnum.IN_APP;
 
-      // eslint-disable-next-line no-console
-      console.log('nothing');
-
       template = await createTemplate(session, channelType);
 
       await sendTrigger(template, newSubscriberIdInAppNotification);
