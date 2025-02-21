@@ -51,7 +51,7 @@ const _DefaultInbox = (props: DefaultInboxProps) => {
 const DefaultInbox = withRenderer(_DefaultInbox);
 
 export const Inbox = React.memo((props: InboxProps) => {
-  const { applicationIdentifier, subscriberId, subscriberHash, backendUrl, socketUrl } = props;
+  const { applicationIdentifier, subscriberId, subscriberHash, backendUrl, socketUrl, jwt } = props;
   const novu = useUnsafeNovu();
 
   if (novu) {
@@ -65,6 +65,7 @@ export const Inbox = React.memo((props: InboxProps) => {
       subscriberHash={subscriberHash}
       backendUrl={backendUrl}
       socketUrl={socketUrl}
+      jwt={jwt}
       userAgentType="components"
     >
       <InboxChild {...props} />
@@ -84,6 +85,7 @@ const InboxChild = React.memo((props: InboxProps) => {
     subscriberHash,
     backendUrl,
     socketUrl,
+    jwt,
   } = props;
   const novu = useNovu();
 
@@ -94,13 +96,14 @@ const InboxChild = React.memo((props: InboxProps) => {
       tabs,
       preferencesFilter,
       routerPush,
-      options: { applicationIdentifier, subscriberId, subscriberHash, backendUrl, socketUrl },
+      options: { applicationIdentifier, subscriberId, subscriberHash, backendUrl, socketUrl, jwt },
     };
   }, [
     localization,
     appearance,
     tabs,
     preferencesFilter,
+    jwt,
     applicationIdentifier,
     subscriberId,
     subscriberHash,
