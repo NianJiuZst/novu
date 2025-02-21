@@ -10,6 +10,7 @@ import { GetEnvironmentTagsDto } from './dtos/get-environment-tags.dto';
 import { CommunityUserAuthGuard } from '../auth/framework/community.user.auth.guard';
 import { SessionGeneratedResponseDto } from './SessionGeneratedResponseDto';
 import { GenerateJwtUsecase } from './generateJwtUsecase';
+import { SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 
 @ApiCommonResponses()
 @Controller({ path: `/environments`, version: '2' })
@@ -40,6 +41,7 @@ export class EnvironmentsController {
   @Post('/session/:subscriberId')
   @ApiResponse(SessionGeneratedResponseDto)
   @UseGuards(CommunityUserAuthGuard)
+  @SdkMethodName('generateSession')
   @ExternalApiAccessible()
   async generateSession(
     @UserSession() user: UserSessionData,
