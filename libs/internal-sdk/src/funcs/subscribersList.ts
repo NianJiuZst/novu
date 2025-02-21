@@ -100,7 +100,6 @@ export async function subscribersList(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "SubscribersV1Controller_listSubscribers",
     oAuth2Scopes: [],
 

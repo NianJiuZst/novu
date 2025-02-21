@@ -91,7 +91,6 @@ export async function workflowsRetrieve(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "WorkflowController_getWorkflow",
     oAuth2Scopes: [],
 

@@ -87,7 +87,6 @@ export async function notificationsList(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "NotificationsController_listNotifications",
     oAuth2Scopes: [],
 

@@ -86,7 +86,6 @@ export async function notificationsStatsGraph(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "NotificationsController_getActivityGraphStats",
     oAuth2Scopes: [],
 

@@ -82,7 +82,6 @@ export async function topicsList(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "TopicsController_listTopics",
     oAuth2Scopes: [],
 

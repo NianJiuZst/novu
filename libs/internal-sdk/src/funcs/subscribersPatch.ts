@@ -96,7 +96,6 @@ export async function subscribersPatch(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "SubscribersController_patchSubscriber",
     oAuth2Scopes: [],
 

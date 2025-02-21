@@ -89,7 +89,6 @@ export async function trigger(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "EventsController_trigger",
     oAuth2Scopes: [],
 

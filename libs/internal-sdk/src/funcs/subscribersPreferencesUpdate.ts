@@ -100,7 +100,6 @@ export async function subscribersPreferencesUpdate(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "SubscribersController_updateSubscriberPreferences",
     oAuth2Scopes: [],
 

@@ -1,22 +1,26 @@
-import { ClassSerializerInterceptor, Controller, Get, Param, UseInterceptors } from '@nestjs/common';
+import { ClassSerializerInterceptor, Controller, Get, Param, Post, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UserSessionData } from '@novu/shared';
 import { ApiTags } from '@nestjs/swagger';
-import { ApiExcludeController } from '@nestjs/swagger/dist/decorators/api-exclude-controller.decorator';
 import { UserSession } from '../shared/framework/user.decorator';
 import { GetEnvironmentTags, GetEnvironmentTagsCommand } from './usecases/get-environment-tags';
 import { ExternalApiAccessible } from '../auth/framework/external-api.decorator';
 import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
 import { UserAuthentication } from '../shared/framework/swagger/api.key.security';
 import { GetEnvironmentTagsDto } from './dtos/get-environment-tags.dto';
+import { CommunityUserAuthGuard } from '../auth/framework/community.user.auth.guard';
+import { SessionGeneratedResponseDto } from './SessionGeneratedResponseDto';
+import { GenerateJwtUsecase } from './generateJwtUsecase';
 
 @ApiCommonResponses()
 @Controller({ path: `/environments`, version: '2' })
 @UseInterceptors(ClassSerializerInterceptor)
 @UserAuthentication()
 @ApiTags('Environments')
-@ApiExcludeController()
 export class EnvironmentsController {
-  constructor(private getEnvironmentTagsUsecase: GetEnvironmentTags) {}
+  constructor(
+    private getEnvironmentTagsUsecase: GetEnvironmentTags,
+    private generateJwtUseCase: GenerateJwtUsecase
+  ) {}
 
   @Get('/:environmentId/tags')
   @ApiResponse(GetEnvironmentTagsDto)
@@ -32,5 +36,17 @@ export class EnvironmentsController {
         organizationId: user.organizationId,
       })
     );
+  }
+  @Post('/session/:subscriberId')
+  @ApiResponse(SessionGeneratedResponseDto)
+  @UseGuards(CommunityUserAuthGuard)
+  @ExternalApiAccessible()
+  async generateSession(
+    @UserSession() user: UserSessionData,
+    @Param('subscriberId') subscriberId: string
+  ): Promise<SessionGeneratedResponseDto> {
+    const jwt = await this.generateJwtUseCase.execute({ user, subscriberId });
+
+    return { jwt };
   }
 }
