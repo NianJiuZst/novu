@@ -14,6 +14,7 @@ import { Container } from '../components/primitives/container';
 import { HelpTooltipIndicator } from '../components/primitives/help-tooltip-indicator';
 import { API_HOSTNAME } from '../config';
 import { useFetchApiKeys } from '../hooks/use-fetch-api-keys';
+import { ExternalAuthIssuerUrlsForm } from '@/components/api-keys/external-auth-issuer-urls-form';
 
 interface ApiKeysFormData {
   apiKey: string;
@@ -66,6 +67,21 @@ export function ApiKeysPage() {
                     isLoading={isLoading}
                   />
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="w-full overflow-hidden shadow-none">
+              <CardHeader>
+                {'<Inbox />'}
+                <p className="text-foreground-500 mt-1 text-xs font-normal">
+                  {'Provide the external authentication issuer URLs for Novu <Inbox />. '}
+                  <ExternalLink href="https://docs.novu.co/inbox/overview" className="text-foreground-500">
+                    Learn more
+                  </ExternalLink>
+                </p>
+              </CardHeader>
+              <CardContent className="rounded-b-xl border-t bg-neutral-50 bg-white p-3">
+                <ExternalAuthIssuerUrlsForm />
               </CardContent>
             </Card>
             <Card className="w-full overflow-hidden shadow-none">

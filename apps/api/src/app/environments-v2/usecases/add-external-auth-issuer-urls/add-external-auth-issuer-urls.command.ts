@@ -4,7 +4,7 @@ import { EnvironmentWithUserCommand } from '../../../shared/commands/project.com
 export class AddExternalAuthISsuerUrlsCommand extends EnvironmentWithUserCommand {
   @IsArray()
   @ArrayNotEmpty()
-  @IsUrl({}, { each: true })
-  @ArrayMaxSize(5)
+  @IsUrl({}, { each: true, message: 'Each external auth issuer URL must be a valid URL' })
+  @ArrayMaxSize(5, { message: 'Max 5 URLs allowed' })
   externalAuthIssuerUrls: string[];
 }

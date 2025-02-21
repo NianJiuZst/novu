@@ -1,9 +1,11 @@
 import { EnvironmentRepository, NotificationTemplateRepository } from '@novu/dal';
 import { UserSession } from '@novu/testing';
 import { expect } from 'chai';
+import { Novu } from '@novu/api';
+import jwt from 'jsonwebtoken';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
-describe('EnviromenmentController E2E', () => {
+describe('EnvironmentController E2E', () => {
   let session: UserSession;
   let novuClient: Novu;
 
@@ -61,6 +63,11 @@ describe('EnviromenmentController E2E', () => {
       await session.initialize();
       novuClient = initNovuClassSdk(session);
     });
-    it('should generateJwt', () => {});
+    it('should generateJwt', async () => {
+      const response = await novuClient.environments.generateSession('someId');
+      const decoded = jwt.decode(response.result.jwt);
+      expect(decoded.subscriberId).to.eq('someId');
+      expect(decoded.publishableKey).to.be.ok;
+    });
   });
 });
