@@ -51,7 +51,7 @@ export function ApiKeysPage() {
               <CardHeader>
                 {'<Inbox />'}
                 <p className="text-foreground-500 mt-1 text-xs font-normal">
-                  {'Use the public application identifier in Novu <Inbox />. '}
+                  {'Use the publishable key in Novu <Inbox />. '}
                   <ExternalLink href="https://docs.novu.co/inbox/overview" className="text-foreground-500">
                     Learn more
                   </ExternalLink>
@@ -60,8 +60,8 @@ export function ApiKeysPage() {
               <CardContent className="rounded-b-xl border-t bg-neutral-50 bg-white p-3">
                 <div className="space-y-4 p-3">
                   <SettingField
-                    label="Application Identifier"
-                    tooltip={`This is unique for the ${currentEnvironment.name} environment.`}
+                    label="Publishable Key"
+                    tooltip={`This is unique for the ${currentEnvironment.name} environment. (Formerly Application Identifier)`}
                     value={form.getValues('identifier')}
                     isLoading={isLoading}
                   />
