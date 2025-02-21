@@ -24,12 +24,20 @@ export type DefaultInboxProps = {
   placementOffset?: InboxProps['placementOffset'];
 };
 
+type TestApplicationId = `pk_test${string}`;
+type JWTTestObject = {
+  subscriberId: string;
+  applicationId: TestApplicationId;
+};
+export type JWT = string | JWTTestObject | (() => string | Promise<string>);
+
 export type BaseProps = {
   applicationIdentifier: string;
   subscriberId: string;
   subscriberHash?: string;
   backendUrl?: string;
   socketUrl?: string;
+  jwt: JWT;
   appearance?: Appearance;
   localization?: Localization;
   tabs?: Array<Tab>;
