@@ -28,6 +28,18 @@ const environmentSchema = new Schema<EnvironmentDBModel>(
         },
       },
     ],
+    externalAuthIssuerUrls: [
+      {
+        url: {
+          type: Schema.Types.String,
+          unique: true,
+        },
+        _userId: {
+          type: Schema.Types.ObjectId,
+          ref: 'User',
+        },
+      },
+    ],
     apiRateLimits: {
       [ApiRateLimitCategoryEnum.TRIGGER]: Schema.Types.Number,
       [ApiRateLimitCategoryEnum.CONFIGURATION]: Schema.Types.Number,

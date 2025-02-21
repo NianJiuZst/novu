@@ -16,6 +16,11 @@ export interface IApiKey {
   _userId: string;
 }
 
+export type ExternalAuthIssuerUrl = {
+  url: string;
+  _userId: string;
+};
+
 export interface IWidgetSettings {
   notificationCenterEncryption: boolean;
 }
@@ -56,6 +61,8 @@ export class EnvironmentEntity {
   createdAt?: string;
 
   updatedAt?: string;
+
+  externalAuthIssuerUrls?: ExternalAuthIssuerUrl[];
 }
 
 export type EnvironmentDBModel = ChangePropsValueType<
@@ -63,4 +70,5 @@ export type EnvironmentDBModel = ChangePropsValueType<
   '_organizationId' | '_parentId'
 > & {
   apiKeys: IApiKey & { _userId: Types.ObjectId }[];
+  externalAuthIssuerUrls?: ExternalAuthIssuerUrl & { _userId: Types.ObjectId }[];
 };
