@@ -94,7 +94,6 @@ export async function subscribersMessagesUpdateAsSeen(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "SubscribersV1Controller_markActionAsSeen",
     oAuth2Scopes: [],
 

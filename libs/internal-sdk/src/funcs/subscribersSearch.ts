@@ -86,7 +86,6 @@ export async function subscribersSearch(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "SubscribersController_searchSubscribers",
     oAuth2Scopes: [],
 

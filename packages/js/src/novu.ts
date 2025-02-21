@@ -33,6 +33,7 @@ export class Novu implements Pick<NovuEventEmitter, 'on'> {
         applicationIdentifier: options.applicationIdentifier,
         subscriberId: options.subscriberId,
         subscriberHash: options.subscriberHash,
+        jwt: options.jwt,
       },
       this.#inboxService,
       this.#emitter

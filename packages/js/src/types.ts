@@ -1,3 +1,4 @@
+import { InitializeSessionArgs } from './session/types';
 import { NovuError } from './utils/errors';
 
 export { type FiltersCountResponse, type ListNotificationsResponse } from './notifications';
@@ -172,10 +173,10 @@ export type Result<D = undefined, E = NovuError> = Promise<{
   error?: E;
 }>;
 
-export type NovuOptions = {
-  applicationIdentifier: string;
-  subscriberId: string;
-  subscriberHash?: string;
+export type NovuOptions = Pick<
+  InitializeSessionArgs,
+  'applicationIdentifier' | 'subscriberId' | 'subscriberHash' | 'jwt'
+> & {
   // @deprecated use apiUrl instead
   backendUrl?: string;
   apiUrl?: string;

@@ -21,6 +21,7 @@ export const NovuProvider = ({
   backendUrl,
   socketUrl,
   useCache,
+  jwt,
 }: NovuProviderProps) => {
   return (
     <InternalNovuProvider
@@ -30,6 +31,7 @@ export const NovuProvider = ({
       backendUrl={backendUrl}
       socketUrl={socketUrl}
       useCache={useCache}
+      jwt={jwt}
       userAgentType="hooks"
     >
       {children}
@@ -49,6 +51,7 @@ export const InternalNovuProvider = ({
   subscriberHash,
   backendUrl,
   socketUrl,
+  jwt,
   useCache,
   userAgentType,
 }: NovuProviderProps & { userAgentType: 'components' | 'hooks' }) => {
@@ -61,6 +64,7 @@ export const InternalNovuProvider = ({
         backendUrl,
         socketUrl,
         useCache,
+        jwt,
         __userAgent: `${baseUserAgent} ${userAgentType}`,
       }),
     [applicationIdentifier, subscriberId, subscriberHash, backendUrl, socketUrl, useCache, userAgentType]

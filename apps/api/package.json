@@ -82,6 +82,7 @@
     "helmet": "^6.0.1",
     "i18next": "^23.7.6",
     "ioredis": "5.3.2",
+    "jose": "^5.10.0",
     "json-logic-js": "^2.0.5",
     "json-schema-to-ts": "^3.0.0",
     "jsonwebtoken": "9.0.0",

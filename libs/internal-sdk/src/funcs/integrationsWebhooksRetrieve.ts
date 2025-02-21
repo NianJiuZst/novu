@@ -95,7 +95,6 @@ export async function integrationsWebhooksRetrieve(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "IntegrationsController_getWebhookSupportStatus",
     oAuth2Scopes: [],
 

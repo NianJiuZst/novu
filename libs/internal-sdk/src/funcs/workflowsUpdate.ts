@@ -83,7 +83,6 @@ export async function workflowsUpdate(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "WorkflowController_update",
     oAuth2Scopes: [],
 

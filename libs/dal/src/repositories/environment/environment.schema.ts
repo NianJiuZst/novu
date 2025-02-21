@@ -7,6 +7,9 @@ import { EnvironmentDBModel } from './environment.entity';
 const environmentSchema = new Schema<EnvironmentDBModel>(
   {
     name: Schema.Types.String,
+    /**
+     * @deprecated Use publishableKey instead
+     */
     identifier: {
       type: Schema.Types.String,
       unique: true,

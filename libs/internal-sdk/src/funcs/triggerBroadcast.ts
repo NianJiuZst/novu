@@ -88,7 +88,6 @@ export async function triggerBroadcast(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "EventsController_broadcastEventToAll",
     oAuth2Scopes: [],
 
