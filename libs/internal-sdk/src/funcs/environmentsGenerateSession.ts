@@ -168,7 +168,7 @@ export async function environmentsGenerateSession(
     | ConnectionError
   >(
     M.json(
-      200,
+      201,
       operations.EnvironmentsControllerGenerateSessionResponse$inboundSchema,
       { hdrs: true, key: "Result" },
     ),

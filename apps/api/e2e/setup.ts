@@ -1,4 +1,4 @@
-import { testServer, TestingQueueService, JobsService } from '@novu/testing';
+import { JobsService, TestingQueueService, testServer } from '@novu/testing';
 import sinon from 'sinon';
 import chai from 'chai';
 import mongoose from 'mongoose';
@@ -15,7 +15,7 @@ let connection: typeof mongoose;
 
 async function getConnection() {
   if (!connection) {
-    connection = await mongoose.connect(process.env.MONGO_URL);
+    connection = await mongoose.connect(process.env.MONGO_URL || '');
   }
 
   return connection;

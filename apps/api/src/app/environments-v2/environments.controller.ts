@@ -39,7 +39,7 @@ export class EnvironmentsController {
     );
   }
   @Post('/session/:subscriberId')
-  @ApiResponse(SessionGeneratedResponseDto)
+  @ApiResponse(SessionGeneratedResponseDto, 201, false)
   @UseGuards(CommunityUserAuthGuard)
   @SdkMethodName('generateSession')
   @ExternalApiAccessible()
