@@ -29,6 +29,10 @@ export interface IEnvironment {
 
   createdAt: Date;
   updatedAt: Date;
+  externalAuthIssuerUrls?: {
+    url: string;
+    _userId: string;
+  }[];
 }
 
 export interface IWidgetSettings {

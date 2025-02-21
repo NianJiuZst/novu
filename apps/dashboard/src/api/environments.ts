@@ -1,5 +1,5 @@
 import { IApiKey, IEnvironment, ITagsResponse } from '@novu/shared';
-import { del, get, getV2, post, put } from './api.client';
+import { del, get, getV2, post, put, putV2 } from './api.client';
 
 export async function getEnvironments() {
   const { data } = await get<{ data: IEnvironment[] }>('/environments');
@@ -41,4 +41,11 @@ export async function createEnvironment(payload: { name: string; color: string }
 
 export async function deleteEnvironment({ environment }: { environment: IEnvironment }): Promise<void> {
   return del(`/environments/${environment._id}`);
+}
+
+export async function updateExternalAuthIssuerUrls(payload: {
+  environment: IEnvironment;
+  externalAuthIssuerUrls: string[];
+}) {
+  return putV2(`/environments/${payload.environment._id}/external-auth-issuer-urls`, { body: payload });
 }
