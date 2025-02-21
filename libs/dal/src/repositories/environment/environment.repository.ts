@@ -1,4 +1,7 @@
+import mongoose from 'mongoose';
+
 import { EncryptedSecret, IApiRateLimitMaximum } from '@novu/shared';
+
 import { BaseRepository } from '../base-repository';
 import { IApiKey, EnvironmentEntity, EnvironmentDBModel } from './environment.entity';
 import { Environment } from './environment.schema';
@@ -8,8 +11,30 @@ export class EnvironmentRepository extends BaseRepository<EnvironmentDBModel, En
     super(Environment, EnvironmentEntity);
   }
 
-  async findEnvironmentByIdentifier(identifier: string) {
-    const data = await this.MongooseModel.findOne({ identifier }).read('secondaryPreferred');
+  /**
+   * @deprecated Use findEnvironmentByPublishableKey instead
+   */
+  async findEnvironmentByIdentifier(identifierOrPublishableKey: string) {
+    let data: mongoose.Document<unknown, {}, EnvironmentDBModel> | null = null;
+
+    if (identifierOrPublishableKey.startsWith('pk_')) {
+      data = await this.MongooseModel.findOne({ publishableKey: identifierOrPublishableKey }).read(
+        'secondaryPreferred'
+      );
+    } else {
+      data = await this.MongooseModel.findOne({ identifier: identifierOrPublishableKey }).read('secondaryPreferred');
+    }
+
+    if (!data) return null;
+
+    return this.mapEntity(data.toObject());
+  }
+
+  async findEnvironmentByPublishableKey(publishableKey: string) {
+    let data: mongoose.Document<unknown, {}, EnvironmentDBModel> | null = null;
+
+    data = await this.MongooseModel.findOne({ publishableKey }).read('secondaryPreferred');
+
     if (!data) return null;
 
     return this.mapEntity(data.toObject());
