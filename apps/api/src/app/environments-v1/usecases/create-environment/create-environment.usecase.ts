@@ -1,8 +1,7 @@
 import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { createHash } from 'crypto';
-import { nanoid } from 'nanoid';
 
-import { encryptApiKey } from '@novu/application-generic';
+import { encryptApiKey, shortId } from '@novu/application-generic';
 import { EnvironmentRepository, NotificationGroupRepository } from '@novu/dal';
 
 import { EnvironmentEnum, PROTECTED_ENVIRONMENTS } from '@novu/shared';
@@ -58,10 +57,13 @@ export class CreateEnvironment {
       throw new BadRequestException('Color property is required');
     }
 
+    const publishableKeyType = normalizedName === EnvironmentEnum.PRODUCTION ? 'live' : 'test';
+    const publishableKey = `pk_${publishableKeyType}-${shortId(12)}`;
     const environment = await this.environmentRepository.create({
       _organizationId: command.organizationId,
       name: normalizedName,
-      identifier: nanoid(12),
+      identifier: publishableKey,
+      publishableKey,
       _parentId: command.parentEnvironmentId,
       color,
       apiKeys: [

@@ -20,10 +20,14 @@ export class EnvironmentService {
   ): Promise<EnvironmentEntity> {
     const key = uuid();
     const hashedApiKey = createHash('sha256').update(key).digest('hex');
+    const environmentName = name ?? faker.name.jobTitle();
+    const publishableKeyType = environmentName === EnvironmentsEnum.PRODUCTION ? 'live' : 'test';
+    const publishableKey = `pk_${publishableKeyType}-${faker.random.alphaNumeric(12)}`;
 
     return await this.environmentRepository.create({
-      identifier: uuid(),
-      name: name ?? faker.name.jobTitle(),
+      identifier: publishableKey,
+      publishableKey,
+      name: environmentName,
       _organizationId: organizationId,
       ...(parentId && { _parentId: parentId }),
       apiKeys: [

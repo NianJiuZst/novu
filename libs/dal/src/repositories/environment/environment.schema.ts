@@ -11,6 +11,10 @@ const environmentSchema = new Schema<EnvironmentDBModel>(
       type: Schema.Types.String,
       unique: true,
     },
+    publishableKey: {
+      type: Schema.Types.String,
+      unique: true,
+    },
     _organizationId: {
       type: Schema.Types.ObjectId,
       ref: 'Organization',

@@ -25,6 +25,8 @@ export interface IDnsSettings {
   inboundParseDomain: string;
 }
 
+export type PublishableKey = `pk_${'test' | 'live'}-${string}`;
+
 export class EnvironmentEntity {
   _id: string;
 
@@ -33,6 +35,8 @@ export class EnvironmentEntity {
   _organizationId: OrganizationId;
 
   identifier: string;
+
+  publishableKey?: PublishableKey;
 
   apiKeys: IApiKey[];
 
