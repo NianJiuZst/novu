@@ -9,6 +9,8 @@ import { UpdateAllNotifications } from './update-all-notifications/update-all-no
 import { UpdateNotificationAction } from './update-notification-action/update-notification-action.usecase';
 import { UpdatePreferences } from './update-preferences/update-preferences.usecase';
 import { GetSubscriberGlobalPreference } from '../../subscribers/usecases/get-subscriber-global-preference';
+import { VerifySession } from './verify-session/verify-session.usecase';
+import { AuthService } from '../../auth/services/auth.service';
 
 export const USE_CASES = [
   Session,
@@ -22,4 +24,6 @@ export const USE_CASES = [
   GetSubscriberGlobalPreference,
   GetSubscriberTemplatePreference,
   UpdatePreferences,
+  VerifySession,
+  AuthService,
 ];

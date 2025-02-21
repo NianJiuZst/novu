@@ -46,6 +46,8 @@ import { UpdatePreferencesRequestDto } from './dtos/update-preferences-request.d
 import { UpdatePreferences } from './usecases/update-preferences/update-preferences.usecase';
 import { UpdatePreferencesCommand } from './usecases/update-preferences/update-preferences.command';
 import { GetPreferencesRequestDto } from './dtos/get-preferences-request.dto';
+import { VerifySessionCommand } from './usecases/verify-session/verify-session.command';
+import { VerifySession } from './usecases/verify-session/verify-session.usecase';
 
 @ApiCommonResponses()
 @Controller('/inbox')
@@ -59,7 +61,8 @@ export class InboxController {
     private updateNotificationActionUsecase: UpdateNotificationAction,
     private updateAllNotifications: UpdateAllNotifications,
     private getInboxPreferencesUsecase: GetInboxPreferences,
-    private updatePreferencesUsecase: UpdatePreferences
+    private updatePreferencesUsecase: UpdatePreferences,
+    private verifySessionUsecase: VerifySession
   ) {}
 
   @Post('/session')
@@ -75,6 +78,13 @@ export class InboxController {
         origin,
       })
     );
+  }
+
+  @Post('/session/verify')
+  async verifySession(@Headers('authorization') authorization: string) {
+    const token = authorization?.replace('Bearer ', '') || '';
+
+    return await this.verifySessionUsecase.execute(VerifySessionCommand.create({ token }));
   }
 
   @UseGuards(AuthGuard('subscriberJwt'))
