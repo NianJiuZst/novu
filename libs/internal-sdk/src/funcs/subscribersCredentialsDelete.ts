@@ -101,7 +101,6 @@ export async function subscribersCredentialsDelete(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "SubscribersV1Controller_deleteSubscriberCredentials",
     oAuth2Scopes: [],
 

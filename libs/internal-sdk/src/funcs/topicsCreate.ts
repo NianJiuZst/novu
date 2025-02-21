@@ -86,7 +86,6 @@ export async function topicsCreate(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "TopicsController_createTopic",
     oAuth2Scopes: [],
 

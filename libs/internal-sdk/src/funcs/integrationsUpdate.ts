@@ -94,7 +94,6 @@ export async function integrationsUpdate(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "IntegrationsController_updateIntegrationById",
     oAuth2Scopes: [],
 

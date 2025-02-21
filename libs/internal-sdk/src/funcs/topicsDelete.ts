@@ -89,7 +89,6 @@ export async function topicsDelete(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "TopicsController_deleteTopic",
     oAuth2Scopes: [],
 

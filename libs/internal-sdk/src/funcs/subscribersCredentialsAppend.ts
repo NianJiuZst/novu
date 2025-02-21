@@ -102,7 +102,6 @@ export async function subscribersCredentialsAppend(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "SubscribersV1Controller_modifySubscriberChannel",
     oAuth2Scopes: [],
 

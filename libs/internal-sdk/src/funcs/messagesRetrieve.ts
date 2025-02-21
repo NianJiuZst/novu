@@ -86,7 +86,6 @@ export async function messagesRetrieve(
   const requestSecurity = resolveGlobalSecurity(securityInput);
 
   const context = {
-    baseURL: options?.serverURL ?? "",
     operationID: "MessagesController_getMessages",
     oAuth2Scopes: [],
 
