@@ -30,7 +30,9 @@ export interface IDnsSettings {
   inboundParseDomain: string;
 }
 
-export type PublishableKey = `pk_${'test' | 'live'}-${string}`;
+type PublishableKeyPrefix = 'pk';
+type PublishableKeyEnvironment = 'test' | 'live';
+type PublishableKey = `${PublishableKeyPrefix}_${PublishableKeyEnvironment}_${string}`;
 
 export class EnvironmentEntity {
   _id: string;
@@ -39,6 +41,9 @@ export class EnvironmentEntity {
 
   _organizationId: OrganizationId;
 
+  /**
+   * @deprecated Use publishableKey instead
+   */
   identifier: string;
 
   publishableKey?: PublishableKey;
