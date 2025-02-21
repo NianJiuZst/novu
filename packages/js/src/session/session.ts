@@ -58,6 +58,7 @@ export class Session {
           subscriberId,
           subscriberHash,
         });
+
         return;
       }
 
