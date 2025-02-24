@@ -7,6 +7,30 @@ import { UserAuthentication } from '../shared/framework/swagger/api.key.security
 import { HubspotIdentifyFormCommand } from './usecases/hubspot-identify-form/hubspot-identify-form.command';
 import { HubspotIdentifyFormUsecase } from './usecases/hubspot-identify-form/hubspot-identify-form.usecase';
 
+const PERSONAL_EMAIL_DOMAINS = [
+  'gmail.com',
+  'yahoo.com',
+  'hotmail.com',
+  'outlook.com',
+  'aol.com',
+  'icloud.com',
+  'mail.com',
+  'proton.me',
+  'protonmail.com',
+  'me.com',
+  'live.com',
+  'msn.com',
+];
+
+function extractBusinessDomain(email: string | null | undefined): string {
+  if (!email) return '';
+
+  const domain = email.split('@')[1];
+  if (!domain) return '';
+
+  return PERSONAL_EMAIL_DOMAINS.includes(domain.toLowerCase()) ? '' : domain;
+}
+
 @Controller({
   path: 'telemetry',
 })
@@ -51,6 +75,7 @@ export class AnalyticsController {
       organizationType: body.organizationType,
       companySize: body.companySize,
       jobTitle: body.jobTitle,
+      website: extractBusinessDomain(user.email),
     });
 
     await this.hubspotIdentifyFormUsecase.execute(

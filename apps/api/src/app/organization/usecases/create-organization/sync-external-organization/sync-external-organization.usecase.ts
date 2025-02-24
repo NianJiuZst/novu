@@ -83,6 +83,8 @@ export class SyncExternalOrganization {
 
     this.analyticsService.track('[Authentication] - Create Organization', user._id, {
       _organization: organization._id,
+      name: organization.name,
+      userEmail: user.email,
     });
 
     const organizationAfterChanges = await this.getOrganizationUsecase.execute(
