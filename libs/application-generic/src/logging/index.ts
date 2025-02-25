@@ -69,7 +69,7 @@ function getLoggingVariables(): ILoggingVariables {
   };
 }
 
-export function createNestLoggingModuleOptions(settings: ILoggerSettings): Params {
+export function createNestLoggingModuleOptions(settings: { serviceName: string; version: string }): Params {
   const values: ILoggingVariables = getLoggingVariables();
 
   let redactFields: string[] = sensitiveFields.map((val) => val);
@@ -99,7 +99,6 @@ export function createNestLoggingModuleOptions(settings: ILoggerSettings): Param
       level: values.level,
       redact: {
         paths: redactFields,
-        censor: customRedaction,
       },
       base: {
         pid: process.pid,
@@ -116,32 +115,26 @@ export function createNestLoggingModuleOptions(settings: ILoggerSettings): Param
        * To include these or any other custom props in mid-request logs,
        * use `PinoLogger.assign(<props>)` explicitly before logging.
        */
-      customProps: (req: any, res: any) => ({
-        user: {
-          userId: req?.user?._id || null,
-          environmentId: req?.user?.environmentId || null,
-          organizationId: req?.user?.organizationId || null,
-          apiServiceLevel: req?.user?.apiServiceLevel || null,
-        },
-        authScheme: req?.authScheme,
-        rateLimitPolicy: res?.rateLimitPolicy,
-      }),
+      customProps: (req: any, res: any) => {
+        /**
+         * This is a workaround to avoid duplicate keys in the final JSON log entry
+         * See https://github.com/pinojs/pino-http/issues/216
+         */
+        if (req?.user) {
+          return {
+            user: {
+              userId: req?.user?._id || null,
+              environmentId: req?.user?.environmentId || null,
+              organizationId: req?.user?.organizationId || null,
+              apiServiceLevel: req?.user?.apiServiceLevel || null,
+            },
+            authScheme: req?.authScheme,
+            rateLimitPolicy: res?.rateLimitPolicy,
+          };
+        }
+
+        return {};
+      },
     },
   };
-}
-
-const customRedaction = (value: any, path: string[]) => {
-  /*
-   * Logger.
-   * if (obj.email && typeof obj.email === 'string') {
-   *   obj.email = '[REDACTED]';
-   * }
-   *
-   * return JSON.parse(JSON.stringify(obj));
-   */
-};
-
-interface ILoggerSettings {
-  serviceName: string;
-  version: string;
 }
