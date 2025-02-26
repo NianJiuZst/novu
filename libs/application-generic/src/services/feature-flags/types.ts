@@ -3,16 +3,21 @@ import { FeatureFlagsKeysEnum } from '@novu/shared';
 
 type PartialWithId<T> = Partial<T> & { _id: string };
 
-export type FeatureFlagContextBase = {
-  environment?: PartialWithId<EnvironmentEntity>;
-  organization?: PartialWithId<OrganizationEntity>;
-  user?: PartialWithId<UserEntity>;
-};
+type RequireAtLeastOne<T> = {
+  [K in keyof T]: { [P in K]: T[P] } & Partial<T>;
+}[keyof T];
+
+export type FeatureFlagContextBase = RequireAtLeastOne<{
+  environment: PartialWithId<EnvironmentEntity>;
+  organization: PartialWithId<OrganizationEntity>;
+  user: PartialWithId<UserEntity>;
+}>;
 
 export type FeatureFlagContext<T_Result> = FeatureFlagContextBase & {
   key: FeatureFlagsKeysEnum;
   defaultValue: T_Result;
 };
+
 export interface IFeatureFlagsService {
   isEnabled: boolean;
 
