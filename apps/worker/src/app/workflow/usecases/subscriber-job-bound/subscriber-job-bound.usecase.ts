@@ -3,7 +3,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   AnalyticsService,
   ApiException,
-  CachedEntity,
   CreateNotificationJobs,
   CreateNotificationJobsCommand,
   CreateOrUpdateSubscriberCommand,
@@ -42,6 +41,7 @@ export class SubscriberJobBound {
 
   @InstrumentUsecase()
   async execute(command: SubscriberJobBoundCommand) {
+    this.logger.info(command, 'SubscriberJobBoundUseCase - START');
     this.logger.assign({
       transactionId: command.transactionId,
       environmentId: command.environmentId,
@@ -98,7 +98,7 @@ export class SubscriberJobBound {
       environmentName,
       statelessWorkflow: !!command.bridge?.url,
     });
-
+    this.logger.info(command, 'SubscriberJobBoundUseCase - CreateOrUpdateSubscriberUseCase - Ref');
     const subscriberProcessed = await this.createOrUpdateSubscriberUsecase.execute(
       CreateOrUpdateSubscriberCommand.create({
         environmentId,
@@ -112,6 +112,7 @@ export class SubscriberJobBound {
         locale: subscriber?.locale,
         data: subscriber?.data,
         channels: subscriber?.channels,
+        activeWorkerName: process.env.ACTIVE_WORKER,
       })
     );
 
