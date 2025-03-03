@@ -7,7 +7,12 @@ import { paymentConfirmedTemplate } from './payment-confirmed';
 import { recentLoginTemplate } from './recent-login';
 import { renewalNoticeTemplate } from './renewal-notice';
 import { WorkflowTemplate } from './types';
-
+import { welcomeTemplate } from './authentication/welcome';
+import { invitationTemplate } from './authentication/invitation';
+import { magicLinkSignInTemplate } from './authentication/magic-link-sign-in';
+import { orgInviteTemplate } from './authentication/org-invite';
+import { verificationCodeTemplate } from './authentication/verification-code';
+import { resetPasswordTemplate } from './authentication/reset-password';
 export function getTemplates(): WorkflowTemplate[] {
   return [
     accessTokenTemplate,
@@ -17,6 +22,12 @@ export function getTemplates(): WorkflowTemplate[] {
     appointmentReminderTemplate,
     recentLoginTemplate,
     paymentConfirmedTemplate,
+    welcomeTemplate,
+    invitationTemplate,
+    magicLinkSignInTemplate,
+    orgInviteTemplate,
+    verificationCodeTemplate,
+    resetPasswordTemplate,
   ];
 }
 
