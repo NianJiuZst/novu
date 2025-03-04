@@ -3,6 +3,7 @@ import { BaseCommand } from '@novu/application-generic';
 export class RenderCommand extends BaseCommand {
   controlValues: Record<string, unknown>;
   fullPayloadForRender: FullPayloadForRender;
+  step?: any;
 }
 export class FullPayloadForRender {
   subscriber: Record<string, unknown>;

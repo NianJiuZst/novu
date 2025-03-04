@@ -137,6 +137,8 @@ export class NotificationStepData implements IStepVariant {
     url: string;
   };
 
+  resolverEndpoint?: string;
+
   template?: IMessageTemplate;
 
   filters?: StepFilter[];
@@ -161,6 +163,7 @@ export class NotificationStepData implements IStepVariant {
 }
 export class NotificationStepEntity extends NotificationStepData implements INotificationTemplateStep {
   variants?: NotificationStepData[];
+  resolverEndpoint?: string;
 }
 
 export class StepFilter implements IMessageFilter {

@@ -1,16 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { ControlValuesLevelEnum, ShortIsPrefixEnum, StepResponseDto, WorkflowOriginEnum } from '@novu/shared';
-import { ControlValuesRepository, NotificationStepEntity, NotificationTemplateEntity } from '@novu/dal';
 import {
   GetWorkflowByIdsUseCase,
   Instrument,
   InstrumentUsecase,
   WorkflowInternalResponseDto,
 } from '@novu/application-generic';
-import { BuildStepDataCommand } from './build-step-data.command';
+import { ControlValuesRepository, NotificationStepEntity, NotificationTemplateEntity } from '@novu/dal';
+import { ControlValuesLevelEnum, ShortIsPrefixEnum, StepResponseDto, WorkflowOriginEnum } from '@novu/shared';
+import { buildSlug } from '../../../shared/helpers/build-slug';
 import { InvalidStepException } from '../../exceptions/invalid-step.exception';
 import { BuildVariableSchemaUsecase } from '../build-variable-schema';
-import { buildSlug } from '../../../shared/helpers/build-slug';
+import { BuildStepDataCommand } from './build-step-data.command';
 
 @Injectable()
 export class BuildStepDataUsecase {
@@ -43,6 +43,7 @@ export class BuildStepDataUsecase {
       variables,
       name: stepName,
       slug,
+      resolverEndpoint: currentStep.resolverEndpoint as any,
       _id: currentStep._templateId,
       stepId: currentStep.stepId || 'Missing Step Id',
       type: currentStep.template?.type,

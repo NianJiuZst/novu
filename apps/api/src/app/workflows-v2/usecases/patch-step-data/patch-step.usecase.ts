@@ -1,19 +1,19 @@
 /* eslint-disable no-param-reassign */
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { StepResponseDto, UserSessionData, ControlValuesLevelEnum } from '@novu/shared';
+import {
+  GetWorkflowByIdsUseCase,
+  UpsertControlValuesCommand,
+  UpsertControlValuesUseCase,
+} from '@novu/application-generic';
 import {
   ControlValuesRepository,
   NotificationStepEntity,
   NotificationTemplateEntity,
   NotificationTemplateRepository,
 } from '@novu/dal';
-import {
-  GetWorkflowByIdsUseCase,
-  UpsertControlValuesCommand,
-  UpsertControlValuesUseCase,
-} from '@novu/application-generic';
-import { PatchStepCommand } from './patch-step.command';
+import { ControlValuesLevelEnum, StepResponseDto, UserSessionData } from '@novu/shared';
 import { BuildStepDataUsecase } from '../build-step-data';
+import { PatchStepCommand } from './patch-step.command';
 
 type ValidNotificationWorkflow = {
   currentStep: NonNullable<NotificationStepEntity>;
@@ -32,6 +32,7 @@ export class PatchStepUsecase {
   async execute(command: PatchStepCommand): Promise<StepResponseDto> {
     const persistedItems = await this.loadPersistedItems(command);
     await this.patchFieldsOnPersistedItems(command, persistedItems);
+
     await this.persistWorkflow(persistedItems.workflow, command.user);
 
     return await this.buildStepDataUsecase.execute(command);
@@ -40,6 +41,12 @@ export class PatchStepUsecase {
   private async patchFieldsOnPersistedItems(command: PatchStepCommand, persistedItems: ValidNotificationWorkflow) {
     if (command.name !== undefined) {
       await this.updateName(persistedItems, command);
+    }
+
+    console.log('command.resolverEndpoint', command.resolverEndpoint);
+
+    if (command.resolverEndpoint !== undefined) {
+      await this.updateResolverEndpoint(persistedItems, command);
     }
 
     if (command.controlValues !== undefined) {
@@ -67,6 +74,10 @@ export class PatchStepUsecase {
 
   private async updateName(persistedItems: ValidNotificationWorkflow, command: PatchStepCommand) {
     persistedItems.currentStep.name = command.name;
+  }
+
+  private async updateResolverEndpoint(persistedItems: ValidNotificationWorkflow, command: PatchStepCommand) {
+    persistedItems.currentStep.resolverEndpoint = command.resolverEndpoint;
   }
 
   private async persistWorkflow(

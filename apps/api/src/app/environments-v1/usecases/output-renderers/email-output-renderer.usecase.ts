@@ -1,14 +1,15 @@
 /* eslint-disable no-param-reassign */
-import { render as mailyRender, JSONContent as MailyJSONContent } from '@maily-to/render';
+import { JSONContent as MailyJSONContent, render as mailyRender } from '@maily-to/render';
 import { Injectable } from '@nestjs/common';
-import { EmailRenderOutput } from '@novu/shared';
 import { InstrumentUsecase } from '@novu/application-generic';
+import { EmailRenderOutput } from '@novu/shared';
+import axios from 'axios';
 
-import { FullPayloadForRender, RenderCommand } from './render-command';
-import { WrapMailyInLiquidUseCase } from './maily-to-liquid/wrap-maily-in-liquid.usecase';
-import { MAILY_ITERABLE_MARK, MailyAttrsEnum } from './maily-to-liquid/maily.types';
 import { parseLiquid } from '../../../shared/helpers/liquid';
 import { hasShow, isRepeatNode, isVariableNode } from './maily-to-liquid/maily-utils';
+import { MAILY_ITERABLE_MARK, MailyAttrsEnum } from './maily-to-liquid/maily.types';
+import { WrapMailyInLiquidUseCase } from './maily-to-liquid/wrap-maily-in-liquid.usecase';
+import { FullPayloadForRender, RenderCommand } from './render-command';
 
 export class EmailOutputRendererCommand extends RenderCommand {}
 
@@ -19,6 +20,37 @@ export class EmailOutputRendererUsecase {
   @InstrumentUsecase()
   async execute(renderCommand: EmailOutputRendererCommand): Promise<EmailRenderOutput> {
     const { body, subject } = renderCommand.controlValues;
+    const { step } = renderCommand;
+
+    console.log('step!!!!!', step);
+
+    // Check if this step has a resolver endpoint defined
+    if (step && 'resolverEndpoint' in step && step.resolverEndpoint) {
+      try {
+        console.log('step.resolverEndpoint', step.resolverEndpoint);
+
+        // Call the resolver endpoint with the step data and payload
+        const response = await axios.post(
+          step.resolverEndpoint as string,
+          {
+            payload: renderCommand.fullPayloadForRender,
+            controlValues: renderCommand.controlValues,
+          },
+          {
+            timeout: 60000,
+          }
+        );
+
+        // Return the HTML from the resolver endpoint
+        return {
+          subject: typeof subject === 'string' ? subject : '',
+          body: response.data.html || '',
+        };
+      } catch (error) {
+        console.error('Error calling resolver endpoint:', error);
+        // Fall back to default rendering if the API call fails
+      }
+    }
 
     if (!body || typeof body !== 'string') {
       /**
@@ -27,8 +59,8 @@ export class EmailOutputRendererUsecase {
        * rather than handling invalid types here.
        */
       return {
-        subject: subject as string,
-        body: body as string,
+        subject: typeof subject === 'string' ? subject : '',
+        body: body as any,
       };
     }
 

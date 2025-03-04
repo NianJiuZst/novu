@@ -9,11 +9,15 @@ import {
   Post,
   Put,
   Query,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common/decorators';
-import { ApiTags } from '@nestjs/swagger';
-import { DeleteWorkflowCommand, DeleteWorkflowUseCase, UserSession } from '@novu/application-generic';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  DeleteWorkflowCommand,
+  DeleteWorkflowUseCase,
+  ExternalApiAccessible,
+  UserSession,
+} from '@novu/application-generic';
 import {
   CreateWorkflowDto,
   DirectionEnum,
@@ -31,9 +35,9 @@ import {
   WorkflowResponseDto,
   WorkflowTestDataResponseDto,
 } from '@novu/shared';
-import { EnvironmentRepository } from '@novu/dal';
 import { ApiCommonResponses } from '../shared/framework/response.decorator';
 import { UserAuthentication } from '../shared/framework/swagger/api.key.security';
+import { SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 import { ParseSlugEnvironmentIdPipe } from './pipes/parse-slug-env-id.pipe';
 import { ParseSlugIdPipe } from './pipes/parse-slug-id.pipe';
 import {
@@ -55,7 +59,6 @@ import { SyncToEnvironmentCommand } from './usecases/sync-to-environment/sync-to
 import { SyncToEnvironmentUseCase } from './usecases/sync-to-environment/sync-to-environment.usecase';
 import { UpsertWorkflowCommand } from './usecases/upsert-workflow/upsert-workflow.command';
 import { UpsertWorkflowUseCase } from './usecases/upsert-workflow/upsert-workflow.usecase';
-import { SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 
 @ApiCommonResponses()
 @Controller({ path: `/workflows`, version: '2' })
@@ -238,5 +241,80 @@ export class WorkflowController {
         user,
       })
     );
+  }
+
+  @Post('/step-resolver-endpoint')
+  @ApiOperation({
+    summary: 'Set resolver endpoint for workflow steps',
+    description: 'Configure external resolver endpoints for workflow steps',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      additionalProperties: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            stepId: {
+              type: 'string',
+              description: 'The ID of the step to connect to the resolver endpoint',
+            },
+            endpoint: {
+              type: 'string',
+              description: 'The URL of the resolver endpoint',
+            },
+          },
+          required: ['stepId', 'endpoint'],
+        },
+      },
+      example: {
+        '64a652d7450a561a767d9347': [
+          {
+            stepId: '64a652d7450a561a767d9348',
+            endpoint: 'https://example.com/api/resolver',
+          },
+          {
+            stepId: '64a652d7450a561a767d9349',
+            endpoint: 'https://example.com/api/resolver2',
+          },
+        ],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Resolver endpoints successfully connected to steps',
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+          example: true,
+        },
+      },
+    },
+  })
+  @ExternalApiAccessible()
+  async setStepResolverEndpoint(
+    @UserSession(ParseSlugEnvironmentIdPipe) user: UserSessionData,
+    @Body() stepResolverEndpointDto: Record<string, Array<{ stepId: string; endpoint: string }>>
+  ): Promise<{ success: boolean }> {
+    for (const [workflowId, stepConfigs] of Object.entries(stepResolverEndpointDto)) {
+      for (const { stepId, endpoint } of stepConfigs) {
+        console.log('workflowId', workflowId);
+        console.log('stepId', stepId);
+        console.log('endpoint', endpoint);
+
+        await this.patchStepDataUsecase.execute({
+          user,
+          workflowIdOrInternalId: workflowId,
+          stepIdOrInternalId: stepId,
+          resolverEndpoint: endpoint,
+        });
+      }
+    }
+
+    return { success: true };
   }
 }

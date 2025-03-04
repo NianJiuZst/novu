@@ -19,6 +19,9 @@ const variantSchemePart = {
     type: Schema.Types.Boolean,
     default: false,
   },
+  resolverEndpoint: {
+    type: Schema.Types.String,
+  },
   issues: Schema.Types.Mixed,
   uuid: Schema.Types.String,
   stepId: Schema.Types.String,

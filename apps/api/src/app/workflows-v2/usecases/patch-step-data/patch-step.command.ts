@@ -18,4 +18,8 @@ export class PatchStepCommand extends EnvironmentWithUserObjectCommand {
   @IsOptional()
   @IsObject()
   controlValues?: Record<string, unknown> | null;
+
+  @IsOptional()
+  @IsString()
+  resolverEndpoint?: string;
 }

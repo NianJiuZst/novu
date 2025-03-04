@@ -1,5 +1,5 @@
-import type { JSONSchemaDto } from './json-schema-dto';
 import { Slug, StepTypeEnum, WorkflowOriginEnum } from '../../types';
+import type { JSONSchemaDto } from './json-schema-dto';
 import { StepContentIssueEnum, StepIntegrationIssueEnum, StepIssueEnum } from './step-content-issue.enum';
 
 export type StepResponseDto = {
@@ -14,6 +14,7 @@ export type StepResponseDto = {
   workflowId: string;
   workflowDatabaseId: string;
   issues?: StepIssuesDto;
+  resolverEndpoint?: string;
 };
 
 export type StepUpdateDto = StepCreateDto & {
@@ -27,6 +28,7 @@ export type StepCreateDto = StepDto & {
 export type PatchStepDataDto = {
   name?: string;
   controlValues?: Record<string, unknown> | null;
+  resolverEndpoint?: string;
 };
 
 export type StepDto = {
@@ -107,3 +109,10 @@ export class ControlsMetadata {
   uiSchema?: UiSchema;
   values: Record<string, unknown>;
 }
+
+export type StepResolverEndpointDto = {
+  [workflowId: string]: Array<{
+    stepId: string;
+    endpoint: string;
+  }>;
+};

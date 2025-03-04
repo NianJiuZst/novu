@@ -1,3 +1,5 @@
+import { JSONSchemaDto } from '../../dto/workflows';
+import type { StepContentIssue, StepIntegrationIssue } from '../../dto/workflows/step.dto';
 import type {
   BuilderFieldType,
   BuilderGroupValues,
@@ -6,13 +8,11 @@ import type {
   WorkflowOriginEnum,
   WorkflowTypeEnum,
 } from '../../types';
-import { JSONSchemaDto } from '../../dto/workflows';
-import type { StepContentIssue, StepIntegrationIssue, StepIssue } from '../../dto/workflows/step.dto';
 import { ControlSchemas, IMessageTemplate } from '../message-template';
 import { INotificationGroup } from '../notification-group';
 import { INotificationBridgeTrigger, INotificationTrigger } from '../notification-trigger';
-import { IPreferenceChannels } from '../subscriber-preference';
 import { IWorkflowStepMetadata } from '../step';
+import { IPreferenceChannels } from '../subscriber-preference';
 
 export interface INotificationTemplate {
   _id?: string;
@@ -71,6 +71,7 @@ export interface IStepVariant {
     active: boolean;
     url: string;
   };
+  resolverEndpoint?: string;
   metadata?: IWorkflowStepMetadata;
   inputs?: {
     schema: JSONSchemaDto;
