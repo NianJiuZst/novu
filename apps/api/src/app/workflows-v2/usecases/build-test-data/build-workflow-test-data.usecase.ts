@@ -32,6 +32,8 @@ export class BuildWorkflowTestDataUseCase {
         workflowId: workflow._id,
       })
     );
+
+    console.log({ variables });
     const toSchema = this.buildToFieldSchema({ user: command.user, steps: workflow.steps, variables });
 
     const payloadSchema = await this.resolvePayloadSchema(workflow, command);
@@ -93,49 +95,41 @@ export class BuildWorkflowTestDataUseCase {
     steps: NotificationStepEntity[];
     variables: Variables;
   }): JSONSchemaDto {
-    // TODO: add subscriber schema
-    const toSchema = buildVariablesSchema({});
-
     const required: string[] = ['subscriberId'];
-    toSchema.properties!.subscriberId = { type: 'string', default: user._id };
+
+    const properties: { [key: string]: JSONSchemaDto } = {
+      subscriberId: { type: 'string', default: user._id },
+      firstName: { type: 'string', default: user?.firstName || '' },
+      lastName: { type: 'string', default: user?.lastName || '' },
+      isOnline: { type: 'boolean', default: true },
+      lastOnlineAt: { type: 'string', format: 'date-time', default: new Date().toISOString() },
+      // TODO: add locale as an enum
+      locale: { type: 'string', default: '' },
+      // TODO: add timezone as an enum
+      timezone: { type: 'string', default: '' },
+      data: buildVariablesSchema(
+        variables?.subscriber && typeof variables.subscriber === 'object' && 'data' in variables.subscriber
+          ? variables.subscriber.data
+          : {}
+      ),
+    };
 
     if (this.hasStep(steps, StepTypeEnum.EMAIL)) {
-      toSchema.properties!.email = { type: 'string', default: user.email ?? '', format: 'email' };
+      properties.email = { type: 'string', default: user.email ?? '', format: 'email' };
       required.push('email');
     }
 
     if (this.hasStep(steps, StepTypeEnum.SMS)) {
-      toSchema.properties!.phone = { type: 'string', default: '' };
+      properties.phone = { type: 'string', default: '' };
       required.push('phone');
     }
 
-    if (variables.subscriber.firstName) {
-      toSchema.properties!.firstName = { type: 'string', default: user?.firstName || '' };
-    }
-
-    if (variables.subscriber.lastName) {
-      toSchema.properties!.lastName = { type: 'string', default: user?.lastName || '' };
-    }
-
-    if (variables.subscriber.isOnline) {
-      toSchema.properties!.isOnline = { type: 'boolean', default: true };
-    }
-
-    if (variables.subscriber.lastOnlineAt) {
-      toSchema.properties!.lastOnlineAt = { type: 'string', format: 'date-time', default: new Date().toISOString() };
-    }
-
-    // TODO: add locale as an enum
-    if (variables.subscriber.locale) {
-      toSchema.properties!.locale = { type: 'string', default: '' };
-    }
-
-    // TODO: add timezone as an enum
-    if (variables.subscriber.timezone) {
-      toSchema.properties!.timezone = { type: 'string', default: '' };
-    }
-
-    return toSchema;
+    return {
+      type: 'object',
+      properties,
+      required,
+      additionalProperties: false,
+    } satisfies JSONSchemaDto;
   }
 
   private hasStep(steps: NotificationStepEntity[], type: StepTypeEnum): boolean {

@@ -1,5 +1,4 @@
 import { JSONSchemaDto } from '@novu/shared';
-import { add } from 'date-fns';
 
 function determineSchemaType(value: unknown): JSONSchemaDto {
   if (value === null) {
