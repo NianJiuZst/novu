@@ -1,7 +1,7 @@
 import { createEffect, createMemo, createSignal, JSX, Show } from 'solid-js';
 
 import type { Notification } from '../../../notifications';
-import { ActionTypeEnum } from '../../../types';
+import { Action, ActionTypeEnum } from '../../../types';
 import { useInboxContext, useLocalization } from '../../context';
 import { cn, formatToRelativeTime, useStyle } from '../../helpers';
 import { MarkAsUnarchived } from '../../icons';
@@ -12,12 +12,21 @@ import { NotificationStatus, type NotificationActionClickHandler, type Notificat
 import Markdown from '../elements/Markdown';
 import { Button } from '../primitives';
 import { Tooltip } from '../primitives/Tooltip';
+import { ExternalElementRenderer } from '../ExternalElementRenderer';
 
-type DefaultNotificationProps = {
+export type DefaultNotificationProps = {
   notification: Notification;
+  className?: string;
   onNotificationClick?: NotificationClickHandler;
   onPrimaryActionClick?: NotificationActionClickHandler;
   onSecondaryActionClick?: NotificationActionClickHandler;
+  renderAvatar?: (el: HTMLDivElement, avatar?: string) => () => void;
+  renderSubject?: (el: HTMLDivElement, subject?: string) => () => void;
+  renderBody?: (el: HTMLDivElement, body: string) => () => void;
+  renderActions?: (el: HTMLDivElement, notification: Notification) => () => void;
+  renderCustomActions?: (el: HTMLDivElement, primaryAction?: Action, secondaryAction?: Action) => () => void;
+  renderDate?: (el: HTMLDivElement, date: string) => () => void;
+  renderDot?: (el: HTMLDivElement, isRead: boolean) => () => void;
 };
 
 export const DefaultNotification = (props: DefaultNotificationProps) => {
@@ -29,6 +38,10 @@ export const DefaultNotification = (props: DefaultNotificationProps) => {
     minutesPassed(); // register as dep
 
     return formatToRelativeTime({ fromDate: new Date(props.notification.createdAt), locale: locale() });
+  });
+
+  createEffect(() => {
+    console.log('Solid.DefaultNotification.mount', { renderBody: props.renderBody });
   });
 
   createEffect(() => {
@@ -75,6 +88,7 @@ export const DefaultNotification = (props: DefaultNotificationProps) => {
         cn(
           'nt-w-full nt-text-sm hover:nt-bg-primary-alpha-25 nt-group nt-relative nt-flex nt-items-start nt-p-4 nt-gap-2',
           '[&:not(:first-child)]:nt-border-t nt-border-neutral-alpha-100',
+          props.className,
           {
             'nt-cursor-pointer': !props.notification.isRead || !!props.notification.redirect?.url,
           }
@@ -83,171 +97,245 @@ export const DefaultNotification = (props: DefaultNotificationProps) => {
       onClick={handleNotificationClick}
     >
       <Show
-        when={props.notification.avatar}
-        fallback={<div class={style('notificationImage', 'nt-size-8 nt-rounded-lg nt-shrink-0')} />}
+        when={props.renderAvatar}
+        fallback={
+          <Show
+            when={props.notification.avatar}
+            fallback={<div class={style('notificationImage', 'nt-size-8 nt-rounded-lg nt-shrink-0')} />}
+          >
+            <img
+              class={style('notificationImage', 'nt-size-8 nt-rounded-lg nt-object-cover')}
+              src={props.notification.avatar}
+            />
+          </Show>
+        }
       >
-        <img
-          class={style('notificationImage', 'nt-size-8 nt-rounded-lg nt-object-cover')}
-          src={props.notification.avatar}
+        <ExternalElementRenderer
+          id={`${props.notification.id}-avatar`}
+          render={(el) => props.renderAvatar!(el, props.notification.avatar)}
         />
       </Show>
+
       <div class={style('notificationContent', 'nt-flex nt-flex-col nt-gap-2 nt-w-full')}>
         <div class={style('notificationTextContainer')}>
-          <Show when={props.notification.subject}>
-            {(subject) => (
-              <Markdown
-                appearanceKey="notificationSubject"
-                class="nt-text-start nt-font-medium"
-                strongAppearanceKey="notificationSubject__strong"
-              >
-                {subject()}
-              </Markdown>
-            )}
-          </Show>
-          <Markdown
-            appearanceKey="notificationBody"
-            strongAppearanceKey="notificationBody__strong"
-            class="nt-text-start nt-whitespace-pre-wrap"
+          <Show
+            when={props.renderSubject}
+            fallback={
+              <Show when={props.notification.subject}>
+                {(subject) => (
+                  <Markdown
+                    appearanceKey="notificationSubject"
+                    class="nt-text-start nt-font-medium"
+                    strongAppearanceKey="notificationSubject__strong"
+                  >
+                    {subject()}
+                  </Markdown>
+                )}
+              </Show>
+            }
           >
-            {props.notification.body}
-          </Markdown>
+            <ExternalElementRenderer
+              id={`${props.notification.id}-subject`}
+              render={(el) => props.renderSubject!(el, props.notification.subject)}
+            />
+          </Show>
+          <Show
+            when={props.renderBody}
+            fallback={
+              <Markdown
+                appearanceKey="notificationBody"
+                strongAppearanceKey="notificationBody__strong"
+                class="nt-text-start nt-whitespace-pre-wrap"
+              >
+                {props.notification.body}
+              </Markdown>
+            }
+          >
+            <ExternalElementRenderer
+              id={`${props.notification.id}-body`}
+              render={(el) => props.renderBody!(el, props.notification.body)}
+            />
+          </Show>
         </div>
-        <div
-          class={style(
-            'notificationDefaultActions',
-            'nt-absolute nt-transition nt-duration-100 nt-ease-out nt-gap-0.5 nt-flex nt-shrink-0 nt-opacity-0 group-hover:nt-opacity-100 group-focus-within:nt-opacity-100 nt-justify-center nt-items-center nt-bg-background/90 nt-right-8 nt-top-3 nt-border nt-border-neutral-alpha-100 nt-rounded-lg nt-backdrop-blur-lg nt-p-0.5'
-          )}
-        >
-          <Show when={status() !== NotificationStatus.ARCHIVED}>
-            <Show
-              when={props.notification.isRead}
-              fallback={
+
+        <Show
+          when={props.renderActions}
+          fallback={
+            <div
+              class={style(
+                'notificationDefaultActions',
+                'nt-absolute nt-transition nt-duration-100 nt-ease-out nt-gap-0.5 nt-flex nt-shrink-0 nt-opacity-0 group-hover:nt-opacity-100 group-focus-within:nt-opacity-100 nt-justify-center nt-items-center nt-bg-background/90 nt-right-8 nt-top-3 nt-border nt-border-neutral-alpha-100 nt-rounded-lg nt-backdrop-blur-lg nt-p-0.5'
+              )}
+            >
+              <Show when={status() !== NotificationStatus.ARCHIVED}>
+                <Show
+                  when={props.notification.isRead}
+                  fallback={
+                    <Tooltip.Root>
+                      <Tooltip.Trigger
+                        asChild={(childProps) => (
+                          <Button
+                            appearanceKey="notificationRead__button"
+                            size="iconSm"
+                            variant="ghost"
+                            {...childProps}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              await props.notification.read();
+                            }}
+                          >
+                            <MarkAsRead class={style('notificationRead__icon', 'nt-size-3')} />
+                          </Button>
+                        )}
+                      />
+                      <Tooltip.Content data-localization="notification.actions.read.tooltip">
+                        {t('notification.actions.read.tooltip')}
+                      </Tooltip.Content>
+                    </Tooltip.Root>
+                  }
+                >
+                  <Tooltip.Root>
+                    <Tooltip.Trigger
+                      asChild={(childProps) => (
+                        <Button
+                          appearanceKey="notificationUnread__button"
+                          size="iconSm"
+                          variant="ghost"
+                          {...childProps}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            await props.notification.unread();
+                          }}
+                        >
+                          <MarkAsUnread class={style('notificationUnread__icon', 'nt-size-3')} />
+                        </Button>
+                      )}
+                    />
+                    <Tooltip.Content data-localization="notification.actions.unread.tooltip">
+                      {t('notification.actions.unread.tooltip')}
+                    </Tooltip.Content>
+                  </Tooltip.Root>
+                </Show>
+              </Show>
+              <Show
+                when={props.notification.isArchived}
+                fallback={
+                  <Tooltip.Root>
+                    <Tooltip.Trigger
+                      asChild={(childProps) => (
+                        <Button
+                          appearanceKey="notificationArchive__button"
+                          size="iconSm"
+                          variant="ghost"
+                          {...childProps}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            await props.notification.archive();
+                          }}
+                        >
+                          <MarkAsArchived class={style('notificationArchive__icon', 'nt-size-3')} />
+                        </Button>
+                      )}
+                    />
+                    <Tooltip.Content data-localization="notification.actions.archive.tooltip">
+                      {t('notification.actions.archive.tooltip')}
+                    </Tooltip.Content>
+                  </Tooltip.Root>
+                }
+              >
                 <Tooltip.Root>
                   <Tooltip.Trigger
                     asChild={(childProps) => (
                       <Button
-                        appearanceKey="notificationRead__button"
+                        appearanceKey="notificationUnarchive__button"
                         size="iconSm"
                         variant="ghost"
                         {...childProps}
                         onClick={async (e) => {
                           e.stopPropagation();
-                          await props.notification.read();
+                          await props.notification.unarchive();
                         }}
                       >
-                        <MarkAsRead class={style('notificationRead__icon', 'nt-size-3')} />
+                        <MarkAsUnarchived class={style('notificationArchive__icon', 'nt-size-3')} />
                       </Button>
                     )}
                   />
-                  <Tooltip.Content data-localization="notification.actions.read.tooltip">
-                    {t('notification.actions.read.tooltip')}
+                  <Tooltip.Content data-localization="notification.actions.unarchive.tooltip">
+                    {t('notification.actions.unarchive.tooltip')}
                   </Tooltip.Content>
                 </Tooltip.Root>
-              }
-            >
-              <Tooltip.Root>
-                <Tooltip.Trigger
-                  asChild={(childProps) => (
-                    <Button
-                      appearanceKey="notificationUnread__button"
-                      size="iconSm"
-                      variant="ghost"
-                      {...childProps}
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        await props.notification.unread();
-                      }}
-                    >
-                      <MarkAsUnread class={style('notificationUnread__icon', 'nt-size-3')} />
-                    </Button>
-                  )}
-                />
-                <Tooltip.Content data-localization="notification.actions.unread.tooltip">
-                  {t('notification.actions.unread.tooltip')}
-                </Tooltip.Content>
-              </Tooltip.Root>
-            </Show>
-          </Show>
-          <Show
-            when={props.notification.isArchived}
-            fallback={
-              <Tooltip.Root>
-                <Tooltip.Trigger
-                  asChild={(childProps) => (
-                    <Button
-                      appearanceKey="notificationArchive__button"
-                      size="iconSm"
-                      variant="ghost"
-                      {...childProps}
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        await props.notification.archive();
-                      }}
-                    >
-                      <MarkAsArchived class={style('notificationArchive__icon', 'nt-size-3')} />
-                    </Button>
-                  )}
-                />
-                <Tooltip.Content data-localization="notification.actions.archive.tooltip">
-                  {t('notification.actions.archive.tooltip')}
-                </Tooltip.Content>
-              </Tooltip.Root>
-            }
-          >
-            <Tooltip.Root>
-              <Tooltip.Trigger
-                asChild={(childProps) => (
-                  <Button
-                    appearanceKey="notificationUnarchive__button"
-                    size="iconSm"
-                    variant="ghost"
-                    {...childProps}
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      await props.notification.unarchive();
-                    }}
-                  >
-                    <MarkAsUnarchived class={style('notificationArchive__icon', 'nt-size-3')} />
-                  </Button>
-                )}
-              />
-              <Tooltip.Content data-localization="notification.actions.unarchive.tooltip">
-                {t('notification.actions.unarchive.tooltip')}
-              </Tooltip.Content>
-            </Tooltip.Root>
-          </Show>
-        </div>
-        <Show when={props.notification.primaryAction || props.notification.secondaryAction}>
-          <div class={style('notificationCustomActions', 'nt-flex nt-flex-wrap nt-gap-2')}>
-            <Show when={props.notification.primaryAction} keyed>
-              {(primaryAction) => (
-                <Button
-                  appearanceKey="notificationPrimaryAction__button"
-                  variant="default"
-                  onClick={(e) => handleActionButtonClick(ActionTypeEnum.PRIMARY, e)}
-                >
-                  {primaryAction.label}
-                </Button>
-              )}
-            </Show>
-            <Show when={props.notification.secondaryAction} keyed>
-              {(secondaryAction) => (
-                <Button
-                  appearanceKey="notificationSecondaryAction__button"
-                  variant="secondary"
-                  onClick={(e) => handleActionButtonClick(ActionTypeEnum.SECONDARY, e)}
-                >
-                  {secondaryAction.label}
-                </Button>
-              )}
-            </Show>
-          </div>
+              </Show>
+            </div>
+          }
+        >
+          <ExternalElementRenderer
+            id={`${props.notification.id}-actions`}
+            render={(el) => props.renderActions!(el, props.notification)}
+          />
         </Show>
-        <p class={style('notificationDate', 'nt-text-foreground-alpha-400')}>{date()}</p>
+
+        <Show
+          when={props.renderCustomActions}
+          fallback={
+            <Show when={props.notification.primaryAction || props.notification.secondaryAction}>
+              <div class={style('notificationCustomActions', 'nt-flex nt-flex-wrap nt-gap-2')}>
+                <Show when={props.notification.primaryAction} keyed>
+                  {(primaryAction) => (
+                    <Button
+                      appearanceKey="notificationPrimaryAction__button"
+                      variant="default"
+                      onClick={(e) => handleActionButtonClick(ActionTypeEnum.PRIMARY, e)}
+                    >
+                      {primaryAction.label}
+                    </Button>
+                  )}
+                </Show>
+                <Show when={props.notification.secondaryAction} keyed>
+                  {(secondaryAction) => (
+                    <Button
+                      appearanceKey="notificationSecondaryAction__button"
+                      variant="secondary"
+                      onClick={(e) => handleActionButtonClick(ActionTypeEnum.SECONDARY, e)}
+                    >
+                      {secondaryAction.label}
+                    </Button>
+                  )}
+                </Show>
+              </div>
+            </Show>
+          }
+        >
+          <ExternalElementRenderer
+            id={`${props.notification.id}-custom-actions`}
+            render={(el) =>
+              props.renderCustomActions!(el, props.notification.primaryAction, props.notification.secondaryAction)
+            }
+          />
+        </Show>
+
+        <Show
+          when={props.renderDate}
+          fallback={<p class={style('notificationDate', 'nt-text-foreground-alpha-400')}>{date()}</p>}
+        >
+          <ExternalElementRenderer
+            id={`${props.notification.id}-date`}
+            render={(el) => props.renderDate!(el, props.notification.createdAt)}
+          />
+        </Show>
       </div>
 
-      <Show when={!props.notification.isRead}>
-        <span class={style('notificationDot', 'nt-size-1.5 nt-bg-primary nt-rounded-full nt-shrink-0')} />
+      <Show
+        when={props.renderDot}
+        fallback={
+          <Show when={!props.notification.isRead}>
+            <span class={style('notificationDot', 'nt-size-1.5 nt-bg-primary nt-rounded-full nt-shrink-0')} />
+          </Show>
+        }
+      >
+        <ExternalElementRenderer
+          id={`${props.notification.id}-dot`}
+          render={(el) => props.renderDot!(el, props.notification.isRead)}
+        />
       </Show>
     </a>
   );

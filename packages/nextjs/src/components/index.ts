@@ -17,11 +17,13 @@ import {
   NotificationsRenderer,
   Preferences,
   WithChildrenProps,
+  DefaultNotification,
+  DefaultNotificationProps,
 } from '@novu/react';
 
 export * from './Inbox';
 
-export { Bell, InboxContent, Notifications, Preferences };
+export { Bell, InboxContent, Notifications, Preferences, DefaultNotification };
 
 export type {
   BaseProps,
@@ -35,4 +37,5 @@ export type {
   NotificationsRenderer,
   WithChildrenProps,
   Notification,
+  DefaultNotificationProps,
 };

@@ -27,5 +27,5 @@ export function Mounter({ mount }: MounterProps) {
     };
   }, [ref, mount]);
 
-  return <div ref={ref} />;
+  return <div ref={ref} data-mounter="react" />;
 }

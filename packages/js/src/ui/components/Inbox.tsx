@@ -1,5 +1,5 @@
 import { type OffsetOptions, type Placement } from '@floating-ui/dom';
-import { createMemo, createSignal, Match, Show, Switch } from 'solid-js';
+import { createEffect, createMemo, createSignal, Match, Show, Switch } from 'solid-js';
 import { useInboxContext } from '../context';
 import { useStyle } from '../helpers';
 import type {
@@ -95,6 +95,10 @@ export const Inbox = (props: InboxProps) => {
   const style = useStyle();
   const { isOpened, setIsOpened } = useInboxContext();
   const isOpen = () => props?.open ?? isOpened();
+
+  createEffect(() => {
+    console.log('Solid.Inbox.mount');
+  });
 
   return (
     <Popover.Root open={isOpen()} onOpenChange={setIsOpened} placement={props.placement} offset={props.placementOffset}>

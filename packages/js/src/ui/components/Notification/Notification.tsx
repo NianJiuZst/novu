@@ -1,4 +1,4 @@
-import { Show } from 'solid-js';
+import { createEffect, Show } from 'solid-js';
 import type { Notification as NotificationType } from '../../../notifications';
 import type { NotificationActionClickHandler, NotificationClickHandler, NotificationRenderer } from '../../types';
 import { ExternalElementRenderer } from '../ExternalElementRenderer';
@@ -13,6 +13,10 @@ type NotificationProps = {
 };
 
 export const Notification = (props: NotificationProps) => {
+  createEffect(() => {
+    console.log('Solid.Notification.mount', { notification: props.notification });
+  });
+
   return (
     <Show
       when={props.renderNotification}
@@ -25,7 +29,10 @@ export const Notification = (props: NotificationProps) => {
         />
       }
     >
-      <ExternalElementRenderer render={(el) => props.renderNotification!(el, props.notification)} />
+      <ExternalElementRenderer
+        id={props.notification.id}
+        render={(el) => props.renderNotification!(el, props.notification)}
+      />
     </Show>
   );
 };

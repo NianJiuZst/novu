@@ -1,37 +1,65 @@
-import { ComponentType, PropsWithChildren, useCallback, useState } from 'react';
-import { MountedElement, RendererProvider } from '../context/RendererContext';
+import { ComponentType, PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { MountedElement, RendererProvider } from '../context/RendererContext';
 
 type RendererProps = PropsWithChildren;
 export const Renderer = (props: RendererProps) => {
   const { children } = props;
-  const [mountedElements, setMountedElements] = useState(new Map<HTMLElement, MountedElement>());
+  const [mountedElements, setMountedElements] = useState(
+    new Map<string, { el: HTMLElement; mountedElement: MountedElement }>()
+  );
 
   const mountElement = useCallback(
     (el: HTMLElement, mountedElement: MountedElement) => {
+      const id = el.getAttribute('data-id');
+      if (!el.isConnected || !id) {
+        console.log('React.Renderer.mountElement.elementNotConnected', { id, el, mountedElement });
+
+        return () => {};
+      }
+
+      console.log('React.Renderer.mountElement', {
+        id,
+        el,
+        mountedElement,
+      });
+
       setMountedElements((prev) => {
         const newMountedElements = new Map(prev);
-        newMountedElements.set(el, mountedElement);
+        newMountedElements.set(id, { el, mountedElement });
 
         return newMountedElements;
       });
 
       return () => {
-        setMountedElements((prev) => {
-          const newMountedElements = new Map(prev);
-          newMountedElements.delete(el);
-
-          return newMountedElements;
-        });
+        console.log('React.Renderer.mountElement.unmountingElement', { el });
+        /*
+         * setMountedElements((prev) => {
+         * const newMountedElements = new Map(prev);
+         * newMountedElements.delete(id);
+         *
+         * return newMountedElements;
+         * });
+         *
+         * setElementOrder((prev) => prev.filter((element) => element !== el));
+         */
       };
     },
     [setMountedElements]
   );
 
+  console.log('React.Renderer.render', mountedElements);
+
+  const value = useMemo(() => ({ mountElement }), [mountElement]);
+
   return (
-    <RendererProvider value={{ mountElement }}>
-      {[...mountedElements].map(([element, mountedElement]) => {
-        return createPortal(mountedElement, element);
+    <RendererProvider value={value}>
+      {Array.from(mountedElements.values()).map((item) => {
+        if (!item) return null;
+
+        console.log('React.Renderer.renderPortal', { item });
+
+        return createPortal(item.mountedElement, item.el);
       })}
 
       {children}

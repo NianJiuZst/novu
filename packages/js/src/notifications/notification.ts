@@ -7,27 +7,46 @@ export class Notification implements Pick<NovuEventEmitter, 'on'>, InboxNotifica
   #emitter: NovuEventEmitter;
   #inboxService: InboxService;
 
-  readonly id: InboxNotification['id'];
-  readonly subject?: InboxNotification['subject'];
-  readonly body: InboxNotification['body'];
-  readonly to: InboxNotification['to'];
-  readonly isRead: InboxNotification['isRead'];
-  readonly isArchived: InboxNotification['isArchived'];
-  readonly createdAt: InboxNotification['createdAt'];
-  readonly readAt?: InboxNotification['readAt'];
-  readonly archivedAt?: InboxNotification['archivedAt'];
-  readonly avatar?: InboxNotification['avatar'];
-  readonly primaryAction?: InboxNotification['primaryAction'];
-  readonly secondaryAction?: InboxNotification['secondaryAction'];
-  readonly channelType: InboxNotification['channelType'];
-  readonly tags: InboxNotification['tags'];
-  readonly redirect: InboxNotification['redirect'];
-  readonly data?: InboxNotification['data'];
+  id: InboxNotification['id'];
+  subject?: InboxNotification['subject'];
+  body: InboxNotification['body'];
+  to: InboxNotification['to'];
+  isRead: InboxNotification['isRead'];
+  isArchived: InboxNotification['isArchived'];
+  createdAt: InboxNotification['createdAt'];
+  readAt?: InboxNotification['readAt'];
+  archivedAt?: InboxNotification['archivedAt'];
+  avatar?: InboxNotification['avatar'];
+  primaryAction?: InboxNotification['primaryAction'];
+  secondaryAction?: InboxNotification['secondaryAction'];
+  channelType: InboxNotification['channelType'];
+  tags: InboxNotification['tags'];
+  redirect: InboxNotification['redirect'];
+  data?: InboxNotification['data'];
 
   constructor(notification: InboxNotification, emitter: NovuEventEmitter, inboxService: InboxService) {
     this.#emitter = emitter;
     this.#inboxService = inboxService;
 
+    this.id = notification.id;
+    this.subject = notification.subject;
+    this.body = notification.body;
+    this.to = notification.to;
+    this.isRead = notification.isRead;
+    this.isArchived = notification.isArchived;
+    this.createdAt = notification.createdAt;
+    this.readAt = notification.readAt;
+    this.archivedAt = notification.archivedAt;
+    this.avatar = notification.avatar;
+    this.primaryAction = notification.primaryAction;
+    this.secondaryAction = notification.secondaryAction;
+    this.channelType = notification.channelType;
+    this.tags = notification.tags;
+    this.redirect = notification.redirect;
+    this.data = notification.data;
+  }
+
+  update(notification: InboxNotification): void {
     this.id = notification.id;
     this.subject = notification.subject;
     this.body = notification.body;

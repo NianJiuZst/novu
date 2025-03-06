@@ -9,6 +9,7 @@ type LinkType = {
 
 const LINKS: LinkType[] = [
   { href: '/', label: 'Default Inbox' },
+  { href: '/default-notification', label: 'Default Notification' },
   { href: '/render-bell', label: 'Render Bell' },
   { href: '/render-notification', label: 'Render Notification' },
   { href: '/preferences', label: 'Preferences' },
@@ -21,9 +22,10 @@ const LINKS: LinkType[] = [
 const NavLink = ({ href, label }: LinkType) => {
   const router = useRouter();
 
-  const pathname = router.pathname;
+  const { pathname } = router;
 
   const isActive = pathname === href;
+
   return (
     <li className={`rounded p-2 hover:bg-slate-200 ${isActive ? 'text-cyan-800 underline' : ''}`}>
       <Link href={href}>{label}</Link>

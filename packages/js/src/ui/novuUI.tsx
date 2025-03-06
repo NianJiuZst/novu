@@ -107,9 +107,13 @@ export class NovuUI {
     this.#dispose = dispose;
   }
 
+  #getConnectedElements(elements: Map<MountableElement, NovuComponent>) {
+    return Array.from(elements.entries()).filter(([el]) => el.isConnected);
+  }
+
   #updateComponentProps(element: MountableElement, props: unknown) {
     this.#setMountedElements((oldMountedElements) => {
-      const newMountedElements = new Map(oldMountedElements);
+      const newMountedElements = new Map(this.#getConnectedElements(oldMountedElements));
       const mountedElement = newMountedElements.get(element);
       if (mountedElement) {
         newMountedElements.set(element, { ...mountedElement, props });
@@ -128,12 +132,23 @@ export class NovuUI {
     element: MountableElement;
     props?: ComponentProps<(typeof novuComponents)[T]>;
   }) {
+    if (!element.isConnected) {
+      console.log('Solid.NovuUI.mountComponent.elementNotConnected', { name, element, componentProps });
+
+      return;
+    }
+
+    console.log('Solid.NovuUI.mountComponent', { elements: this.#mountedElements() });
+
     if (this.#mountedElements().has(element)) {
+      console.log('Solid.NovuUI.mountComponent.has', { name, element, componentProps });
+
       return this.#updateComponentProps(element, componentProps);
     }
 
+    console.log('Solid.NovuUI.mountComponent.doesntHave', { name, element, componentProps });
     this.#setMountedElements((oldNodes) => {
-      const newNodes = new Map(oldNodes);
+      const newNodes = new Map(this.#getConnectedElements(oldNodes));
       newNodes.set(element, { name, props: componentProps });
 
       return newNodes;
@@ -142,7 +157,7 @@ export class NovuUI {
 
   unmountComponent(element: MountableElement) {
     this.#setMountedElements((oldMountedElements) => {
-      const newMountedElements = new Map(oldMountedElements);
+      const newMountedElements = new Map(this.#getConnectedElements(oldMountedElements));
       newMountedElements.delete(element);
 
       return newMountedElements;

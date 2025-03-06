@@ -30,6 +30,10 @@ export const NotificationList = (props: NotificationListProps) => {
     setLimit(props.limit || DEFAULT_LIMIT);
   });
 
+  createEffect(() => {
+    console.log('Solid.NotificationList.mount');
+  });
+
   const handleOnNewMessagesClick: JSX.EventHandlerUnion<HTMLButtonElement, MouseEvent> = async (e) => {
     e.stopPropagation();
     resetNewMessagesCount();
@@ -52,13 +56,16 @@ export const NotificationList = (props: NotificationListProps) => {
         class={style('notificationList', 'nt-relative nt-h-full nt-flex nt-flex-col nt-overflow-y-auto')}
       >
         <Show when={data().length > 0} fallback={<NotificationListSkeleton loading={initialLoading()} />}>
-          <For each={ids()}>
-            {(_, index) => {
-              const notification = () => data()[index()];
+          {/** THE FOR IS CREATING A NEW ELEMENT EACH TIME NOTIFICATION CHANGES */}
+          <For each={data()}>
+            {(notification, index) => {
+              // const notification = () => data()[index()];
+
+              console.log('Solid.NotificationList.renderNotification', { notification });
 
               return (
                 <Notification
-                  notification={notification()}
+                  notification={notification}
                   renderNotification={props.renderNotification}
                   onNotificationClick={props.onNotificationClick}
                   onPrimaryActionClick={props.onPrimaryActionClick}

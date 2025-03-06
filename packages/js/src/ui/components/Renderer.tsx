@@ -1,4 +1,4 @@
-import { For, onCleanup, onMount } from 'solid-js';
+import { For, Index, onCleanup, onMount } from 'solid-js';
 import { MountableElement, Portal } from 'solid-js/web';
 import { NovuUI } from '..';
 import { Novu } from '../../novu';
@@ -14,6 +14,7 @@ import {
 import type { Appearance, Localization, PreferencesFilter, RouterPush, Tab } from '../types';
 import { Bell, Root } from './elements';
 import { Inbox, InboxContent, InboxContentProps, InboxPage } from './Inbox';
+import { DefaultNotification, DefaultNotificationProps } from './Notification/DefaultNotification';
 
 export const novuComponents = {
   Inbox,
@@ -25,6 +26,7 @@ export const novuComponents = {
   Preferences: (props: Omit<InboxContentProps, 'hideNav' | 'initialPage'>) => (
     <InboxContent {...props} hideNav={true} initialPage={InboxPage.Preferences} />
   ),
+  DefaultNotification,
 };
 
 export type NovuComponent = { name: NovuComponentName; props?: any };
@@ -56,6 +58,8 @@ export const Renderer = (props: RendererProps) => {
   const nodes = () => [...props.nodes.keys()];
 
   onMount(() => {
+    console.log('Solid.Renderer.mount');
+
     const id = 'novu-default-css';
     const el = document.getElementById(id);
     if (el) {
@@ -86,6 +90,8 @@ export const Renderer = (props: RendererProps) => {
                     const novuComponent = () => props.nodes.get(node)!;
                     let portalDivElement: HTMLDivElement;
                     const Component = novuComponents[novuComponent().name];
+
+                    console.log('Solid.Renderer.render', { node, novuComponent });
 
                     onMount(() => {
                       /*

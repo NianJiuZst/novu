@@ -37,10 +37,17 @@ export const read = async ({
 
     const response = await apiService.read(notificationId);
 
-    const updatedNotification = new Notification(response, emitter, apiService);
-    emitter.emit('notification.read.resolved', { args, data: updatedNotification });
+    let notification: Notification;
+    if (optimisticValue) {
+      optimisticValue.update(response);
+      notification = optimisticValue;
+    } else {
+      notification = new Notification(response, emitter, apiService);
+    }
 
-    return { data: updatedNotification };
+    emitter.emit('notification.read.resolved', { args, data: notification });
+
+    return { data: notification };
   } catch (error) {
     emitter.emit('notification.read.resolved', { args, error });
 
@@ -78,10 +85,17 @@ export const unread = async ({
 
     const response = await apiService.unread(notificationId);
 
-    const updatedNotification = new Notification(response, emitter, apiService);
-    emitter.emit('notification.unread.resolved', { args, data: updatedNotification });
+    let notification: Notification;
+    if (optimisticValue) {
+      optimisticValue.update(response);
+      notification = optimisticValue;
+    } else {
+      notification = new Notification(response, emitter, apiService);
+    }
 
-    return { data: updatedNotification };
+    emitter.emit('notification.unread.resolved', { args, data: notification });
+
+    return { data: notification };
   } catch (error) {
     emitter.emit('notification.unread.resolved', { args, error });
 
@@ -89,6 +103,7 @@ export const unread = async ({
   }
 };
 
+// TODO: do the same for archive, unarchive, completeAction, revertAction
 export const archive = async ({
   emitter,
   apiService,

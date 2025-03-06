@@ -42,8 +42,8 @@ export function createInfiniteScroll<T>(fetcher: (page: number) => Promise<{ dat
     const content = contents.latest;
     if (!content) return;
 
-    setInitialLoading(false);
     batch(() => {
+      setInitialLoading(false);
       if (!content.hasMore) setEnd(true);
       setData(content.data);
     });
