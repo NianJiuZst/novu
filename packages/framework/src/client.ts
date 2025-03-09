@@ -37,6 +37,7 @@ import type {
 } from './types';
 import { WithPassthrough } from './types/provider.types';
 import {
+  decodeHTML,
   EMOJI,
   log,
   resolveApiUrl,
@@ -358,16 +359,19 @@ export class Client {
         resolve: stepResolve as typeof step.resolve,
       });
 
-      if (
-        Object.values(ChannelStepEnum).includes(step.type as ChannelStepEnum) &&
-        // TODO: Update return type to include ChannelStep and fix typings
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (options as any)?.disableOutputSanitization !== true
-      ) {
+      const shouldSanitizeOutputs =
+        (options as { disableOutputSanitization?: boolean })?.disableOutputSanitization !== true;
+      const isChannelStep = (Object.values(ChannelStepEnum) as string[]).includes(step.type);
+
+      if (isChannelStep && shouldSanitizeOutputs) {
         // Sanitize the outputs to avoid XSS attacks via Channel content.
+        const sanitizedOutputs = sanitizeHtmlInObject(stepResult.outputs);
+        // Decode string values that aren't meant to be HTML back to their original form
+        const decodedOutputs = decodeOutputs(step.type, sanitizedOutputs);
+
         stepResult = {
           ...stepResult,
-          outputs: sanitizeHtmlInObject(stepResult.outputs),
+          outputs: decodedOutputs,
         };
       }
 
@@ -838,3 +842,16 @@ function buildSteps(stateArray: State[]) {
 
   return result;
 }
+
+const decodeOutputs = (stepType: string, output: Record<string, unknown>) => {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(output)) {
+    if (key === 'subject' && stepType === 'email') {
+      result[key] = decodeHTML(value as string);
+    } else {
+      result[key] = value;
+    }
+  }
+
+  return result;
+};
