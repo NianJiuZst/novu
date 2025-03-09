@@ -37,7 +37,6 @@ import type {
 } from './types';
 import { WithPassthrough } from './types/provider.types';
 import {
-  decodeHTML,
   EMOJI,
   log,
   resolveApiUrl,
@@ -359,15 +358,13 @@ export class Client {
         resolve: stepResolve as typeof step.resolve,
       });
 
-      if (shouldSanitize(options, step)) {
+      if (sanitizationEnabled(options, step)) {
         // Sanitize the outputs to avoid XSS attacks via Channel content.
-        const sanitizedOutputs = sanitizeHtmlInObject(stepResult.outputs);
-        // Decode string values that aren't meant to be HTML back to their original form
-        const decodedOutputs = decodeOutputs(step.type, sanitizedOutputs);
+        const sanitizedOutputs = sanitizeOutputs(step.type, stepResult.outputs);
 
         stepResult = {
           ...stepResult,
-          outputs: decodedOutputs,
+          outputs: sanitizedOutputs,
         };
       }
 
@@ -835,7 +832,7 @@ type ChannelStepOption = {
   [key: string]: unknown;
 };
 
-function shouldSanitize(options: ChannelStepOption | undefined, step: DiscoverStepOutput): boolean {
+function sanitizationEnabled(options: ChannelStepOption | undefined, step: DiscoverStepOutput): boolean {
   const shouldSanitizeOutputs = options?.disableOutputSanitization !== true;
   const isChannelStep = (Object.values(ChannelStepEnum) as string[]).includes(step.type);
 
@@ -852,15 +849,25 @@ function buildSteps(stateArray: State[]) {
   return result;
 }
 
-const decodeOutputs = (stepType: string, output: Record<string, unknown>) => {
+const sanitizeOutputs = (stepType: string, output: Record<string, unknown>): Record<string, unknown> => {
   const result: Record<string, unknown> = {};
+
   for (const [key, value] of Object.entries(output)) {
-    if (key === 'subject' && stepType === 'email') {
-      result[key] = decodeHTML(value as string);
-    } else {
+    if (skipOutputSanitization(stepType, key)) {
       result[key] = value;
+    } else {
+      Object.assign(result, sanitizeHtmlInObject({ [key]: value }));
     }
   }
 
   return result;
+};
+
+const skipOutputSanitization = (stepType: string, outputKey: string) => {
+  // Skip sanitization for string values that aren't HTML
+  if (outputKey === 'subject' && stepType === 'email') {
+    return true;
+  }
+
+  return false;
 };

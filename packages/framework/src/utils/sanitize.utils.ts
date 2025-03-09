@@ -85,34 +85,3 @@ export const sanitizeHtmlInObject = <T extends Record<string, unknown>>(object: 
     return acc;
   }, {} as T);
 };
-
-export const decodeHTML = (html: string): string => {
-  if (!html) {
-    return html;
-  }
-
-  return (
-    html
-      // Basic entities
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&nbsp;/g, ' ')
-      // Additional common entities
-      .replace(/&copy;/g, '©')
-      .replace(/&reg;/g, '®')
-      .replace(/&trade;/g, '™')
-      .replace(/&cent;/g, '¢')
-      .replace(/&pound;/g, '£')
-      .replace(/&yen;/g, '¥')
-      .replace(/&euro;/g, '€')
-      .replace(/&sect;/g, '§')
-      .replace(/&mdash;/g, '—')
-      .replace(/&ndash;/g, '–')
-      .replace(/&lsquo;/g, `'`)
-      .replace(/&rsquo;/g, `'`)
-      .replace(/&rdquo;/g, `"`)
-  );
-};
