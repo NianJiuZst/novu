@@ -359,11 +359,7 @@ export class Client {
         resolve: stepResolve as typeof step.resolve,
       });
 
-      const shouldSanitizeOutputs =
-        (options as { disableOutputSanitization?: boolean })?.disableOutputSanitization !== true;
-      const isChannelStep = (Object.values(ChannelStepEnum) as string[]).includes(step.type);
-
-      if (isChannelStep && shouldSanitizeOutputs) {
+      if (shouldSanitize(options, step)) {
         // Sanitize the outputs to avoid XSS attacks via Channel content.
         const sanitizedOutputs = sanitizeHtmlInObject(stepResult.outputs);
         // Decode string values that aren't meant to be HTML back to their original form
@@ -833,6 +829,19 @@ export class Client {
     return getCodeResult;
   }
 }
+
+type ChannelStepOption = {
+  disableOutputSanitization?: boolean;
+  [key: string]: unknown;
+};
+
+function shouldSanitize(options: ChannelStepOption | undefined, step: DiscoverStepOutput): boolean {
+  const shouldSanitizeOutputs = options?.disableOutputSanitization !== true;
+  const isChannelStep = (Object.values(ChannelStepEnum) as string[]).includes(step.type);
+
+  return isChannelStep && shouldSanitizeOutputs;
+}
+
 function buildSteps(stateArray: State[]) {
   const result: Record<string, Record<string, unknown>> = {};
 
