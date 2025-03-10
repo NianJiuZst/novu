@@ -10,6 +10,7 @@ export const useTabsDropdown = ({ tabs }: { tabs: TabsArray }) => {
 
   onMount(() => {
     const tabsListEl = tabsList();
+
     if (!tabsListEl) return;
 
     const tabsElements = [...tabsListEl.querySelectorAll('[role="tab"]')];
