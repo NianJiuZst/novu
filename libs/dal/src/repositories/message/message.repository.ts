@@ -292,6 +292,8 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
 
     if (mark.read != null) {
       requestQuery.read = mark.read;
+      // if read is true, then seen should be true
+      requestQuery.seen = true;
       requestQuery.lastReadDate = new Date();
     }
 

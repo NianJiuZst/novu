@@ -6,7 +6,7 @@ import {
   SubscriberRepository,
   MemberRepository,
 } from '@novu/dal';
-import { AnalyticsService } from '@novu/application-generic';
+import { AnalyticsService, buildFeedKey, InvalidateCacheService } from '@novu/application-generic';
 
 import { UpdateMessageActionsCommand } from './update-message-actions.command';
 
@@ -15,6 +15,7 @@ import { ApiException } from '../../../shared/exceptions/api.exception';
 @Injectable()
 export class UpdateMessageActions {
   constructor(
+    private invalidateCache: InvalidateCacheService,
     private messageRepository: MessageRepository,
     private subscriberRepository: SubscriberRepository,
     private analyticsService: AnalyticsService,
@@ -22,6 +23,12 @@ export class UpdateMessageActions {
   ) {}
 
   async execute(command: UpdateMessageActionsCommand): Promise<MessageEntity> {
+    await this.invalidateCache.invalidateQuery({
+      key: buildFeedKey().invalidate({
+        subscriberId: command.subscriberId,
+        _environmentId: command.environmentId,
+      }),
+    });
     const foundMessage = await this.messageRepository.findOne({
       _environmentId: command.environmentId,
       _id: command.messageId,

@@ -27,7 +27,8 @@ export interface IFilePath {
 export abstract class StorageService {
   abstract getSignedUrl(
     key: string,
-    contentType: string
+    contentType: string,
+    operation?: 'read' | 'write'
   ): Promise<{
     signedUrl: string;
     path: string;
@@ -55,6 +56,10 @@ export class S3StorageService implements StorageService {
     region: process.env.S3_REGION,
     endpoint: process.env.S3_LOCAL_STACK || undefined,
     forcePathStyle: true,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
   });
 
   async uploadFile(
@@ -102,14 +107,24 @@ export class S3StorageService implements StorageService {
     await this.s3.send(command);
   }
 
-  async getSignedUrl(key: string, contentType: string) {
-    const command = new PutObjectCommand({
-      Key: key,
-      Bucket: process.env.S3_BUCKET_NAME,
-      ACL: 'public-read',
-      ContentType: contentType,
-    });
-
+  async getSignedUrl(
+    key: string,
+    contentType: string,
+    operation: 'read' | 'write'
+  ) {
+    let command;
+    if (operation === 'read') {
+      command = new GetObjectCommand({
+        Key: key,
+        Bucket: process.env.S3_BUCKET_NAME,
+      });
+    } else {
+      command = new PutObjectCommand({
+        Key: key,
+        Bucket: process.env.S3_BUCKET_NAME,
+        ContentType: contentType,
+      });
+    }
     const signedUrl = await getSignedUrl(this.s3, command, { expiresIn: 3600 });
     const parsedUrl = new URL(signedUrl);
     const path = process.env.CDN_URL

@@ -4,5 +4,12 @@ import { EnvironmentWithUserCommand } from '../../../shared/commands/project.com
 export class GetSignedUrlCommand extends EnvironmentWithUserCommand {
   @IsString()
   @IsIn(['jpg', 'png', 'jpeg'])
-  extension: string;
+  extension?: string;
+
+  @IsString()
+  @IsIn(['read', 'write'])
+  operation: 'read' | 'write';
+
+  @IsString()
+  imagePath?: string;
 }

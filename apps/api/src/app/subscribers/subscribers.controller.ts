@@ -535,7 +535,7 @@ export class SubscribersController {
   @UseGuards(UserAuthGuard)
   @Post('/:subscriberId/messages/markAs')
   @ApiOperation({
-    summary: 'Mark a subscriber feed message as seen',
+    summary: 'Mark a subscriber feed message as seen/unseen/read/unread',
   })
   @ApiResponse(MessageResponseDto, 201, true)
   async markMessageAs(

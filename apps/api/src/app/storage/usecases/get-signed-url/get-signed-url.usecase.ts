@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as hat from 'hat';
 import { StorageService } from '@novu/application-generic';
 
-import { UploadUrlResponse } from '../../dtos/upload-url-response.dto';
+import { GetSignedUrlResponseDto } from '../../dtos/get-signed-url-response.dto';
 import { GetSignedUrlCommand } from './get-signed-url.command';
 
 const mimeTypes = {
@@ -14,11 +14,22 @@ const mimeTypes = {
 export class GetSignedUrl {
   constructor(private storageService: StorageService) {}
 
-  async execute(command: GetSignedUrlCommand): Promise<UploadUrlResponse> {
-    const path = `${command.organizationId}/${command.environmentId}/${hat()}.${command.extension}`;
+  async execute(command: GetSignedUrlCommand): Promise<GetSignedUrlResponseDto> {
+    const path =
+      command.operation === 'read'
+        ? (command.imagePath as string)
+        : `${command.organizationId}/${command.environmentId}/${hat()}.${command.extension}`;
 
-    const response = await this.storageService.getSignedUrl(path, mimeTypes[command.extension]);
+    const { signedUrl, additionalHeaders } = await this.storageService.getSignedUrl(
+      path,
+      command.operation === 'write' ? mimeTypes[command.extension as keyof typeof mimeTypes] : 'image/png',
+      command.operation
+    );
 
-    return response;
+    return {
+      signedUrl,
+      path,
+      additionalHeaders,
+    };
   }
 }
