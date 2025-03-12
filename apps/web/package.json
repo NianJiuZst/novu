@@ -1,6 +1,6 @@
 {
   "name": "@novu/web",
-  "version": "0.24.3",
+  "version": "0.24.6",
   "private": true,
   "scripts": {
     "start": "cross-env PORT=4200 react-app-rewired start",

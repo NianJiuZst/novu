@@ -1,6 +1,6 @@
 {
   "name": "@novu/widget",
-  "version": "0.24.3",
+  "version": "0.24.6",
   "private": true,
   "scripts": {
     "start": "react-app-rewired start",
