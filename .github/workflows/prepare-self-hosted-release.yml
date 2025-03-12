@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: ['novu/api','novu/worker','novu/inbound-mail','novu/web','novu/webhook','novu/widget','novu/ws','novu/embed','novu/inbound-mail-ee','novu/worker-ee','novu/api-ee','novu/web-ee','novu/widget-ee','novu/embed-ee','novu/ws-ee','novu/webhook-ee']
+        name: ['novu/api','novu/worker','novu/inbound-mail','novu/web','novu/webhook','novu/widget','novu/ws','novu/embed']
     steps:
       - name: Git Checkout with Submodules
         uses: actions/checkout@v4
