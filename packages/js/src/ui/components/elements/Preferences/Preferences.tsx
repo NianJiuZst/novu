@@ -62,7 +62,8 @@ export const Preferences = () => {
         when={allPreferences().workflowPreferences?.length}
         fallback={<PreferencesListSkeleton loading={loading()} />}
       >
-        <For each={allPreferences().workflowPreferences}>
+        {/* We iterate over the workflow preferences ids to avoid loosing the preferences row state, otherwise the row will be mounted */}
+        <For each={allPreferences().workflowPreferencesIds}>
           {(_, index) => {
             const preference = () => allPreferences().workflowPreferences?.[index()] as Preference;
 
@@ -138,32 +139,32 @@ const PreferencesRow = (props: {
   const [isOpenChannels, setIsOpenChannels] = createSignal(false);
   const { t } = useLocalization();
 
-  const channels = createMemo(() => Object.keys(props.channels || {}));
+  const channels = createMemo(() => Object.keys(props.channels));
 
   return (
-    <div class={style('workflowContainer', `nt-p-1 nt-bg-neutral-alpha-25 nt-rounded-lg`)} data-open={isOpenChannels()}>
+    <Show when={channels().length > 0}>
       <div
-        class={style(
-          'workflowLabelContainer',
-          'nt-flex nt-justify-between nt-p-1 nt-flex-nowrap nt-self-stretch nt-cursor-pointer nt-items-center nt-overflow-hidden'
-        )}
-        onClick={() => {
-          if (!channels().length) {
-            return;
-          }
-          setIsOpenChannels((prev) => !prev);
-          setIsOpenDescription((prev) => !prev);
-        }}
+        class={style('workflowContainer', `nt-p-1 nt-bg-neutral-alpha-25 nt-rounded-lg`)}
+        data-open={isOpenChannels()}
       >
-        <div class={style('workflowLabelHeader', 'nt-overflow-hidden')}>
-          <div
-            class={style('workflowLabel', 'nt-text-sm nt-font-semibold nt-truncate')}
-            data-localization={props.localizationKey}
-            data-open={isOpenChannels()}
-          >
-            {t(props.localizationKey)}
-          </div>
-          <Show when={channels().length > 0}>
+        <div
+          class={style(
+            'workflowLabelContainer',
+            'nt-flex nt-justify-between nt-p-1 nt-flex-nowrap nt-self-stretch nt-cursor-pointer nt-items-center nt-overflow-hidden'
+          )}
+          onClick={() => {
+            setIsOpenChannels((prev) => !prev);
+            setIsOpenDescription((prev) => !prev);
+          }}
+        >
+          <div class={style('workflowLabelHeader', 'nt-overflow-hidden')}>
+            <div
+              class={style('workflowLabel', 'nt-text-sm nt-font-semibold nt-truncate')}
+              data-localization={props.localizationKey}
+              data-open={isOpenChannels()}
+            >
+              {t(props.localizationKey)}
+            </div>
             <Collapsible open={isOpenDescription()}>
               <WorkflowDescription
                 channels={props.channels}
@@ -171,9 +172,7 @@ const PreferencesRow = (props: {
                 class="nt-overflow-hidden"
               />
             </Collapsible>
-          </Show>
-        </div>
-        <Show when={channels().length}>
+          </div>
           <span
             class={style(
               'workflowContainerRight__icon',
@@ -183,27 +182,27 @@ const PreferencesRow = (props: {
           >
             <ArrowDropDown class={style('workflowArrow__icon', 'nt-text-foreground-alpha-600 nt-size-4')} />
           </span>
-        </Show>
-      </div>
-      <Collapsible open={isOpenChannels()}>
-        <div
-          class={style(
-            'channelsContainer',
-            'nt-flex nt-bg-background nt-border nt-border-neutral-alpha-50 nt-rounded-lg nt-p-2 nt-flex-col nt-gap-1 nt-overflow-hidden'
-          )}
-        >
-          <For each={channels()}>
-            {(channel) => (
-              <ChannelRow
-                channel={channel as ChannelType}
-                enabled={!!props.channels[channel as keyof ChannelPreference]}
-                workflowId={props.workflowId}
-                onChange={props.onChange}
-              />
-            )}
-          </For>
         </div>
-      </Collapsible>
-    </div>
+        <Collapsible open={isOpenChannels()}>
+          <div
+            class={style(
+              'channelsContainer',
+              'nt-flex nt-bg-background nt-border nt-border-neutral-alpha-50 nt-rounded-lg nt-p-2 nt-flex-col nt-gap-1 nt-overflow-hidden'
+            )}
+          >
+            <For each={channels()}>
+              {(channel) => (
+                <ChannelRow
+                  channel={channel as ChannelType}
+                  enabled={!!props.channels[channel as keyof ChannelPreference]}
+                  workflowId={props.workflowId}
+                  onChange={props.onChange}
+                />
+              )}
+            </For>
+          </div>
+        </Collapsible>
+      </div>
+    </Show>
   );
 };
