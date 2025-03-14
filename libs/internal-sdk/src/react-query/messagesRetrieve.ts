@@ -16,8 +16,11 @@ import { NovuCore } from "../core.js";
 import { messagesRetrieve } from "../funcs/messagesRetrieve.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { ChannelTypeEnum } from "../models/components/channeltypeenum.js";
+import {
+  MessagesControllerGetMessagesRequest,
+  MessagesControllerGetMessagesResponse,
+} from "../models/operations/messagescontrollergetmessages.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -26,8 +29,7 @@ import {
   TupleToPrefixes,
 } from "./_types.js";
 
-export type MessagesRetrieveQueryData =
-  operations.MessagesControllerGetMessagesResponse;
+export type MessagesRetrieveQueryData = MessagesControllerGetMessagesResponse;
 
 /**
  * Get messages
@@ -36,7 +38,7 @@ export type MessagesRetrieveQueryData =
  * Returns a list of messages, could paginate using the `page` query parameter
  */
 export function useMessagesRetrieve(
-  request: operations.MessagesControllerGetMessagesRequest,
+  request: MessagesControllerGetMessagesRequest,
   options?: QueryHookOptions<MessagesRetrieveQueryData>,
 ): UseQueryResult<MessagesRetrieveQueryData, Error> {
   const client = useNovuContext();
@@ -57,7 +59,7 @@ export function useMessagesRetrieve(
  * Returns a list of messages, could paginate using the `page` query parameter
  */
 export function useMessagesRetrieveSuspense(
-  request: operations.MessagesControllerGetMessagesRequest,
+  request: MessagesControllerGetMessagesRequest,
   options?: SuspenseQueryHookOptions<MessagesRetrieveQueryData>,
 ): UseSuspenseQueryResult<MessagesRetrieveQueryData, Error> {
   const client = useNovuContext();
@@ -74,7 +76,7 @@ export function useMessagesRetrieveSuspense(
 export function prefetchMessagesRetrieve(
   queryClient: QueryClient,
   client$: NovuCore,
-  request: operations.MessagesControllerGetMessagesRequest,
+  request: MessagesControllerGetMessagesRequest,
 ): Promise<void> {
   return queryClient.prefetchQuery({
     ...buildMessagesRetrieveQuery(
@@ -88,7 +90,7 @@ export function setMessagesRetrieveData(
   client: QueryClient,
   queryKeyBase: [
     parameters: {
-      channel?: components.ChannelTypeEnum | undefined;
+      channel?: ChannelTypeEnum | undefined;
       subscriberId?: string | undefined;
       transactionId?: Array<string> | undefined;
       page?: number | undefined;
@@ -107,7 +109,7 @@ export function invalidateMessagesRetrieve(
   client: QueryClient,
   queryKeyBase: TupleToPrefixes<
     [parameters: {
-      channel?: components.ChannelTypeEnum | undefined;
+      channel?: ChannelTypeEnum | undefined;
       subscriberId?: string | undefined;
       transactionId?: Array<string> | undefined;
       page?: number | undefined;
@@ -135,7 +137,7 @@ export function invalidateAllMessagesRetrieve(
 
 export function buildMessagesRetrieveQuery(
   client$: NovuCore,
-  request: operations.MessagesControllerGetMessagesRequest,
+  request: MessagesControllerGetMessagesRequest,
   options?: RequestOptions,
 ): {
   queryKey: QueryKey;
@@ -172,7 +174,7 @@ export function buildMessagesRetrieveQuery(
 
 export function queryKeyMessagesRetrieve(
   parameters: {
-    channel?: components.ChannelTypeEnum | undefined;
+    channel?: ChannelTypeEnum | undefined;
     subscriberId?: string | undefined;
     transactionId?: Array<string> | undefined;
     page?: number | undefined;

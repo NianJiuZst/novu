@@ -6,8 +6,10 @@ import { subscribersCredentialsAppend } from "../funcs/subscribersCredentialsApp
 import { subscribersCredentialsDelete } from "../funcs/subscribersCredentialsDelete.js";
 import { subscribersCredentialsUpdate } from "../funcs/subscribersCredentialsUpdate.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { UpdateSubscriberChannelRequestDto } from "../models/components/updatesubscriberchannelrequestdto.js";
+import { SubscribersV1ControllerDeleteSubscriberCredentialsResponse } from "../models/operations/subscribersv1controllerdeletesubscribercredentials.js";
+import { SubscribersV1ControllerModifySubscriberChannelResponse } from "../models/operations/subscribersv1controllermodifysubscriberchannel.js";
+import { SubscribersV1ControllerUpdateSubscriberChannelResponse } from "../models/operations/subscribersv1controllerupdatesubscriberchannel.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class Credentials extends ClientSDK {
@@ -18,14 +20,11 @@ export class Credentials extends ClientSDK {
    * Subscriber credentials associated to the delivery methods such as slack and push tokens.
    */
   async update(
-    updateSubscriberChannelRequestDto:
-      components.UpdateSubscriberChannelRequestDto,
+    updateSubscriberChannelRequestDto: UpdateSubscriberChannelRequestDto,
     subscriberId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<
-    operations.SubscribersV1ControllerUpdateSubscriberChannelResponse
-  > {
+  ): Promise<SubscribersV1ControllerUpdateSubscriberChannelResponse> {
     return unwrapAsync(subscribersCredentialsUpdate(
       this,
       updateSubscriberChannelRequestDto,
@@ -43,14 +42,11 @@ export class Credentials extends ClientSDK {
    *     This endpoint appends provided credentials and deviceTokens to the existing ones.
    */
   async append(
-    updateSubscriberChannelRequestDto:
-      components.UpdateSubscriberChannelRequestDto,
+    updateSubscriberChannelRequestDto: UpdateSubscriberChannelRequestDto,
     subscriberId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<
-    operations.SubscribersV1ControllerModifySubscriberChannelResponse
-  > {
+  ): Promise<SubscribersV1ControllerModifySubscriberChannelResponse> {
     return unwrapAsync(subscribersCredentialsAppend(
       this,
       updateSubscriberChannelRequestDto,
@@ -72,8 +68,7 @@ export class Credentials extends ClientSDK {
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
   ): Promise<
-    | operations.SubscribersV1ControllerDeleteSubscriberCredentialsResponse
-    | undefined
+    SubscribersV1ControllerDeleteSubscriberCredentialsResponse | undefined
   > {
     return unwrapAsync(subscribersCredentialsDelete(
       this,

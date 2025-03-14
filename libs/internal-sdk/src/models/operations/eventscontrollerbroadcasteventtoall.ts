@@ -6,7 +6,18 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  TriggerEventResponseDto,
+  TriggerEventResponseDto$inboundSchema,
+  TriggerEventResponseDto$Outbound,
+  TriggerEventResponseDto$outboundSchema,
+} from "../components/triggereventresponsedto.js";
+import {
+  TriggerEventToAllRequestDto,
+  TriggerEventToAllRequestDto$inboundSchema,
+  TriggerEventToAllRequestDto$Outbound,
+  TriggerEventToAllRequestDto$outboundSchema,
+} from "../components/triggereventtoallrequestdto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type EventsControllerBroadcastEventToAllRequest = {
@@ -14,12 +25,12 @@ export type EventsControllerBroadcastEventToAllRequest = {
    * A header for idempotency purposes
    */
   idempotencyKey?: string | undefined;
-  triggerEventToAllRequestDto: components.TriggerEventToAllRequestDto;
+  triggerEventToAllRequestDto: TriggerEventToAllRequestDto;
 };
 
 export type EventsControllerBroadcastEventToAllResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.TriggerEventResponseDto;
+  result: TriggerEventResponseDto;
 };
 
 /** @internal */
@@ -27,8 +38,7 @@ export const EventsControllerBroadcastEventToAllRequest$inboundSchema:
   z.ZodType<EventsControllerBroadcastEventToAllRequest, z.ZodTypeDef, unknown> =
     z.object({
       "idempotency-key": z.string().optional(),
-      TriggerEventToAllRequestDto:
-        components.TriggerEventToAllRequestDto$inboundSchema,
+      TriggerEventToAllRequestDto: TriggerEventToAllRequestDto$inboundSchema,
     }).transform((v) => {
       return remap$(v, {
         "idempotency-key": "idempotencyKey",
@@ -39,7 +49,7 @@ export const EventsControllerBroadcastEventToAllRequest$inboundSchema:
 /** @internal */
 export type EventsControllerBroadcastEventToAllRequest$Outbound = {
   "idempotency-key"?: string | undefined;
-  TriggerEventToAllRequestDto: components.TriggerEventToAllRequestDto$Outbound;
+  TriggerEventToAllRequestDto: TriggerEventToAllRequestDto$Outbound;
 };
 
 /** @internal */
@@ -50,8 +60,7 @@ export const EventsControllerBroadcastEventToAllRequest$outboundSchema:
     EventsControllerBroadcastEventToAllRequest
   > = z.object({
     idempotencyKey: z.string().optional(),
-    triggerEventToAllRequestDto:
-      components.TriggerEventToAllRequestDto$outboundSchema,
+    triggerEventToAllRequestDto: TriggerEventToAllRequestDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       idempotencyKey: "idempotency-key",
@@ -109,7 +118,7 @@ export const EventsControllerBroadcastEventToAllResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.TriggerEventResponseDto$inboundSchema,
+    Result: TriggerEventResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -120,7 +129,7 @@ export const EventsControllerBroadcastEventToAllResponse$inboundSchema:
 /** @internal */
 export type EventsControllerBroadcastEventToAllResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.TriggerEventResponseDto$Outbound;
+  Result: TriggerEventResponseDto$Outbound;
 };
 
 /** @internal */
@@ -131,7 +140,7 @@ export const EventsControllerBroadcastEventToAllResponse$outboundSchema:
     EventsControllerBroadcastEventToAllResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.TriggerEventResponseDto$outboundSchema,
+    result: TriggerEventResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

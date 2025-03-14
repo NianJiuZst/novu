@@ -16,7 +16,7 @@ import { NovuCore } from "../core.js";
 import { workflowsGetWorkflowTestData } from "../funcs/workflowsGetWorkflowTestData.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { WorkflowControllerGetWorkflowTestDataResponse } from "../models/operations/workflowcontrollergetworkflowtestdata.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -26,7 +26,7 @@ import {
 } from "./_types.js";
 
 export type WorkflowsGetWorkflowTestDataQueryData =
-  operations.WorkflowControllerGetWorkflowTestDataResponse;
+  WorkflowControllerGetWorkflowTestDataResponse;
 
 export function useWorkflowsGetWorkflowTestData(
   workflowId: string,

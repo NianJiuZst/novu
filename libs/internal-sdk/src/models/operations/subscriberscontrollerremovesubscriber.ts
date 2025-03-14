@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  RemoveSubscriberResponseDto,
+  RemoveSubscriberResponseDto$inboundSchema,
+  RemoveSubscriberResponseDto$Outbound,
+  RemoveSubscriberResponseDto$outboundSchema,
+} from "../components/removesubscriberresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type SubscribersControllerRemoveSubscriberRequest = {
@@ -19,7 +24,7 @@ export type SubscribersControllerRemoveSubscriberRequest = {
 
 export type SubscribersControllerRemoveSubscriberResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.RemoveSubscriberResponseDto;
+  result: RemoveSubscriberResponseDto;
 };
 
 /** @internal */
@@ -108,7 +113,7 @@ export const SubscribersControllerRemoveSubscriberResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.RemoveSubscriberResponseDto$inboundSchema,
+    Result: RemoveSubscriberResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -119,7 +124,7 @@ export const SubscribersControllerRemoveSubscriberResponse$inboundSchema:
 /** @internal */
 export type SubscribersControllerRemoveSubscriberResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.RemoveSubscriberResponseDto$Outbound;
+  Result: RemoveSubscriberResponseDto$Outbound;
 };
 
 /** @internal */
@@ -130,7 +135,7 @@ export const SubscribersControllerRemoveSubscriberResponse$outboundSchema:
     SubscribersControllerRemoveSubscriberResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.RemoveSubscriberResponseDto$outboundSchema,
+    result: RemoveSubscriberResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

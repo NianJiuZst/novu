@@ -10,6 +10,7 @@ import { safeParse } from "../lib/schemas.js";
 import { RequestOptions } from "../lib/sdks.js";
 import { extractSecurity, resolveGlobalSecurity } from "../lib/security.js";
 import { pathToFunc } from "../lib/url.js";
+import { ErrorDto, ErrorDto$inboundSchema } from "../models/errors/errordto.js";
 import {
   ConnectionError,
   InvalidRequestError,
@@ -17,10 +18,18 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/httpclienterrors.js";
-import * as errors from "../models/errors/index.js";
 import { SDKError } from "../models/errors/sdkerror.js";
 import { SDKValidationError } from "../models/errors/sdkvalidationerror.js";
-import * as operations from "../models/operations/index.js";
+import {
+  ValidationErrorDto,
+  ValidationErrorDto$inboundSchema,
+} from "../models/errors/validationerrordto.js";
+import {
+  MessagesControllerGetMessagesRequest,
+  MessagesControllerGetMessagesRequest$outboundSchema,
+  MessagesControllerGetMessagesResponse,
+  MessagesControllerGetMessagesResponse$inboundSchema,
+} from "../models/operations/messagescontrollergetmessages.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
 
@@ -32,15 +41,15 @@ import { Result } from "../types/fp.js";
  */
 export function messagesRetrieve(
   client: NovuCore,
-  request: operations.MessagesControllerGetMessagesRequest,
+  request: MessagesControllerGetMessagesRequest,
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    operations.MessagesControllerGetMessagesResponse,
-    | errors.ErrorDto
-    | errors.ErrorDto
-    | errors.ValidationErrorDto
-    | errors.ErrorDto
+    MessagesControllerGetMessagesResponse,
+    | ErrorDto
+    | ErrorDto
+    | ValidationErrorDto
+    | ErrorDto
     | SDKError
     | SDKValidationError
     | UnexpectedClientError
@@ -59,16 +68,16 @@ export function messagesRetrieve(
 
 async function $do(
   client: NovuCore,
-  request: operations.MessagesControllerGetMessagesRequest,
+  request: MessagesControllerGetMessagesRequest,
   options?: RequestOptions,
 ): Promise<
   [
     Result<
-      operations.MessagesControllerGetMessagesResponse,
-      | errors.ErrorDto
-      | errors.ErrorDto
-      | errors.ValidationErrorDto
-      | errors.ErrorDto
+      MessagesControllerGetMessagesResponse,
+      | ErrorDto
+      | ErrorDto
+      | ValidationErrorDto
+      | ErrorDto
       | SDKError
       | SDKValidationError
       | UnexpectedClientError
@@ -82,10 +91,7 @@ async function $do(
 > {
   const parsed = safeParse(
     request,
-    (value) =>
-      operations.MessagesControllerGetMessagesRequest$outboundSchema.parse(
-        value,
-      ),
+    (value) => MessagesControllerGetMessagesRequest$outboundSchema.parse(value),
     "Input validation failed",
   );
   if (!parsed.ok) {
@@ -187,11 +193,11 @@ async function $do(
   };
 
   const [result] = await M.match<
-    operations.MessagesControllerGetMessagesResponse,
-    | errors.ErrorDto
-    | errors.ErrorDto
-    | errors.ValidationErrorDto
-    | errors.ErrorDto
+    MessagesControllerGetMessagesResponse,
+    | ErrorDto
+    | ErrorDto
+    | ValidationErrorDto
+    | ErrorDto
     | SDKError
     | SDKValidationError
     | UnexpectedClientError
@@ -200,20 +206,19 @@ async function $do(
     | RequestTimeoutError
     | ConnectionError
   >(
-    M.json(
-      200,
-      operations.MessagesControllerGetMessagesResponse$inboundSchema,
-      { hdrs: true, key: "Result" },
-    ),
-    M.jsonErr(414, errors.ErrorDto$inboundSchema),
+    M.json(200, MessagesControllerGetMessagesResponse$inboundSchema, {
+      hdrs: true,
+      key: "Result",
+    }),
+    M.jsonErr(414, ErrorDto$inboundSchema),
     M.jsonErr(
       [400, 401, 403, 404, 405, 409, 413, 415],
-      errors.ErrorDto$inboundSchema,
+      ErrorDto$inboundSchema,
       { hdrs: true },
     ),
-    M.jsonErr(422, errors.ValidationErrorDto$inboundSchema, { hdrs: true }),
+    M.jsonErr(422, ValidationErrorDto$inboundSchema, { hdrs: true }),
     M.fail(429),
-    M.jsonErr(500, errors.ErrorDto$inboundSchema, { hdrs: true }),
+    M.jsonErr(500, ErrorDto$inboundSchema, { hdrs: true }),
     M.fail(503),
     M.fail("4XX"),
     M.fail("5XX"),

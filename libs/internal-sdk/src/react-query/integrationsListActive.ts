@@ -16,7 +16,7 @@ import { NovuCore } from "../core.js";
 import { integrationsListActive } from "../funcs/integrationsListActive.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { IntegrationsControllerGetActiveIntegrationsResponse } from "../models/operations/integrationscontrollergetactiveintegrations.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -26,7 +26,7 @@ import {
 } from "./_types.js";
 
 export type IntegrationsListActiveQueryData =
-  operations.IntegrationsControllerGetActiveIntegrationsResponse;
+  IntegrationsControllerGetActiveIntegrationsResponse;
 
 /**
  * Get active integrations

@@ -4,8 +4,8 @@
 
 import { environmentsCreate } from "../funcs/environmentsCreate.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { CreateEnvironmentRequestDto } from "../models/components/createenvironmentrequestdto.js";
+import { EnvironmentsControllerV1CreateEnvironmentResponse } from "../models/operations/environmentscontrollerv1createenvironment.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class Environments extends ClientSDK {
@@ -13,10 +13,10 @@ export class Environments extends ClientSDK {
    * Create environment
    */
   async create(
-    createEnvironmentRequestDto: components.CreateEnvironmentRequestDto,
+    createEnvironmentRequestDto: CreateEnvironmentRequestDto,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.EnvironmentsControllerV1CreateEnvironmentResponse> {
+  ): Promise<EnvironmentsControllerV1CreateEnvironmentResponse> {
     return unwrapAsync(environmentsCreate(
       this,
       createEnvironmentRequestDto,

@@ -16,7 +16,7 @@ import { NovuCore } from "../core.js";
 import { topicsSubscribersRetrieve } from "../funcs/topicsSubscribersRetrieve.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { TopicsControllerGetTopicSubscriberResponse } from "../models/operations/topicscontrollergettopicsubscriber.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -26,7 +26,7 @@ import {
 } from "./_types.js";
 
 export type TopicsSubscribersRetrieveQueryData =
-  operations.TopicsControllerGetTopicSubscriberResponse;
+  TopicsControllerGetTopicSubscriberResponse;
 
 /**
  * Check topic subscriber

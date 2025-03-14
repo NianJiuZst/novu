@@ -6,7 +6,18 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  CreateEnvironmentRequestDto,
+  CreateEnvironmentRequestDto$inboundSchema,
+  CreateEnvironmentRequestDto$Outbound,
+  CreateEnvironmentRequestDto$outboundSchema,
+} from "../components/createenvironmentrequestdto.js";
+import {
+  EnvironmentResponseDto,
+  EnvironmentResponseDto$inboundSchema,
+  EnvironmentResponseDto$Outbound,
+  EnvironmentResponseDto$outboundSchema,
+} from "../components/environmentresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type EnvironmentsControllerV1CreateEnvironmentRequest = {
@@ -14,12 +25,12 @@ export type EnvironmentsControllerV1CreateEnvironmentRequest = {
    * A header for idempotency purposes
    */
   idempotencyKey?: string | undefined;
-  createEnvironmentRequestDto: components.CreateEnvironmentRequestDto;
+  createEnvironmentRequestDto: CreateEnvironmentRequestDto;
 };
 
 export type EnvironmentsControllerV1CreateEnvironmentResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.EnvironmentResponseDto;
+  result: EnvironmentResponseDto;
 };
 
 /** @internal */
@@ -30,8 +41,7 @@ export const EnvironmentsControllerV1CreateEnvironmentRequest$inboundSchema:
     unknown
   > = z.object({
     "idempotency-key": z.string().optional(),
-    CreateEnvironmentRequestDto:
-      components.CreateEnvironmentRequestDto$inboundSchema,
+    CreateEnvironmentRequestDto: CreateEnvironmentRequestDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "idempotency-key": "idempotencyKey",
@@ -42,7 +52,7 @@ export const EnvironmentsControllerV1CreateEnvironmentRequest$inboundSchema:
 /** @internal */
 export type EnvironmentsControllerV1CreateEnvironmentRequest$Outbound = {
   "idempotency-key"?: string | undefined;
-  CreateEnvironmentRequestDto: components.CreateEnvironmentRequestDto$Outbound;
+  CreateEnvironmentRequestDto: CreateEnvironmentRequestDto$Outbound;
 };
 
 /** @internal */
@@ -53,8 +63,7 @@ export const EnvironmentsControllerV1CreateEnvironmentRequest$outboundSchema:
     EnvironmentsControllerV1CreateEnvironmentRequest
   > = z.object({
     idempotencyKey: z.string().optional(),
-    createEnvironmentRequestDto:
-      components.CreateEnvironmentRequestDto$outboundSchema,
+    createEnvironmentRequestDto: CreateEnvironmentRequestDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       idempotencyKey: "idempotency-key",
@@ -113,7 +122,7 @@ export const EnvironmentsControllerV1CreateEnvironmentResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.EnvironmentResponseDto$inboundSchema,
+    Result: EnvironmentResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -124,7 +133,7 @@ export const EnvironmentsControllerV1CreateEnvironmentResponse$inboundSchema:
 /** @internal */
 export type EnvironmentsControllerV1CreateEnvironmentResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.EnvironmentResponseDto$Outbound;
+  Result: EnvironmentResponseDto$Outbound;
 };
 
 /** @internal */
@@ -135,7 +144,7 @@ export const EnvironmentsControllerV1CreateEnvironmentResponse$outboundSchema:
     EnvironmentsControllerV1CreateEnvironmentResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.EnvironmentResponseDto$outboundSchema,
+    result: EnvironmentResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

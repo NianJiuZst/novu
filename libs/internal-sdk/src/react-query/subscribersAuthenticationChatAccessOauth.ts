@@ -16,7 +16,10 @@ import { NovuCore } from "../core.js";
 import { subscribersAuthenticationChatAccessOauth } from "../funcs/subscribersAuthenticationChatAccessOauth.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import {
+  SubscribersV1ControllerChatAccessOauthRequest,
+  SubscribersV1ControllerChatAccessOauthResponse,
+} from "../models/operations/subscribersv1controllerchataccessoauth.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -26,14 +29,14 @@ import {
 } from "./_types.js";
 
 export type SubscribersAuthenticationChatAccessOauthQueryData =
-  | operations.SubscribersV1ControllerChatAccessOauthResponse
+  | SubscribersV1ControllerChatAccessOauthResponse
   | undefined;
 
 /**
  * Handle chat oauth
  */
 export function useSubscribersAuthenticationChatAccessOauth(
-  request: operations.SubscribersV1ControllerChatAccessOauthRequest,
+  request: SubscribersV1ControllerChatAccessOauthRequest,
   options?: QueryHookOptions<SubscribersAuthenticationChatAccessOauthQueryData>,
 ): UseQueryResult<SubscribersAuthenticationChatAccessOauthQueryData, Error> {
   const client = useNovuContext();
@@ -51,7 +54,7 @@ export function useSubscribersAuthenticationChatAccessOauth(
  * Handle chat oauth
  */
 export function useSubscribersAuthenticationChatAccessOauthSuspense(
-  request: operations.SubscribersV1ControllerChatAccessOauthRequest,
+  request: SubscribersV1ControllerChatAccessOauthRequest,
   options?: SuspenseQueryHookOptions<
     SubscribersAuthenticationChatAccessOauthQueryData
   >,
@@ -73,7 +76,7 @@ export function useSubscribersAuthenticationChatAccessOauthSuspense(
 export function prefetchSubscribersAuthenticationChatAccessOauth(
   queryClient: QueryClient,
   client$: NovuCore,
-  request: operations.SubscribersV1ControllerChatAccessOauthRequest,
+  request: SubscribersV1ControllerChatAccessOauthRequest,
 ): Promise<void> {
   return queryClient.prefetchQuery({
     ...buildSubscribersAuthenticationChatAccessOauthQuery(
@@ -144,7 +147,7 @@ export function invalidateAllSubscribersAuthenticationChatAccessOauth(
 
 export function buildSubscribersAuthenticationChatAccessOauthQuery(
   client$: NovuCore,
-  request: operations.SubscribersV1ControllerChatAccessOauthRequest,
+  request: SubscribersV1ControllerChatAccessOauthRequest,
   options?: RequestOptions,
 ): {
   queryKey: QueryKey;

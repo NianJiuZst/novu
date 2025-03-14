@@ -11,20 +11,23 @@ import { NovuCore } from "../core.js";
 import { messagesDeleteByTransactionId } from "../funcs/messagesDeleteByTransactionId.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import {
+  Channel,
+  MessagesControllerDeleteMessagesByTransactionIdResponse,
+} from "../models/operations/messagescontrollerdeletemessagesbytransactionid.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type MessagesDeleteByTransactionIdMutationVariables = {
   transactionId: string;
-  channel?: operations.Channel | undefined;
+  channel?: Channel | undefined;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
 export type MessagesDeleteByTransactionIdMutationData =
-  | operations.MessagesControllerDeleteMessagesByTransactionIdResponse
+  | MessagesControllerDeleteMessagesByTransactionIdResponse
   | undefined;
 
 /**

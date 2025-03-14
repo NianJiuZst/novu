@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  IntegrationResponseDto,
+  IntegrationResponseDto$inboundSchema,
+  IntegrationResponseDto$Outbound,
+  IntegrationResponseDto$outboundSchema,
+} from "../components/integrationresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type IntegrationsControllerSetIntegrationAsPrimaryRequest = {
@@ -19,7 +24,7 @@ export type IntegrationsControllerSetIntegrationAsPrimaryRequest = {
 
 export type IntegrationsControllerSetIntegrationAsPrimaryResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.IntegrationResponseDto;
+  result: IntegrationResponseDto;
 };
 
 /** @internal */
@@ -109,7 +114,7 @@ export const IntegrationsControllerSetIntegrationAsPrimaryResponse$inboundSchema
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.IntegrationResponseDto$inboundSchema,
+    Result: IntegrationResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -120,7 +125,7 @@ export const IntegrationsControllerSetIntegrationAsPrimaryResponse$inboundSchema
 /** @internal */
 export type IntegrationsControllerSetIntegrationAsPrimaryResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.IntegrationResponseDto$Outbound;
+  Result: IntegrationResponseDto$Outbound;
 };
 
 /** @internal */
@@ -131,7 +136,7 @@ export const IntegrationsControllerSetIntegrationAsPrimaryResponse$outboundSchem
     IntegrationsControllerSetIntegrationAsPrimaryResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.IntegrationResponseDto$outboundSchema,
+    result: IntegrationResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

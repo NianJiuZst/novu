@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  GetSubscriberPreferencesDto,
+  GetSubscriberPreferencesDto$inboundSchema,
+  GetSubscriberPreferencesDto$Outbound,
+  GetSubscriberPreferencesDto$outboundSchema,
+} from "../components/getsubscriberpreferencesdto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type SubscribersControllerGetSubscriberPreferencesRequest = {
@@ -19,7 +24,7 @@ export type SubscribersControllerGetSubscriberPreferencesRequest = {
 
 export type SubscribersControllerGetSubscriberPreferencesResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.GetSubscriberPreferencesDto;
+  result: GetSubscriberPreferencesDto;
 };
 
 /** @internal */
@@ -109,7 +114,7 @@ export const SubscribersControllerGetSubscriberPreferencesResponse$inboundSchema
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.GetSubscriberPreferencesDto$inboundSchema,
+    Result: GetSubscriberPreferencesDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -120,7 +125,7 @@ export const SubscribersControllerGetSubscriberPreferencesResponse$inboundSchema
 /** @internal */
 export type SubscribersControllerGetSubscriberPreferencesResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.GetSubscriberPreferencesDto$Outbound;
+  Result: GetSubscriberPreferencesDto$Outbound;
 };
 
 /** @internal */
@@ -131,7 +136,7 @@ export const SubscribersControllerGetSubscriberPreferencesResponse$outboundSchem
     SubscribersControllerGetSubscriberPreferencesResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.GetSubscriberPreferencesDto$outboundSchema,
+    result: GetSubscriberPreferencesDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

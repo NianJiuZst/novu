@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  GeneratePreviewResponseDto,
+  GeneratePreviewResponseDto$inboundSchema,
+  GeneratePreviewResponseDto$Outbound,
+  GeneratePreviewResponseDto$outboundSchema,
+} from "../components/generatepreviewresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type WorkflowControllerGeneratePreviewRequest = {
@@ -20,7 +25,7 @@ export type WorkflowControllerGeneratePreviewRequest = {
 
 export type WorkflowControllerGeneratePreviewResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.GeneratePreviewResponseDto;
+  result: GeneratePreviewResponseDto;
 };
 
 /** @internal */
@@ -109,7 +114,7 @@ export const WorkflowControllerGeneratePreviewResponse$inboundSchema: z.ZodType<
   unknown
 > = z.object({
   Headers: z.record(z.array(z.string())),
-  Result: components.GeneratePreviewResponseDto$inboundSchema,
+  Result: GeneratePreviewResponseDto$inboundSchema,
 }).transform((v) => {
   return remap$(v, {
     "Headers": "headers",
@@ -120,7 +125,7 @@ export const WorkflowControllerGeneratePreviewResponse$inboundSchema: z.ZodType<
 /** @internal */
 export type WorkflowControllerGeneratePreviewResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.GeneratePreviewResponseDto$Outbound;
+  Result: GeneratePreviewResponseDto$Outbound;
 };
 
 /** @internal */
@@ -131,7 +136,7 @@ export const WorkflowControllerGeneratePreviewResponse$outboundSchema:
     WorkflowControllerGeneratePreviewResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.GeneratePreviewResponseDto$outboundSchema,
+    result: GeneratePreviewResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

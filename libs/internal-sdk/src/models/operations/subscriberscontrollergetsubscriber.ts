@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  SubscriberResponseDto,
+  SubscriberResponseDto$inboundSchema,
+  SubscriberResponseDto$Outbound,
+  SubscriberResponseDto$outboundSchema,
+} from "../components/subscriberresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type SubscribersControllerGetSubscriberRequest = {
@@ -19,7 +24,7 @@ export type SubscribersControllerGetSubscriberRequest = {
 
 export type SubscribersControllerGetSubscriberResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.SubscriberResponseDto;
+  result: SubscriberResponseDto;
 };
 
 /** @internal */
@@ -104,7 +109,7 @@ export const SubscribersControllerGetSubscriberResponse$inboundSchema:
   z.ZodType<SubscribersControllerGetSubscriberResponse, z.ZodTypeDef, unknown> =
     z.object({
       Headers: z.record(z.array(z.string())),
-      Result: components.SubscriberResponseDto$inboundSchema,
+      Result: SubscriberResponseDto$inboundSchema,
     }).transform((v) => {
       return remap$(v, {
         "Headers": "headers",
@@ -115,7 +120,7 @@ export const SubscribersControllerGetSubscriberResponse$inboundSchema:
 /** @internal */
 export type SubscribersControllerGetSubscriberResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.SubscriberResponseDto$Outbound;
+  Result: SubscriberResponseDto$Outbound;
 };
 
 /** @internal */
@@ -126,7 +131,7 @@ export const SubscribersControllerGetSubscriberResponse$outboundSchema:
     SubscribersControllerGetSubscriberResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.SubscriberResponseDto$outboundSchema,
+    result: SubscriberResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

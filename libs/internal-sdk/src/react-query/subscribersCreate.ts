@@ -11,20 +11,20 @@ import { NovuCore } from "../core.js";
 import { subscribersCreate } from "../funcs/subscribersCreate.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { CreateSubscriberRequestDto } from "../models/components/createsubscriberrequestdto.js";
+import { SubscribersControllerCreateSubscriberResponse } from "../models/operations/subscriberscontrollercreatesubscriber.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type SubscribersCreateMutationVariables = {
-  createSubscriberRequestDto: components.CreateSubscriberRequestDto;
+  createSubscriberRequestDto: CreateSubscriberRequestDto;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
 export type SubscribersCreateMutationData =
-  operations.SubscribersControllerCreateSubscriberResponse;
+  SubscribersControllerCreateSubscriberResponse;
 
 /**
  * Create subscriber

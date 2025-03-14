@@ -11,7 +11,7 @@ import { NovuCore } from "../core.js";
 import { workflowsWorkflowControllerSync } from "../funcs/workflowsWorkflowControllerSync.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { WorkflowControllerSyncResponse } from "../models/operations/workflowcontrollersync.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
@@ -23,7 +23,7 @@ export type WorkflowsWorkflowControllerSyncMutationVariables = {
 };
 
 export type WorkflowsWorkflowControllerSyncMutationData =
-  operations.WorkflowControllerSyncResponse;
+  WorkflowControllerSyncResponse;
 
 export function useWorkflowsWorkflowControllerSyncMutation(
   options?: MutationHookOptions<

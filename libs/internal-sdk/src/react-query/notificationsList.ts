@@ -16,8 +16,11 @@ import { NovuCore } from "../core.js";
 import { notificationsList } from "../funcs/notificationsList.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { ChannelTypeEnum } from "../models/components/channeltypeenum.js";
+import {
+  NotificationsControllerListNotificationsRequest,
+  NotificationsControllerListNotificationsResponse,
+} from "../models/operations/notificationscontrollerlistnotifications.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -27,13 +30,13 @@ import {
 } from "./_types.js";
 
 export type NotificationsListQueryData =
-  operations.NotificationsControllerListNotificationsResponse;
+  NotificationsControllerListNotificationsResponse;
 
 /**
  * Get notifications
  */
 export function useNotificationsList(
-  request: operations.NotificationsControllerListNotificationsRequest,
+  request: NotificationsControllerListNotificationsRequest,
   options?: QueryHookOptions<NotificationsListQueryData>,
 ): UseQueryResult<NotificationsListQueryData, Error> {
   const client = useNovuContext();
@@ -51,7 +54,7 @@ export function useNotificationsList(
  * Get notifications
  */
 export function useNotificationsListSuspense(
-  request: operations.NotificationsControllerListNotificationsRequest,
+  request: NotificationsControllerListNotificationsRequest,
   options?: SuspenseQueryHookOptions<NotificationsListQueryData>,
 ): UseSuspenseQueryResult<NotificationsListQueryData, Error> {
   const client = useNovuContext();
@@ -68,7 +71,7 @@ export function useNotificationsListSuspense(
 export function prefetchNotificationsList(
   queryClient: QueryClient,
   client$: NovuCore,
-  request: operations.NotificationsControllerListNotificationsRequest,
+  request: NotificationsControllerListNotificationsRequest,
 ): Promise<void> {
   return queryClient.prefetchQuery({
     ...buildNotificationsListQuery(
@@ -82,7 +85,7 @@ export function setNotificationsListData(
   client: QueryClient,
   queryKeyBase: [
     parameters: {
-      channels?: Array<components.ChannelTypeEnum> | undefined;
+      channels?: Array<ChannelTypeEnum> | undefined;
       templates?: Array<string> | undefined;
       emails?: Array<string> | undefined;
       search?: string | undefined;
@@ -106,7 +109,7 @@ export function invalidateNotificationsList(
   client: QueryClient,
   queryKeyBase: TupleToPrefixes<
     [parameters: {
-      channels?: Array<components.ChannelTypeEnum> | undefined;
+      channels?: Array<ChannelTypeEnum> | undefined;
       templates?: Array<string> | undefined;
       emails?: Array<string> | undefined;
       search?: string | undefined;
@@ -139,7 +142,7 @@ export function invalidateAllNotificationsList(
 
 export function buildNotificationsListQuery(
   client$: NovuCore,
-  request: operations.NotificationsControllerListNotificationsRequest,
+  request: NotificationsControllerListNotificationsRequest,
   options?: RequestOptions,
 ): {
   queryKey: QueryKey;
@@ -181,7 +184,7 @@ export function buildNotificationsListQuery(
 
 export function queryKeyNotificationsList(
   parameters: {
-    channels?: Array<components.ChannelTypeEnum> | undefined;
+    channels?: Array<ChannelTypeEnum> | undefined;
     templates?: Array<string> | undefined;
     emails?: Array<string> | undefined;
     search?: string | undefined;

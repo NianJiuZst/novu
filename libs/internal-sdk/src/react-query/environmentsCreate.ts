@@ -11,20 +11,20 @@ import { NovuCore } from "../core.js";
 import { environmentsCreate } from "../funcs/environmentsCreate.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { CreateEnvironmentRequestDto } from "../models/components/createenvironmentrequestdto.js";
+import { EnvironmentsControllerV1CreateEnvironmentResponse } from "../models/operations/environmentscontrollerv1createenvironment.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type EnvironmentsCreateMutationVariables = {
-  createEnvironmentRequestDto: components.CreateEnvironmentRequestDto;
+  createEnvironmentRequestDto: CreateEnvironmentRequestDto;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
 export type EnvironmentsCreateMutationData =
-  operations.EnvironmentsControllerV1CreateEnvironmentResponse;
+  EnvironmentsControllerV1CreateEnvironmentResponse;
 
 /**
  * Create environment

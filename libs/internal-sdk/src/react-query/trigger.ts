@@ -11,19 +11,19 @@ import { NovuCore } from "../core.js";
 import { trigger } from "../funcs/trigger.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { TriggerEventRequestDto } from "../models/components/triggereventrequestdto.js";
+import { EventsControllerTriggerResponse } from "../models/operations/eventscontrollertrigger.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type TriggerMutationVariables = {
-  triggerEventRequestDto: components.TriggerEventRequestDto;
+  triggerEventRequestDto: TriggerEventRequestDto;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
-export type TriggerMutationData = operations.EventsControllerTriggerResponse;
+export type TriggerMutationData = EventsControllerTriggerResponse;
 
 /**
  * Trigger event

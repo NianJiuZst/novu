@@ -16,7 +16,10 @@ import { NovuCore } from "../core.js";
 import { topicsList } from "../funcs/topicsList.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import {
+  TopicsControllerListTopicsRequest,
+  TopicsControllerListTopicsResponse,
+} from "../models/operations/topicscontrollerlisttopics.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -25,7 +28,7 @@ import {
   TupleToPrefixes,
 } from "./_types.js";
 
-export type TopicsListQueryData = operations.TopicsControllerListTopicsResponse;
+export type TopicsListQueryData = TopicsControllerListTopicsResponse;
 
 /**
  * Get topic list filtered
@@ -34,7 +37,7 @@ export type TopicsListQueryData = operations.TopicsControllerListTopicsResponse;
  * Returns a list of topics that can be paginated using the `page` query parameter and filtered by the topic key with the `key` query parameter
  */
 export function useTopicsList(
-  request: operations.TopicsControllerListTopicsRequest,
+  request: TopicsControllerListTopicsRequest,
   options?: QueryHookOptions<TopicsListQueryData>,
 ): UseQueryResult<TopicsListQueryData, Error> {
   const client = useNovuContext();
@@ -55,7 +58,7 @@ export function useTopicsList(
  * Returns a list of topics that can be paginated using the `page` query parameter and filtered by the topic key with the `key` query parameter
  */
 export function useTopicsListSuspense(
-  request: operations.TopicsControllerListTopicsRequest,
+  request: TopicsControllerListTopicsRequest,
   options?: SuspenseQueryHookOptions<TopicsListQueryData>,
 ): UseSuspenseQueryResult<TopicsListQueryData, Error> {
   const client = useNovuContext();
@@ -72,7 +75,7 @@ export function useTopicsListSuspense(
 export function prefetchTopicsList(
   queryClient: QueryClient,
   client$: NovuCore,
-  request: operations.TopicsControllerListTopicsRequest,
+  request: TopicsControllerListTopicsRequest,
 ): Promise<void> {
   return queryClient.prefetchQuery({
     ...buildTopicsListQuery(
@@ -129,7 +132,7 @@ export function invalidateAllTopicsList(
 
 export function buildTopicsListQuery(
   client$: NovuCore,
-  request: operations.TopicsControllerListTopicsRequest,
+  request: TopicsControllerListTopicsRequest,
   options?: RequestOptions,
 ): {
   queryKey: QueryKey;

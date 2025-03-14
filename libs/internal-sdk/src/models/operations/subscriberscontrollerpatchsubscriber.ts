@@ -6,7 +6,18 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  PatchSubscriberRequestDto,
+  PatchSubscriberRequestDto$inboundSchema,
+  PatchSubscriberRequestDto$Outbound,
+  PatchSubscriberRequestDto$outboundSchema,
+} from "../components/patchsubscriberrequestdto.js";
+import {
+  SubscriberResponseDto,
+  SubscriberResponseDto$inboundSchema,
+  SubscriberResponseDto$Outbound,
+  SubscriberResponseDto$outboundSchema,
+} from "../components/subscriberresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type SubscribersControllerPatchSubscriberRequest = {
@@ -15,12 +26,12 @@ export type SubscribersControllerPatchSubscriberRequest = {
    * A header for idempotency purposes
    */
   idempotencyKey?: string | undefined;
-  patchSubscriberRequestDto: components.PatchSubscriberRequestDto;
+  patchSubscriberRequestDto: PatchSubscriberRequestDto;
 };
 
 export type SubscribersControllerPatchSubscriberResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.SubscriberResponseDto;
+  result: SubscriberResponseDto;
 };
 
 /** @internal */
@@ -32,8 +43,7 @@ export const SubscribersControllerPatchSubscriberRequest$inboundSchema:
   > = z.object({
     subscriberId: z.string(),
     "idempotency-key": z.string().optional(),
-    PatchSubscriberRequestDto:
-      components.PatchSubscriberRequestDto$inboundSchema,
+    PatchSubscriberRequestDto: PatchSubscriberRequestDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "idempotency-key": "idempotencyKey",
@@ -45,7 +55,7 @@ export const SubscribersControllerPatchSubscriberRequest$inboundSchema:
 export type SubscribersControllerPatchSubscriberRequest$Outbound = {
   subscriberId: string;
   "idempotency-key"?: string | undefined;
-  PatchSubscriberRequestDto: components.PatchSubscriberRequestDto$Outbound;
+  PatchSubscriberRequestDto: PatchSubscriberRequestDto$Outbound;
 };
 
 /** @internal */
@@ -57,8 +67,7 @@ export const SubscribersControllerPatchSubscriberRequest$outboundSchema:
   > = z.object({
     subscriberId: z.string(),
     idempotencyKey: z.string().optional(),
-    patchSubscriberRequestDto:
-      components.PatchSubscriberRequestDto$outboundSchema,
+    patchSubscriberRequestDto: PatchSubscriberRequestDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       idempotencyKey: "idempotency-key",
@@ -116,7 +125,7 @@ export const SubscribersControllerPatchSubscriberResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.SubscriberResponseDto$inboundSchema,
+    Result: SubscriberResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -127,7 +136,7 @@ export const SubscribersControllerPatchSubscriberResponse$inboundSchema:
 /** @internal */
 export type SubscribersControllerPatchSubscriberResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.SubscriberResponseDto$Outbound;
+  Result: SubscriberResponseDto$Outbound;
 };
 
 /** @internal */
@@ -138,7 +147,7 @@ export const SubscribersControllerPatchSubscriberResponse$outboundSchema:
     SubscribersControllerPatchSubscriberResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.SubscriberResponseDto$outboundSchema,
+    result: SubscriberResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

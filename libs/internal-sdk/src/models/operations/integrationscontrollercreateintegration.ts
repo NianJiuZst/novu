@@ -6,7 +6,18 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  CreateIntegrationRequestDto,
+  CreateIntegrationRequestDto$inboundSchema,
+  CreateIntegrationRequestDto$Outbound,
+  CreateIntegrationRequestDto$outboundSchema,
+} from "../components/createintegrationrequestdto.js";
+import {
+  IntegrationResponseDto,
+  IntegrationResponseDto$inboundSchema,
+  IntegrationResponseDto$Outbound,
+  IntegrationResponseDto$outboundSchema,
+} from "../components/integrationresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type IntegrationsControllerCreateIntegrationRequest = {
@@ -14,12 +25,12 @@ export type IntegrationsControllerCreateIntegrationRequest = {
    * A header for idempotency purposes
    */
   idempotencyKey?: string | undefined;
-  createIntegrationRequestDto: components.CreateIntegrationRequestDto;
+  createIntegrationRequestDto: CreateIntegrationRequestDto;
 };
 
 export type IntegrationsControllerCreateIntegrationResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.IntegrationResponseDto;
+  result: IntegrationResponseDto;
 };
 
 /** @internal */
@@ -30,8 +41,7 @@ export const IntegrationsControllerCreateIntegrationRequest$inboundSchema:
     unknown
   > = z.object({
     "idempotency-key": z.string().optional(),
-    CreateIntegrationRequestDto:
-      components.CreateIntegrationRequestDto$inboundSchema,
+    CreateIntegrationRequestDto: CreateIntegrationRequestDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "idempotency-key": "idempotencyKey",
@@ -42,7 +52,7 @@ export const IntegrationsControllerCreateIntegrationRequest$inboundSchema:
 /** @internal */
 export type IntegrationsControllerCreateIntegrationRequest$Outbound = {
   "idempotency-key"?: string | undefined;
-  CreateIntegrationRequestDto: components.CreateIntegrationRequestDto$Outbound;
+  CreateIntegrationRequestDto: CreateIntegrationRequestDto$Outbound;
 };
 
 /** @internal */
@@ -53,8 +63,7 @@ export const IntegrationsControllerCreateIntegrationRequest$outboundSchema:
     IntegrationsControllerCreateIntegrationRequest
   > = z.object({
     idempotencyKey: z.string().optional(),
-    createIntegrationRequestDto:
-      components.CreateIntegrationRequestDto$outboundSchema,
+    createIntegrationRequestDto: CreateIntegrationRequestDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       idempotencyKey: "idempotency-key",
@@ -113,7 +122,7 @@ export const IntegrationsControllerCreateIntegrationResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.IntegrationResponseDto$inboundSchema,
+    Result: IntegrationResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -124,7 +133,7 @@ export const IntegrationsControllerCreateIntegrationResponse$inboundSchema:
 /** @internal */
 export type IntegrationsControllerCreateIntegrationResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.IntegrationResponseDto$Outbound;
+  Result: IntegrationResponseDto$Outbound;
 };
 
 /** @internal */
@@ -135,7 +144,7 @@ export const IntegrationsControllerCreateIntegrationResponse$outboundSchema:
     IntegrationsControllerCreateIntegrationResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.IntegrationResponseDto$outboundSchema,
+    result: IntegrationResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

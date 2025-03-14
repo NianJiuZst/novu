@@ -6,7 +6,18 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  RenameTopicRequestDto,
+  RenameTopicRequestDto$inboundSchema,
+  RenameTopicRequestDto$Outbound,
+  RenameTopicRequestDto$outboundSchema,
+} from "../components/renametopicrequestdto.js";
+import {
+  RenameTopicResponseDto,
+  RenameTopicResponseDto$inboundSchema,
+  RenameTopicResponseDto$Outbound,
+  RenameTopicResponseDto$outboundSchema,
+} from "../components/renametopicresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type TopicsControllerRenameTopicRequest = {
@@ -18,12 +29,12 @@ export type TopicsControllerRenameTopicRequest = {
    * A header for idempotency purposes
    */
   idempotencyKey?: string | undefined;
-  renameTopicRequestDto: components.RenameTopicRequestDto;
+  renameTopicRequestDto: RenameTopicRequestDto;
 };
 
 export type TopicsControllerRenameTopicResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.RenameTopicResponseDto;
+  result: RenameTopicResponseDto;
 };
 
 /** @internal */
@@ -34,7 +45,7 @@ export const TopicsControllerRenameTopicRequest$inboundSchema: z.ZodType<
 > = z.object({
   topicKey: z.string(),
   "idempotency-key": z.string().optional(),
-  RenameTopicRequestDto: components.RenameTopicRequestDto$inboundSchema,
+  RenameTopicRequestDto: RenameTopicRequestDto$inboundSchema,
 }).transform((v) => {
   return remap$(v, {
     "idempotency-key": "idempotencyKey",
@@ -46,7 +57,7 @@ export const TopicsControllerRenameTopicRequest$inboundSchema: z.ZodType<
 export type TopicsControllerRenameTopicRequest$Outbound = {
   topicKey: string;
   "idempotency-key"?: string | undefined;
-  RenameTopicRequestDto: components.RenameTopicRequestDto$Outbound;
+  RenameTopicRequestDto: RenameTopicRequestDto$Outbound;
 };
 
 /** @internal */
@@ -57,7 +68,7 @@ export const TopicsControllerRenameTopicRequest$outboundSchema: z.ZodType<
 > = z.object({
   topicKey: z.string(),
   idempotencyKey: z.string().optional(),
-  renameTopicRequestDto: components.RenameTopicRequestDto$outboundSchema,
+  renameTopicRequestDto: RenameTopicRequestDto$outboundSchema,
 }).transform((v) => {
   return remap$(v, {
     idempotencyKey: "idempotency-key",
@@ -107,7 +118,7 @@ export const TopicsControllerRenameTopicResponse$inboundSchema: z.ZodType<
   unknown
 > = z.object({
   Headers: z.record(z.array(z.string())),
-  Result: components.RenameTopicResponseDto$inboundSchema,
+  Result: RenameTopicResponseDto$inboundSchema,
 }).transform((v) => {
   return remap$(v, {
     "Headers": "headers",
@@ -118,7 +129,7 @@ export const TopicsControllerRenameTopicResponse$inboundSchema: z.ZodType<
 /** @internal */
 export type TopicsControllerRenameTopicResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.RenameTopicResponseDto$Outbound;
+  Result: RenameTopicResponseDto$Outbound;
 };
 
 /** @internal */
@@ -128,7 +139,7 @@ export const TopicsControllerRenameTopicResponse$outboundSchema: z.ZodType<
   TopicsControllerRenameTopicResponse
 > = z.object({
   headers: z.record(z.array(z.string())),
-  result: components.RenameTopicResponseDto$outboundSchema,
+  result: RenameTopicResponseDto$outboundSchema,
 }).transform((v) => {
   return remap$(v, {
     headers: "Headers",

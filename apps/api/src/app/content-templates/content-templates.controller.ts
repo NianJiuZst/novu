@@ -2,7 +2,7 @@
 import { Body, Controller, Logger, Post } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { format } from 'date-fns';
-import i18next from 'i18next';
+import i18next, { type i18n } from 'i18next';
 import { ModuleRef } from '@nestjs/core';
 import {
   ApiException,
@@ -148,7 +148,11 @@ export class ContentTemplatesController {
     );
   }
 
-  protected async initiateTranslations(environmentId: string, organizationId: string, locale: string | undefined) {
+  protected async initiateTranslations(
+    environmentId: string,
+    organizationId: string,
+    locale: string | undefined
+  ): Promise<i18n | undefined> {
     try {
       if (process.env.NOVU_ENTERPRISE === 'true' || process.env.CI_EE_TEST === 'true') {
         if (!require('@novu/ee-shared-services')?.TranslationsService) {

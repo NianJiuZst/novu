@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  RemoveSubscribersRequestDto,
+  RemoveSubscribersRequestDto$inboundSchema,
+  RemoveSubscribersRequestDto$Outbound,
+  RemoveSubscribersRequestDto$outboundSchema,
+} from "../components/removesubscribersrequestdto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type TopicsControllerRemoveSubscribersRequest = {
@@ -18,7 +23,7 @@ export type TopicsControllerRemoveSubscribersRequest = {
    * A header for idempotency purposes
    */
   idempotencyKey?: string | undefined;
-  removeSubscribersRequestDto: components.RemoveSubscribersRequestDto;
+  removeSubscribersRequestDto: RemoveSubscribersRequestDto;
 };
 
 export type TopicsControllerRemoveSubscribersResponse = {
@@ -33,8 +38,7 @@ export const TopicsControllerRemoveSubscribersRequest$inboundSchema: z.ZodType<
 > = z.object({
   topicKey: z.string(),
   "idempotency-key": z.string().optional(),
-  RemoveSubscribersRequestDto:
-    components.RemoveSubscribersRequestDto$inboundSchema,
+  RemoveSubscribersRequestDto: RemoveSubscribersRequestDto$inboundSchema,
 }).transform((v) => {
   return remap$(v, {
     "idempotency-key": "idempotencyKey",
@@ -46,7 +50,7 @@ export const TopicsControllerRemoveSubscribersRequest$inboundSchema: z.ZodType<
 export type TopicsControllerRemoveSubscribersRequest$Outbound = {
   topicKey: string;
   "idempotency-key"?: string | undefined;
-  RemoveSubscribersRequestDto: components.RemoveSubscribersRequestDto$Outbound;
+  RemoveSubscribersRequestDto: RemoveSubscribersRequestDto$Outbound;
 };
 
 /** @internal */
@@ -57,8 +61,7 @@ export const TopicsControllerRemoveSubscribersRequest$outboundSchema: z.ZodType<
 > = z.object({
   topicKey: z.string(),
   idempotencyKey: z.string().optional(),
-  removeSubscribersRequestDto:
-    components.RemoveSubscribersRequestDto$outboundSchema,
+  removeSubscribersRequestDto: RemoveSubscribersRequestDto$outboundSchema,
 }).transform((v) => {
   return remap$(v, {
     idempotencyKey: "idempotency-key",

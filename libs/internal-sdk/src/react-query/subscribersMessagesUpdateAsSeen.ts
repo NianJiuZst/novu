@@ -11,18 +11,21 @@ import { NovuCore } from "../core.js";
 import { subscribersMessagesUpdateAsSeen } from "../funcs/subscribersMessagesUpdateAsSeen.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import {
+  SubscribersV1ControllerMarkActionAsSeenRequest,
+  SubscribersV1ControllerMarkActionAsSeenResponse,
+} from "../models/operations/subscribersv1controllermarkactionasseen.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type SubscribersMessagesUpdateAsSeenMutationVariables = {
-  request: operations.SubscribersV1ControllerMarkActionAsSeenRequest;
+  request: SubscribersV1ControllerMarkActionAsSeenRequest;
   options?: RequestOptions;
 };
 
 export type SubscribersMessagesUpdateAsSeenMutationData =
-  operations.SubscribersV1ControllerMarkActionAsSeenResponse;
+  SubscribersV1ControllerMarkActionAsSeenResponse;
 
 /**
  * Mark message action as seen

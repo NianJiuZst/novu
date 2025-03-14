@@ -11,7 +11,7 @@ import { NovuCore } from "../core.js";
 import { workflowsDelete } from "../funcs/workflowsDelete.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { WorkflowControllerRemoveWorkflowResponse } from "../models/operations/workflowcontrollerremoveworkflow.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
@@ -23,7 +23,7 @@ export type WorkflowsDeleteMutationVariables = {
 };
 
 export type WorkflowsDeleteMutationData =
-  | operations.WorkflowControllerRemoveWorkflowResponse
+  | WorkflowControllerRemoveWorkflowResponse
   | undefined;
 
 export function useWorkflowsDeleteMutation(

@@ -11,21 +11,20 @@ import { NovuCore } from "../core.js";
 import { topicsRename } from "../funcs/topicsRename.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { RenameTopicRequestDto } from "../models/components/renametopicrequestdto.js";
+import { TopicsControllerRenameTopicResponse } from "../models/operations/topicscontrollerrenametopic.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type TopicsRenameMutationVariables = {
-  renameTopicRequestDto: components.RenameTopicRequestDto;
+  renameTopicRequestDto: RenameTopicRequestDto;
   topicKey: string;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
-export type TopicsRenameMutationData =
-  operations.TopicsControllerRenameTopicResponse;
+export type TopicsRenameMutationData = TopicsControllerRenameTopicResponse;
 
 /**
  * Rename a topic

@@ -11,7 +11,7 @@ import { NovuCore } from "../core.js";
 import { integrationsDelete } from "../funcs/integrationsDelete.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { IntegrationsControllerRemoveIntegrationResponse } from "../models/operations/integrationscontrollerremoveintegration.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
@@ -23,7 +23,7 @@ export type IntegrationsDeleteMutationVariables = {
 };
 
 export type IntegrationsDeleteMutationData =
-  operations.IntegrationsControllerRemoveIntegrationResponse;
+  IntegrationsControllerRemoveIntegrationResponse;
 
 /**
  * Delete integration

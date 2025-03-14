@@ -16,7 +16,7 @@ import { NovuCore } from "../core.js";
 import { topicsRetrieve } from "../funcs/topicsRetrieve.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { TopicsControllerGetTopicResponse } from "../models/operations/topicscontrollergettopic.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -25,8 +25,7 @@ import {
   TupleToPrefixes,
 } from "./_types.js";
 
-export type TopicsRetrieveQueryData =
-  operations.TopicsControllerGetTopicResponse;
+export type TopicsRetrieveQueryData = TopicsControllerGetTopicResponse;
 
 /**
  * Get topic

@@ -11,7 +11,7 @@ import { NovuCore } from "../core.js";
 import { subscribersDelete } from "../funcs/subscribersDelete.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { SubscribersControllerRemoveSubscriberResponse } from "../models/operations/subscriberscontrollerremovesubscriber.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
@@ -23,7 +23,7 @@ export type SubscribersDeleteMutationVariables = {
 };
 
 export type SubscribersDeleteMutationData =
-  operations.SubscribersControllerRemoveSubscriberResponse;
+  SubscribersControllerRemoveSubscriberResponse;
 
 /**
  * Delete subscriber

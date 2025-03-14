@@ -5,8 +5,9 @@
 import { subscribersPreferencesList } from "../funcs/subscribersPreferencesList.js";
 import { subscribersPreferencesUpdate } from "../funcs/subscribersPreferencesUpdate.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { PatchSubscriberPreferencesDto } from "../models/components/patchsubscriberpreferencesdto.js";
+import { SubscribersControllerGetSubscriberPreferencesResponse } from "../models/operations/subscriberscontrollergetsubscriberpreferences.js";
+import { SubscribersControllerUpdateSubscriberPreferencesResponse } from "../models/operations/subscriberscontrollerupdatesubscriberpreferences.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class Preferences extends ClientSDK {
@@ -20,7 +21,7 @@ export class Preferences extends ClientSDK {
     subscriberId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.SubscribersControllerGetSubscriberPreferencesResponse> {
+  ): Promise<SubscribersControllerGetSubscriberPreferencesResponse> {
     return unwrapAsync(subscribersPreferencesList(
       this,
       subscriberId,
@@ -36,13 +37,11 @@ export class Preferences extends ClientSDK {
    * Update subscriber global or workflow specific preferences
    */
   async update(
-    patchSubscriberPreferencesDto: components.PatchSubscriberPreferencesDto,
+    patchSubscriberPreferencesDto: PatchSubscriberPreferencesDto,
     subscriberId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<
-    operations.SubscribersControllerUpdateSubscriberPreferencesResponse
-  > {
+  ): Promise<SubscribersControllerUpdateSubscriberPreferencesResponse> {
     return unwrapAsync(subscribersPreferencesUpdate(
       this,
       patchSubscriberPreferencesDto,

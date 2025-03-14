@@ -6,7 +6,18 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  BulkTriggerEventDto,
+  BulkTriggerEventDto$inboundSchema,
+  BulkTriggerEventDto$Outbound,
+  BulkTriggerEventDto$outboundSchema,
+} from "../components/bulktriggereventdto.js";
+import {
+  TriggerEventResponseDto,
+  TriggerEventResponseDto$inboundSchema,
+  TriggerEventResponseDto$Outbound,
+  TriggerEventResponseDto$outboundSchema,
+} from "../components/triggereventresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type EventsControllerTriggerBulkRequest = {
@@ -14,12 +25,12 @@ export type EventsControllerTriggerBulkRequest = {
    * A header for idempotency purposes
    */
   idempotencyKey?: string | undefined;
-  bulkTriggerEventDto: components.BulkTriggerEventDto;
+  bulkTriggerEventDto: BulkTriggerEventDto;
 };
 
 export type EventsControllerTriggerBulkResponse = {
   headers: { [k: string]: Array<string> };
-  result: Array<components.TriggerEventResponseDto>;
+  result: Array<TriggerEventResponseDto>;
 };
 
 /** @internal */
@@ -29,7 +40,7 @@ export const EventsControllerTriggerBulkRequest$inboundSchema: z.ZodType<
   unknown
 > = z.object({
   "idempotency-key": z.string().optional(),
-  BulkTriggerEventDto: components.BulkTriggerEventDto$inboundSchema,
+  BulkTriggerEventDto: BulkTriggerEventDto$inboundSchema,
 }).transform((v) => {
   return remap$(v, {
     "idempotency-key": "idempotencyKey",
@@ -40,7 +51,7 @@ export const EventsControllerTriggerBulkRequest$inboundSchema: z.ZodType<
 /** @internal */
 export type EventsControllerTriggerBulkRequest$Outbound = {
   "idempotency-key"?: string | undefined;
-  BulkTriggerEventDto: components.BulkTriggerEventDto$Outbound;
+  BulkTriggerEventDto: BulkTriggerEventDto$Outbound;
 };
 
 /** @internal */
@@ -50,7 +61,7 @@ export const EventsControllerTriggerBulkRequest$outboundSchema: z.ZodType<
   EventsControllerTriggerBulkRequest
 > = z.object({
   idempotencyKey: z.string().optional(),
-  bulkTriggerEventDto: components.BulkTriggerEventDto$outboundSchema,
+  bulkTriggerEventDto: BulkTriggerEventDto$outboundSchema,
 }).transform((v) => {
   return remap$(v, {
     idempotencyKey: "idempotency-key",
@@ -100,7 +111,7 @@ export const EventsControllerTriggerBulkResponse$inboundSchema: z.ZodType<
   unknown
 > = z.object({
   Headers: z.record(z.array(z.string())),
-  Result: z.array(components.TriggerEventResponseDto$inboundSchema),
+  Result: z.array(TriggerEventResponseDto$inboundSchema),
 }).transform((v) => {
   return remap$(v, {
     "Headers": "headers",
@@ -111,7 +122,7 @@ export const EventsControllerTriggerBulkResponse$inboundSchema: z.ZodType<
 /** @internal */
 export type EventsControllerTriggerBulkResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: Array<components.TriggerEventResponseDto$Outbound>;
+  Result: Array<TriggerEventResponseDto$Outbound>;
 };
 
 /** @internal */
@@ -121,7 +132,7 @@ export const EventsControllerTriggerBulkResponse$outboundSchema: z.ZodType<
   EventsControllerTriggerBulkResponse
 > = z.object({
   headers: z.record(z.array(z.string())),
-  result: z.array(components.TriggerEventResponseDto$outboundSchema),
+  result: z.array(TriggerEventResponseDto$outboundSchema),
 }).transform((v) => {
   return remap$(v, {
     headers: "Headers",

@@ -6,7 +6,18 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  MarkMessageActionAsSeenDto,
+  MarkMessageActionAsSeenDto$inboundSchema,
+  MarkMessageActionAsSeenDto$Outbound,
+  MarkMessageActionAsSeenDto$outboundSchema,
+} from "../components/markmessageactionasseendto.js";
+import {
+  MessageResponseDto,
+  MessageResponseDto$inboundSchema,
+  MessageResponseDto$Outbound,
+  MessageResponseDto$outboundSchema,
+} from "../components/messageresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type SubscribersV1ControllerMarkActionAsSeenRequest = {
@@ -17,12 +28,12 @@ export type SubscribersV1ControllerMarkActionAsSeenRequest = {
    * A header for idempotency purposes
    */
   idempotencyKey?: string | undefined;
-  markMessageActionAsSeenDto: components.MarkMessageActionAsSeenDto;
+  markMessageActionAsSeenDto: MarkMessageActionAsSeenDto;
 };
 
 export type SubscribersV1ControllerMarkActionAsSeenResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.MessageResponseDto;
+  result: MessageResponseDto;
 };
 
 /** @internal */
@@ -36,8 +47,7 @@ export const SubscribersV1ControllerMarkActionAsSeenRequest$inboundSchema:
     type: z.string(),
     subscriberId: z.string(),
     "idempotency-key": z.string().optional(),
-    MarkMessageActionAsSeenDto:
-      components.MarkMessageActionAsSeenDto$inboundSchema,
+    MarkMessageActionAsSeenDto: MarkMessageActionAsSeenDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "idempotency-key": "idempotencyKey",
@@ -51,7 +61,7 @@ export type SubscribersV1ControllerMarkActionAsSeenRequest$Outbound = {
   type: string;
   subscriberId: string;
   "idempotency-key"?: string | undefined;
-  MarkMessageActionAsSeenDto: components.MarkMessageActionAsSeenDto$Outbound;
+  MarkMessageActionAsSeenDto: MarkMessageActionAsSeenDto$Outbound;
 };
 
 /** @internal */
@@ -65,8 +75,7 @@ export const SubscribersV1ControllerMarkActionAsSeenRequest$outboundSchema:
     type: z.string(),
     subscriberId: z.string(),
     idempotencyKey: z.string().optional(),
-    markMessageActionAsSeenDto:
-      components.MarkMessageActionAsSeenDto$outboundSchema,
+    markMessageActionAsSeenDto: MarkMessageActionAsSeenDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       idempotencyKey: "idempotency-key",
@@ -125,7 +134,7 @@ export const SubscribersV1ControllerMarkActionAsSeenResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.MessageResponseDto$inboundSchema,
+    Result: MessageResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -136,7 +145,7 @@ export const SubscribersV1ControllerMarkActionAsSeenResponse$inboundSchema:
 /** @internal */
 export type SubscribersV1ControllerMarkActionAsSeenResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.MessageResponseDto$Outbound;
+  Result: MessageResponseDto$Outbound;
 };
 
 /** @internal */
@@ -147,7 +156,7 @@ export const SubscribersV1ControllerMarkActionAsSeenResponse$outboundSchema:
     SubscribersV1ControllerMarkActionAsSeenResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.MessageResponseDto$outboundSchema,
+    result: MessageResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

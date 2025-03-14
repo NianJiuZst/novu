@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  IntegrationResponseDto,
+  IntegrationResponseDto$inboundSchema,
+  IntegrationResponseDto$Outbound,
+  IntegrationResponseDto$outboundSchema,
+} from "../components/integrationresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type IntegrationsControllerGetActiveIntegrationsRequest = {
@@ -18,7 +23,7 @@ export type IntegrationsControllerGetActiveIntegrationsRequest = {
 
 export type IntegrationsControllerGetActiveIntegrationsResponse = {
   headers: { [k: string]: Array<string> };
-  result: Array<components.IntegrationResponseDto>;
+  result: Array<IntegrationResponseDto>;
 };
 
 /** @internal */
@@ -105,7 +110,7 @@ export const IntegrationsControllerGetActiveIntegrationsResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: z.array(components.IntegrationResponseDto$inboundSchema),
+    Result: z.array(IntegrationResponseDto$inboundSchema),
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -116,7 +121,7 @@ export const IntegrationsControllerGetActiveIntegrationsResponse$inboundSchema:
 /** @internal */
 export type IntegrationsControllerGetActiveIntegrationsResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: Array<components.IntegrationResponseDto$Outbound>;
+  Result: Array<IntegrationResponseDto$Outbound>;
 };
 
 /** @internal */
@@ -127,7 +132,7 @@ export const IntegrationsControllerGetActiveIntegrationsResponse$outboundSchema:
     IntegrationsControllerGetActiveIntegrationsResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: z.array(components.IntegrationResponseDto$outboundSchema),
+    result: z.array(IntegrationResponseDto$outboundSchema),
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

@@ -11,22 +11,21 @@ import { NovuCore } from "../core.js";
 import { subscribersCredentialsUpdate } from "../funcs/subscribersCredentialsUpdate.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { UpdateSubscriberChannelRequestDto } from "../models/components/updatesubscriberchannelrequestdto.js";
+import { SubscribersV1ControllerUpdateSubscriberChannelResponse } from "../models/operations/subscribersv1controllerupdatesubscriberchannel.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type SubscribersCredentialsUpdateMutationVariables = {
-  updateSubscriberChannelRequestDto:
-    components.UpdateSubscriberChannelRequestDto;
+  updateSubscriberChannelRequestDto: UpdateSubscriberChannelRequestDto;
   subscriberId: string;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
 export type SubscribersCredentialsUpdateMutationData =
-  operations.SubscribersV1ControllerUpdateSubscriberChannelResponse;
+  SubscribersV1ControllerUpdateSubscriberChannelResponse;
 
 /**
  * Update subscriber credentials

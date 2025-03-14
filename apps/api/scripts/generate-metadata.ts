@@ -10,6 +10,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { PluginMetadataGenerator } from '@nestjs/cli/lib/compiler/plugins';
 import { ReadonlyVisitor } from '@nestjs/swagger/dist/plugin';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const tsconfigPath = 'tsconfig.build.json';
 const srcPath = path.join(__dirname, '..', 'src');

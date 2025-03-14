@@ -11,7 +11,7 @@ import { NovuCore } from "../core.js";
 import { workflowsWorkflowControllerGeneratePreview } from "../funcs/workflowsWorkflowControllerGeneratePreview.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { WorkflowControllerGeneratePreviewResponse } from "../models/operations/workflowcontrollergeneratepreview.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
@@ -24,7 +24,7 @@ export type WorkflowsWorkflowControllerGeneratePreviewMutationVariables = {
 };
 
 export type WorkflowsWorkflowControllerGeneratePreviewMutationData =
-  operations.WorkflowControllerGeneratePreviewResponse;
+  WorkflowControllerGeneratePreviewResponse;
 
 export function useWorkflowsWorkflowControllerGeneratePreviewMutation(
   options?: MutationHookOptions<

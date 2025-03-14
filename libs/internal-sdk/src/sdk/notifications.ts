@@ -5,7 +5,11 @@
 import { notificationsList } from "../funcs/notificationsList.js";
 import { notificationsRetrieve } from "../funcs/notificationsRetrieve.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { NotificationsControllerGetNotificationResponse } from "../models/operations/notificationscontrollergetnotification.js";
+import {
+  NotificationsControllerListNotificationsRequest,
+  NotificationsControllerListNotificationsResponse,
+} from "../models/operations/notificationscontrollerlistnotifications.js";
 import { unwrapAsync } from "../types/fp.js";
 import { Stats } from "./stats.js";
 
@@ -19,9 +23,9 @@ export class Notifications extends ClientSDK {
    * Get notifications
    */
   async list(
-    request: operations.NotificationsControllerListNotificationsRequest,
+    request: NotificationsControllerListNotificationsRequest,
     options?: RequestOptions,
-  ): Promise<operations.NotificationsControllerListNotificationsResponse> {
+  ): Promise<NotificationsControllerListNotificationsResponse> {
     return unwrapAsync(notificationsList(
       this,
       request,
@@ -36,7 +40,7 @@ export class Notifications extends ClientSDK {
     notificationId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.NotificationsControllerGetNotificationResponse> {
+  ): Promise<NotificationsControllerGetNotificationResponse> {
     return unwrapAsync(notificationsRetrieve(
       this,
       notificationId,

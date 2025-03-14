@@ -11,21 +11,21 @@ import { NovuCore } from "../core.js";
 import { subscribersPreferencesUpdate } from "../funcs/subscribersPreferencesUpdate.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { PatchSubscriberPreferencesDto } from "../models/components/patchsubscriberpreferencesdto.js";
+import { SubscribersControllerUpdateSubscriberPreferencesResponse } from "../models/operations/subscriberscontrollerupdatesubscriberpreferences.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type SubscribersPreferencesUpdateMutationVariables = {
-  patchSubscriberPreferencesDto: components.PatchSubscriberPreferencesDto;
+  patchSubscriberPreferencesDto: PatchSubscriberPreferencesDto;
   subscriberId: string;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
 export type SubscribersPreferencesUpdateMutationData =
-  operations.SubscribersControllerUpdateSubscriberPreferencesResponse;
+  SubscribersControllerUpdateSubscriberPreferencesResponse;
 
 /**
  * Update subscriber global or workflow specific preferences

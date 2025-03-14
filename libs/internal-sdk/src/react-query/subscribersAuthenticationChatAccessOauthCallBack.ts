@@ -19,7 +19,10 @@ import {
 } from "../funcs/subscribersAuthenticationChatAccessOauthCallBack.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import {
+  SubscribersV1ControllerChatOauthCallbackRequest,
+  SubscribersV1ControllerChatOauthCallbackResponse,
+} from "../models/operations/subscribersv1controllerchatoauthcallback.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -31,13 +34,13 @@ import {
 export { ChatAccessOauthCallBackAcceptEnum } from "../funcs/subscribersAuthenticationChatAccessOauthCallBack.js";
 
 export type SubscribersAuthenticationChatAccessOauthCallBackQueryData =
-  operations.SubscribersV1ControllerChatOauthCallbackResponse;
+  SubscribersV1ControllerChatOauthCallbackResponse;
 
 /**
  * Handle providers oauth redirect
  */
 export function useSubscribersAuthenticationChatAccessOauthCallBack(
-  request: operations.SubscribersV1ControllerChatOauthCallbackRequest,
+  request: SubscribersV1ControllerChatOauthCallbackRequest,
   options?: QueryHookOptions<
     SubscribersAuthenticationChatAccessOauthCallBackQueryData
   >,
@@ -60,7 +63,7 @@ export function useSubscribersAuthenticationChatAccessOauthCallBack(
  * Handle providers oauth redirect
  */
 export function useSubscribersAuthenticationChatAccessOauthCallBackSuspense(
-  request: operations.SubscribersV1ControllerChatOauthCallbackRequest,
+  request: SubscribersV1ControllerChatOauthCallbackRequest,
   options?: SuspenseQueryHookOptions<
     SubscribersAuthenticationChatAccessOauthCallBackQueryData
   >,
@@ -82,7 +85,7 @@ export function useSubscribersAuthenticationChatAccessOauthCallBackSuspense(
 export function prefetchSubscribersAuthenticationChatAccessOauthCallBack(
   queryClient: QueryClient,
   client$: NovuCore,
-  request: operations.SubscribersV1ControllerChatOauthCallbackRequest,
+  request: SubscribersV1ControllerChatOauthCallbackRequest,
 ): Promise<void> {
   return queryClient.prefetchQuery({
     ...buildSubscribersAuthenticationChatAccessOauthCallBackQuery(
@@ -156,7 +159,7 @@ export function invalidateAllSubscribersAuthenticationChatAccessOauthCallBack(
 
 export function buildSubscribersAuthenticationChatAccessOauthCallBackQuery(
   client$: NovuCore,
-  request: operations.SubscribersV1ControllerChatOauthCallbackRequest,
+  request: SubscribersV1ControllerChatOauthCallbackRequest,
   options?: RequestOptions & {
     acceptHeaderOverride?: ChatAccessOauthCallBackAcceptEnum;
   },

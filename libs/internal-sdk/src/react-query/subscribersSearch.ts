@@ -16,7 +16,11 @@ import { NovuCore } from "../core.js";
 import { subscribersSearch } from "../funcs/subscribersSearch.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import {
+  OrderDirection,
+  SubscribersControllerSearchSubscribersRequest,
+  SubscribersControllerSearchSubscribersResponse,
+} from "../models/operations/subscriberscontrollersearchsubscribers.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -26,13 +30,13 @@ import {
 } from "./_types.js";
 
 export type SubscribersSearchQueryData =
-  operations.SubscribersControllerSearchSubscribersResponse;
+  SubscribersControllerSearchSubscribersResponse;
 
 /**
  * Search for subscribers
  */
 export function useSubscribersSearch(
-  request: operations.SubscribersControllerSearchSubscribersRequest,
+  request: SubscribersControllerSearchSubscribersRequest,
   options?: QueryHookOptions<SubscribersSearchQueryData>,
 ): UseQueryResult<SubscribersSearchQueryData, Error> {
   const client = useNovuContext();
@@ -50,7 +54,7 @@ export function useSubscribersSearch(
  * Search for subscribers
  */
 export function useSubscribersSearchSuspense(
-  request: operations.SubscribersControllerSearchSubscribersRequest,
+  request: SubscribersControllerSearchSubscribersRequest,
   options?: SuspenseQueryHookOptions<SubscribersSearchQueryData>,
 ): UseSuspenseQueryResult<SubscribersSearchQueryData, Error> {
   const client = useNovuContext();
@@ -67,7 +71,7 @@ export function useSubscribersSearchSuspense(
 export function prefetchSubscribersSearch(
   queryClient: QueryClient,
   client$: NovuCore,
-  request: operations.SubscribersControllerSearchSubscribersRequest,
+  request: SubscribersControllerSearchSubscribersRequest,
 ): Promise<void> {
   return queryClient.prefetchQuery({
     ...buildSubscribersSearchQuery(
@@ -88,7 +92,7 @@ export function setSubscribersSearchData(
       phone?: string | undefined;
       subscriberId?: string | undefined;
       limit?: number | undefined;
-      orderDirection?: operations.OrderDirection | undefined;
+      orderDirection?: OrderDirection | undefined;
       orderBy?: any | undefined;
       idempotencyKey?: string | undefined;
     },
@@ -111,7 +115,7 @@ export function invalidateSubscribersSearch(
       phone?: string | undefined;
       subscriberId?: string | undefined;
       limit?: number | undefined;
-      orderDirection?: operations.OrderDirection | undefined;
+      orderDirection?: OrderDirection | undefined;
       orderBy?: any | undefined;
       idempotencyKey?: string | undefined;
     }]
@@ -136,7 +140,7 @@ export function invalidateAllSubscribersSearch(
 
 export function buildSubscribersSearchQuery(
   client$: NovuCore,
-  request: operations.SubscribersControllerSearchSubscribersRequest,
+  request: SubscribersControllerSearchSubscribersRequest,
   options?: RequestOptions,
 ): {
   queryKey: QueryKey;
@@ -184,7 +188,7 @@ export function queryKeySubscribersSearch(
     phone?: string | undefined;
     subscriberId?: string | undefined;
     limit?: number | undefined;
-    orderDirection?: operations.OrderDirection | undefined;
+    orderDirection?: OrderDirection | undefined;
     orderBy?: any | undefined;
     idempotencyKey?: string | undefined;
   },

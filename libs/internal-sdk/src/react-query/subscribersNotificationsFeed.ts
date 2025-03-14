@@ -16,7 +16,10 @@ import { NovuCore } from "../core.js";
 import { subscribersNotificationsFeed } from "../funcs/subscribersNotificationsFeed.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import {
+  SubscribersV1ControllerGetNotificationsFeedRequest,
+  SubscribersV1ControllerGetNotificationsFeedResponse,
+} from "../models/operations/subscribersv1controllergetnotificationsfeed.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -26,13 +29,13 @@ import {
 } from "./_types.js";
 
 export type SubscribersNotificationsFeedQueryData =
-  operations.SubscribersV1ControllerGetNotificationsFeedResponse;
+  SubscribersV1ControllerGetNotificationsFeedResponse;
 
 /**
  * Get in-app notification feed for a particular subscriber
  */
 export function useSubscribersNotificationsFeed(
-  request: operations.SubscribersV1ControllerGetNotificationsFeedRequest,
+  request: SubscribersV1ControllerGetNotificationsFeedRequest,
   options?: QueryHookOptions<SubscribersNotificationsFeedQueryData>,
 ): UseQueryResult<SubscribersNotificationsFeedQueryData, Error> {
   const client = useNovuContext();
@@ -50,7 +53,7 @@ export function useSubscribersNotificationsFeed(
  * Get in-app notification feed for a particular subscriber
  */
 export function useSubscribersNotificationsFeedSuspense(
-  request: operations.SubscribersV1ControllerGetNotificationsFeedRequest,
+  request: SubscribersV1ControllerGetNotificationsFeedRequest,
   options?: SuspenseQueryHookOptions<SubscribersNotificationsFeedQueryData>,
 ): UseSuspenseQueryResult<SubscribersNotificationsFeedQueryData, Error> {
   const client = useNovuContext();
@@ -67,7 +70,7 @@ export function useSubscribersNotificationsFeedSuspense(
 export function prefetchSubscribersNotificationsFeed(
   queryClient: QueryClient,
   client$: NovuCore,
-  request: operations.SubscribersV1ControllerGetNotificationsFeedRequest,
+  request: SubscribersV1ControllerGetNotificationsFeedRequest,
 ): Promise<void> {
   return queryClient.prefetchQuery({
     ...buildSubscribersNotificationsFeedQuery(
@@ -132,7 +135,7 @@ export function invalidateAllSubscribersNotificationsFeed(
 
 export function buildSubscribersNotificationsFeedQuery(
   client$: NovuCore,
-  request: operations.SubscribersV1ControllerGetNotificationsFeedRequest,
+  request: SubscribersV1ControllerGetNotificationsFeedRequest,
   options?: RequestOptions,
 ): {
   queryKey: QueryKey;

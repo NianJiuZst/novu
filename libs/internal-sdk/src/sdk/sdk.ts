@@ -7,8 +7,13 @@ import { trigger } from "../funcs/trigger.js";
 import { triggerBroadcast } from "../funcs/triggerBroadcast.js";
 import { triggerBulk } from "../funcs/triggerBulk.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { BulkTriggerEventDto } from "../models/components/bulktriggereventdto.js";
+import { TriggerEventRequestDto } from "../models/components/triggereventrequestdto.js";
+import { TriggerEventToAllRequestDto } from "../models/components/triggereventtoallrequestdto.js";
+import { EventsControllerBroadcastEventToAllResponse } from "../models/operations/eventscontrollerbroadcasteventtoall.js";
+import { EventsControllerCancelResponse } from "../models/operations/eventscontrollercancel.js";
+import { EventsControllerTriggerResponse } from "../models/operations/eventscontrollertrigger.js";
+import { EventsControllerTriggerBulkResponse } from "../models/operations/eventscontrollertriggerbulk.js";
 import { unwrapAsync } from "../types/fp.js";
 import { Environments } from "./environments.js";
 import { Integrations } from "./integrations.js";
@@ -64,10 +69,10 @@ export class Novu extends ClientSDK {
    *     Additional information can be passed according the body interface below.
    */
   async trigger(
-    triggerEventRequestDto: components.TriggerEventRequestDto,
+    triggerEventRequestDto: TriggerEventRequestDto,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.EventsControllerTriggerResponse> {
+  ): Promise<EventsControllerTriggerResponse> {
     return unwrapAsync(trigger(
       this,
       triggerEventRequestDto,
@@ -88,7 +93,7 @@ export class Novu extends ClientSDK {
     transactionId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.EventsControllerCancelResponse> {
+  ): Promise<EventsControllerCancelResponse> {
     return unwrapAsync(cancel(
       this,
       transactionId,
@@ -105,10 +110,10 @@ export class Novu extends ClientSDK {
    *       In the future could be used to trigger events to a subset of subscribers based on defined filters.
    */
   async triggerBroadcast(
-    triggerEventToAllRequestDto: components.TriggerEventToAllRequestDto,
+    triggerEventToAllRequestDto: TriggerEventToAllRequestDto,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.EventsControllerBroadcastEventToAllResponse> {
+  ): Promise<EventsControllerBroadcastEventToAllResponse> {
     return unwrapAsync(triggerBroadcast(
       this,
       triggerEventToAllRequestDto,
@@ -126,10 +131,10 @@ export class Novu extends ClientSDK {
    *       The bulk API is limited to 100 events per request.
    */
   async triggerBulk(
-    bulkTriggerEventDto: components.BulkTriggerEventDto,
+    bulkTriggerEventDto: BulkTriggerEventDto,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.EventsControllerTriggerBulkResponse> {
+  ): Promise<EventsControllerTriggerBulkResponse> {
     return unwrapAsync(triggerBulk(
       this,
       bulkTriggerEventDto,

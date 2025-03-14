@@ -21,7 +21,7 @@ import { NovuCore } from "../core.js";
 import { subscribersList } from "../funcs/subscribersList.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { SubscribersV1ControllerListSubscribersResponse } from "../models/operations/subscribersv1controllerlistsubscribers.js";
 import { unwrapAsync } from "../types/fp.js";
 import { PageIterator, unwrapResultIterator } from "../types/operations.js";
 import { useNovuContext } from "./_context.js";
@@ -34,15 +34,15 @@ import {
 } from "./_types.js";
 
 export type SubscribersListQueryData =
-  operations.SubscribersV1ControllerListSubscribersResponse;
+  SubscribersV1ControllerListSubscribersResponse;
 
 export type SubscribersListInfiniteQueryData = PageIterator<
-  operations.SubscribersV1ControllerListSubscribersResponse,
+  SubscribersV1ControllerListSubscribersResponse,
   { page: number }
 >;
 
 export type SubscribersListPageParams = PageIterator<
-  operations.SubscribersV1ControllerListSubscribersResponse,
+  SubscribersV1ControllerListSubscribersResponse,
   { page: number }
 >["~next"];
 

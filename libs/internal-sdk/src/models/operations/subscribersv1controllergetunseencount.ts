@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  UnseenCountResponse,
+  UnseenCountResponse$inboundSchema,
+  UnseenCountResponse$Outbound,
+  UnseenCountResponse$outboundSchema,
+} from "../components/unseencountresponse.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type SubscribersV1ControllerGetUnseenCountRequest = {
@@ -27,7 +32,7 @@ export type SubscribersV1ControllerGetUnseenCountRequest = {
 
 export type SubscribersV1ControllerGetUnseenCountResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.UnseenCountResponse;
+  result: UnseenCountResponse;
 };
 
 /** @internal */
@@ -122,7 +127,7 @@ export const SubscribersV1ControllerGetUnseenCountResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.UnseenCountResponse$inboundSchema,
+    Result: UnseenCountResponse$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -133,7 +138,7 @@ export const SubscribersV1ControllerGetUnseenCountResponse$inboundSchema:
 /** @internal */
 export type SubscribersV1ControllerGetUnseenCountResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.UnseenCountResponse$Outbound;
+  Result: UnseenCountResponse$Outbound;
 };
 
 /** @internal */
@@ -144,7 +149,7 @@ export const SubscribersV1ControllerGetUnseenCountResponse$outboundSchema:
     SubscribersV1ControllerGetUnseenCountResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.UnseenCountResponse$outboundSchema,
+    result: UnseenCountResponse$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

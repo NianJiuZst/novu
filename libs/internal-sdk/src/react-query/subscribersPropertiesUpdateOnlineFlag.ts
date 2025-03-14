@@ -11,22 +11,21 @@ import { NovuCore } from "../core.js";
 import { subscribersPropertiesUpdateOnlineFlag } from "../funcs/subscribersPropertiesUpdateOnlineFlag.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { UpdateSubscriberOnlineFlagRequestDto } from "../models/components/updatesubscriberonlineflagrequestdto.js";
+import { SubscribersV1ControllerUpdateSubscriberOnlineFlagResponse } from "../models/operations/subscribersv1controllerupdatesubscriberonlineflag.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type SubscribersPropertiesUpdateOnlineFlagMutationVariables = {
-  updateSubscriberOnlineFlagRequestDto:
-    components.UpdateSubscriberOnlineFlagRequestDto;
+  updateSubscriberOnlineFlagRequestDto: UpdateSubscriberOnlineFlagRequestDto;
   subscriberId: string;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
 export type SubscribersPropertiesUpdateOnlineFlagMutationData =
-  operations.SubscribersV1ControllerUpdateSubscriberOnlineFlagResponse;
+  SubscribersV1ControllerUpdateSubscriberOnlineFlagResponse;
 
 /**
  * Update subscriber online status

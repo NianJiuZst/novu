@@ -6,14 +6,24 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  ActivitiesResponseDto,
+  ActivitiesResponseDto$inboundSchema,
+  ActivitiesResponseDto$Outbound,
+  ActivitiesResponseDto$outboundSchema,
+} from "../components/activitiesresponsedto.js";
+import {
+  ChannelTypeEnum,
+  ChannelTypeEnum$inboundSchema,
+  ChannelTypeEnum$outboundSchema,
+} from "../components/channeltypeenum.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type MessagesControllerGetMessagesRequest = {
   /**
    * Channel type through which the message is sent
    */
-  channel?: components.ChannelTypeEnum | undefined;
+  channel?: ChannelTypeEnum | undefined;
   subscriberId?: string | undefined;
   transactionId?: Array<string> | undefined;
   page?: number | undefined;
@@ -26,7 +36,7 @@ export type MessagesControllerGetMessagesRequest = {
 
 export type MessagesControllerGetMessagesResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.ActivitiesResponseDto;
+  result: ActivitiesResponseDto;
 };
 
 /** @internal */
@@ -35,7 +45,7 @@ export const MessagesControllerGetMessagesRequest$inboundSchema: z.ZodType<
   z.ZodTypeDef,
   unknown
 > = z.object({
-  channel: components.ChannelTypeEnum$inboundSchema.optional(),
+  channel: ChannelTypeEnum$inboundSchema.optional(),
   subscriberId: z.string().optional(),
   transactionId: z.array(z.string()).optional(),
   page: z.number().default(0),
@@ -63,7 +73,7 @@ export const MessagesControllerGetMessagesRequest$outboundSchema: z.ZodType<
   z.ZodTypeDef,
   MessagesControllerGetMessagesRequest
 > = z.object({
-  channel: components.ChannelTypeEnum$outboundSchema.optional(),
+  channel: ChannelTypeEnum$outboundSchema.optional(),
   subscriberId: z.string().optional(),
   transactionId: z.array(z.string()).optional(),
   page: z.number().default(0),
@@ -118,7 +128,7 @@ export const MessagesControllerGetMessagesResponse$inboundSchema: z.ZodType<
   unknown
 > = z.object({
   Headers: z.record(z.array(z.string())),
-  Result: components.ActivitiesResponseDto$inboundSchema,
+  Result: ActivitiesResponseDto$inboundSchema,
 }).transform((v) => {
   return remap$(v, {
     "Headers": "headers",
@@ -129,7 +139,7 @@ export const MessagesControllerGetMessagesResponse$inboundSchema: z.ZodType<
 /** @internal */
 export type MessagesControllerGetMessagesResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.ActivitiesResponseDto$Outbound;
+  Result: ActivitiesResponseDto$Outbound;
 };
 
 /** @internal */
@@ -139,7 +149,7 @@ export const MessagesControllerGetMessagesResponse$outboundSchema: z.ZodType<
   MessagesControllerGetMessagesResponse
 > = z.object({
   headers: z.record(z.array(z.string())),
-  result: components.ActivitiesResponseDto$outboundSchema,
+  result: ActivitiesResponseDto$outboundSchema,
 }).transform((v) => {
   return remap$(v, {
     headers: "Headers",

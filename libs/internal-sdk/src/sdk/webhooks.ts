@@ -4,7 +4,7 @@
 
 import { integrationsWebhooksRetrieve } from "../funcs/integrationsWebhooksRetrieve.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { IntegrationsControllerGetWebhookSupportStatusResponse } from "../models/operations/integrationscontrollergetwebhooksupportstatus.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class Webhooks extends ClientSDK {
@@ -18,7 +18,7 @@ export class Webhooks extends ClientSDK {
     providerOrIntegrationId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.IntegrationsControllerGetWebhookSupportStatusResponse> {
+  ): Promise<IntegrationsControllerGetWebhookSupportStatusResponse> {
     return unwrapAsync(integrationsWebhooksRetrieve(
       this,
       providerOrIntegrationId,

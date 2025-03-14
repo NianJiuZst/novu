@@ -11,21 +11,21 @@ import { NovuCore } from "../core.js";
 import { subscribersPatch } from "../funcs/subscribersPatch.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { PatchSubscriberRequestDto } from "../models/components/patchsubscriberrequestdto.js";
+import { SubscribersControllerPatchSubscriberResponse } from "../models/operations/subscriberscontrollerpatchsubscriber.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type SubscribersPatchMutationVariables = {
-  patchSubscriberRequestDto: components.PatchSubscriberRequestDto;
+  patchSubscriberRequestDto: PatchSubscriberRequestDto;
   subscriberId: string;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
 export type SubscribersPatchMutationData =
-  operations.SubscribersControllerPatchSubscriberResponse;
+  SubscribersControllerPatchSubscriberResponse;
 
 /**
  * Patch subscriber

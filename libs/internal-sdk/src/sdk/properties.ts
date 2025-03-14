@@ -4,8 +4,8 @@
 
 import { subscribersPropertiesUpdateOnlineFlag } from "../funcs/subscribersPropertiesUpdateOnlineFlag.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { UpdateSubscriberOnlineFlagRequestDto } from "../models/components/updatesubscriberonlineflagrequestdto.js";
+import { SubscribersV1ControllerUpdateSubscriberOnlineFlagResponse } from "../models/operations/subscribersv1controllerupdatesubscriberonlineflag.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class Properties extends ClientSDK {
@@ -16,14 +16,11 @@ export class Properties extends ClientSDK {
    * Used to update the subscriber isOnline flag.
    */
   async updateOnlineFlag(
-    updateSubscriberOnlineFlagRequestDto:
-      components.UpdateSubscriberOnlineFlagRequestDto,
+    updateSubscriberOnlineFlagRequestDto: UpdateSubscriberOnlineFlagRequestDto,
     subscriberId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<
-    operations.SubscribersV1ControllerUpdateSubscriberOnlineFlagResponse
-  > {
+  ): Promise<SubscribersV1ControllerUpdateSubscriberOnlineFlagResponse> {
     return unwrapAsync(subscribersPropertiesUpdateOnlineFlag(
       this,
       updateSubscriberOnlineFlagRequestDto,

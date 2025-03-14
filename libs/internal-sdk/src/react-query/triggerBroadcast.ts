@@ -11,20 +11,20 @@ import { NovuCore } from "../core.js";
 import { triggerBroadcast } from "../funcs/triggerBroadcast.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { TriggerEventToAllRequestDto } from "../models/components/triggereventtoallrequestdto.js";
+import { EventsControllerBroadcastEventToAllResponse } from "../models/operations/eventscontrollerbroadcasteventtoall.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type TriggerBroadcastMutationVariables = {
-  triggerEventToAllRequestDto: components.TriggerEventToAllRequestDto;
+  triggerEventToAllRequestDto: TriggerEventToAllRequestDto;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
 export type TriggerBroadcastMutationData =
-  operations.EventsControllerBroadcastEventToAllResponse;
+  EventsControllerBroadcastEventToAllResponse;
 
 /**
  * Broadcast event to all

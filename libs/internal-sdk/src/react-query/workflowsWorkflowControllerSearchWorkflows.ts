@@ -16,7 +16,7 @@ import { NovuCore } from "../core.js";
 import { workflowsWorkflowControllerSearchWorkflows } from "../funcs/workflowsWorkflowControllerSearchWorkflows.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { WorkflowControllerSearchWorkflowsResponse } from "../models/operations/workflowcontrollersearchworkflows.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -26,7 +26,7 @@ import {
 } from "./_types.js";
 
 export type WorkflowsWorkflowControllerSearchWorkflowsQueryData =
-  operations.WorkflowControllerSearchWorkflowsResponse;
+  WorkflowControllerSearchWorkflowsResponse;
 
 export function useWorkflowsWorkflowControllerSearchWorkflows(
   idempotencyKey?: string | undefined,

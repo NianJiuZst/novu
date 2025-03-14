@@ -6,8 +6,11 @@ import { topicsSubscribersAssign } from "../funcs/topicsSubscribersAssign.js";
 import { topicsSubscribersRemove } from "../funcs/topicsSubscribersRemove.js";
 import { topicsSubscribersRetrieve } from "../funcs/topicsSubscribersRetrieve.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { AddSubscribersRequestDto } from "../models/components/addsubscribersrequestdto.js";
+import { RemoveSubscribersRequestDto } from "../models/components/removesubscribersrequestdto.js";
+import { TopicsControllerAssignResponse } from "../models/operations/topicscontrollerassign.js";
+import { TopicsControllerGetTopicSubscriberResponse } from "../models/operations/topicscontrollergettopicsubscriber.js";
+import { TopicsControllerRemoveSubscribersResponse } from "../models/operations/topicscontrollerremovesubscribers.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class NovuSubscribers extends ClientSDK {
@@ -18,11 +21,11 @@ export class NovuSubscribers extends ClientSDK {
    * Add subscribers to a topic by key
    */
   async assign(
-    addSubscribersRequestDto: components.AddSubscribersRequestDto,
+    addSubscribersRequestDto: AddSubscribersRequestDto,
     topicKey: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.TopicsControllerAssignResponse> {
+  ): Promise<TopicsControllerAssignResponse> {
     return unwrapAsync(topicsSubscribersAssign(
       this,
       addSubscribersRequestDto,
@@ -43,7 +46,7 @@ export class NovuSubscribers extends ClientSDK {
     externalSubscriberId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.TopicsControllerGetTopicSubscriberResponse> {
+  ): Promise<TopicsControllerGetTopicSubscriberResponse> {
     return unwrapAsync(topicsSubscribersRetrieve(
       this,
       topicKey,
@@ -60,11 +63,11 @@ export class NovuSubscribers extends ClientSDK {
    * Remove subscribers from a topic
    */
   async remove(
-    removeSubscribersRequestDto: components.RemoveSubscribersRequestDto,
+    removeSubscribersRequestDto: RemoveSubscribersRequestDto,
     topicKey: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.TopicsControllerRemoveSubscribersResponse | undefined> {
+  ): Promise<TopicsControllerRemoveSubscribersResponse | undefined> {
     return unwrapAsync(topicsSubscribersRemove(
       this,
       removeSubscribersRequestDto,

@@ -11,7 +11,7 @@ import { NovuCore } from "../core.js";
 import { cancel } from "../funcs/cancel.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { EventsControllerCancelResponse } from "../models/operations/eventscontrollercancel.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
@@ -22,7 +22,7 @@ export type CancelMutationVariables = {
   options?: RequestOptions;
 };
 
-export type CancelMutationData = operations.EventsControllerCancelResponse;
+export type CancelMutationData = EventsControllerCancelResponse;
 
 /**
  * Cancel triggered event

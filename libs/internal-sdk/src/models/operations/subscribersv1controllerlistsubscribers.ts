@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  SubscriberResponseDto,
+  SubscriberResponseDto$inboundSchema,
+  SubscriberResponseDto$Outbound,
+  SubscriberResponseDto$outboundSchema,
+} from "../components/subscriberresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type SubscribersV1ControllerListSubscribersRequest = {
@@ -31,7 +36,7 @@ export type SubscribersV1ControllerListSubscribersResponseBody = {
    * Number of items on each page
    */
   pageSize: number;
-  data: Array<components.SubscriberResponseDto>;
+  data: Array<SubscriberResponseDto>;
 };
 
 export type SubscribersV1ControllerListSubscribersResponse = {
@@ -130,7 +135,7 @@ export const SubscribersV1ControllerListSubscribersResponseBody$inboundSchema:
     page: z.number(),
     hasMore: z.boolean(),
     pageSize: z.number(),
-    data: z.array(components.SubscriberResponseDto$inboundSchema),
+    data: z.array(SubscriberResponseDto$inboundSchema),
   });
 
 /** @internal */
@@ -138,7 +143,7 @@ export type SubscribersV1ControllerListSubscribersResponseBody$Outbound = {
   page: number;
   hasMore: boolean;
   pageSize: number;
-  data: Array<components.SubscriberResponseDto$Outbound>;
+  data: Array<SubscriberResponseDto$Outbound>;
 };
 
 /** @internal */
@@ -151,7 +156,7 @@ export const SubscribersV1ControllerListSubscribersResponseBody$outboundSchema:
     page: z.number(),
     hasMore: z.boolean(),
     pageSize: z.number(),
-    data: z.array(components.SubscriberResponseDto$outboundSchema),
+    data: z.array(SubscriberResponseDto$outboundSchema),
   });
 
 /**

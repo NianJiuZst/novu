@@ -11,21 +11,21 @@ import { NovuCore } from "../core.js";
 import { subscribersMessagesMarkAll } from "../funcs/subscribersMessagesMarkAll.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { MarkAllMessageAsRequestDto } from "../models/components/markallmessageasrequestdto.js";
+import { SubscribersV1ControllerMarkAllUnreadAsReadResponse } from "../models/operations/subscribersv1controllermarkallunreadasread.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type SubscribersMessagesMarkAllMutationVariables = {
-  markAllMessageAsRequestDto: components.MarkAllMessageAsRequestDto;
+  markAllMessageAsRequestDto: MarkAllMessageAsRequestDto;
   subscriberId: string;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
 export type SubscribersMessagesMarkAllMutationData =
-  operations.SubscribersV1ControllerMarkAllUnreadAsReadResponse;
+  SubscribersV1ControllerMarkAllUnreadAsReadResponse;
 
 /**
  * Marks all the subscriber messages as read, unread, seen or unseen. Optionally you can pass feed id (or array) to mark messages of a particular feed.

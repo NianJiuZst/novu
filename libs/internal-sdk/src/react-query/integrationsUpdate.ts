@@ -11,21 +11,21 @@ import { NovuCore } from "../core.js";
 import { integrationsUpdate } from "../funcs/integrationsUpdate.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { UpdateIntegrationRequestDto } from "../models/components/updateintegrationrequestdto.js";
+import { IntegrationsControllerUpdateIntegrationByIdResponse } from "../models/operations/integrationscontrollerupdateintegrationbyid.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type IntegrationsUpdateMutationVariables = {
-  updateIntegrationRequestDto: components.UpdateIntegrationRequestDto;
+  updateIntegrationRequestDto: UpdateIntegrationRequestDto;
   integrationId: string;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
 export type IntegrationsUpdateMutationData =
-  operations.IntegrationsControllerUpdateIntegrationByIdResponse;
+  IntegrationsControllerUpdateIntegrationByIdResponse;
 
 /**
  * Update integration

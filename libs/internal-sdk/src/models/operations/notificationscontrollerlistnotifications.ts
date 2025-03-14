@@ -6,14 +6,24 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  ActivitiesResponseDto,
+  ActivitiesResponseDto$inboundSchema,
+  ActivitiesResponseDto$Outbound,
+  ActivitiesResponseDto$outboundSchema,
+} from "../components/activitiesresponsedto.js";
+import {
+  ChannelTypeEnum,
+  ChannelTypeEnum$inboundSchema,
+  ChannelTypeEnum$outboundSchema,
+} from "../components/channeltypeenum.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type NotificationsControllerListNotificationsRequest = {
   /**
    * Array of channel types
    */
-  channels?: Array<components.ChannelTypeEnum> | undefined;
+  channels?: Array<ChannelTypeEnum> | undefined;
   /**
    * Array of template IDs or a single template ID
    */
@@ -60,7 +70,7 @@ export type NotificationsControllerListNotificationsRequest = {
 
 export type NotificationsControllerListNotificationsResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.ActivitiesResponseDto;
+  result: ActivitiesResponseDto;
 };
 
 /** @internal */
@@ -70,7 +80,7 @@ export const NotificationsControllerListNotificationsRequest$inboundSchema:
     z.ZodTypeDef,
     unknown
   > = z.object({
-    channels: z.array(components.ChannelTypeEnum$inboundSchema).optional(),
+    channels: z.array(ChannelTypeEnum$inboundSchema).optional(),
     templates: z.array(z.string()).optional(),
     emails: z.array(z.string()).optional(),
     search: z.string().optional(),
@@ -109,7 +119,7 @@ export const NotificationsControllerListNotificationsRequest$outboundSchema:
     z.ZodTypeDef,
     NotificationsControllerListNotificationsRequest
   > = z.object({
-    channels: z.array(components.ChannelTypeEnum$outboundSchema).optional(),
+    channels: z.array(ChannelTypeEnum$outboundSchema).optional(),
     templates: z.array(z.string()).optional(),
     emails: z.array(z.string()).optional(),
     search: z.string().optional(),
@@ -177,7 +187,7 @@ export const NotificationsControllerListNotificationsResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.ActivitiesResponseDto$inboundSchema,
+    Result: ActivitiesResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -188,7 +198,7 @@ export const NotificationsControllerListNotificationsResponse$inboundSchema:
 /** @internal */
 export type NotificationsControllerListNotificationsResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.ActivitiesResponseDto$Outbound;
+  Result: ActivitiesResponseDto$Outbound;
 };
 
 /** @internal */
@@ -199,7 +209,7 @@ export const NotificationsControllerListNotificationsResponse$outboundSchema:
     NotificationsControllerListNotificationsResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.ActivitiesResponseDto$outboundSchema,
+    result: ActivitiesResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

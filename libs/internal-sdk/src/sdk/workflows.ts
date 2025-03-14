@@ -14,7 +14,17 @@ import { workflowsWorkflowControllerPatchWorkflowStepData } from "../funcs/workf
 import { workflowsWorkflowControllerSearchWorkflows } from "../funcs/workflowsWorkflowControllerSearchWorkflows.js";
 import { workflowsWorkflowControllerSync } from "../funcs/workflowsWorkflowControllerSync.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { WorkflowControllerCreateResponse } from "../models/operations/workflowcontrollercreate.js";
+import { WorkflowControllerGeneratePreviewResponse } from "../models/operations/workflowcontrollergeneratepreview.js";
+import { WorkflowControllerGetWorkflowResponse } from "../models/operations/workflowcontrollergetworkflow.js";
+import { WorkflowControllerGetWorkflowStepDataResponse } from "../models/operations/workflowcontrollergetworkflowstepdata.js";
+import { WorkflowControllerGetWorkflowTestDataResponse } from "../models/operations/workflowcontrollergetworkflowtestdata.js";
+import { WorkflowControllerPatchWorkflowResponse } from "../models/operations/workflowcontrollerpatchworkflow.js";
+import { WorkflowControllerPatchWorkflowStepDataResponse } from "../models/operations/workflowcontrollerpatchworkflowstepdata.js";
+import { WorkflowControllerRemoveWorkflowResponse } from "../models/operations/workflowcontrollerremoveworkflow.js";
+import { WorkflowControllerSearchWorkflowsResponse } from "../models/operations/workflowcontrollersearchworkflows.js";
+import { WorkflowControllerSyncResponse } from "../models/operations/workflowcontrollersync.js";
+import { WorkflowControllerUpdateResponse } from "../models/operations/workflowcontrollerupdate.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class Workflows extends ClientSDK {
@@ -27,7 +37,7 @@ export class Workflows extends ClientSDK {
   async create(
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.WorkflowControllerCreateResponse> {
+  ): Promise<WorkflowControllerCreateResponse> {
     return unwrapAsync(workflowsCreate(
       this,
       idempotencyKey,
@@ -38,7 +48,7 @@ export class Workflows extends ClientSDK {
   async workflowControllerSearchWorkflows(
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.WorkflowControllerSearchWorkflowsResponse> {
+  ): Promise<WorkflowControllerSearchWorkflowsResponse> {
     return unwrapAsync(workflowsWorkflowControllerSearchWorkflows(
       this,
       idempotencyKey,
@@ -56,7 +66,7 @@ export class Workflows extends ClientSDK {
     workflowId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.WorkflowControllerUpdateResponse> {
+  ): Promise<WorkflowControllerUpdateResponse> {
     return unwrapAsync(workflowsUpdate(
       this,
       workflowId,
@@ -76,7 +86,7 @@ export class Workflows extends ClientSDK {
     environmentId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.WorkflowControllerGetWorkflowResponse> {
+  ): Promise<WorkflowControllerGetWorkflowResponse> {
     return unwrapAsync(workflowsRetrieve(
       this,
       workflowId,
@@ -96,7 +106,7 @@ export class Workflows extends ClientSDK {
     workflowId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.WorkflowControllerRemoveWorkflowResponse | undefined> {
+  ): Promise<WorkflowControllerRemoveWorkflowResponse | undefined> {
     return unwrapAsync(workflowsDelete(
       this,
       workflowId,
@@ -109,7 +119,7 @@ export class Workflows extends ClientSDK {
     workflowId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.WorkflowControllerPatchWorkflowResponse> {
+  ): Promise<WorkflowControllerPatchWorkflowResponse> {
     return unwrapAsync(workflowsWorkflowControllerPatchWorkflow(
       this,
       workflowId,
@@ -123,7 +133,7 @@ export class Workflows extends ClientSDK {
     stepId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.WorkflowControllerGeneratePreviewResponse> {
+  ): Promise<WorkflowControllerGeneratePreviewResponse> {
     return unwrapAsync(workflowsWorkflowControllerGeneratePreview(
       this,
       workflowId,
@@ -138,7 +148,7 @@ export class Workflows extends ClientSDK {
     stepId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.WorkflowControllerGetWorkflowStepDataResponse> {
+  ): Promise<WorkflowControllerGetWorkflowStepDataResponse> {
     return unwrapAsync(workflowsGetStepData(
       this,
       workflowId,
@@ -153,7 +163,7 @@ export class Workflows extends ClientSDK {
     stepId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.WorkflowControllerPatchWorkflowStepDataResponse> {
+  ): Promise<WorkflowControllerPatchWorkflowStepDataResponse> {
     return unwrapAsync(workflowsWorkflowControllerPatchWorkflowStepData(
       this,
       workflowId,
@@ -167,7 +177,7 @@ export class Workflows extends ClientSDK {
     workflowId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.WorkflowControllerSyncResponse> {
+  ): Promise<WorkflowControllerSyncResponse> {
     return unwrapAsync(workflowsWorkflowControllerSync(
       this,
       workflowId,
@@ -180,7 +190,7 @@ export class Workflows extends ClientSDK {
     workflowId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.WorkflowControllerGetWorkflowTestDataResponse> {
+  ): Promise<WorkflowControllerGetWorkflowTestDataResponse> {
     return unwrapAsync(workflowsGetWorkflowTestData(
       this,
       workflowId,

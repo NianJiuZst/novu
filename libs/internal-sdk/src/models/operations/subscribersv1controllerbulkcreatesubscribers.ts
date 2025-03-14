@@ -6,7 +6,18 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  BulkCreateSubscriberResponseDto,
+  BulkCreateSubscriberResponseDto$inboundSchema,
+  BulkCreateSubscriberResponseDto$Outbound,
+  BulkCreateSubscriberResponseDto$outboundSchema,
+} from "../components/bulkcreatesubscriberresponsedto.js";
+import {
+  BulkSubscriberCreateDto,
+  BulkSubscriberCreateDto$inboundSchema,
+  BulkSubscriberCreateDto$Outbound,
+  BulkSubscriberCreateDto$outboundSchema,
+} from "../components/bulksubscribercreatedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type SubscribersV1ControllerBulkCreateSubscribersRequest = {
@@ -14,12 +25,12 @@ export type SubscribersV1ControllerBulkCreateSubscribersRequest = {
    * A header for idempotency purposes
    */
   idempotencyKey?: string | undefined;
-  bulkSubscriberCreateDto: components.BulkSubscriberCreateDto;
+  bulkSubscriberCreateDto: BulkSubscriberCreateDto;
 };
 
 export type SubscribersV1ControllerBulkCreateSubscribersResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.BulkCreateSubscriberResponseDto;
+  result: BulkCreateSubscriberResponseDto;
 };
 
 /** @internal */
@@ -30,7 +41,7 @@ export const SubscribersV1ControllerBulkCreateSubscribersRequest$inboundSchema:
     unknown
   > = z.object({
     "idempotency-key": z.string().optional(),
-    BulkSubscriberCreateDto: components.BulkSubscriberCreateDto$inboundSchema,
+    BulkSubscriberCreateDto: BulkSubscriberCreateDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "idempotency-key": "idempotencyKey",
@@ -41,7 +52,7 @@ export const SubscribersV1ControllerBulkCreateSubscribersRequest$inboundSchema:
 /** @internal */
 export type SubscribersV1ControllerBulkCreateSubscribersRequest$Outbound = {
   "idempotency-key"?: string | undefined;
-  BulkSubscriberCreateDto: components.BulkSubscriberCreateDto$Outbound;
+  BulkSubscriberCreateDto: BulkSubscriberCreateDto$Outbound;
 };
 
 /** @internal */
@@ -52,7 +63,7 @@ export const SubscribersV1ControllerBulkCreateSubscribersRequest$outboundSchema:
     SubscribersV1ControllerBulkCreateSubscribersRequest
   > = z.object({
     idempotencyKey: z.string().optional(),
-    bulkSubscriberCreateDto: components.BulkSubscriberCreateDto$outboundSchema,
+    bulkSubscriberCreateDto: BulkSubscriberCreateDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       idempotencyKey: "idempotency-key",
@@ -111,7 +122,7 @@ export const SubscribersV1ControllerBulkCreateSubscribersResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.BulkCreateSubscriberResponseDto$inboundSchema,
+    Result: BulkCreateSubscriberResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -122,7 +133,7 @@ export const SubscribersV1ControllerBulkCreateSubscribersResponse$inboundSchema:
 /** @internal */
 export type SubscribersV1ControllerBulkCreateSubscribersResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.BulkCreateSubscriberResponseDto$Outbound;
+  Result: BulkCreateSubscriberResponseDto$Outbound;
 };
 
 /** @internal */
@@ -133,7 +144,7 @@ export const SubscribersV1ControllerBulkCreateSubscribersResponse$outboundSchema
     SubscribersV1ControllerBulkCreateSubscribersResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.BulkCreateSubscriberResponseDto$outboundSchema,
+    result: BulkCreateSubscriberResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

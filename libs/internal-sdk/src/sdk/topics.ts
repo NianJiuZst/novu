@@ -8,8 +8,16 @@ import { topicsList } from "../funcs/topicsList.js";
 import { topicsRename } from "../funcs/topicsRename.js";
 import { topicsRetrieve } from "../funcs/topicsRetrieve.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { CreateTopicRequestDto } from "../models/components/createtopicrequestdto.js";
+import { RenameTopicRequestDto } from "../models/components/renametopicrequestdto.js";
+import { TopicsControllerCreateTopicResponse } from "../models/operations/topicscontrollercreatetopic.js";
+import { TopicsControllerDeleteTopicResponse } from "../models/operations/topicscontrollerdeletetopic.js";
+import { TopicsControllerGetTopicResponse } from "../models/operations/topicscontrollergettopic.js";
+import {
+  TopicsControllerListTopicsRequest,
+  TopicsControllerListTopicsResponse,
+} from "../models/operations/topicscontrollerlisttopics.js";
+import { TopicsControllerRenameTopicResponse } from "../models/operations/topicscontrollerrenametopic.js";
 import { unwrapAsync } from "../types/fp.js";
 import { NovuSubscribers } from "./novusubscribers.js";
 
@@ -26,10 +34,10 @@ export class Topics extends ClientSDK {
    * Create a topic
    */
   async create(
-    createTopicRequestDto: components.CreateTopicRequestDto,
+    createTopicRequestDto: CreateTopicRequestDto,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.TopicsControllerCreateTopicResponse> {
+  ): Promise<TopicsControllerCreateTopicResponse> {
     return unwrapAsync(topicsCreate(
       this,
       createTopicRequestDto,
@@ -45,9 +53,9 @@ export class Topics extends ClientSDK {
    * Returns a list of topics that can be paginated using the `page` query parameter and filtered by the topic key with the `key` query parameter
    */
   async list(
-    request: operations.TopicsControllerListTopicsRequest,
+    request: TopicsControllerListTopicsRequest,
     options?: RequestOptions,
-  ): Promise<operations.TopicsControllerListTopicsResponse> {
+  ): Promise<TopicsControllerListTopicsResponse> {
     return unwrapAsync(topicsList(
       this,
       request,
@@ -65,7 +73,7 @@ export class Topics extends ClientSDK {
     topicKey: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.TopicsControllerDeleteTopicResponse | undefined> {
+  ): Promise<TopicsControllerDeleteTopicResponse | undefined> {
     return unwrapAsync(topicsDelete(
       this,
       topicKey,
@@ -84,7 +92,7 @@ export class Topics extends ClientSDK {
     topicKey: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.TopicsControllerGetTopicResponse> {
+  ): Promise<TopicsControllerGetTopicResponse> {
     return unwrapAsync(topicsRetrieve(
       this,
       topicKey,
@@ -100,11 +108,11 @@ export class Topics extends ClientSDK {
    * Rename a topic by providing a new name
    */
   async rename(
-    renameTopicRequestDto: components.RenameTopicRequestDto,
+    renameTopicRequestDto: RenameTopicRequestDto,
     topicKey: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.TopicsControllerRenameTopicResponse> {
+  ): Promise<TopicsControllerRenameTopicResponse> {
     return unwrapAsync(topicsRename(
       this,
       renameTopicRequestDto,

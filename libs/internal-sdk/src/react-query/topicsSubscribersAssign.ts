@@ -11,21 +11,21 @@ import { NovuCore } from "../core.js";
 import { topicsSubscribersAssign } from "../funcs/topicsSubscribersAssign.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { AddSubscribersRequestDto } from "../models/components/addsubscribersrequestdto.js";
+import { TopicsControllerAssignResponse } from "../models/operations/topicscontrollerassign.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type TopicsSubscribersAssignMutationVariables = {
-  addSubscribersRequestDto: components.AddSubscribersRequestDto;
+  addSubscribersRequestDto: AddSubscribersRequestDto;
   topicKey: string;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
 export type TopicsSubscribersAssignMutationData =
-  operations.TopicsControllerAssignResponse;
+  TopicsControllerAssignResponse;
 
 /**
  * Subscribers addition

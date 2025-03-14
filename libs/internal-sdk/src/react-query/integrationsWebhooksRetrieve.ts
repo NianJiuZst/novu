@@ -16,7 +16,7 @@ import { NovuCore } from "../core.js";
 import { integrationsWebhooksRetrieve } from "../funcs/integrationsWebhooksRetrieve.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { IntegrationsControllerGetWebhookSupportStatusResponse } from "../models/operations/integrationscontrollergetwebhooksupportstatus.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -26,7 +26,7 @@ import {
 } from "./_types.js";
 
 export type IntegrationsWebhooksRetrieveQueryData =
-  operations.IntegrationsControllerGetWebhookSupportStatusResponse;
+  IntegrationsControllerGetWebhookSupportStatusResponse;
 
 /**
  * Get webhook support status for provider

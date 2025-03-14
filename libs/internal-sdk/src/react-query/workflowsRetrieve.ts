@@ -16,7 +16,7 @@ import { NovuCore } from "../core.js";
 import { workflowsRetrieve } from "../funcs/workflowsRetrieve.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { WorkflowControllerGetWorkflowResponse } from "../models/operations/workflowcontrollergetworkflow.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -25,8 +25,7 @@ import {
   TupleToPrefixes,
 } from "./_types.js";
 
-export type WorkflowsRetrieveQueryData =
-  operations.WorkflowControllerGetWorkflowResponse;
+export type WorkflowsRetrieveQueryData = WorkflowControllerGetWorkflowResponse;
 
 export function useWorkflowsRetrieve(
   workflowId: string,

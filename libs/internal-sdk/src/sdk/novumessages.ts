@@ -6,8 +6,14 @@ import { subscribersMessagesMarkAll } from "../funcs/subscribersMessagesMarkAll.
 import { subscribersMessagesMarkAllAs } from "../funcs/subscribersMessagesMarkAllAs.js";
 import { subscribersMessagesUpdateAsSeen } from "../funcs/subscribersMessagesUpdateAsSeen.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { MarkAllMessageAsRequestDto } from "../models/components/markallmessageasrequestdto.js";
+import { MessageMarkAsRequestDto } from "../models/components/messagemarkasrequestdto.js";
+import {
+  SubscribersV1ControllerMarkActionAsSeenRequest,
+  SubscribersV1ControllerMarkActionAsSeenResponse,
+} from "../models/operations/subscribersv1controllermarkactionasseen.js";
+import { SubscribersV1ControllerMarkAllUnreadAsReadResponse } from "../models/operations/subscribersv1controllermarkallunreadasread.js";
+import { SubscribersV1ControllerMarkMessagesAsResponse } from "../models/operations/subscribersv1controllermarkmessagesas.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class NovuMessages extends ClientSDK {
@@ -15,9 +21,9 @@ export class NovuMessages extends ClientSDK {
    * Mark message action as seen
    */
   async updateAsSeen(
-    request: operations.SubscribersV1ControllerMarkActionAsSeenRequest,
+    request: SubscribersV1ControllerMarkActionAsSeenRequest,
     options?: RequestOptions,
-  ): Promise<operations.SubscribersV1ControllerMarkActionAsSeenResponse> {
+  ): Promise<SubscribersV1ControllerMarkActionAsSeenResponse> {
     return unwrapAsync(subscribersMessagesUpdateAsSeen(
       this,
       request,
@@ -29,11 +35,11 @@ export class NovuMessages extends ClientSDK {
    * Marks all the subscriber messages as read, unread, seen or unseen. Optionally you can pass feed id (or array) to mark messages of a particular feed.
    */
   async markAll(
-    markAllMessageAsRequestDto: components.MarkAllMessageAsRequestDto,
+    markAllMessageAsRequestDto: MarkAllMessageAsRequestDto,
     subscriberId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.SubscribersV1ControllerMarkAllUnreadAsReadResponse> {
+  ): Promise<SubscribersV1ControllerMarkAllUnreadAsReadResponse> {
     return unwrapAsync(subscribersMessagesMarkAll(
       this,
       markAllMessageAsRequestDto,
@@ -47,11 +53,11 @@ export class NovuMessages extends ClientSDK {
    * Mark a subscriber messages as seen, read, unseen or unread
    */
   async markAllAs(
-    messageMarkAsRequestDto: components.MessageMarkAsRequestDto,
+    messageMarkAsRequestDto: MessageMarkAsRequestDto,
     subscriberId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.SubscribersV1ControllerMarkMessagesAsResponse> {
+  ): Promise<SubscribersV1ControllerMarkMessagesAsResponse> {
     return unwrapAsync(subscribersMessagesMarkAllAs(
       this,
       messageMarkAsRequestDto,

@@ -11,7 +11,7 @@ import { NovuCore } from "../core.js";
 import { integrationsSetAsPrimary } from "../funcs/integrationsSetAsPrimary.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { IntegrationsControllerSetIntegrationAsPrimaryResponse } from "../models/operations/integrationscontrollersetintegrationasprimary.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
@@ -23,7 +23,7 @@ export type IntegrationsSetAsPrimaryMutationVariables = {
 };
 
 export type IntegrationsSetAsPrimaryMutationData =
-  operations.IntegrationsControllerSetIntegrationAsPrimaryResponse;
+  IntegrationsControllerSetIntegrationAsPrimaryResponse;
 
 /**
  * Set integration as primary

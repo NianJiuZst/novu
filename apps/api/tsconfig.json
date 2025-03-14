@@ -4,13 +4,14 @@
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "emitDecoratorMetadata": true,
-    "esModuleInterop": true,
-    "module": "commonjs",
     "skipLibCheck": true,
     "sourceMap": true,
     "strictNullChecks": true,
     "target": "es6",
-    "jsx": "react"
+    "jsx": "react",
+    "esModuleInterop": true,
+    "module": "Preserve",
+    "moduleResolution": "bundler"
   },
   "exclude": ["node_modules"]
 }

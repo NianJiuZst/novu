@@ -10,6 +10,7 @@ import { safeParse } from "../lib/schemas.js";
 import { RequestOptions } from "../lib/sdks.js";
 import { extractSecurity, resolveGlobalSecurity } from "../lib/security.js";
 import { pathToFunc } from "../lib/url.js";
+import { ErrorDto, ErrorDto$inboundSchema } from "../models/errors/errordto.js";
 import {
   ConnectionError,
   InvalidRequestError,
@@ -17,10 +18,18 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/httpclienterrors.js";
-import * as errors from "../models/errors/index.js";
 import { SDKError } from "../models/errors/sdkerror.js";
 import { SDKValidationError } from "../models/errors/sdkvalidationerror.js";
-import * as operations from "../models/operations/index.js";
+import {
+  ValidationErrorDto,
+  ValidationErrorDto$inboundSchema,
+} from "../models/errors/validationerrordto.js";
+import {
+  EventsControllerCancelRequest,
+  EventsControllerCancelRequest$outboundSchema,
+  EventsControllerCancelResponse,
+  EventsControllerCancelResponse$inboundSchema,
+} from "../models/operations/eventscontrollercancel.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
 
@@ -39,11 +48,11 @@ export function cancel(
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    operations.EventsControllerCancelResponse,
-    | errors.ErrorDto
-    | errors.ErrorDto
-    | errors.ValidationErrorDto
-    | errors.ErrorDto
+    EventsControllerCancelResponse,
+    | ErrorDto
+    | ErrorDto
+    | ValidationErrorDto
+    | ErrorDto
     | SDKError
     | SDKValidationError
     | UnexpectedClientError
@@ -69,11 +78,11 @@ async function $do(
 ): Promise<
   [
     Result<
-      operations.EventsControllerCancelResponse,
-      | errors.ErrorDto
-      | errors.ErrorDto
-      | errors.ValidationErrorDto
-      | errors.ErrorDto
+      EventsControllerCancelResponse,
+      | ErrorDto
+      | ErrorDto
+      | ValidationErrorDto
+      | ErrorDto
       | SDKError
       | SDKValidationError
       | UnexpectedClientError
@@ -85,15 +94,14 @@ async function $do(
     APICall,
   ]
 > {
-  const input: operations.EventsControllerCancelRequest = {
+  const input: EventsControllerCancelRequest = {
     transactionId: transactionId,
     idempotencyKey: idempotencyKey,
   };
 
   const parsed = safeParse(
     input,
-    (value) =>
-      operations.EventsControllerCancelRequest$outboundSchema.parse(value),
+    (value) => EventsControllerCancelRequest$outboundSchema.parse(value),
     "Input validation failed",
   );
   if (!parsed.ok) {
@@ -193,11 +201,11 @@ async function $do(
   };
 
   const [result] = await M.match<
-    operations.EventsControllerCancelResponse,
-    | errors.ErrorDto
-    | errors.ErrorDto
-    | errors.ValidationErrorDto
-    | errors.ErrorDto
+    EventsControllerCancelResponse,
+    | ErrorDto
+    | ErrorDto
+    | ValidationErrorDto
+    | ErrorDto
     | SDKError
     | SDKValidationError
     | UnexpectedClientError
@@ -206,19 +214,19 @@ async function $do(
     | RequestTimeoutError
     | ConnectionError
   >(
-    M.json(200, operations.EventsControllerCancelResponse$inboundSchema, {
+    M.json(200, EventsControllerCancelResponse$inboundSchema, {
       hdrs: true,
       key: "Result",
     }),
-    M.jsonErr(414, errors.ErrorDto$inboundSchema),
+    M.jsonErr(414, ErrorDto$inboundSchema),
     M.jsonErr(
       [400, 401, 403, 404, 405, 409, 413, 415],
-      errors.ErrorDto$inboundSchema,
+      ErrorDto$inboundSchema,
       { hdrs: true },
     ),
-    M.jsonErr(422, errors.ValidationErrorDto$inboundSchema, { hdrs: true }),
+    M.jsonErr(422, ValidationErrorDto$inboundSchema, { hdrs: true }),
     M.fail(429),
-    M.jsonErr(500, errors.ErrorDto$inboundSchema, { hdrs: true }),
+    M.jsonErr(500, ErrorDto$inboundSchema, { hdrs: true }),
     M.fail(503),
     M.fail("4XX"),
     M.fail("5XX"),

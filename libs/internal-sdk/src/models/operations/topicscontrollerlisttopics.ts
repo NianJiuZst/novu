@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  FilterTopicsResponseDto,
+  FilterTopicsResponseDto$inboundSchema,
+  FilterTopicsResponseDto$Outbound,
+  FilterTopicsResponseDto$outboundSchema,
+} from "../components/filtertopicsresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type TopicsControllerListTopicsRequest = {
@@ -30,7 +35,7 @@ export type TopicsControllerListTopicsRequest = {
 
 export type TopicsControllerListTopicsResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.FilterTopicsResponseDto;
+  result: FilterTopicsResponseDto;
 };
 
 /** @internal */
@@ -114,7 +119,7 @@ export const TopicsControllerListTopicsResponse$inboundSchema: z.ZodType<
   unknown
 > = z.object({
   Headers: z.record(z.array(z.string())),
-  Result: components.FilterTopicsResponseDto$inboundSchema,
+  Result: FilterTopicsResponseDto$inboundSchema,
 }).transform((v) => {
   return remap$(v, {
     "Headers": "headers",
@@ -125,7 +130,7 @@ export const TopicsControllerListTopicsResponse$inboundSchema: z.ZodType<
 /** @internal */
 export type TopicsControllerListTopicsResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.FilterTopicsResponseDto$Outbound;
+  Result: FilterTopicsResponseDto$Outbound;
 };
 
 /** @internal */
@@ -135,7 +140,7 @@ export const TopicsControllerListTopicsResponse$outboundSchema: z.ZodType<
   TopicsControllerListTopicsResponse
 > = z.object({
   headers: z.record(z.array(z.string())),
-  result: components.FilterTopicsResponseDto$outboundSchema,
+  result: FilterTopicsResponseDto$outboundSchema,
 }).transform((v) => {
   return remap$(v, {
     headers: "Headers",

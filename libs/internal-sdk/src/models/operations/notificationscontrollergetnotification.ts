@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  ActivityNotificationResponseDto,
+  ActivityNotificationResponseDto$inboundSchema,
+  ActivityNotificationResponseDto$Outbound,
+  ActivityNotificationResponseDto$outboundSchema,
+} from "../components/activitynotificationresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type NotificationsControllerGetNotificationRequest = {
@@ -19,7 +24,7 @@ export type NotificationsControllerGetNotificationRequest = {
 
 export type NotificationsControllerGetNotificationResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.ActivityNotificationResponseDto;
+  result: ActivityNotificationResponseDto;
 };
 
 /** @internal */
@@ -108,7 +113,7 @@ export const NotificationsControllerGetNotificationResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.ActivityNotificationResponseDto$inboundSchema,
+    Result: ActivityNotificationResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -119,7 +124,7 @@ export const NotificationsControllerGetNotificationResponse$inboundSchema:
 /** @internal */
 export type NotificationsControllerGetNotificationResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.ActivityNotificationResponseDto$Outbound;
+  Result: ActivityNotificationResponseDto$Outbound;
 };
 
 /** @internal */
@@ -130,7 +135,7 @@ export const NotificationsControllerGetNotificationResponse$outboundSchema:
     NotificationsControllerGetNotificationResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.ActivityNotificationResponseDto$outboundSchema,
+    result: ActivityNotificationResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

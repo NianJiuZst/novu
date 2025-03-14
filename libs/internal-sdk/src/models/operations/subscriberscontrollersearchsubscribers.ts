@@ -7,7 +7,12 @@ import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { ClosedEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  ListSubscribersResponseDto,
+  ListSubscribersResponseDto$inboundSchema,
+  ListSubscribersResponseDto$Outbound,
+  ListSubscribersResponseDto$outboundSchema,
+} from "../components/listsubscribersresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export const OrderDirection = {
@@ -52,7 +57,7 @@ export type SubscribersControllerSearchSubscribersRequest = {
 
 export type SubscribersControllerSearchSubscribersResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.ListSubscribersResponseDto;
+  result: ListSubscribersResponseDto;
 };
 
 /** @internal */
@@ -186,7 +191,7 @@ export const SubscribersControllerSearchSubscribersResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.ListSubscribersResponseDto$inboundSchema,
+    Result: ListSubscribersResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -197,7 +202,7 @@ export const SubscribersControllerSearchSubscribersResponse$inboundSchema:
 /** @internal */
 export type SubscribersControllerSearchSubscribersResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.ListSubscribersResponseDto$Outbound;
+  Result: ListSubscribersResponseDto$Outbound;
 };
 
 /** @internal */
@@ -208,7 +213,7 @@ export const SubscribersControllerSearchSubscribersResponse$outboundSchema:
     SubscribersControllerSearchSubscribersResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.ListSubscribersResponseDto$outboundSchema,
+    result: ListSubscribersResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

@@ -9,8 +9,14 @@ import { integrationsListActive } from "../funcs/integrationsListActive.js";
 import { integrationsSetAsPrimary } from "../funcs/integrationsSetAsPrimary.js";
 import { integrationsUpdate } from "../funcs/integrationsUpdate.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { CreateIntegrationRequestDto } from "../models/components/createintegrationrequestdto.js";
+import { UpdateIntegrationRequestDto } from "../models/components/updateintegrationrequestdto.js";
+import { IntegrationsControllerCreateIntegrationResponse } from "../models/operations/integrationscontrollercreateintegration.js";
+import { IntegrationsControllerGetActiveIntegrationsResponse } from "../models/operations/integrationscontrollergetactiveintegrations.js";
+import { IntegrationsControllerListIntegrationsResponse } from "../models/operations/integrationscontrollerlistintegrations.js";
+import { IntegrationsControllerRemoveIntegrationResponse } from "../models/operations/integrationscontrollerremoveintegration.js";
+import { IntegrationsControllerSetIntegrationAsPrimaryResponse } from "../models/operations/integrationscontrollersetintegrationasprimary.js";
+import { IntegrationsControllerUpdateIntegrationByIdResponse } from "../models/operations/integrationscontrollerupdateintegrationbyid.js";
 import { unwrapAsync } from "../types/fp.js";
 import { Webhooks } from "./webhooks.js";
 
@@ -29,7 +35,7 @@ export class Integrations extends ClientSDK {
   async list(
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.IntegrationsControllerListIntegrationsResponse> {
+  ): Promise<IntegrationsControllerListIntegrationsResponse> {
     return unwrapAsync(integrationsList(
       this,
       idempotencyKey,
@@ -44,10 +50,10 @@ export class Integrations extends ClientSDK {
    * Create an integration for the current environment the user is based on the API key provided
    */
   async create(
-    createIntegrationRequestDto: components.CreateIntegrationRequestDto,
+    createIntegrationRequestDto: CreateIntegrationRequestDto,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.IntegrationsControllerCreateIntegrationResponse> {
+  ): Promise<IntegrationsControllerCreateIntegrationResponse> {
     return unwrapAsync(integrationsCreate(
       this,
       createIntegrationRequestDto,
@@ -60,11 +66,11 @@ export class Integrations extends ClientSDK {
    * Update integration
    */
   async update(
-    updateIntegrationRequestDto: components.UpdateIntegrationRequestDto,
+    updateIntegrationRequestDto: UpdateIntegrationRequestDto,
     integrationId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.IntegrationsControllerUpdateIntegrationByIdResponse> {
+  ): Promise<IntegrationsControllerUpdateIntegrationByIdResponse> {
     return unwrapAsync(integrationsUpdate(
       this,
       updateIntegrationRequestDto,
@@ -81,7 +87,7 @@ export class Integrations extends ClientSDK {
     integrationId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.IntegrationsControllerRemoveIntegrationResponse> {
+  ): Promise<IntegrationsControllerRemoveIntegrationResponse> {
     return unwrapAsync(integrationsDelete(
       this,
       integrationId,
@@ -97,7 +103,7 @@ export class Integrations extends ClientSDK {
     integrationId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.IntegrationsControllerSetIntegrationAsPrimaryResponse> {
+  ): Promise<IntegrationsControllerSetIntegrationAsPrimaryResponse> {
     return unwrapAsync(integrationsSetAsPrimary(
       this,
       integrationId,
@@ -115,7 +121,7 @@ export class Integrations extends ClientSDK {
   async listActive(
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.IntegrationsControllerGetActiveIntegrationsResponse> {
+  ): Promise<IntegrationsControllerGetActiveIntegrationsResponse> {
     return unwrapAsync(integrationsListActive(
       this,
       idempotencyKey,

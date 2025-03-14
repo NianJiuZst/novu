@@ -10,6 +10,7 @@ import { safeParse } from "../lib/schemas.js";
 import { RequestOptions } from "../lib/sdks.js";
 import { extractSecurity, resolveGlobalSecurity } from "../lib/security.js";
 import { pathToFunc } from "../lib/url.js";
+import { ErrorDto, ErrorDto$inboundSchema } from "../models/errors/errordto.js";
 import {
   ConnectionError,
   InvalidRequestError,
@@ -17,10 +18,19 @@ import {
   RequestTimeoutError,
   UnexpectedClientError,
 } from "../models/errors/httpclienterrors.js";
-import * as errors from "../models/errors/index.js";
 import { SDKError } from "../models/errors/sdkerror.js";
 import { SDKValidationError } from "../models/errors/sdkvalidationerror.js";
-import * as operations from "../models/operations/index.js";
+import {
+  ValidationErrorDto,
+  ValidationErrorDto$inboundSchema,
+} from "../models/errors/validationerrordto.js";
+import {
+  Channel,
+  MessagesControllerDeleteMessagesByTransactionIdRequest,
+  MessagesControllerDeleteMessagesByTransactionIdRequest$outboundSchema,
+  MessagesControllerDeleteMessagesByTransactionIdResponse,
+  MessagesControllerDeleteMessagesByTransactionIdResponse$inboundSchema,
+} from "../models/operations/messagescontrollerdeletemessagesbytransactionid.js";
 import { APICall, APIPromise } from "../types/async.js";
 import { Result } from "../types/fp.js";
 
@@ -33,17 +43,16 @@ import { Result } from "../types/fp.js";
 export function messagesDeleteByTransactionId(
   client: NovuCore,
   transactionId: string,
-  channel?: operations.Channel | undefined,
+  channel?: Channel | undefined,
   idempotencyKey?: string | undefined,
   options?: RequestOptions,
 ): APIPromise<
   Result<
-    | operations.MessagesControllerDeleteMessagesByTransactionIdResponse
-    | undefined,
-    | errors.ErrorDto
-    | errors.ErrorDto
-    | errors.ValidationErrorDto
-    | errors.ErrorDto
+    MessagesControllerDeleteMessagesByTransactionIdResponse | undefined,
+    | ErrorDto
+    | ErrorDto
+    | ValidationErrorDto
+    | ErrorDto
     | SDKError
     | SDKValidationError
     | UnexpectedClientError
@@ -65,18 +74,17 @@ export function messagesDeleteByTransactionId(
 async function $do(
   client: NovuCore,
   transactionId: string,
-  channel?: operations.Channel | undefined,
+  channel?: Channel | undefined,
   idempotencyKey?: string | undefined,
   options?: RequestOptions,
 ): Promise<
   [
     Result<
-      | operations.MessagesControllerDeleteMessagesByTransactionIdResponse
-      | undefined,
-      | errors.ErrorDto
-      | errors.ErrorDto
-      | errors.ValidationErrorDto
-      | errors.ErrorDto
+      MessagesControllerDeleteMessagesByTransactionIdResponse | undefined,
+      | ErrorDto
+      | ErrorDto
+      | ValidationErrorDto
+      | ErrorDto
       | SDKError
       | SDKValidationError
       | UnexpectedClientError
@@ -88,18 +96,16 @@ async function $do(
     APICall,
   ]
 > {
-  const input:
-    operations.MessagesControllerDeleteMessagesByTransactionIdRequest = {
-      transactionId: transactionId,
-      channel: channel,
-      idempotencyKey: idempotencyKey,
-    };
+  const input: MessagesControllerDeleteMessagesByTransactionIdRequest = {
+    transactionId: transactionId,
+    channel: channel,
+    idempotencyKey: idempotencyKey,
+  };
 
   const parsed = safeParse(
     input,
     (value) =>
-      operations
-        .MessagesControllerDeleteMessagesByTransactionIdRequest$outboundSchema
+      MessagesControllerDeleteMessagesByTransactionIdRequest$outboundSchema
         .parse(value),
     "Input validation failed",
   );
@@ -207,12 +213,11 @@ async function $do(
   };
 
   const [result] = await M.match<
-    | operations.MessagesControllerDeleteMessagesByTransactionIdResponse
-    | undefined,
-    | errors.ErrorDto
-    | errors.ErrorDto
-    | errors.ValidationErrorDto
-    | errors.ErrorDto
+    MessagesControllerDeleteMessagesByTransactionIdResponse | undefined,
+    | ErrorDto
+    | ErrorDto
+    | ValidationErrorDto
+    | ErrorDto
     | SDKError
     | SDKValidationError
     | UnexpectedClientError
@@ -223,20 +228,19 @@ async function $do(
   >(
     M.nil(
       204,
-      operations
-        .MessagesControllerDeleteMessagesByTransactionIdResponse$inboundSchema
+      MessagesControllerDeleteMessagesByTransactionIdResponse$inboundSchema
         .optional(),
       { hdrs: true },
     ),
-    M.jsonErr(414, errors.ErrorDto$inboundSchema),
+    M.jsonErr(414, ErrorDto$inboundSchema),
     M.jsonErr(
       [400, 401, 403, 404, 405, 409, 413, 415],
-      errors.ErrorDto$inboundSchema,
+      ErrorDto$inboundSchema,
       { hdrs: true },
     ),
-    M.jsonErr(422, errors.ValidationErrorDto$inboundSchema, { hdrs: true }),
+    M.jsonErr(422, ValidationErrorDto$inboundSchema, { hdrs: true }),
     M.fail(429),
-    M.jsonErr(500, errors.ErrorDto$inboundSchema, { hdrs: true }),
+    M.jsonErr(500, ErrorDto$inboundSchema, { hdrs: true }),
     M.fail(503),
     M.fail("4XX"),
     M.fail("5XX"),

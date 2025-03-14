@@ -6,7 +6,15 @@ import { messagesDelete } from "../funcs/messagesDelete.js";
 import { messagesDeleteByTransactionId } from "../funcs/messagesDeleteByTransactionId.js";
 import { messagesRetrieve } from "../funcs/messagesRetrieve.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { MessagesControllerDeleteMessageResponse } from "../models/operations/messagescontrollerdeletemessage.js";
+import {
+  Channel,
+  MessagesControllerDeleteMessagesByTransactionIdResponse,
+} from "../models/operations/messagescontrollerdeletemessagesbytransactionid.js";
+import {
+  MessagesControllerGetMessagesRequest,
+  MessagesControllerGetMessagesResponse,
+} from "../models/operations/messagescontrollergetmessages.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class Messages extends ClientSDK {
@@ -17,9 +25,9 @@ export class Messages extends ClientSDK {
    * Returns a list of messages, could paginate using the `page` query parameter
    */
   async retrieve(
-    request: operations.MessagesControllerGetMessagesRequest,
+    request: MessagesControllerGetMessagesRequest,
     options?: RequestOptions,
-  ): Promise<operations.MessagesControllerGetMessagesResponse> {
+  ): Promise<MessagesControllerGetMessagesResponse> {
     return unwrapAsync(messagesRetrieve(
       this,
       request,
@@ -37,7 +45,7 @@ export class Messages extends ClientSDK {
     messageId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.MessagesControllerDeleteMessageResponse> {
+  ): Promise<MessagesControllerDeleteMessageResponse> {
     return unwrapAsync(messagesDelete(
       this,
       messageId,
@@ -54,12 +62,11 @@ export class Messages extends ClientSDK {
    */
   async deleteByTransactionId(
     transactionId: string,
-    channel?: operations.Channel | undefined,
+    channel?: Channel | undefined,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
   ): Promise<
-    | operations.MessagesControllerDeleteMessagesByTransactionIdResponse
-    | undefined
+    MessagesControllerDeleteMessagesByTransactionIdResponse | undefined
   > {
     return unwrapAsync(messagesDeleteByTransactionId(
       this,

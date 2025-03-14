@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  TopicSubscriberDto,
+  TopicSubscriberDto$inboundSchema,
+  TopicSubscriberDto$Outbound,
+  TopicSubscriberDto$outboundSchema,
+} from "../components/topicsubscriberdto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type TopicsControllerGetTopicSubscriberRequest = {
@@ -26,7 +31,7 @@ export type TopicsControllerGetTopicSubscriberRequest = {
 
 export type TopicsControllerGetTopicSubscriberResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.TopicSubscriberDto;
+  result: TopicSubscriberDto;
 };
 
 /** @internal */
@@ -114,7 +119,7 @@ export const TopicsControllerGetTopicSubscriberResponse$inboundSchema:
   z.ZodType<TopicsControllerGetTopicSubscriberResponse, z.ZodTypeDef, unknown> =
     z.object({
       Headers: z.record(z.array(z.string())),
-      Result: components.TopicSubscriberDto$inboundSchema,
+      Result: TopicSubscriberDto$inboundSchema,
     }).transform((v) => {
       return remap$(v, {
         "Headers": "headers",
@@ -125,7 +130,7 @@ export const TopicsControllerGetTopicSubscriberResponse$inboundSchema:
 /** @internal */
 export type TopicsControllerGetTopicSubscriberResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.TopicSubscriberDto$Outbound;
+  Result: TopicSubscriberDto$Outbound;
 };
 
 /** @internal */
@@ -136,7 +141,7 @@ export const TopicsControllerGetTopicSubscriberResponse$outboundSchema:
     TopicsControllerGetTopicSubscriberResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.TopicSubscriberDto$outboundSchema,
+    result: TopicSubscriberDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

@@ -11,7 +11,7 @@ import { NovuCore } from "../core.js";
 import { subscribersCredentialsDelete } from "../funcs/subscribersCredentialsDelete.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { SubscribersV1ControllerDeleteSubscriberCredentialsResponse } from "../models/operations/subscribersv1controllerdeletesubscribercredentials.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
@@ -24,7 +24,7 @@ export type SubscribersCredentialsDeleteMutationVariables = {
 };
 
 export type SubscribersCredentialsDeleteMutationData =
-  | operations.SubscribersV1ControllerDeleteSubscriberCredentialsResponse
+  | SubscribersV1ControllerDeleteSubscriberCredentialsResponse
   | undefined;
 
 /**

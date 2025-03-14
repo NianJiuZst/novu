@@ -10,8 +10,19 @@ import { subscribersPatch } from "../funcs/subscribersPatch.js";
 import { subscribersRetrieve } from "../funcs/subscribersRetrieve.js";
 import { subscribersSearch } from "../funcs/subscribersSearch.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { BulkSubscriberCreateDto } from "../models/components/bulksubscribercreatedto.js";
+import { CreateSubscriberRequestDto } from "../models/components/createsubscriberrequestdto.js";
+import { PatchSubscriberRequestDto } from "../models/components/patchsubscriberrequestdto.js";
+import { SubscribersControllerCreateSubscriberResponse } from "../models/operations/subscriberscontrollercreatesubscriber.js";
+import { SubscribersControllerGetSubscriberResponse } from "../models/operations/subscriberscontrollergetsubscriber.js";
+import { SubscribersControllerPatchSubscriberResponse } from "../models/operations/subscriberscontrollerpatchsubscriber.js";
+import { SubscribersControllerRemoveSubscriberResponse } from "../models/operations/subscriberscontrollerremovesubscriber.js";
+import {
+  SubscribersControllerSearchSubscribersRequest,
+  SubscribersControllerSearchSubscribersResponse,
+} from "../models/operations/subscriberscontrollersearchsubscribers.js";
+import { SubscribersV1ControllerBulkCreateSubscribersResponse } from "../models/operations/subscribersv1controllerbulkcreatesubscribers.js";
+import { SubscribersV1ControllerListSubscribersResponse } from "../models/operations/subscribersv1controllerlistsubscribers.js";
 import { unwrapAsync } from "../types/fp.js";
 import { PageIterator, unwrapResultIterator } from "../types/operations.js";
 import { Authentication } from "./authentication.js";
@@ -56,9 +67,9 @@ export class Subscribers extends ClientSDK {
    * Search for subscribers
    */
   async search(
-    request: operations.SubscribersControllerSearchSubscribersRequest,
+    request: SubscribersControllerSearchSubscribersRequest,
     options?: RequestOptions,
-  ): Promise<operations.SubscribersControllerSearchSubscribersResponse> {
+  ): Promise<SubscribersControllerSearchSubscribersResponse> {
     return unwrapAsync(subscribersSearch(
       this,
       request,
@@ -73,10 +84,10 @@ export class Subscribers extends ClientSDK {
    * Create subscriber with the given data
    */
   async create(
-    createSubscriberRequestDto: components.CreateSubscriberRequestDto,
+    createSubscriberRequestDto: CreateSubscriberRequestDto,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.SubscribersControllerCreateSubscriberResponse> {
+  ): Promise<SubscribersControllerCreateSubscriberResponse> {
     return unwrapAsync(subscribersCreate(
       this,
       createSubscriberRequestDto,
@@ -95,7 +106,7 @@ export class Subscribers extends ClientSDK {
     subscriberId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.SubscribersControllerGetSubscriberResponse> {
+  ): Promise<SubscribersControllerGetSubscriberResponse> {
     return unwrapAsync(subscribersRetrieve(
       this,
       subscriberId,
@@ -111,11 +122,11 @@ export class Subscribers extends ClientSDK {
    * Patch subscriber by your internal id used to identify the subscriber
    */
   async patch(
-    patchSubscriberRequestDto: components.PatchSubscriberRequestDto,
+    patchSubscriberRequestDto: PatchSubscriberRequestDto,
     subscriberId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.SubscribersControllerPatchSubscriberResponse> {
+  ): Promise<SubscribersControllerPatchSubscriberResponse> {
     return unwrapAsync(subscribersPatch(
       this,
       patchSubscriberRequestDto,
@@ -135,7 +146,7 @@ export class Subscribers extends ClientSDK {
     subscriberId: string,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.SubscribersControllerRemoveSubscriberResponse> {
+  ): Promise<SubscribersControllerRemoveSubscriberResponse> {
     return unwrapAsync(subscribersDelete(
       this,
       subscriberId,
@@ -157,7 +168,7 @@ export class Subscribers extends ClientSDK {
     options?: RequestOptions,
   ): Promise<
     PageIterator<
-      operations.SubscribersV1ControllerListSubscribersResponse,
+      SubscribersV1ControllerListSubscribersResponse,
       { page: number }
     >
   > {
@@ -179,10 +190,10 @@ export class Subscribers extends ClientSDK {
    *       The bulk API is limited to 500 subscribers per request.
    */
   async createBulk(
-    bulkSubscriberCreateDto: components.BulkSubscriberCreateDto,
+    bulkSubscriberCreateDto: BulkSubscriberCreateDto,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.SubscribersV1ControllerBulkCreateSubscribersResponse> {
+  ): Promise<SubscribersV1ControllerBulkCreateSubscribersResponse> {
     return unwrapAsync(subscribersCreateBulk(
       this,
       bulkSubscriberCreateDto,

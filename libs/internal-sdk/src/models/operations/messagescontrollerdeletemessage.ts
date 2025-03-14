@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  DeleteMessageResponseDto,
+  DeleteMessageResponseDto$inboundSchema,
+  DeleteMessageResponseDto$Outbound,
+  DeleteMessageResponseDto$outboundSchema,
+} from "../components/deletemessageresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type MessagesControllerDeleteMessageRequest = {
@@ -19,7 +24,7 @@ export type MessagesControllerDeleteMessageRequest = {
 
 export type MessagesControllerDeleteMessageResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.DeleteMessageResponseDto;
+  result: DeleteMessageResponseDto;
 };
 
 /** @internal */
@@ -100,7 +105,7 @@ export const MessagesControllerDeleteMessageResponse$inboundSchema: z.ZodType<
   unknown
 > = z.object({
   Headers: z.record(z.array(z.string())),
-  Result: components.DeleteMessageResponseDto$inboundSchema,
+  Result: DeleteMessageResponseDto$inboundSchema,
 }).transform((v) => {
   return remap$(v, {
     "Headers": "headers",
@@ -111,7 +116,7 @@ export const MessagesControllerDeleteMessageResponse$inboundSchema: z.ZodType<
 /** @internal */
 export type MessagesControllerDeleteMessageResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.DeleteMessageResponseDto$Outbound;
+  Result: DeleteMessageResponseDto$Outbound;
 };
 
 /** @internal */
@@ -121,7 +126,7 @@ export const MessagesControllerDeleteMessageResponse$outboundSchema: z.ZodType<
   MessagesControllerDeleteMessageResponse
 > = z.object({
   headers: z.record(z.array(z.string())),
-  result: components.DeleteMessageResponseDto$outboundSchema,
+  result: DeleteMessageResponseDto$outboundSchema,
 }).transform((v) => {
   return remap$(v, {
     headers: "Headers",

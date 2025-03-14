@@ -6,7 +6,18 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  MessageMarkAsRequestDto,
+  MessageMarkAsRequestDto$inboundSchema,
+  MessageMarkAsRequestDto$Outbound,
+  MessageMarkAsRequestDto$outboundSchema,
+} from "../components/messagemarkasrequestdto.js";
+import {
+  MessageResponseDto,
+  MessageResponseDto$inboundSchema,
+  MessageResponseDto$Outbound,
+  MessageResponseDto$outboundSchema,
+} from "../components/messageresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type SubscribersV1ControllerMarkMessagesAsRequest = {
@@ -15,12 +26,12 @@ export type SubscribersV1ControllerMarkMessagesAsRequest = {
    * A header for idempotency purposes
    */
   idempotencyKey?: string | undefined;
-  messageMarkAsRequestDto: components.MessageMarkAsRequestDto;
+  messageMarkAsRequestDto: MessageMarkAsRequestDto;
 };
 
 export type SubscribersV1ControllerMarkMessagesAsResponse = {
   headers: { [k: string]: Array<string> };
-  result: Array<components.MessageResponseDto>;
+  result: Array<MessageResponseDto>;
 };
 
 /** @internal */
@@ -32,7 +43,7 @@ export const SubscribersV1ControllerMarkMessagesAsRequest$inboundSchema:
   > = z.object({
     subscriberId: z.string(),
     "idempotency-key": z.string().optional(),
-    MessageMarkAsRequestDto: components.MessageMarkAsRequestDto$inboundSchema,
+    MessageMarkAsRequestDto: MessageMarkAsRequestDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "idempotency-key": "idempotencyKey",
@@ -44,7 +55,7 @@ export const SubscribersV1ControllerMarkMessagesAsRequest$inboundSchema:
 export type SubscribersV1ControllerMarkMessagesAsRequest$Outbound = {
   subscriberId: string;
   "idempotency-key"?: string | undefined;
-  MessageMarkAsRequestDto: components.MessageMarkAsRequestDto$Outbound;
+  MessageMarkAsRequestDto: MessageMarkAsRequestDto$Outbound;
 };
 
 /** @internal */
@@ -56,7 +67,7 @@ export const SubscribersV1ControllerMarkMessagesAsRequest$outboundSchema:
   > = z.object({
     subscriberId: z.string(),
     idempotencyKey: z.string().optional(),
-    messageMarkAsRequestDto: components.MessageMarkAsRequestDto$outboundSchema,
+    messageMarkAsRequestDto: MessageMarkAsRequestDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       idempotencyKey: "idempotency-key",
@@ -114,7 +125,7 @@ export const SubscribersV1ControllerMarkMessagesAsResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: z.array(components.MessageResponseDto$inboundSchema),
+    Result: z.array(MessageResponseDto$inboundSchema),
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -125,7 +136,7 @@ export const SubscribersV1ControllerMarkMessagesAsResponse$inboundSchema:
 /** @internal */
 export type SubscribersV1ControllerMarkMessagesAsResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: Array<components.MessageResponseDto$Outbound>;
+  Result: Array<MessageResponseDto$Outbound>;
 };
 
 /** @internal */
@@ -136,7 +147,7 @@ export const SubscribersV1ControllerMarkMessagesAsResponse$outboundSchema:
     SubscribersV1ControllerMarkMessagesAsResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: z.array(components.MessageResponseDto$outboundSchema),
+    result: z.array(MessageResponseDto$outboundSchema),
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

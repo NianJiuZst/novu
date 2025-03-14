@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  ActivityGraphStatesResponse,
+  ActivityGraphStatesResponse$inboundSchema,
+  ActivityGraphStatesResponse$Outbound,
+  ActivityGraphStatesResponse$outboundSchema,
+} from "../components/activitygraphstatesresponse.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type NotificationsControllerGetActivityGraphStatsRequest = {
@@ -19,7 +24,7 @@ export type NotificationsControllerGetActivityGraphStatsRequest = {
 
 export type NotificationsControllerGetActivityGraphStatsResponse = {
   headers: { [k: string]: Array<string> };
-  result: Array<components.ActivityGraphStatesResponse>;
+  result: Array<ActivityGraphStatesResponse>;
 };
 
 /** @internal */
@@ -109,7 +114,7 @@ export const NotificationsControllerGetActivityGraphStatsResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: z.array(components.ActivityGraphStatesResponse$inboundSchema),
+    Result: z.array(ActivityGraphStatesResponse$inboundSchema),
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -120,7 +125,7 @@ export const NotificationsControllerGetActivityGraphStatsResponse$inboundSchema:
 /** @internal */
 export type NotificationsControllerGetActivityGraphStatsResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: Array<components.ActivityGraphStatesResponse$Outbound>;
+  Result: Array<ActivityGraphStatesResponse$Outbound>;
 };
 
 /** @internal */
@@ -131,7 +136,7 @@ export const NotificationsControllerGetActivityGraphStatsResponse$outboundSchema
     NotificationsControllerGetActivityGraphStatsResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: z.array(components.ActivityGraphStatesResponse$outboundSchema),
+    result: z.array(ActivityGraphStatesResponse$outboundSchema),
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

@@ -5,7 +5,8 @@
 import { notificationsStatsGraph } from "../funcs/notificationsStatsGraph.js";
 import { notificationsStatsRetrieve } from "../funcs/notificationsStatsRetrieve.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import { NotificationsControllerGetActivityGraphStatsResponse } from "../models/operations/notificationscontrollergetactivitygraphstats.js";
+import { NotificationsControllerGetActivityStatsResponse } from "../models/operations/notificationscontrollergetactivitystats.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class Stats extends ClientSDK {
@@ -16,7 +17,7 @@ export class Stats extends ClientSDK {
     days?: number | undefined,
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.NotificationsControllerGetActivityGraphStatsResponse> {
+  ): Promise<NotificationsControllerGetActivityGraphStatsResponse> {
     return unwrapAsync(notificationsStatsGraph(
       this,
       days,
@@ -31,7 +32,7 @@ export class Stats extends ClientSDK {
   async retrieve(
     idempotencyKey?: string | undefined,
     options?: RequestOptions,
-  ): Promise<operations.NotificationsControllerGetActivityStatsResponse> {
+  ): Promise<NotificationsControllerGetActivityStatsResponse> {
     return unwrapAsync(notificationsStatsRetrieve(
       this,
       idempotencyKey,

@@ -6,7 +6,12 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  FeedResponseDto,
+  FeedResponseDto$inboundSchema,
+  FeedResponseDto$Outbound,
+  FeedResponseDto$outboundSchema,
+} from "../components/feedresponsedto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type SubscribersV1ControllerGetNotificationsFeedRequest = {
@@ -27,7 +32,7 @@ export type SubscribersV1ControllerGetNotificationsFeedRequest = {
 
 export type SubscribersV1ControllerGetNotificationsFeedResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.FeedResponseDto;
+  result: FeedResponseDto;
 };
 
 /** @internal */
@@ -132,7 +137,7 @@ export const SubscribersV1ControllerGetNotificationsFeedResponse$inboundSchema:
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.FeedResponseDto$inboundSchema,
+    Result: FeedResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -143,7 +148,7 @@ export const SubscribersV1ControllerGetNotificationsFeedResponse$inboundSchema:
 /** @internal */
 export type SubscribersV1ControllerGetNotificationsFeedResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.FeedResponseDto$Outbound;
+  Result: FeedResponseDto$Outbound;
 };
 
 /** @internal */
@@ -154,7 +159,7 @@ export const SubscribersV1ControllerGetNotificationsFeedResponse$outboundSchema:
     SubscribersV1ControllerGetNotificationsFeedResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.FeedResponseDto$outboundSchema,
+    result: FeedResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

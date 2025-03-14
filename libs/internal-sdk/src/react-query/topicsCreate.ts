@@ -11,20 +11,19 @@ import { NovuCore } from "../core.js";
 import { topicsCreate } from "../funcs/topicsCreate.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { CreateTopicRequestDto } from "../models/components/createtopicrequestdto.js";
+import { TopicsControllerCreateTopicResponse } from "../models/operations/topicscontrollercreatetopic.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type TopicsCreateMutationVariables = {
-  createTopicRequestDto: components.CreateTopicRequestDto;
+  createTopicRequestDto: CreateTopicRequestDto;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
-export type TopicsCreateMutationData =
-  operations.TopicsControllerCreateTopicResponse;
+export type TopicsCreateMutationData = TopicsControllerCreateTopicResponse;
 
 /**
  * Topic creation

@@ -11,21 +11,21 @@ import { NovuCore } from "../core.js";
 import { topicsSubscribersRemove } from "../funcs/topicsSubscribersRemove.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { RemoveSubscribersRequestDto } from "../models/components/removesubscribersrequestdto.js";
+import { TopicsControllerRemoveSubscribersResponse } from "../models/operations/topicscontrollerremovesubscribers.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type TopicsSubscribersRemoveMutationVariables = {
-  removeSubscribersRequestDto: components.RemoveSubscribersRequestDto;
+  removeSubscribersRequestDto: RemoveSubscribersRequestDto;
   topicKey: string;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
 export type TopicsSubscribersRemoveMutationData =
-  | operations.TopicsControllerRemoveSubscribersResponse
+  | TopicsControllerRemoveSubscribersResponse
   | undefined;
 
 /**

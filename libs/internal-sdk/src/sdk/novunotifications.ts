@@ -5,7 +5,14 @@
 import { subscribersNotificationsFeed } from "../funcs/subscribersNotificationsFeed.js";
 import { subscribersNotificationsUnseenCount } from "../funcs/subscribersNotificationsUnseenCount.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import {
+  SubscribersV1ControllerGetNotificationsFeedRequest,
+  SubscribersV1ControllerGetNotificationsFeedResponse,
+} from "../models/operations/subscribersv1controllergetnotificationsfeed.js";
+import {
+  SubscribersV1ControllerGetUnseenCountRequest,
+  SubscribersV1ControllerGetUnseenCountResponse,
+} from "../models/operations/subscribersv1controllergetunseencount.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export class NovuNotifications extends ClientSDK {
@@ -13,9 +20,9 @@ export class NovuNotifications extends ClientSDK {
    * Get in-app notification feed for a particular subscriber
    */
   async feed(
-    request: operations.SubscribersV1ControllerGetNotificationsFeedRequest,
+    request: SubscribersV1ControllerGetNotificationsFeedRequest,
     options?: RequestOptions,
-  ): Promise<operations.SubscribersV1ControllerGetNotificationsFeedResponse> {
+  ): Promise<SubscribersV1ControllerGetNotificationsFeedResponse> {
     return unwrapAsync(subscribersNotificationsFeed(
       this,
       request,
@@ -27,9 +34,9 @@ export class NovuNotifications extends ClientSDK {
    * Get the unseen in-app notifications count for subscribers feed
    */
   async unseenCount(
-    request: operations.SubscribersV1ControllerGetUnseenCountRequest,
+    request: SubscribersV1ControllerGetUnseenCountRequest,
     options?: RequestOptions,
-  ): Promise<operations.SubscribersV1ControllerGetUnseenCountResponse> {
+  ): Promise<SubscribersV1ControllerGetUnseenCountResponse> {
     return unwrapAsync(subscribersNotificationsUnseenCount(
       this,
       request,

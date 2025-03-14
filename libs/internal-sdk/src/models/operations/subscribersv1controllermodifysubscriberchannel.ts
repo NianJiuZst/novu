@@ -6,7 +6,18 @@ import * as z from "zod";
 import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
-import * as components from "../components/index.js";
+import {
+  SubscriberResponseDto,
+  SubscriberResponseDto$inboundSchema,
+  SubscriberResponseDto$Outbound,
+  SubscriberResponseDto$outboundSchema,
+} from "../components/subscriberresponsedto.js";
+import {
+  UpdateSubscriberChannelRequestDto,
+  UpdateSubscriberChannelRequestDto$inboundSchema,
+  UpdateSubscriberChannelRequestDto$Outbound,
+  UpdateSubscriberChannelRequestDto$outboundSchema,
+} from "../components/updatesubscriberchannelrequestdto.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type SubscribersV1ControllerModifySubscriberChannelRequest = {
@@ -15,13 +26,12 @@ export type SubscribersV1ControllerModifySubscriberChannelRequest = {
    * A header for idempotency purposes
    */
   idempotencyKey?: string | undefined;
-  updateSubscriberChannelRequestDto:
-    components.UpdateSubscriberChannelRequestDto;
+  updateSubscriberChannelRequestDto: UpdateSubscriberChannelRequestDto;
 };
 
 export type SubscribersV1ControllerModifySubscriberChannelResponse = {
   headers: { [k: string]: Array<string> };
-  result: components.SubscriberResponseDto;
+  result: SubscriberResponseDto;
 };
 
 /** @internal */
@@ -34,7 +44,7 @@ export const SubscribersV1ControllerModifySubscriberChannelRequest$inboundSchema
     subscriberId: z.string(),
     "idempotency-key": z.string().optional(),
     UpdateSubscriberChannelRequestDto:
-      components.UpdateSubscriberChannelRequestDto$inboundSchema,
+      UpdateSubscriberChannelRequestDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "idempotency-key": "idempotencyKey",
@@ -46,8 +56,7 @@ export const SubscribersV1ControllerModifySubscriberChannelRequest$inboundSchema
 export type SubscribersV1ControllerModifySubscriberChannelRequest$Outbound = {
   subscriberId: string;
   "idempotency-key"?: string | undefined;
-  UpdateSubscriberChannelRequestDto:
-    components.UpdateSubscriberChannelRequestDto$Outbound;
+  UpdateSubscriberChannelRequestDto: UpdateSubscriberChannelRequestDto$Outbound;
 };
 
 /** @internal */
@@ -60,7 +69,7 @@ export const SubscribersV1ControllerModifySubscriberChannelRequest$outboundSchem
     subscriberId: z.string(),
     idempotencyKey: z.string().optional(),
     updateSubscriberChannelRequestDto:
-      components.UpdateSubscriberChannelRequestDto$outboundSchema,
+      UpdateSubscriberChannelRequestDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       idempotencyKey: "idempotency-key",
@@ -119,7 +128,7 @@ export const SubscribersV1ControllerModifySubscriberChannelResponse$inboundSchem
     unknown
   > = z.object({
     Headers: z.record(z.array(z.string())),
-    Result: components.SubscriberResponseDto$inboundSchema,
+    Result: SubscriberResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {
       "Headers": "headers",
@@ -130,7 +139,7 @@ export const SubscribersV1ControllerModifySubscriberChannelResponse$inboundSchem
 /** @internal */
 export type SubscribersV1ControllerModifySubscriberChannelResponse$Outbound = {
   Headers: { [k: string]: Array<string> };
-  Result: components.SubscriberResponseDto$Outbound;
+  Result: SubscriberResponseDto$Outbound;
 };
 
 /** @internal */
@@ -141,7 +150,7 @@ export const SubscribersV1ControllerModifySubscriberChannelResponse$outboundSche
     SubscribersV1ControllerModifySubscriberChannelResponse
   > = z.object({
     headers: z.record(z.array(z.string())),
-    result: components.SubscriberResponseDto$outboundSchema,
+    result: SubscriberResponseDto$outboundSchema,
   }).transform((v) => {
     return remap$(v, {
       headers: "Headers",

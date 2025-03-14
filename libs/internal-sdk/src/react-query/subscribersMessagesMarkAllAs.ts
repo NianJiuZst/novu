@@ -11,21 +11,21 @@ import { NovuCore } from "../core.js";
 import { subscribersMessagesMarkAllAs } from "../funcs/subscribersMessagesMarkAllAs.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { MessageMarkAsRequestDto } from "../models/components/messagemarkasrequestdto.js";
+import { SubscribersV1ControllerMarkMessagesAsResponse } from "../models/operations/subscribersv1controllermarkmessagesas.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type SubscribersMessagesMarkAllAsMutationVariables = {
-  messageMarkAsRequestDto: components.MessageMarkAsRequestDto;
+  messageMarkAsRequestDto: MessageMarkAsRequestDto;
   subscriberId: string;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
 export type SubscribersMessagesMarkAllAsMutationData =
-  operations.SubscribersV1ControllerMarkMessagesAsResponse;
+  SubscribersV1ControllerMarkMessagesAsResponse;
 
 /**
  * Mark a subscriber messages as seen, read, unseen or unread

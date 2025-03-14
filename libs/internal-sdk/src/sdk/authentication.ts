@@ -8,7 +8,14 @@ import {
   subscribersAuthenticationChatAccessOauthCallBack,
 } from "../funcs/subscribersAuthenticationChatAccessOauthCallBack.js";
 import { ClientSDK, RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import {
+  SubscribersV1ControllerChatAccessOauthRequest,
+  SubscribersV1ControllerChatAccessOauthResponse,
+} from "../models/operations/subscribersv1controllerchataccessoauth.js";
+import {
+  SubscribersV1ControllerChatOauthCallbackRequest,
+  SubscribersV1ControllerChatOauthCallbackResponse,
+} from "../models/operations/subscribersv1controllerchatoauthcallback.js";
 import { unwrapAsync } from "../types/fp.js";
 
 export { ChatAccessOauthCallBackAcceptEnum } from "../funcs/subscribersAuthenticationChatAccessOauthCallBack.js";
@@ -18,11 +25,9 @@ export class Authentication extends ClientSDK {
    * Handle chat oauth
    */
   async chatAccessOauth(
-    request: operations.SubscribersV1ControllerChatAccessOauthRequest,
+    request: SubscribersV1ControllerChatAccessOauthRequest,
     options?: RequestOptions,
-  ): Promise<
-    operations.SubscribersV1ControllerChatAccessOauthResponse | undefined
-  > {
+  ): Promise<SubscribersV1ControllerChatAccessOauthResponse | undefined> {
     return unwrapAsync(subscribersAuthenticationChatAccessOauth(
       this,
       request,
@@ -34,11 +39,11 @@ export class Authentication extends ClientSDK {
    * Handle providers oauth redirect
    */
   async chatAccessOauthCallBack(
-    request: operations.SubscribersV1ControllerChatOauthCallbackRequest,
+    request: SubscribersV1ControllerChatOauthCallbackRequest,
     options?: RequestOptions & {
       acceptHeaderOverride?: ChatAccessOauthCallBackAcceptEnum;
     },
-  ): Promise<operations.SubscribersV1ControllerChatOauthCallbackResponse> {
+  ): Promise<SubscribersV1ControllerChatOauthCallbackResponse> {
     return unwrapAsync(subscribersAuthenticationChatAccessOauthCallBack(
       this,
       request,

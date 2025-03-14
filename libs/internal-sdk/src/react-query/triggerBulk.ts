@@ -11,20 +11,19 @@ import { NovuCore } from "../core.js";
 import { triggerBulk } from "../funcs/triggerBulk.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
-import * as operations from "../models/operations/index.js";
+import { BulkTriggerEventDto } from "../models/components/bulktriggereventdto.js";
+import { EventsControllerTriggerBulkResponse } from "../models/operations/eventscontrollertriggerbulk.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type TriggerBulkMutationVariables = {
-  bulkTriggerEventDto: components.BulkTriggerEventDto;
+  bulkTriggerEventDto: BulkTriggerEventDto;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
 
-export type TriggerBulkMutationData =
-  operations.EventsControllerTriggerBulkResponse;
+export type TriggerBulkMutationData = EventsControllerTriggerBulkResponse;
 
 /**
  * Bulk trigger event

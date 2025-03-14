@@ -16,7 +16,10 @@ import { NovuCore } from "../core.js";
 import { subscribersNotificationsUnseenCount } from "../funcs/subscribersNotificationsUnseenCount.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
+import {
+  SubscribersV1ControllerGetUnseenCountRequest,
+  SubscribersV1ControllerGetUnseenCountResponse,
+} from "../models/operations/subscribersv1controllergetunseencount.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
 import {
@@ -26,13 +29,13 @@ import {
 } from "./_types.js";
 
 export type SubscribersNotificationsUnseenCountQueryData =
-  operations.SubscribersV1ControllerGetUnseenCountResponse;
+  SubscribersV1ControllerGetUnseenCountResponse;
 
 /**
  * Get the unseen in-app notifications count for subscribers feed
  */
 export function useSubscribersNotificationsUnseenCount(
-  request: operations.SubscribersV1ControllerGetUnseenCountRequest,
+  request: SubscribersV1ControllerGetUnseenCountRequest,
   options?: QueryHookOptions<SubscribersNotificationsUnseenCountQueryData>,
 ): UseQueryResult<SubscribersNotificationsUnseenCountQueryData, Error> {
   const client = useNovuContext();
@@ -50,7 +53,7 @@ export function useSubscribersNotificationsUnseenCount(
  * Get the unseen in-app notifications count for subscribers feed
  */
 export function useSubscribersNotificationsUnseenCountSuspense(
-  request: operations.SubscribersV1ControllerGetUnseenCountRequest,
+  request: SubscribersV1ControllerGetUnseenCountRequest,
   options?: SuspenseQueryHookOptions<
     SubscribersNotificationsUnseenCountQueryData
   >,
@@ -69,7 +72,7 @@ export function useSubscribersNotificationsUnseenCountSuspense(
 export function prefetchSubscribersNotificationsUnseenCount(
   queryClient: QueryClient,
   client$: NovuCore,
-  request: operations.SubscribersV1ControllerGetUnseenCountRequest,
+  request: SubscribersV1ControllerGetUnseenCountRequest,
 ): Promise<void> {
   return queryClient.prefetchQuery({
     ...buildSubscribersNotificationsUnseenCountQuery(
@@ -131,7 +134,7 @@ export function invalidateAllSubscribersNotificationsUnseenCount(
 
 export function buildSubscribersNotificationsUnseenCountQuery(
   client$: NovuCore,
-  request: operations.SubscribersV1ControllerGetUnseenCountRequest,
+  request: SubscribersV1ControllerGetUnseenCountRequest,
   options?: RequestOptions,
 ): {
   queryKey: QueryKey;
