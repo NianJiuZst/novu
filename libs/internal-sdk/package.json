@@ -1,7 +1,8 @@
 {
   "name": "@novu/api",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "author": "Novu",
+  "description": "The open-source notification infrastructure for developers",
   "type": "module",
   "tshy": {
     "sourceDialects": [
@@ -10,16 +11,22 @@
     "exports": {
       ".": "./src/index.ts",
       "./package.json": "./package.json",
+      "./types": "./src/types/index.ts",
+      "./models/errors": "./src/models/errors/index.ts",
+      "./models/components": "./src/models/components/index.ts",
+      "./models/operations": "./src/models/operations/index.ts",
       "./*.js": "./src/*.ts",
-      "./*": "./src/*.ts",
-      "./**/*.js": "./src/**/*.ts",
-      "./**/*": "./src/**/*.ts"
+      "./*": "./src/*.ts"
     }
   },
   "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/novuhq/novu-ts.git"
+  },
   "scripts": {
     "lint": "eslint --cache --max-warnings=0 src",
-    "build": "tshy",
+    "build": "npm run && tshy",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
@@ -45,7 +52,7 @@
     "@types/react": "^18.3.12",
     "eslint": "^9.19.0",
     "globals": "^15.14.0",
-    "tshy": "^2.0.1",
+    "tshy": "^2.0.0",
     "typescript": "^5.4.5",
     "typescript-eslint": "^8.22.0",
     "zod": "^3.23.4"
@@ -63,6 +70,50 @@
       }
     },
     "./package.json": "./package.json",
+    "./types": {
+      "import": {
+        "@novu/api/source": "./src/types/index.ts",
+        "types": "./dist/esm/types/index.d.ts",
+        "default": "./dist/esm/types/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/types/index.d.ts",
+        "default": "./dist/commonjs/types/index.js"
+      }
+    },
+    "./models/errors": {
+      "import": {
+        "@novu/api/source": "./src/models/errors/index.ts",
+        "types": "./dist/esm/models/errors/index.d.ts",
+        "default": "./dist/esm/models/errors/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/models/errors/index.d.ts",
+        "default": "./dist/commonjs/models/errors/index.js"
+      }
+    },
+    "./models/components": {
+      "import": {
+        "@novu/api/source": "./src/models/components/index.ts",
+        "types": "./dist/esm/models/components/index.d.ts",
+        "default": "./dist/esm/models/components/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/models/components/index.d.ts",
+        "default": "./dist/commonjs/models/components/index.js"
+      }
+    },
+    "./models/operations": {
+      "import": {
+        "@novu/api/source": "./src/models/operations/index.ts",
+        "types": "./dist/esm/models/operations/index.d.ts",
+        "default": "./dist/esm/models/operations/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/models/operations/index.d.ts",
+        "default": "./dist/commonjs/models/operations/index.js"
+      }
+    },
     "./*.js": {
       "import": {
         "@novu/api/source": "./src/*.ts",
@@ -83,28 +134,6 @@
       "require": {
         "types": "./dist/commonjs/*.d.ts",
         "default": "./dist/commonjs/*.js"
-      }
-    },
-    "./**/*.js": {
-      "import": {
-        "@novu/api/source": "./src/**/*.ts",
-        "types": "./dist/esm/**/*.d.ts",
-        "default": "./dist/esm/**/*.js"
-      },
-      "require": {
-        "types": "./dist/commonjs/**/*.d.ts",
-        "default": "./dist/commonjs/**/*.js"
-      }
-    },
-    "./**/*": {
-      "import": {
-        "@novu/api/source": "./src/**/*.ts",
-        "types": "./dist/esm/**/*.d.ts",
-        "default": "./dist/esm/**/*.js"
-      },
-      "require": {
-        "types": "./dist/commonjs/**/*.d.ts",
-        "default": "./dist/commonjs/**/*.js"
       }
     }
   },
