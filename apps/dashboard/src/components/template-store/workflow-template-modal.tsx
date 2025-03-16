@@ -1,9 +1,18 @@
+import { Button } from '@/components/primitives/button';
+import { CompactButton } from '@/components/primitives/button-compact';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/primitives/dialog';
+import { Form, FormRoot } from '@/components/primitives/form/form';
+import TruncatedText from '@/components/truncated-text';
+import { CreateWorkflowForm } from '@/components/workflow-editor/create-workflow-form';
+import { workflowSchema } from '@/components/workflow-editor/schema';
+import { WorkflowCanvas } from '@/components/workflow-editor/workflow-canvas';
 import { useTelemetry } from '@/hooks/use-telemetry';
+import { buildRoute, ROUTES } from '@/utils/routes';
 import { TelemetryEvent } from '@/utils/telemetry';
 import { ComponentProps, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiArrowLeftSLine } from 'react-icons/ri';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { useCreateWorkflow } from '../../hooks/use-create-workflow';
 import { useGenerateWorkflowSuggestions } from '../../hooks/workflows/use-generate-workflow-suggestions';
@@ -15,15 +24,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '../primitives/breadcrumb';
-import { Button } from '../primitives/button';
-import { CompactButton } from '../primitives/button-compact';
-import { Form } from '../primitives/form/form';
 import { ToastIcon } from '../primitives/sonner';
 import { showToast } from '../primitives/sonner-helpers';
-import TruncatedText from '../truncated-text';
-import { CreateWorkflowForm } from '../workflow-editor/create-workflow-form';
-import { workflowSchema } from '../workflow-editor/schema';
-import { WorkflowCanvas } from '../workflow-editor/workflow-canvas';
 import { WorkflowGenerate } from './components/workflow-generate';
 import { WorkflowResults } from './components/workflow-results';
 import { getTemplates, IWorkflowSuggestion } from './templates';
@@ -36,18 +38,24 @@ export type WorkflowTemplateModalProps = ComponentProps<typeof DialogTrigger> & 
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   source?: string;
+  selectedTemplate?: IWorkflowSuggestion;
 };
 
 export function WorkflowTemplateModal(props: WorkflowTemplateModalProps) {
   const form = useForm();
   const track = useTelemetry();
   const [prompt, setPrompt] = useState('');
+  const navigate = useNavigate();
+  const { environmentSlug } = useParams();
+  const [searchParams] = useSearchParams();
   const { submit: createFromTemplate, isLoading: isCreating } = useCreateWorkflow();
   const [selectedCategory, setSelectedCategory] = useState<string>('popular');
   const [suggestions, setSuggestions] = useState<IWorkflowSuggestion[]>([]);
   const [mode, setMode] = useState<WorkflowMode>(WorkflowMode.TEMPLATES);
-  const [selectedTemplate, setSelectedTemplate] = useState<IWorkflowSuggestion | null>(null);
   const { mutateAsync: generateSuggestions, isPending: isGenerating } = useGenerateWorkflowSuggestions();
+  const [internalSelectedTemplate, setInternalSelectedTemplate] = useState<IWorkflowSuggestion | null>(null);
+
+  const selectedTemplate = props.selectedTemplate ?? internalSelectedTemplate;
 
   const filteredTemplates = WORKFLOW_TEMPLATES.filter((template) =>
     selectedCategory === 'popular' ? template.isPopular : template.category === selectedCategory
@@ -82,10 +90,16 @@ export function WorkflowTemplateModal(props: WorkflowTemplateModalProps) {
   useEffect(() => {
     if (props.open) {
       track(TelemetryEvent.TEMPLATE_MODAL_OPENED, {
-        source: props.source || 'unknown',
+        source: searchParams.get('source') || 'unknown',
       });
     }
-  }, [props.open, props.source, track]);
+  }, [props.open, track, searchParams]);
+
+  useEffect(() => {
+    if (props.selectedTemplate) {
+      setInternalSelectedTemplate(props.selectedTemplate);
+    }
+  }, [props.selectedTemplate]);
 
   const handleCreateWorkflow = async (values: z.infer<typeof workflowSchema>) => {
     if (!selectedTemplate) return;
@@ -119,11 +133,12 @@ export function WorkflowTemplateModal(props: WorkflowTemplateModalProps) {
   };
 
   const handleTemplateClick = (template: IWorkflowSuggestion) => {
-    setSelectedTemplate(template);
+    setInternalSelectedTemplate(template);
   };
 
   const handleBackClick = () => {
-    setSelectedTemplate(null);
+    navigate(buildRoute(ROUTES.TEMPLATE_STORE, { environmentSlug: environmentSlug || '' }));
+    setInternalSelectedTemplate(null);
     setMode(WorkflowMode.TEMPLATES);
   };
 
@@ -191,7 +206,7 @@ export function WorkflowTemplateModal(props: WorkflowTemplateModalProps) {
             {!selectedTemplate ? (
               <div className="p-3">
                 <Form {...form}>
-                  <form>
+                  <FormRoot>
                     <div className="mb-1.5 flex items-center justify-between">
                       <h2 className="text-label-md text-strong">{getHeaderText()}</h2>
                     </div>
@@ -209,7 +224,7 @@ export function WorkflowTemplateModal(props: WorkflowTemplateModalProps) {
                     ) : (
                       <WorkflowResults mode={mode} suggestions={templates} onClick={handleTemplateClick} />
                     )}
-                  </form>
+                  </FormRoot>
                 </Form>
               </div>
             ) : (

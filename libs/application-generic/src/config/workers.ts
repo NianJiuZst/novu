@@ -4,7 +4,6 @@ enum WorkerEnum {
   STANDARD = 'StandardWorker',
   WEB_SOCKET = 'WebSocketWorker',
   WORKFLOW = 'WorkflowWorker',
-  EXECUTION_LOG = 'ExecutionLogWorker',
 }
 
 interface IWorkerConfig {
@@ -12,17 +11,11 @@ interface IWorkerConfig {
   lockDuration: number;
 }
 
-type WorkersConfig = Record<WorkerEnum, IWorkerConfig>;
-
 const getDefaultConcurrency = () =>
-  process.env.WORKER_DEFAULT_CONCURRENCY
-    ? Number(process.env.WORKER_DEFAULT_CONCURRENCY)
-    : undefined;
+  process.env.WORKER_DEFAULT_CONCURRENCY ? Number(process.env.WORKER_DEFAULT_CONCURRENCY) : undefined;
 
 const getDefaultLockDuration = () =>
-  process.env.WORKER_DEFAULT_LOCK_DURATION
-    ? Number(process.env.WORKER_DEFAULT_LOCK_DURATION)
-    : undefined;
+  process.env.WORKER_DEFAULT_LOCK_DURATION ? Number(process.env.WORKER_DEFAULT_LOCK_DURATION) : undefined;
 
 const getWorkerConfig = (worker: WorkerEnum): IWorkerConfig => {
   const workersConfig = {
@@ -46,29 +39,17 @@ const getWorkerConfig = (worker: WorkerEnum): IWorkerConfig => {
       concurrency: getDefaultConcurrency() ?? 200,
       lockDuration: getDefaultLockDuration() ?? 90000,
     },
-    [WorkerEnum.EXECUTION_LOG]: {
-      concurrency: getDefaultConcurrency() ?? 200,
-      lockDuration: getDefaultLockDuration() ?? 90000,
-    },
   };
 
   return workersConfig[worker];
 };
 
-export const getInboundParseMailWorkerOptions = () =>
-  getWorkerConfig(WorkerEnum.INBOUND_PARSE_MAIL);
+export const getInboundParseMailWorkerOptions = () => getWorkerConfig(WorkerEnum.INBOUND_PARSE_MAIL);
 
-export const getSubscriberProcessWorkerOptions = () =>
-  getWorkerConfig(WorkerEnum.SUBSCRIBER_PROCESS);
+export const getSubscriberProcessWorkerOptions = () => getWorkerConfig(WorkerEnum.SUBSCRIBER_PROCESS);
 
-export const getStandardWorkerOptions = () =>
-  getWorkerConfig(WorkerEnum.STANDARD);
+export const getStandardWorkerOptions = () => getWorkerConfig(WorkerEnum.STANDARD);
 
-export const getWebSocketWorkerOptions = () =>
-  getWorkerConfig(WorkerEnum.WEB_SOCKET);
+export const getWebSocketWorkerOptions = () => getWorkerConfig(WorkerEnum.WEB_SOCKET);
 
-export const getWorkflowWorkerOptions = () =>
-  getWorkerConfig(WorkerEnum.WORKFLOW);
-
-export const getExecutionLogWorkerOptions = () =>
-  getWorkerConfig(WorkerEnum.EXECUTION_LOG);
+export const getWorkflowWorkerOptions = () => getWorkerConfig(WorkerEnum.WORKFLOW);

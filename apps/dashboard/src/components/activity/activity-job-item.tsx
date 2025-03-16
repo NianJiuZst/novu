@@ -123,6 +123,7 @@ function getStatusMessage(job: IActivityJob): string | React.ReactNode {
           (job.digest as IDigestRegularMetadata)?.unit ?? ''
         }`;
       }
+
       if (job.status === JobStatusEnum.DELAYED) {
         return `Collecting Digest events for ${(job.digest as IDigestRegularMetadata)?.amount ?? 0} ${
           (job.digest as IDigestRegularMetadata)?.unit ?? ''
@@ -136,12 +137,15 @@ function getStatusMessage(job: IActivityJob): string | React.ReactNode {
       }
 
       if (job.status === JobStatusEnum.DELAYED) {
-        return (
-          'Waiting for ' +
-          (job.digest as IDelayRegularMetadata)?.amount +
-          ' ' +
-          (job.digest as IDelayRegularMetadata)?.unit
-        );
+        // TODO: Ensure that the API populates the delay unit and amount for all occasions
+        const { unit, amount } = (job.digest || {}) as IDelayRegularMetadata;
+        let msg = 'Waiting';
+
+        if (unit && amount) {
+          msg = `Waiting for ${amount} ${unit}`;
+        }
+
+        return msg;
       }
 
       return '';
@@ -179,18 +183,18 @@ function getJobIcon(type?: StepTypeEnum) {
   return <Icon className="h-3.5 w-3.5" />;
 }
 
-function getJobColor(status: JobStatusEnum) {
+function getJobClasses(status: JobStatusEnum) {
   switch (status) {
     case JobStatusEnum.COMPLETED:
-      return 'success';
+      return 'text-success';
     case JobStatusEnum.FAILED:
-      return 'destructive';
+      return 'text-destructive';
     case JobStatusEnum.DELAYED:
-      return 'warning';
+      return 'text-warning';
     case JobStatusEnum.MERGED:
-      return 'neutral-300';
+      return 'text-neutral-300';
     default:
-      return 'neutral-300';
+      return 'text-neutral-300';
   }
 }
 
@@ -201,7 +205,10 @@ function JobDetails({ job }: { job: IActivityJob }) {
         {job.executionDetails && job.executionDetails.length > 0 && (
           <div className="flex flex-col gap-2">
             {job.executionDetails.map((detail, index) => (
-              <ExecutionDetailItem key={index} detail={detail} />
+              <ExecutionDetailItem
+                key={index}
+                detail={{ ...detail, status: job.executionDetails[job.executionDetails.length - 1].status }}
+              />
             ))}
           </div>
         )}
@@ -239,7 +246,7 @@ function JobStatusIndicator({ status }: JobStatusIndicatorProps) {
   return (
     <div className="relative flex-shrink-0">
       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-[0px_1px_2px_0px_rgba(10,13,20,0.03)]">
-        <div className={`text-${getJobColor(status)} flex items-center justify-center`}>
+        <div className={`${getJobClasses(status)} flex items-center justify-center`}>
           <Icon className={cn('h-4 w-4', animationClass)} />
         </div>
       </div>

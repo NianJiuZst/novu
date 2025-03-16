@@ -30,6 +30,7 @@ const subscriberSchema = new Schema<SubscriberDBModel>(
     },
     lastOnlineAt: Schema.Types.Date,
     data: Schema.Types.Mixed,
+    timezone: Schema.Types.String,
   },
   schemaOptions
 );
@@ -192,6 +193,24 @@ subscriberSchema.index({
   _organizationId: 1,
   deleted: 1,
 });
+
+subscriberSchema.index({
+  _environmentId: 1,
+  _organizationId: 1,
+  updatedAt: 1,
+  _id: 1,
+});
+
+subscriberSchema.index({
+  _environmentId: 1,
+  _organizationId: 1,
+  _id: 1,
+});
+
+subscriberSchema.index(
+  { _environmentId: 1, subscriberId: 1 },
+  { name: 'unique_subscriber_per_environment', unique: true, partialFilterExpression: { deleted: false } }
+);
 
 subscriberSchema.plugin(mongooseDelete, { deletedAt: true, deletedBy: true, overrideMethods: 'all' });
 

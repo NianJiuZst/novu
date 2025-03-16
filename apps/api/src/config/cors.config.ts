@@ -1,4 +1,4 @@
-import { INestApplication, Logger } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { HttpRequestHeaderKeysEnum } from '@novu/application-generic';
 
 export const corsOptionsDelegate: Parameters<INestApplication['enableCors']>[0] = function (req: Request, callback) {
@@ -31,6 +31,10 @@ export const corsOptionsDelegate: Parameters<INestApplication['enableCors']>[0] 
     if (process.env.NODE_ENV === 'dev') {
       corsOptions.origin.push(origin(req));
     }
+    // Enable CORS for the docs
+    if (process.env.DOCS_BASE_URL) {
+      corsOptions.origin.push(process.env.DOCS_BASE_URL);
+    }
   }
 
   callback(null as unknown as Error, corsOptions);
@@ -53,7 +57,7 @@ function isBlueprintRoute(url: string): boolean {
 }
 
 function isSandboxEnvironment(): boolean {
-  return ['test', 'local'].includes(process.env.NODE_ENV);
+  return ['test', 'local'].includes(process.env.NODE_ENV || '');
 }
 
 function origin(req: Request): string {

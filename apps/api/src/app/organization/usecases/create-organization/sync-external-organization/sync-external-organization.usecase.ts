@@ -1,7 +1,7 @@
 /* eslint-disable global-require */
-import { BadRequestException, Injectable, Logger, Scope } from '@nestjs/common';
-import { OrganizationEntity, OrganizationRepository, UserRepository } from '@novu/dal';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { AnalyticsService } from '@novu/application-generic';
+import { OrganizationEntity, OrganizationRepository, UserRepository } from '@novu/dal';
 
 import { ModuleRef } from '@nestjs/core';
 import { CreateEnvironmentCommand } from '../../../../environments-v1/usecases/create-environment/create-environment.command';
@@ -9,9 +9,9 @@ import { CreateEnvironment } from '../../../../environments-v1/usecases/create-e
 import { GetOrganizationCommand } from '../../get-organization/get-organization.command';
 import { GetOrganization } from '../../get-organization/get-organization.usecase';
 
-import { ApiException } from '../../../../shared/exceptions/api.exception';
-import { CreateNovuIntegrations } from '../../../../integrations/usecases/create-novu-integrations/create-novu-integrations.usecase';
 import { CreateNovuIntegrationsCommand } from '../../../../integrations/usecases/create-novu-integrations/create-novu-integrations.command';
+import { CreateNovuIntegrations } from '../../../../integrations/usecases/create-novu-integrations/create-novu-integrations.usecase';
+import { ApiException } from '../../../../shared/exceptions/api.exception';
 import { SyncExternalOrganizationCommand } from './sync-external-organization.command';
 
 // TODO: eventually move to @novu/ee-auth
@@ -49,6 +49,7 @@ export class SyncExternalOrganization {
         userId: user._id,
         name: 'Development',
         organizationId: organization._id,
+        system: true,
       })
     );
 
@@ -66,6 +67,7 @@ export class SyncExternalOrganization {
         name: 'Production',
         organizationId: organization._id,
         parentEnvironmentId: devEnv._id,
+        system: true,
       })
     );
 
@@ -91,13 +93,13 @@ export class SyncExternalOrganization {
     );
 
     if (organizationAfterChanges !== null) {
-      await this.startFreeTrial(user._id, organizationAfterChanges._id);
+      await this.startFreeTrial(user.email, organizationAfterChanges._id);
     }
 
     return organizationAfterChanges as OrganizationEntity;
   }
 
-  private async startFreeTrial(userId: string, organizationId: string) {
+  private async startFreeTrial(billingEmail: string, organizationId: string) {
     try {
       if (process.env.NOVU_ENTERPRISE === 'true' || process.env.CI_EE_TEST === 'true') {
         if (!require('@novu/ee-billing')?.StartReverseFreeTrial) {
@@ -107,8 +109,8 @@ export class SyncExternalOrganization {
           strict: false,
         });
         await usecase.execute({
-          userId,
           organizationId,
+          billingEmail,
         });
       }
     } catch (e) {

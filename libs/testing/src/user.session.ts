@@ -15,6 +15,7 @@ import {
 import {
   ChangeEntity,
   ChangeRepository,
+  CommunityOrganizationRepository,
   EnvironmentEntity,
   FeedRepository,
   LayoutRepository,
@@ -37,14 +38,16 @@ import { EEUserService } from './ee/ee.user.service';
 import { EEOrganizationService } from './ee/ee.organization.service';
 import { TEST_USER_PASSWORD } from './constants';
 import { ClerkJwtPayload } from './ee/types';
+import { CLERK_ORGANIZATION_1, CLERK_USER_1 } from './ee/clerk-mock-data';
 
 type UserSessionOptions = {
   noOrganization?: boolean;
   noEnvironment?: boolean;
+  noWidgetSession?: boolean;
   showOnBoardingTour?: boolean;
   ee?: {
-    userId: 'clerk_user_1' | 'clerk_user_2';
-    orgId: 'clerk_org_1';
+    userId: string;
+    orgId: string;
   };
 };
 
@@ -92,9 +95,8 @@ export class UserSession {
     this.jobsService = new JobsService();
   }
 
-  async initialize(options?: UserSessionOptions) {
+  async initialize(options: UserSessionOptions = {}) {
     if (isClerkEnabled()) {
-      // The ids of pre-seeded Clerk resources (MongoDB: clerk_users, clerk_organizations, clerk_organization_memberships)
       await this.initializeEE(options);
     } else {
       await this.initializeCommunity(options);
@@ -137,32 +139,30 @@ export class UserSession {
       }
     }
 
-    if (!options.noOrganization && !options.noEnvironment) {
+    if (!options.noOrganization && !options.noEnvironment && !options.noWidgetSession) {
       const { token, profile } = await this.initializeWidgetSession();
       this.subscriberToken = token;
       this.subscriberProfile = profile;
     }
   }
 
-  private async initializeEE(options: UserSessionOptions = { ee: { userId: 'clerk_user_1', orgId: 'clerk_org_1' } }) {
+  private async initializeEE(options: UserSessionOptions) {
     const userService = new EEUserService();
 
-    // user is already in org
-    const userId = options.ee?.userId || 'clerk_user_1';
-    const orgId = options.ee?.orgId || 'clerk_org_1';
+    const externalUserId = options.ee?.userId || CLERK_USER_1.id;
+    const externalOrgId = options.ee?.orgId || CLERK_ORGANIZATION_1.id;
 
-    // already existing user in Clerk
-    const user = await userService.getUser(userId);
+    const user = await userService.getUser(externalUserId);
 
     if (!user._id) {
       // not linked in clerk
-      this.user = await userService.createUser(userId);
+      this.user = await userService.createUser(externalUserId);
     } else {
       this.user = user;
     }
 
     if (!options.noOrganization) {
-      await this.addOrganizationEE(orgId);
+      await this.addOrganizationEE(externalOrgId);
     }
 
     await this.fetchJwtEE();
@@ -179,7 +179,7 @@ export class UserSession {
       }
     }
 
-    if (!options.noOrganization && !options.noEnvironment) {
+    if (!options.noOrganization && !options.noEnvironment && !options.noWidgetSession) {
       const { token, profile } = await this.initializeWidgetSession();
       this.subscriberToken = token;
       this.subscriberProfile = profile;
@@ -222,10 +222,10 @@ export class UserSession {
   }
 
   async addOrganization() {
-    if (isClerkEnabled()) {
-      return await this.addOrganizationEE('clerk_org_1');
-    } else {
+    if (!isClerkEnabled()) {
       return await this.addOrganizationCommunity();
+    } else {
+      throw new Error('Not implemented');
     }
   }
 
@@ -424,13 +424,13 @@ export class UserSession {
     return feed;
   }
 
-  public async awaitRunningJobs(
+  public async waitForJobCompletion(
     templateId?: string | string[],
     delay?: boolean,
     unfinishedJobs = 0,
     organizationId = this.organization._id
   ) {
-    return await this.jobsService.awaitRunningJobs({
+    return this.jobsService.waitForJobCompletion({
       templateId,
       organizationId,
       delay,
@@ -438,8 +438,28 @@ export class UserSession {
     });
   }
 
+  public async runAllDelayedJobsImmediately() {
+    return this.jobsService.runAllDelayedJobsImmediately();
+  }
+
+  public async awaitAllJobs() {
+    return this.jobsService.awaitAllJobs();
+  }
+
+  public async waitForStorageImmediateJobCompletion() {
+    return this.jobsService.waitForStorageImmediateJobCompletion();
+  }
+
+  public async waitForQueueImmediateJobCompletion() {
+    return this.jobsService.waitForQueueImmediateJobCompletion();
+  }
+
   public async queueGet(jobTopicName: JobTopicNameEnum, getter: 'getDelayed') {
     return await this.jobsService.queueGet(jobTopicName, getter);
+  }
+
+  public async getQueueMetric() {
+    return await this.jobsService.getQueueMetric();
   }
 
   public async applyChanges(where: Partial<ChangeEntity> = {}) {
@@ -462,9 +482,9 @@ export class UserSession {
   }
 
   public async updateOrganizationServiceLevel(serviceLevel: ApiServiceLevelEnum) {
-    const organizationService = isClerkEnabled() ? new EEOrganizationService() : new OrganizationService();
+    const communityOrganizationRepository = new CommunityOrganizationRepository();
 
-    await organizationService.updateServiceLevel(this.organization._id, serviceLevel);
+    await communityOrganizationRepository.update({ _id: this.organization._id }, { apiServiceLevel: serviceLevel });
   }
 
   public async updateEnvironmentApiRateLimits(apiRateLimits: Partial<IApiRateLimitMaximum>) {

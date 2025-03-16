@@ -37,7 +37,7 @@ export const buttonVariants = tv({
     mode: {
       filled: {},
       outline: {
-        root: 'ring-1 ring-inset',
+        root: 'border',
       },
       lighter: {
         root: 'ring-1 ring-inset',
@@ -59,11 +59,11 @@ export const buttonVariants = tv({
         icon: '',
       },
       xs: {
-        root: 'h-8 gap-2.5 rounded-lg px-2 text-label-xs',
+        root: 'h-8 gap-2.5 rounded-lg px-1.5 text-label-xs',
         icon: 'size-4',
       },
       '2xs': {
-        root: 'h-7 gap-2.5 rounded-lg px-2 text-label-xs',
+        root: 'h-7 gap-2.5 rounded-lg px-1.5 text-label-xs',
         icon: 'size-4',
       },
     },
@@ -386,6 +386,7 @@ function ButtonIcon<T extends React.ElementType>({
 
   return <Component className={icon({ class: className })} {...rest} />;
 }
+
 ButtonIcon.displayName = BUTTON_ICON_NAME;
 
 export { Button, ButtonIcon, ButtonRoot };
