@@ -1,3 +1,20 @@
+# 3.0.0 (2025-03-17)
+
+### 🚀 Features
+
+- **js:** Inbox retheme ([#7759](https://github.com/novuhq/novu/pull/7759))
+
+### 🩹 Fixes
+
+- **api-service:** Remove redlock ([#7845](https://github.com/novuhq/novu/pull/7845))
+- **api-service:** fix idices not created in mongo-test ([#7857](https://github.com/novuhq/novu/pull/7857))
+
+### ❤️ Thank You
+
+- GalTidhar @tatarco
+- George Desipris @desiprisg
+
+
 ## 2.6.6 (2025-02-25)
 
 ### 🚀 Features

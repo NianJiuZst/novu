@@ -1,3 +1,31 @@
+# 3.0.0 (2025-03-17)
+
+### 🚀 Features
+
+- **dashboard:** custom html email block ([#7899](https://github.com/novuhq/novu/pull/7899))
+- **root:** refine-system-and-tier-limits-application ([#7855](https://github.com/novuhq/novu/pull/7855))
+- **api-service:** indicate subscription cancellation date ([#7834](https://github.com/novuhq/novu/pull/7834))
+- **api-service:** remove 'adminUser' checks ([#7820](https://github.com/novuhq/novu/pull/7820))
+- **js:** Inbox retheme ([#7759](https://github.com/novuhq/novu/pull/7759))
+
+### 🩹 Fixes
+
+- **api-service:** Remove redlock ([#7845](https://github.com/novuhq/novu/pull/7845))
+- **api-service:** fix idices not created in mongo-test ([#7857](https://github.com/novuhq/novu/pull/7857))
+- **js:** Fix deprecated JSDoc annotation ([#7873](https://github.com/novuhq/novu/pull/7873))
+- **shared:** Compute correctly the limits per plan ([#7801](https://github.com/novuhq/novu/pull/7801))
+- **api-service:** Nv 5454 visual bugs in tiers fix position switch of when clicking ([#7783](https://github.com/novuhq/novu/pull/7783))
+- **api-service:** bugs found in bug bash in regarding to 4 tiers ([#7775](https://github.com/novuhq/novu/pull/7775))
+
+### ❤️ Thank You
+
+- Adam Chmara @ChmaraX
+- GalTidhar @tatarco
+- George Desipris @desiprisg
+- George Djabarov @djabarovgeorge
+- Sokratis Vidros @SokratisVidros
+
+
 ## 2.6.6 (2025-02-25)
 
 ### 🚀 Features
