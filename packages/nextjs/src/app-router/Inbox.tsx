@@ -8,5 +8,3 @@ export function Inbox(props: InboxProps) {
 
   return <RInbox routerPush={router.push} {...props} />;
 }
-
-export { Bell, Preferences, Notifications, InboxContent, NovuProvider } from '@novu/react';
