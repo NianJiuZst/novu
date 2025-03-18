@@ -9,7 +9,7 @@ import { usePopover } from './PopoverRoot';
 export const popoverContentVariants = () =>
   cn(
     'nt-w-[400px] nt-h-[600px] nt-rounded-xl nt-bg-background',
-    'nt-shadow-popover nt-animate-in nt-slide-in-from-top-2 nt-fade-in nt-z-10 nt-cursor-default nt-flex nt-flex-col nt-overflow-hidden nt-border nt-border-border'
+    'nt-shadow-popover nt-animate-in nt-slide-in-from-top-2 nt-fade-in nt-z-[9999] nt-cursor-default nt-flex nt-flex-col nt-overflow-hidden nt-border nt-border-border'
   );
 
 const PopoverContentBody = (props: PopoverContentProps) => {
