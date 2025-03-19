@@ -88,6 +88,7 @@ export class EventsController {
         requestCategory: TriggerRequestCategoryEnum.SINGLE,
         bridgeUrl: body.bridgeUrl,
         controls: body.controls,
+        workflow: body.workflow,
       })
     );
 

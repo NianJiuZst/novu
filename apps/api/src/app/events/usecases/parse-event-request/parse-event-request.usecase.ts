@@ -65,15 +65,15 @@ export class ParseEventRequest {
 
   @InstrumentUsecase()
   public async execute(command: ParseEventRequestCommand) {
-    const transactionId = command.transactionId || uuidv4();
-
     const { environment, statelessWorkflowAllowed } = await this.isStatelessWorkflowAllowed(
       command.environmentId,
-      command.bridgeUrl
+      command.bridgeUrl,
+      command.workflow
     );
 
     if (environment && statelessWorkflowAllowed) {
-      const discoveredWorkflow = await this.queryDiscoverWorkflow(command);
+      const transactionId = generateTransactionId(command);
+      const discoveredWorkflow = command.workflow ?? (await this.queryDiscoverWorkflow(command));
 
       if (!discoveredWorkflow) {
         throw new UnprocessableEntityException('workflow_not_found');
@@ -171,6 +171,7 @@ export class ParseEventRequest {
     // eslint-disable-next-line no-param-reassign
     command.payload = merge({}, defaultPayload, command.payload);
 
+    const transactionId = command.transactionId || uuidv4();
     const result = await this.dispatchEventToWorkflowQueue(command, transactionId);
 
     return result;
@@ -206,6 +207,7 @@ export class ParseEventRequest {
       ...commandArgs,
       actor: command.actor,
       transactionId,
+      ...(discoveredWorkflow ? { identifier: discoveredWorkflow.workflowId } : {}),
       bridgeWorkflow: discoveredWorkflow ?? undefined,
     };
 
@@ -224,9 +226,10 @@ export class ParseEventRequest {
 
   private async isStatelessWorkflowAllowed(
     environmentId: string,
-    bridgeUrl: string | undefined
+    bridgeUrl: string | undefined,
+    workflow: Record<string, unknown> | undefined
   ): Promise<{ environment: EnvironmentEntity | null; statelessWorkflowAllowed: boolean }> {
-    if (!bridgeUrl) {
+    if (!bridgeUrl && !workflow) {
       return { environment: null, statelessWorkflowAllowed: false };
     }
 
@@ -337,4 +340,20 @@ export class ParseEventRequest {
 
     return null;
   }
+}
+
+function generateTransactionId(command: ParseEventRequestCommand) {
+  if (command.transactionId) {
+    return command.transactionId;
+  }
+
+  const triggerSource = command.payload.__source ? `t_s=${command.payload.__source}` : '';
+  let workflowSource = '';
+  if (command.workflow) {
+    workflowSource = `w_s=snapshot`;
+  } else if (command.bridgeUrl) {
+    workflowSource = `w_s=bridge`;
+  }
+
+  return [triggerSource, workflowSource, uuidv4()].filter(Boolean).join(':');
 }

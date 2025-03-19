@@ -1,12 +1,15 @@
 import { IsDefined, IsObject, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiExtraModels, ApiHideProperty, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+
 import {
   TriggerRecipientsPayload,
   TriggerRecipientsTypeEnum,
   TriggerRecipientSubscriber,
   TriggerTenantContext,
 } from '@novu/shared';
+import { DiscoverWorkflowOutput } from '@novu/framework/internal';
+
 import { CreateSubscriberRequestDto } from '../../subscribers/dtos';
 import { UpdateTenantRequestDto } from '../../tenant/dtos';
 import { SdkApiProperty } from '../../shared/framework/swagger/sdk.decorators';
@@ -81,6 +84,13 @@ export class TriggerEventRequestDto {
   @IsString()
   @IsOptional()
   bridgeUrl?: string;
+
+  @ApiProperty({
+    description: 'The workflow you wish to send.',
+  })
+  @IsObject()
+  @IsOptional()
+  workflow?: DiscoverWorkflowOutput;
 
   @ApiPropertyOptional({
     description: 'This could be used to override provider specific configurations',

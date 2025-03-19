@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import { v4 as uuidv4 } from 'uuid';
-import { devCommand, DevCommandOptions } from './commands';
+import { devCommand, DevCommandOptions, onboardCommand } from './commands';
 import { sync } from './commands/sync';
 import { AnalyticService, ConfigService } from './services';
 import { IInitCommandOptions, init } from './commands/init';
@@ -97,6 +97,43 @@ program
   .option('-a, --api-url <url>', 'The Novu Cloud API URL', 'https://api.novu.co')
   .action(async (options: IInitCommandOptions) => {
     return await init(options, anonymousId);
+  });
+
+program
+  .command('onboard')
+  .description(
+    `Send an onboarding notification to a subscriber's inbox
+    
+  Basic usage:
+  (e.g., npx novu@latest onboard --api-key YOUR_API_KEY --subscriber-id YOUR_SUBSCRIBER_ID)
+    
+  Using with EU region:
+  (e.g., npx novu@latest onboard --api-key YOUR_API_KEY --subscriber-id YOUR_SUBSCRIBER_ID --api-url https://eu.api.novu.co)`
+  )
+  .usage('--api-key <api-key> --subscriber-id <subscriber-id> [--api-url <url>]')
+  .requiredOption('-k, --api-key <api-key>', 'Your Novu API Key. Obtainable at https://dashboard.novu.co/api-keys')
+  .requiredOption(
+    '-s, --subscriber-id <subscriber-id>',
+    'The ID of the subscriber who will receive the onboarding notification'
+  )
+  .option('-a, --api-url <url>', 'The Novu Cloud API URL', NOVU_API_URL || 'https://api.novu.co')
+  .action(async (options) => {
+    analytics.track({
+      identity: {
+        anonymousId,
+      },
+      data: {},
+      event: 'Run Onboard Command',
+    });
+
+    await onboardCommand(
+      {
+        apiKey: options.apiKey,
+        subscriberId: options.subscriberId,
+        apiUrl: options.apiUrl,
+      },
+      anonymousId
+    );
   });
 
 program.parse(process.argv);

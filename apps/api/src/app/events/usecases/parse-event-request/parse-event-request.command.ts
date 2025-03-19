@@ -1,4 +1,4 @@
-import { IsDefined, IsEnum, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
+import { IsDefined, IsEnum, IsObject, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
 import {
   AddressingTypeEnum,
   StatelessControls,
@@ -7,6 +7,7 @@ import {
   TriggerRequestCategoryEnum,
   TriggerTenantContext,
 } from '@novu/shared';
+import { DiscoverWorkflowOutput } from '@novu/framework/internal';
 
 import { EnvironmentWithUserCommand } from '../../../shared/commands/project.command';
 
@@ -42,6 +43,11 @@ export class ParseEventRequestBaseCommand extends EnvironmentWithUserCommand {
   @IsString()
   @IsOptional()
   bridgeUrl?: string;
+
+  @IsObject()
+  @IsOptional()
+  workflow?: DiscoverWorkflowOutput;
+
   /**
    * A mapping of step IDs to their corresponding data.
    * Built for stateless triggering by the local studio, those values will not be persisted outside the job scope
