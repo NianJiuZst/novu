@@ -2,7 +2,7 @@ import { Flex, Grid, Group, Input, LoadingOverlay, Stack, UnstyledButton, useMan
 import { Dropzone } from '@mantine/dropzone';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import styled from '@emotion/styled';
 import { useOutletContext } from 'react-router-dom';
@@ -19,55 +19,24 @@ const mimeTypes = {
   'image/png': 'png',
 };
 
-export const BrandingForm = () => {
-  const [imagePath, setImagePath] = useState<string | undefined>(undefined);
+export function BrandingForm() {
   const { currentOrganization: organization } = useOutletContext<{
     currentOrganization: IOrganizationEntity | undefined;
   }>();
-
-  const theme = useMantineTheme();
-
   const { mutateAsync: getSignedUrlAction } = useMutation<
     { signedUrl: string; path: string; additionalHeaders: object },
     IResponseError,
-    { extension: string; operation: 'read' | 'write'; imagePath?: string }
+    string
   >(getSignedUrl);
-
-  const getLogoUrl = useCallback(
-    async (logo: string | undefined) => {
-      if (!logo) {
-        return '';
-      } else if (logo.includes('https')) {
-        return logo;
-      }
-
-      try {
-        const logoParts = logo.split('.');
-
-        const { signedUrl: signedUrlToRead } = await getSignedUrlAction({
-          extension: logoParts[logoParts.length - 1],
-          operation: 'read',
-          imagePath: logo,
-        });
-
-        return signedUrlToRead;
-      } catch (e) {
-        console.error('Error getting logo URL:', e);
-
-        return '';
-      }
-    },
-    [getSignedUrlAction]
-  );
-
   const { setValue, handleSubmit, control } = useForm({
     defaultValues: {
       fontFamily: organization?.branding?.fontFamily || 'inherit',
       color: organization?.branding?.color || '#f47373',
-      image: '',
+      image: organization?.branding?.logo || '',
       file: '',
     },
   });
+  const theme = useMantineTheme();
 
   const { mutateAsync: updateBrandingSettingsMutation, isLoading: isUpdateBrandingLoading } = useMutation<
     { logo: string; path: string },
@@ -77,17 +46,13 @@ export const BrandingForm = () => {
 
   useEffect(() => {
     if (organization) {
-      getLogoUrl(organization?.branding?.logo).then((url) => {
-        setValue('image', url);
-
-        return url;
-      });
+      organization?.branding?.logo ? setValue('image', organization.branding.logo) : setValue('image', '');
       organization?.branding?.color ? setValue('color', organization?.branding?.color) : setValue('color', '#f47373');
       organization?.branding?.fontFamily
         ? setValue('fontFamily', organization?.branding?.fontFamily)
         : setValue('fontFamily', 'inherit');
     }
-  }, [organization, setValue, getLogoUrl]);
+  }, [organization, setValue]);
 
   function removeFile() {
     setValue('file', '');
@@ -98,21 +63,13 @@ export const BrandingForm = () => {
     const file = files[0];
     if (!file) return;
 
-    const {
-      signedUrl: signedUrlToUpload,
-      additionalHeaders,
-      path: imagePathToUpload,
-    } = await getSignedUrlAction({
-      extension: mimeTypes[file.type],
-      operation: 'write',
-    });
-
+    const { signedUrl, path, additionalHeaders } = await getSignedUrlAction(mimeTypes[file.type]);
     const contentTypeHeaders = {
       'Content-Type': file.type,
     };
 
     const mergedHeaders = Object.assign({}, contentTypeHeaders, additionalHeaders || {});
-    await axios.put(signedUrlToUpload, file, {
+    await axios.put(signedUrl, file, {
       headers: mergedHeaders,
       transformRequest: [
         (data, headers) => {
@@ -126,14 +83,7 @@ export const BrandingForm = () => {
       ],
     });
 
-    const { signedUrl: signedUrlToRead, path: imagePathToRead } = await getSignedUrlAction({
-      extension: mimeTypes[file.type],
-      operation: 'read',
-      imagePath: imagePathToUpload,
-    });
-
-    setValue('image', signedUrlToRead);
-    setImagePath(imagePathToRead);
+    setValue('image', path);
   }
 
   const dropzoneRef = useRef<() => void>(null);
@@ -141,7 +91,7 @@ export const BrandingForm = () => {
   async function saveBrandsForm({ color, fontFamily, image }) {
     const brandData = {
       color,
-      logo: imagePath,
+      logo: image || null,
       fontFamily,
     };
 
@@ -290,7 +240,7 @@ export const BrandingForm = () => {
       </form>
     </Stack>
   );
-};
+}
 
 const DropzoneButton: any = styled(UnstyledButton)`
   color: ${colors.B70};

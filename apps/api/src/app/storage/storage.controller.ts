@@ -5,7 +5,7 @@ import { GetSignedUrlCommand } from './usecases/get-signed-url/get-signed-url.co
 import { UserSession } from '../shared/framework/user.decorator';
 import { UserAuthGuard } from '../auth/framework/user.auth.guard';
 import { ApiExcludeController, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { GetSignedUrlResponseDto } from './dtos/get-signed-url-response.dto';
+import { UploadUrlResponse } from './dtos/upload-url-response.dto';
 import { ExternalApiAccessible } from '../auth/framework/external-api.decorator';
 import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
 
@@ -18,26 +18,19 @@ import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.de
 export class StorageController {
   constructor(private getSignedUrlUsecase: GetSignedUrl) {}
 
-  @Get('/signed-url')
+  @Get('/upload-url')
   @ApiOperation({
-    summary: 'Get signed url for uploading or reading a file',
+    summary: 'Get upload url',
   })
-  @ApiResponse(GetSignedUrlResponseDto)
+  @ApiResponse(UploadUrlResponse)
   @ExternalApiAccessible()
-  async signedUrl(
-    @UserSession() user: IJwtPayload,
-    @Query('operation') operation: 'read' | 'write',
-    @Query('extension') extension?: string,
-    @Query('imagePath') imagePath?: string
-  ): Promise<GetSignedUrlResponseDto> {
+  async signedUrl(@UserSession() user: IJwtPayload, @Query('extension') extension: string): Promise<UploadUrlResponse> {
     return await this.getSignedUrlUsecase.execute(
       GetSignedUrlCommand.create({
         environmentId: user.environmentId,
         organizationId: user.organizationId,
         userId: user._id,
         extension,
-        operation,
-        imagePath,
       })
     );
   }

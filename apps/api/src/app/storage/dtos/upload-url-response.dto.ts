@@ -1,10 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class GetSignedUrlResponseDto {
+export class UploadUrlResponse {
   @ApiProperty()
   signedUrl: string;
   @ApiProperty()
   path: string;
-  @ApiProperty()
-  additionalHeaders?: Record<string, string>;
 }
