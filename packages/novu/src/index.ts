@@ -100,7 +100,7 @@ program
   });
 
 program
-  .command('onboard')
+  .command('inbox')
   .description(
     `Send an onboarding notification to a subscriber's inbox
     
