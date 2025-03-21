@@ -33,7 +33,7 @@ export const BypassSanitizationSwitch = () => {
       <FormLabel className="text-foreground-600 text-xs">Bypass sanitization</FormLabel>
       <HelpTooltipIndicator
         size="4"
-        text="Bypassing HTML sanitization may expose your app to XSS attacks from untrusted input. Enable this option only if you are sure that the notification input is safe."
+        text="Disabling content sanitization may expose your app to security risks such as XSS attacks. Only use with trusted input."
       />
     </div>
   );
