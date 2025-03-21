@@ -1,5 +1,11 @@
 import { DalService } from '@novu/dal';
-import { AnalyticsService, CacheInMemoryProviderService, CacheService, FeatureFlagsService } from '../services';
+import {
+  AnalyticsService,
+  CacheInMemoryProviderService,
+  CacheService,
+  DistributedLockService,
+  FeatureFlagsService,
+} from '../services';
 
 export const featureFlagsService = {
   provide: FeatureFlagsService,
@@ -45,6 +51,19 @@ export const analyticsService = {
   provide: AnalyticsService,
   useFactory: async () => {
     const service = new AnalyticsService(process.env.SEGMENT_TOKEN);
+    await service.initialize();
+
+    return service;
+  },
+};
+
+export const distributedLockService = {
+  provide: DistributedLockService,
+  useFactory: async (): Promise<DistributedLockService> => {
+    const factoryCacheInMemoryProviderService = cacheInMemoryProviderService.useFactory();
+
+    const service = new DistributedLockService(factoryCacheInMemoryProviderService);
+
     await service.initialize();
 
     return service;

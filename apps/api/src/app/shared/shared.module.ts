@@ -2,9 +2,6 @@
 import { Module } from '@nestjs/common';
 import {
   ChangeRepository,
-  CommunityMemberRepository,
-  CommunityOrganizationRepository,
-  CommunityUserRepository,
   ControlValuesRepository,
   DalService,
   EnvironmentRepository,
@@ -27,6 +24,9 @@ import {
   TopicSubscribersRepository,
   UserRepository,
   WorkflowOverrideRepository,
+  CommunityUserRepository,
+  CommunityMemberRepository,
+  CommunityOrganizationRepository,
 } from '@novu/dal';
 import {
   analyticsService,
@@ -36,6 +36,7 @@ import {
   CreateExecutionDetails,
   createNestLoggingModuleOptions,
   DalServiceHealthIndicator,
+  distributedLockService,
   ExecuteBridgeRequest,
   featureFlagsService,
   GetDecryptedSecretKey,
@@ -116,6 +117,7 @@ const PROVIDERS = [
   ComputeJobWaitDurationService,
   dalService,
   DalServiceHealthIndicator,
+  distributedLockService,
   featureFlagsService,
   InvalidateCacheService,
   storageService,

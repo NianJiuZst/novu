@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { SubscriberEntity, SubscriberRepository } from '@novu/dal';
 
-import { buildSubscriberKey, InvalidateCacheService } from '../../services';
-import { ApiException, subscriberNeedUpdate } from '../../utils';
+import { buildSubscriberKey, CachedEntity, InvalidateCacheService } from '../../services/cache';
+import { subscriberNeedUpdate } from '../../utils/subscriber';
 
 import { UpdateSubscriberCommand } from './update-subscriber.command';
+import { ApiException } from '../../utils/exceptions';
 import { OAuthHandlerEnum, UpdateSubscriberChannel, UpdateSubscriberChannelCommand } from '../subscribers';
-import { CachedResponse } from '../../services/cache/interceptors/cached-return.interceptor';
 
 @Injectable()
 export class UpdateSubscriber {
@@ -122,7 +122,7 @@ export class UpdateSubscriber {
     }
   }
 
-  @CachedResponse({
+  @CachedEntity({
     builder: (command: { subscriberId: string; _environmentId: string }) =>
       buildSubscriberKey({
         _environmentId: command._environmentId,
