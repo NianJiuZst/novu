@@ -2,8 +2,8 @@ import { IsDefined, IsOptional, IsString } from 'class-validator';
 
 export class SubscriberSessionRequestDto {
   @IsString()
-  @IsDefined()
-  readonly applicationIdentifier: string;
+  @IsOptional()
+  readonly applicationIdentifier?: string;
 
   @IsString()
   @IsDefined()

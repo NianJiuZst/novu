@@ -52,6 +52,42 @@ export class CommunityAuthService implements IAuthService {
     private switchOrganizationUsecase: SwitchOrganization
   ) {}
 
+  // todo remove this as this will not be supported in community edition
+  public async getSandboxUser(applicationIdentifier?: string): Promise<UserSessionData> {
+    // eslint-disable-next-line no-console
+    console.log('applicationIdentifier ', applicationIdentifier);
+    if (!applicationIdentifier) {
+      throw new UnauthorizedException('Sandbox entry not found');
+    }
+
+    const environment = await this.environmentRepository.findEnvironmentByIdentifier(applicationIdentifier);
+
+    if (!environment) {
+      throw new UnauthorizedException('Sandbox entry not found');
+    }
+
+    const user = await this.userRepository.findByEmail('system-sandbox@novu.co');
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // eslint-disable-next-line no-console
+    console.log('66666666');
+
+    return {
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName || undefined,
+      email: user.email,
+      profilePicture: user.profilePicture || undefined,
+      roles: [MemberRoleEnum.ADMIN],
+      organizationId: environment?._organizationId || '',
+      environmentId: environment?._id || '',
+      exp: 0,
+      scheme: ApiAuthSchemeEnum.SANDBOX,
+    };
+  }
+
   public async authenticate(
     authProvider: AuthProviderEnum,
     accessToken: string,
@@ -169,6 +205,8 @@ export class CommunityAuthService implements IAuthService {
 
   @Instrument()
   public async getUserByApiKey(apiKey: string): Promise<UserSessionData> {
+    // eslint-disable-next-line no-console
+    console.log('getUserByApiKey apiKey ', apiKey);
     const { environment, user, error } = await this.getApiKeyUser({
       apiKey,
     });
@@ -262,6 +300,8 @@ export class CommunityAuthService implements IAuthService {
 
   @Instrument()
   public async validateUser(payload: UserSessionData): Promise<UserEntity> {
+    // eslint-disable-next-line no-console
+    console.log('validateUser payload ', payload);
     const userPromise = this.getUser({ _id: payload._id });
 
     const isMemberPromise = payload.organizationId
@@ -333,6 +373,9 @@ export class CommunityAuthService implements IAuthService {
       hash: hashedApiKey,
     });
 
+    // eslint-disable-next-line no-console
+    console.log('1111111111');
+
     if (!environment) {
       // Failed to find the environment for the provided API key.
       return { error: 'API Key not found' };
@@ -340,6 +383,8 @@ export class CommunityAuthService implements IAuthService {
 
     const key = environment.apiKeys.find((i) => i.hash === hashedApiKey);
 
+    // eslint-disable-next-line no-console
+    console.log('1111111111');
     if (!key) {
       return { error: 'API Key not found' };
     }

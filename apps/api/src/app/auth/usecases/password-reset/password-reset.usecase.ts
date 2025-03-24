@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { hash } from 'bcrypt';
 import { isBefore, subDays } from 'date-fns';
 import { UserRepository } from '@novu/dal';
-import { InvalidateCacheService, buildUserKey } from '@novu/application-generic';
-import { AuthService } from '../../services/auth.service';
+import { InvalidateCacheService, buildUserKey, IAuthService } from '@novu/application-generic';
 import { PasswordResetCommand } from './password-reset.command';
 import { ApiException } from '../../../shared/exceptions/api.exception';
 
@@ -12,7 +11,7 @@ export class PasswordReset {
   constructor(
     private invalidateCache: InvalidateCacheService,
     private userRepository: UserRepository,
-    private authService: AuthService
+    @Inject('AUTH_SERVICE') private authService: IAuthService
   ) {}
 
   async execute(command: PasswordResetCommand): Promise<{ token: string }> {

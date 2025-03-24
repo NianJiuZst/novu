@@ -26,7 +26,7 @@ export class InboxService {
     subscriberId,
     subscriberHash,
   }: {
-    applicationIdentifier: string;
+    applicationIdentifier?: string;
     subscriberId: string;
     subscriberHash?: string;
   }): Promise<Session> {

@@ -4,6 +4,11 @@ import { getCommunityAuthModuleConfig, configure as configureCommunity } from '.
 import { getEEModuleConfig, configure as configureEE } from './ee.auth.module.config';
 
 function getModuleConfig(): ModuleMetadata {
+  // eslint-disable-next-line no-console
+  console.error('isClerkEnabled', isClerkEnabled());
+
+  // eslint-disable-next-line no-console
+  console.log('process.env.CLERK_ENABLED', process.env.CLERK_ENABLED);
   if (isClerkEnabled()) {
     return getEEModuleConfig();
   } else {

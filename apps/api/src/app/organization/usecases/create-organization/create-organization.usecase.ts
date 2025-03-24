@@ -13,9 +13,7 @@ import { CreateOrganizationCommand } from './create-organization.command';
 
 import { ApiException } from '../../../shared/exceptions/api.exception';
 
-@Injectable({
-  scope: Scope.REQUEST,
-})
+@Injectable()
 export class CreateOrganization {
   constructor(
     private readonly organizationRepository: OrganizationRepository,

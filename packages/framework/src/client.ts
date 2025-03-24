@@ -75,6 +75,10 @@ export class Client {
 
   constructor(options?: ClientOptions) {
     const builtOpts = this.buildOptions(options);
+    /*
+     * todo find a good and handler-polimorfic place to console log that we are in dev mode,
+     * suggest to sign in and get more benefits from Dashboard
+     */
     this.apiUrl = builtOpts.apiUrl;
     this.secretKey = builtOpts.secretKey;
     this.strictAuthentication = builtOpts.strictAuthentication;

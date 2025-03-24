@@ -61,6 +61,7 @@ export type Session = {
   totalUnreadCount: number;
   removeNovuBranding: boolean;
   isDevelopmentMode: boolean;
+  applicationIdentifier?: string;
 };
 
 export type MessageButton = {
@@ -174,7 +175,7 @@ export type Result<D = undefined, E = NovuError> = Promise<{
 }>;
 
 export type NovuOptions = {
-  applicationIdentifier: string;
+  applicationIdentifier?: string;
   subscriberId: string;
   subscriberHash?: string;
   /** @deprecated Use apiUrl instead  */

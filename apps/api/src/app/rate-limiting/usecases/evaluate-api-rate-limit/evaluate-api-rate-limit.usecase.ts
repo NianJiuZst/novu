@@ -36,7 +36,7 @@ export class EvaluateApiRateLimit {
     const burstLimit = this.getBurstLimit(maxTokensPerWindow, burstAllowance);
 
     const identifier = buildEvaluateApiRateLimitKey({
-      _environmentId: command.environmentId,
+      _environmentId: command.ip ?? command.environmentId,
       apiRateLimitCategory: command.apiRateLimitCategory,
     });
 

@@ -1,10 +1,9 @@
 import bcrypt from 'bcrypt';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { differenceInMinutes, parseISO } from 'date-fns';
 import { UserRepository, UserEntity, OrganizationRepository } from '@novu/dal';
-import { AnalyticsService, createHash } from '@novu/application-generic';
+import { AnalyticsService, createHash, IAuthService } from '@novu/application-generic';
 import { normalizeEmail } from '@novu/shared';
-import { AuthService } from '../../services/auth.service';
 import { LoginCommand } from './login.command';
 import { ApiException } from '../../../shared/exceptions/api.exception';
 
@@ -14,7 +13,7 @@ export class Login {
   private MAX_LOGIN_ATTEMPTS = 5;
   constructor(
     private userRepository: UserRepository,
-    private authService: AuthService,
+    @Inject('AUTH_SERVICE') private authService: IAuthService,
     private analyticsService: AnalyticsService,
     private organizationRepository: OrganizationRepository
   ) {}

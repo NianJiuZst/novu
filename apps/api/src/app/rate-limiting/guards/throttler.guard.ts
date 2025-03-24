@@ -27,7 +27,7 @@ import { ThrottlerCategory, ThrottlerCost } from './throttler.decorator';
 import { EvaluateApiRateLimit, EvaluateApiRateLimitCommand } from '../usecases/evaluate-api-rate-limit';
 
 export const THROTTLED_EXCEPTION_MESSAGE = 'API rate limit exceeded';
-export const ALLOWED_AUTH_SCHEMES = [ApiAuthSchemeEnum.API_KEY];
+export const ALLOWED_AUTH_SCHEMES = [ApiAuthSchemeEnum.API_KEY, ApiAuthSchemeEnum.SANDBOX];
 
 const defaultApiRateLimitCategory = ApiRateLimitCategoryEnum.GLOBAL;
 const defaultApiRateLimitCost = ApiRateLimitCostEnum.SINGLE;
@@ -59,8 +59,10 @@ export class ApiRateLimitInterceptor extends ThrottlerGuard implements NestInter
   }
 
   @Instrument()
-  canActivate(context: ExecutionContext): Promise<boolean> {
-    return super.canActivate(context);
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const canActivate = await super.canActivate(context);
+
+    return canActivate;
   }
 
   protected async shouldSkip(context: ExecutionContext): Promise<boolean> {
@@ -103,12 +105,14 @@ export class ApiRateLimitInterceptor extends ThrottlerGuard implements NestInter
 
     const handler = context.getHandler();
     const classRef = context.getClass();
+    const { organizationId, environmentId, _id, scheme } = this.getReqUser(context);
+    const isNoAuth = scheme === ApiAuthSchemeEnum.SANDBOX;
+
     const apiRateLimitCategory =
       this.reflector.getAllAndOverride(ThrottlerCategory, [handler, classRef]) || defaultApiRateLimitCategory;
-    const apiRateLimitCost =
-      this.reflector.getAllAndOverride(ThrottlerCost, [handler, classRef]) || defaultApiRateLimitCost;
-
-    const { organizationId, environmentId, _id } = this.getReqUser(context);
+    const apiRateLimitCost = isNoAuth
+      ? ApiRateLimitCostEnum.BULK
+      : this.reflector.getAllAndOverride(ThrottlerCost, [handler, classRef]) || defaultApiRateLimitCost;
 
     const { success, limit, remaining, reset, windowDuration, burstLimit, algorithm, apiServiceLevel } =
       await this.evaluateApiRateLimit.execute(
@@ -117,8 +121,23 @@ export class ApiRateLimitInterceptor extends ThrottlerGuard implements NestInter
           environmentId,
           apiRateLimitCategory,
           apiRateLimitCost,
+          ...(isNoAuth && { ip: req.ip }),
         })
       );
+
+    // eslint-disable-next-line no-console
+    console.log('handleRequest evaluateApiRateLimit 333333333 ', {
+      ips: req.ips,
+      ip: req.ip,
+      success,
+      limit,
+      remaining,
+      reset,
+      windowDuration,
+      burstLimit,
+      algorithm,
+      apiServiceLevel,
+    });
 
     const secondsToReset = Math.max(Math.ceil((reset - Date.now()) / 1e3), 0);
 
@@ -126,13 +145,17 @@ export class ApiRateLimitInterceptor extends ThrottlerGuard implements NestInter
      * The purpose of the dry run is to allow us to observe how
      * the rate limiting would behave without actually enforcing it.
      */
-    const isDryRun = await this.featureFlagService.getFlag({
-      environment: { _id: environmentId } as EnvironmentEntity,
-      organization: { _id: organizationId } as OrganizationEntity,
-      user: { _id } as UserEntity,
-      key: FeatureFlagsKeysEnum.IS_API_RATE_LIMITING_DRY_RUN_ENABLED,
-      defaultValue: false,
-    });
+    /*
+     * const isDryRun = await this.featureFlagService.getFlag({
+     *   environment: { _id: environmentId } as EnvironmentEntity,
+     *   organization: { _id: organizationId } as OrganizationEntity,
+     *   user: { _id } as UserEntity,
+     *   key: FeatureFlagsKeysEnum.IS_API_RATE_LIMITING_DRY_RUN_ENABLED,
+     *   defaultValue: false,
+     * });
+     */
+
+    const isDryRun = false;
 
     res.header(HttpResponseHeaderKeysEnum.RATELIMIT_REMAINING, remaining);
     res.header(HttpResponseHeaderKeysEnum.RATELIMIT_LIMIT, limit);
@@ -169,9 +192,18 @@ export class ApiRateLimitInterceptor extends ThrottlerGuard implements NestInter
     }
 
     if (success) {
+      // eslint-disable-next-line no-console
+      console.log('handleRequest success 333333333 ', success);
+
       return true;
     } else {
       res.header(HttpResponseHeaderKeysEnum.RETRY_AFTER, secondsToReset);
+      // eslint-disable-next-line no-console
+      console.log('handleRequest ThrottlerException 333333333 ', {
+        header: HttpResponseHeaderKeysEnum.RETRY_AFTER,
+        value: secondsToReset,
+      });
+
       throw new ThrottlerException(THROTTLED_EXCEPTION_MESSAGE);
     }
   }

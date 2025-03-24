@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { OrganizationEntity, UserRepository } from '@novu/dal';
 import { hash } from 'bcrypt';
 import { SignUpOriginEnum, normalizeEmail } from '@novu/shared';
-import { AnalyticsService, createHash } from '@novu/application-generic';
-import { AuthService } from '../../services/auth.service';
+import { AnalyticsService, createHash, IAuthService } from '@novu/application-generic';
 import { UserRegisterCommand } from './user-register.command';
 import { ApiException } from '../../../shared/exceptions/api.exception';
 import { CreateOrganization } from '../../../organization/usecases/create-organization/create-organization.usecase';
@@ -12,7 +11,7 @@ import { CreateOrganizationCommand } from '../../../organization/usecases/create
 @Injectable()
 export class UserRegister {
   constructor(
-    private authService: AuthService,
+    @Inject('AUTH_SERVICE') private authService: IAuthService,
     private userRepository: UserRepository,
     private createOrganizationUsecase: CreateOrganization,
     private analyticsService: AnalyticsService
@@ -22,16 +21,24 @@ export class UserRegister {
     if (process.env.DISABLE_USER_REGISTRATION === 'true') throw new ApiException('Account creation is disabled');
 
     const email = normalizeEmail(command.email);
+    // eslint-disable-next-line no-console
+    console.log('email 333333 ', email);
     const existingUser = await this.userRepository.findByEmail(email);
+    // eslint-disable-next-line no-console
+    console.log('existingUser 333333', existingUser);
     if (existingUser) throw new ApiException('User already exists');
 
     const passwordHash = await hash(command.password, 10);
+    // eslint-disable-next-line no-console
+    console.log('passwordHash 333333', passwordHash);
     const user = await this.userRepository.create({
       email,
       firstName: command.firstName.toLowerCase(),
       lastName: command.lastName?.toLowerCase(),
       password: passwordHash,
     });
+    // eslint-disable-next-line no-console
+    console.log('user 333333', user);
 
     if (process.env.INTERCOM_IDENTITY_VERIFICATION_SECRET_KEY) {
       const intercomSecretKey = process.env.INTERCOM_IDENTITY_VERIFICATION_SECRET_KEY as string;

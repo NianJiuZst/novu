@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import githubPassport from 'passport-github2';
 import { Metadata, StateStoreStoreCallback, StateStoreVerifyCallback } from 'passport-oauth2';
 import { AuthProviderEnum } from '@novu/shared';
-import { AuthService } from '../auth.service';
+import { IAuthService } from '@novu/application-generic';
 
 @Injectable()
 export class GitHubStrategy extends PassportStrategy(githubPassport.Strategy, 'github') {
-  constructor(private authService: AuthService) {
+  constructor(@Inject('AUTH_SERVICE') private authService: IAuthService) {
     super({
       clientID: process.env.GITHUB_OAUTH_CLIENT_ID,
       clientSecret: process.env.GITHUB_OAUTH_CLIENT_SECRET,

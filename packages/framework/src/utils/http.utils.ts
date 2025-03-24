@@ -7,12 +7,21 @@ export const initApiClient = (secretKey: string, apiUrl: string) => {
   }
 
   return {
-    post: async <T = unknown>(route: string, data: Record<string, unknown>): Promise<T> => {
+    post: async <T = unknown>(
+      route: string,
+      data: Record<string, unknown>,
+      headers?: Record<string, unknown>
+    ): Promise<T> => {
+      // eslint-disable-next-line no-console
+      console.log('headers 9999999999 ', headers);
+      const authentication = secretKey === 'Sandbox' ? secretKey : `ApiKey ${secretKey}`;
       const response = await fetch(`${apiUrl}/v1${route}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `ApiKey ${secretKey}`,
+          test: 'test',
+          Authorization: authentication,
+          ...(headers ? { ...headers } : {}),
         },
         body: JSON.stringify(data),
       });

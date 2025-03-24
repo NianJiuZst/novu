@@ -174,4 +174,14 @@ export const appearanceKeys = [
 
   // Text formatting
   'strong',
+
+  // Sandbox Widget
+  'sandboxWidget',
+  'sandboxWidgetContainer',
+  'sandboxWidgetTrigger',
+  'sandboxWidgetContent',
+  'sandboxWidgetTitle',
+  'sandboxWidgetBadge',
+  'sandboxWidgetText',
+  'sandboxWidgetCode',
 ] as const;

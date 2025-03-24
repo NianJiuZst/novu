@@ -1,5 +1,5 @@
 import { MiddlewareConsumer, ModuleMetadata, Provider, RequestMethod } from '@nestjs/common';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import passport from 'passport';
 import { AuthProviderEnum, PassportStrategyEnum } from '@novu/shared';
@@ -15,12 +15,13 @@ import { EnvironmentsModuleV1 } from '../environments-v1/environments-v1.module'
 import { JwtSubscriberStrategy } from './services/passport/subscriber-jwt.strategy';
 import { RootEnvironmentGuard } from './framework/root-environment-guard.service';
 import { ApiKeyStrategy } from './services/passport/apikey.strategy';
-import { AuthService } from './services/auth.service';
 import { RolesGuard } from './framework/roles.guard';
 import { CommunityAuthService } from './services/community.auth.service';
 import { CommunityUserAuthGuard } from './framework/community.user.auth.guard';
+import { SandboxStrategy } from './services/passport/sandbox.strategy';
 
-const AUTH_STRATEGIES: Provider[] = [JwtStrategy, ApiKeyStrategy, JwtSubscriberStrategy];
+// todo remove SandboxStrategy as it will not be used in community edition
+const AUTH_STRATEGIES: Provider[] = [JwtStrategy, ApiKeyStrategy, JwtSubscriberStrategy, SandboxStrategy];
 
 if (process.env.GITHUB_OAUTH_CLIENT_ID) {
   AUTH_STRATEGIES.push(GitHubStrategy);
@@ -39,7 +40,7 @@ export function getCommunityAuthModuleConfig(): ModuleMetadata {
     }),
   ];
 
-  const baseProviders = [...AUTH_STRATEGIES, AuthService, RolesGuard, RootEnvironmentGuard];
+  const baseProviders = [...AUTH_STRATEGIES, RolesGuard, RootEnvironmentGuard];
 
   // Wherever is the string token used, override it with the provider
   const injectableProviders = [
@@ -72,7 +73,6 @@ export function getCommunityAuthModuleConfig(): ModuleMetadata {
     exports: [
       RolesGuard,
       RootEnvironmentGuard,
-      AuthService,
       'AUTH_SERVICE',
       'USER_AUTH_GUARD',
       'USER_REPOSITORY',

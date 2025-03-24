@@ -1,4 +1,5 @@
 import { isClerkEnabled } from '@novu/shared';
+import { CommunityOrganizationRepository } from '@novu/dal';
 import { CreateOrganization } from './create-organization/create-organization.usecase';
 import { GetOrganization } from './get-organization/get-organization.usecase';
 import { AddMember } from './membership/add-member/add-member.usecase';

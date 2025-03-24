@@ -216,7 +216,13 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
         ...(triggerEvent.controls && { controls: triggerEvent.controls }),
       };
 
-      const result = await this.http.post('/events/trigger', requestPayload);
+      const headers = {
+        'x-application-identifier': triggerEvent.applicationIdentifier,
+      };
+
+      // eslint-disable-next-line no-console
+      console.log('headers 777777777', headers);
+      const result = await this.http.post('/events/trigger', requestPayload, headers);
 
       return this.createResponse(HttpStatusEnum.OK, result);
     };

@@ -1,5 +1,5 @@
 export type InitializeSessionArgs = {
-  applicationIdentifier: string;
+  applicationIdentifier?: string;
   subscriberId: string;
   subscriberHash?: string;
 };

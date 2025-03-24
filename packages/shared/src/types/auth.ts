@@ -14,7 +14,7 @@ export interface IJwtClaims {
   roles: string[];
   exp: number;
   iss?: string;
-  scheme: ApiAuthSchemeEnum.BEARER | ApiAuthSchemeEnum.API_KEY;
+  scheme: ApiAuthSchemeEnum.BEARER | ApiAuthSchemeEnum.API_KEY | ApiAuthSchemeEnum.SANDBOX;
 }
 
 export type UserSessionData = IJwtClaims & { environmentId: string };
@@ -22,12 +22,14 @@ export type UserSessionData = IJwtClaims & { environmentId: string };
 export enum ApiAuthSchemeEnum {
   BEARER = 'Bearer',
   API_KEY = 'ApiKey',
+  SANDBOX = 'Sandbox',
 }
 
 export enum PassportStrategyEnum {
   JWT = 'jwt',
   JWT_CLERK = 'jwt-clerk',
   HEADER_API_KEY = 'headerapikey',
+  SANDBOX = 'sandbox',
 }
 
 export type SentryUser = {

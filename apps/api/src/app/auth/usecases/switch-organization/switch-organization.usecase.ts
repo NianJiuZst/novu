@@ -1,7 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { MemberRepository, UserRepository } from '@novu/dal';
+import { IAuthService } from '@novu/application-generic';
 import { ApiException } from '../../../shared/exceptions/api.exception';
-import { AuthService } from '../../services/auth.service';
 import { SwitchOrganizationCommand } from './switch-organization.command';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class SwitchOrganization {
   constructor(
     private userRepository: UserRepository,
     private memberRepository: MemberRepository,
-    private authService: AuthService
+    @Inject('AUTH_SERVICE') private authService: IAuthService
   ) {}
 
   async execute(command: SwitchOrganizationCommand) {

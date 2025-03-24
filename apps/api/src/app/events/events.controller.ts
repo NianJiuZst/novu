@@ -35,6 +35,7 @@ import {
 import { ThrottlerCategory, ThrottlerCost } from '../rate-limiting/guards';
 import { UserAuthentication } from '../shared/framework/swagger/api.key.security';
 import { SdkGroupName, SdkMethodName, SdkUsageExample } from '../shared/framework/swagger/sdk.decorators';
+import { SandboxAccessible } from '../shared/framework/swagger/sandbox.security';
 
 @ThrottlerCategory(ApiRateLimitCategoryEnum.TRIGGER)
 @ResourceCategory(ResourceEnum.EVENTS)
@@ -55,6 +56,7 @@ export class EventsController {
 
   @ExternalApiAccessible()
   @UserAuthentication()
+  @SandboxAccessible()
   @Post('/trigger')
   @ApiResponse(TriggerEventResponseDto, 201)
   @ApiOperation({
@@ -72,6 +74,13 @@ export class EventsController {
     @UserSession() user: UserSessionData,
     @Body() body: TriggerEventRequestDto
   ): Promise<TriggerEventResponseDto> {
+    // eslint-disable-next-line no-console
+    console.log('body 333 ', { user, body });
+
+    /*
+     * get the IP as user identifier
+     * const { ip } = req;
+     */
     const result = await this.parseEventRequest.execute(
       ParseEventRequestMulticastCommand.create({
         userId: user._id,

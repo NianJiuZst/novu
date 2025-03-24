@@ -4,7 +4,6 @@ import { NotFoundException } from '@nestjs/common';
 import { EnvironmentRepository, IntegrationRepository } from '@novu/dal';
 import { AnalyticsService, CreateOrUpdateSubscriberUseCase, SelectIntegration } from '@novu/application-generic';
 import { ChannelTypeEnum, InAppProviderIdEnum } from '@novu/shared';
-import { AuthService } from '../../../auth/services/auth.service';
 import { Session } from './session.usecase';
 import { ApiException } from '../../../shared/exceptions/api.exception';
 import { SessionCommand } from './session.command';
@@ -13,6 +12,7 @@ import { AnalyticsEventsEnum } from '../../utils';
 // eslint-disable-next-line import/no-namespace
 import * as encryption from '../../utils/encryption';
 import { NotificationsCount } from '../notifications-count/notifications-count.usecase';
+import { CommunityAuthService } from '../../../auth/services/community.auth.service';
 
 const mockIntegration = {
   _id: '_id',
@@ -30,12 +30,11 @@ const mockIntegration = {
   deletedAt: '',
   deletedBy: '',
 };
-
 describe('Session', () => {
   let session: Session;
   let environmentRepository: sinon.SinonStubbedInstance<EnvironmentRepository>;
   let createSubscriber: sinon.SinonStubbedInstance<CreateOrUpdateSubscriberUseCase>;
-  let authService: sinon.SinonStubbedInstance<AuthService>;
+  let authService: sinon.SinonStubbedInstance<CommunityAuthService>;
   let selectIntegration: sinon.SinonStubbedInstance<SelectIntegration>;
   let analyticsService: sinon.SinonStubbedInstance<AnalyticsService>;
   let notificationsCount: sinon.SinonStubbedInstance<NotificationsCount>;
@@ -43,7 +42,7 @@ describe('Session', () => {
   beforeEach(() => {
     environmentRepository = sinon.createStubInstance(EnvironmentRepository);
     createSubscriber = sinon.createStubInstance(CreateOrUpdateSubscriberUseCase);
-    authService = sinon.createStubInstance(AuthService);
+    authService = sinon.createStubInstance(CommunityAuthService);
     selectIntegration = sinon.createStubInstance(SelectIntegration);
     analyticsService = sinon.createStubInstance(AnalyticsService);
     notificationsCount = sinon.createStubInstance(NotificationsCount);

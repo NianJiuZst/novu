@@ -1,9 +1,9 @@
-import { Injectable, Logger, NotFoundException, Scope } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException, Scope } from '@nestjs/common';
 
 import { MemberEntity, MemberRepository, OrganizationRepository, UserEntity, UserRepository } from '@novu/dal';
 import { MemberStatusEnum } from '@novu/shared';
 import { Novu } from '@novu/api';
-import { AuthService } from '../../../auth/services/auth.service';
+import { IAuthService } from '@novu/application-generic';
 import { ApiException } from '../../../shared/exceptions/api.exception';
 import { AcceptInviteCommand } from './accept-invite.command';
 import { capitalize } from '../../../shared/services/helper/helper.service';
@@ -18,7 +18,7 @@ export class AcceptInvite {
     private organizationRepository: OrganizationRepository,
     private memberRepository: MemberRepository,
     private userRepository: UserRepository,
-    private authService: AuthService
+    @Inject('AUTH_SERVICE') private authService: IAuthService
   ) {}
 
   async execute(command: AcceptInviteCommand): Promise<string> {

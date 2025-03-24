@@ -29,7 +29,7 @@ export type DefaultInboxProps = {
 };
 
 export type BaseProps = {
-  applicationIdentifier: string;
+  applicationIdentifier?: string;
   subscriberId: string;
   subscriberHash?: string;
   backendUrl?: string;

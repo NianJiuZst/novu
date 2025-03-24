@@ -3,5 +3,5 @@ export function resolveApiUrl(providedApiUrl?: string): string {
 }
 
 export function resolveSecretKey(providedSecretKey?: string): string {
-  return providedSecretKey || process.env.NOVU_SECRET_KEY || process.env.NOVU_API_KEY || '';
+  return providedSecretKey || process.env.NOVU_SECRET_KEY || process.env.NOVU_API_KEY || 'Sandbox';
 }

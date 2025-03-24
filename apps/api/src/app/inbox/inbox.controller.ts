@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { SubscriberEntity } from '@novu/dal';
+import { SubscriberEntity, User } from '@novu/dal';
 import { MessageActionStatusEnum, PreferenceLevelEnum } from '@novu/shared';
 
 import { SubscriberSessionRequestDto } from './dtos/subscriber-session-request.dto';
@@ -21,7 +21,7 @@ import { SubscriberSessionResponseDto } from './dtos/subscriber-session-response
 import { SessionCommand } from './usecases/session/session.command';
 import { Session } from './usecases/session/session.usecase';
 import { ApiCommonResponses } from '../shared/framework/response.decorator';
-import { SubscriberSession } from '../shared/framework/user.decorator';
+import { SubscriberSession, UserSession } from '../shared/framework/user.decorator';
 import { GetNotificationsRequestDto } from './dtos/get-notifications-request.dto';
 import { GetNotifications } from './usecases/get-notifications/get-notifications.usecase';
 import { GetNotificationsCommand } from './usecases/get-notifications/get-notifications.command';
@@ -46,6 +46,7 @@ import { UpdatePreferencesRequestDto } from './dtos/update-preferences-request.d
 import { UpdatePreferences } from './usecases/update-preferences/update-preferences.usecase';
 import { UpdatePreferencesCommand } from './usecases/update-preferences/update-preferences.command';
 import { GetPreferencesRequestDto } from './dtos/get-preferences-request.dto';
+import { SandboxAccessible } from '../shared/framework/swagger/sandbox.security';
 
 @ApiCommonResponses()
 @Controller('/inbox')

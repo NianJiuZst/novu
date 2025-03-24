@@ -59,6 +59,10 @@ export type EventTriggerParams<T_Payload = EventPayload> = {
    * Override secret key for the trigger
    */
   secretKey?: string;
+  /**
+   * Override application identifier for the trigger
+   */
+  applicationIdentifier?: string;
 } & ConditionalPartial<
   {
     /**

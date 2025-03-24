@@ -3,10 +3,12 @@ import { PlatformException, cacheService } from '@novu/application-generic';
 import { MiddlewareConsumer, ModuleMetadata } from '@nestjs/common';
 import { RootEnvironmentGuard } from './framework/root-environment-guard.service';
 import { ApiKeyStrategy } from './services/passport/apikey.strategy';
+import { SandboxStrategy } from './services/passport/sandbox.strategy';
 import { JwtSubscriberStrategy } from './services/passport/subscriber-jwt.strategy';
 import { OrganizationModule } from '../organization/organization.module';
-import { AuthService } from './services/auth.service';
 import { RolesGuard } from './framework/roles.guard';
+import { UserRegister } from './usecases/register/user-register.usecase';
+import { SandboxModule } from './sandbox/sandbox.module';
 
 function getEEAuthProviders() {
   const eeAuthPackage = require('@novu/ee-auth');
@@ -16,7 +18,7 @@ function getEEAuthProviders() {
 
 export function getEEModuleConfig(): ModuleMetadata {
   const eeAuthPackage = require('@novu/ee-auth');
-  const eeAuthModule = eeAuthPackage?.eEAuthModule;
+  const eeAuthModule = eeAuthPackage?.eeAuthModule;
 
   if (!eeAuthModule) {
     throw new PlatformException('ee-auth module is not loaded');
@@ -30,17 +32,17 @@ export function getEEModuleConfig(): ModuleMetadata {
       ...getEEAuthProviders(),
       // reused services
       ApiKeyStrategy,
+      SandboxStrategy,
       JwtSubscriberStrategy,
-      AuthService,
       cacheService,
       RolesGuard,
       RootEnvironmentGuard,
+      UserRegister,
     ],
     exports: [
       ...eeAuthModule.exports,
       RolesGuard,
       RootEnvironmentGuard,
-      AuthService,
       'USER_REPOSITORY',
       'MEMBER_REPOSITORY',
       'ORGANIZATION_REPOSITORY',

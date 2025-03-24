@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { EnvironmentRepository } from '@novu/dal';
 import { ChannelTypeEnum, InAppProviderIdEnum } from '@novu/shared';
 import {
@@ -7,11 +7,11 @@ import {
   CreateOrUpdateSubscriberCommand,
   CreateOrUpdateSubscriberUseCase,
   decryptApiKey,
+  IAuthService,
   LogDecorator,
   SelectIntegration,
   SelectIntegrationCommand,
 } from '@novu/application-generic';
-import { AuthService } from '../../../auth/services/auth.service';
 import { ApiException } from '../../../shared/exceptions/api.exception';
 import { InitializeSessionCommand } from './initialize-session.command';
 
@@ -22,7 +22,7 @@ export class InitializeSession {
   constructor(
     private environmentRepository: EnvironmentRepository,
     private createOrUpdateSubscriberUsecase: CreateOrUpdateSubscriberUseCase,
-    private authService: AuthService,
+    @Inject('AUTH_SERVICE') private authService: IAuthService,
     private selectIntegration: SelectIntegration,
     private analyticsService: AnalyticsService
   ) {}

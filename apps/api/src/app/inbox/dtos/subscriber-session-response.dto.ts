@@ -3,4 +3,5 @@ export class SubscriberSessionResponseDto {
   readonly totalUnreadCount: number;
   readonly removeNovuBranding: boolean;
   readonly isDevelopmentMode: boolean;
+  readonly applicationIdentifier?: string;
 }
