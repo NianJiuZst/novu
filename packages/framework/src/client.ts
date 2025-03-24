@@ -1,5 +1,4 @@
 import { Liquid } from 'liquidjs';
-import { digest } from './filters/digest';
 
 import { PostActionEnum } from './constants';
 import {
@@ -37,19 +36,13 @@ import type {
   Workflow,
 } from './types';
 import { WithPassthrough } from './types/provider.types';
-import {
-  EMOJI,
-  log,
-  resolveApiUrl,
-  resolveSecretKey,
-  sanitizeHtmlInObject,
-  stringifyDataStructureWithSingleQuotes,
-} from './utils';
+import { EMOJI, log, resolveApiUrl, resolveSecretKey, sanitizeHtmlInObject } from './utils';
 import { validateData } from './validators';
 
 import { mockSchema } from './jsonSchemaFaker';
 import { prettyPrintDiscovery } from './resources/workflow/pretty-print-discovery';
 import { deepMerge } from './utils/object.utils';
+import { createLiquidEngine } from './utils/liquid.utils';
 
 function isRuntimeInDevelopment() {
   return ['development', undefined].includes(process.env.NODE_ENV);
@@ -59,11 +52,7 @@ export class Client {
   private discoveredWorkflows = new Map<string, DiscoverWorkflowOutput>();
   private discoverWorkflowPromises = new Map<string, Promise<void>>();
 
-  private templateEngine = new Liquid({
-    outputEscape: (output) => {
-      return stringifyDataStructureWithSingleQuotes(output);
-    },
-  });
+  private templateEngine: Liquid;
 
   public secretKey: string;
 
@@ -78,11 +67,7 @@ export class Client {
     this.apiUrl = builtOpts.apiUrl;
     this.secretKey = builtOpts.secretKey;
     this.strictAuthentication = builtOpts.strictAuthentication;
-
-    this.templateEngine.registerFilter('json', (value, spaces) =>
-      stringifyDataStructureWithSingleQuotes(value, spaces)
-    );
-    this.templateEngine.registerFilter('digest', digest);
+    this.templateEngine = createLiquidEngine();
   }
 
   private buildOptions(providedOptions?: ClientOptions) {
