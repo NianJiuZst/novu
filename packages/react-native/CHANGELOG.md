@@ -1,3 +1,17 @@
+## 2.6.10 (2025-03-24)
+
+### 🧱 Updated Dependencies
+
+- Updated @novu/react to 3.0.1
+
+### ❤️ Thank You
+
+- Aaron Ritter @Aaron-Ritter
+- GalTidhar @tatarco
+- Pawan Jain
+- Sokratis Vidros @SokratisVidros
+
+
 ## 2.6.6 (2025-02-25)
 
 ### 🚀 Features
