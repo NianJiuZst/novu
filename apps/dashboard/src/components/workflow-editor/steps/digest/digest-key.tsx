@@ -4,7 +4,7 @@ import { useFormContext } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/primitives/form/form';
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 import { parseStepVariablesToLiquidVariables } from '@/utils/parseStepVariablesToLiquidVariables';
-import { ControlInput } from '../../../primitives/control-input';
+import { OneControlInput } from '../../../primitives/control-input/one-control-input';
 import { InputRoot, InputWrapper } from '../../../primitives/input';
 import { StaticVariablePill } from '../../../primitives/control-input/variable-plugin/static-variable-pill';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../../primitives/tooltip';
@@ -34,7 +34,7 @@ export const DigestKey = () => {
                   </TooltipTrigger>
                   <TooltipContent>this is a default key</TooltipContent>
                 </Tooltip>
-                <ControlInput
+                <OneControlInput
                   multiline={false}
                   indentWithTab={false}
                   placeholder="Add additional digest..."
