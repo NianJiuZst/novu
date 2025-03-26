@@ -13,7 +13,6 @@ interface SuggestionStrategy {
     to?: number;
     options: Completion[];
   } | null;
-  getSuggestions: (text: string, variables: LiquidVariable[]) => LiquidVariable[];
   applyCompletion: (view: EditorView, completion: Completion, from: number, to: number) => boolean;
 }
 
@@ -26,10 +25,6 @@ const liquidStrategy: SuggestionStrategy = {
 
     const { from, to, options: completionOptions } = options;
     return { from, to, options: [...completionOptions] };
-  },
-
-  getSuggestions: (text: string, variables: LiquidVariable[]) => {
-    return getMatchingVariables(text, variables);
   },
 
   applyCompletion: (view: EditorView, completion: Completion, from: number, to: number) => {
@@ -59,31 +54,48 @@ const liquidStrategy: SuggestionStrategy = {
 
 const freeTextStrategy: SuggestionStrategy = {
   matchBeforeRegex: /(.+)/,
+  // getOptions: (variables: LiquidVariable[], context: CompletionContext) => {
+  //   const options = completions(variables)(context);
+  //   if (!options) return null;
+
+  //   const { from, to, options: completionOptions } = options;
+  //   return { from, to, options: [...completionOptions] };
+  // },
   getOptions: (variables: LiquidVariable[], context: CompletionContext) => {
     const { state, pos } = context;
     const beforeCursor = state.sliceDoc(0, pos);
     const word = beforeCursor.match(/[^\s]*$/)?.[0] || '';
 
-    const suggestions = freeTextStrategy.getSuggestions(word, variables);
-    if (suggestions.length === 0) return null;
+    const matchingVariables = getMatchingVariables(word, variables);
+    if (matchingVariables.length === 0) return null;
 
     return {
       from: pos - word.length,
       to: pos,
-      options: suggestions.map((v) => createCompletionOption(v.label, 'variable')),
+      options: matchingVariables.map((v) => createCompletionOption(v.label, 'variable')),
     };
-  },
-  getSuggestions: (text: string, variables: LiquidVariable[]) => {
-    if (!text) return variables;
-    const searchLower = text.toLowerCase();
-    return variables.filter((v) => v.label.toLowerCase().includes(searchLower));
   },
   applyCompletion: (view: EditorView, completion: Completion, from: number, to: number) => {
     const selectedValue = completion.label;
+    const content = view.state.doc.toString();
+    const beforeCursor = content.slice(0, from);
+    const afterCursor = content.slice(to);
+
+    // Ensure proper {{ }} wrapping
+    const needsOpening = !beforeCursor.endsWith('{{');
+    const needsClosing = !afterCursor.startsWith('}}');
+
+    const wrappedValue = `${needsOpening ? '{{' : ''}${selectedValue}${needsClosing ? '}}' : ''}`;
+
+    // Calculate the final cursor position
+    // Add 2 if we need to account for closing brackets
+    const finalCursorPos = from + wrappedValue.length + (needsClosing ? 0 : 2);
+
     view.dispatch({
-      changes: { from, to, insert: selectedValue },
-      selection: { anchor: from + selectedValue.length },
+      changes: { from, to, insert: wrappedValue },
+      selection: { anchor: finalCursorPos },
     });
+
     return true;
   },
 };
