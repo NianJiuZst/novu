@@ -15,7 +15,8 @@ export class VariablePluginView {
     view: EditorView,
     private viewRef: MutableRefObject<EditorView | null>,
     private lastCompletionRef: MutableRefObject<{ from: number; to: number } | null>,
-    private onSelect?: (value: string, from: number, to: number) => void
+    private onSelect?: (value: string, from: number, to: number) => void,
+    private allowDelete: boolean = false
   ) {
     this.decorations = this.createDecorations(view);
     viewRef.current = view;
@@ -56,7 +57,15 @@ export class VariablePluginView {
       if (name) {
         decorations.push(
           Decoration.replace({
-            widget: new VariablePillWidget(name, fullLiquidExpression, start, end, filters?.length > 0, this.onSelect),
+            widget: new VariablePillWidget(
+              name,
+              fullLiquidExpression,
+              start,
+              end,
+              filters?.length > 0,
+              this.onSelect,
+              this.allowDelete
+            ),
             inclusive: false,
             side: -1,
           }).range(start, end)

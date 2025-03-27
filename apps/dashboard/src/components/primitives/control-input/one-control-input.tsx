@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { autocompletion } from '@codemirror/autocomplete';
 import { EditorView } from '@uiw/react-codemirror';
 import { cn } from '@/utils/ui';
@@ -11,6 +11,7 @@ import { useVariables } from './hooks/use-variables';
 import { createVariableExtension } from './variable-plugin';
 import { variablePillTheme } from './variable-plugin/variable-theme';
 import { EditVariablePopover } from '@/components/variable/edit-variable-popover';
+import { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 
 const variants = cva('relative w-full', {
   variants: {
@@ -56,7 +57,23 @@ export function OneControlInput({
   indentWithTab,
 }: OneControlInputProps) {
   const viewRef = useRef<EditorView | null>(null);
+  const editorRef = useRef<ReactCodeMirrorRef>(null);
   const lastCompletionRef = useRef<CompletionRange | null>(null);
+
+  // Register the editor view globally so delete handlers can find it
+  useEffect(() => {
+    if (editorRef.current && editorRef.current.view) {
+      viewRef.current = editorRef.current.view;
+      (window as any).__CM_EDITOR_VIEW = editorRef.current.view;
+    }
+
+    return () => {
+      // Cleanup on unmount
+      if ((window as any).__CM_EDITOR_VIEW === viewRef.current) {
+        (window as any).__CM_EDITOR_VIEW = null;
+      }
+    };
+  }, [editorRef.current]);
 
   const { selectedVariable, setSelectedVariable, handleVariableSelect, handleVariableUpdate } = useVariables(
     viewRef,
@@ -82,6 +99,7 @@ export function OneControlInput({
         viewRef,
         lastCompletionRef,
         onSelect: handleVariableSelect,
+        allowDelete: true,
       }),
     [handleVariableSelect]
   );
@@ -109,6 +127,7 @@ export function OneControlInput({
   return (
     <div className={variants({ size, className })}>
       <Editor
+        ref={editorRef}
         fontFamily="inherit"
         multiline={multiline}
         indentWithTab={indentWithTab}
