@@ -7,11 +7,9 @@ import { HTMLAttributes, useCallback, useMemo, useState } from 'react';
 import { HTMLCodeBlockView } from '@/components/workflow-editor/steps/email/extensions/html-view';
 import { MailyVariablesList } from '@/components/workflow-editor/steps/email/extensions/maily-variables-list';
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
-import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { parseStepVariables } from '@/utils/parseStepVariablesToLiquidVariables';
 import { cn } from '@/utils/ui';
-import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { ForExtension } from './extensions/for';
 import { VariableView } from './extensions/variable-view';
 import { createDefaultEditorBlocks, DEFAULT_EDITOR_CONFIG } from './maily-config';
@@ -51,7 +49,6 @@ export const Maily = ({ value, onChange, className, ...rest }: MailyProps) => {
     [mailyVariables.namespaces]
   );
   const [_, setEditor] = useState<any>();
-  const isCustomEmailBlocksEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_CUSTOM_EMAIL_BLOCKS_ENABLED);
   const track = useTelemetry();
 
   const calculateVariables = useCallback(
@@ -186,7 +183,7 @@ export const Maily = ({ value, onChange, className, ...rest }: MailyProps) => {
         <Editor
           key="repeat-block-enabled"
           config={DEFAULT_EDITOR_CONFIG}
-          blocks={createDefaultEditorBlocks({ track, isCustomEmailBlocksEnabled })}
+          blocks={createDefaultEditorBlocks({ track })}
           // @ts-expect-error - TODO: Polish Maily typing when extending Maily core and update accordingly
           extensions={extensions}
           contentJson={value ? JSON.parse(value) : undefined}
