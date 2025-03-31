@@ -25,6 +25,7 @@ export const SignInPage = () => {
 
   return (
     <div className="flex min-h-screen w-full flex-col md:max-w-[1100px] md:flex-row md:gap-36">
+      THIS IS THE CONTENT CHANGE
       <PageMeta title="Sign in" />
       <div className="w-full md:w-auto">
         <AuthSideBanner />
