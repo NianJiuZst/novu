@@ -103,7 +103,7 @@ describe('CreateUsageRecords #novu-v2', () => {
     );
 
     const expectedStartDate = new Date('2021-01-14T00:00:00Z');
-    const expectedEndDate = new Date('2021-01-15T00:00:00Z');
+    const expectedEndDate = new Date('2021-01-14T23:59:59Z');
 
     expect(getPlatformNotificationUsageStub.lastCall.args).to.deep.equal([
       {
