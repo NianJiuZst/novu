@@ -47,6 +47,8 @@ import { CreateSubscriberPage } from './pages/create-subscriber';
 initializeSentry();
 overrideZodErrorMap();
 
+console.log('TESTING PREVIEW DEPLOYMENT');
+
 const router = createBrowserRouter([
   {
     element: <RootRoute />,
