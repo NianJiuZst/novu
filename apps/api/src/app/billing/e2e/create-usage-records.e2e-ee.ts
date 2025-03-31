@@ -179,7 +179,7 @@ describe('CreateUsageRecords #novu-v2', () => {
     });
     const useCase = createUseCase();
 
-    const expectedTimestamp = new Date('2021-01-14T00:00:00Z').getTime() / 1000;
+    const expectedTimestamp = new Date('2021-01-15T00:00:00Z').getTime() / 1000;
 
     await useCase.execute(
       CreateUsageRecordsCommand.create({
