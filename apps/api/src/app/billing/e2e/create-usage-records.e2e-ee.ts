@@ -264,7 +264,7 @@ describe('CreateUsageRecords #novu-v2', () => {
       })
     );
 
-    const expectedUsageTimestamp = new Date('2021-01-14T00:00:00Z').getTime() / 1000;
+    const expectedUsageTimestamp = new Date('2021-01-15T00:00:00Z').getTime() / 1000;
 
     expect(createUsageRecordStub.getCalls().map(({ args }) => args)).to.deep.equal([
       [
