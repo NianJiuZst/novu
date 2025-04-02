@@ -52,7 +52,7 @@ export class ExecuteBridgeJob {
   async execute(command: ExecuteBridgeJobCommand): Promise<ExecuteOutput | null> {
     const stepId = command.job.step.stepId || command.job.step.uuid;
 
-    const isStateful = !command.job.step.bridgeUrl;
+    const isStateful = !command.job.step.bridgeUrl && !command.job.transactionId.includes('w_s=snapshot');
 
     let workflow: NotificationTemplateEntity | null = null;
     if (isStateful) {
@@ -101,11 +101,12 @@ export class ExecuteBridgeJob {
       ? await this.findControlValues(command, workflow as NotificationTemplateEntity)
       : command.job.step.controlVariables;
 
-    const bridgeEvent: Omit<Event, 'workflowId' | 'stepId' | 'action'> = {
+    const bridgeEvent = {
       payload: payload ?? {},
       controls: variablesStores ?? {},
       state,
       subscriber: subscriber ?? {},
+      workflow: { ...(command.job.step as any).workflow },
     };
 
     const workflowId = isStateful
@@ -118,7 +119,10 @@ export class ExecuteBridgeJob {
        * TODO: We fallback to external due to lack of backfilling origin for existing Workflows.
        * Once we backfill the origin field for existing Workflows, we should remove the fallback.
        */
-      workflowOrigin: workflow?.origin || WorkflowOriginEnum.EXTERNAL,
+      workflowOrigin:
+        workflow?.origin || command.job.transactionId.includes('w_s=snapshot')
+          ? WorkflowOriginEnum.NOVU_CLOUD
+          : WorkflowOriginEnum.EXTERNAL,
       statelessBridgeUrl: command.job.step.bridgeUrl,
       event: bridgeEvent,
       job: command.job,

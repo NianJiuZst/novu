@@ -45,6 +45,7 @@ export class NovuBridgeClient {
           environmentId: req.params.environmentId,
           workflowId: req.query.workflowId as string,
           controlValues: req.body.controls,
+          workflow: req.body.workflow,
           action: req.query.action as PostActionEnum,
         })
       );
@@ -55,7 +56,10 @@ export class NovuBridgeClient {
     this.novuRequestHandler = new NovuRequestHandler({
       frameworkName,
       workflows,
-      client: new Client({ secretKey, strictAuthentication: true }),
+      client: new Client({
+        secretKey,
+        strictAuthentication: true,
+      }),
       handler: this.novuHandler.handler,
     });
 

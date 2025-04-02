@@ -32,7 +32,6 @@ export class SubscriberJobBound {
     private storeSubscriberJobs: StoreSubscriberJobs,
     private createNotificationJobs: CreateNotificationJobs,
     private createOrUpdateSubscriberUsecase: CreateOrUpdateSubscriberUseCase,
-
     private integrationRepository: IntegrationRepository,
     private notificationTemplateRepository: NotificationTemplateRepository,
     private logger: PinoLogger,
@@ -190,6 +189,7 @@ export class SubscriberJobBound {
 
         return {
           ...step,
+          workflow: bridgeWorkflow,
           bridgeUrl: command.bridge?.url,
           controlVariables: stepControlVariables,
           active: true,

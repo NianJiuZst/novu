@@ -459,6 +459,7 @@ export class Client {
         ...event,
         payload: executionData,
       };
+
       await Promise.race([
         concludeExecutionPromise,
         workflow.execute({

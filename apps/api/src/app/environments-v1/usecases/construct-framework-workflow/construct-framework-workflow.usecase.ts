@@ -1,8 +1,27 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { workflow } from '@novu/framework/express';
-import { ActionStep, ChannelStep, JsonSchema, Step, StepOptions, StepOutput, Workflow } from '@novu/framework/internal';
+import {
+  ActionStep,
+  ChannelStep,
+  DiscoverStepOutput,
+  DiscoverWorkflowOutput,
+  JsonSchema,
+  Step,
+  StepOptions,
+  StepOutput,
+  Workflow,
+} from '@novu/framework/internal';
 import { NotificationStepEntity, NotificationTemplateEntity, NotificationTemplateRepository } from '@novu/dal';
-import { JSONSchemaDefinition, StepTypeEnum, WorkflowOriginEnum } from '@novu/shared';
+import {
+  IMessageTemplate,
+  JSONSchemaDefinition,
+  JSONSchemaDto,
+  StepTypeEnum,
+  TriggerTypeEnum,
+  WorkflowOriginEnum,
+  WorkflowStatusEnum,
+  WorkflowTypeEnum,
+} from '@novu/shared';
 import { Instrument, InstrumentUsecase, PinoLogger } from '@novu/application-generic';
 import { AdditionalOperation, RulesLogic } from 'json-logic-js';
 import _ from 'lodash';
@@ -38,7 +57,13 @@ export class ConstructFrameworkWorkflow {
 
   @InstrumentUsecase()
   async execute(command: ConstructFrameworkWorkflowCommand): Promise<Workflow> {
-    const dbWorkflow = await this.getDbWorkflow(command.environmentId, command.workflowId);
+    const dbWorkflow = command.workflow
+      ? mapDiscoveryWorkflowToWorkflow(
+          { environmentId: command.environmentId, organizationId: command.organizationId },
+          command.workflow as DiscoverWorkflowOutput
+        )
+      : await this.getDbWorkflow(command.environmentId, command.workflowId);
+
     if (command.controlValues) {
       for (const step of dbWorkflow.steps) {
         step.controlVariables = command.controlValues;
@@ -257,3 +282,71 @@ const PERMISSIVE_EMPTY_SCHEMA = {
   required: [],
   additionalProperties: true,
 } as const;
+
+function mapDiscoveryWorkflowToWorkflow(
+  command: {
+    environmentId: string;
+    organizationId?: string;
+  },
+  discoveryWorkflow: DiscoverWorkflowOutput
+): NotificationTemplateEntity {
+  return {
+    _id: '',
+    _organizationId: command.organizationId ?? '',
+    _notificationGroupId: '',
+    _creatorId: '',
+    deleted: false,
+    createdAt: undefined,
+    updatedAt: undefined,
+    deletedAt: '',
+    deletedBy: '',
+    critical: false,
+    isBlueprint: false,
+    blueprintId: undefined,
+    data: {},
+    issues: {},
+    description: '',
+    tags: [],
+    preferenceSettings: {},
+    origin: WorkflowOriginEnum.NOVU_CLOUD,
+    type: WorkflowTypeEnum.BRIDGE,
+    draft: false,
+    _environmentId: command.environmentId,
+    name: discoveryWorkflow.workflowId,
+    triggers: [
+      {
+        type: TriggerTypeEnum.EVENT,
+        identifier: discoveryWorkflow.workflowId,
+        variables: [],
+        subscriberVariables: [],
+        reservedVariables: [],
+      },
+    ],
+    steps: discoveryWorkflow.steps.map((step) => mapStep(step)),
+    rawData: discoveryWorkflow as unknown as Record<string, unknown>,
+    payloadSchema: discoveryWorkflow.payload?.schema as JSONSchemaDto,
+    active: true,
+    status: WorkflowStatusEnum.ACTIVE,
+  };
+}
+
+function mapStep(step: DiscoverStepOutput): NotificationStepEntity {
+  const template = {
+    _id: '',
+    type: step.type,
+    name: step.stepId,
+    controls: step.controls,
+    output: step.outputs,
+    options: step.options,
+    code: step.code,
+  } as unknown as IMessageTemplate;
+
+  return {
+    template,
+    name: step.stepId,
+    stepId: step.stepId,
+    uuid: step.stepId,
+    _templateId: '',
+    shouldStopOnFail: (step.options as { failOnErrorEnabled: boolean })?.failOnErrorEnabled ?? false,
+  };
+}
