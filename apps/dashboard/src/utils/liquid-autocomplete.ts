@@ -15,7 +15,16 @@ const ROOT_PREFIXES = {
   steps: 'steps.',
 } as const;
 
-const VALID_DYNAMIC_PATHS = ['subscriber.data.', 'payload.', /^steps\.[^.]+\.events\[\d+\]\.payload\./] as const;
+const VALID_DYNAMIC_PATH_SUGGESTIONS = [
+  'subscriber.data.',
+  'payload.',
+  /^steps\.[^.]+\.events\[\d+\]\.payload\./,
+] as const;
+const INVALID_DYNAMIC_PATH_VALUES = [
+  'subscriber.data',
+  'payload',
+  /steps\.[^.]+\.events\[\d+\]\.payload(?!\.)/,
+] as const;
 
 /**
  * Liquid variable autocomplete for the following patterns:
@@ -140,8 +149,14 @@ function getFilterCompletions(afterPipe: string, isEnhancedDigestEnabled: boolea
 }
 
 function isValidDynamicPath(searchText: string): boolean {
-  return VALID_DYNAMIC_PATHS.some((path) =>
+  return VALID_DYNAMIC_PATH_SUGGESTIONS.some((path) =>
     typeof path === 'string' ? searchText.startsWith(path) : path.test(searchText)
+  );
+}
+
+function isInvalidDynamicPathValues(searchText: string): boolean {
+  return INVALID_DYNAMIC_PATH_VALUES.some((path) =>
+    typeof path === 'string' ? searchText === path : path.test(searchText)
   );
 }
 
@@ -230,11 +245,13 @@ export function createAutocompleteSource(variables: LiquidVariable[], isEnhanced
           const beforeCursor = content.slice(0, from);
           const afterCursor = content.slice(to);
 
+          const isInvalidValue = isInvalidDynamicPathValues(selectedValue);
+
           // Ensure proper {{ }} wrapping
           const needsOpening = !beforeCursor.endsWith('{{');
           const needsClosing = !afterCursor.startsWith('}}');
 
-          const wrappedValue = `${needsOpening ? '{{' : ''}${selectedValue}${needsClosing ? '}}' : ''}`;
+          const wrappedValue = `${needsOpening ? '{{' : ''}${selectedValue}${isInvalidValue ? '.' : ''}${needsClosing && !isInvalidValue ? '}}' : ''}`;
 
           // Calculate the final cursor position
           // Add 2 if we need to account for closing brackets
