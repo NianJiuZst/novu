@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { ReactNode, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { buildRoute, ROUTES } from '../../utils/routes';
+import { ClerkIcon } from '../icons/integrations/clerk-icon';
 import { Badge } from '../primitives/badge';
 import { WorkflowMode } from './types';
 
@@ -199,7 +200,7 @@ const useCases = [
     icon: <KeyRound className="h-3 w-3 text-gray-700" />,
     label: 'Authentication',
     bgColor: 'bg-green-50',
-    hasSubmenu: false,
+    hasSubmenu: true,
   },
   {
     id: 'operational',
@@ -228,9 +229,9 @@ export function WorkflowSidebar({ selectedCategory, onCategorySelect, mode }: Wo
   };
 
   const handleCategorySelect = (categoryId: string) => {
-    if (categoryId === 'billing') {
-      setOpenSubmenu(openSubmenu === 'billing' ? null : 'billing');
-      onCategorySelect('billing');
+    if (categoryId === 'billing' || categoryId === 'authentication') {
+      setOpenSubmenu(openSubmenu === categoryId ? null : categoryId);
+      onCategorySelect(categoryId);
     } else {
       setOpenSubmenu(null);
       onCategorySelect(categoryId);
@@ -294,6 +295,19 @@ export function WorkflowSidebar({ selectedCategory, onCategorySelect, mode }: Wo
                     onClick={() => onCategorySelect('stripe')}
                     isActive={mode === WorkflowMode.TEMPLATES && selectedCategory === 'stripe'}
                     bgColor="bg-blue-50"
+                    isSubmenuItem
+                  />
+                </div>
+              )}
+              {item.id === 'authentication' && openSubmenu === 'authentication' && (
+                <div className="ml-4 mt-1 border-l-2 border-gray-100 pl-2">
+                  <SidebarButton
+                    key="clerk"
+                    icon={<ClerkIcon width={12} height={12} className="text-gray-700" />}
+                    label="Clerk"
+                    onClick={() => onCategorySelect('clerk')}
+                    isActive={mode === WorkflowMode.TEMPLATES && selectedCategory === 'clerk'}
+                    bgColor="bg-green-50"
                     isSubmenuItem
                   />
                 </div>
