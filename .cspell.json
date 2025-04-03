@@ -826,8 +826,6 @@
     "packages/framework/src/jsonSchemaFaker.js",
     "packages/js/src/ui/index.directcss",
     "packages/js/tsup.config.ts",
-    "packages/notification-center/rollup.config.mjs",
-    "packages/notification-center/src/i18n/languages/**",
     "packages/shared/src/types/timezones/timezones.types.ts",
     "pnpm-lock.yaml",
     "pnpm-workspace.yaml",

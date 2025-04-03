@@ -88,7 +88,7 @@ describe('Generate Preview #novu-v2', () => {
         expect(previewResponseDto.previewPayloadExample).to.exist;
         expect(previewResponseDto.previewPayloadExample?.steps).to.be.ok;
         if (previewResponseDto.result?.type === 'sms' && previewResponseDto.result?.preview.body) {
-          expect(previewResponseDto.result!.preview.body).to.contain(`[[{{steps.${inAppStepId}.seen}}]]`);
+          expect(previewResponseDto.result!.preview.body).to.contain(`[[seen]]`);
         }
       });
     });
@@ -118,7 +118,9 @@ describe('Generate Preview #novu-v2', () => {
       if (previewResponseDto.result?.type !== 'in_app') {
         throw new Error('should have a in-app preview ');
       }
-      expect(previewResponseDto.result.preview.subject).to.deep.equal(controlValues.subject);
+      expect(previewResponseDto.result.preview.subject).to.deep.equal(
+        'firstName Hello, World! this is the replacement text for the placeholder'
+      );
     });
 
     describe('Happy Path, no payload, expected same response as requested', () => {
@@ -134,7 +136,12 @@ describe('Generate Preview #novu-v2', () => {
           throw new Error('should be in app preview type');
         }
         const inApp = getTestControlValues().in_app;
-        const previewRequestWithoutTheRedirect = { ...inApp, primaryAction: { label: inApp.primaryAction.label } };
+        const previewRequestWithoutTheRedirect = {
+          ...inApp,
+          subject: 'firstName Hello, World! subject',
+          body: 'Hello, World! body',
+          primaryAction: { label: 'primaryUrlLabel' },
+        };
         expect(previewResponseDto.result!.preview).to.deep.equal(previewRequestWithoutTheRedirect);
       });
 
@@ -146,7 +153,7 @@ describe('Generate Preview #novu-v2', () => {
         expect(previewResponseDto.previewPayloadExample.subscriber, 'Expecting to find subscriber in the payload').to
           .exist;
 
-        expect(previewResponseDto.result!.preview).to.deep.equal(getTestControlValues()[StepTypeEnum.SMS]);
+        expect(previewResponseDto.result!.preview).to.deep.equal({ body: ' Hello, World! firstName' });
       });
 
       it('push: should match the body in the preview response', async () => {
@@ -157,7 +164,10 @@ describe('Generate Preview #novu-v2', () => {
         expect(previewResponseDto.previewPayloadExample.subscriber, 'Expecting to find subscriber in the payload').to
           .exist;
 
-        expect(previewResponseDto.result!.preview).to.deep.equal(getTestControlValues()[StepTypeEnum.PUSH]);
+        expect(previewResponseDto.result!.preview).to.deep.equal({
+          subject: 'Hello, World!',
+          body: 'Hello, World! firstName',
+        });
       });
 
       it('chat: should match the body in the preview response', async () => {
@@ -168,7 +178,7 @@ describe('Generate Preview #novu-v2', () => {
         expect(previewResponseDto.previewPayloadExample.subscriber, 'Expecting to find subscriber in the payload').to
           .exist;
 
-        expect(previewResponseDto.result!.preview).to.deep.equal(getTestControlValues()[StepTypeEnum.CHAT]);
+        expect(previewResponseDto.result!.preview).to.deep.equal({ body: 'Hello, World! firstName' });
       });
 
       it('email: should match the body in the preview response', async () => {
@@ -181,7 +191,7 @@ describe('Generate Preview #novu-v2', () => {
         expect(preview.body).to.exist;
         expect(preview.subject).to.exist;
         expect(preview.body).to.contain(previewPayloadExample().payload.body);
-        expect(preview.subject).to.contain(`Hello, World! ${SUBJECT_TEST_PAYLOAD}`);
+        expect(preview.subject).to.contain(`Hello, World! payload`);
         expect(previewResponseDto.previewPayloadExample).to.exist;
         expect(previewResponseDto.previewPayloadExample).to.deep.equal(previewPayloadExample());
       });
@@ -213,9 +223,9 @@ describe('Generate Preview #novu-v2', () => {
         if (previewResponseDto.result!.type !== 'sms') {
           throw new Error('Expected sms');
         }
-        expect(previewResponseDto.result!.preview.body).to.contain('{{PAYLOAD.VARIABLENAME}}');
+        expect(previewResponseDto.result!.preview.body).to.contain('VARIABLENAME');
         expect(previewResponseDto.previewPayloadExample).to.exist;
-        expect(previewResponseDto?.previewPayloadExample?.payload?.variableName).to.equal('{{payload.variableName}}');
+        expect(previewResponseDto?.previewPayloadExample?.payload?.variableName).to.equal('variableName');
       });
 
       it('Should not fail if inApp is providing partial URL in redirect', async () => {
@@ -255,7 +265,7 @@ describe('Generate Preview #novu-v2', () => {
           expect(generatePreviewResponseDto.result.preview.body).to.equal(
             {
               subject: `{{subscriber.firstName}} Hello, World! ${PLACEHOLDER_SUBJECT_INAPP}`,
-              body: `Hello, World! {{payload.placeholder.body}}`,
+              body: `Hello, World! body`,
               avatar: 'https://www.example.com/avatar.png',
               primaryAction: {
                 label: '{{payload.secondaryUrl}}',
@@ -296,7 +306,7 @@ describe('Generate Preview #novu-v2', () => {
         );
 
         if (generatePreviewResponseDto.result?.type === ChannelTypeEnum.IN_APP) {
-          expect(generatePreviewResponseDto.result.preview.body).to.equal('Hello, World! {{payload.placeholder.body}}');
+          expect(generatePreviewResponseDto.result.preview.body).to.equal('Hello, World! body');
         }
       });
     });
