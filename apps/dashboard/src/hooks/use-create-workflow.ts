@@ -4,17 +4,19 @@ import { QueryKeys } from '@/utils/query-keys';
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { type CreateWorkflowDto, WorkflowCreationSourceEnum } from '@novu/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { workflowSchema } from '../components/workflow-editor/schema';
-import { showSuccessToast, showErrorToast } from '../components/workflow-editor/toasts';
-import { useState } from 'react';
+import { showErrorToast, showSuccessToast } from '../components/workflow-editor/toasts';
 
 interface UseCreateWorkflowOptions {
   onSuccess?: () => void;
+  preventNavigation?: boolean;
+  suppressToast?: boolean;
 }
 
-export function useCreateWorkflow({ onSuccess }: UseCreateWorkflowOptions = {}) {
+export function useCreateWorkflow({ onSuccess, preventNavigation, suppressToast }: UseCreateWorkflowOptions = {}) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { currentEnvironment } = useEnvironment();
@@ -28,13 +30,18 @@ export function useCreateWorkflow({ onSuccess }: UseCreateWorkflowOptions = {}) 
         queryKey: [QueryKeys.fetchTags, currentEnvironment?._id],
       });
 
-      showSuccessToast(toastId);
-      navigate(
-        buildRoute(ROUTES.EDIT_WORKFLOW, {
-          environmentSlug: currentEnvironment?.slug ?? '',
-          workflowSlug: result.data.slug ?? '',
-        })
-      );
+      if (!suppressToast) {
+        showSuccessToast(toastId);
+      }
+
+      if (!preventNavigation) {
+        navigate(
+          buildRoute(ROUTES.EDIT_WORKFLOW, {
+            environmentSlug: currentEnvironment?.slug ?? '',
+            workflowSlug: result.data.slug ?? '',
+          })
+        );
+      }
 
       onSuccess?.();
     },

@@ -10,6 +10,8 @@ import { Button } from '@/components/primitives/button';
 import { CompactButton } from '@/components/primitives/button-compact';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/primitives/dialog';
 import { Form, FormRoot } from '@/components/primitives/form/form';
+import { Toast, ToastIcon } from '@/components/primitives/sonner';
+import { showErrorToast } from '@/components/primitives/sonner-helpers';
 import { WorkflowResults } from '@/components/template-store/components/workflow-results';
 import { getTemplates } from '@/components/template-store/templates';
 import { IWorkflowSuggestion } from '@/components/template-store/templates/types';
@@ -19,6 +21,7 @@ import TruncatedText from '@/components/truncated-text';
 import { CreateWorkflowForm } from '@/components/workflow-editor/create-workflow-form';
 import { workflowSchema } from '@/components/workflow-editor/schema';
 import { WorkflowCanvas } from '@/components/workflow-editor/workflow-canvas';
+import { useEnvironment } from '@/context/environment/hooks';
 import { useCreateWorkflow } from '@/hooks/use-create-workflow';
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { buildRoute, ROUTES } from '@/utils/routes';
@@ -27,6 +30,7 @@ import { ComponentProps, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiArrowLeftSLine } from 'react-icons/ri';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import { z } from 'zod';
 import { ClerkIcon } from '../icons/integrations/clerk-icon';
 
@@ -45,11 +49,17 @@ export function WorkflowTemplateModal(props: WorkflowTemplateModalProps) {
   const navigate = useNavigate();
   const { environmentSlug } = useParams();
   const [searchParams] = useSearchParams();
+  const { currentEnvironment } = useEnvironment();
   const { submit: createFromTemplate, isLoading: isCreating } = useCreateWorkflow();
+  const { submit: createTemplateWithoutNavigation } = useCreateWorkflow({
+    preventNavigation: true,
+    suppressToast: true,
+  });
   const [selectedCategory, setSelectedCategory] = useState<string>('popular');
   const [suggestions, setSuggestions] = useState<IWorkflowSuggestion[]>([]);
   const [mode, setMode] = useState<WorkflowMode>(WorkflowMode.TEMPLATES);
   const [internalSelectedTemplate, setInternalSelectedTemplate] = useState<IWorkflowSuggestion | null>(null);
+  const [importingCollection, setImportingCollection] = useState(false);
 
   // Integration-specific display configurations
   interface IntegrationConfig {
@@ -164,6 +174,18 @@ export function WorkflowTemplateModal(props: WorkflowTemplateModalProps) {
     },
   };
 
+  // Function to get the correct webhook guide URL based on the integration
+  const getWebhookGuideUrl = (integration: string): string => {
+    switch (integration) {
+      case 'stripe':
+        return 'https://docs.novu.co/guides/webhooks/stripe';
+      case 'clerk':
+        return 'https://docs.novu.co/guides/webhooks/clerk';
+      default:
+        return '';
+    }
+  };
+
   const selectedTemplate = props.selectedTemplate ?? internalSelectedTemplate;
 
   const filteredTemplates = WORKFLOW_TEMPLATES.filter((template) => {
@@ -197,15 +219,79 @@ export function WorkflowTemplateModal(props: WorkflowTemplateModalProps) {
     }
   }, [props.selectedTemplate]);
 
+  const handleBackClick = () => {
+    setInternalSelectedTemplate(null);
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    setSuggestions([]);
+    setMode(WorkflowMode.TEMPLATES);
+    track(TelemetryEvent.TEMPLATE_CATEGORY_SELECTED, {
+      category,
+    });
+  };
+
+  // Function to show the workflow import success toast
+  const showWorkflowImportSuccessToast = (
+    successCount: number,
+    totalCount: number,
+    category: string,
+    workflowName?: string
+  ) => {
+    const title = `${successCount}/${totalCount} workflow${totalCount > 1 ? 's' : ''} imported`;
+    const webhookGuideUrl = getWebhookGuideUrl(category);
+
+    const message = workflowName
+      ? `${workflowName} workflow has been added to your ${currentEnvironment?.name || 'dev'} environment, with ${integrationConfigs[category]?.parentCategory} webhook integration.`
+      : `${successCount} workflow${successCount > 1 ? 's have' : ' has'} been added to your ${currentEnvironment?.name || 'dev'} environment, with ${integrationConfigs[category]?.parentCategory} webhook integration.`;
+
+    toast.custom(
+      (t) => (
+        <Toast title={title}>
+          <ToastIcon variant="success" />
+          <div className="flex flex-col gap-2">
+            <span className="text-sm">{message}</span>
+            <a
+              href={webhookGuideUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:text-primary-hover mt-1 text-sm underline"
+            >
+              Webhook Integration guide →
+            </a>
+          </div>
+        </Toast>
+      ),
+      {
+        duration: 10000,
+        position: 'bottom-right',
+        unstyled: true,
+      }
+    );
+  };
+
   const handleCreateWorkflow = async (values: z.infer<typeof workflowSchema>) => {
     if (!selectedTemplate) return;
 
     await createFromTemplate(values, selectedTemplate.workflowDefinition);
+
+    // Track the event
     track(TelemetryEvent.CREATE_WORKFLOW_FROM_TEMPLATE, {
       templateId: selectedTemplate.id,
       templateName: selectedTemplate.name,
       category: selectedCategory,
     });
+
+    // If the template has an integration tag (like 'stripe' or 'clerk'), show the success toast with guide link
+    const integrationTag = selectedTemplate.workflowDefinition.tags?.find((tag) =>
+      Object.keys(integrationConfigs).includes(tag)
+    );
+
+    if (integrationTag && integrationConfigs[integrationTag]) {
+      // Show a custom success toast with the integration guide link
+      showWorkflowImportSuccessToast(1, 1, integrationTag, values.name);
+    }
   };
 
   const getHeaderText = () => {
@@ -244,18 +330,7 @@ export function WorkflowTemplateModal(props: WorkflowTemplateModalProps) {
     setInternalSelectedTemplate(template);
   };
 
-  const handleBackClick = () => {};
-
-  const handleCategorySelect = (category: string) => {
-    setSelectedCategory(category);
-    setSuggestions([]);
-    setMode(WorkflowMode.TEMPLATES);
-    track(TelemetryEvent.TEMPLATE_CATEGORY_SELECTED, {
-      category,
-    });
-  };
-
-  const handleImportCollection = () => {
+  const handleImportCollection = async () => {
     if (selectedCategory === 'stripe' || selectedCategory === 'clerk') {
       // Get all templates for this integration category
       const templatesToImport = WORKFLOW_TEMPLATES.filter((template) =>
@@ -269,17 +344,65 @@ export function WorkflowTemplateModal(props: WorkflowTemplateModalProps) {
         source: 'collection_import',
       });
 
-      // Close the modal
-      if (props.onOpenChange) {
-        props.onOpenChange(false);
-      }
+      // Set loading state
+      setImportingCollection(true);
 
-      // Redirect to the template store with a query parameter for the collection
-      navigate(
-        `${buildRoute(ROUTES.TEMPLATE_STORE, {
-          environmentSlug: environmentSlug || '',
-        })}?collection=${selectedCategory}&import=true`
-      );
+      // Track successes and failures
+      let successCount = 0;
+      const failedTemplates: string[] = [];
+
+      try {
+        // Create workflows without navigating
+        for (const template of templatesToImport) {
+          const values = {
+            name: template.name,
+            description: template.description || '',
+            workflowId: template.id,
+            active: true,
+            tags: template.workflowDefinition.tags || [],
+          };
+
+          try {
+            // Use the non-navigating version of createFromTemplate
+            await createTemplateWithoutNavigation(values, template.workflowDefinition);
+            successCount++;
+          } catch (templateError) {
+            console.error(`Failed to import template "${template.name}":`, templateError);
+            failedTemplates.push(template.name);
+            // Continue with other templates
+          }
+        }
+
+        // Close the modal
+        if (props.onOpenChange) {
+          props.onOpenChange(false);
+        }
+
+        // Show the appropriate success/partial success toast
+        if (successCount === templatesToImport.length || successCount > 0) {
+          // All or some templates imported successfully
+          showWorkflowImportSuccessToast(successCount, templatesToImport.length, selectedCategory);
+        } else {
+          // No templates imported successfully
+          showErrorToast('Failed to import workflow collection. Please try again.');
+        }
+
+        // Only navigate if at least one workflow was created successfully
+        if (successCount > 0) {
+          navigate(
+            buildRoute(ROUTES.WORKFLOWS, {
+              environmentSlug: environmentSlug || '',
+            })
+          );
+        }
+      } catch (error) {
+        console.error('Failed to import workflows:', error);
+
+        // Show error toast
+        showErrorToast('Failed to import workflow collection. Please try again.');
+      } finally {
+        setImportingCollection(false);
+      }
     }
   };
 
@@ -372,7 +495,12 @@ export function WorkflowTemplateModal(props: WorkflowTemplateModalProps) {
                 Import all {integrationConfigs[selectedCategory]?.parentCategory} templates at once
               </span>
             </div>
-            <Button mode="gradient" onClick={handleImportCollection}>
+            <Button
+              mode="gradient"
+              onClick={handleImportCollection}
+              isLoading={importingCollection}
+              disabled={importingCollection}
+            >
               <div className="flex items-center gap-2">
                 <span>Import workflow collection</span>
                 <span className="rounded-sm bg-white/20 px-1.5 py-0.5 text-xs">
