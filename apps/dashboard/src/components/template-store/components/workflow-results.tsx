@@ -26,6 +26,7 @@ export function WorkflowResults({ mode, suggestions, onClick }: WorkflowResultsP
             description={template.description || ''}
             steps={template.workflowDefinition.steps.map((step) => step.type)}
             tags={template.workflowDefinition.tags || []}
+            integration={template.integration}
           />
         );
       })}

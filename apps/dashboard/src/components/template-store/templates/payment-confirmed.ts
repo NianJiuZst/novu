@@ -1,35 +1,31 @@
 import { StepTypeEnum, WorkflowCreationSourceEnum } from '@novu/shared';
+import { IntegrationType } from '../../icons/integrations';
 import { WorkflowTemplate } from './types';
 
 export const paymentConfirmedTemplate: WorkflowTemplate = {
   id: 'payment-confirmed',
   name: 'Payment Confirmed',
-  description: 'Send payment confirmations with receipts',
+  description: 'Sent when a user successfully completes a payment.',
   category: 'billing',
-  isPopular: true,
   workflowDefinition: {
     name: 'Payment Confirmed',
-    description: '',
+    description: 'Sent when a user successfully completes a payment.',
     workflowId: 'payment-confirmed',
     steps: [
+      {
+        name: 'Push Step',
+        type: StepTypeEnum.PUSH,
+        controlValues: {
+          body: '{"@import":"body"}',
+          title: 'Payment Confirmed',
+        },
+      },
       {
         name: 'In-App Step',
         type: StepTypeEnum.IN_APP,
         controlValues: {
-          body: 'Your payment of **{{payload.amount}}** for **Acme {{payload.tier}}** has been processed.',
-          avatar: '',
-          subject: 'Payment Successful!',
-          primaryAction: {
-            label: 'View Receipt',
-            redirect: {
-              target: '_self',
-              url: '{{payload.receipt_link}}',
-            },
-          },
-          redirect: {
-            url: '{{payload.receipt_link}}',
-            target: '_self',
-          },
+          payload: '{"@import":"payload"}',
+          content: 'Payment confirmed for {{payload.amount}}. Thank you for your purchase!',
         },
       },
       {
@@ -45,4 +41,5 @@ export const paymentConfirmedTemplate: WorkflowTemplate = {
     active: true,
     __source: WorkflowCreationSourceEnum.TEMPLATE_STORE,
   },
+  integration: IntegrationType.STRIPE,
 };

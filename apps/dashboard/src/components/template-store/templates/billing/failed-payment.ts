@@ -1,4 +1,5 @@
 import { StepTypeEnum, WorkflowCreationSourceEnum } from '@novu/shared';
+import { IntegrationType } from '../../../icons/integrations';
 import { WorkflowTemplate } from '../types';
 
 export const failedPaymentTemplate: WorkflowTemplate = {
@@ -25,4 +26,5 @@ export const failedPaymentTemplate: WorkflowTemplate = {
     active: true,
     __source: WorkflowCreationSourceEnum.TEMPLATE_STORE,
   },
+  integration: IntegrationType.STRIPE,
 };
