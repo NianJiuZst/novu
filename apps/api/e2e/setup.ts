@@ -10,7 +10,7 @@ const dalService = new DalService();
 
 async function getConnection() {
   if (!connection) {
-    connection = await dalService.connect(process.env.MONGO_URL);
+    connection = await dalService.connect(process.env.MONGO_URL || '');
   }
 
   return connection;
