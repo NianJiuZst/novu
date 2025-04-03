@@ -41,7 +41,7 @@ export const paymentConfirmedTemplate: WorkflowTemplate = {
         },
       },
     ],
-    tags: ['billing'],
+    tags: ['billing', 'stripe'],
     active: true,
     __source: WorkflowCreationSourceEnum.TEMPLATE_STORE,
   },
