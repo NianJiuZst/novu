@@ -65,7 +65,11 @@ export function workflow<
       ...(bridgeUrl && { bridgeUrl }),
     };
 
-    const result = await apiClient.post<EventTriggerResponse>('/events/trigger', requestPayload);
+    const headers = {
+      'x-application-identifier': event.applicationIdentifier,
+    };
+
+    const result = await apiClient.post<EventTriggerResponse>('/events/trigger', requestPayload, headers);
 
     const cancel = async () => {
       return apiClient.delete<CancelEventTriggerResponse>(`/events/trigger/${result.transactionId}`);
