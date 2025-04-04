@@ -349,7 +349,6 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
 
           {!isReadOnly && (
             <SidebarFooter>
-              <Separator />
               <ConfirmationModal
                 open={isDeleteModalOpen}
                 onOpenChange={setIsDeleteModalOpen}
