@@ -55,6 +55,8 @@ export class Session {
         if (storedAppId) {
           finalApplicationIdentifier = storedAppId;
         }
+      } else {
+        this.storeApplicationIdentifier('');
       }
 
       // eslint-disable-next-line no-console
