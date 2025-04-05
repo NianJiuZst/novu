@@ -39,7 +39,7 @@ export function SandboxModeIndicator() {
                 class={style(
                   'button',
                   cn(
-                    'nt-bg-red-500/90 nt-border nt-border-neutral-alpha-100 nt-rounded-lg nt-backdrop-blur-lg',
+                    'nt-bg-red-500/90 nt-border nt-border-neutral-alpha-100 nt-rounded-full nt-backdrop-blur-lg',
                     'nt-p-2 nt-transition-all nt-duration-300 nt-ease-in-out',
                     'hover:nt-bg-primary-alpha-25'
                   )
