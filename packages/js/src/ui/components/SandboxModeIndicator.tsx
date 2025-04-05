@@ -3,13 +3,12 @@ import { useInboxContext } from '../context';
 import { useStyle } from '../helpers';
 import { cn } from '../helpers/cn.js';
 import { Button } from './primitives';
-import { Tooltip } from './primitives/Tooltip';
+import { Popover } from './primitives/Popover';
 import { Sandbox } from '../icons/Sandbox.js';
 
 export function SandboxModeIndicator() {
   const style = useStyle();
   const { isSandbox, applicationIdentifier } = useInboxContext();
-  const [isTooltipOpen, setIsTooltipOpen] = createSignal(false);
   const [shouldShow, setShouldShow] = createSignal(false);
   const identifier = applicationIdentifier() || window.localStorage.getItem('novu_sandbox_application_identifier');
 
@@ -30,8 +29,8 @@ export function SandboxModeIndicator() {
           )
         )}
       >
-        <Tooltip.Root>
-          <Tooltip.Trigger
+        <Popover.Root>
+          <Popover.Trigger
             asChild={(props) => (
               <Button
                 appearanceKey="button"
@@ -50,8 +49,8 @@ export function SandboxModeIndicator() {
                 <Sandbox class={style('icon', 'nt-size-4 nt-text-white')} />
               </Button>
             )}
-          ></Tooltip.Trigger>
-          <Tooltip.Content
+          ></Popover.Trigger>
+          <Popover.Content
             class={style(
               'popoverContent',
               cn(
@@ -73,8 +72,8 @@ export function SandboxModeIndicator() {
                 <code class={style('button', 'nt-bg-primary-alpha-25 nt-px-1 nt-py-0.5 nt-rounded')}>{identifier}</code>
               </p>
             </Show>
-          </Tooltip.Content>
-        </Tooltip.Root>
+          </Popover.Content>
+        </Popover.Root>
       </div>
     </Show>
   );
