@@ -37,6 +37,16 @@ export const DefaultNotification = (props: DefaultNotificationProps) => {
   const date = createMemo(() => {
     minutesPassed(); // register as dep
 
+    // eslint-disable-next-line no-console
+    console.log('props.notification ', props.notification);
+
+    // eslint-disable-next-line no-console
+    console.log('props.notification.createdAt ', props.notification.createdAt);
+
+    if (!props.notification.createdAt) {
+      return '';
+    }
+
     return formatToRelativeTime({ fromDate: new Date(props.notification.createdAt), locale: locale() });
   });
 

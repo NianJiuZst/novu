@@ -6,16 +6,12 @@ import {
   ParentProps,
   Setter,
   useContext,
-  Show,
-  onMount,
   onCleanup,
 } from 'solid-js';
-import { render } from 'solid-js/web';
 import { NotificationFilter, Redirect } from '../../types';
 import { DEFAULT_REFERRER, DEFAULT_TARGET, getTagsFromTab } from '../helpers';
 import { useNovuEvent } from '../helpers/useNovuEvent';
 import { NotificationStatus, PreferencesFilter, RouterPush, Tab } from '../types';
-import { SandboxWidget } from '../components/SandboxWidget';
 
 type InboxContextType = {
   setStatus: (status: NotificationStatus) => void;
@@ -69,7 +65,6 @@ export const InboxProvider = (props: InboxProviderProps) => {
   );
   const [isSandbox, setIsSandbox] = createSignal(false);
   const [applicationIdentifier, setApplicationIdentifier] = createSignal<string | null>(null);
-  const [portalContainer, setPortalContainer] = createSignal<HTMLElement | null>(null);
 
   const setNewStatus = (newStatus: NotificationStatus) => {
     setStatus(newStatus);
@@ -110,13 +105,6 @@ export const InboxProvider = (props: InboxProviderProps) => {
     pushState({}, '', fullUrl);
   };
 
-  onMount(() => {
-    const div = document.createElement('div');
-    div.id = 'novu-sandbox-widget';
-    document.body.appendChild(div);
-    setPortalContainer(div);
-  });
-
   onCleanup(() => {
     const element = document.getElementById('novu-sandbox-widget');
     if (element) {
@@ -140,28 +128,28 @@ export const InboxProvider = (props: InboxProviderProps) => {
         return;
       }
 
+      const identifier = window.localStorage.getItem('novu_sandbox_application_identifier');
+
+      // Debug logs
+      console.log('Session initialize resolved');
+      console.log('data.applicationIdentifier:', data.applicationIdentifier);
+      console.log('localStorage identifier:', identifier);
+
       setHideBranding(data.removeNovuBranding);
       setIsDevelopmentMode(data.isDevelopmentMode);
-      setIsSandbox(!!data.applicationIdentifier);
+      setIsSandbox(!!data.applicationIdentifier || !!identifier?.startsWith('pk_sandbox_'));
       setApplicationIdentifier(data.applicationIdentifier ?? null);
-      /*
-       * if (data.applicationIdentifier) {
-       *   try {
-       *     localStorage.setItem(
-       *       'novu_application_identifier',
-       *       JSON.stringify({ applicationIdentifier: data.applicationIdentifier })
-       *     );
-       *   } catch (error) {
-       *     console.error('Failed to store application identifier:', error);
-       *   }
-       * }
-       */
+
+      // Debug log after setting
+      console.log('isSandbox set to:', !!data.applicationIdentifier || !!identifier?.startsWith('pk_sandbox_'));
     },
   });
 
   createEffect(() => {
-    if (isSandbox() && applicationIdentifier() && portalContainer()) {
-      render(() => <SandboxWidget applicationIdentifier={applicationIdentifier()!} />, portalContainer()!);
+    if (isSandbox()) {
+      const identifier = applicationIdentifier() ?? window.localStorage.getItem('novu_sandbox_application_identifier');
+      // eslint-disable-next-line no-console
+      console.log('identifier ', identifier);
     }
   });
 

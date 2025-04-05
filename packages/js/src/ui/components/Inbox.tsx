@@ -15,6 +15,7 @@ import { PreferencesHeader } from './elements/Preferences/PreferencesHeader';
 import { InboxTabs } from './InboxTabs';
 import { NotificationList } from './Notification';
 import { Button, Popover } from './primitives';
+import { SandboxModeIndicator } from './SandboxModeIndicator';
 
 export type NotificationRendererProps = {
   renderNotification: NotificationRenderer;
@@ -119,35 +120,43 @@ export const Inbox = (props: InboxProps) => {
   const isOpen = () => props?.open ?? isOpened();
 
   return (
-    <Popover.Root open={isOpen()} onOpenChange={setIsOpened} placement={props.placement} offset={props.placementOffset}>
-      <Popover.Trigger
-        asChild={(triggerProps) => (
-          <Button class={style('inbox__popoverTrigger')} variant="ghost" size="icon" {...triggerProps}>
-            <Bell renderBell={props.renderBell} />
-          </Button>
-        )}
-      />
-      <Popover.Content appearanceKey="inbox__popoverContent" portal>
-        <Show
-          when={props.renderNotification}
-          fallback={
+    <>
+      <Popover.Root
+        open={isOpen()}
+        onOpenChange={setIsOpened}
+        placement={props.placement}
+        offset={props.placementOffset}
+      >
+        <Popover.Trigger
+          asChild={(triggerProps) => (
+            <Button class={style('inbox__popoverTrigger')} variant="ghost" size="icon" {...triggerProps}>
+              <Bell renderBell={props.renderBell} />
+            </Button>
+          )}
+        />
+        <Popover.Content appearanceKey="inbox__popoverContent" portal>
+          <Show
+            when={props.renderNotification}
+            fallback={
+              <InboxContent
+                renderSubject={props.renderSubject}
+                renderBody={props.renderBody}
+                onNotificationClick={props.onNotificationClick}
+                onPrimaryActionClick={props.onPrimaryActionClick}
+                onSecondaryActionClick={props.onSecondaryActionClick}
+              />
+            }
+          >
             <InboxContent
-              renderSubject={props.renderSubject}
-              renderBody={props.renderBody}
+              renderNotification={props.renderNotification}
               onNotificationClick={props.onNotificationClick}
               onPrimaryActionClick={props.onPrimaryActionClick}
               onSecondaryActionClick={props.onSecondaryActionClick}
             />
-          }
-        >
-          <InboxContent
-            renderNotification={props.renderNotification}
-            onNotificationClick={props.onNotificationClick}
-            onPrimaryActionClick={props.onPrimaryActionClick}
-            onSecondaryActionClick={props.onSecondaryActionClick}
-          />
-        </Show>
-      </Popover.Content>
-    </Popover.Root>
+          </Show>
+        </Popover.Content>
+      </Popover.Root>
+      <SandboxModeIndicator />
+    </>
   );
 };
