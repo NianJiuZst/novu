@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { createHash } from 'crypto';
 
 import {
@@ -26,11 +19,9 @@ import {
   EnvironmentEntity,
   EnvironmentRepository,
   IntegrationRepository,
-  NotificationGroupRepository,
-  OrganizationRepository,
 } from '@novu/dal';
-import { ChannelTypeEnum, EnvironmentEnum, InAppProviderIdEnum, PROTECTED_ENVIRONMENTS } from '@novu/shared';
-import { nanoid } from 'nanoid';
+import { ChannelTypeEnum, InAppProviderIdEnum } from '@novu/shared';
+import { differenceInDays } from 'date-fns';
 import { ApiException } from '../../../shared/exceptions/api.exception';
 import { SubscriberSessionResponseDto } from '../../dtos/subscriber-session-response.dto';
 import { AnalyticsEventsEnum } from '../../utils';
@@ -38,15 +29,15 @@ import { validateHmacEncryption } from '../../utils/encryption';
 import { NotificationsCountCommand } from '../notifications-count/notifications-count.command';
 import { NotificationsCount } from '../notifications-count/notifications-count.usecase';
 import { SessionCommand } from './session.command';
-import { CreateEnvironmentCommand } from '../../../environments-v1/usecases/create-environment/create-environment.command';
 import { GenerateUniqueApiKey } from '../../../environments-v1/usecases/generate-unique-api-key/generate-unique-api-key.usecase';
-import { CreateDefaultLayout, CreateDefaultLayoutCommand } from '../../../layouts/usecases';
 import { CreateNovuIntegrations } from '../../../integrations/usecases/create-novu-integrations/create-novu-integrations.usecase';
 import { CreateNovuIntegrationsCommand } from '../../../integrations/usecases/create-novu-integrations/create-novu-integrations.command';
 import { EnvironmentResponseDto } from '../../../environments-v1/dtos/environment-response.dto';
 
 @Injectable()
 export class Session {
+  private readonly SANDBOX_ENVIRONMENT_PREFIX = 'pk_sandbox_';
+
   constructor(
     private environmentRepository: EnvironmentRepository,
     private communityOrganizationRepository: CommunityOrganizationRepository,
@@ -57,45 +48,21 @@ export class Session {
     private notificationsCount: NotificationsCount,
     private integrationRepository: IntegrationRepository,
     private generateUniqueApiKey: GenerateUniqueApiKey,
-    private createDefaultLayoutUsecase: CreateDefaultLayout,
     private createNovuIntegrationsUsecase: CreateNovuIntegrations,
-    private notificationGroupRepository: NotificationGroupRepository,
     private communityUserRepository: CommunityUserRepository,
     private logger: PinoLogger
   ) {}
 
   @LogDecorator()
   async execute(command: SessionCommand): Promise<SubscriberSessionResponseDto> {
-    const isSandbox = !command.applicationIdentifier;
-    this.logger.error('Session.execute called', command);
-
-    const organization = await this.communityOrganizationRepository.findOne({
-      name: 'Sandbox Organization baking-endanger-luckless',
-    });
-
-    if (!organization) {
-      this.logger.error('Sandbox Organization not found');
-      throw new InternalServerErrorException('Sandbox Organization not found');
-    }
-
-    const user = await this.communityUserRepository.findByEmail('system-sandbox@novu.co');
-
-    if (!user) {
-      throw new InternalServerErrorException('Sandbox User not found');
-    }
-
-    // if applicationIdentifier is not provided, we will use the created environment
-
-    /*
-     * if applicationIdentifier is provided and its Sandbox application we will check its expiration date
-     * if it's expired, we will use the created environment
-     * if it's not expired, we will use the provided applicationIdentifier
-     */
-
-    // else we will use the created environment as bellow
+    const isSandboxInitialize = !command.applicationIdentifier;
+    const isSandbox = command.applicationIdentifier?.includes(this.SANDBOX_ENVIRONMENT_PREFIX);
+    const isSandboxExpired = isSandbox ? await this.isSandboxExpired(command.applicationIdentifier) : false;
 
     const applicationIdentifier =
-      command.applicationIdentifier || (await this.processSandbox(organization._id, user._id)).identifier;
+      isSandboxInitialize || isSandboxExpired
+        ? (await this.processSandbox()).identifier
+        : command.applicationIdentifier;
 
     const environment = await this.environmentRepository.findEnvironmentByIdentifier(applicationIdentifier);
 
@@ -184,7 +151,7 @@ export class Session {
     }
 
     return {
-      ...(isSandbox ? { applicationIdentifier: environment.identifier } : {}),
+      ...(isSandboxInitialize ? { applicationIdentifier: environment.identifier } : {}),
       token,
       totalUnreadCount,
       removeNovuBranding,
@@ -192,21 +159,49 @@ export class Session {
     };
   }
 
-  async processSandbox(organizationId: string, userId: string): Promise<EnvironmentResponseDto> {
+  async isSandboxExpired(applicationIdentifier: string | undefined) {
+    const createdDate = applicationIdentifier?.split('_')[0];
+    const createdDateTimestamp = timestampHexToDate(createdDate);
+    const now = new Date();
+    const diffTime = differenceInDays(now, createdDateTimestamp);
+
+    if (diffTime > 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async processSandbox(): Promise<EnvironmentResponseDto> {
+    const organization = await this.communityOrganizationRepository.findOne({
+      name: 'Sandbox Organization baking-endanger-luckless',
+    });
+
+    if (!organization) {
+      this.logger.error('Sandbox Organization not found');
+      throw new InternalServerErrorException('Sandbox Organization not found');
+    }
+
+    const user = await this.communityUserRepository.findByEmail('system-sandbox@novu.co');
+
+    if (!user) {
+      throw new InternalServerErrorException('Sandbox User not found');
+    }
+
     const key = `sk_${await this.generateUniqueApiKey.execute()}`;
     const encryptedApiKey = encryptApiKey(key);
     const hashedApiKey = createHash('sha256').update(key).digest('hex');
 
     const encodedDate = dateToTimestampHex(new Date());
-    const identifier = `pk_sandbox_${encodedDate}_${shortId(4)}`;
+    const identifier = `${this.SANDBOX_ENVIRONMENT_PREFIX}${encodedDate}_${shortId(4)}`;
     const environment = await this.environmentRepository.create({
-      _organizationId: organizationId,
+      _organizationId: organization._id,
       name: `Sandbox ${new Date().toLocaleDateString()}`,
       identifier,
       apiKeys: [
         {
           key: encryptedApiKey,
-          _userId: userId,
+          _userId: user._id,
           hash: hashedApiKey,
         },
       ],
@@ -216,7 +211,7 @@ export class Session {
       CreateNovuIntegrationsCommand.create({
         environmentId: environment._id,
         organizationId: environment._organizationId,
-        userId,
+        userId: user._id,
       })
     );
 
@@ -244,31 +239,8 @@ export class Session {
 
     return dto;
   }
-
-  private encodeMongoTimestamp(timestamp: number): string {
-    const seconds = Math.floor(timestamp / 1000);
-
-    return Buffer.from(seconds.toString(16).padStart(8, '0'), 'hex').toString('base64');
-  }
-
-  private decodeMongoTimestamp(encodedTimestamp: string): number {
-    const buffer = Buffer.from(encodedTimestamp, 'base64');
-
-    return parseInt(buffer.toString('hex'), 16) * 1000; // Convert back to milliseconds
-  }
 }
 
-// Generate timestamp portion of ObjectId
-function generateTimestampHex() {
-  const now = new Date();
-  const timeInSeconds = Math.floor(now.getTime() / 1000);
-  const buffer = Buffer.alloc(4);
-  buffer.writeUInt32BE(timeInSeconds, 0);
-
-  return buffer.toString('hex');
-}
-
-// Convert Date to ObjectId timestamp bytes
 function dateToTimestampHex(date) {
   const timeInSeconds = Math.floor(date.getTime() / 1000);
   const buffer = Buffer.alloc(4);
@@ -277,7 +249,6 @@ function dateToTimestampHex(date) {
   return buffer.toString('hex');
 }
 
-// Convert timestamp hex to Date
 function timestampHexToDate(timestampHex) {
   const buffer = Buffer.from(timestampHex, 'hex');
   const timestamp = buffer.readUInt32BE(0);

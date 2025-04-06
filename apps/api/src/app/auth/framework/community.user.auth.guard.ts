@@ -19,6 +19,9 @@ export class CommunityUserAuthGuard extends AuthGuard([
   }
 
   getAuthenticateOptions(context: ExecutionContext): IAuthModuleOptions<any> {
+    // eslint-disable-next-line no-console
+    console.log('CommunityUserAuthGuard');
+
     const request = context.switchToHttp().getRequest();
     const authorizationHeader = request.headers.authorization;
     const applicationIdentifier = request.headers['x-application-identifier'];
