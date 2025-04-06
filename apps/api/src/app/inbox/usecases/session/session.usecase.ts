@@ -158,12 +158,32 @@ export class Session {
   }
 
   async isSandboxExpired(applicationIdentifier: string | undefined) {
-    const createdDate = applicationIdentifier?.split('_')[0];
-    const createdDateTimestamp = timestampHexToDate(createdDate);
-    const now = new Date();
-    const diffTime = differenceInDays(now, createdDateTimestamp);
+    if (!applicationIdentifier) {
+      return true; // If no identifier is provided, consider it expired
+    }
 
-    if (diffTime > 0) {
+    const parts = applicationIdentifier.replace(this.SANDBOX_ENVIRONMENT_PREFIX, '').split('_');
+    if (parts.length < 1) {
+      return true; // Invalid format, consider expired
+    }
+
+    const createdDate = parts[0];
+
+    if (!createdDate || createdDate.length < 8) {
+      // Ensure we have at least 4 bytes (8 hex chars)
+      return true; // Invalid timestamp format, consider expired
+    }
+
+    try {
+      const createdDateTimestamp = timestampHexToDate(createdDate);
+      const now = new Date();
+      const diffTime = differenceInDays(now, createdDateTimestamp);
+
+      if (diffTime > 0) {
+        return true;
+      }
+    } catch (error) {
+      // If there's any error parsing the timestamp, consider it expired
       return true;
     }
 
@@ -248,7 +268,15 @@ function dateToTimestampHex(date) {
 }
 
 function timestampHexToDate(timestampHex) {
+  if (!timestampHex || typeof timestampHex !== 'string' || timestampHex.length < 8) {
+    throw new Error('Invalid timestamp hex format');
+  }
+
   const buffer = Buffer.from(timestampHex, 'hex');
+  if (buffer.length < 4) {
+    throw new Error('Buffer too small to read 32-bit integer');
+  }
+
   const timestamp = buffer.readUInt32BE(0);
 
   return new Date(timestamp * 1000);
