@@ -55,6 +55,8 @@ export class CommunityAuthService implements IAuthService {
   // todo remove this as this will not be supported in community edition
   public async getSandboxUser(applicationIdentifier?: string): Promise<UserSessionData> {
     // eslint-disable-next-line no-console
+    console.log('CommunityAuthService getSandboxUser');
+    // eslint-disable-next-line no-console
     console.log('applicationIdentifier ', applicationIdentifier);
     if (!applicationIdentifier) {
       throw new UnauthorizedException('Sandbox entry not found');
