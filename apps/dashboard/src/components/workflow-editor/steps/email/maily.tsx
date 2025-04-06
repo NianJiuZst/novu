@@ -7,13 +7,11 @@ import { HTMLAttributes, useCallback, useMemo, useState } from 'react';
 import { HTMLCodeBlockView } from '@/components/workflow-editor/steps/email/extensions/html-view';
 import { MailyVariablesList } from '@/components/workflow-editor/steps/email/extensions/maily-variables-list';
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
-import { useFeatureFlag } from '@/hooks/use-feature-flag';
+import { useParseVariables } from '@/hooks/use-parse-variables';
 import { useTelemetry } from '@/hooks/use-telemetry';
-import { parseStepVariables } from '@/utils/parseStepVariablesToLiquidVariables';
 import { cn } from '@/utils/ui';
-import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { ForExtension } from './extensions/for';
-import { VariableView } from './extensions/variable-view';
+import { createVariableView } from './extensions/variable-view';
 import { createDefaultEditorBlocks, DEFAULT_EDITOR_CONFIG } from './maily-config';
 
 type MailyProps = HTMLAttributes<HTMLDivElement> & {
@@ -24,26 +22,30 @@ type MailyProps = HTMLAttributes<HTMLDivElement> & {
 
 const VARIABLE_TRIGGER_CHARACTER = '{{';
 
+/**
+ * Fixed width (600px) for the email editor and rendered content.
+ * This width ensures optimal compatibility across email clients
+ * while maintaining good readability on all devices.
+ * (Hardcoded in Maily)
+ */
+export const MAILY_EMAIL_WIDTH = 600;
+
 export const Maily = ({ value, onChange, className, ...rest }: MailyProps) => {
   const { step } = useWorkflow();
-  const mailyVariables = useMemo(
-    () => (step ? parseStepVariables(step.variables) : { primitives: [], arrays: [], namespaces: [] }),
-    [step]
-  );
+  const parsedVariables = useParseVariables(step?.variables);
   const primitives = useMemo(
-    () => mailyVariables.primitives.map((v) => ({ name: v.label, required: false })),
-    [mailyVariables.primitives]
+    () => parsedVariables.primitives.map((v) => ({ name: v.label, required: false })),
+    [parsedVariables.primitives]
   );
   const arrays = useMemo(
-    () => mailyVariables.arrays.map((v) => ({ name: v.label, required: false })),
-    [mailyVariables.arrays]
+    () => parsedVariables.arrays.map((v) => ({ name: v.label, required: false })),
+    [parsedVariables.arrays]
   );
   const namespaces = useMemo(
-    () => mailyVariables.namespaces.map((v) => ({ name: v.label, required: false })),
-    [mailyVariables.namespaces]
+    () => parsedVariables.namespaces.map((v) => ({ name: v.label, required: false })),
+    [parsedVariables.namespaces]
   );
   const [_, setEditor] = useState<any>();
-  const isCustomEmailBlocksEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_CUSTOM_EMAIL_BLOCKS_ENABLED);
   const track = useTelemetry();
 
   const calculateVariables = useCallback(
@@ -87,7 +89,7 @@ export const Maily = ({ value, onChange, className, ...rest }: MailyProps) => {
       if (from === 'repeat-variable') {
         filteredVariables.push(...arrays, ...namespaces);
 
-        if (namespaces.some((namespace) => queryWithoutSuffix.includes(namespace.name))) {
+        if (parsedVariables.isAllowedVariable(queryWithoutSuffix)) {
           filteredVariables.push({ name: queryWithoutSuffix, required: false });
         }
 
@@ -120,7 +122,7 @@ export const Maily = ({ value, onChange, className, ...rest }: MailyProps) => {
       VariableExtension.extend({
         // @ts-expect-error - TODO: Polish Maily typing when extending Maily core and update accordingly
         addNodeView() {
-          return ReactNodeViewRenderer(VariableView, {
+          return ReactNodeViewRenderer(createVariableView(parsedVariables.isAllowedVariable), {
             className: 'relative inline-block',
             as: 'div',
           });
@@ -159,6 +161,7 @@ export const Maily = ({ value, onChange, className, ...rest }: MailyProps) => {
               border-radius: 4px;
               box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.04), 0px 1px 2px 0px rgba(0, 0, 0, 0.02);
               border-radius: 4px;
+              margin: 2px;
             }
           }
         `}
@@ -169,13 +172,16 @@ export const Maily = ({ value, onChange, className, ...rest }: MailyProps) => {
     <>
       {overrideTippyBoxStyles()}
       <div
-        className={cn('shadow-xs mx-auto flex h-full flex-col items-start rounded-lg bg-white', className)}
+        className={cn(
+          `shadow-xs mx-auto flex min-h-full max-w-[${MAILY_EMAIL_WIDTH}px] flex-col items-start rounded-lg bg-white`,
+          className
+        )}
         {...rest}
       >
         <Editor
           key="repeat-block-enabled"
           config={DEFAULT_EDITOR_CONFIG}
-          blocks={createDefaultEditorBlocks({ track, isCustomEmailBlocksEnabled })}
+          blocks={createDefaultEditorBlocks({ track })}
           // @ts-expect-error - TODO: Polish Maily typing when extending Maily core and update accordingly
           extensions={extensions}
           contentJson={value ? JSON.parse(value) : undefined}

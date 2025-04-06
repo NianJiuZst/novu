@@ -698,6 +698,52 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
     });
   });
 
+  describe('Duplicate Workflow Permutations', () => {
+    it('should duplicate a workflow', async () => {
+      const workflowCreated = await createWorkflowAndValidate('XYZ');
+      const duplicatedWorkflow = await workflowsClient.duplicateWorkflow(workflowCreated._id, {
+        name: 'Duplicated Workflow',
+      });
+      expect(duplicatedWorkflow.isSuccessResult()).to.be.true;
+
+      expect(duplicatedWorkflow.value?._id).to.not.equal(workflowCreated._id);
+      expect(duplicatedWorkflow.value?.active).to.be.false;
+      expect(duplicatedWorkflow.value?.name).to.equal('Duplicated Workflow');
+      expect(duplicatedWorkflow.value?.description).to.equal(workflowCreated.description);
+      expect(duplicatedWorkflow.value?.tags).to.deep.equal(workflowCreated.tags);
+      expect(duplicatedWorkflow.value?.steps.length).to.equal(workflowCreated.steps.length);
+      duplicatedWorkflow.value?.steps.forEach((step, index) => {
+        expect(step.name).to.equal(workflowCreated.steps[index].name);
+        expect(step._id).to.not.equal(workflowCreated.steps[index]._id);
+      });
+      expect(duplicatedWorkflow.value?.preferences).to.deep.equal(workflowCreated.preferences);
+    });
+
+    it('should duplicate a workflow with overrides', async () => {
+      const workflowCreated = await createWorkflowAndValidate('XYZ');
+      const duplicatedWorkflow = await workflowsClient.duplicateWorkflow(workflowCreated._id, {
+        name: 'Duplicated Workflow',
+        tags: ['tag1', 'tag2'],
+        description: 'New Description',
+      });
+      expect(duplicatedWorkflow.isSuccessResult()).to.be.true;
+      expect(duplicatedWorkflow.value?._id).to.not.equal(workflowCreated._id);
+      expect(duplicatedWorkflow.value?.active).to.be.false;
+      expect(duplicatedWorkflow.value?.name).to.equal('Duplicated Workflow');
+      expect(duplicatedWorkflow.value?.description).to.equal('New Description');
+      expect(duplicatedWorkflow.value?.tags).to.deep.equal(['tag1', 'tag2']);
+    });
+
+    it('should throw an error if the workflow to duplicate is not found', async () => {
+      const res = await workflowsClient.duplicateWorkflow('123', { name: 'Duplicated Workflow' });
+      expect(res.isSuccessResult()).to.be.false;
+      expect(res.error!.status).to.equal(404);
+      expect(res.error!.responseText).to.contain('Workflow');
+      const parse = JSON.parse(res.error!.responseText);
+      expect(parse.ctx.workflowId).to.contain('123');
+    });
+  });
+
   describe('Get Step Data Permutations', () => {
     it('should get step by worflow slugify ids', async () => {
       const workflowCreated = await createWorkflowAndValidate('XYZ');
@@ -767,8 +813,8 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
         const payloadVariables = properties.payload;
         expect(payloadVariables).to.be.ok;
         if (!payloadVariables) throw new Error('Payload schema is not valid');
-        expect(JSON.stringify(payloadVariables)).to.contain('payload.prefixBodyText2');
-        expect(JSON.stringify(payloadVariables)).to.contain('{{payload.prefixSubjectText}}');
+        expect(JSON.stringify(payloadVariables)).to.contain('prefixBodyText2');
+        expect(JSON.stringify(payloadVariables)).to.contain('prefixSubjectText');
       });
       it('should serve previous step variables with payload schema', async () => {
         const steps = [
@@ -791,6 +837,7 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
       });
     });
   });
+
   describe('Get Test Data Permutations', () => {
     it('should get test data', async () => {
       const steps = [
@@ -814,19 +861,13 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
       if (typeof payload === 'boolean') throw new Error('Variables is not an object');
 
       expect(payload.properties).to.have.property('emailPrefixBodyText');
-      expect(payload.properties?.emailPrefixBodyText)
-        .to.have.property('default')
-        .that.equals('{{payload.emailPrefixBodyText}}');
+      expect(payload.properties?.emailPrefixBodyText).to.have.property('default').that.equals('emailPrefixBodyText');
 
       expect(payload.properties).to.have.property('prefixSubjectText');
-      expect(payload.properties?.prefixSubjectText)
-        .to.have.property('default')
-        .that.equals('{{payload.prefixSubjectText}}');
+      expect(payload.properties?.prefixSubjectText).to.have.property('default').that.equals('prefixSubjectText');
 
       expect(payload.properties).to.have.property('inAppSubjectText');
-      expect(payload.properties?.inAppSubjectText)
-        .to.have.property('default')
-        .that.equals('{{payload.inAppSubjectText}}');
+      expect(payload.properties?.inAppSubjectText).to.have.property('default').that.equals('inAppSubjectText');
       /*
        * Validate the 'to' schema
        * Note: Can't use deep comparison since emails differ between local and CI environments due to user sessions
@@ -853,6 +894,7 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
       expect(toSchema.additionalProperties).to.be.false;
     });
   });
+
   describe('Patch Workflow Step Data Permutations', () => {
     it('when patch one control values the second step stays untouched', async () => {
       const response = await createWorkflowRest(buildCreateWorkflowDto('', {}));

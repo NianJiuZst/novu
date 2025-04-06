@@ -34,6 +34,8 @@ import { CreateNovuIntegrations } from '../../../integrations/usecases/create-no
 import { CreateNovuIntegrationsCommand } from '../../../integrations/usecases/create-novu-integrations/create-novu-integrations.command';
 import { EnvironmentResponseDto } from '../../../environments-v1/dtos/environment-response.dto';
 
+const ALLOWED_ORIGINS_REGEX = new RegExp(process.env.FRONT_BASE_URL || '');
+
 @Injectable()
 export class Session {
   private readonly SANDBOX_ENVIRONMENT_PREFIX = 'pk_sandbox_';
@@ -125,11 +127,7 @@ export class Session {
      * We want to prevent the playground inbox demo from marking the integration as connected
      * And only treat the real customer domain or local environment as valid origins
      */
-    const isOriginFromNovu =
-      command.origin &&
-      ((process.env.DASHBOARD_V2_BASE_URL && command.origin?.includes(process.env.DASHBOARD_V2_BASE_URL as string)) ||
-        (process.env.FRONT_BASE_URL && command.origin?.includes(process.env.FRONT_BASE_URL as string)));
-
+    const isOriginFromNovu = ALLOWED_ORIGINS_REGEX.test(command.origin ?? '');
     if (!isOriginFromNovu && !inAppIntegration.connected) {
       this.analyticsService.mixpanelTrack(AnalyticsEventsEnum.INBOX_CONNECTED, '', {
         _organization: environment._organizationId,

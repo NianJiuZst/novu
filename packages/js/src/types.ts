@@ -5,6 +5,17 @@ export type { Notification } from './notifications';
 export type { Preference } from './preferences/preference';
 export type { NovuError } from './utils/errors';
 
+declare global {
+  /**
+   * If you want to provide custom types for the notification.data object,
+   * simply redeclare this rule in the global namespace.
+   * Every notification object will use the provided type.
+   */
+  interface NotificationData {
+    [k: string]: unknown;
+  }
+}
+
 export enum NotificationStatus {
   READ = 'read',
   SEEN = 'seen',
@@ -98,6 +109,14 @@ export type Action = {
   redirect?: Redirect;
 };
 
+export type Workflow = {
+  id: string;
+  identifier: string;
+  name: string;
+  critical: boolean;
+  tags?: string[];
+};
+
 export type InboxNotification = {
   id: string;
   subject?: string;
@@ -113,22 +132,15 @@ export type InboxNotification = {
   secondaryAction?: Action;
   channelType: ChannelType;
   tags?: string[];
-  data?: Record<string, unknown>;
+  data?: NotificationData;
   redirect?: Redirect;
+  workflow?: Workflow;
 };
 
 export type NotificationFilter = {
   tags?: string[];
   read?: boolean;
   archived?: boolean;
-};
-
-export type Workflow = {
-  id: string;
-  identifier: string;
-  name: string;
-  critical: boolean;
-  tags?: string[];
 };
 
 export type ChannelPreference = {

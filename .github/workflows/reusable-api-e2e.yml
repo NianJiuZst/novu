@@ -46,7 +46,7 @@ jobs:
         name: Start localstack
 
       - name: Build API & Worker
-        run: CI='' pnpm run build:api_and_worker --skip-nx-cache
+        run: CI='' pnpm nx run-many --skip-nx-cache --target=build --all --projects=@novu/api-service,@novu/worker
 
       - name: Start Worker
         shell: bash
