@@ -35,8 +35,9 @@ export function parseStepVariables(schema: JSONSchemaDefinition, isEnhancedDiges
     if (typeof obj === 'boolean') return;
 
     if (obj.type === 'object') {
-      // Handle object with additionalProperties
-      if (obj.additionalProperties === true) {
+      // Exclude naked payload from suggested variables to try the new UX of appending payload to all unknown step variables.
+      // TODO: Move the exclusion to the API side after the two deployments to avoid breaking the contract between the Dashboard and the API.
+      if (obj.additionalProperties === true && !path.includes('payload')) {
         result.namespaces.push({
           type: 'variable',
           label: path,
