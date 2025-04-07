@@ -2,7 +2,7 @@ import { getFilters } from '@/components/variable/constants';
 import { LiquidVariable } from '@/utils/parseStepVariables';
 import { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete';
 import { EditorView } from '@uiw/react-codemirror';
-import { DYNAMIC_PATH_ROOTS, DYNAMIC_STEP_NAME_ROOT_REGEX } from './constants';
+import { DYNAMIC_PATH_ROOTS, DYNAMIC_STEP_NAME_ROOT_REGEX, INVALID_DYNAMIC_PATH_VALUES } from './constants';
 
 interface CompletionOption {
   label: string;
@@ -20,15 +20,6 @@ const VALID_DYNAMIC_PATH_SUGGESTIONS = [
   'subscriber.data.',
   'payload.',
   /^steps\.[^.]+\.events\[\d+\]\.payload\./,
-] as const;
-
-const INVALID_DYNAMIC_PATH_VALUES = [
-  'subscriber.data',
-  'subscriber.data.',
-  'payload',
-  'payload.',
-  /^steps\.[^.]+\.events\[\d+\]\.payload$/, // Invalidates "steps.x.events[n].payload"
-  /^steps\.[^.]+\.events\[\d+\]\.payload\.$/, // Invalidates "steps.x.events[n].payload."
 ] as const;
 
 /**
