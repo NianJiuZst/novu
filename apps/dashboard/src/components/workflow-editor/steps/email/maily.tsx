@@ -1,5 +1,4 @@
 import { Editor } from '@maily-to/core';
-
 import type { Editor as TiptapEditor } from '@tiptap/core';
 import { HTMLAttributes, useCallback, useMemo, useState } from 'react';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
@@ -12,7 +11,6 @@ import { createEditorBlocks, createExtensions, DEFAULT_EDITOR_CONFIG, MAILY_EMAI
 import { calculateVariables, VariableFrom } from './variables/variables';
 import { RepeatMenuDescription } from './views/repeat-menu-description';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
-import { DYNAMIC_PATH_ROOTS, DYNAMIC_STEP_NAME_ROOT_REGEX } from '@/utils/constants';
 
 type MailyProps = HTMLAttributes<HTMLDivElement> & {
   value: string;
@@ -115,52 +113,4 @@ export const Maily = ({ value, onChange, className, ...rest }: MailyProps) => {
       </div>
     </>
   );
-};
-
-const dedupAndSortVariables = (
-  variables: { name: string; required: boolean }[],
-  query: string
-): { name: string; required: boolean }[] => {
-  // Filter variables that match the query
-  let filteredVariables = variables.filter((variable) => variable.name.toLowerCase().includes(query.toLowerCase()));
-
-  if (filteredVariables.length === 0 && variables.length > 0) {
-    /**
-     * When typing a variable that is not present in the list,
-     * we need to check if the variable is a dynamic path.
-     * If it is, we need to add the dynamic path values to the list.
-     * For example, if the user types "hello" and there are dynamic paths like "steps.x.events[n].payload",
-     * we need to add "steps.x.events[n].payload.hello", "payload.hello" , "subscriber.data.hello" to the list.
-     * This is done to allow the user to create dynamic paths.
-     */
-    const dynamicStepNames = variables
-      .map((entry) => entry.name.match(DYNAMIC_STEP_NAME_ROOT_REGEX))
-      .filter((match): match is RegExpMatchArray => match !== null)
-      .map((match) => `${match[0]}.`);
-
-    filteredVariables = [...DYNAMIC_PATH_ROOTS, ...dynamicStepNames].map((value) => {
-      return {
-        name: value + query.trim(),
-        required: false,
-      };
-    });
-  }
-
-  // Deduplicate based on name property
-  const uniqueVariables = Array.from(new Map(filteredVariables.map((item) => [item.name, item])).values());
-
-  // Sort variables: exact matches first, then starts with query, then alphabetically
-  return uniqueVariables.sort((a, b) => {
-    const aExactMatch = a.name.toLowerCase() === query.toLowerCase();
-    const bExactMatch = b.name.toLowerCase() === query.toLowerCase();
-    const aStartsWithQuery = a.name.toLowerCase().startsWith(query.toLowerCase());
-    const bStartsWithQuery = b.name.toLowerCase().startsWith(query.toLowerCase());
-
-    if (aExactMatch && !bExactMatch) return -1;
-    if (!aExactMatch && bExactMatch) return 1;
-    if (aStartsWithQuery && !bStartsWithQuery) return -1;
-    if (!aStartsWithQuery && bStartsWithQuery) return 1;
-
-    return a.name.localeCompare(b.name);
-  });
 };

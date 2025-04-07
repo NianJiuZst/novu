@@ -16,11 +16,7 @@ const ROOT_PREFIXES = {
   steps: 'steps.',
 } as const;
 
-const VALID_DYNAMIC_PATH_SUGGESTIONS = [
-  'subscriber.data.',
-  'payload.',
-  /^steps\.[^.]+\.events\[\d+\]\.payload\./,
-] as const;
+const VALID_DYNAMIC_PATH_SUGGESTIONS = ['subscriber.data.', /^steps\.[^.]+\.events\[\d+\]\.payload\./] as const;
 
 /**
  * Liquid variable autocomplete for the following patterns:
