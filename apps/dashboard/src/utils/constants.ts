@@ -36,3 +36,6 @@ export const DEFAULT_CONTROL_DIGEST_AMOUNT = 30;
 export const DEFAULT_CONTROL_DIGEST_UNIT = TimeUnitEnum.SECONDS;
 export const DEFAULT_CONTROL_DIGEST_CRON = '';
 export const DEFAULT_CONTROL_DIGEST_DIGEST_KEY = '';
+
+export const DYNAMIC_PATH_ROOTS = ['subscriber.data.', 'payload.'] as const;
+export const DYNAMIC_STEP_NAME_ROOT_REGEX = /^steps\.(.+?)\.events\[\d+\]\.payload$/;

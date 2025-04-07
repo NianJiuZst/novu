@@ -16,6 +16,15 @@ export interface ParsedVariables {
   isAllowedVariable: IsAllowedVariable;
 }
 
+const INVALID_DYNAMIC_PATH_VALUES = [
+  'subscriber.data',
+  'subscriber.data.',
+  'payload',
+  'payload.',
+  /^steps\.[^.]+\.events\[\d+\]\.payload$/, // Invalidates "steps.x.events[n].payload"
+  /^steps\.[^.]+\.events\[\d+\]\.payload\.$/, // Invalidates "steps.x.events[n].payload."
+] as const;
+
 /**
  * Parse JSON Schema and extract variables for Liquid autocompletion.
  * @param schema - The JSON Schema to parse.
@@ -111,6 +120,14 @@ export function parseStepVariables(schema: JSONSchemaDefinition, isEnhancedDiges
 
   function isAllowedVariable(path: string): boolean {
     if (typeof schema === 'boolean') return false;
+
+    if (
+      INVALID_DYNAMIC_PATH_VALUES.some((invalid) =>
+        typeof invalid === 'string' ? path === invalid : invalid.test(path)
+      )
+    ) {
+      return false;
+    }
 
     if (result.primitives.some((primitive) => primitive.label === path)) {
       return true;

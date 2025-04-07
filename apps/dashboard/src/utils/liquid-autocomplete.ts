@@ -2,6 +2,7 @@ import { getFilters } from '@/components/variable/constants';
 import { LiquidVariable } from '@/utils/parseStepVariables';
 import { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete';
 import { EditorView } from '@uiw/react-codemirror';
+import { DYNAMIC_PATH_ROOTS, DYNAMIC_STEP_NAME_ROOT_REGEX } from './constants';
 
 interface CompletionOption {
   label: string;
@@ -20,10 +21,14 @@ const VALID_DYNAMIC_PATH_SUGGESTIONS = [
   'payload.',
   /^steps\.[^.]+\.events\[\d+\]\.payload\./,
 ] as const;
+
 const INVALID_DYNAMIC_PATH_VALUES = [
   'subscriber.data',
+  'subscriber.data.',
   'payload',
-  /steps\.[^.]+\.events\[\d+\]\.payload(?!\.)/,
+  'payload.',
+  /^steps\.[^.]+\.events\[\d+\]\.payload$/, // Invalidates "steps.x.events[n].payload"
+  /^steps\.[^.]+\.events\[\d+\]\.payload\.$/, // Invalidates "steps.x.events[n].payload."
 ] as const;
 
 /**
@@ -220,7 +225,23 @@ function getMatchingVariables(searchText: string, variables: LiquidVariable[]): 
   }
 
   // Default case: show any variables containing the search text
-  return variables.filter((v) => v.label.toLowerCase().includes(searchLower));
+  let result = variables.filter((v) => v.label.toLowerCase().includes(searchLower));
+
+  if (result.length === 0) {
+    const dynamicStepNames = variables
+      .map((entry) => entry.label.match(DYNAMIC_STEP_NAME_ROOT_REGEX))
+      .filter((match): match is RegExpMatchArray => match !== null)
+      .map((match) => `${match[0]}.`);
+
+    result = [...DYNAMIC_PATH_ROOTS, ...dynamicStepNames].map((value) => {
+      return {
+        label: value + searchLower.trim(),
+        type: 'variable',
+      };
+    });
+  }
+
+  return result;
 }
 
 export function createAutocompleteSource(variables: LiquidVariable[], isEnhancedDigestEnabled: boolean) {
@@ -251,11 +272,11 @@ export function createAutocompleteSource(variables: LiquidVariable[], isEnhanced
           const needsOpening = !beforeCursor.endsWith('{{');
           const needsClosing = !afterCursor.startsWith('}}');
 
-          const wrappedValue = `${needsOpening ? '{{' : ''}${selectedValue}${isInvalidValue ? '.' : ''}${needsClosing && !isInvalidValue ? '}}' : ''}`;
+          const wrappedValue = `${needsOpening ? '{{' : ''}${selectedValue}${isInvalidValue && !selectedValue.endsWith('.') ? '.' : ''}${needsClosing && !isInvalidValue ? '}}' : ''}`;
 
           // Calculate the final cursor position
           // Add 2 if we need to account for closing brackets
-          const finalCursorPos = from + wrappedValue.length + (needsClosing ? 0 : 2);
+          const finalCursorPos = from + wrappedValue.length + (needsClosing || isInvalidValue ? 0 : 2);
 
           view.dispatch({
             changes: { from, to, insert: wrappedValue },

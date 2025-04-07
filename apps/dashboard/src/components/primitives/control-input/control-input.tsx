@@ -91,7 +91,7 @@ export function ControlInput({
         onSelect: handleVariableSelect,
         isAllowedVariable,
       }),
-    [handleVariableSelect]
+    [handleVariableSelect, isAllowedVariable]
   );
 
   const extensions = useMemo(() => {
