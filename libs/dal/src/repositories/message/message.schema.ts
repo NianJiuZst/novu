@@ -207,15 +207,20 @@ messageSchema.index({
  *           channel = command.channel;
  *        })
  */
-messageSchema.index({
-  _subscriberId: 1,
-  _environmentId: 1,
-  channel: 1,
-  read: 1,
-  archived: 1,
-  seen: 1,
-  createdAt: -1,
-});
+messageSchema.index(
+  {
+    _subscriberId: 1,
+    _environmentId: 1,
+    read: 1,
+    archived: 1,
+    seen: 1,
+    createdAt: -1,
+  },
+  {
+    name: 'in_app_messages_count',
+    partialFilterExpression: { channel: 'in-app' },
+  }
+);
 
 /*
  * Path : libs/dal/src/repositories/message/message.repository.ts
