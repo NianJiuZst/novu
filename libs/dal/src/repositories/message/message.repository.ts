@@ -45,7 +45,10 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       read?: boolean;
       archived?: boolean;
       payload?: object;
-    } = {}
+    } = {},
+    createdAt?: {
+      $gte: Date;
+    }
   ): Promise<MessageQuery & EnforceEnvId> {
     let requestQuery: MessageQuery & EnforceEnvId = {
       _environmentId: environmentId,
@@ -96,6 +99,10 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       }
     } else {
       requestQuery.$or = [{ archived: { $exists: false } }, { archived: { $in: [true, false] } }];
+    }
+
+    if (createdAt != null) {
+      requestQuery.createdAt = createdAt;
     }
 
     if (query.payload) {
@@ -208,16 +215,25 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       archived?: boolean;
       payload?: object;
     } = {},
-    options: { limit: number; skip?: number } = { limit: 100, skip: 0 }
+    options: { limit: number; skip?: number } = { limit: 100, skip: 0 },
+    createdAt?: {
+      $gte: Date;
+    }
   ) {
-    const requestQuery = await this.getFilterQueryForMessage(environmentId, subscriberId, channel, {
-      feedId: query.feedId,
-      seen: query.seen,
-      tags: query.tags,
-      read: query.read,
-      archived: query.archived,
-      payload: query.payload,
-    });
+    const requestQuery = await this.getFilterQueryForMessage(
+      environmentId,
+      subscriberId,
+      channel,
+      {
+        feedId: query.feedId,
+        seen: query.seen,
+        tags: query.tags,
+        read: query.read,
+        archived: query.archived,
+        payload: query.payload,
+      },
+      createdAt
+    );
 
     return this.MongooseModel.countDocuments(requestQuery, options).read('secondaryPreferred');
   }
