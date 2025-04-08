@@ -1,6 +1,6 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { MessageRepository, OrganizationRepository, SubscriberRepository } from '@novu/dal';
-import { ApiServiceLevelEnum, ChannelTypeEnum } from '@novu/shared';
+import { ChannelTypeEnum } from '@novu/shared';
 import { buildMessageCountKey, CachedQuery } from '@novu/application-generic';
 import { addHours } from 'date-fns';
 
