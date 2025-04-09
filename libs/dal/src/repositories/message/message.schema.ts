@@ -218,7 +218,7 @@ messageSchema.index(
   },
   {
     name: 'in_app_messages_count',
-    partialFilterExpression: { channel: 'in-app' },
+    partialFilterExpression: { channel: 'in_app' },
   }
 );
 
