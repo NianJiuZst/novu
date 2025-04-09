@@ -1,8 +1,9 @@
 import { getFilters } from '@/components/variable/constants';
-import { LiquidVariable } from '@/utils/parseStepVariables';
+import type { LiquidVariable } from '@/components/variable/parseStepVariables';
+
 import { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete';
 import { EditorView } from '@uiw/react-codemirror';
-import { DYNAMIC_PATH_ROOTS, DYNAMIC_STEP_NAME_ROOT_REGEX, INVALID_DYNAMIC_PATH_VALUES } from './constants';
+import { FIXED_NAMESPACES_WITH_UNKNOWN_KEYS, DYNAMIC_NAMESPACES_WITH_UNKNOWN_KEYS_REGEX } from '../constants';
 
 interface CompletionOption {
   label: string;
@@ -10,21 +11,12 @@ interface CompletionOption {
   boost?: number;
 }
 
-const ROOT_PREFIXES = {
-  subscriber: 'subscriber.',
-  payload: 'payload.',
-  steps: 'steps.',
-} as const;
-
-const VALID_DYNAMIC_PATH_SUGGESTIONS = ['subscriber.data.', /^steps\.[^.]+\.events\[\d+\]\.payload\./] as const;
-
 /**
  * Liquid variable autocomplete for the following patterns:
  *
  * 1. Payload Variables:
  *    Valid:
- *    - payload.
- *    - payload.user
+ *    - payload.userId
  *    - payload.anyNewField (allows any new field)
  *    - payload.deeply.nested.field
  *    Invalid:
@@ -100,17 +92,16 @@ export const completions =
       };
     }
 
-    const matchingVariables = getMatchingVariables(searchText, variables);
+    const matchingVariables = getVariableCompletions(searchText, variables);
+
+    const options = matchingVariables.map((v) => createCompletionOption(v.label, 'variable'));
 
     // If we have matches or we're in a valid context, show them
     if (matchingVariables.length > 0 || isInsideLiquidBlock(beforeCursor)) {
       return {
         from: lastOpenBrace + 2,
         to: pos,
-        options:
-          matchingVariables.length > 0
-            ? matchingVariables.map((v) => createCompletionOption(v.label, 'variable'))
-            : variables.map((v) => createCompletionOption(v.label, 'variable')),
+        options,
       };
     }
 
@@ -118,9 +109,7 @@ export const completions =
   };
 
 function isInsideLiquidBlock(beforeCursor: string): boolean {
-  const lastOpenBrace = beforeCursor.lastIndexOf('{{');
-
-  return lastOpenBrace !== -1;
+  return beforeCursor.lastIndexOf('{{') !== -1;
 }
 
 function getContentAfterPipe(content: string): string | null {
@@ -140,95 +129,43 @@ function getFilterCompletions(afterPipe: string, isEnhancedDigestEnabled: boolea
     .map((f) => createCompletionOption(f.value, 'function'));
 }
 
-function isValidDynamicPath(searchText: string): boolean {
-  return VALID_DYNAMIC_PATH_SUGGESTIONS.some((path) =>
-    typeof path === 'string' ? searchText.startsWith(path) : path.test(searchText)
-  );
-}
-
-function isInvalidDynamicPathValues(searchText: string): boolean {
-  return INVALID_DYNAMIC_PATH_VALUES.some((path) =>
-    typeof path === 'string' ? searchText === path : path.test(searchText)
-  );
-}
-
-function validateSubscriberField(searchText: string, matches: LiquidVariable[]): LiquidVariable[] {
-  const parts = searchText.split('.');
-
-  if (parts.length === 2 && parts[0] === 'subscriber') {
-    if (!matches.some((v) => v.label === searchText)) {
-      return [];
-    }
-  }
-
-  return matches;
-}
-
-function validateStepId(searchText: string, variables: LiquidVariable[]): boolean {
-  if (!searchText.startsWith('steps.')) return true;
-
-  const stepMatch = searchText.match(/^steps\.([^.]+)/);
-  if (!stepMatch) return true;
-
-  const stepId = stepMatch[1];
-  return variables.some((v) => v.label.startsWith(`steps.${stepId}.`));
-}
-
-function getMatchingVariables(searchText: string, variables: LiquidVariable[]): LiquidVariable[] {
+function getVariableCompletions(searchText: string, variables: LiquidVariable[]): LiquidVariable[] {
   if (!searchText) return variables;
 
   const searchLower = searchText.toLowerCase();
 
-  // Handle root prefixes and their partials
-  for (const [root, prefix] of Object.entries(ROOT_PREFIXES)) {
-    if (searchLower.startsWith(root) || root.startsWith(searchLower)) {
-      let matches = variables.filter((v) => v.label.startsWith(prefix));
+  const dynamicNamespacesWithUnknownKeys = variables.reduce<string[]>((acc, entry) => {
+    const match = entry.label.match(DYNAMIC_NAMESPACES_WITH_UNKNOWN_KEYS_REGEX);
 
-      // Special handling for subscriber fields
-      if (prefix === 'subscriber.') {
-        matches = validateSubscriberField(searchText, matches);
-      }
-
-      // Allow new paths for dynamic paths
-      if (isValidDynamicPath(searchText)) {
-        if (!matches.some((v) => v.label === searchText)) {
-          matches.push({ label: searchText, type: 'variable' } as LiquidVariable);
-        }
-      }
-
-      return matches;
+    if (match) {
+      acc.push(`${match[0]}.payload`);
     }
-  }
 
-  // Handle dot endings
-  if (searchText.endsWith('.')) {
-    const prefix = searchText.slice(0, -1);
-    return variables.filter((v) => v.label.startsWith(prefix));
-  }
+    return acc;
+  }, []);
 
-  // Validate step ID exists
-  if (!validateStepId(searchText, variables)) {
-    return [];
-  }
-
-  // Default case: show any variables containing the search text
-  let result = variables.filter((v) => v.label.toLowerCase().includes(searchLower));
-
-  if (result.length === 0) {
-    const dynamicStepNames = variables
-      .map((entry) => entry.label.match(DYNAMIC_STEP_NAME_ROOT_REGEX))
-      .filter((match): match is RegExpMatchArray => match !== null)
-      .map((match) => `${match[0]}.`);
-
-    result = [...DYNAMIC_PATH_ROOTS, ...dynamicStepNames].map((value) => {
-      return {
-        label: value + searchLower.trim(),
+  const dynamicVariables = [...FIXED_NAMESPACES_WITH_UNKNOWN_KEYS, ...dynamicNamespacesWithUnknownKeys].reduce<
+    LiquidVariable[]
+  >((acc, namespace) => {
+    if (searchText.startsWith(namespace) && searchText !== namespace) {
+      // Ensure that if the user types payload.foo the first suggestion is payload.foo
+      acc.push({ label: searchText, type: 'variable' });
+    } else if (!searchText.startsWith(namespace)) {
+      // For all other values, suggest payload.whatever, subscriber.data.whatever
+      acc.push({
+        label: `${namespace}.${searchLower.trim()}`,
         type: 'variable',
-      };
-    });
-  }
+      });
+    }
 
-  return result;
+    return acc;
+  }, []);
+
+  const uniqueVariables = Array.from(
+    new Map([...variables, ...dynamicVariables].map((item) => [item.label, item])).values()
+  );
+
+  return uniqueVariables.filter((v) => v.label.toLowerCase().includes(searchLower));
 }
 
 export function createAutocompleteSource(variables: LiquidVariable[], isEnhancedDigestEnabled: boolean) {
@@ -253,17 +190,15 @@ export function createAutocompleteSource(variables: LiquidVariable[], isEnhanced
           const beforeCursor = content.slice(0, from);
           const afterCursor = content.slice(to);
 
-          const isInvalidValue = isInvalidDynamicPathValues(selectedValue);
-
           // Ensure proper {{ }} wrapping
           const needsOpening = !beforeCursor.endsWith('{{');
           const needsClosing = !afterCursor.startsWith('}}');
 
-          const wrappedValue = `${needsOpening ? '{{' : ''}${selectedValue}${isInvalidValue && !selectedValue.endsWith('.') ? '.' : ''}${needsClosing && !isInvalidValue ? '}}' : ''}`;
+          const wrappedValue = `${needsOpening ? '{{' : ''}${selectedValue}${needsClosing ? '}}' : ''}`;
 
           // Calculate the final cursor position
           // Add 2 if we need to account for closing brackets
-          const finalCursorPos = from + wrappedValue.length + (needsClosing || isInvalidValue ? 0 : 2);
+          const finalCursorPos = from + wrappedValue.length + (needsClosing ? 0 : 2);
 
           view.dispatch({
             changes: { from, to, insert: wrappedValue },

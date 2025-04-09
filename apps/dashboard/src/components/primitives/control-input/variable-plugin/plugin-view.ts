@@ -1,4 +1,4 @@
-import { IsAllowedVariable } from '@/utils/parseStepVariables';
+import { IsAllowedVariable } from '@/components/variable/parseStepVariables';
 import { Decoration, DecorationSet, EditorView, Range } from '@uiw/react-codemirror';
 import { MutableRefObject } from 'react';
 import { VARIABLE_REGEX_STRING } from './';

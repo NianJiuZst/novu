@@ -6,8 +6,8 @@ import { useCallback, useMemo, useRef } from 'react';
 
 import { Editor } from '@/components/primitives/editor';
 import { EditVariablePopover } from '@/components/variable/edit-variable-popover';
-import { createAutocompleteSource } from '@/utils/liquid-autocomplete';
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import { createAutocompleteSource } from '@/components/variable/utils/codemirror-autocomplete';
+import { IsAllowedVariable, LiquidVariable } from '@/components/variable/parseStepVariables';
 import { useVariables } from './hooks/use-variables';
 import { createVariableExtension } from './variable-plugin';
 import { variablePillTheme } from './variable-plugin/variable-theme';
@@ -79,6 +79,17 @@ export function ControlInput({
         closeOnBlur: true,
         defaultKeymap: true,
         activateOnTyping: true,
+        addToOptions: [
+          {
+            render: (completion) => {
+              console.log('completion', completion);
+              const div = document.createElement('div');
+              div.textContent = 'Hello';
+              return div;
+            },
+            position: 0,
+          },
+        ],
       }),
     [completionSource]
   );

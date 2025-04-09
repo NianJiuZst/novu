@@ -129,9 +129,9 @@ FormMessagePure.displayName = 'FormMessagePure';
 const FormMessage = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement> & { suppressError?: boolean }
->(({ children, suppressError, ...rest }, ref) => {
+>(({ children, ...rest }, ref) => {
   const { error, formMessageId } = useFormField();
-  const content = !suppressError && error ? String(error.message) : children;
+  const content = error ? String(error.message) : children;
   const icon = error ? RiErrorWarningFill : RiInformationLine;
 
   const isFirstMount = useRef(true);

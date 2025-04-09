@@ -22,6 +22,7 @@ export const Maily = ({ value, onChange, className, ...rest }: MailyProps) => {
   const { step } = useWorkflow();
   const isEnhancedDigestEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_ENHANCED_DIGEST_ENABLED);
   const parsedVariables = useParseVariables(step?.variables);
+
   const primitives = useMemo(
     () => parsedVariables.primitives.map((v) => ({ name: v.label, required: false })),
     [parsedVariables.primitives]

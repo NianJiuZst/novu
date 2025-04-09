@@ -1,4 +1,4 @@
-import { parseStepVariables } from '@/utils/parseStepVariables';
+import { parseStepVariables } from '@/components/variable/parseStepVariables';
 import type { JSONSchemaDefinition } from '@novu/shared';
 import { useMemo } from 'react';
 import { useFeatureFlag } from './use-feature-flag';

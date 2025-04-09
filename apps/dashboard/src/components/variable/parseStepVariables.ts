@@ -1,5 +1,4 @@
 import type { JSONSchemaDefinition } from '@novu/shared';
-import { INVALID_DYNAMIC_PATH_VALUES } from './constants';
 
 export interface LiquidVariable {
   type: 'variable';
@@ -24,6 +23,9 @@ export interface ParsedVariables {
  */
 export function parseStepVariables(schema: JSONSchemaDefinition, isEnhancedDigestEnabled: boolean): ParsedVariables {
   const result: ParsedVariables = {
+    /**
+     * deprecated: use variables instead
+     */
     primitives: [],
     arrays: [],
     variables: [],
@@ -35,18 +37,14 @@ export function parseStepVariables(schema: JSONSchemaDefinition, isEnhancedDiges
     if (typeof obj === 'boolean') return;
 
     if (obj.type === 'object') {
-      // Exclude naked payload from suggested variables to try the new UX of appending payload to all unknown step variables.
-      // TODO: Move the exclusion to the API side after the two deployments to avoid breaking the contract between the Dashboard and the API.
-      if (obj.additionalProperties === true && !path.includes('payload')) {
+      if (obj.additionalProperties === true) {
         result.namespaces.push({
           type: 'variable',
           label: path,
         });
       }
 
-      if (!obj.properties) return;
-
-      for (const [key, value] of Object.entries(obj.properties)) {
+      for (const [key, value] of Object.entries(obj.properties || {})) {
         const fullPath = path ? `${path}.${key}` : key;
 
         if (typeof value === 'object') {
@@ -93,76 +91,39 @@ export function parseStepVariables(schema: JSONSchemaDefinition, isEnhancedDiges
 
   extractProperties(schema);
 
-  function parseVariablePath(path: string): string[] | null {
-    const parts = path
-      .split(/\.|\[(\d+)\]/)
-      .filter(Boolean)
-      .map((part): string | null => {
-        const num = parseInt(part);
+  function isAllowedVariable(value: string): boolean {
+    // Validate is variable is valid against the parsed array of variables coming from the server
+    const isValidFromServerResponse = !!result.variables.find((v) => v.label === value);
 
-        if (!isNaN(num)) {
-          if (num < 0) return null;
-          return num.toString();
-        }
-
-        return part;
-      });
-
-    return parts.includes(null) ? null : (parts as string[]);
-  }
-
-  function isAllowedVariable(path: string): boolean {
-    if (typeof schema === 'boolean') return false;
-
-    if (
-      INVALID_DYNAMIC_PATH_VALUES.some((invalid) =>
-        typeof invalid === 'string' ? path === invalid : invalid.test(path)
-      )
-    ) {
-      return false;
-    }
-
-    if (result.primitives.some((primitive) => primitive.label === path)) {
+    if (isValidFromServerResponse) {
       return true;
     }
 
-    const parts = parseVariablePath(path);
-    if (!parts) return false;
+    // Handle array variables and validate them against the parsed array variables.
+    // For example: steps.digest.events[1].payload.name is validated against steps.digest.events that is returned by the server
+    const isValidFromArrayNameSpace = result.arrays.some((v) => value.startsWith(v.label));
 
-    let currentObj: JSONSchemaDefinition = schema;
-
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
-
-      if (typeof currentObj === 'boolean' || !('type' in currentObj)) return false;
-
-      if (currentObj.type === 'array') {
-        const items = Array.isArray(currentObj.items) ? currentObj.items[0] : currentObj.items;
-        currentObj = items as JSONSchemaDefinition;
-        continue;
-      }
-
-      if (currentObj.type !== 'object') return false;
-
-      if (currentObj.additionalProperties === true) {
-        return true;
-      }
-
-      if (!currentObj.properties || !(part in currentObj.properties)) {
-        return false;
-      }
-
-      currentObj = currentObj.properties[part];
+    if (isValidFromArrayNameSpace) {
+      return true;
     }
 
-    return true;
+    // Handle variable for payload and subscriber.data namespace such as payload.name or subscriber.data.name
+    const isValidFromNamespaceWithUnknownKeys = result.namespaces.some(
+      (v) => value.startsWith(v.label) && value !== v.label
+    );
+
+    if (isValidFromNamespaceWithUnknownKeys) {
+      return true;
+    }
+
+    return false;
   }
 
   return {
     ...result,
     variables: isEnhancedDigestEnabled
       ? [...result.primitives, ...result.arrays, ...result.namespaces]
-      : [...result.primitives, ...result.namespaces],
+      : [...result.primitives],
     isAllowedVariable,
   };
 }

@@ -1,7 +1,9 @@
 import { Filters } from './types';
 
-const FILTERS: Filters[] = [
-  // Text Transformations
+export const FIXED_NAMESPACES_WITH_UNKNOWN_KEYS = ['subscriber.data', 'payload'];
+export const DYNAMIC_NAMESPACES_WITH_UNKNOWN_KEYS_REGEX = /^steps\.(.+?)\.events\[\d+\]/;
+
+export const FILTERS: Filters[] = [
   {
     label: 'Uppercase',
     value: 'upcase',
