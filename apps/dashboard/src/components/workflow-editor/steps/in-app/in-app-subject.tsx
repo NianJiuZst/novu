@@ -31,10 +31,12 @@ export const InAppSubject = () => {
                 onChange={field.onChange}
                 variables={variables}
                 isAllowedVariable={isAllowedVariable}
+                autoFocus
               />
             </InputRoot>
           </FormControl>
-          <FormMessage>
+          {/* Use only form message for hints, not for errors */}
+          <FormMessage suppressError>
             {containsHTMLEntities(field.value) &&
               !getValues('disableOutputSanitization') &&
               'HTML entities detected. Consider disabling content sanitization for proper rendering'}
