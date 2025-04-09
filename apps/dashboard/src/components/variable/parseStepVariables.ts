@@ -121,9 +121,7 @@ export function parseStepVariables(schema: JSONSchemaDefinition, isEnhancedDiges
 
   return {
     ...result,
-    variables: isEnhancedDigestEnabled
-      ? [...result.primitives, ...result.arrays, ...result.namespaces]
-      : [...result.primitives],
+    variables: [...result.primitives, ...result.arrays],
     isAllowedVariable,
   };
 }

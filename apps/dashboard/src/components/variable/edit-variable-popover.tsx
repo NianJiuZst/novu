@@ -1,6 +1,6 @@
 import { Popover, PopoverTrigger } from '@/components/primitives/popover';
 import { EditVariablePopoverContent } from '@/components/variable/edit-variable-popover-content';
-import { IsAllowedVariable } from '@/utils/parseStepVariables';
+import { IsAllowedVariable } from '@/components/variable/parseStepVariables';
 import { ReactNode } from 'react';
 
 type EditVariablePopoverProps = {

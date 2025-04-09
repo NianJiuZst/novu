@@ -5,7 +5,7 @@ import { FormControl, FormField, FormItem, FormMessage } from '@/components/prim
 import { InputProps, InputRoot } from '@/components/primitives/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/primitives/select';
 import { useSaveForm } from '@/components/workflow-editor/steps/save-form-context';
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import { IsAllowedVariable, LiquidVariable } from '@/components/variable/parseStepVariables';
 
 type URLInputProps = Omit<InputProps, 'value' | 'onChange'> & {
   options: string[];

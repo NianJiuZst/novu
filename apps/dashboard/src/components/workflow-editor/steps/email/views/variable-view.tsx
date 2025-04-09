@@ -6,7 +6,7 @@ import { VARIABLE_REGEX_STRING } from '@/components/primitives/control-input/var
 import { parseVariable } from '@/components/primitives/control-input/variable-plugin/utils';
 import { EditVariablePopover } from '@/components/variable/edit-variable-popover';
 import { VariablePill } from '@/components/variable/variable-pill';
-import { IsAllowedVariable } from '@/utils/parseStepVariables';
+import { IsAllowedVariable } from '@/components/variable/parseStepVariables';
 
 type InternalVariableViewProps = NodeViewProps & {
   isAllowedVariable: IsAllowedVariable;

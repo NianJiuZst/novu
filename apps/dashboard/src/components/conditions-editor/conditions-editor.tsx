@@ -10,7 +10,7 @@ import { FieldSelector } from '@/components/conditions-editor/field-selector';
 import { OperatorSelector } from '@/components/conditions-editor/operator-selector';
 import { RuleActions } from '@/components/conditions-editor/rule-actions';
 import { ValueEditor } from '@/components/conditions-editor/value-editor';
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import { IsAllowedVariable, LiquidVariable } from '@/components/variable/parseStepVariables';
 
 const ruleActionsClassName = `[&>[data-actions="true"]]:opacity-0 [&:hover>[data-actions="true"]]:opacity-100 [&>[data-actions="true"]:has(~[data-radix-popper-content-wrapper])]:opacity-100`;
 const groupActionsClassName = `[&_.ruleGroup-header>[data-actions="true"]]:opacity-0 [&_.ruleGroup-header:hover>[data-actions="true"]]:opacity-100 [&_.ruleGroup-header>[data-actions="true"]:has(~[data-radix-popper-content-wrapper])]:opacity-100`;

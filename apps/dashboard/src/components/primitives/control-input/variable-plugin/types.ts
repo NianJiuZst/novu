@@ -1,4 +1,4 @@
-import { IsAllowedVariable } from '@/utils/parseStepVariables';
+import { IsAllowedVariable } from '@/components/variable/parseStepVariables';
 import { EditorView } from '@uiw/react-codemirror';
 import { MutableRefObject } from 'react';
 

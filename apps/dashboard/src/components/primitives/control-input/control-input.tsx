@@ -79,17 +79,6 @@ export function ControlInput({
         closeOnBlur: true,
         defaultKeymap: true,
         activateOnTyping: true,
-        addToOptions: [
-          {
-            render: (completion) => {
-              console.log('completion', completion);
-              const div = document.createElement('div');
-              div.textContent = 'Hello';
-              return div;
-            },
-            position: 0,
-          },
-        ],
       }),
     [completionSource]
   );

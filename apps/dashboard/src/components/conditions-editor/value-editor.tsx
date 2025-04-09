@@ -2,7 +2,7 @@ import { useFormContext } from 'react-hook-form';
 import { useValueEditor, ValueEditorProps } from 'react-querybuilder';
 
 import { InputRoot } from '@/components/primitives/input';
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import { IsAllowedVariable, LiquidVariable } from '@/components/variable/parseStepVariables';
 import { ControlInput } from '../primitives/control-input/control-input';
 
 export const ValueEditor = (props: ValueEditorProps) => {
