@@ -1,3 +1,47 @@
+## v3.1.0 (2025-04-11)
+
+### 🚀 Features
+
+- **api-service,dashboard,framework:** expose digest eventCount and events variables ([#8089](https://github.com/novuhq/novu/pull/8089))
+- **react,nextjs:** better dist folders structure and tsup config improvements ([#7914](https://github.com/novuhq/novu/pull/7914))
+- **js,react:** inbox subject, body render props ([#7886](https://github.com/novuhq/novu/pull/7886))
+- **js:** Inbox retheme ([#7759](https://github.com/novuhq/novu/pull/7759))
+- **api-service:** system limits & update pricing pages ([#7718](https://github.com/novuhq/novu/pull/7718))
+- **root:** add no only github action ([#7692](https://github.com/novuhq/novu/pull/7692))
+
+### 🩹 Fixes
+
+- **js,react,nextjs:** Named type exports ([#8084](https://github.com/novuhq/novu/pull/8084))
+- **js:** Fix event triggering ([#8102](https://github.com/novuhq/novu/pull/8102))
+- **react:** apiUrl prop passing to novu/js ([#8104](https://github.com/novuhq/novu/pull/8104))
+- **root:** Add our first cursor rule ([23f8cb097c](https://github.com/novuhq/novu/commit/23f8cb097c))
+- **js,react,next:** Named type exports" ([#8083](https://github.com/novuhq/novu/pull/8083))
+- **js,react,next:** Named type exports ([#8080](https://github.com/novuhq/novu/pull/8080))
+- **api-service:** Remove lock from cached entity 2nd try ([#7979](https://github.com/novuhq/novu/pull/7979))
+- **root:** simplify service dependencies in docker-compose.yml ([#7993](https://github.com/novuhq/novu/pull/7993))
+- **root:** Stop updating lock-file when releasing new packages ([2107336ae2](https://github.com/novuhq/novu/commit/2107336ae2))
+- **api-service:** remove-lock-from-cached-entity ([#7923](https://github.com/novuhq/novu/pull/7923))
+- **root:** add NEW_RELIC_ENABLED to docker community ([#7943](https://github.com/novuhq/novu/pull/7943))
+- **root:** remove healthcheck option in docker-compose.yml ([#7929](https://github.com/novuhq/novu/pull/7929))
+- **react,nextjs:** Add use-client to exports ([#7934](https://github.com/novuhq/novu/pull/7934))
+- **react:** use counts hooks used with not existing tags ([#7933](https://github.com/novuhq/novu/pull/7933))
+- **api-service:** Remove redlock ([#7845](https://github.com/novuhq/novu/pull/7845))
+- **api-service:** fix idices not created in mongo-test ([#7857](https://github.com/novuhq/novu/pull/7857))
+- **root:** unhandled promise reject and undefined ff kind ([#7732](https://github.com/novuhq/novu/pull/7732))
+- **api-service:** remove only on e2e ([#7691](https://github.com/novuhq/novu/pull/7691))
+
+### ❤️ Thank You
+
+- Aaron Ritter @Aaron-Ritter
+- Dima Grossman @scopsy
+- GalTidhar @tatarco
+- George Desipris @desiprisg
+- George Djabarov @djabarovgeorge
+- Himanshu Garg @merrcury
+- Pawan Jain
+- Paweł Tymczuk @LetItRock
+- Sokratis Vidros @SokratisVidros
+
 ## v3.0.3 (2025-03-31)
 
 ### 🚀 Features
