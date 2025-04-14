@@ -92,8 +92,7 @@ export class NotificationsCount {
       retentionDays = retentionPeriods[organization.apiServiceLevel];
     }
 
-    // const retentionHours = Math.floor(retentionDays / (60 * 60 * 1000));
-    const retentionHours = 144;
+    const retentionHours = Math.floor(retentionDays / (60 * 60 * 1000));
 
     return addHours(new Date(), -retentionHours);
   }
