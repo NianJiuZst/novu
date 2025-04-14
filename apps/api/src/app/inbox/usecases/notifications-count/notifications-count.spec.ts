@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import { expect } from 'chai';
-import { MessageRepository, SubscriberRepository } from '@novu/dal';
+import { MessageRepository, OrganizationRepository, SubscriberRepository } from '@novu/dal';
 import { ChannelTypeEnum } from '@novu/shared';
 import { buildMessageCountKey, CachedQuery } from '@novu/application-generic';
 
@@ -15,12 +15,17 @@ describe('NotificationsCount', () => {
   let notificationsCount: NotificationsCount;
   let messageRepository: sinon.SinonStubbedInstance<MessageRepository>;
   let subscriberRepository: sinon.SinonStubbedInstance<SubscriberRepository>;
+  let organizationRepository: sinon.SinonStubbedInstance<OrganizationRepository>;
 
   beforeEach(() => {
     messageRepository = sinon.createStubInstance(MessageRepository);
     subscriberRepository = sinon.createStubInstance(SubscriberRepository);
-
-    notificationsCount = new NotificationsCount(messageRepository as any, subscriberRepository as any);
+    organizationRepository = sinon.createStubInstance(OrganizationRepository);
+    notificationsCount = new NotificationsCount(
+      messageRepository as any,
+      subscriberRepository as any,
+      organizationRepository as any
+    );
   });
 
   describe('execute', () => {
