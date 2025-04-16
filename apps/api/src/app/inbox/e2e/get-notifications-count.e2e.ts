@@ -6,7 +6,6 @@ import {
   SubscriberEntity,
   SubscriberRepository,
   CommunityOrganizationRepository,
-  OrganizationRepository,
 } from '@novu/dal';
 import {
   ActorTypeEnum,
@@ -18,7 +17,8 @@ import {
   TemplateVariableTypeEnum,
 } from '@novu/shared';
 import { Novu } from '@novu/api';
-import { subHours } from 'date-fns';
+import { subDays, subHours } from 'date-fns';
+import { Types } from 'mongoose';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
 describe('Get Notifications Count - /inbox/notifications/count (GET) #novu-v2', async () => {
@@ -411,12 +411,18 @@ describe('Get Notifications Count - /inbox/notifications/count (GET) #novu-v2', 
       });
 
       const now = new Date();
-      const withinRetention = subHours(now, 25 * 24); // Within 30+3 days
-      const outsideRetention = subHours(now, 40 * 24); // Outside 30+3 days
+      const withinRetention = subDays(now, 33);
+      const outsideRetention = subDays(now, 34);
 
-      await communityOrganizationRepository.update(
-        { _id: session.organization._id },
-        { apiServiceLevel: ApiServiceLevelEnum.FREE, createdAt: new Date('2024-01-28') }
+      // Use MongoDB's native updateOne with bypassDocumentValidation to ensure the update goes through
+      await communityOrganizationRepository._model.collection.updateOne(
+        { _id: new Types.ObjectId(session.organization._id) },
+        {
+          $set: {
+            apiServiceLevel: ApiServiceLevelEnum.FREE,
+            createdAt: new Date('2024-01-28'),
+          },
+        }
       );
 
       await createMessagesWithDates(
@@ -435,16 +441,12 @@ describe('Get Notifications Count - /inbox/notifications/count (GET) #novu-v2', 
     });
 
     it('should use fallback retention period for unknown apiServiceLevel', async function () {
-      const unknownSession = new UserSession();
-      await unknownSession.initialize();
-
-      const communityOrganizationRepository = new CommunityOrganizationRepository();
       await communityOrganizationRepository.update(
-        { _id: unknownSession.organization._id },
+        { _id: session.organization._id },
         { apiServiceLevel: 'unknown' as any }
       );
 
-      const unknownTemplate = await unknownSession.createTemplate({
+      const unknownTemplate = await session.createTemplate({
         noFeedId: true,
         steps: [
           {
@@ -459,16 +461,13 @@ describe('Get Notifications Count - /inbox/notifications/count (GET) #novu-v2', 
       });
 
       const now = new Date();
-      const withinRetention = subHours(now, 80 * 24); // Within fallback retention (93 days)
-      const outsideRetention = subHours(now, 100 * 24); // Outside fallback retention
+      const withinRetention = subDays(now, 80); // Within fallback retention (93 days)
+      const outsideRetention = subDays(now, 100); // Outside fallback retention
 
-      await communityOrganizationRepository.update(
-        { _id: unknownSession.organization._id },
-        { apiServiceLevel: undefined }
-      );
+      await communityOrganizationRepository.update({ _id: session.organization._id }, { apiServiceLevel: undefined });
 
       await createMessagesWithDates(
-        unknownSession,
+        session,
         [withinRetention, outsideRetention],
         unknownTemplate,
         subscriberRepository
@@ -522,7 +521,6 @@ const createMessagesWithDates = async (
   template: NotificationTemplateEntity,
   subscriberRepository: SubscriberRepository
 ) => {
-  // const novuClient = initNovuClassSdk(session);
   const subscriber = await subscriberRepository.findBySubscriberId(session.environment._id, session.subscriberId);
 
   if (!subscriber) {
@@ -549,13 +547,4 @@ const createMessagesWithDates = async (
       },
     });
   }
-};
-
-const getNotificationsCount2 = async (
-  session: UserSession,
-  filters: Array<{ tags?: string[]; read?: boolean; archived?: boolean }>
-) => {
-  return await session.testAgent
-    .get(`/v1/inbox/notifications/count?filters=${JSON.stringify(filters)}`)
-    .set('Authorization', `Bearer ${session.token}`);
 };
