@@ -66,7 +66,7 @@ export function ControlInput({
     viewRef,
     onChange
   );
-
+  const isVariablePopoverOpen = !!selectedVariable;
   const variable: LiquidVariable | undefined = selectedVariable
     ? {
         name: selectedVariable.value,
@@ -96,8 +96,9 @@ export function ControlInput({
         lastCompletionRef,
         onSelect: handleVariableSelect,
         isAllowedVariable,
+        isEnhancedDigestEnabled,
       }),
-    [handleVariableSelect, isAllowedVariable]
+    [handleVariableSelect, isAllowedVariable, isEnhancedDigestEnabled]
   );
 
   const extensions = useMemo(() => {
@@ -109,6 +110,7 @@ export function ControlInput({
     (open: boolean) => {
       if (!open) {
         setTimeout(() => setSelectedVariable(null), 0);
+        viewRef.current?.focus();
       }
     },
     [setSelectedVariable]
@@ -129,19 +131,28 @@ export function ControlInput({
         value={value}
         onChange={onChange}
       />
-      <EditVariablePopover
-        open={!!selectedVariable}
-        onOpenChange={handleOpenChange}
-        variable={variable}
-        isAllowedVariable={isAllowedVariable}
-        onUpdate={(newValue) => {
-          handleVariableUpdate(newValue);
-          // Focus back to the editor after updating the variable
-          viewRef.current?.focus();
-        }}
-      >
-        <div />
-      </EditVariablePopover>
+      {isVariablePopoverOpen && (
+        <EditVariablePopover
+          variables={variables}
+          open={isVariablePopoverOpen}
+          onOpenChange={handleOpenChange}
+          variable={variable}
+          isAllowedVariable={isAllowedVariable}
+          onUpdate={(newValue) => {
+            handleVariableUpdate(newValue);
+            // Focus back to the editor after updating the variable
+            setTimeout(() => viewRef.current?.focus(), 0);
+          }}
+          onDeleteClick={() => {
+            handleVariableUpdate('');
+            setSelectedVariable(null);
+            // Focus back to the editor after updating the variable
+            setTimeout(() => viewRef.current?.focus(), 0);
+          }}
+        >
+          <div />
+        </EditVariablePopover>
+      )}
     </div>
   );
 }

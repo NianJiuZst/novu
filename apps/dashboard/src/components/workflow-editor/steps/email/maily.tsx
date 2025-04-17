@@ -1,8 +1,8 @@
+import { HTMLAttributes, useCallback, useMemo, useState } from 'react';
 import { Editor } from '@maily-to/core';
 import { Editor as EditorDigest } from '@maily-to/core-digest';
-
 import type { Editor as TiptapEditor } from '@tiptap/core';
-import { HTMLAttributes, useCallback, useMemo, useState } from 'react';
+import { Editor as TiptapEditorReact } from '@tiptap/react';
 
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 import { useParseVariables } from '@/hooks/use-parse-variables';
@@ -39,6 +39,10 @@ export const Maily = ({ value, onChange, className, ...rest }: MailyProps) => {
   const [_, setEditor] = useState<any>();
   const track = useTelemetry();
 
+  const blocks = useMemo(() => {
+    return createEditorBlocks({ track, digestStepBeforeCurrent, isEnhancedDigestEnabled });
+  }, [digestStepBeforeCurrent, isEnhancedDigestEnabled, track]);
+
   const handleCalculateVariables = useCallback(
     ({ query, editor, from }: { query: string; editor: TiptapEditor; from: VariableFrom }) => {
       return calculateVariables({
@@ -64,8 +68,14 @@ export const Maily = ({ value, onChange, className, ...rest }: MailyProps) => {
   );
 
   const extensions = useMemo(
-    () => createExtensions({ calculateVariables: handleCalculateVariables, parsedVariables, isEnhancedDigestEnabled }),
-    [handleCalculateVariables, parsedVariables, isEnhancedDigestEnabled]
+    () =>
+      createExtensions({
+        handleCalculateVariables,
+        parsedVariables,
+        blocks,
+        isEnhancedDigestEnabled,
+      }),
+    [handleCalculateVariables, parsedVariables, blocks, isEnhancedDigestEnabled]
   );
 
   /*
@@ -92,6 +102,23 @@ export const Maily = ({ value, onChange, className, ...rest }: MailyProps) => {
     </style>
   );
 
+  const repeatMenuConfig = useMemo(() => {
+    return {
+      description: (editor: TiptapEditorReact) => <RepeatMenuDescription editor={editor} />,
+    };
+  }, []);
+
+  const onUpdate = useCallback(
+    (editor: TiptapEditorReact) => {
+      setEditor(editor);
+
+      if (onChange) {
+        onChange(JSON.stringify(editor.getJSON()));
+      }
+    },
+    [onChange]
+  );
+
   const _Editor = isEnhancedDigestEnabled ? EditorDigest : Editor;
 
   return (
@@ -107,20 +134,12 @@ export const Maily = ({ value, onChange, className, ...rest }: MailyProps) => {
         <_Editor
           key="repeat-block-enabled"
           config={DEFAULT_EDITOR_CONFIG}
-          blocks={createEditorBlocks({ track, digestStepBeforeCurrent, isEnhancedDigestEnabled })}
+          blocks={blocks}
           extensions={extensions}
           contentJson={value ? JSON.parse(value) : undefined}
           onCreate={setEditor}
-          onUpdate={(editor) => {
-            setEditor(editor);
-
-            if (onChange) {
-              onChange(JSON.stringify(editor.getJSON()));
-            }
-          }}
-          repeatMenuConfig={{
-            description: (editor) => <RepeatMenuDescription editor={editor} />,
-          }}
+          onUpdate={onUpdate}
+          repeatMenuConfig={repeatMenuConfig}
         />
       </div>
     </>
