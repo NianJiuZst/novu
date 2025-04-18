@@ -55,7 +55,6 @@ export class SubscriberResponseDtoOptional {
   @ApiPropertyOptional({
     description: 'An array of topics that the subscriber is subscribed to.',
     type: [String],
-    deprecated: true,
   })
   topics?: string[];
 
