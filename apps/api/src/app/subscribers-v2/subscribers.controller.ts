@@ -12,38 +12,38 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  CreateOrUpdateSubscriberCommand,
+  CreateOrUpdateSubscriberUseCase,
   ExternalApiAccessible,
   UserSession,
-  CreateOrUpdateSubscriberUseCase,
-  CreateOrUpdateSubscriberCommand,
 } from '@novu/application-generic';
 import { ApiRateLimitCategoryEnum, SubscriberCustomData, UserSessionData } from '@novu/shared';
+import { ThrottlerCategory } from '../rate-limiting/guards/throttler.decorator';
+import { DirectionEnum } from '../shared/dtos/base-responses';
 import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
 import { UserAuthentication } from '../shared/framework/swagger/api.key.security';
-import { ListSubscribersCommand } from './usecases/list-subscribers/list-subscribers.command';
-import { ListSubscribersUseCase } from './usecases/list-subscribers/list-subscribers.usecase';
-import { GetSubscriber } from './usecases/get-subscriber/get-subscriber.usecase';
-import { GetSubscriberCommand } from './usecases/get-subscriber/get-subscriber.command';
-import { PatchSubscriber } from './usecases/patch-subscriber/patch-subscriber.usecase';
-import { PatchSubscriberCommand } from './usecases/patch-subscriber/patch-subscriber.command';
-import { GetSubscriberPreferences } from './usecases/get-subscriber-preferences/get-subscriber-preferences.usecase';
-import { GetSubscriberPreferencesCommand } from './usecases/get-subscriber-preferences/get-subscriber-preferences.command';
+import { SdkGroupName, SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
+import { SubscriberResponseDto } from '../subscribers/dtos';
+import { CreateSubscriberRequestDto } from './dtos/create-subscriber.dto';
+import { GetSubscriberPreferencesDto } from './dtos/get-subscriber-preferences.dto';
 import { ListSubscribersQueryDto } from './dtos/list-subscribers-query.dto';
 import { ListSubscribersResponseDto } from './dtos/list-subscribers-response.dto';
-import { SdkGroupName, SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
-import { DirectionEnum } from '../shared/dtos/base-responses';
+import { PatchSubscriberPreferencesDto } from './dtos/patch-subscriber-preferences.dto';
 import { PatchSubscriberRequestDto } from './dtos/patch-subscriber.dto';
-import { SubscriberResponseDto } from '../subscribers/dtos';
+import { RemoveSubscriberResponseDto } from './dtos/remove-subscriber.dto';
+import { GetSubscriberPreferencesCommand } from './usecases/get-subscriber-preferences/get-subscriber-preferences.command';
+import { GetSubscriberPreferences } from './usecases/get-subscriber-preferences/get-subscriber-preferences.usecase';
+import { GetSubscriberCommand } from './usecases/get-subscriber/get-subscriber.command';
+import { GetSubscriber } from './usecases/get-subscriber/get-subscriber.usecase';
+import { ListSubscribersCommand } from './usecases/list-subscribers/list-subscribers.command';
+import { ListSubscribersUseCase } from './usecases/list-subscribers/list-subscribers.usecase';
+import { mapSubscriberEntityToDto } from './usecases/list-subscribers/map-subscriber-entity-to.dto';
+import { PatchSubscriberCommand } from './usecases/patch-subscriber/patch-subscriber.command';
+import { PatchSubscriber } from './usecases/patch-subscriber/patch-subscriber.usecase';
 import { RemoveSubscriberCommand } from './usecases/remove-subscriber/remove-subscriber.command';
 import { RemoveSubscriber } from './usecases/remove-subscriber/remove-subscriber.usecase';
-import { RemoveSubscriberResponseDto } from './dtos/remove-subscriber.dto';
-import { GetSubscriberPreferencesDto } from './dtos/get-subscriber-preferences.dto';
-import { PatchSubscriberPreferencesDto } from './dtos/patch-subscriber-preferences.dto';
 import { UpdateSubscriberPreferencesCommand } from './usecases/update-subscriber-preferences/update-subscriber-preferences.command';
 import { UpdateSubscriberPreferences } from './usecases/update-subscriber-preferences/update-subscriber-preferences.usecase';
-import { ThrottlerCategory } from '../rate-limiting/guards/throttler.decorator';
-import { CreateSubscriberRequestDto } from './dtos/create-subscriber.dto';
-import { mapSubscriberEntityToDto } from './usecases/list-subscribers/map-subscriber-entity-to.dto';
 
 @ThrottlerCategory(ApiRateLimitCategoryEnum.CONFIGURATION)
 @Controller({ path: '/subscribers', version: '2' })
@@ -102,6 +102,7 @@ export class SubscribersController {
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string
   ): Promise<SubscriberResponseDto> {
+    console.log('GET SUBSCRIBER', { user });
     return await this.getSubscriberUsecase.execute(
       GetSubscriberCommand.create({
         environmentId: user.environmentId,

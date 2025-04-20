@@ -97,8 +97,6 @@ export class SendMessage {
       } as SubscriberEntity;
     }
 
-    console.log('enrichedSubscriber', enrichedSubscriber);
-
     const variables = await this.normalizeVariablesUsecase.execute(
       NormalizeVariablesCommand.create({
         filters: command.job.step.filters || [],
