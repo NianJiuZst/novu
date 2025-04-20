@@ -1,16 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
 import {
-  DigestTypeEnum,
-  ExecutionDetailsSourceEnum,
-  ExecutionDetailsStatusEnum,
-  IDigestRegularMetadata,
-  IPreferenceChannels,
-  PreferencesTypeEnum,
-  StepTypeEnum,
-  WorkflowTypeEnum,
-} from '@novu/shared';
-import {
   AnalyticsService,
   buildSubscriberKey,
   CachedResponse,
@@ -19,6 +9,7 @@ import {
   CreateExecutionDetails,
   CreateExecutionDetailsCommand,
   DetailEnum,
+  ExecuteBridgeRequest,
   GetPreferences,
   GetSubscriberTemplatePreference,
   GetSubscriberTemplatePreferenceCommand,
@@ -31,27 +22,40 @@ import {
   PlatformException,
 } from '@novu/application-generic';
 import {
+  EnvironmentRepository,
   JobEntity,
   JobRepository,
   JobStatusEnum,
   NotificationTemplateRepository,
+  SubscriberEntity,
   SubscriberRepository,
   TenantEntity,
   TenantRepository,
 } from '@novu/dal';
-import { ExecuteOutput } from '@novu/framework/internal';
+import { ExecuteOutput, PostActionEnum } from '@novu/framework/internal';
+import {
+  DigestTypeEnum,
+  ExecutionDetailsSourceEnum,
+  ExecutionDetailsStatusEnum,
+  IDigestRegularMetadata,
+  IPreferenceChannels,
+  PreferencesTypeEnum,
+  StepTypeEnum,
+  WorkflowOriginEnum,
+  WorkflowTypeEnum,
+} from '@novu/shared';
 
-import { SendMessageCommand } from './send-message.command';
-import { SendMessageDelay } from './send-message-delay.usecase';
-import { SendMessageEmail } from './send-message-email.usecase';
-import { SendMessageSms } from './send-message-sms.usecase';
-import { SendMessageInApp } from './send-message-in-app.usecase';
-import { SendMessageChat } from './send-message-chat.usecase';
-import { SendMessagePush } from './send-message-push.usecase';
+import { ExecuteBridgeJob } from '../execute-bridge-job';
 import { Digest } from './digest';
 import { ExecuteStepCustom } from './execute-step-custom.usecase';
-import { ExecuteBridgeJob } from '../execute-bridge-job';
+import { SendMessageChat } from './send-message-chat.usecase';
+import { SendMessageDelay } from './send-message-delay.usecase';
+import { SendMessageEmail } from './send-message-email.usecase';
+import { SendMessageInApp } from './send-message-in-app.usecase';
+import { SendMessagePush } from './send-message-push.usecase';
+import { SendMessageSms } from './send-message-sms.usecase';
 import { SendMessageResult } from './send-message-type.usecase';
+import { SendMessageCommand } from './send-message.command';
 
 @Injectable()
 export class SendMessage {
@@ -73,12 +77,27 @@ export class SendMessage {
     private tenantRepository: TenantRepository,
     private analyticsService: AnalyticsService,
     private normalizeVariablesUsecase: NormalizeVariables,
-    private executeBridgeJob: ExecuteBridgeJob
+    private executeBridgeJob: ExecuteBridgeJob,
+    private executeBridgeRequest: ExecuteBridgeRequest,
+    private environmentRepository: EnvironmentRepository
   ) {}
 
   @InstrumentUsecase()
   public async execute(command: SendMessageCommand): Promise<SendMessageResult> {
     const payload = await this.buildCompileContext(command);
+
+    // Get subscriber details from resolver if available
+    console.log('RESOLVING SUBSCRIBER', command.job.subscriberId);
+    const enrichedSubscriber = await this.resolveSubscriberDetails(command);
+
+    if (enrichedSubscriber) {
+      payload.subscriber = {
+        ...payload.subscriber,
+        ...enrichedSubscriber,
+      } as SubscriberEntity;
+    }
+
+    console.log('enrichedSubscriber', enrichedSubscriber);
 
     const variables = await this.normalizeVariablesUsecase.execute(
       NormalizeVariablesCommand.create({
@@ -486,6 +505,70 @@ export class SendMessage {
     }
 
     return tenant;
+  }
+
+  /**
+   * Resolves subscriber details using the bridge resolver functionality
+   * @param command The SendMessageCommand containing job and environment details
+   * @returns Enriched subscriber details if available, null otherwise
+   */
+  private async resolveSubscriberDetails(command: SendMessageCommand): Promise<Record<string, any> | null> {
+    try {
+      const environment = await this.environmentRepository.findOne(
+        {
+          _id: command.environmentId,
+          _organizationId: command.organizationId,
+        },
+        'bridge apiKeys _id'
+      );
+
+      if (!environment || !environment?.bridge?.url) {
+        return null;
+      }
+
+      const subscriberId = command.job.subscriberId;
+      if (!subscriberId) {
+        return null;
+      }
+
+      // Since we need to send the entities in the body, we need to use the PostActionEnum.TRIGGER
+      // and pass our own body with the entities to resolve
+      const response = await this.executeBridgeRequest.execute({
+        environmentId: command.environmentId,
+        workflowOrigin: WorkflowOriginEnum.NOVU_CLOUD,
+        statelessBridgeUrl: environment?.bridge?.url,
+        event: {
+          entities: [
+            {
+              type: 'subscriber',
+              id: subscriberId,
+            },
+          ],
+        } as any,
+        action: PostActionEnum.RESOLVE,
+        searchParams: {
+          action: 'resolve',
+        } as any,
+        processError: async (error) => {
+          // Log the error but don't fail the job
+          console.error(`Error resolving subscriber: ${error.message}`);
+        },
+      });
+
+      // Cast to any because we know the response structure
+      const responseData = response as any;
+
+      // Return the subscriber data if found
+      if (responseData?.subscriber) {
+        return responseData.subscriber;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Failed to resolve subscriber details:', error);
+
+      return null;
+    }
   }
 }
 

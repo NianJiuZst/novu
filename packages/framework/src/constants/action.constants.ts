@@ -2,6 +2,7 @@ export enum PostActionEnum {
   TRIGGER = 'trigger',
   EXECUTE = 'execute',
   PREVIEW = 'preview',
+  RESOLVE = 'resolve',
 }
 
 export enum GetActionEnum {

@@ -28,6 +28,7 @@ import type {
   Event,
   ExecuteOutput,
   HealthCheck,
+  ResolveSubscriberCommand,
   Schema,
   Skip,
   State,
@@ -41,8 +42,8 @@ import { validateData } from './validators';
 
 import { mockSchema } from './jsonSchemaFaker';
 import { prettyPrintDiscovery } from './resources/workflow/pretty-print-discovery';
-import { deepMerge } from './utils/object.utils';
 import { createLiquidEngine } from './utils/liquid.utils';
+import { deepMerge } from './utils/object.utils';
 
 function isRuntimeInDevelopment() {
   return ['development', undefined].includes(process.env.NODE_ENV);
@@ -62,11 +63,14 @@ export class Client {
 
   public strictAuthentication: boolean;
 
+  private resolvers?: ClientOptions['resolvers'];
+
   constructor(options?: ClientOptions) {
     const builtOpts = this.buildOptions(options);
     this.apiUrl = builtOpts.apiUrl;
     this.secretKey = builtOpts.secretKey;
     this.strictAuthentication = builtOpts.strictAuthentication;
+    this.resolvers = options?.resolvers;
     this.templateEngine = createLiquidEngine();
   }
 
@@ -75,6 +79,7 @@ export class Client {
       apiUrl: resolveApiUrl(providedOptions?.apiUrl),
       secretKey: resolveSecretKey(providedOptions?.secretKey),
       strictAuthentication: !isRuntimeInDevelopment(),
+      resolvers: providedOptions?.resolvers || {},
     };
 
     if (providedOptions?.strictAuthentication !== undefined) {
@@ -388,6 +393,7 @@ export class Client {
     const actionMessages = {
       [PostActionEnum.EXECUTE]: 'Executing',
       [PostActionEnum.PREVIEW]: 'Previewing',
+      [PostActionEnum.RESOLVE]: 'Resolving',
     } as const;
 
     const actionMessage = actionMessages[event.action];
@@ -480,6 +486,7 @@ export class Client {
     const resultMessages = {
       [PostActionEnum.EXECUTE]: 'Executed',
       [PostActionEnum.PREVIEW]: 'Previewed',
+      [PostActionEnum.RESOLVE]: 'Resolved',
     } as const;
     const resultMessage = resultMessages[event.action];
 
@@ -531,6 +538,7 @@ export class Client {
     const actionMessages = {
       [PostActionEnum.EXECUTE]: 'Executed',
       [PostActionEnum.PREVIEW]: 'Previewed',
+      [PostActionEnum.RESOLVE]: 'Resolved',
     } as const;
     const actionMessage = actionMessages[event.action];
     const message = error ? 'Failed to execute' : actionMessage;
@@ -816,6 +824,39 @@ export class Client {
     }
 
     return getCodeResult;
+  }
+
+  /**
+   * Resolves entities using the resolver functions provided in the client options.
+   * Currently only supports subscriber entities.
+   * @param command - The command containing the entities to resolve
+   * @returns Object with resolved entities grouped by type
+   */
+  public async resolveSubscriber(command: ResolveSubscriberCommand): Promise<Record<string, any>> {
+    const result: Record<string, any> = {};
+
+    if (!command.entities || !Array.isArray(command.entities) || command.entities.length === 0) {
+      return result;
+    }
+
+    for (const entity of command.entities) {
+      if (entity.type === 'subscriber') {
+        if (!this.resolvers?.subscriber) {
+          continue;
+        }
+
+        try {
+          const subscriber = await this.resolvers.subscriber(entity.id);
+          if (subscriber) {
+            result.subscriber = subscriber;
+          }
+        } catch (error) {
+          console.error(`${EMOJI.ERROR} Failed to resolve subscriber: ${entity.id}`, error);
+        }
+      }
+    }
+
+    return result;
   }
 }
 function buildSteps(stateArray: State[]) {

@@ -1,4 +1,13 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { EnvironmentRepository } from '@novu/dal';
+import {
+  GetActionEnum,
+  HttpHeaderKeysEnum,
+  HttpQueryKeysEnum,
+  isFrameworkError,
+  PostActionEnum,
+} from '@novu/framework/internal';
+import { WorkflowOriginEnum } from '@novu/shared';
 import got, {
   CacheError,
   HTTPError,
@@ -12,21 +21,12 @@ import got, {
   UploadError,
 } from 'got';
 import { createHmac } from 'node:crypto';
-import {
-  GetActionEnum,
-  HttpHeaderKeysEnum,
-  HttpQueryKeysEnum,
-  isFrameworkError,
-  PostActionEnum,
-} from '@novu/framework/internal';
-import { EnvironmentRepository } from '@novu/dal';
-import { WorkflowOriginEnum } from '@novu/shared';
-import { BridgeError, ExecuteBridgeRequestCommand, ExecuteBridgeRequestDto } from './execute-bridge-request.command';
-import { GetDecryptedSecretKey, GetDecryptedSecretKeyCommand } from '../get-decrypted-secret-key';
-import { BRIDGE_EXECUTION_ERROR } from '../../utils';
 import { HttpRequestHeaderKeysEnum } from '../../http';
 import { Instrument, InstrumentUsecase } from '../../instrumentation';
 import { PinoLogger } from '../../logging';
+import { BRIDGE_EXECUTION_ERROR } from '../../utils';
+import { GetDecryptedSecretKey, GetDecryptedSecretKeyCommand } from '../get-decrypted-secret-key';
+import { BridgeError, ExecuteBridgeRequestCommand, ExecuteBridgeRequestDto } from './execute-bridge-request.command';
 
 const inTestEnv = process.env.NODE_ENV === 'test';
 
@@ -176,7 +176,9 @@ export class ExecuteBridgeRequest {
       },
     };
 
-    const request = [PostActionEnum.EXECUTE, PostActionEnum.PREVIEW].includes(command.action as PostActionEnum)
+    const request = [PostActionEnum.EXECUTE, PostActionEnum.PREVIEW, PostActionEnum.RESOLVE].includes(
+      command.action as PostActionEnum
+    )
       ? got.post
       : got.get;
 
@@ -303,6 +305,8 @@ export class ExecuteBridgeRequest {
         // If the body is not valid JSON, we'll just use an empty object.
         body = {};
       }
+      console.log('body', body);
+      console.log('error', error);
 
       if (error instanceof HTTPError && isFrameworkError(body)) {
         // Handle known Framework errors. Propagate the error code and message.

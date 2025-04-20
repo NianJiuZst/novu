@@ -20,9 +20,9 @@ import {
   SignatureNotFoundError,
   SigningKeyNotFoundError,
 } from './errors';
-import type { Awaitable, EventTriggerParams, Workflow } from './types';
-import { initApiClient, createHmacSubtle } from './utils';
 import { isPlatformError } from './errors/guard.errors';
+import type { Awaitable, EventTriggerParams, Workflow } from './types';
+import { createHmacSubtle, initApiClient } from './utils';
 
 export type ServeHandlerOptions = {
   client?: Client;
@@ -197,6 +197,35 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
           stepId,
           action,
         });
+
+        return this.createResponse(HttpStatusEnum.OK, result);
+      },
+      /**
+       * Handle the 'resolve' action which uses the resolver functions
+       * provided in the ClientOptions to fetch entity data.
+       *
+       * This action requires an entities array in the request body.
+       * Returns an object with resolved entities grouped by type.
+       */
+      [PostActionEnum.RESOLVE]: async () => {
+        const { entities } = body;
+
+        if (!entities || !Array.isArray(entities) || entities.length === 0) {
+          return this.createResponse(HttpStatusEnum.BAD_REQUEST, {
+            message: 'entities array is required',
+          });
+        }
+
+        // Validate each entity in the array
+        for (const entity of entities) {
+          if (!entity.type || !entity.id) {
+            return this.createResponse(HttpStatusEnum.BAD_REQUEST, {
+              message: 'Each entity must have type and id properties',
+            });
+          }
+        }
+
+        const result = await this.client.resolveSubscriber({ entities });
 
         return this.createResponse(HttpStatusEnum.OK, result);
       },
