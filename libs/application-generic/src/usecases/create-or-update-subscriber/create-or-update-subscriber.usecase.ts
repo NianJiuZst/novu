@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { SubscriberEntity, SubscriberRepository } from '@novu/dal';
-import { AnalyticsService, buildSubscriberKey, InvalidateCacheService } from '../../services';
-import { UpdateSubscriber, UpdateSubscriberCommand } from '../update-subscriber';
-import { OAuthHandlerEnum, UpdateSubscriberChannel, UpdateSubscriberChannelCommand } from '../subscribers';
+import { EnvironmentRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
 import { RetryOnError } from '../../decorators/retry-on-error-decorator';
+import { AnalyticsService, buildSubscriberKey, InvalidateCacheService } from '../../services';
+import { OAuthHandlerEnum, UpdateSubscriberChannel, UpdateSubscriberChannelCommand } from '../subscribers';
+import { UpdateSubscriber, UpdateSubscriberCommand } from '../update-subscriber';
 import { CreateOrUpdateSubscriberCommand } from './create-or-update-subscriber.command';
 
 @Injectable()
@@ -13,7 +13,8 @@ export class CreateOrUpdateSubscriberUseCase {
     private subscriberRepository: SubscriberRepository,
     private updateSubscriberUseCase: UpdateSubscriber,
     private updateSubscriberChannel: UpdateSubscriberChannel,
-    private analyticsService: AnalyticsService
+    private analyticsService: AnalyticsService,
+    private environmentRepository: EnvironmentRepository
   ) {}
 
   @RetryOnError('MongoServerError', {
@@ -21,12 +22,15 @@ export class CreateOrUpdateSubscriberUseCase {
     delay: 500,
   })
   async execute(command: CreateOrUpdateSubscriberCommand) {
+    const environment = await this.environmentRepository.findOne({
+      _id: command.environmentId,
+    });
     const persistedSubscriber = await this.getExistingSubscriber(command);
 
     if (persistedSubscriber) {
-      await this.updateSubscriber(command, persistedSubscriber);
+      await this.updateSubscriber(command, persistedSubscriber, environment?.disableSubscriberPersistence);
     } else {
-      await this.createSubscriber(command);
+      await this.createSubscriber(command, environment?.disableSubscriberPersistence);
     }
 
     if (command.channels?.length) {
@@ -39,8 +43,8 @@ export class CreateOrUpdateSubscriberUseCase {
     });
   }
 
-  private async updateSubscriber(command: CreateOrUpdateSubscriberCommand, existingSubscriber: SubscriberEntity) {
-    return await this.updateSubscriberUseCase.execute(this.buildUpdateSubscriberCommand(command, existingSubscriber));
+  private async updateSubscriber(command: CreateOrUpdateSubscriberCommand, existingSubscriber: SubscriberEntity, disableSubscriberPersistence: boolean) {
+    return await this.updateSubscriberUseCase.execute(this.buildUpdateSubscriberCommand(command, existingSubscriber, disableSubscriberPersistence));
   }
 
   private async getExistingSubscriber(command: CreateOrUpdateSubscriberCommand) {
@@ -66,7 +70,16 @@ export class CreateOrUpdateSubscriberUseCase {
     });
   }
 
-  private buildUpdateSubscriberCommand(command: CreateOrUpdateSubscriberCommand, subscriber: SubscriberEntity) {
+  private buildUpdateSubscriberCommand(command: CreateOrUpdateSubscriberCommand, subscriber: SubscriberEntity, disableSubscriberPersistence: boolean) {
+    if (disableSubscriberPersistence) {
+      return UpdateSubscriberCommand.create({
+        environmentId: command.environmentId,
+        organizationId: command.organizationId,
+        subscriberId: command.subscriberId,
+        subscriber,
+      });
+    }
+
     return UpdateSubscriberCommand.create({
       environmentId: command.environmentId,
       organizationId: command.organizationId,
@@ -101,7 +114,7 @@ export class CreateOrUpdateSubscriberUseCase {
     }
   }
 
-  private async createSubscriber(command: CreateOrUpdateSubscriberCommand): Promise<SubscriberEntity> {
+  private async createSubscriber(command: CreateOrUpdateSubscriberCommand, disableSubscriberPersistence: boolean): Promise<SubscriberEntity> {
     await this.invalidateCache.invalidateByKey({
       key: buildSubscriberKey({
         subscriberId: command.subscriberId,
@@ -109,19 +122,27 @@ export class CreateOrUpdateSubscriberUseCase {
       }),
     });
 
-    const createdSubscriber = await this.subscriberRepository.create({
+    let subscriberData: Partial<SubscriberEntity> & { _environmentId: string; _organizationId: string; } = {
       _environmentId: command.environmentId,
       _organizationId: command.organizationId,
-      firstName: command.firstName,
-      lastName: command.lastName,
       subscriberId: command.subscriberId,
-      email: command.email,
-      phone: command.phone,
-      avatar: command.avatar,
-      locale: command.locale,
-      data: command.data,
-      timezone: command.timezone,
-    });
+    };
+
+    if (!disableSubscriberPersistence) {
+      subscriberData = {
+        ...subscriberData,
+        firstName: command.firstName,
+        lastName: command.lastName,
+        email: command.email,
+        phone: command.phone,
+        avatar: command.avatar,
+        locale: command.locale,
+        data: command.data,
+        timezone: command.timezone,
+      };
+    }
+
+    const createdSubscriber = await this.subscriberRepository.create(subscriberData);
     this.publishSubscriberCreatedEvent(command);
 
     return createdSubscriber;

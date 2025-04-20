@@ -50,6 +50,10 @@ const environmentSchema = new Schema<EnvironmentDBModel>(
     echo: {
       url: Schema.Types.String,
     },
+    disableSubscriberPersistence: {
+      type: Schema.Types.Boolean,
+      default: false,
+    },
     bridge: {
       url: Schema.Types.String,
     },

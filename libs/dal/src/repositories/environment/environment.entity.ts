@@ -53,6 +53,8 @@ export class EnvironmentEntity {
     url: string;
   };
 
+  disableSubscriberPersistence?: boolean;
+
   createdAt?: string;
 
   updatedAt?: string;
