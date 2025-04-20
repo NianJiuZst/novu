@@ -1,16 +1,16 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { SubscribersService, UserSession } from '@novu/testing';
-import { NotFoundException } from '@nestjs/common';
 import { expect } from 'chai';
 
-import { GetSubscriber } from './get-subscriber.usecase';
 import { GetSubscriberCommand } from './get-subscriber.command';
+import { GetSubscriberV1 } from './get-subscriber.usecase';
 
-import { SubscribersV1Module } from '../../subscribersV1.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { SubscribersV1Module } from '../../subscribersV1.module';
 
 describe('Get Subscriber', function () {
-  let useCase: GetSubscriber;
+  let useCase: GetSubscriberV1;
   let session: UserSession;
 
   beforeEach(async () => {
@@ -22,7 +22,7 @@ describe('Get Subscriber', function () {
     session = new UserSession();
     await session.initialize();
 
-    useCase = moduleRef.get<GetSubscriber>(GetSubscriber);
+    useCase = moduleRef.get<GetSubscriberV1>(GetSubscriberV1);
   });
 
   it('should get a subscriber', async function () {

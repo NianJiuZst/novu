@@ -1,15 +1,15 @@
-import sinon from 'sinon';
-import { expect } from 'chai';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { ButtonTypeEnum, ChannelCTATypeEnum, MessageActionStatusEnum } from '@novu/shared';
-import { ChannelTypeEnum, MessageRepository } from '@novu/dal';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { AnalyticsService, buildFeedKey, InvalidateCacheService } from '@novu/application-generic';
+import { ChannelTypeEnum, MessageRepository } from '@novu/dal';
+import { ButtonTypeEnum, ChannelCTATypeEnum, MessageActionStatusEnum } from '@novu/shared';
+import { expect } from 'chai';
+import sinon from 'sinon';
 
-import { GetSubscriber } from '../../../subscribers/usecases/get-subscriber';
-import { UpdateNotificationAction } from './update-notification-action.usecase';
-import type { UpdateNotificationActionCommand } from './update-notification-action.command';
-import { mapToDto } from '../../utils/notification-mapper';
+import { GetSubscriberV1 } from '../../../subscribers/usecases/get-subscriber';
 import { AnalyticsEventsEnum } from '../../utils';
+import { mapToDto } from '../../utils/notification-mapper';
+import type { UpdateNotificationActionCommand } from './update-notification-action.command';
+import { UpdateNotificationAction } from './update-notification-action.usecase';
 
 const mockSubscriber: any = { _id: '123', subscriberId: 'test-mockSubscriber' };
 const mockMessage: any = {
@@ -52,13 +52,13 @@ const mockMessageWithButtons: any = {
 describe('UpdateNotificationAction', () => {
   let updateNotificationAction: UpdateNotificationAction;
   let invalidateCacheMock: sinon.SinonStubbedInstance<InvalidateCacheService>;
-  let getSubscriberMock: sinon.SinonStubbedInstance<GetSubscriber>;
+  let getSubscriberMock: sinon.SinonStubbedInstance<GetSubscriberV1>;
   let analyticsServiceMock: sinon.SinonStubbedInstance<AnalyticsService>;
   let messageRepositoryMock: sinon.SinonStubbedInstance<MessageRepository>;
 
   beforeEach(() => {
     invalidateCacheMock = sinon.createStubInstance(InvalidateCacheService);
-    getSubscriberMock = sinon.createStubInstance(GetSubscriber);
+    getSubscriberMock = sinon.createStubInstance(GetSubscriberV1);
     analyticsServiceMock = sinon.createStubInstance(AnalyticsService);
     messageRepositoryMock = sinon.createStubInstance(MessageRepository);
 

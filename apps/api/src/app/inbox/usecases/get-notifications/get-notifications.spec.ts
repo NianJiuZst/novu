@@ -1,15 +1,15 @@
-import sinon from 'sinon';
-import { expect } from 'chai';
-import { ChannelCTATypeEnum } from '@novu/shared';
-import { ChannelTypeEnum, MessageRepository } from '@novu/dal';
 import { AnalyticsService } from '@novu/application-generic';
+import { ChannelTypeEnum, MessageRepository } from '@novu/dal';
+import { ChannelCTATypeEnum } from '@novu/shared';
+import { expect } from 'chai';
+import sinon from 'sinon';
 
 import { BadRequestException } from '@nestjs/common';
-import { GetNotifications } from './get-notifications.usecase';
-import { GetSubscriber } from '../../../subscribers/usecases/get-subscriber';
-import type { GetNotificationsCommand } from './get-notifications.command';
-import { mapToDto } from '../../utils/notification-mapper';
+import { GetSubscriberV1 } from '../../../subscribers/usecases/get-subscriber';
 import { AnalyticsEventsEnum } from '../../utils';
+import { mapToDto } from '../../utils/notification-mapper';
+import type { GetNotificationsCommand } from './get-notifications.command';
+import { GetNotifications } from './get-notifications.usecase';
 
 const mockSubscriber: any = { _id: '123', subscriberId: 'test-mockSubscriber' };
 const mockMessages: any = [
@@ -32,12 +32,12 @@ const mockMessages: any = [
 
 describe('GetNotifications', () => {
   let getNotifications: GetNotifications;
-  let getSubscriberMock: sinon.SinonStubbedInstance<GetSubscriber>;
+  let getSubscriberMock: sinon.SinonStubbedInstance<GetSubscriberV1>;
   let messageRepositoryMock: sinon.SinonStubbedInstance<MessageRepository>;
   let analyticsServiceMock: sinon.SinonStubbedInstance<AnalyticsService>;
 
   beforeEach(() => {
-    getSubscriberMock = sinon.createStubInstance(GetSubscriber);
+    getSubscriberMock = sinon.createStubInstance(GetSubscriberV1);
     messageRepositoryMock = sinon.createStubInstance(MessageRepository);
     analyticsServiceMock = sinon.createStubInstance(AnalyticsService);
 

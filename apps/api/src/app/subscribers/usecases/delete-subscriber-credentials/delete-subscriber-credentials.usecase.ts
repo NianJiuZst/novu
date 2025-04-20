@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { SubscriberRepository } from '@novu/dal';
 import { AnalyticsService, buildSubscriberKey, InvalidateCacheService } from '@novu/application-generic';
+import { SubscriberRepository } from '@novu/dal';
 
+import { GetSubscriberCommand, GetSubscriberV1 } from '../get-subscriber';
 import { DeleteSubscriberCredentialsCommand } from './delete-subscriber-credentials.command';
-import { GetSubscriberCommand, GetSubscriber } from '../get-subscriber';
 
 @Injectable()
 export class DeleteSubscriberCredentials {
@@ -11,7 +11,7 @@ export class DeleteSubscriberCredentials {
     private invalidateCache: InvalidateCacheService,
     private subscriberRepository: SubscriberRepository,
     private analyticsService: AnalyticsService,
-    private getSubscriberUseCase: GetSubscriber
+    private getSubscriberUseCase: GetSubscriberV1
   ) {}
 
   async execute(command: DeleteSubscriberCredentialsCommand): Promise<void> {

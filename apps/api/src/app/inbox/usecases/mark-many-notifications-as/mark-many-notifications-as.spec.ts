@@ -1,16 +1,16 @@
-import sinon from 'sinon';
-import { expect } from 'chai';
-import { ButtonTypeEnum, ChannelCTATypeEnum, WebSocketEventEnum } from '@novu/shared';
-import { ChannelTypeEnum, MessageRepository } from '@novu/dal';
 import {
   buildFeedKey,
   buildMessageCountKey,
   InvalidateCacheService,
   WebSocketsQueueService,
 } from '@novu/application-generic';
+import { ChannelTypeEnum, MessageRepository } from '@novu/dal';
+import { ChannelCTATypeEnum, WebSocketEventEnum } from '@novu/shared';
+import { expect } from 'chai';
+import sinon from 'sinon';
 
 import { BadRequestException } from '@nestjs/common';
-import { GetSubscriber } from '../../../subscribers/usecases/get-subscriber';
+import { GetSubscriberV1 } from '../../../subscribers/usecases/get-subscriber';
 import type { MarkManyNotificationsAsCommand } from './mark-many-notifications-as.command';
 import { MarkManyNotificationsAs } from './mark-many-notifications-as.usecase';
 
@@ -35,13 +35,13 @@ describe('MarkManyNotificationsAs', () => {
   let markManyNotificationsAs: MarkManyNotificationsAs;
   let invalidateCacheMock: sinon.SinonStubbedInstance<InvalidateCacheService>;
   let webSocketsQueueServiceMock: sinon.SinonStubbedInstance<WebSocketsQueueService>;
-  let getSubscriberMock: sinon.SinonStubbedInstance<GetSubscriber>;
+  let getSubscriberMock: sinon.SinonStubbedInstance<GetSubscriberV1>;
   let messageRepositoryMock: sinon.SinonStubbedInstance<MessageRepository>;
 
   beforeEach(() => {
     invalidateCacheMock = sinon.createStubInstance(InvalidateCacheService);
     webSocketsQueueServiceMock = sinon.createStubInstance(WebSocketsQueueService);
-    getSubscriberMock = sinon.createStubInstance(GetSubscriber);
+    getSubscriberMock = sinon.createStubInstance(GetSubscriberV1);
     messageRepositoryMock = sinon.createStubInstance(MessageRepository);
 
     markManyNotificationsAs = new MarkManyNotificationsAs(

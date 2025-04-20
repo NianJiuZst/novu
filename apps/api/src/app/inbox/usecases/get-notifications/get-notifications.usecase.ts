@@ -1,8 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AnalyticsService, buildFeedKey, CachedQuery } from '@novu/application-generic';
 import { ChannelTypeEnum, MessageRepository } from '@novu/dal';
 
-import { GetSubscriber } from '../../../subscribers/usecases/get-subscriber';
+import { GetSubscriberV1 } from '../../../subscribers/usecases/get-subscriber';
 import type { GetNotificationsResponseDto } from '../../dtos/get-notifications-response.dto';
 import { AnalyticsEventsEnum } from '../../utils';
 import { mapToDto } from '../../utils/notification-mapper';
@@ -11,7 +11,7 @@ import type { GetNotificationsCommand } from './get-notifications.command';
 @Injectable()
 export class GetNotifications {
   constructor(
-    private getSubscriber: GetSubscriber,
+    private getSubscriber: GetSubscriberV1,
     private analyticsService: AnalyticsService,
     private messageRepository: MessageRepository
   ) {}

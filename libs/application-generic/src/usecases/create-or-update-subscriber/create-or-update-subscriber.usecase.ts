@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { EnvironmentRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
-import { PostActionEnum } from '@novu/framework/internal';
-import { WorkflowOriginEnum } from '@novu/shared';
 import { RetryOnError } from '../../decorators/retry-on-error-decorator';
 import { AnalyticsService, buildSubscriberKey, InvalidateCacheService } from '../../services';
-import { ExecuteBridgeRequest } from '../execute-bridge-request';
+import { GetSubscriber, GetSubscriberCommand } from '../get-subscriber';
 import { OAuthHandlerEnum, UpdateSubscriberChannel, UpdateSubscriberChannelCommand } from '../subscribers';
 import { UpdateSubscriber, UpdateSubscriberCommand } from '../update-subscriber';
 import { CreateOrUpdateSubscriberCommand } from './create-or-update-subscriber.command';
@@ -18,7 +16,7 @@ export class CreateOrUpdateSubscriberUseCase {
     private updateSubscriberChannel: UpdateSubscriberChannel,
     private analyticsService: AnalyticsService,
     private environmentRepository: EnvironmentRepository,
-    private executeBridgeRequest: ExecuteBridgeRequest,
+    private getSubscriberUsecase: GetSubscriber
   ) {}
 
   @RetryOnError('MongoServerError', {
@@ -26,9 +24,13 @@ export class CreateOrUpdateSubscriberUseCase {
     delay: 500,
   })
   async execute(command: CreateOrUpdateSubscriberCommand) {
-    const environment = await this.environmentRepository.findOne({
-      _id: command.environmentId,
-    }, 'disableSubscriberPersistence _id');
+    const environment = await this.environmentRepository.findOne(
+      {
+        _id: command.environmentId,
+      },
+      'bridge apiKeys _id disableSubscriberPersistence'
+    );
+
     const persistedSubscriber = await this.getExistingSubscriber(command);
 
     if (persistedSubscriber) {
@@ -44,12 +46,18 @@ export class CreateOrUpdateSubscriberUseCase {
     return await this.fetchSubscriber({
       _environmentId: command.environmentId,
       subscriberId: command.subscriberId,
-      disableSubscriberPersistence: environment.disableSubscriberPersistence,
+      organizationId: command.organizationId,
     });
   }
 
-  private async updateSubscriber(command: CreateOrUpdateSubscriberCommand, existingSubscriber: SubscriberEntity, disableSubscriberPersistence: boolean) {
-    return await this.updateSubscriberUseCase.execute(this.buildUpdateSubscriberCommand(command, existingSubscriber, disableSubscriberPersistence));
+  private async updateSubscriber(
+    command: CreateOrUpdateSubscriberCommand,
+    existingSubscriber: SubscriberEntity,
+    disableSubscriberPersistence: boolean
+  ) {
+    return await this.updateSubscriberUseCase.execute(
+      this.buildUpdateSubscriberCommand(command, existingSubscriber, disableSubscriberPersistence)
+    );
   }
 
   private async getExistingSubscriber(command: CreateOrUpdateSubscriberCommand) {
@@ -58,7 +66,7 @@ export class CreateOrUpdateSubscriberUseCase {
       (await this.fetchSubscriber({
         _environmentId: command.environmentId,
         subscriberId: command.subscriberId,
-        disableSubscriberPersistence: false
+        disableSubscriberPersistence: false,
       }));
 
     return existingSubscriber;
@@ -76,7 +84,11 @@ export class CreateOrUpdateSubscriberUseCase {
     });
   }
 
-  private buildUpdateSubscriberCommand(command: CreateOrUpdateSubscriberCommand, subscriber: SubscriberEntity, disableSubscriberPersistence: boolean) {
+  private buildUpdateSubscriberCommand(
+    command: CreateOrUpdateSubscriberCommand,
+    subscriber: SubscriberEntity,
+    disableSubscriberPersistence: boolean
+  ) {
     if (disableSubscriberPersistence) {
       return UpdateSubscriberCommand.create({
         environmentId: command.environmentId,
@@ -120,7 +132,10 @@ export class CreateOrUpdateSubscriberUseCase {
     }
   }
 
-  private async createSubscriber(command: CreateOrUpdateSubscriberCommand, disableSubscriberPersistence: boolean): Promise<SubscriberEntity> {
+  private async createSubscriber(
+    command: CreateOrUpdateSubscriberCommand,
+    disableSubscriberPersistence: boolean
+  ): Promise<SubscriberEntity> {
     await this.invalidateCache.invalidateByKey({
       key: buildSubscriberKey({
         subscriberId: command.subscriberId,
@@ -128,7 +143,7 @@ export class CreateOrUpdateSubscriberUseCase {
       }),
     });
 
-    let subscriberData: Partial<SubscriberEntity> & { _environmentId: string; _organizationId: string; } = {
+    let subscriberData: Partial<SubscriberEntity> & { _environmentId: string; _organizationId: string } = {
       _environmentId: command.environmentId,
       _organizationId: command.organizationId,
       subscriberId: command.subscriberId,
@@ -157,88 +172,18 @@ export class CreateOrUpdateSubscriberUseCase {
   private async fetchSubscriber({
     subscriberId,
     _environmentId,
-    disableSubscriberPersistence,
+    organizationId,
   }: {
     subscriberId: string;
     _environmentId: string;
-    disableSubscriberPersistence: boolean;
+    organizationId: string;
   }): Promise<SubscriberEntity | null> {
-
-
-    let dbSubscriber = await this.subscriberRepository.findBySubscriberId(_environmentId, subscriberId, false);
-    if (!dbSubscriber) {
-      return null;
-    }
-
-    if (disableSubscriberPersistence) {
-      const resolvedSubscriber = await this.resolveSubscriberDetails(_environmentId, subscriberId);
-
-      if (resolvedSubscriber) {
-        dbSubscriber = {
-          ...dbSubscriber,
-          ...resolvedSubscriber,
-        }
-      }
-    }
-
-    return dbSubscriber;
-  }
-
-
-  private async resolveSubscriberDetails(environmentId: string, subscriberId: string): Promise<SubscriberEntity | null> {
-    try {
-      const environment = await this.environmentRepository.findOne(
-        {
-          _id: environmentId,
-        },
-        'bridge apiKeys _id'
-      );
-
-      if (!environment || !environment?.bridge?.url) {
-        return null;
-      }
-
-      if (!subscriberId) {
-        return null;
-      }
-
-      // Since we need to send the entities in the body, we need to use the PostActionEnum.TRIGGER
-      // and pass our own body with the entities to resolve
-      const response = await this.executeBridgeRequest.execute({
-        environmentId: environmentId,
-        workflowOrigin: WorkflowOriginEnum.NOVU_CLOUD,
-        statelessBridgeUrl: environment?.bridge?.url,
-        event: {
-          entities: [
-            {
-              type: 'subscriber',
-              id: subscriberId,
-            },
-          ],
-        } as any,
-        action: PostActionEnum.RESOLVE,
-        searchParams: {
-          action: 'resolve',
-        } as any,
-        processError: async (error) => {
-          // Log the error but don't fail the job
-          console.error(`Error resolving subscriber: ${error.message}`);
-        },
-      });
-
-      // Cast to any because we know the response structure
-      const responseData = response as any;
-
-      // Return the subscriber data if found
-      if (responseData?.subscriber) {
-        return responseData.subscriber;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Failed to resolve subscriber details:', error);
-
-      return null;
-    }
+    return this.getSubscriberUsecase.execute(
+      GetSubscriberCommand.create({
+        environmentId: _environmentId,
+        organizationId,
+        subscriberId,
+      })
+    );
   }
 }

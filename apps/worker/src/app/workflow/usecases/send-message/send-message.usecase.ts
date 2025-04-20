@@ -34,7 +34,7 @@ import {
   TenantEntity,
   TenantRepository,
 } from '@novu/dal';
-import { ExecuteOutput, PostActionEnum } from '@novu/framework/internal';
+import { ExecuteOutput } from '@novu/framework/internal';
 import {
   DigestTypeEnum,
   ExecutionDetailsSourceEnum,
@@ -43,7 +43,6 @@ import {
   IPreferenceChannels,
   PreferencesTypeEnum,
   StepTypeEnum,
-  WorkflowOriginEnum,
   WorkflowTypeEnum,
 } from '@novu/shared';
 
@@ -524,72 +523,6 @@ export class SendMessage {
     }
 
     return tenant;
-  }
-
-  /**
-   * Resolves subscriber details using the bridge resolver functionality
-   * @param command The SendMessageCommand containing job and environment details
-   * @returns Enriched subscriber details if available, null otherwise
-   */
-  private async resolveSubscriberDetails(command: SendMessageCommand): Promise<Record<string, any> | null> {
-    try {
-      const environment = await this.environmentRepository.findOne(
-        {
-          _id: command.environmentId,
-          _organizationId: command.organizationId,
-        },
-        'bridge apiKeys _id'
-      );
-
-      if (!environment || !environment?.bridge?.url) {
-        return null;
-      }
-
-      const { subscriberId } = command.job;
-      if (!subscriberId) {
-        return null;
-      }
-
-      /*
-       * Since we need to send the entities in the body, we need to use the PostActionEnum.TRIGGER
-       * and pass our own body with the entities to resolve
-       */
-      const response = await this.executeBridgeRequest.execute({
-        environmentId: command.environmentId,
-        workflowOrigin: WorkflowOriginEnum.NOVU_CLOUD,
-        statelessBridgeUrl: environment?.bridge?.url,
-        event: {
-          entities: [
-            {
-              type: 'subscriber',
-              id: subscriberId,
-            },
-          ],
-        } as any,
-        action: PostActionEnum.RESOLVE,
-        searchParams: {
-          action: 'resolve',
-        } as any,
-        processError: async (error) => {
-          // Log the error but don't fail the job
-          console.error(`Error resolving subscriber: ${error.message}`);
-        },
-      });
-
-      // Cast to any because we know the response structure
-      const responseData = response as any;
-
-      // Return the subscriber data if found
-      if (responseData?.subscriber) {
-        return responseData.subscriber;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Failed to resolve subscriber details:', error);
-
-      return null;
-    }
   }
 }
 

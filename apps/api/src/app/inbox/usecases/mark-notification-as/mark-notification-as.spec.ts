@@ -1,17 +1,17 @@
-import sinon from 'sinon';
-import { expect } from 'chai';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { ChannelCTATypeEnum } from '@novu/shared';
-import { ChannelTypeEnum, MessageRepository } from '@novu/dal';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { AnalyticsService } from '@novu/application-generic';
+import { ChannelTypeEnum, MessageRepository } from '@novu/dal';
+import { ChannelCTATypeEnum } from '@novu/shared';
+import { expect } from 'chai';
+import sinon from 'sinon';
 
-import { MarkNotificationAs } from './mark-notification-as.usecase';
-import { GetSubscriber } from '../../../subscribers/usecases/get-subscriber';
-import type { MarkNotificationAsCommand } from './mark-notification-as.command';
-import { mapToDto } from '../../utils/notification-mapper';
+import { GetSubscriberV1 } from '../../../subscribers/usecases/get-subscriber';
 import { AnalyticsEventsEnum } from '../../utils';
-import { MarkManyNotificationsAs } from '../mark-many-notifications-as/mark-many-notifications-as.usecase';
+import { mapToDto } from '../../utils/notification-mapper';
 import { MarkManyNotificationsAsCommand } from '../mark-many-notifications-as/mark-many-notifications-as.command';
+import { MarkManyNotificationsAs } from '../mark-many-notifications-as/mark-many-notifications-as.usecase';
+import type { MarkNotificationAsCommand } from './mark-notification-as.command';
+import { MarkNotificationAs } from './mark-notification-as.usecase';
 
 const mockSubscriber: any = { _id: '6447aff5d89122e250412c79', subscriberId: '6447aff5d89122e250412c79' };
 const mockMessage: any = {
@@ -33,13 +33,13 @@ const mockMessage: any = {
 describe('MarkNotificationAs', () => {
   let updateNotification: MarkNotificationAs;
   let markManyNotificationsAsMock: sinon.SinonStubbedInstance<MarkManyNotificationsAs>;
-  let getSubscriberMock: sinon.SinonStubbedInstance<GetSubscriber>;
+  let getSubscriberMock: sinon.SinonStubbedInstance<GetSubscriberV1>;
   let analyticsServiceMock: sinon.SinonStubbedInstance<AnalyticsService>;
   let messageRepositoryMock: sinon.SinonStubbedInstance<MessageRepository>;
 
   beforeEach(() => {
     markManyNotificationsAsMock = sinon.createStubInstance(MarkManyNotificationsAs);
-    getSubscriberMock = sinon.createStubInstance(GetSubscriber);
+    getSubscriberMock = sinon.createStubInstance(GetSubscriberV1);
     analyticsServiceMock = sinon.createStubInstance(AnalyticsService);
     messageRepositoryMock = sinon.createStubInstance(MessageRepository);
 

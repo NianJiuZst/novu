@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AnalyticsService } from '@novu/application-generic';
 import { MessageEntity, MessageRepository } from '@novu/dal';
 
-import { GetSubscriber } from '../../../subscribers/usecases/get-subscriber';
+import { GetSubscriberV1 } from '../../../subscribers/usecases/get-subscriber';
 import { AnalyticsEventsEnum } from '../../utils';
 import { mapToDto } from '../../utils/notification-mapper';
 import { InboxNotification } from '../../utils/types';
@@ -14,7 +14,7 @@ import { MarkNotificationAsCommand } from './mark-notification-as.command';
 export class MarkNotificationAs {
   constructor(
     private markManyNotificationsAs: MarkManyNotificationsAs,
-    private getSubscriber: GetSubscriber,
+    private getSubscriber: GetSubscriberV1,
     private analyticsService: AnalyticsService,
     private messageRepository: MessageRepository
   ) {}

@@ -3,14 +3,14 @@ import { MessageEntity, MessageRepository, OrganizationEntity, SubscriberEntity 
 import { ActorTypeEnum, FeatureFlagsKeysEnum } from '@novu/shared';
 
 import { FeatureFlagsService } from '@novu/application-generic';
+import { GetSubscriberCommand, GetSubscriberV1 } from '../../../subscribers/usecases/get-subscriber';
 import { GetMessagesCommand } from './get-messages.command';
-import { GetSubscriber, GetSubscriberCommand } from '../../../subscribers/usecases/get-subscriber';
 
 @Injectable()
 export class GetMessages {
   constructor(
     private messageRepository: MessageRepository,
-    private getSubscriberUseCase: GetSubscriber,
+    private getSubscriberUseCase: GetSubscriberV1,
     private featureFlagService: FeatureFlagsService
   ) {}
 
