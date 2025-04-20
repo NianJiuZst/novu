@@ -8,6 +8,7 @@ import {
   featureFlagsService,
   GetDecryptedSecretKey,
   GetPreferences,
+  GetSubscriber,
   GetSubscriberTemplatePreference,
   GetWorkflowByIdsUseCase,
   InvalidateCacheService,
@@ -32,7 +33,6 @@ import { GetSubscriberGlobalPreference } from '../subscribers/usecases/get-subsc
 import { GetSubscriberPreference } from '../subscribers/usecases/get-subscriber-preference';
 import { SubscribersController } from './subscribers.controller';
 import { GetSubscriberPreferences } from './usecases/get-subscriber-preferences/get-subscriber-preferences.usecase';
-import { GetSubscriber } from './usecases/get-subscriber/get-subscriber.usecase';
 import { ListSubscribersUseCase } from './usecases/list-subscribers/list-subscribers.usecase';
 import { PatchSubscriber } from './usecases/patch-subscriber/patch-subscriber.usecase';
 import { RemoveSubscriber } from './usecases/remove-subscriber/remove-subscriber.usecase';

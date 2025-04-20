@@ -11,6 +11,8 @@ import {
   DetailEnum,
   ExecuteBridgeRequest,
   GetPreferences,
+  GetSubscriber,
+  GetSubscriberCommand,
   GetSubscriberTemplatePreference,
   GetSubscriberTemplatePreferenceCommand,
   IConditionsFilterResponse,
@@ -22,13 +24,13 @@ import {
   PlatformException,
 } from '@novu/application-generic';
 import {
+  EnvironmentEntity,
   EnvironmentRepository,
   JobEntity,
   JobRepository,
   JobStatusEnum,
   NotificationTemplateRepository,
   SubscriberEntity,
-  SubscriberRepository,
   TenantEntity,
   TenantRepository,
 } from '@novu/dal';
@@ -73,28 +75,20 @@ export class SendMessage {
     private sendMessageDelay: SendMessageDelay,
     private executeStepCustom: ExecuteStepCustom,
     private conditionsFilter: ConditionsFilter,
-    private subscriberRepository: SubscriberRepository,
     private tenantRepository: TenantRepository,
     private analyticsService: AnalyticsService,
     private normalizeVariablesUsecase: NormalizeVariables,
     private executeBridgeJob: ExecuteBridgeJob,
     private executeBridgeRequest: ExecuteBridgeRequest,
-    private environmentRepository: EnvironmentRepository
+    private environmentRepository: EnvironmentRepository,
+    private getSubscriberUsecase: GetSubscriber
   ) {}
 
   @InstrumentUsecase()
   public async execute(command: SendMessageCommand): Promise<SendMessageResult> {
     const payload = await this.buildCompileContext(command);
-
-    // Get subscriber details from resolver if available
-    console.log('RESOLVING SUBSCRIBER', command.job.subscriberId);
-    const enrichedSubscriber = await this.resolveSubscriberDetails(command);
-
-    if (enrichedSubscriber) {
-      payload.subscriber = {
-        ...payload.subscriber,
-        ...enrichedSubscriber,
-      } as SubscriberEntity;
+    if (!payload.subscriber) {
+      throw new PlatformException(`Subscriber not found with id ${command.job.subscriberId}`);
     }
 
     const variables = await this.normalizeVariablesUsecase.execute(
@@ -119,7 +113,12 @@ export class SendMessage {
       });
     }
     const isBridgeSkipped = bridgeResponse?.options?.skip;
-    const { stepCondition, channelPreference } = await this.evaluateFilters(isBridgeSkipped, command, variables);
+    const { stepCondition, channelPreference } = await this.evaluateFilters(
+      isBridgeSkipped,
+      command,
+      variables,
+      payload.subscriber
+    );
 
     if (!command.payload?.$on_boarding_trigger) {
       this.sendProcessStepEvent(command, isBridgeSkipped, stepCondition, channelPreference, !!bridgeResponse?.outputs);
@@ -210,7 +209,8 @@ export class SendMessage {
   private async evaluateFilters(
     bridgeSkip: boolean | undefined,
     command: SendMessageCommand,
-    variables: IFilterVariables
+    variables: IFilterVariables,
+    subscriber: SubscriberEntity
   ): Promise<{
     stepCondition: IConditionsFilterResponse | null;
     channelPreference: boolean | null;
@@ -224,7 +224,7 @@ export class SendMessage {
 
     const [stepCondition, channelPreference] = await Promise.all([
       this.evaluateStepCondition(command, variables),
-      this.evaluateChannelPreference(command),
+      this.evaluateChannelPreference(command, subscriber),
     ]);
 
     return { stepCondition, channelPreference };
@@ -299,7 +299,7 @@ export class SendMessage {
   }
 
   @Instrument()
-  private async evaluateChannelPreference(command: SendMessageCommand): Promise<boolean> {
+  private async evaluateChannelPreference(command: SendMessageCommand, subscriber: SubscriberEntity): Promise<boolean> {
     const { job } = command;
 
     if (this.isActionStep(job)) {
@@ -310,12 +310,6 @@ export class SendMessage {
       _id: job._templateId,
       environmentId: job._environmentId,
     });
-
-    const subscriber = await this.getSubscriberBySubscriberId({
-      _environmentId: job._environmentId,
-      subscriberId: job.subscriberId,
-    });
-    if (!subscriber) throw new PlatformException(`Subscriber not found with id ${job._subscriberId}`);
 
     let subscriberPreference: { enabled: boolean; channels: IPreferenceChannels };
     let subscriberPreferenceType: PreferencesTypeEnum;
@@ -382,15 +376,30 @@ export class SendMessage {
 
   @Instrument()
   private async buildCompileContext(command: SendMessageCommand): Promise<IFilterVariables> {
+    const environment = await this.environmentRepository.findOne(
+      {
+        _id: command.environmentId,
+      },
+      'bridge apiKeys _id disableSubscriberPersistence'
+    );
+
+    if (!environment) {
+      throw new PlatformException(`Environment with id '${command.environmentId}' was not found`);
+    }
+
     const [subscriber, actor, tenant] = await Promise.all([
       this.getSubscriberBySubscriberId({
         subscriberId: command.subscriberId,
         _environmentId: command.environmentId,
+        organizationId: command.organizationId,
+        environment,
       }),
       command.job.actorId &&
         this.getSubscriberBySubscriberId({
           subscriberId: command.job.actorId,
           _environmentId: command.environmentId,
+          organizationId: command.organizationId,
+          environment,
         }),
       this.handleTenantExecution(command.job),
     ]);
@@ -415,7 +424,11 @@ export class SendMessage {
   }
 
   @CachedResponse({
-    builder: (command: { subscriberId: string; _environmentId: string }) =>
+    options: {
+      skipCache: (command: { subscriberId: string; _environmentId: string; environment: EnvironmentEntity }) =>
+        !!command.environment.disableSubscriberPersistence,
+    },
+    builder: (command: { subscriberId: string; _environmentId: string; environment: EnvironmentEntity }) =>
       buildSubscriberKey({
         _environmentId: command._environmentId,
         subscriberId: command.subscriberId,
@@ -424,14 +437,22 @@ export class SendMessage {
   public async getSubscriberBySubscriberId({
     subscriberId,
     _environmentId,
+    organizationId,
+    environment,
   }: {
     subscriberId: string;
     _environmentId: string;
+    organizationId: string;
+    environment: EnvironmentEntity;
   }) {
-    return await this.subscriberRepository.findOne({
-      _environmentId,
-      subscriberId,
-    });
+    return this.getSubscriberUsecase.execute(
+      GetSubscriberCommand.create({
+        environment,
+        environmentId: _environmentId,
+        organizationId,
+        subscriberId,
+      })
+    );
   }
 
   @Instrument()
@@ -524,13 +545,15 @@ export class SendMessage {
         return null;
       }
 
-      const subscriberId = command.job.subscriberId;
+      const { subscriberId } = command.job;
       if (!subscriberId) {
         return null;
       }
 
-      // Since we need to send the entities in the body, we need to use the PostActionEnum.TRIGGER
-      // and pass our own body with the entities to resolve
+      /*
+       * Since we need to send the entities in the body, we need to use the PostActionEnum.TRIGGER
+       * and pass our own body with the entities to resolve
+       */
       const response = await this.executeBridgeRequest.execute({
         environmentId: command.environmentId,
         workflowOrigin: WorkflowOriginEnum.NOVU_CLOUD,

@@ -13,6 +13,7 @@ import {
   GetNovuLayout,
   GetNovuProviderCredentials,
   GetPreferences,
+  GetSubscriber,
   GetSubscriberTemplatePreference,
   GetTopicSubscribersUseCase,
   NormalizeVariables,
@@ -27,8 +28,8 @@ import {
 } from '@novu/application-generic';
 import { CommunityOrganizationRepository, JobRepository, PreferencesRepository } from '@novu/dal';
 
-import { Type } from '@nestjs/common/interfaces/type.interface';
 import { ForwardReference } from '@nestjs/common/interfaces/modules/forward-reference.interface';
+import { Type } from '@nestjs/common/interfaces/type.interface';
 import { JobTopicNameEnum } from '@novu/shared';
 import {
   Digest,
@@ -51,11 +52,11 @@ import {
   WebhookFilterBackoffStrategy,
 } from './usecases';
 
-import { SharedModule } from '../shared/shared.module';
 import { ACTIVE_WORKERS, workersToProcess } from '../../config/worker-init.config';
+import { SharedModule } from '../shared/shared.module';
+import { AddDelayJob, AddJob, MergeOrCreateDigest } from './usecases/add-job';
 import { InboundEmailParse } from './usecases/inbound-email-parse/inbound-email-parse.usecase';
 import { ExecuteStepCustom } from './usecases/send-message/execute-step-custom.usecase';
-import { AddDelayJob, AddJob, MergeOrCreateDigest } from './usecases/add-job';
 import { StoreSubscriberJobs } from './usecases/store-subscriber-jobs';
 import { SubscriberJobBound } from './usecases/subscriber-job-bound/subscriber-job-bound.usecase';
 
@@ -131,6 +132,7 @@ const USE_CASES = [
   InboundEmailParse,
   ExecuteBridgeJob,
   GetPreferences,
+  GetSubscriber,
 ];
 
 const PROVIDERS: Provider[] = [];

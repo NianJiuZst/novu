@@ -15,6 +15,8 @@ import {
   CreateOrUpdateSubscriberCommand,
   CreateOrUpdateSubscriberUseCase,
   ExternalApiAccessible,
+  GetSubscriber,
+  GetSubscriberCommand,
   UserSession,
 } from '@novu/application-generic';
 import { ApiRateLimitCategoryEnum, SubscriberCustomData, UserSessionData } from '@novu/shared';
@@ -33,8 +35,6 @@ import { PatchSubscriberRequestDto } from './dtos/patch-subscriber.dto';
 import { RemoveSubscriberResponseDto } from './dtos/remove-subscriber.dto';
 import { GetSubscriberPreferencesCommand } from './usecases/get-subscriber-preferences/get-subscriber-preferences.command';
 import { GetSubscriberPreferences } from './usecases/get-subscriber-preferences/get-subscriber-preferences.usecase';
-import { GetSubscriberCommand } from './usecases/get-subscriber/get-subscriber.command';
-import { GetSubscriber } from './usecases/get-subscriber/get-subscriber.usecase';
 import { ListSubscribersCommand } from './usecases/list-subscribers/list-subscribers.command';
 import { ListSubscribersUseCase } from './usecases/list-subscribers/list-subscribers.usecase';
 import { mapSubscriberEntityToDto } from './usecases/list-subscribers/map-subscriber-entity-to.dto';
@@ -102,13 +102,14 @@ export class SubscribersController {
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string
   ): Promise<SubscriberResponseDto> {
-    console.log('GET SUBSCRIBER', { user });
-    return await this.getSubscriberUsecase.execute(
-      GetSubscriberCommand.create({
-        environmentId: user.environmentId,
-        organizationId: user.organizationId,
-        subscriberId,
-      })
+    return mapSubscriberEntityToDto(
+      await this.getSubscriberUsecase.execute(
+        GetSubscriberCommand.create({
+          environmentId: user.environmentId,
+          organizationId: user.organizationId,
+          subscriberId,
+        })
+      )
     );
   }
 

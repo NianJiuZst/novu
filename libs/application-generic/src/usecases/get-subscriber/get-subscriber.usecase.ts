@@ -1,10 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ExecuteBridgeRequest } from '@novu/application-generic';
 import { EnvironmentEntity, EnvironmentRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
 import { PostActionEnum } from '@novu/framework/internal';
 import { WorkflowOriginEnum } from '@novu/shared';
-import { SubscriberResponseDto } from '../../../subscribers/dtos';
-import { mapSubscriberEntityToDto } from '../list-subscribers/map-subscriber-entity-to.dto';
+import { ExecuteBridgeRequest } from '../execute-bridge-request';
 import { GetSubscriberCommand } from './get-subscriber.command';
 
 @Injectable()
@@ -15,15 +13,15 @@ export class GetSubscriber {
     private executeBridgeRequest: ExecuteBridgeRequest
   ) {}
 
-  async execute(command: GetSubscriberCommand): Promise<SubscriberResponseDto> {
-    const environment = await this.environmentRepository.findOne(
-      {
-        _id: command.environmentId,
-      },
-      'bridge apiKeys _id disableSubscriberPersistence'
-    );
-
-    console.log('ENVVVV', { environment });
+  async execute(command: GetSubscriberCommand): Promise<SubscriberEntity> {
+    const environment =
+      command.environment ??
+      (await this.environmentRepository.findOne(
+        {
+          _id: command.environmentId,
+        },
+        'bridge apiKeys _id disableSubscriberPersistence'
+      ));
 
     let subscriber = await this.fetchSubscriber({
       _environmentId: command.environmentId,
@@ -38,8 +36,6 @@ export class GetSubscriber {
     if (environment?.disableSubscriberPersistence) {
       const resolvedSubscriber = await this.resolveSubscriberDetails(environment, command.subscriberId);
 
-      console.log('RESOLVED SUBSCRIBER', { resolvedSubscriber });
-
       if (resolvedSubscriber) {
         subscriber = {
           ...subscriber,
@@ -48,7 +44,7 @@ export class GetSubscriber {
       }
     }
 
-    return mapSubscriberEntityToDto(subscriber);
+    return subscriber;
   }
 
   private async fetchSubscriber({
@@ -76,8 +72,10 @@ export class GetSubscriber {
         return null;
       }
 
-      // Since we need to send the entities in the body, we need to use the PostActionEnum.TRIGGER
-      // and pass our own body with the entities to resolve
+      /*
+       * Since we need to send the entities in the body, we need to use the PostActionEnum.TRIGGER
+       * and pass our own body with the entities to resolve
+       */
       const response = await this.executeBridgeRequest.execute({
         environmentId: environment._id,
         workflowOrigin: WorkflowOriginEnum.NOVU_CLOUD,
