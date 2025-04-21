@@ -59,6 +59,12 @@ export class CreateNotificationJobs {
     }
 
     if (process.env.NOVU_ENTERPRISE) {
+      /**
+       * Usage and billing are connected to a create notification entity,
+       * so we need to increment the usage only after the notification is created.
+       *
+       * This caching key, is not used for actual billing reporting, but rather for throttling triggers.
+       */
       await this.cachingService.incr(
         buildUsageKey({
           _organizationId: command.organizationId,
