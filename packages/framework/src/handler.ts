@@ -27,6 +27,9 @@ import { createHmacSubtle, initApiClient } from './utils';
 export type ServeHandlerOptions = {
   client?: Client;
   workflows: Array<Workflow>;
+  resolvers?: {
+    subscriber?: (subscriberId: string) => Promise<Record<string, unknown>>;
+  };
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,6 +70,7 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
   private readonly hmacEnabled: boolean;
   private readonly http;
   private readonly workflows: Array<Workflow>;
+  private readonly resolvers?: INovuRequestHandlerOptions['resolvers'];
 
   constructor(options: INovuRequestHandlerOptions<Input, Output>) {
     this.handler = options.handler;
@@ -75,6 +79,7 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
     this.http = initApiClient(this.client.secretKey, this.client.apiUrl);
     this.frameworkName = options.frameworkName;
     this.hmacEnabled = this.client.strictAuthentication;
+    this.resolvers = options.resolvers;
   }
 
   public createHandler(): (...args: Input) => Promise<Output> {
@@ -202,7 +207,7 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
       },
       /**
        * Handle the 'resolve' action which uses the resolver functions
-       * provided in the ClientOptions to fetch entity data.
+       * provided in the handler options to fetch entity data.
        *
        * This action requires an entities array in the request body.
        * Returns an object with resolved entities grouped by type.
@@ -225,7 +230,7 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
           }
         }
 
-        const result = await this.client.resolveSubscriber({ entities });
+        const result = await this.resolveSubscriber({ entities });
 
         return this.createResponse(HttpStatusEnum.OK, result);
       },
@@ -350,5 +355,40 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
     if (!isMatching) {
       throw new SignatureMismatchError();
     }
+  }
+
+  /**
+   * Resolves entities using the resolver functions provided in the handler options.
+   * Currently only supports subscriber entities.
+   * @param command - The command containing the entities to resolve
+   * @returns Object with resolved entities grouped by type
+   */
+  private async resolveSubscriber(command: {
+    entities: Array<{ type: string; id: string }>;
+  }): Promise<Record<string, unknown>> {
+    const result: Record<string, unknown> = {};
+
+    if (!command.entities || !Array.isArray(command.entities) || command.entities.length === 0) {
+      return result;
+    }
+
+    for (const entity of command.entities) {
+      if (entity.type === 'subscriber') {
+        if (!this.resolvers?.subscriber) {
+          continue;
+        }
+
+        try {
+          const subscriber = await this.resolvers.subscriber(entity.id);
+          if (subscriber) {
+            result.subscriber = subscriber;
+          }
+        } catch (error) {
+          console.error(`Failed to resolve subscriber: ${entity.id}`, error);
+        }
+      }
+    }
+
+    return result;
   }
 }

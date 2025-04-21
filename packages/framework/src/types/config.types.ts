@@ -1,5 +1,3 @@
-import { Subscriber } from './subscriber.types';
-
 export type ClientOptions = {
   /**
    * Use Novu Cloud US (https://api.novu.co) or EU deployment (https://eu.api.novu.co). Defaults to US.
@@ -25,10 +23,6 @@ export type ClientOptions = {
    * Defaults to true.
    */
   strictAuthentication?: boolean;
-
-  resolvers?: {
-    subscriber?: (subscriberId: string) => Promise<Subscriber>;
-  };
 };
 
 export type ResolveEntityType = 'subscriber';
