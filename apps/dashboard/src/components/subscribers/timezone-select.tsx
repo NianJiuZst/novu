@@ -28,7 +28,7 @@ export function TimezoneSelect(props: TimezoneSelectProps) {
           variant="secondary"
           mode="outline"
           className={cn('flex h-8 w-full items-center gap-1 truncate rounded-lg px-3 focus:z-10', className)}
-          disabled={disabled}
+          disabled={disabled || readOnly}
           {...rest}
         >
           <div className="flex max-w-full flex-1 items-center gap-1 overflow-hidden">

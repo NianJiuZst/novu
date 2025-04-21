@@ -64,9 +64,10 @@ export class CreateOrUpdateSubscriberUseCase {
     const existingSubscriber: SubscriberEntity =
       command.subscriber ??
       (await this.fetchSubscriber({
+        organizationId: command.organizationId,
         _environmentId: command.environmentId,
         subscriberId: command.subscriberId,
-        disableSubscriberPersistence: false,
+        skipSubscriberResolve: true,
       }));
 
     return existingSubscriber;
@@ -173,16 +174,19 @@ export class CreateOrUpdateSubscriberUseCase {
     subscriberId,
     _environmentId,
     organizationId,
+    skipSubscriberResolve,
   }: {
     subscriberId: string;
     _environmentId: string;
     organizationId: string;
+    skipSubscriberResolve?: boolean;
   }): Promise<SubscriberEntity | null> {
     return this.getSubscriberUsecase.execute(
       GetSubscriberCommand.create({
         environmentId: _environmentId,
         organizationId,
         subscriberId,
+        skipSubscriberResolve,
       })
     );
   }

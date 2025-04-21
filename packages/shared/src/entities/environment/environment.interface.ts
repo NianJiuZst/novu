@@ -29,6 +29,8 @@ export interface IEnvironment {
 
   createdAt: Date;
   updatedAt: Date;
+
+  disableSubscriberPersistence?: boolean;
 }
 
 export interface IWidgetSettings {

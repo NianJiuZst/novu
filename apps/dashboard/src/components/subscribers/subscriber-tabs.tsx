@@ -1,3 +1,4 @@
+import { InlineToast } from '@/components/primitives/inline-toast';
 import { Separator } from '@/components/primitives/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/primitives/tabs';
 import { Preferences } from '@/components/subscribers/preferences/preferences';
@@ -9,9 +10,10 @@ import TruncatedText from '@/components/truncated-text';
 import { useFetchSubscriber } from '@/hooks/use-fetch-subscriber';
 import useFetchSubscriberPreferences from '@/hooks/use-fetch-subscriber-preferences';
 import { useFormProtection } from '@/hooks/use-form-protection';
+import { motion } from 'motion/react';
 import { useState } from 'react';
 import { RiGroup2Line } from 'react-icons/ri';
-import { motion } from 'motion/react';
+import { useEnvironment } from '../../context/environment/hooks';
 
 type SubscriberOverviewProps = {
   subscriberId: string;
@@ -23,12 +25,25 @@ const SubscriberOverview = (props: SubscriberOverviewProps) => {
   const { data, isPending } = useFetchSubscriber({
     subscriberId,
   });
+  const { currentEnvironment } = useEnvironment();
+  const isRemoteBridgeMode = currentEnvironment?.disableSubscriberPersistence;
 
   if (isPending) {
     return <SubscriberOverviewSkeleton />;
   }
 
-  return <SubscriberOverviewForm subscriber={data!} readOnly={readOnly} />;
+  return (
+    <div className="flex flex-col gap-3">
+      {isRemoteBridgeMode && (
+        <InlineToast
+          variant="info"
+          className="mx-3 mt-3"
+          description="This data is in read-only mode and resolved from the remote bridge without persistence."
+        />
+      )}
+      <SubscriberOverviewForm subscriber={data!} readOnly={readOnly} />
+    </div>
+  );
 };
 
 type SubscriberPreferencesProps = {
@@ -58,6 +73,8 @@ type SubscriberTabsProps = {
 };
 
 export function SubscriberTabs(props: SubscriberTabsProps) {
+  const { currentEnvironment } = useEnvironment();
+
   const { subscriberId, readOnly = false } = props;
   const [tab, setTab] = useState('overview');
   const {
@@ -97,7 +114,10 @@ export function SubscriberTabs(props: SubscriberTabsProps) {
         </TabsTrigger>
       </TabsList>
       <TabsContent value="overview" className="h-full w-full overflow-y-auto">
-        <SubscriberOverview subscriberId={subscriberId} readOnly={readOnly} />
+        <SubscriberOverview
+          subscriberId={subscriberId}
+          readOnly={currentEnvironment?.disableSubscriberPersistence || readOnly}
+        />
       </TabsContent>
       <TabsContent value="preferences" className="h-full w-full overflow-y-auto">
         <SubscriberPreferences subscriberId={subscriberId} readOnly={readOnly} />

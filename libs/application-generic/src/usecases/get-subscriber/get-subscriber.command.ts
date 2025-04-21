@@ -9,4 +9,7 @@ export class GetSubscriberCommand extends EnvironmentCommand {
 
   @IsOptional()
   environment?: EnvironmentEntity;
+
+  @IsOptional()
+  skipSubscriberResolve?: boolean;
 }

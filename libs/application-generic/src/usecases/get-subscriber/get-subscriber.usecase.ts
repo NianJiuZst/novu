@@ -33,7 +33,7 @@ export class GetSubscriber {
       throw new NotFoundException(`Subscriber: ${command.subscriberId} was not found`);
     }
 
-    if (environment?.disableSubscriberPersistence) {
+    if (environment?.disableSubscriberPersistence && !command.skipSubscriberResolve) {
       const resolvedSubscriber = await this.resolveSubscriberDetails(environment, command.subscriberId);
 
       if (resolvedSubscriber) {
