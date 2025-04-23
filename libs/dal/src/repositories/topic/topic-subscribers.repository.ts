@@ -89,9 +89,13 @@ export class TopicSubscribersRepository extends BaseRepository<
   async fetchSubscriberTopics({
     subscriberIds,
     _environmentId,
+    limit = 10, // Default limit
+    offset = 0, // Default offset
   }: {
     subscriberIds: string[];
     _environmentId: string;
+    limit?: number; // Optional parameter for limit
+    offset?: number; // Optional parameter for offset
   }): Promise<Record<string, string[]>> {
     const subscriberTopics = await this._model.aggregate([
       {
@@ -101,15 +105,53 @@ export class TopicSubscribersRepository extends BaseRepository<
         },
       },
       {
+        $sort: { topicKey: 1 }, // Sort by topicKey in ascending order
+      },
+      {
         $group: {
           _id: '$externalSubscriberId',
           topics: { $addToSet: '$topicKey' },
         },
       },
+      {
+        $skip: offset, // Skip the number of documents specified by offset
+      },
+      {
+        $limit: limit, // Limit the number of documents returned
+      },
     ]);
 
     return subscriberTopics.reduce((acc, item) => {
       acc[item._id] = item.topics;
+
+      return acc;
+    }, {});
+  }
+
+  async fetchSubscriberTopicCounts({
+    subscriberIds,
+    _environmentId,
+  }: {
+    subscriberIds: string[];
+    _environmentId: string;
+  }): Promise<Record<string, number>> {
+    const subscriberTopicCounts = await this._model.aggregate([
+      {
+        $match: {
+          _environmentId: new mongoose.Types.ObjectId(_environmentId),
+          externalSubscriberId: { $in: subscriberIds },
+        },
+      },
+      {
+        $group: {
+          _id: '$externalSubscriberId',
+          topicCount: { $sum: 1 }, // Count the number of topics per subscriber
+        },
+      },
+    ]);
+
+    return subscriberTopicCounts.reduce((acc, item) => {
+      acc[item._id] = item.topicCount; // Map subscriber ID to topic count
 
       return acc;
     }, {});

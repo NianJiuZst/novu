@@ -1,11 +1,11 @@
 import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
-import { TopicKey } from '../../types';
+import { ApiProperty } from '@nestjs/swagger';
 import { EnvironmentCommand } from '../../../shared/commands/project.command';
 
 export class FilterTopicsCommand extends EnvironmentCommand {
   @IsString()
   @IsOptional()
-  key?: TopicKey;
+  keys?: string[];
 
   @IsOptional()
   @IsInt()
@@ -17,4 +17,14 @@ export class FilterTopicsCommand extends EnvironmentCommand {
   @Min(0)
   @Max(10)
   pageSize?: number = 10;
+
+  @ApiProperty({
+    example: 'someSubscriberId',
+    required: false,
+    type: 'string',
+    description: 'filter By Topics Assigned To Subscriber Id',
+  })
+  @IsString()
+  @IsOptional()
+  public subscriberId?: string;
 }

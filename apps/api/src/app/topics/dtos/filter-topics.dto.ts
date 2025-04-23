@@ -36,6 +36,16 @@ export class FilterTopicsRequestDto {
   @IsString()
   @IsOptional()
   public key?: string;
+
+  @ApiProperty({
+    example: 'someSubscriberId',
+    required: false,
+    type: 'string',
+    description: 'filterByTopicsAssignedToSubscriberId',
+  })
+  @IsString()
+  @IsOptional()
+  public subscriberId?: string;
 }
 
 export class FilterTopicsResponseDto {

@@ -52,12 +52,6 @@ export class SubscriberResponseDtoOptional {
   })
   channels?: ChannelSettingsDto[];
 
-  @ApiPropertyOptional({
-    description: 'An array of topics that the subscriber is subscribed to.',
-    type: [String],
-  })
-  topics?: string[];
-
   @ApiProperty({
     description: 'Indicates whether the subscriber is currently online.',
     type: Boolean,

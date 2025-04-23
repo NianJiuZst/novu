@@ -183,7 +183,7 @@ export class TopicsController {
     return await this.filterTopicsUseCase.execute(
       FilterTopicsCommand.create({
         environmentId: user.environmentId,
-        key: query?.key,
+        keys: query?.key ? [query?.key] : [],
         organizationId: user.organizationId,
         page: query?.page,
         pageSize: query?.pageSize,
