@@ -23,6 +23,10 @@ export type TopicsControllerListTopicsRequest = {
    */
   key?: string | undefined;
   /**
+   * filterByTopicsAssignedToSubscriberId
+   */
+  subscriberId?: string | undefined;
+  /**
    * A header for idempotency purposes
    */
   idempotencyKey?: string | undefined;
@@ -42,6 +46,7 @@ export const TopicsControllerListTopicsRequest$inboundSchema: z.ZodType<
   page: z.number().int().default(0),
   pageSize: z.number().int().default(10),
   key: z.string().optional(),
+  subscriberId: z.string().optional(),
   "idempotency-key": z.string().optional(),
 }).transform((v) => {
   return remap$(v, {
@@ -54,6 +59,7 @@ export type TopicsControllerListTopicsRequest$Outbound = {
   page: number;
   pageSize: number;
   key?: string | undefined;
+  subscriberId?: string | undefined;
   "idempotency-key"?: string | undefined;
 };
 
@@ -66,6 +72,7 @@ export const TopicsControllerListTopicsRequest$outboundSchema: z.ZodType<
   page: z.number().int().default(0),
   pageSize: z.number().int().default(10),
   key: z.string().optional(),
+  subscriberId: z.string().optional(),
   idempotencyKey: z.string().optional(),
 }).transform((v) => {
   return remap$(v, {

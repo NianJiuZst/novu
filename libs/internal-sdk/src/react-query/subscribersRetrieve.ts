@@ -32,7 +32,9 @@ export type SubscribersRetrieveQueryData =
  * Get subscriber
  *
  * @remarks
- * Get subscriber by your internal id used to identify the subscriber
+ * Get subscriber by your internal id used to identify the subscriber,
+ *     topics have been removed from the response use
+ *      GET: v1/topics to retrieve the subscriber topic list
  */
 export function useSubscribersRetrieve(
   subscriberId: string,
@@ -55,7 +57,9 @@ export function useSubscribersRetrieve(
  * Get subscriber
  *
  * @remarks
- * Get subscriber by your internal id used to identify the subscriber
+ * Get subscriber by your internal id used to identify the subscriber,
+ *     topics have been removed from the response use
+ *      GET: v1/topics to retrieve the subscriber topic list
  */
 export function useSubscribersRetrieveSuspense(
   subscriberId: string,

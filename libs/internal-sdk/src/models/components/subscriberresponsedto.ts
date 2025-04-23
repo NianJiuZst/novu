@@ -48,10 +48,6 @@ export type SubscriberResponseDto = {
    */
   channels?: Array<ChannelSettingsDto> | undefined;
   /**
-   * An array of topics that the subscriber is subscribed to.
-   */
-  topics?: Array<string> | undefined;
-  /**
    * Indicates whether the subscriber is currently online.
    */
   isOnline?: boolean | undefined;
@@ -111,7 +107,6 @@ export const SubscriberResponseDto$inboundSchema: z.ZodType<
   avatar: z.string().optional(),
   locale: z.string().optional(),
   channels: z.array(ChannelSettingsDto$inboundSchema).optional(),
-  topics: z.array(z.string()).optional(),
   isOnline: z.boolean().optional(),
   lastOnlineAt: z.string().optional(),
   __v: z.number().optional(),
@@ -142,7 +137,6 @@ export type SubscriberResponseDto$Outbound = {
   avatar?: string | undefined;
   locale?: string | undefined;
   channels?: Array<ChannelSettingsDto$Outbound> | undefined;
-  topics?: Array<string> | undefined;
   isOnline?: boolean | undefined;
   lastOnlineAt?: string | undefined;
   __v?: number | undefined;
@@ -170,7 +164,6 @@ export const SubscriberResponseDto$outboundSchema: z.ZodType<
   avatar: z.string().optional(),
   locale: z.string().optional(),
   channels: z.array(ChannelSettingsDto$outboundSchema).optional(),
-  topics: z.array(z.string()).optional(),
   isOnline: z.boolean().optional(),
   lastOnlineAt: z.string().optional(),
   v: z.number().optional(),
