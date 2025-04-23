@@ -1,6 +1,7 @@
 import { captureException } from '@sentry/node';
 import { MessageEntity, MessageRepository } from '@novu/dal';
 import { CreateExecutionDetails } from '@novu/application-generic';
+import { MessagesDeliveryStatusEnum } from '@novu/shared';
 import { SendMessageCommand } from './send-message.command';
 
 export type SendMessageResult = {
@@ -18,7 +19,7 @@ export abstract class SendMessageType {
 
   protected async sendErrorStatus(
     message: MessageEntity,
-    status: 'error' | 'sent' | 'warning',
+    status: MessagesDeliveryStatusEnum,
     errorId: string,
     errorMessageFallback: string,
     command: SendMessageCommand,

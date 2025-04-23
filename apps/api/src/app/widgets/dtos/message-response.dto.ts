@@ -8,6 +8,7 @@ import {
   IMessageAction,
   IMessageCTA,
   MessageActionStatusEnum,
+  MessagesDeliveryStatusEnum,
   TextAlignEnum,
 } from '@novu/shared';
 import { SubscriberResponseDto } from '../../subscribers/dtos';
@@ -310,11 +311,11 @@ export class MessageResponseDto implements IMessage {
   _feedId?: string | null;
 
   @ApiProperty({
-    enum: ['sent', 'error', 'warning'],
-    enumName: 'MessageStatusEnum',
+    enum: [...Object.values(MessagesDeliveryStatusEnum)],
+    enumName: 'MessagesDeliveryStatusEnum',
     description: 'Status of the message',
   })
-  status: 'sent' | 'error' | 'warning';
+  status: MessagesDeliveryStatusEnum;
 
   @ApiPropertyOptional({
     type: String,

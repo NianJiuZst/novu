@@ -9,7 +9,13 @@ import {
   MessageEntity,
   IntegrationEntity,
 } from '@novu/dal';
-import { ChannelTypeEnum, LogCodeEnum, ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum } from '@novu/shared';
+import {
+  ChannelTypeEnum,
+  LogCodeEnum,
+  ExecutionDetailsSourceEnum,
+  ExecutionDetailsStatusEnum,
+  MessagesDeliveryStatusEnum,
+} from '@novu/shared';
 import {
   InstrumentUsecase,
   DetailEnum,
@@ -201,7 +207,7 @@ export class SendMessageSms extends SendMessageBase {
       await this.messageRepository.updateMessageStatus(
         command.environmentId,
         message._id,
-        'warning',
+        MessagesDeliveryStatusEnum.WARNING,
         null,
         'no_subscriber_phone',
         'Subscriber does not have active phone'
@@ -227,7 +233,7 @@ export class SendMessageSms extends SendMessageBase {
     if (!integration) {
       await this.sendErrorStatus(
         message,
-        'warning',
+        MessagesDeliveryStatusEnum.WARNING,
         'sms_missing_integration_error',
         'Subscriber does not have an active sms integration',
         command
@@ -253,7 +259,7 @@ export class SendMessageSms extends SendMessageBase {
     if (!integration?.credentials?.from) {
       await this.sendErrorStatus(
         message,
-        'warning',
+        MessagesDeliveryStatusEnum.WARNING,
         'no_integration_from_phone',
         'Integration does not have from phone configured',
         command
@@ -345,7 +351,7 @@ export class SendMessageSms extends SendMessageBase {
     } catch (e) {
       await this.sendErrorStatus(
         message,
-        'error',
+        MessagesDeliveryStatusEnum.ERROR,
         'unexpected_sms_error',
         e.message || e.name || 'Un-expect SMS provider error',
         command,

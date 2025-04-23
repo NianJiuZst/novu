@@ -1,4 +1,4 @@
-import { ActorTypeEnum } from '@novu/shared';
+import { ActorTypeEnum, MessagesDeliveryStatusEnum } from '@novu/shared';
 import mongoose, { Schema } from 'mongoose';
 
 import { schemaOptions } from '../schema-default.options';
@@ -32,6 +32,10 @@ const messageSchema = new Schema<MessageDBModel>(
     _jobId: {
       type: Schema.Types.ObjectId,
       ref: 'Job',
+    },
+    _snoozeOriginMessageId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Message',
     },
     templateIdentifier: Schema.Types.String,
     email: Schema.Types.String,
@@ -81,16 +85,22 @@ const messageSchema = new Schema<MessageDBModel>(
       type: Schema.Types.Boolean,
       default: false,
     },
+    isSnoozeOrigin: {
+      type: Schema.Types.Boolean,
+      default: false,
+    },
     archived: {
       type: Schema.Types.Boolean,
       default: false,
     },
     lastSeenDate: Schema.Types.Date,
     lastReadDate: Schema.Types.Date,
+    scheduledDate: Schema.Types.Date,
     archivedAt: Schema.Types.Date,
     status: {
       type: Schema.Types.String,
-      default: 'sent',
+      enum: MessagesDeliveryStatusEnum,
+      default: MessagesDeliveryStatusEnum.SENT,
     },
     errorId: Schema.Types.String,
     errorText: Schema.Types.String,

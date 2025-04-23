@@ -10,6 +10,7 @@ import {
   ExecutionDetailsStatusEnum,
   IChannelSettings,
   ProvidersIdEnum,
+  MessagesDeliveryStatusEnum,
 } from '@novu/shared';
 import {
   InstrumentUsecase,
@@ -322,7 +323,7 @@ export class SendMessagePush extends SendMessageBase {
     } catch (e) {
       await this.sendErrorStatus(
         message,
-        'error',
+        MessagesDeliveryStatusEnum.ERROR,
         'unexpected_push_error',
         e.message || e.name || 'Un-expect Push provider error',
         command,

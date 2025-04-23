@@ -4,6 +4,7 @@ import {
   ButtonTypeEnum,
   ChannelTypeEnum,
   MessageActionStatusEnum,
+  MessagesDeliveryStatusEnum,
   MessagesStatusEnum,
 } from '@novu/shared';
 
@@ -375,7 +376,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
   async updateMessageStatus(
     environmentId: string,
     id: string,
-    status: 'error' | 'sent' | 'warning',
+    status: MessagesDeliveryStatusEnum,
     // eslint-disable-next-line
     providerPayload: any = {},
     errorId: string,
@@ -470,6 +471,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     seen,
     read,
     archived,
+    isSnoozeOrigin,
   }: {
     environmentId: string;
     subscriberId: string;
@@ -477,6 +479,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     seen?: boolean;
     read?: boolean;
     archived?: boolean;
+    isSnoozeOrigin?: boolean;
   }) {
     const query: MessageQuery & EnforceEnvId = {
       _environmentId: environmentId,
@@ -493,6 +496,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       seen,
       read,
       archived,
+      isSnoozeOrigin,
     });
   }
 
@@ -545,7 +549,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
 
   /**
    * Allows to update the status of queried messages at once.
-   * The status can be updated to seen, unseen, read, unread, archived or unarchived.
+   * The status can be updated to seen, unseen, read, unread, archived, unarchived, snoozed, unsnoozed.
    * Depending on the flag passed, the other flags will be updated accordingly.
    * For example:
    * seen -> { seen: true }
@@ -554,21 +558,26 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
    * unseen -> { seen: false, read: false, archived: false }
    * unread -> { seen: true, read: false, archived: false }
    * unarchived -> { seen: true, read: true, archived: false }
+   * snoozed -> { seen: true, archived: false, isSnoozeOrigin: true }
+   * unsnoozed -> { seen: true, archived: false, isSnoozeOrigin: false }
    */
   private async updateMessagesStatus({
     query,
     seen,
     read,
     archived,
+    isSnoozeOrigin,
   }: {
     query: MessageQuery & EnforceEnvId;
     seen?: boolean;
     read?: boolean;
     archived?: boolean;
+    isSnoozeOrigin?: boolean;
   }) {
     const isUpdatingSeen = seen !== undefined;
     const isUpdatingRead = read !== undefined;
     const isUpdatingArchived = archived !== undefined;
+    const isUpdatingSnoozeOrigin = isSnoozeOrigin !== undefined;
 
     let updatePayload: FilterQuery<MessageEntity> = {};
     if (isUpdatingArchived) {
@@ -597,6 +606,14 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
         lastReadDate: !seen ? null : undefined,
         archived: !seen ? false : undefined,
         archivedAt: !seen ? null : undefined,
+      };
+    } else if (isUpdatingSnoozeOrigin) {
+      updatePayload = {
+        isSnoozeOrigin,
+        seen: true,
+        lastSeenDate: new Date(),
+        archived: false,
+        archivedAt: null,
       };
     }
 

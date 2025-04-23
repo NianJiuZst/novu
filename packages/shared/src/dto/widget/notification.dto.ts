@@ -1,4 +1,4 @@
-import { ChannelTypeEnum } from '../../types';
+import { ChannelTypeEnum, MessagesDeliveryStatusEnum } from '../../types';
 import { ISubscriberFeedResponseDto } from '../subscriber';
 import { IActorDto, IMessageCTADto } from '../message-template';
 
@@ -28,7 +28,7 @@ export interface INotificationDto {
   subject?: string | null;
   deviceTokens?: string[] | null;
   cta: IMessageCTADto;
-  status: 'sent' | 'error' | 'warning';
+  status: MessagesDeliveryStatusEnum;
   payload?: Record<string, unknown>;
   overrides?: Record<string, unknown>;
 }

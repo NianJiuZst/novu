@@ -18,6 +18,7 @@ import {
   ExecutionDetailsStatusEnum,
   ProvidersIdEnum,
   ITenantDefine,
+  MessagesDeliveryStatusEnum,
 } from '@novu/shared';
 import {
   InstrumentUsecase,
@@ -339,7 +340,7 @@ export class SendMessageChat extends SendMessageBase {
       await this.messageRepository.updateMessageStatus(
         command.environmentId,
         message._id,
-        'warning',
+        MessagesDeliveryStatusEnum.WARNING,
         null,
         'no_subscriber_chat_phone_number',
         'Subscriber does not have phone number specified'
@@ -368,7 +369,7 @@ export class SendMessageChat extends SendMessageBase {
       await this.messageRepository.updateMessageStatus(
         command.environmentId,
         message._id,
-        'warning',
+        MessagesDeliveryStatusEnum.WARNING,
         null,
         'no_subscriber_chat_channel_id',
         'Subscriber does not have active chat channel id'
@@ -397,7 +398,7 @@ export class SendMessageChat extends SendMessageBase {
     if (!integration) {
       await this.sendErrorStatus(
         message,
-        'warning',
+        MessagesDeliveryStatusEnum.WARNING,
         'chat_missing_integration_error',
         'Subscriber does not have an active chat integration',
         command
@@ -480,7 +481,7 @@ export class SendMessageChat extends SendMessageBase {
     } catch (e) {
       await this.sendErrorStatus(
         message,
-        'error',
+        MessagesDeliveryStatusEnum.ERROR,
         'unexpected_chat_error',
         e.message || e.name || 'Un-expect CHAT provider error',
         command,

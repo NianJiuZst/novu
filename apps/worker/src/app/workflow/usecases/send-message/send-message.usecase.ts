@@ -93,6 +93,9 @@ export class SendMessage {
     );
 
     const stepType = command.step?.template?.type;
+    const isSnoozed = this.isSnoozed(command.job);
+
+    console.log('=== IS SNOOZED ===', isSnoozed);
 
     let bridgeResponse: ExecuteOutput | null = null;
     if (isChannelStep(stepType)) {
@@ -101,8 +104,11 @@ export class SendMessage {
         variables,
       });
     }
-    const isBridgeSkipped = bridgeResponse?.options?.skip;
-    const { stepCondition, channelPreference } = await this.evaluateFilters(isBridgeSkipped, command, variables);
+
+    const isBridgeSkipped = !!bridgeResponse?.options?.skip;
+    const shouldSkipFilters = isSnoozed || isBridgeSkipped;
+
+    const { stepCondition, channelPreference } = await this.evaluateFilters(shouldSkipFilters, command, variables);
 
     if (!command.payload?.$on_boarding_trigger) {
       this.sendProcessStepEvent(command, isBridgeSkipped, stepCondition, channelPreference, !!bridgeResponse?.outputs);
@@ -191,14 +197,14 @@ export class SendMessage {
   }
 
   private async evaluateFilters(
-    bridgeSkip: boolean | undefined,
+    skipFilters: boolean,
     command: SendMessageCommand,
     variables: IFilterVariables
   ): Promise<{
     stepCondition: IConditionsFilterResponse | null;
     channelPreference: boolean | null;
   }> {
-    if (bridgeSkip === true) {
+    if (skipFilters) {
       return {
         stepCondition: { passed: true, conditions: [], variables: {} },
         channelPreference: true,
@@ -229,7 +235,7 @@ export class SendMessage {
 
   private sendProcessStepEvent(
     command: SendMessageCommand,
-    isBridgeSkipped: boolean | undefined,
+    isBridgeSkipped: boolean,
     filterResult: IConditionsFilterResponse | null,
     preferredResult: boolean | null,
     isBridgeWorkflow: boolean
@@ -432,6 +438,10 @@ export class SendMessage {
     const channels = [StepTypeEnum.IN_APP, StepTypeEnum.EMAIL, StepTypeEnum.SMS, StepTypeEnum.PUSH, StepTypeEnum.CHAT];
 
     return !channels.find((channel) => channel === job.type);
+  }
+
+  private isSnoozed(job: JobEntity): boolean {
+    return !!job.payload?.snooze && job.type === StepTypeEnum.IN_APP && !!job.delay;
   }
 
   protected async sendSelectedTenantExecution(job: JobEntity, tenant: TenantEntity) {

@@ -13,6 +13,8 @@ export enum DetailEnum {
   MESSAGE_CONTENT_NOT_GENERATED = 'Message content could not be generated',
   MESSAGE_CONTENT_SYNTAX_ERROR = 'Message content could not be generated due to syntax error in email editor',
   MESSAGE_CREATED = 'Message created',
+  MESSAGE_SNOOZED = 'Message snoozed',
+  MESSAGE_SNOOZE_FAILED = 'Message snooze failed',
   SUCCESSFUL_BRIDGE_RESPONSE_RECEIVED = 'Successful Bridge response received',
   FAILED_BRIDGE_EXECUTION = 'Bridge execution failed',
   SUBSCRIBER_NO_ACTIVE_INTEGRATION = 'Subscriber does not have an active integration',

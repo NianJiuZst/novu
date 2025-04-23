@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { ChannelTypeEnum, IActor, IMessageCTA } from '@novu/shared';
+import { ChannelTypeEnum, IActor, IMessageCTA, MessagesDeliveryStatusEnum } from '@novu/shared';
 
 import { IEmailBlock } from '../message-template';
 import { SubscriberEntity } from '../subscriber';
@@ -25,6 +25,8 @@ export class MessageEntity {
 
   _subscriberId: string;
 
+  _snoozeOriginMessageId?: string;
+
   subscriber?: SubscriberEntity;
 
   actorSubscriber?: SubscriberEntity;
@@ -39,6 +41,8 @@ export class MessageEntity {
 
   archivedAt?: string;
 
+  snoozedAt?: string;
+
   content: string | IEmailBlock[];
 
   transactionId: string;
@@ -50,6 +54,10 @@ export class MessageEntity {
   seen: boolean;
 
   read: boolean;
+
+  isSnoozeOrigin: boolean;
+
+  scheduledDate: string;
 
   archived: boolean;
 
@@ -80,7 +88,7 @@ export class MessageEntity {
 
   _feedId: string;
 
-  status: 'sent' | 'error' | 'warning';
+  status: MessagesDeliveryStatusEnum;
 
   errorId: string;
 
@@ -117,4 +125,5 @@ export type MessageDBModel = ChangePropsValueType<
   | '_subscriberId'
   | '_feedId'
   | '_actorId'
+  | '_snoozeOriginMessageId'
 >;

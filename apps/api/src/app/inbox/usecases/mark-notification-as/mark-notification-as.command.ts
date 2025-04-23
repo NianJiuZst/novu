@@ -14,4 +14,8 @@ export class MarkNotificationAsCommand extends EnvironmentWithSubscriber {
   @IsOptional()
   @IsBoolean()
   readonly archived?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  readonly isSnoozeOrigin?: boolean;
 }

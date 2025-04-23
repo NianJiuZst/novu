@@ -22,6 +22,7 @@ import {
   IAttachmentOptions,
   IEmailOptions,
   FeatureFlagsKeysEnum,
+  MessagesDeliveryStatusEnum,
 } from '@novu/shared';
 import {
   InstrumentUsecase,
@@ -388,7 +389,7 @@ export class SendMessageEmail extends SendMessageBase {
     command: SendMessageCommand
   ): Promise<SendMessageResult> {
     const errorMessage = 'Subscriber does not have an';
-    const status = 'warning';
+    const status = MessagesDeliveryStatusEnum.WARNING;
     const errorId = 'mail_unexpected_error';
 
     if (!email) {
@@ -495,7 +496,7 @@ export class SendMessageEmail extends SendMessageBase {
     } catch (error) {
       await this.sendErrorStatus(
         message,
-        'error',
+        MessagesDeliveryStatusEnum.ERROR,
         'mail_unexpected_error',
         error.message || error.name || 'Error while sending email with provider',
         command,

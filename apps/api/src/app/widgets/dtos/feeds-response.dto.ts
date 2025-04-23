@@ -1,5 +1,5 @@
 import { ApiExtraModels, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ActorTypeEnum, ChannelTypeEnum, IActor, INotificationDto } from '@novu/shared';
+import { ActorTypeEnum, ChannelTypeEnum, IActor, INotificationDto, MessagesDeliveryStatusEnum } from '@novu/shared';
 
 import { SubscriberFeedResponseDto } from '../../subscribers/dtos';
 import { EmailBlock, MessageCTA } from './message-response.dto';
@@ -193,11 +193,12 @@ export class NotificationFeedItemDto implements INotificationDto {
 
   @ApiProperty({
     description: 'Current status of the notification.',
-    enum: ['sent', 'error', 'warning'],
-    example: 'sent',
+    enum: [...Object.values(MessagesDeliveryStatusEnum)],
+    enumName: 'MessagesDeliveryStatusEnum',
+    example: MessagesDeliveryStatusEnum.SENT,
     type: String,
   })
-  status: 'sent' | 'error' | 'warning';
+  status: MessagesDeliveryStatusEnum;
 
   @ApiProperty({
     description: 'The payload that was used to send the notification trigger.',
