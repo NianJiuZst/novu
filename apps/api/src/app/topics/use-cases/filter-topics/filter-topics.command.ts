@@ -1,11 +1,15 @@
-import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { EnvironmentCommand } from '../../../shared/commands/project.command';
 
 export class FilterTopicsCommand extends EnvironmentCommand {
-  @IsString()
+  @IsArray()
   @IsOptional()
   keys?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  shouldReturnSubscriberList?: boolean = false;
 
   @IsOptional()
   @IsInt()

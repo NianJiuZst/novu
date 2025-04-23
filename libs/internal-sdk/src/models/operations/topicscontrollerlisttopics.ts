@@ -23,6 +23,10 @@ export type TopicsControllerListTopicsRequest = {
    */
   key?: string | undefined;
   /**
+   * should return subscriber list, default is false
+   */
+  shouldReturnSubscriberList?: boolean | undefined;
+  /**
    * filterByTopicsAssignedToSubscriberId
    */
   subscriberId?: string | undefined;
@@ -46,6 +50,7 @@ export const TopicsControllerListTopicsRequest$inboundSchema: z.ZodType<
   page: z.number().int().default(0),
   pageSize: z.number().int().default(10),
   key: z.string().optional(),
+  shouldReturnSubscriberList: z.boolean().default(false),
   subscriberId: z.string().optional(),
   "idempotency-key": z.string().optional(),
 }).transform((v) => {
@@ -59,6 +64,7 @@ export type TopicsControllerListTopicsRequest$Outbound = {
   page: number;
   pageSize: number;
   key?: string | undefined;
+  shouldReturnSubscriberList: boolean;
   subscriberId?: string | undefined;
   "idempotency-key"?: string | undefined;
 };
@@ -72,6 +78,7 @@ export const TopicsControllerListTopicsRequest$outboundSchema: z.ZodType<
   page: z.number().int().default(0),
   pageSize: z.number().int().default(10),
   key: z.string().optional(),
+  shouldReturnSubscriberList: z.boolean().default(false),
   subscriberId: z.string().optional(),
   idempotencyKey: z.string().optional(),
 }).transform((v) => {

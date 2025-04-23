@@ -51,8 +51,33 @@ export class TopicRepository extends BaseRepository<TopicDBModel, TopicEntity, E
       _environmentId: environmentId,
     });
   }
-
   async filterTopics(
+    query: FilterQuery<TopicDBModel>,
+    pagination: { limit: number; skip: number }
+  ): Promise<TopicEntity[]> {
+    const parsedQuery = { ...query };
+    if (query._id) {
+      parsedQuery._id = this.convertStringToObjectId(query._id);
+    }
+
+    parsedQuery._environmentId = this.convertStringToObjectId(query._environmentId);
+    parsedQuery._organizationId = this.convertStringToObjectId(query._organizationId);
+
+    return await this.aggregate([
+      {
+        $match: parsedQuery,
+      },
+      lookup,
+      {
+        $skip: pagination.skip,
+      },
+      {
+        $limit: pagination.limit,
+      },
+    ]);
+  }
+
+  async filterTopicsWithSubscribers(
     query: FilterQuery<TopicDBModel>,
     pagination: { limit: number; skip: number }
   ): Promise<TopicEntity & { subscribers: ExternalSubscriberId[] }[]> {
@@ -64,7 +89,7 @@ export class TopicRepository extends BaseRepository<TopicDBModel, TopicEntity, E
     parsedQuery._environmentId = this.convertStringToObjectId(query._environmentId);
     parsedQuery._organizationId = this.convertStringToObjectId(query._organizationId);
 
-    const data = await this.aggregate([
+    return await this.aggregate([
       {
         $match: parsedQuery,
       },
@@ -77,8 +102,6 @@ export class TopicRepository extends BaseRepository<TopicDBModel, TopicEntity, E
         $limit: pagination.limit,
       },
     ]);
-
-    return data;
   }
 
   async findTopic(

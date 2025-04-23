@@ -98,6 +98,7 @@ async function $do(
     "key": payload.key,
     "page": payload.page,
     "pageSize": payload.pageSize,
+    "shouldReturnSubscriberList": payload.shouldReturnSubscriberList,
     "subscriberId": payload.subscriberId,
   });
 

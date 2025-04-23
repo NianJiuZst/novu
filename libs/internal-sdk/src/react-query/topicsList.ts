@@ -89,6 +89,7 @@ export function setTopicsListData(
       page?: number | undefined;
       pageSize?: number | undefined;
       key?: string | undefined;
+      shouldReturnSubscriberList?: boolean | undefined;
       subscriberId?: string | undefined;
       idempotencyKey?: string | undefined;
     },
@@ -107,6 +108,7 @@ export function invalidateTopicsList(
       page?: number | undefined;
       pageSize?: number | undefined;
       key?: string | undefined;
+      shouldReturnSubscriberList?: boolean | undefined;
       subscriberId?: string | undefined;
       idempotencyKey?: string | undefined;
     }]
@@ -142,6 +144,7 @@ export function buildTopicsListQuery(
       page: request.page,
       pageSize: request.pageSize,
       key: request.key,
+      shouldReturnSubscriberList: request.shouldReturnSubscriberList,
       subscriberId: request.subscriberId,
       idempotencyKey: request.idempotencyKey,
     }),
@@ -168,6 +171,7 @@ export function queryKeyTopicsList(
     page?: number | undefined;
     pageSize?: number | undefined;
     key?: string | undefined;
+    shouldReturnSubscriberList?: boolean | undefined;
     subscriberId?: string | undefined;
     idempotencyKey?: string | undefined;
   },

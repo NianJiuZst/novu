@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 import { Transform } from 'class-transformer';
 import { TopicDto } from './topic.dto';
@@ -36,6 +36,18 @@ export class FilterTopicsRequestDto {
   @IsString()
   @IsOptional()
   public key?: string;
+
+  @ApiProperty({
+    example: 'false',
+    required: false,
+    type: 'boolean',
+    default: false, // Set the default value in the documentation
+    description: 'should return subscriber list, default is false',
+  })
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true')
+  @IsOptional()
+  public shouldReturnSubscriberList?: boolean = true;
 
   @ApiProperty({
     example: 'someSubscriberId',

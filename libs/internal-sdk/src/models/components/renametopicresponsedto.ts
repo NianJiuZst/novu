@@ -9,12 +9,30 @@ import { Result as SafeParseResult } from "../../types/fp.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type RenameTopicResponseDto = {
-  id?: string | undefined;
+  /**
+   * Unique identifier for the topic
+   */
+  id: string;
+  /**
+   * Identifier for the organization that owns the topic
+   */
   organizationId: string;
+  /**
+   * Identifier for the environment associated with the topic
+   */
   environmentId: string;
+  /**
+   * Key for the topic, used for identifying it uniquely
+   */
   key: string;
+  /**
+   * Name of the topic
+   */
   name: string;
-  subscribers: Array<string>;
+  /**
+   * List of subscriber IDs for the topic
+   */
+  subscribers?: Array<string> | undefined;
 };
 
 /** @internal */
@@ -23,12 +41,12 @@ export const RenameTopicResponseDto$inboundSchema: z.ZodType<
   z.ZodTypeDef,
   unknown
 > = z.object({
-  _id: z.string().optional(),
+  _id: z.string(),
   _organizationId: z.string(),
   _environmentId: z.string(),
   key: z.string(),
   name: z.string(),
-  subscribers: z.array(z.string()),
+  subscribers: z.array(z.string()).optional(),
 }).transform((v) => {
   return remap$(v, {
     "_id": "id",
@@ -39,12 +57,12 @@ export const RenameTopicResponseDto$inboundSchema: z.ZodType<
 
 /** @internal */
 export type RenameTopicResponseDto$Outbound = {
-  _id?: string | undefined;
+  _id: string;
   _organizationId: string;
   _environmentId: string;
   key: string;
   name: string;
-  subscribers: Array<string>;
+  subscribers?: Array<string> | undefined;
 };
 
 /** @internal */
@@ -53,12 +71,12 @@ export const RenameTopicResponseDto$outboundSchema: z.ZodType<
   z.ZodTypeDef,
   RenameTopicResponseDto
 > = z.object({
-  id: z.string().optional(),
+  id: z.string(),
   organizationId: z.string(),
   environmentId: z.string(),
   key: z.string(),
   name: z.string(),
-  subscribers: z.array(z.string()),
+  subscribers: z.array(z.string()).optional(),
 }).transform((v) => {
   return remap$(v, {
     id: "_id",

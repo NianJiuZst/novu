@@ -59,9 +59,8 @@ export class TopicsController {
     private getTopicSubscriberUseCase: GetTopicSubscriberUseCase,
     private getTopicUseCase: GetTopicUseCase,
     private removeSubscribersUseCase: RemoveSubscribersUseCase,
-    private renameTopicUseCase: RenameTopicUseCase,
-  ) {
-  }
+    private renameTopicUseCase: RenameTopicUseCase
+  ) {}
 
   @Post('')
   @ExternalApiAccessible()
@@ -69,7 +68,7 @@ export class TopicsController {
   @ApiOperation({ summary: 'Topic creation', description: 'Create a topic' })
   async createTopic(
     @UserSession() user: UserSessionData,
-    @Body() body: CreateTopicRequestDto,
+    @Body() body: CreateTopicRequestDto
   ): Promise<CreateTopicResponseDto> {
     const topic = await this.createTopicUseCase.execute(
       CreateTopicCommand.create({
@@ -78,7 +77,7 @@ export class TopicsController {
         name: body.name,
         organizationId: user.organizationId,
         userId: user._id,
-      }),
+      })
     );
 
     return {
@@ -98,7 +97,7 @@ export class TopicsController {
   async assign(
     @UserSession() user: UserSessionData,
     @Param('topicKey') topicKey: TopicKey,
-    @Body() body: AddSubscribersRequestDto,
+    @Body() body: AddSubscribersRequestDto
   ): Promise<AssignSubscriberToTopicDto> {
     const { existingExternalSubscribers, nonExistingExternalSubscribers } = await this.addSubscribersUseCase.execute(
       AddSubscribersCommand.create({
@@ -107,7 +106,7 @@ export class TopicsController {
         subscribers: body.subscribers,
         userId: user._id,
         topicKey,
-      }),
+      })
     );
 
     return {
@@ -131,7 +130,7 @@ export class TopicsController {
   async getTopicSubscriber(
     @UserSession() user: UserSessionData,
     @Param('topicKey') topicKey: TopicKey,
-    @Param('externalSubscriberId') externalSubscriberId: ExternalSubscriberId,
+    @Param('externalSubscriberId') externalSubscriberId: ExternalSubscriberId
   ): Promise<TopicSubscriberDto> {
     return await this.getTopicSubscriberUseCase.execute(
       GetTopicSubscriberCommand.create({
@@ -139,7 +138,7 @@ export class TopicsController {
         organizationId: user.organizationId,
         externalSubscriberId,
         topicKey,
-      }),
+      })
     );
   }
 
@@ -154,7 +153,7 @@ export class TopicsController {
   async removeSubscribers(
     @UserSession() user: UserSessionData,
     @Param('topicKey') topicKey: TopicKey,
-    @Body() body: RemoveSubscribersRequestDto,
+    @Body() body: RemoveSubscribersRequestDto
   ): Promise<void> {
     await this.removeSubscribersUseCase.execute(
       RemoveSubscribersCommand.create({
@@ -162,7 +161,7 @@ export class TopicsController {
         organizationId: user.organizationId,
         topicKey,
         subscribers: body.subscribers,
-      }),
+      })
     );
   }
 
@@ -179,17 +178,18 @@ export class TopicsController {
   })
   async listTopics(
     @UserSession() user: UserSessionData,
-    @Query() query?: FilterTopicsRequestDto,
+    @Query() query?: FilterTopicsRequestDto
   ): Promise<FilterTopicsResponseDto> {
     return await this.filterTopicsUseCase.execute(
       FilterTopicsCommand.create({
         environmentId: user.environmentId,
         keys: query?.key ? [query?.key] : [],
-        subscriberId: query?.subscriberId
+        subscriberId: query?.subscriberId,
         organizationId: user.organizationId,
+        shouldReturnSubscriberList: query?.shouldReturnSubscriberList,
         page: query?.page,
         pageSize: query?.pageSize,
-      }),
+      })
     );
   }
 
@@ -207,7 +207,7 @@ export class TopicsController {
         environmentId: user.environmentId,
         topicKey,
         organizationId: user.organizationId,
-      }),
+      })
     );
   }
 
@@ -218,14 +218,14 @@ export class TopicsController {
   @ApiParam({ name: 'topicKey', description: 'The topic key', type: String, required: true })
   async getTopic(
     @UserSession() user: UserSessionData,
-    @Param('topicKey') topicKey: TopicKey,
+    @Param('topicKey') topicKey: TopicKey
   ): Promise<GetTopicResponseDto> {
     return await this.getTopicUseCase.execute(
       GetTopicCommand.create({
         environmentId: user.environmentId,
         topicKey,
         organizationId: user.organizationId,
-      }),
+      })
     );
   }
 
@@ -238,7 +238,7 @@ export class TopicsController {
   async renameTopic(
     @UserSession() user: UserSessionData,
     @Param('topicKey') topicKey: TopicKey,
-    @Body() body: RenameTopicRequestDto,
+    @Body() body: RenameTopicRequestDto
   ): Promise<RenameTopicResponseDto> {
     return await this.renameTopicUseCase.execute(
       RenameTopicCommand.create({
@@ -246,7 +246,7 @@ export class TopicsController {
         topicKey,
         name: body.name,
         organizationId: user.organizationId,
-      }),
+      })
     );
   }
 }

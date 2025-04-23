@@ -40,7 +40,18 @@ describe('Filter topics - /topics (GET) #novu-v2', async () => {
     expect(subscribers).to.have.members(result.map((subscriber) => subscriber.externalSubscriberId));
     novuClient = initNovuClassSdk(session);
   });
-
+  describe('filter by subscriberId', () => {
+    it('should show all topics assigned to a subscriber', async () => {
+      await novuClient.topics.subscribers.assign({ subscribers: [session.subscriberId] }, 'someTopic');
+      const response = await novuClient.topics.list({ subscriberId: session.subscriberId });
+      const { totalCount, page, pageSize, data } = response.result;
+      expect(totalCount).to.eql(1);
+      expect(page).to.eql(0);
+      expect(pageSize).to.eql(10);
+      expect(data.length).to.eql(1);
+      expect(data[0].key).to.eql('someTopic');
+    });
+  });
   it('should return a validation error if the params provided are not in the right type', async () => {
     const response = await session.testAgent.get(`/v1/topics?page=first&pageSize=big`);
     expect(response.statusCode).to.eql(422);

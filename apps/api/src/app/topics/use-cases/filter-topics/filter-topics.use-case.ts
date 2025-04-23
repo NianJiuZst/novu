@@ -38,14 +38,28 @@ export class FilterTopicsUseCase {
     }
 
     const query = this.mapFromCommandToEntity(command);
-    const filteredTopics = await this.topicRepository.filterTopics(query, pagination);
+    const filteredTopics = await this.getPaginatedTopics(command, query, pagination);
 
     return {
       page,
       totalCount: await this.topicRepository.count(query),
       pageSize,
-      data: filteredTopics.map(this.mapFromEntityToDto),
+      data: filteredTopics.map((topic) => this.mapFromEntityToDto(topic)),
     };
+  }
+
+  async getPaginatedTopics(
+    command: FilterTopicsCommand,
+    query:
+      | { _environmentId: string; _organizationId: string }
+      | { key: { $in: string[] }; _environmentId: string; _organizationId: string },
+    pagination: ITopicsPaginationObject
+  ) {
+    if (command.shouldReturnSubscriberList) {
+      return await this.topicRepository.filterTopicsWithSubscribers(query, pagination);
+    }
+
+    return await this.topicRepository.filterTopics(query, pagination);
   }
 
   private async buildPagedTopicListForSubscriberId(
@@ -56,13 +70,13 @@ export class FilterTopicsUseCase {
     // eslint-disable-next-line no-param-reassign
     command.keys = [...pagedTopics, ...(command.keys || [])];
     const query = this.mapFromCommandToEntity(command);
-    const filteredTopics = await this.topicRepository.filterTopics(query, pagination);
+    const filteredTopics = await this.getPaginatedTopics(command, query, pagination);
 
     return {
-      page: pagination.limit,
+      page: pagination.page,
       totalCount,
       pageSize: pagination.pageSize,
-      data: filteredTopics.map(this.mapFromEntityToDto),
+      data: filteredTopics.map((topic) => this.mapFromEntityToDto(topic)),
     };
   }
 
@@ -87,12 +101,14 @@ export class FilterTopicsUseCase {
     return baseQuery;
   }
 
-  private mapFromEntityToDto(topic: TopicEntity & { subscribers: ExternalSubscriberId[] }): TopicDto {
+  private mapFromEntityToDto(topic: (TopicEntity & { subscribers: ExternalSubscriberId[] }) | TopicEntity): TopicDto {
     return {
-      ...topic,
       _id: topic._id,
       _organizationId: topic._organizationId,
       _environmentId: topic._environmentId,
+      key: topic.key,
+      name: topic.name,
+      subscribers: 'subscribers' in topic ? topic.subscribers : undefined,
     };
   }
 
