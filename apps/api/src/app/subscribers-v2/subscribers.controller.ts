@@ -94,9 +94,7 @@ export class SubscribersController {
   @ExternalApiAccessible()
   @ApiOperation({
     summary: 'Get subscriber',
-    description: `Get subscriber by your internal id used to identify the subscriber, 
-    topics have been removed from the response use
-     GET: v1/topics to retrieve the subscriber topic list`,
+    description: `Get subscriber by your internal id used to identify the subscriber`,
   })
   @ApiResponse(SubscriberResponseDto)
   @SdkMethodName('retrieve')
