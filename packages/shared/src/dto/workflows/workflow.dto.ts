@@ -1,4 +1,4 @@
-import { StepTypeEnum, WorkflowCreationSourceEnum, WorkflowOriginEnum, WorkflowPreferences } from '../../types';
+import { StepTypeEnum, WorkflowOriginEnum, WorkflowPreferences } from '../../types';
 import { Slug } from '../../types/utils';
 import type { JSONSchemaDto } from './json-schema-dto';
 import { StepCreateDto, StepResponseDto, StepUpdateDto } from './step.dto';
@@ -58,7 +58,7 @@ export type WorkflowResponseDto = WorkflowCommonsFields & {
   lastTriggeredAt?: string;
 };
 
-export type WorkflowCreateAndUpdateKeys = keyof CreateWorkflowDto | keyof UpdateWorkflowDto;
+export type WorkflowCreateAndUpdateKeys = keyof UpdateWorkflowDto;
 
 export class RuntimeIssueDto {
   issueType: WorkflowIssueTypeEnum;
@@ -73,16 +73,6 @@ export enum WorkflowIssueTypeEnum {
   DUPLICATED_VALUE = 'DUPLICATED_VALUE',
   LIMIT_REACHED = 'LIMIT_REACHED',
 }
-
-export type CreateWorkflowDto = WorkflowCommonsFields & {
-  workflowId: string;
-
-  steps: StepCreateDto[];
-
-  __source: WorkflowCreationSourceEnum;
-
-  preferences?: PreferencesRequestDto;
-};
 
 export type UpdateWorkflowDto = WorkflowCommonsFields & {
   /**
@@ -105,7 +95,7 @@ export type UpsertStepBody = StepCreateBody | UpdateStepBody;
 export type StepCreateBody = StepCreateDto;
 export type UpdateStepBody = StepUpdateDto;
 
-export type DuplicateWorkflowDto = Pick<CreateWorkflowDto, 'name' | 'tags' | 'description'>;
+export type DuplicateWorkflowDto = Pick<UpdateWorkflowDto, 'name' | 'tags' | 'description'>;
 
 export function isStepCreateBody(step: UpsertStepBody): step is StepCreateDto {
   return step && typeof step === 'object' && !(step as UpdateStepBody)._id;

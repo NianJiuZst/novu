@@ -1,5 +1,4 @@
 import type {
-  CreateWorkflowDto,
   DuplicateWorkflowDto,
   IEnvironment,
   ListWorkflowResponse,
@@ -10,6 +9,8 @@ import type {
   WorkflowTestDataResponseDto,
 } from '@novu/shared';
 import { delV2, getV2, patchV2, post, postV2, putV2 } from './api.client';
+import { CreateWorkflowDto } from '@novu/api/models/components';
+import { initNovuSdk } from '@/api/e2e-sdk.helper.ts';
 
 export const getWorkflow = async ({
   environment,
@@ -107,7 +108,8 @@ export async function createWorkflow({
   environment: IEnvironment;
   workflow: CreateWorkflowDto;
 }) {
-  return postV2<{ data: WorkflowResponseDto }>(`/workflows`, { environment, body: workflow });
+  const novu = await initNovuSdk(environment);
+  return (await novu.workflows.create(workflow)).result;
 }
 
 export async function syncWorkflow({

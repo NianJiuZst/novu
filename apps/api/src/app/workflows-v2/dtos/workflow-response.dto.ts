@@ -1,11 +1,13 @@
 import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateWorkflowDto, Slug, UpdateWorkflowDto, WorkflowOriginEnum, WorkflowStatusEnum } from '@novu/shared';
+import { Slug, WorkflowOriginEnum, WorkflowStatusEnum } from '@novu/shared';
 import { WorkflowCommonsFields } from './workflow-commons.dto';
 import { StepResponseDto } from './step.response.dto';
 import { WorkflowPreferencesResponseDto } from './preferences.response.dto';
 import { RuntimeIssueDto } from './runtime-issue.dto';
+import { CreateWorkflowDto } from './create-workflow.dto';
+import { UpdateWorkflowDto } from './update-workflow.dto';
 
 @ApiExtraModels(RuntimeIssueDto)
 export class WorkflowResponseDto extends WorkflowCommonsFields {

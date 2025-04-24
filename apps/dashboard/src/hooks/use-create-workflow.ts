@@ -2,13 +2,13 @@ import { createWorkflow } from '@/api/workflows';
 import { useEnvironment } from '@/context/environment/hooks';
 import { QueryKeys } from '@/utils/query-keys';
 import { buildRoute, ROUTES } from '@/utils/routes';
-import { type CreateWorkflowDto, WorkflowCreationSourceEnum } from '@novu/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { workflowSchema } from '../components/workflow-editor/schema';
-import { showSuccessToast, showErrorToast } from '../components/workflow-editor/toasts';
+import { showErrorToast, showSuccessToast } from '../components/workflow-editor/toasts';
 import { useState } from 'react';
+import { CreateWorkflowDto, WorkflowCreationSourceEnum } from '@novu/api/models/components';
 
 interface UseCreateWorkflowOptions {
   onSuccess?: () => void;
@@ -32,7 +32,7 @@ export function useCreateWorkflow({ onSuccess }: UseCreateWorkflowOptions = {}) 
       navigate(
         buildRoute(ROUTES.EDIT_WORKFLOW, {
           environmentSlug: currentEnvironment?.slug ?? '',
-          workflowSlug: result.data.slug ?? '',
+          workflowSlug: result.slug ?? '',
         })
       );
 
@@ -48,7 +48,7 @@ export function useCreateWorkflow({ onSuccess }: UseCreateWorkflowOptions = {}) 
     return mutation.mutateAsync({
       name: values.name,
       steps: template?.steps ?? [],
-      __source: template?.__source ?? WorkflowCreationSourceEnum.DASHBOARD,
+      source: template?.source ?? WorkflowCreationSourceEnum.Dashboard,
       workflowId: values.workflowId,
       description: values.description || undefined,
       tags: values.tags || [],
