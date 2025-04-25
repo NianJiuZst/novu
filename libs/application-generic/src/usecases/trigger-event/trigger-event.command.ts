@@ -1,11 +1,4 @@
-import {
-  IsDefined,
-  IsEnum,
-  IsOptional,
-  IsString,
-  ValidateIf,
-  ValidateNested,
-} from 'class-validator';
+import { IsDefined, IsEnum, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
 
 import {
   AddressingTypeEnum,
@@ -69,8 +62,9 @@ export class TriggerEventMulticastCommand extends TriggerEventBaseCommand {
 export class TriggerEventBroadcastCommand extends TriggerEventBaseCommand {
   @IsEnum(AddressingTypeEnum)
   addressingType: AddressingTypeEnum.BROADCAST;
+
+  @IsOptional()
+  subscriberFilter?: Record<string, unknown>;
 }
 
-export type TriggerEventCommand =
-  | TriggerEventMulticastCommand
-  | TriggerEventBroadcastCommand;
+export type TriggerEventCommand = TriggerEventMulticastCommand | TriggerEventBroadcastCommand;

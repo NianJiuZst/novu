@@ -28,4 +28,8 @@ export class TriggerEventToAllCommand extends EnvironmentWithUserCommand {
   @IsOptional()
   @IsString()
   bridgeUrl?: string;
+
+  @IsObject()
+  @IsOptional()
+  subscriberFilter?: Record<string, unknown>;
 }

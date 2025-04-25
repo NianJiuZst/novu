@@ -132,9 +132,17 @@ export class EventsController {
   @SdkUsageExample('Broadcast Event to All')
   @SdkGroupName('')
   @ApiOperation({
-    summary: 'Broadcast event to all',
-    description: `Trigger a broadcast event to all existing subscribers, could be used to send announcements, etc.
-      In the future could be used to trigger events to a subset of subscribers based on defined filters.`,
+    summary: 'Broadcast event to subscribers',
+    description: `Trigger a broadcast event to subscribers, could be used to send announcements, etc.
+      You can filter which subscribers receive the notification by providing a subscriberFilter parameter with MongoDB query operators.
+      
+      Examples:
+      - Filter by country: { "data.country": "USA" }
+      - Filter by plan: { "data.plan": "premium" }
+      - Filter with $in operator: { "data.plan": { "$in": ["premium", "enterprise"] } }
+      - Filter with $regex: { "lastName": { "$regex": "^A" } }
+      
+      If no filter is provided, the notification will be sent to all subscribers.`,
   })
   @ApiCreatedResponse({
     description: 'Broadcast request has been registered successfully ',
@@ -157,6 +165,7 @@ export class EventsController {
         transactionId,
         overrides: body.overrides || {},
         actor: body.actor,
+        subscriberFilter: body.subscriberFilter,
       })
     );
   }

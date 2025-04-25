@@ -1,4 +1,4 @@
-import { IsDefined, IsEnum, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
+import { IsDefined, IsEnum, IsObject, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
 import {
   AddressingTypeEnum,
   StatelessControls,
@@ -63,6 +63,10 @@ export class ParseEventRequestMulticastCommand extends ParseEventRequestBaseComm
 export class ParseEventRequestBroadcastCommand extends ParseEventRequestBaseCommand {
   @IsEnum(AddressingTypeEnum)
   addressingType: AddressingTypeEnum.BROADCAST;
+
+  @IsObject()
+  @IsOptional()
+  subscriberFilter?: Record<string, unknown>;
 }
 
 export type ParseEventRequestCommand = ParseEventRequestMulticastCommand | ParseEventRequestBroadcastCommand;

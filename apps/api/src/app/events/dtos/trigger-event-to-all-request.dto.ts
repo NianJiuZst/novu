@@ -81,4 +81,17 @@ export class TriggerEventToAllRequestDto {
   @ValidateNested()
   @Type(() => TenantPayloadDto)
   tenant?: TriggerTenantContext;
+
+  @ApiPropertyOptional({
+    description: 'MongoDB-compatible query to filter subscribers who should receive the notification',
+    example: {
+      'data.country': 'USA',
+      'data.plan': { $in: ['premium', 'enterprise'] },
+      lastName: { $regex: '^A' },
+    },
+    type: 'object',
+  })
+  @IsObject()
+  @IsOptional()
+  subscriberFilter?: Record<string, unknown>;
 }

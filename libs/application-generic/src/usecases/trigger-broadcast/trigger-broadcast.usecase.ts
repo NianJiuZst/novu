@@ -34,11 +34,19 @@ export class TriggerBroadcast {
     const subscriberFetchBatchSize = 500;
     let subscribers: SubscriberEntity[] = [];
 
+    // Base query includes environment and organization
+    const query: Record<string, unknown> = {
+      _environmentId: command.environmentId,
+      _organizationId: command.organizationId,
+    };
+
+    // Add subscriber filter if provided
+    if (command.subscriberFilter && Object.keys(command.subscriberFilter).length > 0) {
+      Object.assign(query, command.subscriberFilter);
+    }
+
     for await (const subscriber of this.subscriberRepository.findBatch(
-      {
-        _environmentId: command.environmentId,
-        _organizationId: command.organizationId,
-      },
+      query as any,
       'subscriberId',
       {},
       subscriberFetchBatchSize

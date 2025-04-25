@@ -40,6 +40,8 @@ import {
   isStringifiedMailyJSONContent,
 } from '../../../environments-v1/usecases/output-renderers/maily-to-liquid/wrap-maily-in-liquid.command';
 import { GeneratePreviewResponseDto, JSONSchemaDto, PreviewPayloadDto, StepResponseDto } from '../../dtos';
+import { hasAttrs } from '../../../environments-v1/usecases/output-renderers/maily-to-liquid/maily-utils';
+import { MailyContentTypeEnum } from '../../../environments-v1/usecases/output-renderers/maily-to-liquid/maily.types';
 
 const LOG_CONTEXT = 'GeneratePreviewUsecase';
 
@@ -307,24 +309,74 @@ export class PreviewUsecase {
       const isMailyJSONContent = isStringifiedMailyJSONContent(controlValues);
 
       for (const invalidVariable of invalidVariables) {
-        let variableOutput = invalidVariable.output;
-
         if (isMailyJSONContent) {
-          variableOutput = variableOutput.replace(/\{\{|\}\}/g, '').trim();
-        }
+          const variableOutput = invalidVariable.output.replace(/\{\{|\}\}/g, '').trim();
 
-        if (!controlValuesString.includes(variableOutput)) {
-          continue;
-        }
+          controlValuesString = this.handleMailyJSONContent(controlValuesString, variableOutput);
+        } else {
+          if (!controlValuesString.includes(invalidVariable.output)) {
+            continue;
+          }
 
-        const EMPTY_STRING = '';
-        controlValuesString = replaceAll(controlValuesString, variableOutput, EMPTY_STRING);
+          const EMPTY_STRING = '';
+          controlValuesString = replaceAll(controlValuesString, invalidVariable.output, EMPTY_STRING);
+        }
       }
 
       return JSON.parse(controlValuesString);
     } catch (error) {
       return controlValues;
     }
+  }
+
+  /**
+   * Processes Maily JSON content to replace invalid variables with empty strings
+   * Traverses the Maily document structure and replaces variables that match the invalidVariableOutput
+   */
+  private handleMailyJSONContent(mailyJsonString: string, variableOutput: string): string {
+    try {
+      const mailyContent = JSON.parse(mailyJsonString);
+      const processedContent = this.wrapVariablesInLiquid(mailyContent, variableOutput);
+
+      return JSON.stringify(processedContent);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log('######################## error', error);
+
+      // If parsing fails, return the original string
+      return mailyJsonString;
+    }
+  }
+
+  private wrapVariablesInLiquid(node: MailyJSONContent, variableOutput: string): MailyJSONContent {
+    const newNode = { ...node } as MailyJSONContent & { attrs: Record<string, any> };
+
+    if (node.content) {
+      newNode.content = node.content.map((child) => this.wrapVariablesInLiquid(child, variableOutput));
+    }
+
+    if (hasAttrs(node)) {
+      newNode.attrs = this.processVariableNodeAttributes(node, variableOutput);
+    }
+
+    return newNode;
+  }
+
+  private processVariableNodeAttributes(
+    node: MailyJSONContent & { attrs: Record<string, string> },
+    variableOutput: string
+  ) {
+    // eslint-disable-next-line no-console
+    console.log('11111 node', node);
+    const { attrs, type } = node;
+
+    if (type !== MailyContentTypeEnum.VARIABLE) {
+      return attrs;
+    }
+
+    const { output } = node;
+
+    return attrs;
   }
 
   /*
