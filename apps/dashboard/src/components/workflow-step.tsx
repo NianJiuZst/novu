@@ -2,7 +2,7 @@ import { Step, StepProps } from '@/components/primitives/step';
 import { IconType } from 'react-icons/lib';
 import { STEP_TYPE_TO_ICON } from './icons/utils';
 import { ComponentProps } from 'react';
-import { StepTypeEnum } from '@novu/api/models/components/steptypeenum';
+import { StepTypeEnum } from '@novu/api/models/components';
 
 type WorkflowStepProps = StepProps & {
   step: StepTypeEnum;
