@@ -10,7 +10,9 @@ import { Mail3Fill } from './mail-3-fill';
 import { Notification5Fill } from './notification-5-fill';
 import { Sms } from './sms';
 import { IconType } from 'react-icons/lib';
-import { StepTypeEnum } from '@novu/api/models/components';
+import { StepTypeEnum } from '@novu/api/models/components/steptypeenum';
+
+;
 
 export const STEP_TYPE_TO_ICON: Record<StepTypeEnum, IconType> = {
   [StepTypeEnum.Chat]: RiChatThreadFill,

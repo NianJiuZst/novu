@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { StepTypeEnum, WorkflowCreationSourceEnum } from '@novu/shared';
-import type { IResponseError, ICreateNotificationTemplateDto, INotificationTemplate } from '@novu/shared';
+import type { ICreateNotificationTemplateDto, INotificationTemplate, IResponseError } from '@novu/shared';
 
 import { v4 as uuid4 } from 'uuid';
 import { createTemplate } from '../../notification-templates';
