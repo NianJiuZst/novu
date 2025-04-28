@@ -1,20 +1,21 @@
+import _ from 'lodash';
 import { Injectable } from '@nestjs/common';
 import { ControlValuesRepository, EnvironmentEntity, OrganizationEntity, UserEntity } from '@novu/dal';
 import { ControlValuesLevelEnum, FeatureFlagsKeysEnum } from '@novu/shared';
 import { FeatureFlagsService, Instrument, InstrumentUsecase } from '@novu/application-generic';
 
-import { keysToObject } from '../../util/utils';
+import { collectKeys, keysToObject } from '../../util/utils';
 import { buildVariables } from '../../util/build-variables';
 import { CreateVariablesObjectCommand } from './create-variables-object.command';
-import { isStringifiedMailyJSONContent } from '../../../environments-v1/usecases/output-renderers/maily-to-liquid/wrap-maily-in-liquid.command';
-import { MailyAttrsEnum } from '../../../environments-v1/usecases/output-renderers/maily-to-liquid/maily.types';
+import { MailyAttrsEnum } from '../../../shared/helpers/maily.types';
+import { isStringifiedMailyJSONContent } from '../../../shared/helpers/maily-utils';
 
 export type ArrayVariable = {
   path: string;
   iterations: number;
 };
 
-export const DEFAULT_ARRAY_ELEMENTS = 3;
+export const DEFAULT_ARRAY_ELEMENTS = 5;
 /**
  * Extracts all the variables used in the step control values.
  * Then it creates the object representation of those variables.
@@ -64,19 +65,54 @@ export class CreateVariablesObject {
         'length' in step.events
       );
 
-      const hasUsedEvents = !!(step.events && typeof step.events === 'string');
-      if (hasUsedEventCount || hasUsedEventsLength || hasUsedEvents) {
-        step.events = Array.isArray(step.events)
-          ? step.events
-          : Array.from({ length: DEFAULT_ARRAY_ELEMENTS }, (_, index) => {
-              return {
-                payload: { name: `event-${index}` },
-              };
-            });
+      const hasUsedEvents = !!(step.events && typeof step.events === 'string') || Array.isArray(step.events);
+      /**
+       * Check if events is an object and has a payload property, for example used in the repeat block like this:
+       * steps.digest-step.events.payload which is valid variable
+       */
+      const hasUsedEventsWithPayload = !!(
+        step.events &&
+        typeof step.events === 'object' &&
+        !Array.isArray(step.events) &&
+        'payload' in step.events
+      );
+
+      if (hasUsedEventCount || hasUsedEventsLength || hasUsedEvents || hasUsedEventsWithPayload) {
+        let payload = {};
+        if (Array.isArray(step.events)) {
+          const hasPayloadInEvents = step.events.every((evt) => {
+            return typeof evt === 'object' && 'payload' in evt;
+          });
+          if (hasPayloadInEvents) {
+            payload = step.events[0].payload;
+          }
+        } else if (hasUsedEventsWithPayload) {
+          const variableNameAfterPayload = collectKeys((step.events as Record<string, unknown>).payload);
+          for (const variableName of variableNameAfterPayload) {
+            const key = variableName.split('.').pop() ?? variableName;
+
+            payload = { ...payload, ...this.setNestedValue(payload, variableName, key) };
+          }
+        }
+        step.events = Array.from({ length: DEFAULT_ARRAY_ELEMENTS }, () => ({ payload }));
       }
     });
 
     return variablesObject;
+  }
+
+  private setNestedValue(obj: Record<string, unknown>, path: string, value: string) {
+    const keys = path.split('.');
+
+    const val = keys.reduceRight((acc, key, index) => {
+      if (index === keys.length - 1) {
+        return { [key]: value };
+      } else {
+        return { [key]: acc };
+      }
+    }, {});
+
+    return _.merge(obj, val);
   }
 
   private async getControlValues(command: CreateVariablesObjectCommand) {
@@ -166,7 +202,7 @@ export class CreateVariablesObject {
     // Extract 'Repeat' block iterable variables ('each' key) together with their set iterations
     const eachKeyVars = this.extractMailyAttribute(controlValues, MailyAttrsEnum.EACH_KEY).map((path) => ({
       path,
-      iterations: this.getIterationsForVariable(path, controlValues) || DEFAULT_ARRAY_ELEMENTS,
+      iterations: DEFAULT_ARRAY_ELEMENTS,
     }));
 
     // Extract iterable variables outside of 'Repeat' blocks, always with 3 iterations
@@ -185,27 +221,5 @@ export class CreateVariablesObject {
    */
   private extractArrayPath(value: string): string | undefined {
     return value.match(/([^[]+)\[\d+\]/)?.[1];
-  }
-
-  private getIterationsForVariable(variable: string, controlValues: unknown[]): number | undefined {
-    const pattern = new RegExp(
-      `"${MailyAttrsEnum.EACH_KEY}"\\s*:\\s*"${variable}"[^}]*"iterations"\\s*:\\s*(\\d+)`,
-      'g'
-    );
-
-    for (const value of controlValues) {
-      if (!isStringifiedMailyJSONContent(value)) continue;
-
-      const unescapedString = unescape(value);
-      const match = pattern.exec(unescapedString);
-      if (match) {
-        const iterations = parseInt(match[1], 10);
-        if (!Number.isNaN(iterations)) {
-          return iterations;
-        }
-      }
-    }
-
-    return undefined;
   }
 }
