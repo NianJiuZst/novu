@@ -1,4 +1,4 @@
-import { CreateWorkflowDto } from '@novu/shared';
+import { CreateWorkflowDto } from '@novu/api/models/components';
 
 export interface WorkflowTemplate {
   id: string;

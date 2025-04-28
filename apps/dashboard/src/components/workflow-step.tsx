@@ -1,23 +1,23 @@
 import { Step, StepProps } from '@/components/primitives/step';
 import { IconType } from 'react-icons/lib';
 import { STEP_TYPE_TO_ICON } from './icons/utils';
-import { StepTypeEnum } from '@/utils/enums';
 import { ComponentProps } from 'react';
+import { StepTypeEnum } from '@novu/api/models/components';
 
 type WorkflowStepProps = StepProps & {
   step: StepTypeEnum;
 };
 
 const stepRenderData: Record<StepTypeEnum, { variant: ComponentProps<typeof Step>['variant']; icon: IconType }> = {
-  [StepTypeEnum.CHAT]: { variant: 'feature', icon: STEP_TYPE_TO_ICON[StepTypeEnum.CHAT] },
-  [StepTypeEnum.CUSTOM]: { variant: 'alert', icon: STEP_TYPE_TO_ICON[StepTypeEnum.CUSTOM] },
-  [StepTypeEnum.DELAY]: { variant: 'warning', icon: STEP_TYPE_TO_ICON[StepTypeEnum.DELAY] },
-  [StepTypeEnum.DIGEST]: { variant: 'highlighted', icon: STEP_TYPE_TO_ICON[StepTypeEnum.DIGEST] },
-  [StepTypeEnum.EMAIL]: { variant: 'information', icon: STEP_TYPE_TO_ICON[StepTypeEnum.EMAIL] },
-  [StepTypeEnum.IN_APP]: { variant: 'stable', icon: STEP_TYPE_TO_ICON[StepTypeEnum.IN_APP] },
-  [StepTypeEnum.PUSH]: { variant: 'verified', icon: STEP_TYPE_TO_ICON[StepTypeEnum.PUSH] },
-  [StepTypeEnum.SMS]: { variant: 'destructive', icon: STEP_TYPE_TO_ICON[StepTypeEnum.SMS] },
-  [StepTypeEnum.TRIGGER]: { variant: 'neutral', icon: STEP_TYPE_TO_ICON[StepTypeEnum.TRIGGER] },
+  [StepTypeEnum.Chat]: { variant: 'feature', icon: STEP_TYPE_TO_ICON[StepTypeEnum.Chat] },
+  [StepTypeEnum.Custom]: { variant: 'alert', icon: STEP_TYPE_TO_ICON[StepTypeEnum.Custom] },
+  [StepTypeEnum.Delay]: { variant: 'warning', icon: STEP_TYPE_TO_ICON[StepTypeEnum.Delay] },
+  [StepTypeEnum.Digest]: { variant: 'highlighted', icon: STEP_TYPE_TO_ICON[StepTypeEnum.Digest] },
+  [StepTypeEnum.Email]: { variant: 'information', icon: STEP_TYPE_TO_ICON[StepTypeEnum.Email] },
+  [StepTypeEnum.InApp]: { variant: 'stable', icon: STEP_TYPE_TO_ICON[StepTypeEnum.InApp] },
+  [StepTypeEnum.Push]: { variant: 'verified', icon: STEP_TYPE_TO_ICON[StepTypeEnum.Push] },
+  [StepTypeEnum.Sms]: { variant: 'destructive', icon: STEP_TYPE_TO_ICON[StepTypeEnum.Sms] },
+  [StepTypeEnum.Trigger]: { variant: 'neutral', icon: STEP_TYPE_TO_ICON[StepTypeEnum.Trigger] },
 };
 
 export const WorkflowStep = (props: WorkflowStepProps) => {

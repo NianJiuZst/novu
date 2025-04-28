@@ -4,7 +4,6 @@ import {
   GeneratePreviewResponseDto,
   InAppRenderOutput,
   PushRenderOutput,
-  StepTypeEnum,
 } from '@novu/shared';
 import { ChatPreview } from './workflow-editor/steps/chat/chat-preview';
 import { EmailPreviewHeader, EmailPreviewSubject } from './workflow-editor/steps/email/email-preview';
@@ -12,6 +11,7 @@ import { Maily } from './workflow-editor/steps/email/maily';
 import { InboxPreview } from './workflow-editor/steps/in-app/inbox-preview';
 import { PushPreview } from './workflow-editor/steps/push/push-preview';
 import { SmsPhone } from './workflow-editor/steps/sms/sms-phone';
+import { StepTypeEnum } from '@novu/api/models/components';
 
 export type StepType = StepTypeEnum;
 
@@ -21,11 +21,11 @@ interface StepPreviewProps {
 }
 
 export function StepPreview({ type, controlValues }: StepPreviewProps) {
-  if (type === StepTypeEnum.TRIGGER || type === StepTypeEnum.DELAY || type === StepTypeEnum.DIGEST) {
+  if (type === StepTypeEnum.Trigger || type === StepTypeEnum.Delay || type === StepTypeEnum.Digest) {
     return null;
   }
 
-  if (type === StepTypeEnum.IN_APP) {
+  if (type === StepTypeEnum.InApp) {
     const { subject, body } = controlValues;
 
     return (
@@ -45,7 +45,7 @@ export function StepPreview({ type, controlValues }: StepPreviewProps) {
     );
   }
 
-  if (type === StepTypeEnum.EMAIL) {
+  if (type === StepTypeEnum.Email) {
     const { subject, body } = controlValues;
 
     return (
@@ -59,7 +59,7 @@ export function StepPreview({ type, controlValues }: StepPreviewProps) {
     );
   }
 
-  if (type === StepTypeEnum.SMS) {
+  if (type === StepTypeEnum.Sms) {
     const { body } = controlValues;
 
     return (
@@ -69,7 +69,7 @@ export function StepPreview({ type, controlValues }: StepPreviewProps) {
     );
   }
 
-  if (type === StepTypeEnum.CHAT) {
+  if (type === StepTypeEnum.Chat) {
     const { body } = controlValues;
     const previewData: GeneratePreviewResponseDto = {
       result: {
@@ -89,7 +89,7 @@ export function StepPreview({ type, controlValues }: StepPreviewProps) {
     );
   }
 
-  if (type === StepTypeEnum.PUSH) {
+  if (type === StepTypeEnum.Push) {
     const { subject, body } = controlValues;
     const previewData: GeneratePreviewResponseDto = {
       result: {

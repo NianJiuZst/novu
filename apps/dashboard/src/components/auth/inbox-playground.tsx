@@ -1,7 +1,7 @@
 import { useEnvironment } from '@/context/environment/hooks';
 import { useTriggerWorkflow } from '@/hooks/use-trigger-workflow';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { IEnvironment, StepTypeEnum, WorkflowCreationSourceEnum } from '@novu/shared';
+import { IEnvironment } from '@novu/shared';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiNotification2Fill } from 'react-icons/ri';
@@ -20,6 +20,7 @@ import { showErrorToast, showSuccessToast } from '../primitives/sonner-helpers';
 import { UsecasePlaygroundHeader } from '../usecase-playground-header';
 import { CustomizeInbox } from './customize-inbox-playground';
 import { InboxPreviewContent } from './inbox-preview-content';
+import { StepTypeEnum, WorkflowCreationSourceEnum } from '@novu/api/models/components';
 
 export interface ActionConfig {
   label: string;
@@ -260,7 +261,7 @@ async function createDemoWorkflow({ environment }: { environment: IEnvironment }
       steps: [
         {
           name: 'Inbox',
-          type: StepTypeEnum.IN_APP,
+          type: StepTypeEnum.InApp,
           controlValues: {
             subject: '{{payload.subject}}',
             body: '{{payload.body}}',
@@ -282,7 +283,7 @@ async function createDemoWorkflow({ environment }: { environment: IEnvironment }
           },
         },
       ],
-      __source: WorkflowCreationSourceEnum.DASHBOARD,
+      source: WorkflowCreationSourceEnum.Dashboard,
     },
   });
 }
