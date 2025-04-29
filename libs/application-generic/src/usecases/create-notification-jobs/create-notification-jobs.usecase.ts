@@ -17,11 +17,10 @@ import {
   StepTypeEnum,
 } from '@novu/shared';
 
+import { ModuleRef } from '@nestjs/core';
 import { InstrumentUsecase } from '../../instrumentation';
-import { CacheService } from '../../services';
-import { buildUsageKey } from '../../services/cache/key-builders';
-import { getNestedValue } from '../../utils';
-import { PlatformException } from '../../utils/exceptions';
+import { buildUsageKey, CacheService } from '../../services';
+import { getNestedValue, PlatformException } from '../../utils';
 import { DigestFilterSteps, DigestFilterStepsCommand } from '../digest-filter-steps';
 import { CreateNotificationJobsCommand } from './create-notification-jobs.command';
 
@@ -34,7 +33,8 @@ export class CreateNotificationJobs {
     private digestFilterSteps: DigestFilterSteps,
     private notificationRepository: NotificationRepository,
     private cachingService: CacheService,
-    private organizationRepository: CommunityOrganizationRepository
+    private organizationRepository: CommunityOrganizationRepository,
+    private moduleRef: ModuleRef
   ) {}
 
   @InstrumentUsecase()
@@ -70,12 +70,28 @@ export class CreateNotificationJobs {
        */
       const organization = await this.organizationRepository.findById(command.organizationId);
       if (organization?.apiServiceLevel === ApiServiceLevelEnum.FREE) {
-        await this.cachingService.incr(
-          buildUsageKey({
-            _organizationId: command.organizationId,
-            resourceType: ResourceEnum.EVENTS,
-          })
-        );
+        if (process.env.NOVU_ENTERPRISE === 'true' || process.env.CI_EE_TEST === 'true') {
+          // eslint-disable-next-line global-require
+          if (!require('@novu/ee-billing').GetEventResourceUsage) {
+            throw new Error("GetEventResourceUsage doesn't exist");
+          }
+          // eslint-disable-next-line global-require
+          const getEventResourceUsage = this.moduleRef.get(require('@novu/ee-billing').GetEventResourceUsage, {
+            strict: false,
+          });
+          // This is a workaround to make sure the count is cached.
+          await getEventResourceUsage.execute({
+            userId: command.userId,
+            environmentId: command.environmentId,
+            organizationId: command.organizationId,
+          });
+          await this.cachingService.incr(
+            buildUsageKey({
+              _organizationId: command.organizationId,
+              resourceType: ResourceEnum.EVENTS,
+            })
+          );
+        }
       }
     }
 
