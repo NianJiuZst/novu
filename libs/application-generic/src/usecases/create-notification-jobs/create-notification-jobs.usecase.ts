@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  CommunityOrganizationRepository,
   JobEntity,
   JobStatusEnum,
   NotificationEntity,
@@ -7,6 +8,7 @@ import {
   NotificationStepEntity,
 } from '@novu/dal';
 import {
+  ApiServiceLevelEnum,
   DigestTypeEnum,
   IDigestBaseMetadata,
   IWorkflowStepMetadata,
@@ -31,7 +33,8 @@ export class CreateNotificationJobs {
   constructor(
     private digestFilterSteps: DigestFilterSteps,
     private notificationRepository: NotificationRepository,
-    private cachingService: CacheService
+    private cachingService: CacheService,
+    private organizationRepository: CommunityOrganizationRepository
   ) {}
 
   @InstrumentUsecase()
@@ -65,12 +68,15 @@ export class CreateNotificationJobs {
        *
        * This caching key, is not used for actual billing reporting, but rather for throttling triggers.
        */
-      await this.cachingService.incr(
-        buildUsageKey({
-          _organizationId: command.organizationId,
-          resourceType: ResourceEnum.EVENTS,
-        })
-      );
+      const organization = await this.organizationRepository.findById(command.organizationId);
+      if (organization?.apiServiceLevel === ApiServiceLevelEnum.FREE) {
+        await this.cachingService.incr(
+          buildUsageKey({
+            _organizationId: command.organizationId,
+            resourceType: ResourceEnum.EVENTS,
+          })
+        );
+      }
     }
 
     const jobs: NotificationJob[] = [];
