@@ -1,11 +1,17 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { DalService, SubscriberRepository, NotificationRepository, MessageRepository } from '@novu/dal';
+import {
+  CommunityOrganizationRepository,
+  DalService,
+  MessageRepository,
+  NotificationRepository,
+  SubscriberRepository,
+} from '@novu/dal';
 import {
   AnalyticsService,
   DalServiceHealthIndicator,
-  WebSocketsInMemoryProviderService,
   QueuesModule,
+  WebSocketsInMemoryProviderService,
 } from '@novu/application-generic';
 
 import { JobTopicNameEnum } from '@novu/shared';
@@ -39,6 +45,8 @@ const PROVIDERS = [
   DalServiceHealthIndicator,
   SubscriberOnlineService,
   WebSocketsInMemoryProviderService,
+  CommunityOrganizationRepository,
+
   ...DAL_MODELS,
 ];
 
