@@ -27,6 +27,7 @@ import {
   UpdateTenant,
 } from '@novu/application-generic';
 import {
+  CommunityOrganizationRepository,
   ControlValuesRepository,
   DalService,
   EnvironmentRepository,
@@ -106,6 +107,7 @@ const PROVIDERS = [
   ActiveJobsMetricService,
   ExecuteBridgeRequest,
   GetDecryptedSecretKey,
+  CommunityOrganizationRepository,
 ];
 
 @Module({
