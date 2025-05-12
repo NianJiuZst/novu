@@ -5,6 +5,7 @@ import {
   ClientSession,
   FilterQuery,
   Model,
+  MongooseUpdateQueryOptions,
   ProjectionType,
   QueryOptions,
   QueryWithHelpers,
@@ -282,7 +283,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   async update(
     query: FilterQuery<T_DBModel> & T_Enforcement,
     updateBody: UpdateQuery<T_DBModel>,
-    options: QueryOptions<T_DBModel> = {}
+    options: MongooseUpdateQueryOptions<T_DBModel> = {}
   ): Promise<{
     matched: number;
     modified: number;

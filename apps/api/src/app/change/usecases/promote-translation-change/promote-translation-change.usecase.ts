@@ -36,7 +36,7 @@ export class PromoteTranslationChange {
   }
 
   private async applyGroupChange(command: PromoteTypeChangeCommand) {
-    const newItem = command.item as {
+    const newItem = command.item as unknown as {
       _groupId: string;
     };
 

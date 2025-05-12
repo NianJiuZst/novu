@@ -139,9 +139,6 @@ messageSchema.pre('findOneAndUpdate', function filterDeletedFindOneAndUpdate() {
 messageSchema.pre('countDocuments', function filterDeletedCountDocuments() {
   this.where({ deleted: { $ne: true } });
 });
-messageSchema.pre('count', function filterDeletedCount() {
-  this.where({ deleted: { $ne: true } });
-});
 
 messageSchema.virtual('subscriber', {
   ref: 'Subscriber',

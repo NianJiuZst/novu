@@ -15,7 +15,7 @@ export class PromoteLayoutChange {
 
     // For the scenario where the layout is deleted and an active default layout change was pending
     if (!item) {
-      item = await this.layoutRepository.findDeletedByParentId(command.item._id, command.environmentId);
+      item = await this.layoutRepository.findDeletedByParentId(command.item._id as string, command.environmentId);
     }
 
     const newItem = command.item as LayoutEntity;

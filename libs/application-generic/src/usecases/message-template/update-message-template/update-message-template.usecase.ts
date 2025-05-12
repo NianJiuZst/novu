@@ -4,7 +4,7 @@ import { ChangeRepository, MessageRepository, MessageTemplateEntity, MessageTemp
 import { ChangeEntityTypeEnum, isBridgeWorkflow } from '@novu/shared';
 
 import { UpdateMessageTemplateCommand } from './update-message-template.command';
-import { CreateChange, CreateChangeCommand } from '../../create-change';
+import { CreateChange, CreateChangeCommand, IItem } from '../../create-change';
 import { UpdateChange, UpdateChangeCommand } from '../../update-change';
 import { normalizeVariantDefault } from '../../../utils';
 import { shouldSanitize } from '../shared';
@@ -146,7 +146,7 @@ export class UpdateMessageTemplate {
             organizationId: command.organizationId,
             environmentId: command.environmentId,
             userId: command.userId,
-            item,
+            item: item as IItem,
             type: ChangeEntityTypeEnum.MESSAGE_TEMPLATE,
             parentChangeId: command.parentChangeId,
             changeId,
