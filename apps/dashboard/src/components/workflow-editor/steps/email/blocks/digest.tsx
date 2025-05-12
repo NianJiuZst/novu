@@ -18,7 +18,7 @@ export const createDigestBlock = (props: {
     description: 'Display digested notifications in list.',
     searchTerms: ['digest', 'notification'],
     icon: <RiShadowLine className="h-4 w-4" />,
-    preview: '/images/email-editor/digest-block-preview.webp',
+    preview: '/images/email-editor/digest-preview.webp',
     render: () => {
       return (
         <>
