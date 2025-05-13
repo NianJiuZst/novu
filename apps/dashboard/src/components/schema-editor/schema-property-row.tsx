@@ -18,6 +18,7 @@ interface SchemaPropertyRowProps {
   onAddNestedProperty: (parentId: string) => void;
   onAddArrayItemProperty: (arrayPropertyId: string) => void;
   indentationLevel?: number;
+  errorMessage?: string;
 }
 
 export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
@@ -31,6 +32,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
     onAddNestedProperty,
     onAddArrayItemProperty,
     indentationLevel = 0,
+    errorMessage,
   } = props;
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -94,12 +96,16 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
       <div className={cn('flex flex-col', indentationLevel > 0 && `ml-${indentationLevel * 6}`)}>
         <div className="flex items-center space-x-2 py-1">
           <RiBracesLine className="h-5 w-5 shrink-0 text-gray-400" />
-          <Input
-            value={property.name}
-            onChange={(e) => handleNameChange(e.target.value)}
-            placeholder="Property name"
-            className="h-8 text-sm"
-          />
+          <div className="flex-1 flex-col">
+            <Input
+              value={property.name}
+              onChange={(e) => handleNameChange(e.target.value)}
+              placeholder="Property name"
+              className={cn('h-8 text-sm', errorMessage && 'border-destructive focus-visible:ring-destructive')}
+              hasError={!!errorMessage}
+            />
+            {errorMessage && <p className="text-destructive mt-1 text-xs">{errorMessage}</p>}
+          </div>
           <Select value={property.type} onValueChange={handleTypeChange}>
             <SelectTrigger className="h-8 w-[120px] text-sm">
               <SelectValue placeholder="Select type" />
@@ -196,6 +202,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                     onAddNestedProperty={onAddNestedProperty}
                     onAddArrayItemProperty={onAddArrayItemProperty}
                     indentationLevel={indentationLevel + 1}
+                    errorMessage={errorMessage}
                   />
                 ))}
                 <Button
@@ -227,6 +234,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                 onAddNestedProperty={onAddNestedProperty}
                 onAddArrayItemProperty={onAddArrayItemProperty}
                 indentationLevel={indentationLevel + 1}
+                errorMessage={errorMessage}
               />
             ))}
             <Button
