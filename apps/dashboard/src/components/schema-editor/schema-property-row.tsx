@@ -17,28 +17,11 @@ interface SchemaPropertyRowProps {
   pathPrefix: string;
   property: SchemaProperty;
   onDeleteProperty: () => void;
-  onAddEnumChoice: () => void;
-  onUpdateEnumChoice: (choiceIndex: number, value: string) => void;
-  onDeleteEnumChoice: (choiceIndex: number) => void;
-  onAddNestedProperty: () => void;
-  onAddArrayItemProperty: () => void;
   indentationLevel?: number;
 }
 
 export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
-  const {
-    control,
-    index,
-    pathPrefix,
-    property,
-    onDeleteProperty,
-    onAddEnumChoice,
-    onUpdateEnumChoice,
-    onDeleteEnumChoice,
-    onAddNestedProperty,
-    onAddArrayItemProperty,
-    indentationLevel = 0,
-  } = props;
+  const { control, index, pathPrefix, property, onDeleteProperty, indentationLevel = 0 } = props;
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -244,11 +227,6 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                     pathPrefix={`${pathPrefix}.arrayItemSchema.${itemIndex}`}
                     property={itemField as any as SchemaProperty}
                     onDeleteProperty={() => removeArrayItem(itemIndex)}
-                    onAddEnumChoice={() => console.log('TODO: add enum to array item')}
-                    onUpdateEnumChoice={() => console.log('TODO: update enum in array item')}
-                    onDeleteEnumChoice={() => console.log('TODO: delete enum in array item')}
-                    onAddNestedProperty={() => console.log('TODO: add nested to array item')}
-                    onAddArrayItemProperty={() => console.log('TODO: add array item to array item')}
                     indentationLevel={indentationLevel + 1}
                   />
                 ))}
@@ -277,11 +255,6 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                 pathPrefix={`${pathPrefix}.children.${childIndex}`}
                 property={childPropertyField as any as SchemaProperty}
                 onDeleteProperty={() => removeChild(childIndex)}
-                onAddEnumChoice={() => console.log('TODO: add enum to child')}
-                onUpdateEnumChoice={() => console.log('TODO: update enum in child')}
-                onDeleteEnumChoice={() => console.log('TODO: delete enum in child')}
-                onAddNestedProperty={() => console.log('TODO: add nested to child')}
-                onAddArrayItemProperty={() => console.log('TODO: add array item to child')}
                 indentationLevel={indentationLevel + 1}
               />
             ))}

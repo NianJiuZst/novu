@@ -29,18 +29,19 @@ export function SchemaEditor({ initialSchema, onChange }: SchemaEditorProps) {
   const {
     control,
     watch,
-    formState: { errors },
+    // formState: { errors }, // errors can be used for top-level form errors if needed
   } = methods;
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'schemaRows',
-    keyName: 'rhfId',
+    keyName: 'rhfId', // react-hook-form uses 'id' by default, ensure this was intended
   });
 
   useEffect(() => {
     const subscription = watch((value) => {
       if (onChange && value.schemaRows) {
+        // TODO: ensure value.schemaRows is deeply cloned or handled if mutations are a concern downstream
         onChange(value.schemaRows as SchemaProperty[]);
       }
     });
@@ -82,19 +83,16 @@ export function SchemaEditor({ initialSchema, onChange }: SchemaEditorProps) {
         </div>
         {fields.map((field, index) => {
           const pathPrefix = `schemaRows.${index}`;
+          // Cast field to any for now to avoid excessive type errors during refactor
+          // Will be properly typed once SchemaProperty aligns with RHF field structure
           return (
             <SchemaPropertyRow
               key={field.rhfId}
-              control={control as unknown as Control<FieldValues>}
-              property={field as any}
+              control={control as unknown as Control<FieldValues>} // Proper control typing
+              property={field as any} // Temporarily 'any', should align with Zod schema later
               index={index}
               pathPrefix={pathPrefix}
               onDeleteProperty={() => handleDeleteProperty(index)}
-              onAddEnumChoice={() => handleAddEnumChoice(index)}
-              onUpdateEnumChoice={(choiceIndex, value) => handleUpdateEnumChoice(index, choiceIndex, value)}
-              onDeleteEnumChoice={(choiceIndex) => handleDeleteEnumChoice(index, choiceIndex)}
-              onAddNestedProperty={() => handleAddNestedProperty(pathPrefix)}
-              onAddArrayItemProperty={() => handleAddArrayItemProperty(pathPrefix)}
               indentationLevel={0}
             />
           );
@@ -109,6 +107,11 @@ export function SchemaEditor({ initialSchema, onChange }: SchemaEditorProps) {
         >
           Add property
         </Button>
+        {/* Display top-level schema errors if any
+        {errors.schemaRows?.message && (
+          <p className=\"text-sm text-red-500\">{errors.schemaRows.message}</p>
+        )}
+        */}
       </div>
     </FormProvider>
   );
