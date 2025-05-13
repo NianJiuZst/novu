@@ -255,16 +255,18 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                 indentationLevel={indentationLevel + 1}
               />
             ))}
-            <Button
-              variant="secondary"
-              mode="outline"
-              size="sm"
-              className="mt-1 h-8 w-fit self-start text-xs"
-              leadingIcon={RiAddLine}
-              onClick={() => appendChild(createNewProperty(), { shouldFocus: false })}
-            >
-              Add nested property
-            </Button>
+            <div>
+              <Button
+                variant="secondary"
+                mode="lighter"
+                size="2xs"
+                className="mt-1"
+                leadingIcon={RiAddLine}
+                onClick={() => appendChild(createNewProperty(), { shouldFocus: false })}
+              >
+                Add nested property
+              </Button>
+            </div>
           </div>
         )}
       </div>
