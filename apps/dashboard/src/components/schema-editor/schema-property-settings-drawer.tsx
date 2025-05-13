@@ -1,5 +1,5 @@
 import { forwardRef, useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, type Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -36,10 +36,12 @@ const settingsSchema = z.object({
 type SettingsFormData = z.infer<typeof settingsSchema>;
 
 interface SchemaPropertySettingsDrawerProps {
-  property: SchemaProperty | null; // Can be null if no property selected
+  property: SchemaProperty | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (updatedSettings: Partial<SchemaProperty>) => void;
+  pathPrefix?: string; // Added for context if drawer fields were to be registered to main form
+  control?: Control<any>; // Control type is now imported
 }
 
 // Helper function to parse default value based on property type
@@ -77,7 +79,7 @@ function parseDefaultValue(value: any, type: SchemaValueType | undefined): any {
 
 export const SchemaPropertySettingsDrawer = forwardRef<HTMLDivElement, SchemaPropertySettingsDrawerProps>(
   (props, ref) => {
-    const { property, open, onOpenChange, onSave } = props;
+    const { property, open, onOpenChange, onSave, pathPrefix, control: mainFormControl } = props;
 
     const form = useForm<SettingsFormData>({
       resolver: zodResolver(settingsSchema),

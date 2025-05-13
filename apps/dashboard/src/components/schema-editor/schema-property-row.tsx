@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RiSettings3Line, RiDeleteBinLine, RiAddLine, RiBracesLine } from 'react-icons/ri';
+import { Controller, useFormContext, useFieldArray, useWatch, type Control } from 'react-hook-form';
+
 import { Input } from '@/components/primitives/input';
 import { Button } from '@/components/primitives/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/primitives/select';
@@ -7,24 +9,28 @@ import type { SchemaProperty, SchemaValueType } from './types';
 import { SCHEMA_TYPE_OPTIONS } from './constants';
 import { cn } from '@/utils/ui';
 import { SchemaPropertySettingsDrawer } from './schema-property-settings-drawer';
+import { createNewProperty } from './utils/property-helpers';
 
 interface SchemaPropertyRowProps {
+  control: Control<any>;
+  index: number;
+  pathPrefix: string;
   property: SchemaProperty;
-  onUpdateProperty: (id: string, updates: Partial<SchemaProperty>) => void;
-  onDeleteProperty: (id: string) => void;
-  onAddEnumChoice: (propertyId: string) => void;
-  onUpdateEnumChoice: (propertyId: string, choiceIndex: number, value: string) => void;
-  onDeleteEnumChoice: (propertyId: string, choiceIndex: number) => void;
-  onAddNestedProperty: (parentId: string) => void;
-  onAddArrayItemProperty: (arrayPropertyId: string) => void;
+  onDeleteProperty: () => void;
+  onAddEnumChoice: () => void;
+  onUpdateEnumChoice: (choiceIndex: number, value: string) => void;
+  onDeleteEnumChoice: (choiceIndex: number) => void;
+  onAddNestedProperty: () => void;
+  onAddArrayItemProperty: () => void;
   indentationLevel?: number;
-  errorMessage?: string;
 }
 
 export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
   const {
+    control,
+    index,
+    pathPrefix,
     property,
-    onUpdateProperty,
     onDeleteProperty,
     onAddEnumChoice,
     onUpdateEnumChoice,
@@ -32,63 +38,75 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
     onAddNestedProperty,
     onAddArrayItemProperty,
     indentationLevel = 0,
-    errorMessage,
   } = props;
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const handleNameChange = (newName: string) => {
-    onUpdateProperty(property.id, { name: newName });
-  };
+  const { setValue, getValues } = useFormContext();
 
-  const handleTypeChange = (newType: SchemaValueType) => {
-    const updates: Partial<SchemaProperty> = { type: newType };
+  const currentType = useWatch({
+    control,
+    name: `${pathPrefix}.type`,
+  }) as SchemaValueType;
 
-    if (newType !== 'enum') {
-      updates.enumValues = [];
-    } else {
-      if (!property.enumValues || property.enumValues.length === 0) {
-        updates.enumValues = [''];
-      }
+  const currentArrayItemType = useWatch({
+    control,
+    name: `${pathPrefix}.arrayItemType`,
+  }) as SchemaValueType;
+
+  useEffect(() => {
+    const schemaProp = getValues(pathPrefix) as SchemaProperty | undefined;
+    if (!schemaProp) return;
+
+    if (currentType !== 'enum' && schemaProp.enumValues && schemaProp.enumValues.length > 0) {
+      setValue(`${pathPrefix}.enumValues`, []);
     }
 
-    if (newType !== 'array') {
-      updates.arrayItemType = 'string';
-      updates.arrayItemSchema = [];
-    } else {
-      updates.arrayItemType = property.arrayItemType || 'string';
-
-      if (updates.arrayItemType === 'object' && (!property.arrayItemSchema || property.arrayItemSchema.length === 0)) {
-        updates.arrayItemSchema = property.arrayItemSchema || [];
-      }
+    if (currentType !== 'object' && schemaProp.children && schemaProp.children.length > 0) {
+      setValue(`${pathPrefix}.children`, []);
     }
 
-    if (newType !== 'object') {
-      updates.children = [];
-    } else {
-      if (!property.children || property.children.length === 0) {
-        updates.children = property.children || [];
-      }
+    if (
+      currentType !== 'array' &&
+      ((schemaProp.arrayItemSchema && schemaProp.arrayItemSchema.length > 0) || schemaProp.arrayItemType !== 'string')
+    ) {
+      setValue(`${pathPrefix}.arrayItemType`, 'string');
+      setValue(`${pathPrefix}.arrayItemSchema`, []);
     }
+  }, [currentType, pathPrefix, setValue, getValues]);
 
-    onUpdateProperty(property.id, updates);
-  };
+  const {
+    fields: enumFields,
+    append: appendEnum,
+    remove: removeEnum,
+  } = useFieldArray({
+    control,
+    name: `${pathPrefix}.enumValues`,
+  });
 
-  const handleArrayItemTypeChange = (newType: SchemaValueType) => {
-    const updates: Partial<SchemaProperty> = { arrayItemType: newType };
+  const {
+    fields: childFields,
+    append: appendChild,
+    remove: removeChild,
+  } = useFieldArray({
+    control,
+    name: `${pathPrefix}.children`,
+  });
 
-    if (newType !== 'object') {
-      updates.arrayItemSchema = [];
-    } else {
-      updates.arrayItemSchema =
-        property.arrayItemSchema && property.arrayItemSchema.length > 0 ? property.arrayItemSchema : [];
-    }
-
-    onUpdateProperty(property.id, updates);
-  };
+  const {
+    fields: arrayItemFields,
+    append: appendArrayItem,
+    remove: removeArrayItem,
+  } = useFieldArray({
+    control,
+    name: `${pathPrefix}.arrayItemSchema`,
+  });
 
   const handleSaveSettings = (updatedSettings: Partial<SchemaProperty>) => {
-    onUpdateProperty(property.id, updatedSettings);
+    Object.entries(updatedSettings).forEach(([key, value]) => {
+      setValue(`${pathPrefix}.${key}`, value);
+    });
+    setIsSettingsOpen(false);
   };
 
   return (
@@ -97,27 +115,43 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
         <div className="flex items-center space-x-2 py-1">
           <RiBracesLine className="h-5 w-5 shrink-0 text-gray-400" />
           <div className="flex-1 flex-col">
-            <Input
-              value={property.name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              placeholder="Property name"
-              className={cn('h-8 text-sm', errorMessage && 'border-destructive focus-visible:ring-destructive')}
-              hasError={!!errorMessage}
+            <Controller
+              name={`${pathPrefix}.name`}
+              control={control}
+              render={({ field, fieldState }) => (
+                <>
+                  <Input
+                    {...field}
+                    placeholder="Property name"
+                    className={cn(
+                      'h-8 text-sm',
+                      fieldState.error && 'border-destructive focus-visible:ring-destructive'
+                    )}
+                    hasError={!!fieldState.error}
+                  />
+                  {fieldState.error && <p className="text-destructive mt-1 text-xs">{fieldState.error.message}</p>}
+                </>
+              )}
             />
-            {errorMessage && <p className="text-destructive mt-1 text-xs">{errorMessage}</p>}
           </div>
-          <Select value={property.type} onValueChange={handleTypeChange}>
-            <SelectTrigger className="h-8 w-[120px] text-sm">
-              <SelectValue placeholder="Select type" />
-            </SelectTrigger>
-            <SelectContent>
-              {SCHEMA_TYPE_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value} className="text-sm">
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Controller
+            name={`${pathPrefix}.type`}
+            control={control}
+            render={({ field }) => (
+              <Select value={field.value as string | undefined} onValueChange={field.onChange}>
+                <SelectTrigger className="h-8 w-[120px] text-sm">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SCHEMA_TYPE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value} className="text-sm">
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
           <Button
             variant="secondary"
             mode="ghost"
@@ -132,77 +166,90 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
             size="xs"
             leadingIcon={RiDeleteBinLine}
             className="h-8 w-8"
-            onClick={() => onDeleteProperty(property.id)}
+            onClick={onDeleteProperty}
           />
         </div>
 
-        {property.type === 'enum' && (
+        {currentType === 'enum' && (
           <div className={cn('ml-6 flex flex-col space-y-1 pt-1')}>
-            {(property.enumValues ?? []).map((value, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <Input
-                  value={value}
-                  onChange={(e) => onUpdateEnumChoice(property.id, index, e.target.value)}
-                  placeholder={`item${index + 1}`}
-                  className="h-8 text-sm"
-                />
-                <Input disabled value="string" className="h-8 w-[100px] bg-gray-50 text-sm text-gray-400" />
-                <Button
-                  variant="error"
-                  mode="ghost"
-                  size="xs"
-                  leadingIcon={RiDeleteBinLine}
-                  className="h-8 w-8"
-                  onClick={() => onDeleteEnumChoice(property.id, index)}
-                />
-              </div>
-            ))}
+            {enumFields.map((field, enumIndex) => {
+              const enumPath = `${pathPrefix}.enumValues.${enumIndex}` as const;
+              return (
+                <div key={field.id} className="flex items-center space-x-2">
+                  <Controller
+                    name={enumPath}
+                    control={control}
+                    defaultValue={getValues(enumPath) || ''}
+                    render={({ field: enumValueField }) => (
+                      <Input {...enumValueField} placeholder={`item${enumIndex + 1}`} className="h-8 text-sm" />
+                    )}
+                  />
+                  <Input disabled value="string" className="h-8 w-[100px] bg-gray-50 text-sm text-gray-400" />
+                  <Button
+                    variant="error"
+                    mode="ghost"
+                    size="xs"
+                    leadingIcon={RiDeleteBinLine}
+                    className="h-8 w-8"
+                    onClick={() => removeEnum(enumIndex)}
+                  />
+                </div>
+              );
+            })}
             <Button
               variant="secondary"
               mode="outline"
               size="sm"
               className="mt-1 h-8 w-fit self-start text-xs"
               leadingIcon={RiAddLine}
-              onClick={() => onAddEnumChoice(property.id)}
+              onClick={() => appendEnum('', { shouldFocus: true })}
             >
               Add choice
             </Button>
           </div>
         )}
 
-        {property.type === 'array' && (
+        {currentType === 'array' && (
           <div className={cn('ml-6 flex flex-col space-y-1 pt-1')}>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-500">items</span>
-              <Select value={property.arrayItemType ?? 'string'} onValueChange={handleArrayItemTypeChange}>
-                <SelectTrigger className="h-8 w-[120px] text-sm">
-                  <SelectValue placeholder="Select item type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SCHEMA_TYPE_OPTIONS.filter((opt) => opt.value !== 'enum').map((option) => (
-                    <SelectItem key={option.value} value={option.value} className="text-sm">
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                name={`${pathPrefix}.arrayItemType`}
+                control={control}
+                defaultValue="string"
+                render={({ field }) => (
+                  <Select value={field.value as string | undefined} onValueChange={field.onChange}>
+                    <SelectTrigger className="h-8 w-[120px] text-sm">
+                      <SelectValue placeholder="Select item type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SCHEMA_TYPE_OPTIONS.filter((opt) => opt.value !== 'enum').map((option) => (
+                        <SelectItem key={option.value} value={option.value} className="text-sm">
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
-            {property.arrayItemType === 'object' && (
+            {currentArrayItemType === 'object' && (
               <div className={cn('ml-6 flex flex-col space-y-1 pt-1')}>
-                {(property.arrayItemSchema ?? []).map((itemProperty) => (
+                {arrayItemFields.map((itemField, itemIndex) => (
                   <SchemaPropertyRow
-                    key={itemProperty.id}
-                    property={itemProperty}
-                    onUpdateProperty={onUpdateProperty}
-                    onDeleteProperty={onDeleteProperty}
-                    onAddEnumChoice={onAddEnumChoice}
-                    onUpdateEnumChoice={onUpdateEnumChoice}
-                    onDeleteEnumChoice={onDeleteEnumChoice}
-                    onAddNestedProperty={onAddNestedProperty}
-                    onAddArrayItemProperty={onAddArrayItemProperty}
+                    key={itemField.id}
+                    control={control}
+                    index={itemIndex}
+                    pathPrefix={`${pathPrefix}.arrayItemSchema.${itemIndex}`}
+                    property={itemField as any as SchemaProperty}
+                    onDeleteProperty={() => removeArrayItem(itemIndex)}
+                    onAddEnumChoice={() => console.log('TODO: add enum to array item')}
+                    onUpdateEnumChoice={() => console.log('TODO: update enum in array item')}
+                    onDeleteEnumChoice={() => console.log('TODO: delete enum in array item')}
+                    onAddNestedProperty={() => console.log('TODO: add nested to array item')}
+                    onAddArrayItemProperty={() => console.log('TODO: add array item to array item')}
                     indentationLevel={indentationLevel + 1}
-                    errorMessage={errorMessage}
                   />
                 ))}
                 <Button
@@ -211,7 +258,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                   size="sm"
                   className="mt-1 h-8 w-fit self-start text-xs"
                   leadingIcon={RiAddLine}
-                  onClick={() => onAddArrayItemProperty(property.id)}
+                  onClick={() => appendArrayItem(createNewProperty(), { shouldFocus: false })}
                 >
                   Add property to item
                 </Button>
@@ -220,21 +267,22 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
           </div>
         )}
 
-        {property.type === 'object' && (
+        {currentType === 'object' && (
           <div className={cn('ml-6 flex flex-col space-y-1 pt-1')}>
-            {(property.children ?? []).map((childProperty) => (
+            {childFields.map((childPropertyField, childIndex) => (
               <SchemaPropertyRow
-                key={childProperty.id}
-                property={childProperty}
-                onUpdateProperty={onUpdateProperty}
-                onDeleteProperty={onDeleteProperty}
-                onAddEnumChoice={onAddEnumChoice}
-                onUpdateEnumChoice={onUpdateEnumChoice}
-                onDeleteEnumChoice={onDeleteEnumChoice}
-                onAddNestedProperty={onAddNestedProperty}
-                onAddArrayItemProperty={onAddArrayItemProperty}
+                key={childPropertyField.id}
+                control={control}
+                index={childIndex}
+                pathPrefix={`${pathPrefix}.children.${childIndex}`}
+                property={childPropertyField as any as SchemaProperty}
+                onDeleteProperty={() => removeChild(childIndex)}
+                onAddEnumChoice={() => console.log('TODO: add enum to child')}
+                onUpdateEnumChoice={() => console.log('TODO: update enum in child')}
+                onDeleteEnumChoice={() => console.log('TODO: delete enum in child')}
+                onAddNestedProperty={() => console.log('TODO: add nested to child')}
+                onAddArrayItemProperty={() => console.log('TODO: add array item to child')}
                 indentationLevel={indentationLevel + 1}
-                errorMessage={errorMessage}
               />
             ))}
             <Button
@@ -243,19 +291,23 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
               size="sm"
               className="mt-1 h-8 w-fit self-start text-xs"
               leadingIcon={RiAddLine}
-              onClick={() => onAddNestedProperty(property.id)}
+              onClick={() => appendChild(createNewProperty(), { shouldFocus: false })}
             >
               Add nested property
             </Button>
           </div>
         )}
       </div>
-      <SchemaPropertySettingsDrawer
-        property={property}
-        open={isSettingsOpen}
-        onOpenChange={setIsSettingsOpen}
-        onSave={handleSaveSettings}
-      />
+      {isSettingsOpen && (
+        <SchemaPropertySettingsDrawer
+          open={isSettingsOpen}
+          onOpenChange={setIsSettingsOpen}
+          property={property as SchemaProperty}
+          onSave={handleSaveSettings}
+          pathPrefix={pathPrefix}
+          control={control}
+        />
+      )}
     </>
   );
 }
