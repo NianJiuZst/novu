@@ -91,7 +91,7 @@ const JSON_SCHEMA_FORMATS = [
 
 export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPropertySettingsPopoverProps>(
   (props, ref) => {
-    const { property, open, onOpenChange, onSave, onDelete } = props;
+    const { property, open, onOpenChange, onSave, onDelete, control } = props;
 
     const form = useForm<SettingsFormData>({
       resolver: zodResolver(settingsSchema),

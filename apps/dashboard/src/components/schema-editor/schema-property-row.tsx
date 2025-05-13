@@ -40,6 +40,11 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
 
   const { setValue, getValues } = useFormContext();
 
+  const currentProperty = useWatch({
+    control,
+    name: pathPrefix,
+  });
+
   const currentType = useWatch({
     control,
     name: `${pathPrefix}.type`,
@@ -171,7 +176,8 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
               <SchemaPropertySettingsPopover
                 open={isSettingsOpen}
                 onOpenChange={setIsSettingsOpen}
-                property={property as SchemaProperty}
+                control={control}
+                property={currentProperty as SchemaProperty}
                 onSave={handleSaveSettings}
                 onDelete={onDeleteProperty}
               />
