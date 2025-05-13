@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class PatchWorkflowDto {
   @ApiPropertyOptional({
@@ -35,4 +35,12 @@ export class PatchWorkflowDto {
   @IsArray()
   @IsString({ each: true })
   tags?: string[];
+
+  @ApiPropertyOptional({
+    description: 'The payload JSON Schema for the workflow',
+    type: 'object',
+  })
+  @IsOptional()
+  @IsObject()
+  payloadSchema?: object;
 }
