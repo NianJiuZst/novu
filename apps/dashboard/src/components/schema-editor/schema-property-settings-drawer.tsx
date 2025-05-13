@@ -120,6 +120,10 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
 
     if (!property) return null;
 
+    const isStringType = property.type === 'string';
+    const isArrayType = property.type === 'array';
+    const isNumericType = property.type === 'integer' || property.type === 'number';
+
     return (
       <PopoverContent ref={ref} className="w-[350px] p-0" side="bottom" align="start">
         <div className="bg-bg-weak border-b border-b-neutral-100">
@@ -163,20 +167,20 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                 )}
               />
 
-              {(property.type === 'string' || property.type === 'array') && (
+              {(isStringType || isArrayType) && (
                 <>
                   <FormField
                     control={form.control}
                     name="minLength"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">Min Length</FormLabel>
+                        <FormLabel className="text-xs">{isArrayType ? 'Min Items' : 'Min Length'}</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             {...field}
                             onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
-                            placeholder="Minimum length"
+                            placeholder={isArrayType ? 'Minimum items' : 'Minimum length'}
                             className="h-8 text-sm"
                           />
                         </FormControl>
@@ -189,13 +193,13 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                     name="maxLength"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">Max Length</FormLabel>
+                        <FormLabel className="text-xs">{isArrayType ? 'Max Items' : 'Max Length'}</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             {...field}
                             onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
-                            placeholder="Maximum length"
+                            placeholder={isArrayType ? 'Maximum items' : 'Maximum length'}
                             className="h-8 text-sm"
                           />
                         </FormControl>
@@ -206,38 +210,38 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                 </>
               )}
 
-              {property.type === 'string' && (
-                <FormField
-                  control={form.control}
-                  name="pattern"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs">Pattern (Regex)</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Regular expression" className="h-8 text-sm" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-              {property.type === 'string' && (
-                <FormField
-                  control={form.control}
-                  name="format"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs">Format</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="e.g., date-time, email" className="h-8 text-sm" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              {isStringType && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="pattern"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Pattern (Regex)</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Regular expression" className="h-8 text-sm" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="format"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Format</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="e.g., date-time, email" className="h-8 text-sm" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
               )}
 
-              {(property.type === 'integer' || property.type === 'number') && (
+              {isNumericType && (
                 <>
                   <FormField
                     control={form.control}

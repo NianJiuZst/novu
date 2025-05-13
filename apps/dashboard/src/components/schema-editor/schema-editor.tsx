@@ -59,28 +59,9 @@ export function SchemaEditor({ initialSchema, onChange }: SchemaEditorProps) {
     [remove]
   );
 
-  const handleAddNestedProperty = useCallback((parentPropertyPath: string) => {
-    console.log('handleAddNestedProperty for:', parentPropertyPath);
-  }, []);
-  const handleAddArrayItemProperty = useCallback((arrayPropertyPath: string) => {
-    console.log('handleAddArrayItemProperty for:', arrayPropertyPath);
-  }, []);
-  const handleAddEnumChoice = useCallback((propertyIndex: number) => {
-    console.log('handleAddEnumChoice for property index:', propertyIndex);
-  }, []);
-  const handleUpdateEnumChoice = useCallback((propertyIndex: number, choiceIndex: number, value: string) => {
-    console.log('handleUpdateEnumChoice for:', propertyIndex, choiceIndex, value);
-  }, []);
-  const handleDeleteEnumChoice = useCallback((propertyIndex: number, choiceIndex: number) => {
-    console.log('handleDeleteEnumChoice for:', propertyIndex, choiceIndex);
-  }, []);
-
   return (
     <FormProvider {...methods}>
-      <div className="space-y-2">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-base font-semibold">Payload schema</h3>
-        </div>
+      <div className="rounded-4 bg-bg-white border border-neutral-100 p-2">
         {fields.map((field, index) => {
           const pathPrefix = `schemaRows.${index}`;
           // Cast field to any for now to avoid excessive type errors during refactor

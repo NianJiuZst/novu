@@ -8,6 +8,7 @@ import {
   SheetDescription,
   SheetFooter,
   SheetHeader,
+  SheetMain,
   SheetTitle,
 } from '@/components/primitives/sheet';
 import { cn } from '@/utils/ui';
@@ -19,6 +20,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/primitives/dropdown-menu';
 import { convertInternalSchemaToJsonSchemaRoot } from '@/components/schema-editor/utils/export-helpers';
+import { ExternalLink } from '../shared/external-link';
+import { Separator } from '../primitives/separator';
 
 type PayloadSchemaDrawerProps = {
   open: boolean;
@@ -67,38 +70,44 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
           'pointer-events-none opacity-0': !open,
         })}
       />
-      <SheetContent ref={ref} className="flex w-[720px] flex-col p-0 sm:max-w-3xl">
-        <SheetHeader className="flex flex-row items-center justify-between border-b border-neutral-200 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <RiListView className="h-6 w-6 text-neutral-600" />
-            <SheetTitle className="text-lg font-semibold">Manage Payload Schema</SheetTitle>
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" mode="outline" leadingIcon={RiDownload2Line} className="text-sm">
-                Import / Export
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleExportToJsonSchema} className="cursor-pointer">
-                <RiDownload2Line className="mr-2 h-4 w-4" />
-                Export to JSON Schema
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleExportToZod} className="cursor-pointer">
-                <RiDownload2Line className="mr-2 h-4 w-4" />
-                Export to Zod
-              </DropdownMenuItem>
-              {/* <DropdownMenuItem disabled className="cursor-not-allowed">
+      <SheetContent ref={ref} className="bg-bg-weak flex w-[600px] flex-col p-0 sm:max-w-3xl">
+        <SheetHeader className="space-y-1 px-3 py-4">
+          <SheetTitle className="text-label-lg">Manage Payload Schema</SheetTitle>
+          <SheetDescription className="text-paragraph-xs mt-0">
+            Define the structure of your workflow payload.{' '}
+            <ExternalLink href="https://docs.novu.co/platform/concepts/workflows">Learn more</ExternalLink>
+          </SheetDescription>
+        </SheetHeader>
+        <Separator />
+
+        <SheetMain className="p-3">
+          <div className="mb-2 flex flex-row items-center justify-between gap-2">
+            <h3 className="text-label-xs text-base font-semibold">Payload schema</h3>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" mode="outline" leadingIcon={RiDownload2Line} size="2xs" className="text-sm">
+                  Import / Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExportToJsonSchema} className="cursor-pointer">
+                  <RiDownload2Line className="mr-2 h-4 w-4" />
+                  Export to JSON Schema
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportToZod} className="cursor-pointer">
+                  <RiDownload2Line className="mr-2 h-4 w-4" />
+                  Export to Zod
+                </DropdownMenuItem>
+                {/* <DropdownMenuItem disabled className="cursor-not-allowed">
                 <RiUpload2Line className="mr-2 h-4 w-4" />
                 Import from JSON Schema (Soon)
               </DropdownMenuItem> */}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </SheetHeader>
-        <SheetDescription className="sr-only">Define the structure of your workflow payload.</SheetDescription>
-        <div className="flex-1 overflow-y-auto p-6">
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           <SchemaEditor initialSchema={currentSchema} onChange={handleSchemaChange} />
-        </div>
+        </SheetMain>
         <SheetFooter className="border-t border-neutral-200 p-6">
           <Button onClick={handleSaveChanges} className="w-full">
             Save Changes
