@@ -16,7 +16,7 @@ import { Popover, PopoverTrigger } from '@/components/primitives/popover';
 import type { SchemaProperty, SchemaValueType } from './types';
 import { SCHEMA_TYPE_OPTIONS } from './constants';
 import { cn } from '@/utils/ui';
-import { SchemaPropertySettingsPopover } from './schema-property-settings-drawer';
+import { SchemaPropertySettingsPopover } from './schema-property-settings-popover';
 import { createNewProperty } from './utils/property-helpers';
 import { Code2 } from '../icons/code-2';
 
