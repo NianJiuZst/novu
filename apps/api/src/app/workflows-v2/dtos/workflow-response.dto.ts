@@ -82,5 +82,14 @@ export class WorkflowResponseDto extends WorkflowCommonsFields {
   @IsOptional()
   @IsString()
   lastTriggeredAt?: string;
+
+  @ApiPropertyOptional({
+    description: 'The payload JSON Schema for the workflow',
+    type: 'object',
+    nullable: true,
+  })
+  @IsOptional()
+  payloadSchema?: object;
 }
+
 export type WorkflowCreateAndUpdateKeys = keyof CreateWorkflowDto | keyof UpdateWorkflowDto;

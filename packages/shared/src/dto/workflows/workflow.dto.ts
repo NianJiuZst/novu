@@ -13,6 +13,7 @@ export type PatchWorkflowDto = {
   name?: string;
   description?: string;
   tags?: string[];
+  payloadSchema?: object;
 };
 
 export type ListWorkflowResponse = {

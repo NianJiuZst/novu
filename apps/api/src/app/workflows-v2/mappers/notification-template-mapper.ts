@@ -43,6 +43,7 @@ export function toResponseWorkflowDto(
     status: workflow.status || WorkflowStatusEnum.ACTIVE,
     issues: workflow.issues as unknown as Record<WorkflowCreateAndUpdateKeys, RuntimeIssueDto>,
     lastTriggeredAt: workflow.lastTriggeredAt,
+    payloadSchema: workflow.payloadSchema,
   };
 }
 

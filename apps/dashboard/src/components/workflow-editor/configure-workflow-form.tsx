@@ -211,6 +211,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
         isLoading={isDeleteWorkflowPending}
       />
       <PayloadSchemaDrawer
+        workflowIdOrSlug={workflow.workflowId}
         open={isPayloadSchemaDrawerOpen}
         onOpenChange={setIsPayloadSchemaDrawerOpen}
         initialSchema={payloadSchema}

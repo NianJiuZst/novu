@@ -22,25 +22,64 @@ import {
 import { convertInternalSchemaToJsonSchemaRoot } from '@/components/schema-editor/utils/export-helpers';
 import { ExternalLink } from '../shared/external-link';
 import { Separator } from '../primitives/separator';
+import { usePatchWorkflow } from '@/hooks/use-patch-workflow';
 
 type PayloadSchemaDrawerProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialSchema?: SchemaProperty[];
   onSave?: (schema: SchemaProperty[]) => void;
+  workflowIdOrSlug: string;
 };
 
 export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawerProps>((props, ref) => {
-  const { open, onOpenChange, initialSchema, onSave } = props;
+  const { open, onOpenChange, initialSchema, onSave, workflowIdOrSlug } = props;
   const [currentSchema, setCurrentSchema] = useState<SchemaProperty[]>(initialSchema || []);
+  const { patchWorkflow, isPending: isSavingSchema } = usePatchWorkflow();
 
   const handleSchemaChange = useCallback((schema: SchemaProperty[]) => {
+    console.log('Schema changed in editor:', schema);
     setCurrentSchema(schema);
   }, []);
 
-  const handleSaveChanges = () => {
-    onSave?.(currentSchema);
-    onOpenChange(false);
+  const handleSaveChanges = async () => {
+    console.log('handleSaveChanges called'); // Log when function starts
+
+    if (!workflowIdOrSlug) {
+      console.error('Workflow ID/Slug is missing. Cannot save.');
+      // toast.error('Workflow ID/Slug is missing, cannot save schema.');
+      return;
+    }
+
+    if (!currentSchema || currentSchema.length === 0) {
+      console.warn('Current schema is empty. Nothing to save.');
+      // toast.warn('Schema is empty. Add some properties to save.');
+      // onOpenChange(false); // Optionally close
+      return;
+    }
+
+    console.log('Current schema state before conversion:', currentSchema);
+    const payloadSchemaForApi = convertInternalSchemaToJsonSchemaRoot(currentSchema);
+
+    console.log('Attempting to save schema for workflow:', workflowIdOrSlug);
+    console.log('Converted payload schema being sent to API:', JSON.stringify(payloadSchemaForApi, null, 2));
+
+    try {
+      console.log('Calling patchWorkflow mutation...');
+      await patchWorkflow({
+        workflowSlug: workflowIdOrSlug,
+        workflow: {
+          payloadSchema: payloadSchemaForApi as any,
+        },
+      });
+      console.log('Payload schema saved successfully! API call succeeded.');
+      // toast.success('Payload schema saved successfully!');
+      onSave?.(currentSchema);
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Failed to save payload schema due to API error:', error);
+      // toast.error('Failed to save payload schema. Please try again.');
+    }
   };
 
   const handleExportToJsonSchema = () => {
@@ -109,8 +148,8 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
           <SchemaEditor initialSchema={currentSchema} onChange={handleSchemaChange} />
         </SheetMain>
         <SheetFooter className="border-t border-neutral-200 p-6">
-          <Button onClick={handleSaveChanges} className="w-full">
-            Save Changes
+          <Button onClick={handleSaveChanges} className="w-full" disabled={isSavingSchema || !currentSchema?.length}>
+            {isSavingSchema ? 'Saving...' : 'Save Changes'}
           </Button>
         </SheetFooter>
       </SheetContent>
