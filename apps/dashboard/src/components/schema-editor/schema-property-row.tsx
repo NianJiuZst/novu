@@ -12,10 +12,11 @@ import { Controller, useFormContext, useFieldArray, useWatch, type Control } fro
 import { Input, InputRoot, InputWrapper, InputPure } from '@/components/primitives/input';
 import { Button } from '@/components/primitives/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/primitives/select';
+import { Popover, PopoverTrigger } from '@/components/primitives/popover';
 import type { SchemaProperty, SchemaValueType } from './types';
 import { SCHEMA_TYPE_OPTIONS } from './constants';
 import { cn } from '@/utils/ui';
-import { SchemaPropertySettingsDrawer } from './schema-property-settings-drawer';
+import { SchemaPropertySettingsPopover } from './schema-property-settings-drawer';
 import { createNewProperty } from './utils/property-helpers';
 import { Code2 } from '../icons/code-2';
 
@@ -139,14 +140,26 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
               </Select>
             )}
           />
-          <Button
-            variant="secondary"
-            mode="outline"
-            size="2xs"
-            className="text-text-soft"
-            leadingIcon={RiSettings4Line}
-            onClick={() => setIsSettingsOpen(true)}
-          />
+          <Popover open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="secondary"
+                mode="outline"
+                size="2xs"
+                className="text-text-soft"
+                leadingIcon={RiSettings4Line}
+              />
+            </PopoverTrigger>
+            {isSettingsOpen && (
+              <SchemaPropertySettingsPopover
+                open={isSettingsOpen}
+                onOpenChange={setIsSettingsOpen}
+                property={property as SchemaProperty}
+                onSave={handleSaveSettings}
+                onDelete={onDeleteProperty}
+              />
+            )}
+          </Popover>
           <Button variant="error" mode="outline" size="2xs" leadingIcon={RiDeleteBin6Line} onClick={onDeleteProperty} />
         </div>
 
@@ -270,16 +283,6 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
           </div>
         )}
       </div>
-      {isSettingsOpen && (
-        <SchemaPropertySettingsDrawer
-          open={isSettingsOpen}
-          onOpenChange={setIsSettingsOpen}
-          property={property as SchemaProperty}
-          onSave={handleSaveSettings}
-          pathPrefix={pathPrefix}
-          control={control}
-        />
-      )}
     </>
   );
 }
