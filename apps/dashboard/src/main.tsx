@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
+import { Navigate } from 'react-router-dom';
 
 import { ConfigureWorkflow } from '@/components/workflow-editor/configure-workflow';
 import { EditStepConditions } from '@/components/workflow-editor/steps/conditions/edit-step-conditions';
@@ -31,7 +32,9 @@ import { UpdateIntegrationSidebar } from './components/integrations/components/u
 import { ChannelPreferences } from './components/workflow-editor/channel-preferences';
 import { FeatureFlagsProvider } from './context/feature-flags-provider';
 import { CreateSubscriberPage } from './pages/create-subscriber';
+import { CreateTopicPage } from './pages/create-topic';
 import { EditSubscriberPage } from './pages/edit-subscriber-page';
+import { EditTopicPage } from './pages/edit-topic';
 import { EditWorkflowPage } from './pages/edit-workflow';
 import { EnvironmentsPage } from './pages/environments';
 import { InboxEmbedPage } from './pages/inbox-embed-page';
@@ -39,12 +42,14 @@ import { InboxEmbedSuccessPage } from './pages/inbox-embed-success-page';
 import { InboxUsecasePage } from './pages/inbox-usecase-page';
 import { RedirectToLegacyStudioAuth } from './pages/redirect-to-legacy-studio-auth';
 import { TestWorkflowPage } from './pages/test-workflow';
+import { TopicsPage } from './pages/topics';
+import { VercelIntegrationPage } from './pages/vercel-integration-page';
 import { AuthRoute, CatchAllRoute, DashboardRoute, RootRoute } from './routes';
 import { OnboardingParentRoute } from './routes/onboarding';
 import { ROUTES } from './utils/routes';
 import { initializeSentry } from './utils/sentry';
 import { overrideZodErrorMap } from './utils/validation';
-import { VercelIntegrationPage } from './pages/vercel-integration-page';
+import { IS_SELF_HOSTED } from './config';
 
 initializeSentry();
 overrideZodErrorMap();
@@ -145,6 +150,20 @@ const router = createBrowserRouter([
                 ],
               },
               {
+                path: ROUTES.TOPICS,
+                element: <TopicsPage />,
+                children: [
+                  {
+                    path: ROUTES.TOPICS_CREATE,
+                    element: <CreateTopicPage />,
+                  },
+                  {
+                    path: ROUTES.TOPICS_EDIT,
+                    element: <EditTopicPage />,
+                  },
+                ],
+              },
+              {
                 path: ROUTES.API_KEYS,
                 element: <ApiKeysPage />,
               },
@@ -221,23 +240,23 @@ const router = createBrowserRouter([
           },
           {
             path: ROUTES.SETTINGS,
-            element: <SettingsPage />,
+            element: IS_SELF_HOSTED ? <Navigate to={ROUTES.ROOT} /> : <SettingsPage />,
           },
           {
             path: ROUTES.SETTINGS_ACCOUNT,
-            element: <SettingsPage />,
+            element: IS_SELF_HOSTED ? <Navigate to={ROUTES.ROOT} /> : <SettingsPage />,
           },
           {
             path: ROUTES.SETTINGS_ORGANIZATION,
-            element: <SettingsPage />,
+            element: IS_SELF_HOSTED ? <Navigate to={ROUTES.ROOT} /> : <SettingsPage />,
           },
           {
             path: ROUTES.SETTINGS_TEAM,
-            element: <SettingsPage />,
+            element: IS_SELF_HOSTED ? <Navigate to={ROUTES.ROOT} /> : <SettingsPage />,
           },
           {
             path: ROUTES.SETTINGS_BILLING,
-            element: <SettingsPage />,
+            element: IS_SELF_HOSTED ? <Navigate to={ROUTES.ROOT} /> : <SettingsPage />,
           },
           {
             path: ROUTES.LOCAL_STUDIO_AUTH,

@@ -1,5 +1,5 @@
 import { HTMLAttributes, useCallback, useMemo, useState } from 'react';
-import { Editor } from '@maily-to/core-digest';
+import { Editor } from '@maily-to/core';
 import type { Editor as TiptapEditor } from '@tiptap/core';
 import { Editor as TiptapEditorReact } from '@tiptap/react';
 
