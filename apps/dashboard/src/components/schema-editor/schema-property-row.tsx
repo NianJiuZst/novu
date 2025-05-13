@@ -1,24 +1,18 @@
-import { useState, useEffect } from 'react';
-import {
-  RiSettings3Line,
-  RiDeleteBinLine,
-  RiAddLine,
-  RiBracesLine,
-  RiSettings4Line,
-  RiDeleteBin6Line,
-} from 'react-icons/ri';
-import { Controller, useFormContext, useFieldArray, useWatch, type Control } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { Controller, useFieldArray, useFormContext, useWatch, type Control } from 'react-hook-form';
+import { RiAddLine, RiDeleteBin6Line, RiDeleteBinLine, RiSettings4Line, RiErrorWarningLine } from 'react-icons/ri';
 
-import { Input, InputRoot, InputWrapper, InputPure } from '@/components/primitives/input';
 import { Button } from '@/components/primitives/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/primitives/select';
+import { Input, InputPure, InputRoot, InputWrapper } from '@/components/primitives/input';
 import { Popover, PopoverTrigger } from '@/components/primitives/popover';
-import type { SchemaProperty, SchemaValueType } from './types';
-import { SCHEMA_TYPE_OPTIONS } from './constants';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/primitives/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/primitives/tooltip';
 import { cn } from '@/utils/ui';
-import { SchemaPropertySettingsPopover } from './schema-property-settings-popover';
-import { createNewProperty } from './utils/property-helpers';
 import { Code2 } from '../icons/code-2';
+import { SCHEMA_TYPE_OPTIONS } from './constants';
+import { SchemaPropertySettingsPopover } from './schema-property-settings-popover';
+import type { SchemaProperty, SchemaValueType } from './types';
+import { createNewProperty } from './utils/property-helpers';
 
 interface SchemaPropertyRowProps {
   control: Control<any>;
@@ -110,15 +104,28 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
               name={`${pathPrefix}.name`}
               control={control}
               render={({ field, fieldState }) => (
-                <>
-                  <InputRoot hasError={!!fieldState.error} size="2xs" className="font-mono">
-                    <InputWrapper>
-                      <Code2 className="h-4 w-4 shrink-0 text-gray-500" />
-                      <InputPure {...field} placeholder="Property name" className="text-sm" />
-                    </InputWrapper>
-                  </InputRoot>
-                  {fieldState.error && <p className="text-destructive mt-1 text-xs">{fieldState.error.message}</p>}
-                </>
+                <div className="relative">
+                  <TooltipProvider delayDuration={0}>
+                    <InputRoot hasError={!!fieldState.error} size="2xs" className="font-mono">
+                      <InputWrapper>
+                        <Code2 className="h-4 w-4 shrink-0 text-gray-500" />
+                        <InputPure {...field} placeholder="Property name" className="text-xs" />
+                        {fieldState.error && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="inline-flex cursor-default items-center justify-center">
+                                <RiErrorWarningLine className="text-destructive h-4 w-4 shrink-0" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" sideOffset={5}>
+                              <p>{fieldState.error.message}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </InputWrapper>
+                    </InputRoot>
+                  </TooltipProvider>
+                </div>
               )}
             />
           </div>
@@ -181,7 +188,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                   <Button
                     variant="error"
                     mode="ghost"
-                    size="xs"
+                    size="2xs"
                     leadingIcon={RiDeleteBinLine}
                     className="h-8 w-8"
                     onClick={() => removeEnum(enumIndex)}
@@ -189,16 +196,18 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                 </div>
               );
             })}
-            <Button
-              variant="secondary"
-              mode="outline"
-              size="sm"
-              className="mt-1 h-8 w-fit self-start text-xs"
-              leadingIcon={RiAddLine}
-              onClick={() => appendEnum('', { shouldFocus: true })}
-            >
-              Add choice
-            </Button>
+            <div>
+              <Button
+                variant="secondary"
+                mode="lighter"
+                size="2xs"
+                className="mt-1"
+                leadingIcon={RiAddLine}
+                onClick={() => appendEnum('', { shouldFocus: true })}
+              >
+                Add choice
+              </Button>
+            </div>
           </div>
         )}
 
@@ -242,9 +251,9 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                 ))}
                 <Button
                   variant="secondary"
-                  mode="outline"
-                  size="sm"
-                  className="mt-1 h-8 w-fit self-start text-xs"
+                  mode="lighter"
+                  size="2xs"
+                  className="mt-1"
                   leadingIcon={RiAddLine}
                   onClick={() => appendArrayItem(createNewProperty(), { shouldFocus: false })}
                 >
