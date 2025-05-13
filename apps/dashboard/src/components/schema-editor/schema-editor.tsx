@@ -99,19 +99,14 @@ export function SchemaEditor({ initialSchema, onChange }: SchemaEditorProps) {
         })}
         <Button
           variant="secondary"
-          mode="outline"
-          size="sm"
+          mode="lighter"
+          size="2xs"
           onClick={handleAddProperty}
-          className="mt-2 w-full"
+          className="mt-2"
           leadingIcon={RiAddLine}
         >
           Add property
         </Button>
-        {/* Display top-level schema errors if any
-        {errors.schemaRows?.message && (
-          <p className=\"text-sm text-red-500\">{errors.schemaRows.message}</p>
-        )}
-        */}
       </div>
     </FormProvider>
   );

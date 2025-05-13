@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
-import { RiSettings3Line, RiDeleteBinLine, RiAddLine, RiBracesLine } from 'react-icons/ri';
+import {
+  RiSettings3Line,
+  RiDeleteBinLine,
+  RiAddLine,
+  RiBracesLine,
+  RiSettings4Line,
+  RiDeleteBin6Line,
+} from 'react-icons/ri';
 import { Controller, useFormContext, useFieldArray, useWatch, type Control } from 'react-hook-form';
 
-import { Input } from '@/components/primitives/input';
+import { Input, InputRoot, InputWrapper, InputPure } from '@/components/primitives/input';
 import { Button } from '@/components/primitives/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/primitives/select';
 import type { SchemaProperty, SchemaValueType } from './types';
@@ -10,6 +17,7 @@ import { SCHEMA_TYPE_OPTIONS } from './constants';
 import { cn } from '@/utils/ui';
 import { SchemaPropertySettingsDrawer } from './schema-property-settings-drawer';
 import { createNewProperty } from './utils/property-helpers';
+import { Code2 } from '../icons/code-2';
 
 interface SchemaPropertyRowProps {
   control: Control<any>;
@@ -96,22 +104,18 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
     <>
       <div className={cn('flex flex-col', indentationLevel > 0 && `ml-${indentationLevel * 6}`)}>
         <div className="flex items-center space-x-2 py-1">
-          <RiBracesLine className="h-5 w-5 shrink-0 text-gray-400" />
           <div className="flex-1 flex-col">
             <Controller
               name={`${pathPrefix}.name`}
               control={control}
               render={({ field, fieldState }) => (
                 <>
-                  <Input
-                    {...field}
-                    placeholder="Property name"
-                    className={cn(
-                      'h-8 text-sm',
-                      fieldState.error && 'border-destructive focus-visible:ring-destructive'
-                    )}
-                    hasError={!!fieldState.error}
-                  />
+                  <InputRoot hasError={!!fieldState.error} size="2xs" className="font-mono">
+                    <InputWrapper>
+                      <Code2 className="h-4 w-4 shrink-0 text-gray-500" />
+                      <InputPure {...field} placeholder="Property name" className="text-sm" />
+                    </InputWrapper>
+                  </InputRoot>
                   {fieldState.error && <p className="text-destructive mt-1 text-xs">{fieldState.error.message}</p>}
                 </>
               )}
@@ -122,7 +126,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
             control={control}
             render={({ field }) => (
               <Select value={field.value as string | undefined} onValueChange={field.onChange}>
-                <SelectTrigger className="h-8 w-[120px] text-sm">
+                <SelectTrigger className="w-[120px] text-sm" size="2xs">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -137,20 +141,13 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
           />
           <Button
             variant="secondary"
-            mode="ghost"
-            size="xs"
-            leadingIcon={RiSettings3Line}
-            className="h-8 w-8"
+            mode="outline"
+            size="2xs"
+            className="text-text-soft"
+            leadingIcon={RiSettings4Line}
             onClick={() => setIsSettingsOpen(true)}
           />
-          <Button
-            variant="error"
-            mode="ghost"
-            size="xs"
-            leadingIcon={RiDeleteBinLine}
-            className="h-8 w-8"
-            onClick={onDeleteProperty}
-          />
+          <Button variant="error" mode="outline" size="2xs" leadingIcon={RiDeleteBin6Line} onClick={onDeleteProperty} />
         </div>
 
         {currentType === 'enum' && (
