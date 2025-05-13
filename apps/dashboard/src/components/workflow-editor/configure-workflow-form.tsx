@@ -63,10 +63,13 @@ import {
   RiCodeSSlashLine,
   RiDeleteBin2Line,
   RiGitPullRequestFill,
+  RiListView,
   RiMore2Fill,
   RiSettingsLine,
 } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
+
+import { PayloadSchemaDrawer } from './payload-schema-drawer';
 
 type ConfigureWorkflowFormProps = {
   workflow: WorkflowResponseDto;
@@ -86,6 +89,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
   const isReadOnly = workflow.origin === WorkflowOriginEnum.EXTERNAL;
   const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isPayloadSchemaDrawerOpen, setIsPayloadSchemaDrawerOpen] = useState(false);
   const { tags } = useTags();
   const { currentEnvironment } = useEnvironment();
   const { currentOrganization } = useAuth();
@@ -190,6 +194,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
         onConfirm={onDeleteWorkflow}
         isLoading={isDeleteWorkflowPending}
       />
+      <PayloadSchemaDrawer open={isPayloadSchemaDrawerOpen} onOpenChange={setIsPayloadSchemaDrawerOpen} />
       <PageMeta title={workflow.name} />
       <motion.div
         className={cn('relative flex h-full w-full flex-col')}
@@ -203,9 +208,6 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
             <RouteFill />
             <span>Configure workflow</span>
           </div>
-          {/**
-           * Needs modal={false} to prevent the click freeze after the modal is closed
-           */}
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <CompactButton size="md" icon={RiMore2Fill} variant="ghost" className="ml-auto">
@@ -424,6 +426,18 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
               <span className="ml-auto" />
             </Button>
           </Link>
+          <Button
+            variant="secondary"
+            mode="outline"
+            leadingIcon={RiListView}
+            className="mt-2 flex w-full justify-start gap-1.5 p-1.5 text-xs font-medium"
+            type="button"
+            onClick={() => setIsPayloadSchemaDrawerOpen(true)}
+            trailingIcon={RiArrowRightSLine}
+          >
+            Manage payload schema
+            <span className="ml-auto" />
+          </Button>
         </SidebarContent>
         <Separator />
       </motion.div>
