@@ -14,6 +14,16 @@ import { SchemaPropertySettingsPopover } from './schema-property-settings-popove
 import type { SchemaProperty, SchemaValueType } from './types';
 import { createNewProperty } from './utils/property-helpers';
 
+const getMarginClassPx = (level: number): string => {
+  if (level <= 0) return 'ml-0';
+  if (level === 1) return 'ml-[24px]';
+  if (level === 2) return 'ml-[48px]';
+  if (level === 3) return 'ml-[72px]';
+  if (level === 4) return 'ml-[96px]';
+
+  return `ml-[${level * 24}px]`;
+};
+
 interface SchemaPropertyRowProps {
   control: Control<any>;
   index: number;
@@ -97,8 +107,8 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
 
   return (
     <>
-      <div className={cn('flex flex-col', indentationLevel > 0 && `ml-${indentationLevel * 6}`)}>
-        <div className="flex items-center space-x-2 py-1">
+      <div className={cn('flex flex-col')}>
+        <div className={cn('flex items-center space-x-2 py-0.5', getMarginClassPx(indentationLevel))}>
           <div className="flex-1 flex-col">
             <Controller
               name={`${pathPrefix}.name`}
@@ -171,7 +181,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
         </div>
 
         {currentType === 'enum' && (
-          <div className={cn('ml-6 flex flex-col space-y-1 pt-1')}>
+          <div className={cn('flex flex-col space-y-1 pt-1', getMarginClassPx(indentationLevel + 1))}>
             {enumFields.map((field, enumIndex) => {
               const enumPath = `${pathPrefix}.enumValues.${enumIndex}` as const;
               return (
@@ -201,7 +211,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                 variant="secondary"
                 mode="lighter"
                 size="2xs"
-                className="mt-1"
+                className={cn('mt-1', getMarginClassPx(indentationLevel + 1))}
                 leadingIcon={RiAddLine}
                 onClick={() => appendEnum('', { shouldFocus: true })}
               >
@@ -212,8 +222,8 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
         )}
 
         {currentType === 'array' && (
-          <div className={cn('ml-6 flex flex-col space-y-1 pt-1')}>
-            <div className="flex items-center space-x-2">
+          <div className={cn('flex flex-col space-y-1 pt-1')}>
+            <div className={cn('flex items-center space-x-2', getMarginClassPx(indentationLevel + 1))}>
               <span className="text-sm text-gray-500">items</span>
               <Controller
                 name={`${pathPrefix}.arrayItemType`}
@@ -221,7 +231,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                 defaultValue="string"
                 render={({ field }) => (
                   <Select value={field.value as string | undefined} onValueChange={field.onChange}>
-                    <SelectTrigger className="h-8 w-[120px] text-sm">
+                    <SelectTrigger size="2xs" className="w-[120px] text-sm">
                       <SelectValue placeholder="Select item type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -237,7 +247,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
             </div>
 
             {currentArrayItemType === 'object' && (
-              <div className={cn('ml-6 flex flex-col space-y-1 pt-1')}>
+              <div className={cn('flex flex-col space-y-1 pt-1')}>
                 {arrayItemFields.map((itemField, itemIndex) => (
                   <SchemaPropertyRow
                     key={itemField.id}
@@ -249,23 +259,25 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                     indentationLevel={indentationLevel + 1}
                   />
                 ))}
-                <Button
-                  variant="secondary"
-                  mode="lighter"
-                  size="2xs"
-                  className="mt-1"
-                  leadingIcon={RiAddLine}
-                  onClick={() => appendArrayItem(createNewProperty(), { shouldFocus: false })}
-                >
-                  Add property to item
-                </Button>
+                <div>
+                  <Button
+                    variant="secondary"
+                    mode="lighter"
+                    size="2xs"
+                    className={cn('mt-1', getMarginClassPx(indentationLevel + 1))}
+                    leadingIcon={RiAddLine}
+                    onClick={() => appendArrayItem(createNewProperty(), { shouldFocus: false })}
+                  >
+                    Add property to item
+                  </Button>
+                </div>
               </div>
             )}
           </div>
         )}
 
         {currentType === 'object' && (
-          <div className={cn('ml-6 flex flex-col space-y-1 pt-1')}>
+          <div className={cn('flex flex-col space-y-1 pt-1')}>
             {childFields.map((childPropertyField, childIndex) => (
               <SchemaPropertyRow
                 key={childPropertyField.id}
@@ -277,7 +289,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                 indentationLevel={indentationLevel + 1}
               />
             ))}
-            <div>
+            <div className={cn(getMarginClassPx(indentationLevel + 1))}>
               <Button
                 variant="secondary"
                 mode="lighter"
