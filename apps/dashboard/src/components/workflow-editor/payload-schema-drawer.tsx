@@ -1,10 +1,24 @@
 import { forwardRef, useState, useCallback } from 'react';
-import { RiListView } from 'react-icons/ri';
+import { RiListView, RiUpload2Line, RiDownload2Line } from 'react-icons/ri';
 
 import { Button } from '@/components/primitives/button';
-import { Sheet, SheetContent, SheetDescription, SheetFooter } from '@/components/primitives/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/primitives/sheet';
 import { cn } from '@/utils/ui';
 import { SchemaEditor, type SchemaProperty } from '@/components/schema-editor';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/primitives/dropdown-menu';
+import { convertInternalSchemaToJsonSchemaRoot } from '@/components/schema-editor/utils/export-helpers';
 
 type PayloadSchemaDrawerProps = {
   open: boolean;
@@ -26,6 +40,26 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
     onOpenChange(false);
   };
 
+  const handleExportToJsonSchema = () => {
+    const jsonSchema = convertInternalSchemaToJsonSchemaRoot(currentSchema);
+    const jsonString = JSON.stringify(jsonSchema, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'payload-schema.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    console.log('Exported JSON Schema:', jsonString);
+  };
+
+  const handleExportToZod = () => {
+    console.log('Exporting to Zod:', currentSchema);
+    // Actual Zod schema generation logic will go here
+  };
+
   return (
     <Sheet modal={false} open={open} onOpenChange={onOpenChange}>
       <div
@@ -33,11 +67,35 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
           'pointer-events-none opacity-0': !open,
         })}
       />
-      <SheetContent ref={ref} className="flex w-[580px] flex-col p-0">
-        <div className="flex h-14 shrink-0 items-center gap-3 border-b border-neutral-200 px-6">
-          <RiListView className="size-5 shrink-0" />
-          <h2 className="flex-1 truncate text-base font-semibold">Manage Payload Schema</h2>
-        </div>
+      <SheetContent ref={ref} className="flex w-[720px] flex-col p-0 sm:max-w-3xl">
+        <SheetHeader className="flex flex-row items-center justify-between border-b border-neutral-200 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <RiListView className="h-6 w-6 text-neutral-600" />
+            <SheetTitle className="text-lg font-semibold">Manage Payload Schema</SheetTitle>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" mode="outline" leadingIcon={RiDownload2Line} className="text-sm">
+                Import / Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleExportToJsonSchema} className="cursor-pointer">
+                <RiDownload2Line className="mr-2 h-4 w-4" />
+                Export to JSON Schema
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportToZod} className="cursor-pointer">
+                <RiDownload2Line className="mr-2 h-4 w-4" />
+                Export to Zod
+              </DropdownMenuItem>
+              {/* <DropdownMenuItem disabled className="cursor-not-allowed">
+                <RiUpload2Line className="mr-2 h-4 w-4" />
+                Import from JSON Schema (Soon)
+              </DropdownMenuItem> */}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SheetHeader>
+        <SheetDescription className="sr-only">Define the structure of your workflow payload.</SheetDescription>
         <div className="flex-1 overflow-y-auto p-6">
           <SchemaEditor initialSchema={currentSchema} onChange={handleSchemaChange} />
         </div>
