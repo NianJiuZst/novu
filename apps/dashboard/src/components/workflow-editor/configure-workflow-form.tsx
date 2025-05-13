@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import type { ExternalToast } from 'sonner';
@@ -56,7 +56,6 @@ import { buildRoute, ROUTES } from '@/utils/routes';
 import { TelemetryEvent } from '@/utils/telemetry';
 import { cn } from '@/utils/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { WorkflowOriginEnum, WorkflowResponseDto } from '@novu/shared';
 import { FilesIcon } from 'lucide-react';
 import {
   RiArrowRightSLine,
@@ -70,11 +69,13 @@ import {
 import { Link } from 'react-router-dom';
 
 import { PayloadSchemaDrawer } from './payload-schema-drawer';
+import type { SchemaProperty } from '@/components/schema-editor';
+import { WorkflowOriginEnum, WorkflowResponseDto, type JSONSchemaDto, UpdateWorkflowDto } from '@novu/shared';
 
-type ConfigureWorkflowFormProps = {
+interface ConfigureWorkflowFormProps {
   workflow: WorkflowResponseDto;
   update: UpdateWorkflowFn;
-};
+}
 
 const toastOptions: ExternalToast = {
   position: 'bottom-right',
@@ -90,6 +91,8 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
   const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isPayloadSchemaDrawerOpen, setIsPayloadSchemaDrawerOpen] = useState(false);
+  const [payloadSchema, setPayloadSchema] = useState<SchemaProperty[]>([]);
+
   const { tags } = useTags();
   const { currentEnvironment } = useEnvironment();
   const { currentOrganization } = useAuth();
@@ -157,7 +160,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
     previousData: workflow,
     form,
     isReadOnly,
-    save: update,
+    save: (data) => update(data as UpdateWorkflowDto),
     shouldClientValidate: true,
   });
 
@@ -170,8 +173,21 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
     showComingSoonBanner();
   }
 
-  const otherEnvironments = environments.filter((env) => env._id !== currentEnvironment?._id);
+  const handleSavePayloadSchema = useCallback((updatedSchema: SchemaProperty[]) => {
+    setPayloadSchema(updatedSchema);
+    console.log('Payload schema saved (client-side):', JSON.stringify(updatedSchema, null, 2));
+    showToast({
+      children: () => (
+        <>
+          <ToastIcon variant="success" />
+          <span className="text-sm">Payload schema updated (logged to console).</span>
+        </>
+      ),
+      options: toastOptions,
+    });
+  }, []);
 
+  const otherEnvironments = environments.filter((env) => env._id !== currentEnvironment?._id);
   const isDuplicable = useMemo(() => workflow.origin === WorkflowOriginEnum.NOVU_CLOUD, [workflow.origin]);
 
   return (
@@ -194,7 +210,12 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
         onConfirm={onDeleteWorkflow}
         isLoading={isDeleteWorkflowPending}
       />
-      <PayloadSchemaDrawer open={isPayloadSchemaDrawerOpen} onOpenChange={setIsPayloadSchemaDrawerOpen} />
+      <PayloadSchemaDrawer
+        open={isPayloadSchemaDrawerOpen}
+        onOpenChange={setIsPayloadSchemaDrawerOpen}
+        initialSchema={payloadSchema}
+        onSave={handleSavePayloadSchema}
+      />
       <PageMeta title={workflow.name} />
       <motion.div
         className={cn('relative flex h-full w-full flex-col')}

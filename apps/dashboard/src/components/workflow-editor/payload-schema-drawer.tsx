@@ -1,27 +1,33 @@
-import { forwardRef } from 'react';
+import { forwardRef, useState, useCallback } from 'react';
 import { RiListView } from 'react-icons/ri';
 
 import { Button } from '@/components/primitives/button';
 import { Sheet, SheetContent, SheetDescription, SheetFooter } from '@/components/primitives/sheet';
 import { cn } from '@/utils/ui';
+import { SchemaEditor, type SchemaProperty } from '@/components/schema-editor';
 
 type PayloadSchemaDrawerProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialSchema?: SchemaProperty[];
+  onSave?: (schema: SchemaProperty[]) => void;
 };
 
 export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawerProps>((props, ref) => {
-  const { open, onOpenChange } = props;
+  const { open, onOpenChange, initialSchema, onSave } = props;
+  const [currentSchema, setCurrentSchema] = useState<SchemaProperty[]>(initialSchema || []);
 
-  // For now, the save button doesn't do anything
+  const handleSchemaChange = useCallback((schema: SchemaProperty[]) => {
+    setCurrentSchema(schema);
+  }, []);
+
   const handleSaveChanges = () => {
-    // TODO: Implement save logic
+    onSave?.(currentSchema);
     onOpenChange(false);
   };
 
   return (
     <Sheet modal={false} open={open} onOpenChange={onOpenChange}>
-      {/* Custom overlay since SheetOverlay does not work with modal={false} */}
       <div
         className={cn('fade-in animate-in fixed inset-0 z-50 bg-black/20 transition-opacity duration-300', {
           'pointer-events-none opacity-0': !open,
@@ -33,8 +39,7 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
           <h2 className="flex-1 truncate text-base font-semibold">Manage Payload Schema</h2>
         </div>
         <div className="flex-1 overflow-y-auto p-6">
-          {/* Content will go here */}
-          <p className="text-center text-neutral-500">Payload schema management will be available here.</p>
+          <SchemaEditor initialSchema={currentSchema} onChange={handleSchemaChange} />
         </div>
         <SheetFooter className="border-t border-neutral-200 p-6">
           <Button onClick={handleSaveChanges} className="w-full">
