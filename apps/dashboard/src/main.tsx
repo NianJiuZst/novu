@@ -9,6 +9,7 @@ import { ConfigureWorkflow } from '@/components/workflow-editor/configure-workfl
 import { EditStepConditions } from '@/components/workflow-editor/steps/conditions/edit-step-conditions';
 import { ConfigureStep } from '@/components/workflow-editor/steps/configure-step';
 import { ConfigureStepTemplate } from '@/components/workflow-editor/steps/configure-step-template';
+import { EnvironmentRedirect } from '@/components/redirect/environment-redirect';
 import {
   ActivityFeed,
   ApiKeysPage,
@@ -25,6 +26,7 @@ import {
   WelcomePage,
   WorkflowsPage,
 } from '@/pages';
+
 import { DuplicateWorkflowPage } from '@/pages/duplicate-workflow';
 import { SubscribersPage } from '@/pages/subscribers';
 import { CreateIntegrationSidebar } from './components/integrations/components/create-integration-sidebar';
@@ -59,6 +61,35 @@ const router = createBrowserRouter([
     element: <RootRoute />,
     errorElement: <ErrorPage />,
     children: [
+      // Direct path routes that will redirect to environment-specific paths
+      {
+        path: '/topics',
+        element: <EnvironmentRedirect />,
+      },
+      {
+        path: '/workflows',
+        element: <EnvironmentRedirect />,
+      },
+      {
+        path: '/api-keys',
+        element: <EnvironmentRedirect />,
+      },
+      {
+        path: '/environments',
+        element: <EnvironmentRedirect />,
+      },
+      {
+        path: '/activity-feed',
+        element: <EnvironmentRedirect />,
+      },
+      {
+        path: '/subscribers',
+        element: <EnvironmentRedirect />,
+      },
+      {
+        path: '/welcome',
+        element: <EnvironmentRedirect />,
+      },
       {
         element: <AuthRoute />,
         children: [
@@ -205,7 +236,7 @@ const router = createBrowserRouter([
                 path: ROUTES.TEST_WORKFLOW,
                 element: <TestWorkflowPage />,
               },
-
+              
               {
                 path: '*',
                 element: <CatchAllRoute />,
