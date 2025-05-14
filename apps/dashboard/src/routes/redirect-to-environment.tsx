@@ -1,6 +1,7 @@
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { buildRoute, ROUTES } from '@/utils/routes';
-import { useEnvironment } from '@/context/environment/hooks';
+import { buildRoute, ROUTES } from '../utils/routes';
+import { useEnvironment } from '../context/environment/hooks';
 
 interface RedirectToEnvironmentProps {
   targetRoute: string;
