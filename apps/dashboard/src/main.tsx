@@ -44,7 +44,7 @@ import { RedirectToLegacyStudioAuth } from './pages/redirect-to-legacy-studio-au
 import { TestWorkflowPage } from './pages/test-workflow';
 import { TopicsPage } from './pages/topics';
 import { VercelIntegrationPage } from './pages/vercel-integration-page';
-import { AuthRoute, CatchAllRoute, DashboardRoute, RootRoute } from './routes';
+import { AuthRoute, CatchAllRoute, DashboardRoute, RedirectToEnvironment, RootRoute } from './routes';
 import { OnboardingParentRoute } from './routes/onboarding';
 import { ROUTES } from './utils/routes';
 import { initializeSentry } from './utils/sentry';
@@ -106,6 +106,30 @@ const router = createBrowserRouter([
         path: ROUTES.ROOT,
         element: <DashboardRoute />,
         children: [
+          {
+            path: 'topics',
+            element: <RedirectToEnvironment targetRoute={ROUTES.TOPICS} />,
+          },
+          {
+            path: 'workflows',
+            element: <RedirectToEnvironment targetRoute={ROUTES.WORKFLOWS} />,
+          },
+          {
+            path: 'subscribers',
+            element: <RedirectToEnvironment targetRoute={ROUTES.SUBSCRIBERS} />,
+          },
+          {
+            path: 'api-keys',
+            element: <RedirectToEnvironment targetRoute={ROUTES.API_KEYS} />,
+          },
+          {
+            path: 'environments',
+            element: <RedirectToEnvironment targetRoute={ROUTES.ENVIRONMENTS} />,
+          },
+          {
+            path: 'activity-feed',
+            element: <RedirectToEnvironment targetRoute={ROUTES.ACTIVITY_FEED} />,
+          },
           {
             path: ROUTES.ENV,
             children: [
