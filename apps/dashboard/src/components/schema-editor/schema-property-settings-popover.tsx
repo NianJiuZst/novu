@@ -12,6 +12,7 @@ import { RiDeleteBin2Line } from 'react-icons/ri';
 import { Separator } from '../primitives/separator';
 import type { JSONSchema7, JSONSchema7TypeName } from './json-schema';
 import type { SchemaEditorFormValues } from './utils/validation-schema';
+import { useSchemaPropertyType } from './hooks/use-schema-property-type';
 
 interface SchemaPropertySettingsPopoverProps {
   definitionPath: string;
@@ -77,14 +78,10 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
   (props, ref) => {
     const { definitionPath, propertyKeyForDisplay, isRequiredPath, open, onOpenChange, onDeleteProperty } = props;
 
-    const { control, setValue, getValues, watch } = useFormContext<SchemaEditorFormValues>();
+    const { control, watch } = useFormContext<SchemaEditorFormValues>();
 
     const currentDefinition = watch(definitionPath as any) as JSONSchema7 | undefined;
-    const currentType = useMemo(() => {
-      if (!currentDefinition) return undefined;
-      if (currentDefinition.enum) return 'enum';
-      return currentDefinition.type as JSONSchema7TypeName | 'enum' | undefined;
-    }, [currentDefinition]);
+    const currentType = useSchemaPropertyType(currentDefinition);
 
     const handleApplyChanges = () => {
       onOpenChange(false);
@@ -132,7 +129,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
             <FormItem>
               <FormLabel className="text-xs">Default Value</FormLabel>
               <Controller
-                name={defaultValuePath as any}
+                name={defaultValuePath}
                 control={control}
                 render={({ field }) => (
                   <FormControl>
@@ -155,7 +152,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
             <FormItem className="flex flex-row items-center justify-between rounded-md border p-2.5">
               <FormLabel className="text-xs">Required</FormLabel>
               <Controller
-                name={isRequiredPath as any}
+                name={isRequiredPath}
                 control={control}
                 render={({ field }) => (
                   <FormControl>
@@ -170,7 +167,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
             <FormItem>
               <FormLabel className="text-xs">Description</FormLabel>
               <Controller
-                name={descriptionPath as any}
+                name={descriptionPath}
                 control={control}
                 render={({ field }) => (
                   <FormControl>

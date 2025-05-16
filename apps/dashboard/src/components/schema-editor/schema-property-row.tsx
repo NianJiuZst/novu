@@ -4,17 +4,16 @@ import { RiAddLine, RiDeleteBin6Line, RiDeleteBinLine, RiSettings4Line, RiErrorW
 import { v4 as uuidv4 } from 'uuid';
 
 import { Button } from '@/components/primitives/button';
-import { Input, InputPure, InputRoot } from '@/components/primitives/input';
+import { InputPure, InputRoot } from '@/components/primitives/input';
 import { Popover, PopoverTrigger } from '@/components/primitives/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/primitives/tooltip';
 import { cn } from '@/utils/ui';
 
-import type { JSONSchema7, JSONSchema7TypeName } from './json-schema';
+import type { JSONSchema7 } from './json-schema';
 import { SchemaPropertySettingsPopover } from './schema-property-settings-popover';
 import { newProperty } from './utils/json-helpers';
 import { getMarginClassPx } from './utils/ui-helpers';
 
-// Import new sub-components
 import { PropertyNameInput } from './components/property-name-input';
 import { PropertyTypeSelector } from './components/property-type-selector';
 
@@ -22,6 +21,7 @@ import { Checkbox } from '@/components/primitives/checkbox';
 import { Label } from '@/components/primitives/label';
 
 import type { PropertyListItem } from './utils/validation-schema';
+import { useSchemaPropertyType } from './hooks/use-schema-property-type';
 
 export interface SchemaPropertyRowProps {
   control: Control<any>;
@@ -40,17 +40,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
   const definitionPath = `${pathPrefix}.definition`;
   const currentDefinition = propertyListItem?.definition as JSONSchema7 | undefined;
 
-  // // useEffect(() => {
-  // //   console.log(`[SchemaPropertyRow path="${pathPrefix}"] Watched currentDefinition:`, JSON.stringify(currentDefinition));
-  // // }, [currentDefinition, pathPrefix]);
-
-  const currentType = useMemo(() => {
-    if (!currentDefinition) return undefined;
-    if (Array.isArray(currentDefinition.enum)) return 'enum';
-    if (currentDefinition.type === 'object') return 'object';
-    if (currentDefinition.type === 'array') return 'array';
-    return currentDefinition.type as JSONSchema7TypeName | undefined;
-  }, [currentDefinition]);
+  const currentType = useSchemaPropertyType(currentDefinition);
 
   const keyNamePath = `${pathPrefix}.keyName`;
   const isRequiredPath = `${pathPrefix}.isRequired`;
@@ -58,7 +48,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
   const enumArrayPath = `${definitionPath}.enum`;
   const enumFieldArrayHook = useFieldArray({
     control,
-    name: currentType === 'enum' ? (enumArrayPath as any) : `_unused_enum_path_.${index}`,
+    name: currentType === 'enum' ? enumArrayPath : `_unused_enum_path_.${index}`,
     keyName: 'enumChoiceId',
   });
   const enumFields = currentType === 'enum' ? enumFieldArrayHook.fields : [];
@@ -70,7 +60,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
   const nestedPropertyListPath = `${definitionPath}.propertyList`;
   const objectFieldArray = useFieldArray({
     control,
-    name: currentType === 'object' ? (nestedPropertyListPath as any) : `_unused_object_path_.${index}`,
+    name: currentType === 'object' ? nestedPropertyListPath : `_unused_object_path_.${index}`,
     keyName: 'nestedFieldId',
   });
   const nestedFields = currentType === 'object' ? objectFieldArray.fields : [];
@@ -104,7 +94,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
 
   const arrayItemObjectFieldArray = useFieldArray({
     control,
-    name: itemIsObject ? (itemPropertiesListPath as any) : `_unused_array_item_object_path_.${index}`,
+    name: itemIsObject ? itemPropertiesListPath : `_unused_array_item_object_path_.${index}`,
     keyName: 'itemNestedFieldId',
   });
   const itemNestedFields = itemIsObject ? arrayItemObjectFieldArray.fields : [];
@@ -151,7 +141,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
         />
         <div className="ml-auto flex items-center space-x-1.5">
           <Controller
-            name={isRequiredPath as any}
+            name={isRequiredPath}
             control={control}
             render={({ field }) => (
               <Checkbox
@@ -204,9 +194,9 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
           {enumFields.map((enumField, enumIndex) => {
             const enumChoicePath = `${enumArrayPath}.${enumIndex}`;
             return (
-              <div key={(enumField as any).enumChoiceId} className="flex items-center space-x-2">
+              <div key={enumField.enumChoiceId} className="flex items-center space-x-2">
                 <Controller
-                  name={enumChoicePath as any}
+                  name={enumChoicePath}
                   control={control}
                   render={({ field: choiceField, fieldState: choiceFieldState }) => (
                     <InputRoot hasError={!!choiceFieldState.error} size="2xs" className="flex-1">
@@ -256,7 +246,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
         <div className={cn('pt-1', getMarginClassPx(indentationLevel + 1))}>
           {nestedFields.map((nestedField, nestedIndex) => (
             <SchemaPropertyRow
-              key={(nestedField as any).nestedFieldId}
+              key={nestedField.nestedFieldId}
               control={control}
               index={nestedIndex}
               pathPrefix={`${nestedPropertyListPath}.${nestedIndex}`}
@@ -298,7 +288,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
             <div className={cn('mt-1 border-l border-neutral-200', getMarginClassPx(1))}>
               {itemNestedFields.map((itemNestedField, itemNestedIndex) => (
                 <SchemaPropertyRow
-                  key={(itemNestedField as any).itemNestedFieldId}
+                  key={itemNestedField.itemNestedFieldId}
                   control={control}
                   index={itemNestedIndex}
                   pathPrefix={`${itemPropertiesListPath}.${itemNestedIndex}`}

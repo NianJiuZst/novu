@@ -37,9 +37,9 @@ export function PropertyActions({
       const newSchemaFragment = { ...currentSchemaAtPath, ...actualSchemaChanges };
 
       Object.keys(newSchemaFragment).forEach((key) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if ((newSchemaFragment as any)[key] === undefined) delete (newSchemaFragment as any)[key];
+        if (newSchemaFragment[key] === undefined) delete (newSchemaFragment as any)[key];
       });
+
       setValue(pathPrefix, newSchemaFragment, { shouldValidate: true, shouldDirty: true });
 
       if (_isNowRequired !== undefined) {

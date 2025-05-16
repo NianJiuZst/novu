@@ -14,7 +14,7 @@ import {
   ensureString,
 } from '../utils/json-helpers';
 import { SCHEMA_TYPE_OPTIONS } from '../constants';
-import type { PropertyListItem } from '../utils/validation-schema';
+import { useSchemaPropertyType } from '../hooks/use-schema-property-type';
 
 type PropertyTypeSelectorProps = {
   definitionPath: string;
@@ -33,15 +33,7 @@ export function PropertyTypeSelector({
 }: PropertyTypeSelectorProps) {
   const currentDefinition = useWatch({ control, name: definitionPath }) as JSONSchema7 | undefined;
 
-  const currentType = useMemo(() => {
-    if (!currentDefinition) return undefined;
-
-    if (Array.isArray(currentDefinition.enum)) return 'enum';
-    if (currentDefinition.type === 'object') return 'object';
-    if (currentDefinition.type === 'array') return 'array';
-
-    return currentDefinition.type as JSONSchema7TypeName | undefined;
-  }, [currentDefinition]);
+  const currentType = useSchemaPropertyType(currentDefinition);
 
   const handleTypeChange = useCallback(
     (newSchemaType: JSONSchema7TypeName | 'enum') => {
@@ -49,19 +41,26 @@ export function PropertyTypeSelector({
 
       let newTransformedSchema: JSONSchema7;
 
-      if (newSchemaType === 'enum') newTransformedSchema = ensureEnum(currentDef);
-      else if (newSchemaType === 'array') newTransformedSchema = ensureArray(currentDef);
-      else if (newSchemaType === 'object') newTransformedSchema = ensureObject(currentDef);
-      else if (newSchemaType === 'string') newTransformedSchema = ensureString(currentDef);
-      else if (newSchemaType === 'number' || newSchemaType === 'integer')
+      if (newSchemaType === 'enum') {
+        newTransformedSchema = ensureEnum(currentDef);
+      } else if (newSchemaType === 'array') {
+        newTransformedSchema = ensureArray(currentDef);
+      } else if (newSchemaType === 'object') {
+        newTransformedSchema = ensureObject(currentDef);
+      } else if (newSchemaType === 'string') {
+        newTransformedSchema = ensureString(currentDef);
+      } else if (newSchemaType === 'number' || newSchemaType === 'integer') {
         newTransformedSchema = ensureNumberOrInteger(currentDef, newSchemaType);
-      else if (newSchemaType === 'boolean') newTransformedSchema = ensureBoolean(currentDef);
-      else if (newSchemaType === 'null') newTransformedSchema = ensureNull(currentDef);
-      else {
+      } else if (newSchemaType === 'boolean') {
+        newTransformedSchema = ensureBoolean(currentDef);
+      } else if (newSchemaType === 'null') {
+        newTransformedSchema = ensureNull(currentDef);
+      } else {
         newTransformedSchema = { ...currentDef, type: newSchemaType as JSONSchema7TypeName };
-        delete (newTransformedSchema as any).propertyList;
-        delete (newTransformedSchema as any).items;
-        delete (newTransformedSchema as any).enum;
+
+        delete newTransformedSchema.propertyList;
+        delete newTransformedSchema.items;
+        delete newTransformedSchema.enum;
       }
 
       setValue(definitionPath, newTransformedSchema, { shouldValidate: true, shouldDirty: true });
