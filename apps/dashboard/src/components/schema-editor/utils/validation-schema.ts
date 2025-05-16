@@ -76,16 +76,15 @@ const baseJsonSchema: z.ZodType<JSONSchema7> = z.lazy(() =>
                 path: [key], // Error associated with the property object at this UUID key
               });
             }
-
-            // Add other key validations here if needed, e.g. regex for valid characters if not handled by rename logic
-            // For example, if a key is not empty, not a UUID, but contains invalid characters:
-            // else if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {
-            //   ctx.addIssue({
-            //     code: z.ZodIssueCode.custom,
-            //     message: 'Property name contains invalid characters.',
-            //     path: [key],
-            //   });
-            // }
+            // Validation 3: Character set for property names (if not empty and not a UUID needing naming first)
+            else if (key.trim() !== '' && !uuidPattern.test(key) && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message:
+                  'Name must start with a letter or underscore, and contain only letters, numbers, or underscores.',
+                path: [key],
+              });
+            }
           }
         }),
       required: z.array(z.string()).optional(),
