@@ -114,7 +114,7 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} modal={false} onOpenChange={onOpenChange}>
       <div
         className={cn('fade-in animate-in fixed inset-0 z-50 bg-black/20 transition-opacity duration-300', {
           'pointer-events-none opacity-0': !open,
