@@ -144,20 +144,6 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
     }
   }, [currentPropertySchema, currentType, currentArrayItemType]);
 
-  useEffect(() => {
-    const schema = getValues(pathPrefix) as JSONSchema7 | undefined;
-
-    if (currentType && currentType !== 'enum' && schema && schema.enum !== undefined) {
-      // console.log(`[SchemaPropertyRow (${propertyKey})] useEffect: Cleaning .enum field because currentType is ${currentType}`);
-      const { enum: enumToRemove, ...restOfSchema } = schema;
-      setValue(pathPrefix, restOfSchema, {
-        shouldValidate: true,
-        shouldDirty: false,
-        shouldTouch: false,
-      });
-    }
-  }, [currentType, getValues, pathPrefix, propertyKey, setValue]);
-
   const handleNameChange = useCallback(
     async (newName: string) => {
       setNameError(null);

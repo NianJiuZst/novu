@@ -61,7 +61,7 @@ const baseJsonSchema: z.ZodType<JSONSchema7> = z.lazy(() =>
       uniqueItems: z.boolean().optional(),
 
       // Enum
-      enum: z.array(z.any()).optional(), // Values should match the type
+      enum: z.array(z.string().min(1, { message: 'Enum choice value cannot be empty.' })).optional(), // Updated for non-empty string enums
 
       // Conditional Schemas
       if: baseJsonSchema.optional(),
