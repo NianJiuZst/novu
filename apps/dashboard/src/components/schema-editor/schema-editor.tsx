@@ -13,6 +13,7 @@ import { editorSchema } from './utils/validation-schema';
 interface SchemaEditorProps {
   initialSchema?: JSONSchema7;
   onChange?: (schema: JSONSchema7) => void;
+  onValidityChange?: (isValid: boolean) => void;
 }
 
 interface FormValues {
@@ -24,7 +25,7 @@ const defaultSchema: JSONSchema7 = {
   properties: {},
 };
 
-export function SchemaEditor({ initialSchema, onChange }: SchemaEditorProps) {
+export function SchemaEditor({ initialSchema, onChange, onValidityChange }: SchemaEditorProps) {
   const propertyOrderRef = useRef<string[]>(initialSchema?.properties ? Object.keys(initialSchema.properties) : []);
 
   const methods = useForm<FormValues>({
@@ -82,7 +83,46 @@ export function SchemaEditor({ initialSchema, onChange }: SchemaEditorProps) {
       clearTimeout(debounceTimer);
       subscription.unsubscribe();
     };
-  }, [watch, onChange, getValues, setValue]); // Added getValues, setValue to deps, review if needed
+  }, [watch, onChange, getValues, setValue]); // Removed methods.formState.isValid and onValidityChange
+
+  // Effect to report validity changes immediately
+  useEffect(() => {
+    if (onValidityChange) {
+      onValidityChange(methods.formState.isValid);
+    }
+  }, [methods.formState.isValid, onValidityChange]);
+
+  // Effect to forward Zod errors for new properties to the correct RHF input field
+  useEffect(() => {
+    const errors = methods.formState.errors.schema?.properties as FieldValues | undefined;
+
+    if (errors) {
+      const currentProperties = getValues('schema.properties') || {};
+      Object.keys(errors).forEach((propertyKey) => {
+        const errorForProperty = errors[propertyKey];
+
+        if (
+          errorForProperty &&
+          typeof errorForProperty === 'object' &&
+          'message' in errorForProperty &&
+          errorForProperty.message === 'New property must be named.' &&
+          Object.prototype.hasOwnProperty.call(currentProperties, propertyKey)
+        ) {
+          const tempNameKeyPath = `schema.properties.${propertyKey}.${propertyKey}__tempNameKey`;
+          // Check if an error isn't already set by RHF for this exact path
+          const fieldState = methods.getFieldState(tempNameKeyPath as any); // Use 'as any' for dynamic path
+
+          if (fieldState.error?.message !== errorForProperty.message) {
+            methods.setError(tempNameKeyPath as any, {
+              // Use 'as any' for dynamic path
+              type: 'manual',
+              message: errorForProperty.message as string,
+            });
+          }
+        }
+      });
+    }
+  }, [methods.formState.errors, methods.setError, getValues, methods.getFieldState]); // methods.clearErrors removed as it's not used
 
   const handleAddProperty = useCallback(() => {
     const newKey = uuidv4();

@@ -46,7 +46,48 @@ const baseJsonSchema: z.ZodType<JSONSchema7> = z.lazy(() =>
       multipleOf: z.number().positive().optional(),
 
       // Object specific
-      properties: z.record(baseJsonSchema).optional(),
+      properties: z
+        .record(baseJsonSchema)
+        .optional()
+        .superRefine((properties, ctx) => {
+          if (!properties) return true;
+          const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+          for (const key in properties) {
+            if (!Object.prototype.hasOwnProperty.call(properties, key)) continue;
+
+            const propertySchema = properties[key];
+
+            // Validation 1: Key itself cannot be an empty string AFTER a rename attempt
+            if (key.trim() === '') {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Property name cannot be empty.',
+                path: [key], // Error associated with the property object at this (empty) key
+              });
+            }
+
+            // Validation 2: If key is a UUID (placeholder for a new property)
+            // and its schema is basic (e.g., no title/description), it needs to be properly named.
+            if (uuidPattern.test(key) && propertySchema && !propertySchema.title && !propertySchema.description) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'New property must be named.', // Specific message
+                path: [key], // Error associated with the property object at this UUID key
+              });
+            }
+
+            // Add other key validations here if needed, e.g. regex for valid characters if not handled by rename logic
+            // For example, if a key is not empty, not a UUID, but contains invalid characters:
+            // else if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {
+            //   ctx.addIssue({
+            //     code: z.ZodIssueCode.custom,
+            //     message: 'Property name contains invalid characters.',
+            //     path: [key],
+            //   });
+            // }
+          }
+        }),
       required: z.array(z.string()).optional(),
       additionalProperties: z.union([z.boolean(), baseJsonSchema]).optional(),
       minProperties: z.number().int().nonnegative().optional(),

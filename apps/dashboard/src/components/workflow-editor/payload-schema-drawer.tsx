@@ -40,6 +40,7 @@ const defaultEditorSchema: JSONSchema7 = {
 export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawerProps>((props, ref) => {
   const { open, onOpenChange, workflow, onSave } = props;
   const [currentSchema, setCurrentSchema] = useState<JSONSchema7>(defaultEditorSchema);
+  const [isSchemaEditorFormValid, setIsSchemaEditorFormValid] = useState<boolean>(true);
   const { patchWorkflow, isPending: isSavingSchema } = usePatchWorkflow();
 
   useEffect(() => {
@@ -52,6 +53,10 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
 
   const handleSchemaChange = useCallback((schema: JSONSchema7) => {
     setCurrentSchema(schema);
+  }, []);
+
+  const handleSchemaValidityChange = useCallback((isValid: boolean) => {
+    setIsSchemaEditorFormValid(isValid);
   }, []);
 
   const handleSaveChanges = async () => {
@@ -150,7 +155,11 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
             </Button>
           </div>
 
-          <SchemaEditor initialSchema={currentSchema} onChange={handleSchemaChange} />
+          <SchemaEditor
+            initialSchema={currentSchema}
+            onChange={handleSchemaChange}
+            onValidityChange={handleSchemaValidityChange}
+          />
         </SheetMain>
         <SheetFooter className="border-neutral-content-weak space-between flex border-t px-3 py-1.5">
           <div className="flex w-full flex-row items-center justify-between gap-2">
@@ -164,7 +173,11 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
               mode="gradient"
               variant="secondary"
               onClick={handleSaveChanges}
-              disabled={isSavingSchema || (workflow?.payloadSchema === currentSchema && !isSchemaEmpty)}
+              disabled={
+                isSavingSchema ||
+                !isSchemaEditorFormValid ||
+                (workflow?.payloadSchema === currentSchema && !isSchemaEmpty)
+              }
               data-test-id="save-payload-schema-btn"
             >
               {isSavingSchema ? 'Saving...' : 'Save changes'}

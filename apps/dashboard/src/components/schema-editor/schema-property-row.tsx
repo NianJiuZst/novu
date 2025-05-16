@@ -44,7 +44,7 @@ export interface SchemaPropertyRowProps {
 
 export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
   const {
-    control,
+    control: mainFormControl,
     propertyKey,
     pathPrefix,
     onDeleteProperty: onDeleteThisProperty,
@@ -54,10 +54,8 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
 
   const { setValue, getValues } = useFormContext();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [localName, setLocalName] = useState(propertyKey);
-  const [nameError, setNameError] = useState<string | null>(null);
 
-  const currentPropertySchema = useWatch({ control, name: pathPrefix }) as JSONSchema7 | undefined;
+  const currentPropertySchema = useWatch({ control: mainFormControl, name: pathPrefix }) as JSONSchema7 | undefined;
 
   const currentType = useMemo(() => {
     if (!currentPropertySchema) return undefined;
@@ -80,17 +78,6 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
 
   const childPropertyOrderRef = useRef<string[]>([]);
   const arrayItemPropertyOrderRef = useRef<string[]>([]);
-
-  useEffect(() => {
-    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    const schemaFragment = getValues(pathPrefix) as JSONSchema7 | undefined;
-
-    if (uuidPattern.test(propertyKey) && (!schemaFragment || (!schemaFragment.title && !schemaFragment.description))) {
-      setLocalName('');
-    } else {
-      setLocalName(propertyKey);
-    }
-  }, [propertyKey, getValues, pathPrefix]);
 
   useEffect(() => {
     if (currentPropertySchema) {
@@ -121,35 +108,6 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
       }
     }
   }, [currentPropertySchema, currentType, currentArrayItemType]);
-
-  const handleNameChange = useCallback(
-    async (newName: string) => {
-      setNameError(null);
-      const trimmedNewName = newName.trim();
-
-      if (trimmedNewName === propertyKey) {
-        setLocalName(propertyKey);
-        return;
-      }
-
-      if (!trimmedNewName) {
-        setNameError('Property name cannot be empty.');
-        return;
-      }
-
-      if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(trimmedNewName)) {
-        setNameError('Name must start with a letter or underscore, and contain only letters, numbers, or underscores.');
-        return;
-      }
-
-      try {
-        onRenameThisPropertyKey(propertyKey, trimmedNewName);
-      } catch (e: any) {
-        setNameError(e.message || 'Failed to rename property.');
-      }
-    },
-    [propertyKey, onRenameThisPropertyKey]
-  );
 
   const handleTypeChange = useCallback(
     (newSchemaType: JSONSchema7TypeName | 'enum') => {
@@ -195,7 +153,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
     append: appendEnum,
     remove: removeEnum,
   } = useFieldArray({
-    control,
+    control: mainFormControl,
     name: enumFieldArrayPath,
   });
 
@@ -405,14 +363,13 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
           <PropertyNameInput
             propertyKey={propertyKey}
             pathPrefix={pathPrefix}
-            onRenamePropertyKey={onRenameThisPropertyKey}
-            getValues={getValues}
-            control={control}
+            onAttemptRename={onRenameThisPropertyKey}
+            control={mainFormControl}
           />
           <PropertyTypeSelector
             currentType={currentType}
             pathPrefix={pathPrefix}
-            control={control}
+            control={mainFormControl}
             setValue={setValue}
             getValues={getValues}
           />
@@ -434,7 +391,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                 <div key={field.id} className="flex items-center space-x-2">
                   <Controller
                     name={enumValuePath}
-                    control={control}
+                    control={mainFormControl}
                     defaultValue={getValues(enumValuePath) || ''}
                     render={({ field: enumValueField, fieldState }) => (
                       <InputRoot hasError={!!fieldState.error} size="2xs" className="flex-1">
@@ -488,7 +445,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
           <ArrayItemSchemaRenderer
             pathPrefix={pathPrefix}
             currentPropertySchema={currentPropertySchema}
-            control={control}
+            control={mainFormControl}
             setValue={setValue}
             getValues={getValues}
             indentationLevel={indentationLevel}
@@ -503,7 +460,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
           <ObjectPropertiesRenderer
             pathPrefix={pathPrefix}
             currentPropertySchema={currentPropertySchema}
-            control={control}
+            control={mainFormControl}
             setValue={setValue}
             getValues={getValues}
             indentationLevel={indentationLevel}
