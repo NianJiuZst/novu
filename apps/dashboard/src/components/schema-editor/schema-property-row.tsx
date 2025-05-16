@@ -51,43 +51,16 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
   const [localName, setLocalName] = useState(propertyKey);
   const [nameError, setNameError] = useState<string | null>(null);
 
-  const watchedValueForLog = useWatch({
-    control,
-    name: pathPrefix,
-  });
-  const currentPropertySchema = watchedValueForLog as JSONSchema7 | undefined;
+  const currentPropertySchema = useWatch({ control, name: pathPrefix }) as JSONSchema7 | undefined;
 
   const currentType = useMemo(() => {
-    if (!currentPropertySchema) {
-      // console.log(`[SchemaPropertyRow (${propertyKey})] currentType useMemo: currentPropertySchema is undefined`);
-      return undefined;
-    }
-
-    // console.log(
-    //   `[SchemaPropertyRow (${propertyKey})] currentType useMemo: Evaluating schema:`,
     //   JSON.parse(JSON.stringify(currentPropertySchema))
-    // );
-    if (currentPropertySchema.enum) {
-      // console.log(`[SchemaPropertyRow (${propertyKey})] currentType useMemo: Resolved to ENUM because .enum exists`);
-      return 'enum';
-    }
-
-    if (currentPropertySchema.properties && !currentPropertySchema.type) {
-      // console.log(`[SchemaPropertyRow (${propertyKey})] currentType useMemo: Resolved to OBJECT (implicit)`);
-      return 'object';
-    }
-
-    if (currentPropertySchema.items && !currentPropertySchema.type) {
-      // console.log(`[SchemaPropertyRow (${propertyKey})] currentType useMemo: Resolved to ARRAY (implicit)`);
-      return 'array';
-    }
-
-    // console.log(
-    //   `[SchemaPropertyRow (${propertyKey})] currentType useMemo: Resolved to schema.type:`,
-    //   currentPropertySchema.type
-    // );
+    if (!currentPropertySchema) return undefined;
+    if (currentPropertySchema.enum) return 'enum';
+    if (currentPropertySchema.properties && !currentPropertySchema.type) return 'object';
+    if (currentPropertySchema.items && !currentPropertySchema.type) return 'array';
     return currentPropertySchema.type as JSONSchema7TypeName | 'enum' | undefined;
-  }, [currentPropertySchema, propertyKey]);
+  }, [currentPropertySchema]);
 
   const currentArrayItemType = useMemo(() => {
     if (currentType !== 'array' || !currentPropertySchema?.items || typeof currentPropertySchema.items !== 'object') {
@@ -170,34 +143,23 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
         setNameError(e.message || 'Failed to rename property.');
       }
     },
-    [propertyKey, onRenamePropertyKey, getValues, pathPrefix]
+    [propertyKey, onRenamePropertyKey]
   );
 
   const handleTypeChange = useCallback(
     (newSchemaType: JSONSchema7TypeName | 'enum') => {
       const currentSchema = getValues(pathPrefix) as JSONSchema7;
       if (!currentSchema) return;
-
       let newTransformedSchema: JSONSchema7;
-
-      if (newSchemaType === 'enum') {
-        newTransformedSchema = ensureEnum(currentSchema);
-      } else if (newSchemaType === 'array') {
-        newTransformedSchema = ensureArray(currentSchema);
-      } else if (newSchemaType === 'object') {
-        newTransformedSchema = ensureObject(currentSchema);
-      } else if (newSchemaType === 'string') {
-        newTransformedSchema = ensureString(currentSchema);
-      } else if (newSchemaType === 'number' || newSchemaType === 'integer') {
+      if (newSchemaType === 'enum') newTransformedSchema = ensureEnum(currentSchema);
+      else if (newSchemaType === 'array') newTransformedSchema = ensureArray(currentSchema);
+      else if (newSchemaType === 'object') newTransformedSchema = ensureObject(currentSchema);
+      else if (newSchemaType === 'string') newTransformedSchema = ensureString(currentSchema);
+      else if (newSchemaType === 'number' || newSchemaType === 'integer')
         newTransformedSchema = ensureNumberOrInteger(currentSchema, newSchemaType);
-      } else if (newSchemaType === 'boolean') {
-        newTransformedSchema = ensureBoolean(currentSchema);
-      } else if (newSchemaType === 'null') {
-        newTransformedSchema = ensureNull(currentSchema);
-      } else {
-        newTransformedSchema = { ...currentSchema, type: newSchemaType as JSONSchema7TypeName };
-      }
-
+      else if (newSchemaType === 'boolean') newTransformedSchema = ensureBoolean(currentSchema);
+      else if (newSchemaType === 'null') newTransformedSchema = ensureNull(currentSchema);
+      else newTransformedSchema = { ...currentSchema, type: newSchemaType as JSONSchema7TypeName };
       setValue(pathPrefix, newTransformedSchema, { shouldValidate: true, shouldDirty: true });
     },
     [getValues, setValue, pathPrefix]
@@ -207,24 +169,15 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
     (newItemSchemaType: JSONSchema7TypeName) => {
       const parentArraySchema = getValues(pathPrefix) as JSONSchema7;
       if (!parentArraySchema || parentArraySchema.type !== 'array') return;
-
       const currentItemSchema = (parentArraySchema.items as JSONSchema7) || {};
       let newTransformedItemSchema: JSONSchema7;
-
-      if (newItemSchemaType === 'object') {
-        newTransformedItemSchema = ensureObject(currentItemSchema);
-      } else if (newItemSchemaType === 'string') {
-        newTransformedItemSchema = ensureString(currentItemSchema);
-      } else if (newItemSchemaType === 'number' || newItemSchemaType === 'integer') {
+      if (newItemSchemaType === 'object') newTransformedItemSchema = ensureObject(currentItemSchema);
+      else if (newItemSchemaType === 'string') newTransformedItemSchema = ensureString(currentItemSchema);
+      else if (newItemSchemaType === 'number' || newItemSchemaType === 'integer')
         newTransformedItemSchema = ensureNumberOrInteger(currentItemSchema, newItemSchemaType);
-      } else if (newItemSchemaType === 'boolean') {
-        newTransformedItemSchema = ensureBoolean(currentItemSchema);
-      } else if (newItemSchemaType === 'null') {
-        newTransformedItemSchema = ensureNull(currentItemSchema);
-      } else {
-        newTransformedItemSchema = { ...currentItemSchema, type: newItemSchemaType };
-      }
-
+      else if (newItemSchemaType === 'boolean') newTransformedItemSchema = ensureBoolean(currentItemSchema);
+      else if (newItemSchemaType === 'null') newTransformedItemSchema = ensureNull(currentItemSchema);
+      else newTransformedItemSchema = { ...currentItemSchema, type: newItemSchemaType };
       setValue(`${pathPrefix}.items`, newTransformedItemSchema, { shouldValidate: true, shouldDirty: true });
     },
     [getValues, setValue, pathPrefix]
@@ -232,7 +185,6 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
 
   const enumFieldArrayPath =
     currentType === 'enum' && pathPrefix ? `${pathPrefix}.enum` : 'schemaEditor.dummy.enumPath';
-
   const {
     fields: enumFields,
     append: appendEnum,
@@ -246,10 +198,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
     const childKey = uuidv4();
     const currentObjectSchema = getValues(pathPrefix) as JSONSchema7;
     const newChildProp = newProperty('string');
-    const newChildProperties = {
-      ...(currentObjectSchema.properties || {}),
-      ['']: newChildProp,
-    };
+    const newChildProperties = { ...(currentObjectSchema.properties || {}), [childKey]: newChildProp };
     setValue(`${pathPrefix}.properties`, newChildProperties, { shouldValidate: true, shouldDirty: true });
     childPropertyOrderRef.current = [...(childPropertyOrderRef.current || []), childKey];
   }, [getValues, setValue, pathPrefix]);
@@ -277,15 +226,8 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
   const handleRenameChildPropertyKey = useCallback(
     (oldChildKey: string, newChildKey: string) => {
       const parentSchema = getValues(pathPrefix) as JSONSchema7;
-
-      if (!parentSchema.properties || !parentSchema.properties[oldChildKey] || oldChildKey === newChildKey) {
-        return;
-      }
-
-      if (parentSchema.properties[newChildKey]) {
-        throw new Error(`Property "${newChildKey}" already exists.`);
-      }
-
+      if (!parentSchema.properties || !parentSchema.properties[oldChildKey] || oldChildKey === newChildKey) return;
+      if (parentSchema.properties[newChildKey]) throw new Error(`Property "${newChildKey}" already exists.`);
       const currentChildProperties = { ...parentSchema.properties };
       const propertyToRename = currentChildProperties[oldChildKey];
       delete currentChildProperties[oldChildKey];
@@ -330,7 +272,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
       if (
         !parentArraySchema?.items ||
         typeof parentArraySchema.items !== 'object' ||
-        !parentArraySchema.items.properties
+        !(parentArraySchema.items as JSONSchema7).properties
       )
         return;
       const itemSchema = parentArraySchema.items as JSONSchema7;
@@ -346,7 +288,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
       }
 
       arrayItemPropertyOrderRef.current = (arrayItemPropertyOrderRef.current || []).filter(
-        (key) => key !== itemPropertyKeyToDelete
+        (key: string) => key !== itemPropertyKeyToDelete
       );
     },
     [getValues, setValue, pathPrefix]
@@ -358,17 +300,13 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
       if (
         !parentArraySchema?.items ||
         typeof parentArraySchema.items !== 'object' ||
-        !parentArraySchema.items.properties ||
-        !parentArraySchema.items.properties[oldItemKey] ||
+        !(parentArraySchema.items as JSONSchema7).properties ||
+        !(parentArraySchema.items as JSONSchema7).properties![oldItemKey] ||
         oldItemKey === newItemKey
       )
         return;
       const itemSchema = parentArraySchema.items as JSONSchema7;
-
-      if (itemSchema.properties![newItemKey]) {
-        throw new Error(`Property "${newItemKey}" already exists.`);
-      }
-
+      if (itemSchema.properties![newItemKey]) throw new Error(`Property "${newItemKey}" already exists.`);
       const currentItemProperties = { ...itemSchema.properties! };
       const propertyToRename = currentItemProperties[oldItemKey];
       delete currentItemProperties[oldItemKey];
@@ -383,7 +321,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
         );
       }
 
-      arrayItemPropertyOrderRef.current = (arrayItemPropertyOrderRef.current || []).map((key) =>
+      arrayItemPropertyOrderRef.current = (arrayItemPropertyOrderRef.current || []).map((key: string) =>
         key === oldItemKey ? newItemKey : key
       );
     },
@@ -402,12 +340,10 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
 
       if (_isNowRequired !== undefined) {
         let parentSchemaPath = '';
-
-        if (pathPrefix.includes('.properties.')) {
+        if (pathPrefix.includes('.properties.'))
           parentSchemaPath = pathPrefix.substring(0, pathPrefix.lastIndexOf('.properties.'));
-        } else if (pathPrefix.includes('.items.properties.')) {
+        else if (pathPrefix.includes('.items.properties.'))
           parentSchemaPath = pathPrefix.substring(0, pathPrefix.lastIndexOf('.items.properties.')) + '.items';
-        }
 
         if (parentSchemaPath) {
           const parentSchema = getValues(parentSchemaPath) as JSONSchema7 | undefined;
@@ -438,9 +374,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
     [getValues, setValue, pathPrefix, propertyKey]
   );
 
-  if (!currentPropertySchema) {
-    return null;
-  }
+  if (!currentPropertySchema) return null;
 
   const orderedChildPropertyKeys = [
     ...(childPropertyOrderRef.current || []).filter((key) => currentPropertySchema.properties?.[key] !== undefined),
