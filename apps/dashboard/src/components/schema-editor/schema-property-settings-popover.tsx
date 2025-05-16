@@ -149,7 +149,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
               <FormMessage />
             </FormItem>
 
-            <FormItem className="flex flex-row items-center justify-between rounded-md border p-2.5">
+            <FormItem className="flex flex-row items-center justify-between">
               <FormLabel className="text-xs">Required</FormLabel>
               <Controller
                 name={isRequiredPath as Path<SchemaEditorFormValues>}
@@ -163,26 +163,6 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
             </FormItem>
 
             <Separator />
-
-            <FormItem>
-              <FormLabel className="text-xs">Description</FormLabel>
-              <Controller
-                name={descriptionPath as Path<SchemaEditorFormValues>}
-                control={control}
-                render={({ field }) => (
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      value={field.value === undefined || field.value === null ? '' : String(field.value)}
-                      onChange={(e) => field.onChange(e.target.value === '' ? undefined : e.target.value)}
-                      placeholder="Property description (supports Markdown)"
-                      rows={3}
-                    />
-                  </FormControl>
-                )}
-              />
-              <FormMessage />
-            </FormItem>
 
             {(isStringType || isArrayType) && (
               <>
@@ -342,6 +322,26 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                 </div>
               </>
             )}
+
+            <FormItem>
+              <FormLabel className="text-xs">Description</FormLabel>
+              <Controller
+                name={descriptionPath as Path<SchemaEditorFormValues>}
+                control={control}
+                render={({ field }) => (
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      value={field.value === undefined || field.value === null ? '' : String(field.value)}
+                      onChange={(e) => field.onChange(e.target.value === '' ? undefined : e.target.value)}
+                      placeholder="Property description (supports Markdown)"
+                      rows={3}
+                    />
+                  </FormControl>
+                )}
+              />
+              <FormMessage />
+            </FormItem>
           </div>
           <Separator />
           <div className="flex justify-end px-3 py-2">
