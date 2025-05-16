@@ -22,10 +22,6 @@ export function PropertyNameInput({
   isDisabled = false,
   placeholder = 'Property name',
 }: PropertyNameInputProps) {
-  // Removed all local state, useEffect for blanking UUIDs, custom __tempNameKey logic.
-  // This component is now a simple controlled input via RHF Controller.
-  // Zod validation on PropertyListItemSchema.keyName will provide errors directly.
-
   return (
     <div className="flex-1 flex-col">
       <Controller
@@ -42,7 +38,6 @@ export function PropertyNameInput({
                   placeholder={placeholder}
                   className="text-xs"
                   disabled={isDisabled}
-                  // autoFocus can be useful for newly added fields if we can detect that
                 />
                 {fieldState.error && (
                   <TooltipProvider delayDuration={0}>
