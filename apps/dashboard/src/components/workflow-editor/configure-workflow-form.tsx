@@ -108,6 +108,8 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
     },
   });
 
+  console.log({ isPayloadSchemaEnabled });
+
   const { deleteWorkflow, isPending: isDeleteWorkflowPending } = useDeleteWorkflow({
     onSuccess: () => {
       showToast({
@@ -445,7 +447,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
               <span className="ml-auto" />
             </Button>
           </Link>
-          {isPayloadSchemaEnabled && (
+          {(isPayloadSchemaEnabled || true) && (
             <Button
               variant="secondary"
               mode="outline"

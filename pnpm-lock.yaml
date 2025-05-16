@@ -848,6 +848,9 @@ importers:
       js-cookie:
         specifier: ^3.0.5
         version: 3.0.5
+      json-schema:
+        specifier: ^0.4.0
+        version: 0.4.0
       launchdarkly-react-client-sdk:
         specifier: ^3.3.2
         version: 3.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -932,6 +935,9 @@ importers:
       use-deep-compare-effect:
         specifier: ^1.8.1
         version: 1.8.1(react@18.3.1)
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -993,6 +999,9 @@ importers:
       '@types/react-window':
         specifier: ^1.8.8
         version: 1.8.8
+      '@types/uuid':
+        specifier: ^8.3.4
+        version: 8.3.4
       '@vitejs/plugin-react':
         specifier: ^4.3.1
         version: 4.3.1(vite@5.4.2(@types/node@22.7.4)(less@4.2.0)(lightningcss@1.29.2)(sass@1.77.8)(sugarss@4.0.1(postcss@8.4.47))(terser@5.31.6))
@@ -52135,7 +52144,7 @@ snapshots:
       react-inspector: 6.0.2(react@18.3.1)
       telejson: 7.2.0
       ts-dedent: 2.2.0
-      uuid: 9.0.0
+      uuid: 9.0.1
     optionalDependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -52160,7 +52169,7 @@ snapshots:
       react-inspector: 6.0.2(react@18.3.1)
       telejson: 7.2.0
       ts-dedent: 2.2.0
-      uuid: 9.0.0
+      uuid: 9.0.1
     optionalDependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -59076,7 +59085,7 @@ snapshots:
       msgpackr: 1.8.5
       semver: 7.5.4
       tslib: 2.6.2
-      uuid: 9.0.0
+      uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
 

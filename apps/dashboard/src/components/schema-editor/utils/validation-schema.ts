@@ -1,92 +1,94 @@
 import { z } from 'zod';
-import { SCHEMA_TYPE_OPTIONS } from '../constants';
-import type { SchemaProperty as OriginalSchemaProperty, SchemaValueType } from '../types';
+import type { JSONSchema7 } from '../json-schema'; // Import our JSONSchema7 type
 
-const schemaValueTypesTuple = SCHEMA_TYPE_OPTIONS.map((option) => option.value) as [
-  SchemaValueType,
-  ...SchemaValueType[],
-];
-const schemaValueTypeEnum = z.enum(schemaValueTypesTuple);
+// Basic Zod schema for JSONSchema7. This is not exhaustive but covers core structure.
+// For full validation, a dedicated JSON Schema validator like AJV would be typically used.
+const baseJsonSchema: z.ZodType<JSONSchema7> = z.lazy(() =>
+  z
+    .object({
+      // Core Keywords
+      $id: z.string().url().optional(),
+      $schema: z.string().url().optional(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+      default: z.any().optional(),
+      examples: z.array(z.any()).optional(),
+      deprecated: z.boolean().optional(),
+      readOnly: z.boolean().optional(),
+      writeOnly: z.boolean().optional(),
 
-// Define a TypeScript interface for the recursive structure.
-interface RecursiveSchemaProperty extends Omit<OriginalSchemaProperty, 'children' | 'arrayItemSchema'> {
-  children?: RecursiveSchemaProperty[];
-  arrayItemSchema?: RecursiveSchemaProperty[];
-}
+      // Type-specific Keywords
+      type: z
+        .union([
+          z.literal('string'),
+          z.literal('number'),
+          z.literal('integer'),
+          z.literal('object'),
+          z.literal('array'),
+          z.literal('boolean'),
+          z.literal('null'),
+          // Support for array of types, e.g. ['string', 'null']
+          z.array(z.enum(['string', 'number', 'integer', 'object', 'array', 'boolean', 'null'])).min(1),
+        ])
+        .optional(),
 
-// Zod schema implementing the recursive interface.
-// The explicit type annotation on schemaPropertySchema helps TypeScript understand the recursion.
-export const schemaPropertySchema: z.ZodType<RecursiveSchemaProperty> = z.object({
-  id: z.string(),
-  name: z.string().min(1, { message: 'Property name cannot be empty' }),
-  type: schemaValueTypeEnum,
-  description: z.string().optional(),
-  required: z.boolean().optional().default(false),
-  format: z.string().optional(),
-  pattern: z.string().optional(),
-  minLength: z.number().optional(),
-  maxLength: z.number().optional(),
-  minimum: z.number().optional(),
-  maximum: z.number().optional(),
-  defaultValue: z.any().optional(),
-  enumValues: z.array(z.string().min(1, { message: 'Enum choice cannot be empty' })).optional(),
-  children: z.array(z.lazy(() => schemaPropertySchema)).optional(), // Recursive call
-  arrayItemType: schemaValueTypeEnum.optional().default('string'),
-  arrayItemSchema: z.array(z.lazy(() => schemaPropertySchema)).optional(), // Recursive call
+      // String specific
+      minLength: z.number().int().nonnegative().optional(),
+      maxLength: z.number().int().nonnegative().optional(),
+      pattern: z.string().optional(), // Should be a valid regex
+      format: z.string().optional(), // date-time, email, etc.
+
+      // Number/Integer specific
+      minimum: z.number().optional(),
+      maximum: z.number().optional(),
+      exclusiveMinimum: z.number().optional(),
+      exclusiveMaximum: z.number().optional(),
+      multipleOf: z.number().positive().optional(),
+
+      // Object specific
+      properties: z.record(baseJsonSchema).optional(),
+      required: z.array(z.string()).optional(),
+      additionalProperties: z.union([z.boolean(), baseJsonSchema]).optional(),
+      minProperties: z.number().int().nonnegative().optional(),
+      maxProperties: z.number().int().nonnegative().optional(),
+      patternProperties: z.record(baseJsonSchema).optional(),
+
+      // Array specific
+      items: z.union([baseJsonSchema, z.array(baseJsonSchema)]).optional(),
+      contains: baseJsonSchema.optional(),
+      minItems: z.number().int().nonnegative().optional(),
+      maxItems: z.number().int().nonnegative().optional(),
+      uniqueItems: z.boolean().optional(),
+
+      // Enum
+      enum: z.array(z.any()).optional(), // Values should match the type
+
+      // Conditional Schemas
+      if: baseJsonSchema.optional(),
+      then: baseJsonSchema.optional(),
+      else: baseJsonSchema.optional(),
+      allOf: z.array(baseJsonSchema).optional(),
+      anyOf: z.array(baseJsonSchema).optional(),
+      oneOf: z.array(baseJsonSchema).optional(),
+      not: baseJsonSchema.optional(),
+
+      // Definitions (reusable schemas)
+      definitions: z.record(baseJsonSchema).optional(),
+      $defs: z.record(baseJsonSchema).optional(), // newer draft
+
+      // Reference
+      $ref: z.string().optional(),
+
+      // Comments
+      $comment: z.string().optional(),
+    })
+    // Allow any other properties (custom keywords, etc.)
+    .catchall(z.any())
+);
+
+export const editorSchema = z.object({
+  schema: baseJsonSchema.refine((schema) => schema.type === 'object' || (!schema.type && !!schema.properties), {
+    message: "Root schema must be of type 'object' or implicitly an object with properties.",
+    path: ['type'], // Path to the 'type' field of the root schema object
+  }),
 });
-
-export const editorSchema = z
-  .object({
-    // Cast schemaPropertySchema to z.ZodTypeAny in z.array if direct usage causes issues with inference,
-    // but ideally, it should work if schemaPropertySchema is correctly typed.
-    schemaRows: z.array(schemaPropertySchema as z.ZodTypeAny), // Use the defined recursive schema
-  })
-  .superRefine((data, ctx) => {
-    function checkUniqueNames(
-      properties: RecursiveSchemaProperty[] | undefined | null, // Use RecursiveSchemaProperty here
-      pathPrefix: string,
-      parentType?: string
-    ): void {
-      if (!properties || properties.length === 0) return;
-      const nameCounts = new Map<string, number[]>();
-      properties.forEach((prop, index) => {
-        if (typeof prop.name === 'string' && prop.name.trim() !== '') {
-          const lowerName = prop.name.toLowerCase();
-
-          if (!nameCounts.has(lowerName)) {
-            nameCounts.set(lowerName, []);
-          }
-
-          nameCounts.get(lowerName)!.push(index);
-        }
-
-        if (prop.type === 'object' && prop.children && prop.children.length > 0) {
-          checkUniqueNames(prop.children, `${pathPrefix}[${index}].children`, 'object');
-        }
-
-        if (
-          prop.type === 'array' &&
-          prop.arrayItemType === 'object' &&
-          prop.arrayItemSchema &&
-          prop.arrayItemSchema.length > 0
-        ) {
-          checkUniqueNames(prop.arrayItemSchema, `${pathPrefix}[${index}].arrayItemSchema`, 'arrayItem');
-        }
-      });
-      nameCounts.forEach((indices) => {
-        if (indices.length > 1) {
-          indices.forEach((index) => {
-            const propertyName = properties[index]?.name || '';
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: `Property name "${propertyName}" must be unique at this level.`,
-              path: [`${pathPrefix}[${index}].name`],
-            });
-          });
-        }
-      });
-    }
-
-    // Ensure data.schemaRows aligns with RecursiveSchemaProperty[] if necessary for checkUniqueNames input
-    checkUniqueNames(data.schemaRows as RecursiveSchemaProperty[] | undefined | null, 'schemaRows', 'root');
-  });

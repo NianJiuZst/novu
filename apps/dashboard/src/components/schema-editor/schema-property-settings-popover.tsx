@@ -1,82 +1,77 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { forwardRef, useEffect } from 'react';
-import { useForm, type Control } from 'react-hook-form';
+import { forwardRef, useEffect, useMemo } from 'react';
+import { useForm, useFormContext } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/primitives/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/primitives/form/form';
-import { Input, InputPure, InputRoot, InputWrapper } from '@/components/primitives/input';
+import { Input } from '@/components/primitives/input';
 import { PopoverContent } from '@/components/primitives/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/primitives/select';
 import { Switch } from '@/components/primitives/switch';
 import { Textarea } from '@/components/primitives/textarea';
 import { RiDeleteBin2Line } from 'react-icons/ri';
-import { Code2 } from '../icons/code-2';
 import { Separator } from '../primitives/separator';
 import { SCHEMA_TYPE_OPTIONS } from './constants';
-import type { SchemaProperty, SchemaValueType } from './types';
+import type { JSONSchema7, JSONSchema7TypeName } from './json-schema';
 
 const settingsSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }),
-  type: z.custom<SchemaValueType>(),
   description: z.string().optional(),
-  defaultValue: z.any().optional(),
+  defaultValue: z.string().optional(),
   format: z.string().optional(),
-  minLength: z.number().optional(),
-  maxLength: z.number().optional(),
+  minLength: z.number().int().min(0).optional(),
+  maxLength: z.number().int().min(0).optional(),
   minimum: z.number().optional(),
   maximum: z.number().optional(),
   pattern: z.string().optional(),
-  required: z.boolean().optional(),
+  _isNowRequired: z.boolean().optional(),
 });
 
 type SettingsFormData = z.infer<typeof settingsSchema>;
 
 interface SchemaPropertySettingsPopoverProps {
-  property: SchemaProperty | null;
+  propertySchema: JSONSchema7;
+  propertyKey: string;
+  parentSchema?: JSONSchema7;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updatedSettings: Partial<SchemaProperty>) => void;
+  onSave: (updatedSettings: Partial<JSONSchema7> & { _isNowRequired?: boolean }) => void;
   onDelete: () => void;
-  pathPrefix?: string;
-  control?: Control<any>;
 }
 
-function parseDefaultValue(value: any, type: SchemaValueType | undefined): any {
-  if (value === undefined || value === null) {
+function parseDefaultValue(value: string | undefined, type: JSONSchema7TypeName | undefined): any {
+  if (value === undefined || value === null || value.trim() === '') {
     return undefined;
-  }
-
-  const stringValue = String(value);
-
-  if (stringValue.trim() === '') {
-    return type === 'string' ? '' : undefined;
   }
 
   switch (type) {
     case 'integer': {
-      const intValue = parseInt(stringValue, 10);
-      return Number.isNaN(intValue) ? stringValue : intValue;
+      const intValue = parseInt(value, 10);
+      return Number.isNaN(intValue) ? value : intValue;
     }
 
     case 'number': {
-      const floatValue = parseFloat(stringValue);
-      return Number.isNaN(floatValue) ? stringValue : floatValue;
+      const floatValue = parseFloat(value);
+      return Number.isNaN(floatValue) ? value : floatValue;
     }
 
     case 'boolean':
-      if (stringValue.toLowerCase() === 'true') return true;
-      if (stringValue.toLowerCase() === 'false') return false;
-      return stringValue;
+      if (value.toLowerCase() === 'true') return true;
+      if (value.toLowerCase() === 'false') return false;
+      return value;
+    case 'null':
+      if (value.toLowerCase() === 'null') return null;
+      return value;
+    case 'string':
     default:
-      return stringValue;
+      return value;
   }
 }
 
 const NONE_FORMAT_VALUE = '_NONE_';
 
 const JSON_SCHEMA_FORMATS = [
-  NONE_FORMAT_VALUE, // Allow unsetting the format
+  NONE_FORMAT_VALUE,
   'date-time',
   'date',
   'time',
@@ -87,56 +82,95 @@ const JSON_SCHEMA_FORMATS = [
   'ipv6',
   'uuid',
   'uri',
+  'uri-reference',
+  'uri-template',
+  'json-pointer',
+  'relative-json-pointer',
+  'regex',
 ];
 
 export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPropertySettingsPopoverProps>(
   (props, ref) => {
-    const { property, open, onOpenChange, onSave, onDelete, control } = props;
+    const { propertySchema, propertyKey, parentSchema, open, onOpenChange, onSave, onDelete } = props;
+
+    const { getValues: getMainFormValues } = useFormContext() || {};
 
     const form = useForm<SettingsFormData>({
       resolver: zodResolver(settingsSchema),
-      defaultValues: {
-        name: '',
-        type: 'string',
-      },
+      defaultValues: {},
     });
 
+    const isCurrentlyRequired = useMemo(() => {
+      if (parentSchema && parentSchema.type === 'object' && parentSchema.required) {
+        return parentSchema.required.includes(propertyKey);
+      }
+
+      return false;
+    }, [parentSchema, propertyKey]);
+
     useEffect(() => {
-      if (property && open) {
+      if (propertySchema && open) {
         form.reset({
-          name: property.name || '',
-          type: property.type || 'string',
-          description: property.description || '',
+          description: propertySchema.description || '',
           defaultValue:
-            property.defaultValue === undefined || property.defaultValue === null ? '' : String(property.defaultValue),
-          format: property.format || '',
-          minLength: property.minLength,
-          maxLength: property.maxLength,
-          minimum: property.minimum,
-          maximum: property.maximum,
-          pattern: property.pattern || '',
-          required: property.required || false,
+            propertySchema.default === undefined || propertySchema.default === null
+              ? ''
+              : String(propertySchema.default),
+          format: propertySchema.format || '',
+          minLength: propertySchema.minLength,
+          maxLength: propertySchema.maxLength,
+          minimum: propertySchema.minimum,
+          maximum: propertySchema.maximum,
+          pattern: propertySchema.pattern || '',
+          _isNowRequired: isCurrentlyRequired,
         });
       } else if (!open) {
-        // Optionally clear form or specific fields when popover closes if needed
-        // form.reset({}); // or reset to initial/empty state
+        // form.reset({});
       }
-    }, [property, form.reset, open]);
+    }, [propertySchema, form.reset, open, isCurrentlyRequired]);
 
     const onSubmit = (data: SettingsFormData) => {
-      const processedData: Partial<SchemaProperty> = {
-        name: data.name,
-        type: data.type,
-        description: data.description?.trim() === '' ? undefined : data.description,
-        defaultValue: parseDefaultValue(data.defaultValue, data.type),
-        format: data.format?.trim() === '' ? undefined : data.format,
-        minLength: data.minLength === undefined || data.minLength === null ? undefined : Number(data.minLength),
-        maxLength: data.maxLength === undefined || data.maxLength === null ? undefined : Number(data.maxLength),
-        minimum: data.minimum === undefined || data.minimum === null ? undefined : Number(data.minimum),
-        maximum: data.maximum === undefined || data.maximum === null ? undefined : Number(data.maximum),
-        pattern: data.pattern?.trim() === '' ? undefined : data.pattern,
-        required: data.required,
+      const { _isNowRequired, ...jsonData } = data;
+      const currentType = propertySchema.type;
+
+      const processedData: Partial<JSONSchema7> & { _isNowRequired?: boolean } = {
+        _isNowRequired: data._isNowRequired,
       };
+
+      if (jsonData.description !== undefined) {
+        processedData.description = jsonData.description.trim() === '' ? undefined : jsonData.description.trim();
+      }
+
+      if (jsonData.defaultValue !== undefined) {
+        processedData.default = parseDefaultValue(jsonData.defaultValue, currentType as JSONSchema7TypeName);
+      }
+
+      if (currentType === 'string' || currentType === 'array') {
+        if (jsonData.minLength !== undefined) processedData.minLength = Number(jsonData.minLength);
+        if (jsonData.maxLength !== undefined) processedData.maxLength = Number(jsonData.maxLength);
+      }
+
+      if (currentType === 'string') {
+        if (jsonData.format !== undefined) {
+          processedData.format =
+            jsonData.format.trim() === '' || jsonData.format === NONE_FORMAT_VALUE ? undefined : jsonData.format.trim();
+        }
+
+        if (jsonData.pattern !== undefined) {
+          processedData.pattern = jsonData.pattern.trim() === '' ? undefined : jsonData.pattern.trim();
+        }
+      }
+
+      if (currentType === 'number' || currentType === 'integer') {
+        if (jsonData.minimum !== undefined) processedData.minimum = Number(jsonData.minimum);
+        if (jsonData.maximum !== undefined) processedData.maximum = Number(jsonData.maximum);
+      }
+
+      Object.keys(processedData).forEach((key) => {
+        if ((processedData as any)[key] === undefined) {
+          delete (processedData as any)[key];
+        }
+      });
 
       onSave(processedData);
       onOpenChange(false);
@@ -147,18 +181,19 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
       onOpenChange(false);
     };
 
-    if (!property) return null;
-
-    const isStringType = property.type === 'string';
-    const isArrayType = property.type === 'array';
-    const isNumericType = property.type === 'integer' || property.type === 'number';
+    const effectiveType = propertySchema.enum ? 'enum' : propertySchema.type;
+    const isStringType = effectiveType === 'string';
+    const isArrayType = effectiveType === 'array';
+    const isNumericType = effectiveType === 'integer' || effectiveType === 'number';
 
     return (
-      <PopoverContent ref={ref} className="w-[300px] p-0">
+      <PopoverContent ref={ref} className="w-[320px] p-0" sideOffset={5}>
         <div className="bg-bg-weak border-b border-b-neutral-100">
           <div className="flex flex-row items-center justify-between space-y-0 px-1.5 py-1">
             <div className="flex w-full items-center justify-between gap-1">
-              <span className="text-subheading-2xs text-text-soft">SCHEMA CONFIGURATION</span>
+              <span className="text-subheading-2xs text-text-soft">
+                {propertyKey ? `${propertyKey} - ` : ''} Settings
+              </span>
               <Button variant="secondary" mode="ghost" className="h-5 p-1" onClick={handleDelete}>
                 <RiDeleteBin2Line className="size-3.5 text-neutral-400" />
               </Button>
@@ -167,49 +202,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col">
-            <div className="max-h-[400px] space-y-1.5 overflow-y-auto p-2">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field, fieldState }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs">Variable</FormLabel>
-                    <FormControl>
-                      <InputRoot hasError={!!fieldState.error} size="2xs" className="font-mono">
-                        <InputWrapper>
-                          <Code2 className="h-4 w-4 shrink-0 text-gray-500" />
-                          <InputPure {...field} placeholder="Property name" className="text-sm" />
-                        </InputWrapper>
-                      </InputRoot>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select value={field.value as string | undefined} onValueChange={field.onChange}>
-                        <SelectTrigger size="2xs" className="w-full text-sm">
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {SCHEMA_TYPE_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value} className="text-sm">
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
+            <div className="max-h-[450px] space-y-2.5 overflow-y-auto p-3">
               <FormField
                 control={form.control}
                 name="defaultValue"
@@ -217,7 +210,12 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                   <FormItem>
                     <FormLabel className="text-xs">Default Value</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Default value" size="2xs" />
+                      <Input
+                        {...field}
+                        value={field.value || ''}
+                        placeholder={`Enter default (${String(effectiveType)})`}
+                        size="2xs"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -226,9 +224,9 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
 
               <FormField
                 control={form.control}
-                name="required"
+                name="_isNowRequired"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between">
+                  <FormItem className="flex flex-row items-center justify-between rounded-md border p-2.5">
                     <FormLabel className="text-xs">Required</FormLabel>
                     <FormControl>
                       <Switch className="mt-0" checked={field.value} onCheckedChange={field.onChange} />
@@ -241,21 +239,27 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
 
               {(isStringType || isArrayType) && (
                 <>
-                  <div className="flex space-x-2">
+                  <FormLabel className="mb-1 block text-xs">
+                    {isArrayType ? 'Array Constraints' : 'String Constraints'}
+                  </FormLabel>
+                  <div className="grid grid-cols-2 gap-2.5">
                     <FormField
                       control={form.control}
                       name="minLength"
                       render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormLabel className="text-xs">{isArrayType ? 'Min Items' : 'Min Length'}</FormLabel>
+                        <FormItem>
+                          <FormLabel className="text-xs font-normal">
+                            {isArrayType ? 'Min Items' : 'Min Length'}
+                          </FormLabel>
                           <FormControl>
                             <Input
                               type="number"
                               {...field}
+                              value={field.value === undefined ? '' : field.value}
                               onChange={(e) =>
-                                field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
+                                field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))
                               }
-                              placeholder={isArrayType ? 'Minimum items' : 'Minimum length'}
+                              placeholder="e.g., 0"
                               size="2xs"
                             />
                           </FormControl>
@@ -267,16 +271,19 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                       control={form.control}
                       name="maxLength"
                       render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormLabel className="text-xs">{isArrayType ? 'Max Items' : 'Max Length'}</FormLabel>
+                        <FormItem>
+                          <FormLabel className="text-xs font-normal">
+                            {isArrayType ? 'Max Items' : 'Max Length'}
+                          </FormLabel>
                           <FormControl>
                             <Input
                               type="number"
                               {...field}
+                              value={field.value === undefined ? '' : field.value}
                               onChange={(e) =>
-                                field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
+                                field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))
                               }
-                              placeholder={isArrayType ? 'Maximum items' : 'Maximum length'}
+                              placeholder="e.g., 100"
                               size="2xs"
                             />
                           </FormControl>
@@ -299,15 +306,15 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                         <FormControl>
                           <Select
                             value={field.value || NONE_FORMAT_VALUE}
-                            onValueChange={(value) => field.onChange(value === NONE_FORMAT_VALUE ? undefined : value)}
+                            onValueChange={(value) => field.onChange(value === NONE_FORMAT_VALUE ? '' : value)}
                           >
                             <SelectTrigger size="2xs" className="w-full text-sm">
                               <SelectValue placeholder="Select a format" />
                             </SelectTrigger>
                             <SelectContent>
-                              {JSON_SCHEMA_FORMATS.map((format) => (
-                                <SelectItem key={format} value={format}>
-                                  {format === NONE_FORMAT_VALUE ? 'None' : format}
+                              {JSON_SCHEMA_FORMATS.map((formatVal) => (
+                                <SelectItem key={formatVal} value={formatVal}>
+                                  {formatVal === NONE_FORMAT_VALUE ? 'None' : formatVal}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -324,7 +331,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                       <FormItem>
                         <FormLabel className="text-xs">Pattern (Regex)</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Regular expression" size="2xs" />
+                          <Input {...field} value={field.value || ''} placeholder="^\\d{3}$" size="2xs" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -335,21 +342,23 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
 
               {isNumericType && (
                 <>
-                  <div className="flex space-x-2">
+                  <FormLabel className="mb-1 block text-xs">Numeric Constraints</FormLabel>
+                  <div className="grid grid-cols-2 gap-2.5">
                     <FormField
                       control={form.control}
                       name="minimum"
                       render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormLabel className="text-xs">Minimum Value</FormLabel>
+                        <FormItem>
+                          <FormLabel className="text-xs font-normal">Minimum</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
                               {...field}
+                              value={field.value === undefined ? '' : field.value}
                               onChange={(e) =>
-                                field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
+                                field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))
                               }
-                              placeholder="Minimum value"
+                              placeholder="e.g., 0"
                               size="2xs"
                             />
                           </FormControl>
@@ -361,16 +370,17 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                       control={form.control}
                       name="maximum"
                       render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormLabel className="text-xs">Maximum Value</FormLabel>
+                        <FormItem>
+                          <FormLabel className="text-xs font-normal">Maximum</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
                               {...field}
+                              value={field.value === undefined ? '' : field.value}
                               onChange={(e) =>
-                                field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
+                                field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))
                               }
-                              placeholder="Maximum value"
+                              placeholder="e.g., 100"
                               size="2xs"
                             />
                           </FormControl>
@@ -389,7 +399,12 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                   <FormItem>
                     <FormLabel className="text-xs">Description</FormLabel>
                     <FormControl>
-                      <Textarea {...field} placeholder="Property description" rows={2} />
+                      <Textarea
+                        {...field}
+                        value={field.value || ''}
+                        placeholder="Property description (supports Markdown)"
+                        rows={3}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -397,9 +412,9 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
               />
             </div>
             <Separator />
-            <div className="flex justify-end px-2 py-1.5">
+            <div className="flex justify-end px-3 py-2">
               <Button type="submit" size="2xs" mode="filled" variant="secondary">
-                Apply
+                Apply Changes
               </Button>
             </div>
           </form>
