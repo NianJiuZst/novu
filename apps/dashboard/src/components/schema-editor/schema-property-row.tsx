@@ -58,12 +58,36 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
   const currentPropertySchema = watchedValueForLog as JSONSchema7 | undefined;
 
   const currentType = useMemo(() => {
-    if (!currentPropertySchema) return undefined;
-    if (currentPropertySchema.enum) return 'enum';
-    if (currentPropertySchema.properties && !currentPropertySchema.type) return 'object';
-    if (currentPropertySchema.items && !currentPropertySchema.type) return 'array';
+    if (!currentPropertySchema) {
+      // console.log(`[SchemaPropertyRow (${propertyKey})] currentType useMemo: currentPropertySchema is undefined`);
+      return undefined;
+    }
+
+    // console.log(
+    //   `[SchemaPropertyRow (${propertyKey})] currentType useMemo: Evaluating schema:`,
+    //   JSON.parse(JSON.stringify(currentPropertySchema))
+    // );
+    if (currentPropertySchema.enum) {
+      // console.log(`[SchemaPropertyRow (${propertyKey})] currentType useMemo: Resolved to ENUM because .enum exists`);
+      return 'enum';
+    }
+
+    if (currentPropertySchema.properties && !currentPropertySchema.type) {
+      // console.log(`[SchemaPropertyRow (${propertyKey})] currentType useMemo: Resolved to OBJECT (implicit)`);
+      return 'object';
+    }
+
+    if (currentPropertySchema.items && !currentPropertySchema.type) {
+      // console.log(`[SchemaPropertyRow (${propertyKey})] currentType useMemo: Resolved to ARRAY (implicit)`);
+      return 'array';
+    }
+
+    // console.log(
+    //   `[SchemaPropertyRow (${propertyKey})] currentType useMemo: Resolved to schema.type:`,
+    //   currentPropertySchema.type
+    // );
     return currentPropertySchema.type as JSONSchema7TypeName | 'enum' | undefined;
-  }, [currentPropertySchema]);
+  }, [currentPropertySchema, propertyKey]);
 
   const currentArrayItemType = useMemo(() => {
     if (currentType !== 'array' || !currentPropertySchema?.items || typeof currentPropertySchema.items !== 'object') {
@@ -119,6 +143,20 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
       }
     }
   }, [currentPropertySchema, currentType, currentArrayItemType]);
+
+  useEffect(() => {
+    const schema = getValues(pathPrefix) as JSONSchema7 | undefined;
+
+    if (currentType && currentType !== 'enum' && schema && schema.enum !== undefined) {
+      // console.log(`[SchemaPropertyRow (${propertyKey})] useEffect: Cleaning .enum field because currentType is ${currentType}`);
+      const { enum: enumToRemove, ...restOfSchema } = schema;
+      setValue(pathPrefix, restOfSchema, {
+        shouldValidate: true,
+        shouldDirty: false,
+        shouldTouch: false,
+      });
+    }
+  }, [currentType, getValues, pathPrefix, propertyKey, setValue]);
 
   const handleNameChange = useCallback(
     async (newName: string) => {
@@ -206,13 +244,16 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
     [getValues, setValue, pathPrefix]
   );
 
+  const enumFieldArrayPath =
+    currentType === 'enum' && pathPrefix ? `${pathPrefix}.enum` : 'schemaEditor.dummy.enumPath';
+
   const {
     fields: enumFields,
     append: appendEnum,
     remove: removeEnum,
   } = useFieldArray({
     control,
-    name: `${pathPrefix}.enum`,
+    name: enumFieldArrayPath,
   });
 
   const handleAddChildProperty = useCallback(() => {
@@ -535,9 +576,9 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
           <Button variant="error" mode="outline" size="2xs" leadingIcon={RiDeleteBin6Line} onClick={onDeleteProperty} />
         </div>
 
-        {currentType === 'enum' && currentPropertySchema.enum && (
+        {currentType === 'enum' && enumFieldArrayPath === `${pathPrefix}.enum` && currentPropertySchema?.enum && (
           <div className={cn('flex flex-col space-y-1 pt-1', getMarginClassPx(indentationLevel + 1))}>
-            {enumFields.map((field, enumIndex) => {
+            {(enumFields || []).map((field, enumIndex) => {
               const enumValuePath = `${pathPrefix}.enum.${enumIndex}` as const;
               return (
                 <div key={field.id} className="flex items-center space-x-2">
@@ -547,11 +588,26 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                     defaultValue={getValues(enumValuePath) || ''}
                     render={({ field: enumValueField, fieldState }) => (
                       <InputRoot hasError={!!fieldState.error} size="2xs" className="flex-1">
-                        <InputPure {...enumValueField} placeholder={`Choice ${enumIndex + 1}`} className="text-xs" />
+                        <InputPure
+                          {...enumValueField}
+                          placeholder={`Choice ${enumIndex + 1}`}
+                          className="pl-2 text-xs"
+                        />
+                        {fieldState.error && (
+                          <Tooltip open>
+                            <TooltipTrigger asChild>
+                              <span className="inline-flex cursor-default items-center justify-center pl-1">
+                                <RiErrorWarningLine className="text-destructive h-3 w-3 shrink-0" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" sideOffset={4} className="text-xs">
+                              <p>{fieldState.error.message}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
                       </InputRoot>
                     )}
                   />
-                  <Input disabled value="string" className="h-8 w-[100px] bg-gray-50 text-sm text-gray-400" />
                   <Button
                     variant="error"
                     mode="ghost"
