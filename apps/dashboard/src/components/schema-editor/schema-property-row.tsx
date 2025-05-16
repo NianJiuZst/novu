@@ -261,7 +261,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
           </div>
 
           {itemIsObject && (
-            <div className={cn('mt-1 border-l border-neutral-200', getMarginClassPx(1))}>
+            <div className={cn('mt-1', getMarginClassPx(1))}>
               {itemNestedFields.map((itemNestedField, itemNestedIndex) => (
                 <SchemaPropertyRow
                   key={itemNestedField.itemNestedFieldId}
