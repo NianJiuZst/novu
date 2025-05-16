@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useMemo } from 'react';
-import { useFormContext, Controller } from 'react-hook-form';
+import { useFormContext, Controller, type Path } from 'react-hook-form';
 
 import { Button } from '@/components/primitives/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/primitives/form/form';
@@ -129,7 +129,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
             <FormItem>
               <FormLabel className="text-xs">Default Value</FormLabel>
               <Controller
-                name={defaultValuePath}
+                name={defaultValuePath as Path<SchemaEditorFormValues>}
                 control={control}
                 render={({ field }) => (
                   <FormControl>
@@ -152,7 +152,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
             <FormItem className="flex flex-row items-center justify-between rounded-md border p-2.5">
               <FormLabel className="text-xs">Required</FormLabel>
               <Controller
-                name={isRequiredPath}
+                name={isRequiredPath as Path<SchemaEditorFormValues>}
                 control={control}
                 render={({ field }) => (
                   <FormControl>
@@ -167,7 +167,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
             <FormItem>
               <FormLabel className="text-xs">Description</FormLabel>
               <Controller
-                name={descriptionPath}
+                name={descriptionPath as Path<SchemaEditorFormValues>}
                 control={control}
                 render={({ field }) => (
                   <FormControl>
@@ -193,7 +193,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                   <FormItem>
                     <FormLabel className="text-xs font-normal">{isArrayType ? 'Min Items' : 'Min Length'}</FormLabel>
                     <Controller
-                      name={(isArrayType ? minItemsPath : minLengthPath) as any}
+                      name={(isArrayType ? minItemsPath : minLengthPath) as Path<SchemaEditorFormValues>}
                       control={control}
                       render={({ field }) => (
                         <FormControl>
@@ -215,7 +215,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                   <FormItem>
                     <FormLabel className="text-xs font-normal">{isArrayType ? 'Max Items' : 'Max Length'}</FormLabel>
                     <Controller
-                      name={(isArrayType ? maxItemsPath : maxLengthPath) as any}
+                      name={(isArrayType ? maxItemsPath : maxLengthPath) as Path<SchemaEditorFormValues>}
                       control={control}
                       render={({ field }) => (
                         <FormControl>
@@ -243,7 +243,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                 <FormItem>
                   <FormLabel className="text-xs">Format</FormLabel>
                   <Controller
-                    name={formatPath as any}
+                    name={formatPath as Path<SchemaEditorFormValues>}
                     control={control}
                     render={({ field }) => (
                       <FormControl>
@@ -270,7 +270,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                 <FormItem>
                   <FormLabel className="text-xs">Pattern (Regex)</FormLabel>
                   <Controller
-                    name={patternPath as any}
+                    name={patternPath as Path<SchemaEditorFormValues>}
                     control={control}
                     render={({ field }) => (
                       <FormControl>
@@ -296,7 +296,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                   <FormItem>
                     <FormLabel className="text-xs font-normal">Minimum</FormLabel>
                     <Controller
-                      name={minimumPath as any}
+                      name={minimumPath as Path<SchemaEditorFormValues>}
                       control={control}
                       render={({ field }) => (
                         <FormControl>
@@ -318,7 +318,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                   <FormItem>
                     <FormLabel className="text-xs font-normal">Maximum</FormLabel>
                     <Controller
-                      name={maximumPath as any}
+                      name={maximumPath as Path<SchemaEditorFormValues>}
                       control={control}
                       render={({ field }) => (
                         <FormControl>
