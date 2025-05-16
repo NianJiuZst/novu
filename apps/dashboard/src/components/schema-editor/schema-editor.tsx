@@ -147,24 +147,13 @@ export function SchemaEditor({ initialSchema, onChange, onValidityChange }: Sche
   }, [watch, onChange]);
 
   const handleAddProperty = useCallback(() => {
-    const newItem = {
+    append({
       id: uuidv4(),
       keyName: '',
       definition: newProperty('string'),
       isRequired: false,
-    };
-    append(newItem as PropertyListItem);
-
-    const currentPropertyList = getValues('propertyList');
-
-    if (currentPropertyList && currentPropertyList.length > 0) {
-      const lastItem = currentPropertyList[currentPropertyList.length - 1];
-      console.log(
-        '[SchemaEditor handleAddProperty] Definition of new item AFTER append:',
-        JSON.stringify(lastItem.definition)
-      );
-    }
-  }, [append, getValues]);
+    } as PropertyListItem);
+  }, [append]);
 
   return (
     <FormProvider {...methods}>
@@ -191,19 +180,6 @@ export function SchemaEditor({ initialSchema, onChange, onValidityChange }: Sche
           Add property
         </Button>
       </div>
-      {/* Remove the Log Form State button if it was only for debugging */}
-      {/* 
-      <Button 
-        onClick={() => {
-          console.log('Current Form Values:', getValues());
-          console.log('Errors:', formState.errors);
-          console.log('Is Form Valid:', formState.isValid);
-        }}
-        className="mt-2"
-      >
-        Log Form State
-      </Button>
-      */}
     </FormProvider>
   );
 }

@@ -40,34 +40,17 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
   const definitionPath = `${pathPrefix}.definition`;
   const currentDefinition = propertyListItem?.definition as JSONSchema7 | undefined;
 
-  // useEffect(() => {
-  //   console.log(`[SchemaPropertyRow path="${pathPrefix}"] Watched currentDefinition:`, JSON.stringify(currentDefinition));
-  // }, [currentDefinition, pathPrefix]); // Keep this log for now if needed for this specific issue
+  // // useEffect(() => {
+  // //   console.log(`[SchemaPropertyRow path="${pathPrefix}"] Watched currentDefinition:`, JSON.stringify(currentDefinition));
+  // // }, [currentDefinition, pathPrefix]);
 
   const currentType = useMemo(() => {
-    if (!currentDefinition) {
-      // console.log(`[SchemaPropertyRow path="${pathPrefix}"] currentType useMemo: currentDefinition is falsy.`);
-      return undefined;
-    }
-
-    if (Array.isArray(currentDefinition.enum)) {
-      // console.log(`[SchemaPropertyRow path="${pathPrefix}"] currentType useMemo: Definition has enum array. Type: 'enum'. Definition:`, JSON.stringify(currentDefinition));
-      return 'enum';
-    }
-
-    if (currentDefinition.type === 'object') {
-      // console.log(`[SchemaPropertyRow path="${pathPrefix}"] currentType useMemo: Type is 'object'. Definition:`, JSON.stringify(currentDefinition));
-      return 'object';
-    }
-
-    if (currentDefinition.type === 'array') {
-      // console.log(`[SchemaPropertyRow path="${pathPrefix}"] currentType useMemo: Type is 'array'. Definition:`, JSON.stringify(currentDefinition));
-      return 'array';
-    }
-
-    // console.log(`[SchemaPropertyRow path="${pathPrefix}"] currentType useMemo: Defaulting to type field. Type: '${currentDefinition.type}'. Definition:`, JSON.stringify(currentDefinition));
+    if (!currentDefinition) return undefined;
+    if (Array.isArray(currentDefinition.enum)) return 'enum';
+    if (currentDefinition.type === 'object') return 'object';
+    if (currentDefinition.type === 'array') return 'array';
     return currentDefinition.type as JSONSchema7TypeName | undefined;
-  }, [currentDefinition]); // Removed pathPrefix from dependencies, only currentDefinition matters
+  }, [currentDefinition]);
 
   const keyNamePath = `${pathPrefix}.keyName`;
   const isRequiredPath = `${pathPrefix}.isRequired`;

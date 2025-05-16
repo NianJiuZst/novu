@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Controller, type Control, type FieldValues, useFormContext } from 'react-hook-form';
+import { Controller, type Control, type FieldValues } from 'react-hook-form';
 import { RiErrorWarningLine } from 'react-icons/ri';
 
 import { InputPure, InputRoot, InputWrapper } from '@/components/primitives/input';
@@ -26,8 +26,6 @@ export function PropertyNameInput({
   // This component is now a simple controlled input via RHF Controller.
   // Zod validation on PropertyListItemSchema.keyName will provide errors directly.
 
-  // // console.log(`[PropertyNameInput for path "${fieldPath}"] Rendering.`);
-
   return (
     <div className="flex-1 flex-col">
       <Controller
@@ -35,16 +33,8 @@ export function PropertyNameInput({
         control={control}
         // defaultValue can be omitted if the parent useFieldArray/form sets initial values (e.g., keyName: '')
         render={({ field, fieldState }) => {
-          // // console.log(`[PropertyNameInput for "${fieldPath}"] fieldState.error:`, fieldState.error ? JSON.parse(JSON.stringify(fieldState.error)) : null, "Value:", field.value);
           return (
-            <InputRoot
-              hasError={!!fieldState.error}
-              size="2xs"
-              className={cn(
-                'font-mono'
-                // { 'border-red-500 border-2': !!fieldState.error } // REMOVE Temporary diagnostic style
-              )}
-            >
+            <InputRoot hasError={!!fieldState.error} size="2xs" className={cn('font-mono')}>
               <InputWrapper>
                 <Code2 className="h-4 w-4 shrink-0 text-gray-500" />
                 <InputPure
@@ -59,12 +49,7 @@ export function PropertyNameInput({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span className="inline-flex cursor-default items-center justify-center pl-1 pr-1">
-                          <RiErrorWarningLine
-                            className={cn(
-                              'text-destructive h-4 w-4 shrink-0'
-                              // { 'bg-yellow-300': !!fieldState.error } // REMOVE Temporary diagnostic style
-                            )}
-                          />
+                          <RiErrorWarningLine className={cn('text-destructive h-4 w-4 shrink-0')} />
                         </span>
                       </TooltipTrigger>
                       <TooltipContent side="top" sideOffset={5}>
