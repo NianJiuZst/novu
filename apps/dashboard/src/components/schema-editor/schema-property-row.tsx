@@ -140,7 +140,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
   const currentKeyName = propertyListItem.keyName;
 
   return (
-    <div className={cn('flex flex-col border-b border-neutral-100 py-1 last:border-b-0')}>
+    <div className={cn('flex flex-col py-1')}>
       <div className={cn('flex items-center space-x-2', getMarginClassPx(indentationLevel))}>
         <PropertyNameInput fieldPath={keyNamePath} control={control} />
         <PropertyTypeSelector
