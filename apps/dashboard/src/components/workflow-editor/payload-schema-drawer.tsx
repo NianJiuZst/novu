@@ -1,4 +1,4 @@
-import { forwardRef, useState, useCallback } from 'react';
+import { forwardRef, useState, useCallback, useEffect } from 'react';
 import {
   RiListView,
   RiUpload2Line,
@@ -21,32 +21,199 @@ import {
 } from '@/components/primitives/sheet';
 import { cn } from '@/utils/ui';
 import { SchemaEditor, type SchemaProperty } from '@/components/schema-editor';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/primitives/dropdown-menu';
 import { convertInternalSchemaToJsonSchemaRoot } from '@/components/schema-editor/utils/export-helpers';
 import { ExternalLink } from '../shared/external-link';
 import { Separator } from '../primitives/separator';
 import { usePatchWorkflow } from '@/hooks/use-patch-workflow';
 import { Link } from 'react-router-dom';
-import { LinkButton } from '../primitives/button-link';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/primitives/tooltip';
+import type { WorkflowResponseDto as NovuWorkflowResponseDto } from '@novu/shared';
+import type { SchemaValueType } from '@/components/schema-editor/types'; // Import SchemaValueType
+
+// Define a more specific type for the workflow object expected by this drawer
+interface WorkflowForSchemaEditing extends NovuWorkflowResponseDto {
+  payloadSchema?: Record<string, any>; // Or a more specific JSON Schema type
+}
+
+function jsonSchemaTypeToSchemaValueType(jsonType: string | string[]): SchemaValueType {
+  const type = Array.isArray(jsonType) ? jsonType.find((t) => t !== 'null') || 'string' : jsonType;
+
+  switch (type) {
+    case 'integer':
+      return 'integer';
+    case 'number':
+      return 'number';
+    case 'boolean':
+      return 'boolean';
+    case 'array':
+      return 'array';
+    case 'object':
+      return 'object';
+    case 'null':
+      return 'null';
+    case 'string':
+    default:
+      // Check for enum here as enums are often strings but should be 'enum' type for our editor
+      return 'string';
+  }
+}
+
+function parseJsonSchemaProperties(properties: Record<string, any>, requiredFields: Set<string>): SchemaProperty[] {
+  const result: SchemaProperty[] = [];
+
+  for (const key in properties) {
+    if (Object.prototype.hasOwnProperty.call(properties, key)) {
+      const propSchema = properties[key];
+      if (typeof propSchema !== 'object' || propSchema === null) continue;
+
+      let editorType = jsonSchemaTypeToSchemaValueType(propSchema.type);
+
+      if (propSchema.enum) {
+        editorType = 'enum';
+      }
+
+      const schemaProperty: SchemaProperty = {
+        id: key, // Consider generating a more unique ID if needed
+        name: key,
+        type: editorType,
+        required: requiredFields.has(key),
+        description: propSchema.description,
+        defaultValue: propSchema.default,
+        format: propSchema.format,
+        minLength: propSchema.minLength,
+        maxLength: propSchema.maxLength,
+        minimum: propSchema.minimum,
+        maximum: propSchema.maximum,
+        pattern: propSchema.pattern,
+      };
+
+      if (editorType === 'enum' && Array.isArray(propSchema.enum)) {
+        schemaProperty.enumValues = propSchema.enum.map(String); // Ensure enum values are strings
+      }
+
+      if (editorType === 'object' && propSchema.properties) {
+        const reqArray: string[] = (propSchema.required || []).map((val: any) => String(val));
+        const nestedRequired = new Set<string>(reqArray);
+        schemaProperty.children = parseJsonSchemaProperties(propSchema.properties, nestedRequired);
+      }
+
+      if (editorType === 'array' && propSchema.items) {
+        // Assuming items is a single schema object
+        const itemSchema = propSchema.items;
+
+        if (typeof itemSchema === 'object' && itemSchema !== null) {
+          let itemEditorType = jsonSchemaTypeToSchemaValueType(itemSchema.type);
+
+          if (itemSchema.enum) {
+            itemEditorType = 'enum';
+          }
+
+          schemaProperty.arrayItemType = itemEditorType;
+
+          if (itemEditorType === 'object' && itemSchema.properties) {
+            const itemReqArray: string[] = (itemSchema.required || []).map((val: any) => String(val));
+            const nestedItemRequired = new Set<string>(itemReqArray);
+            schemaProperty.arrayItemSchema = parseJsonSchemaProperties(itemSchema.properties, nestedItemRequired);
+          }
+          // If array items are enums, store their values if SchemaProperty supports it directly for arrayItemType='enum'
+          // Current SchemaProperty seems to store enumValues at the top level,
+          // so this might need adjustment based on how array of enums is best represented.
+          // For now, if arrayItemType is enum, the UI for SchemaEditor would need to handle this.
+        } else if (typeof itemSchema === 'boolean' && !itemSchema) {
+          // "items": false disallows any items, can be ignored or represented if model supports it
+        } else {
+          // if items is not an object (e.g. items: true, or a reference $ref), this needs more handling.
+          // For now, we assume 'items' is a schema object.
+        }
+      }
+
+      result.push(schemaProperty);
+    }
+  }
+
+  return result;
+}
+
+function convertJsonSchemaToInternalSchema(jsonSchema: any): {
+  internalSchema: SchemaProperty[];
+  unsupportedProperties: Record<string, any>;
+} {
+  const internalSchema: SchemaProperty[] = [];
+  const unsupportedProperties: Record<string, any> = {};
+
+  if (typeof jsonSchema !== 'object' || jsonSchema === null || jsonSchema.type !== 'object') {
+    // Expecting a root object schema
+    if (typeof jsonSchema === 'object' && jsonSchema !== null) {
+      // If it's not type object but still an object, capture all its props as unsupported
+      for (const key in jsonSchema) {
+        if (Object.prototype.hasOwnProperty.call(jsonSchema, key)) {
+          unsupportedProperties[key] = jsonSchema[key];
+        }
+      }
+    }
+
+    return { internalSchema, unsupportedProperties };
+  }
+
+  const properties = jsonSchema.properties || {};
+  const rootReqArray: string[] = (jsonSchema.required || []).map((val: any) => String(val));
+  const requiredFields = new Set<string>(rootReqArray);
+
+  const parsedProps = parseJsonSchemaProperties(properties, requiredFields);
+  internalSchema.push(...parsedProps);
+
+  // Capture other top-level properties from the JSON schema root as unsupported
+  const knownRootProps = ['type', 'properties', 'required', '$schema', 'title', 'description', 'id', '$id']; // 'id' or '$id' are common for schema identifiers
+
+  for (const key in jsonSchema) {
+    if (Object.prototype.hasOwnProperty.call(jsonSchema, key)) {
+      if (!knownRootProps.includes(key) && !properties[key]) {
+        // ensure it's not a property we've processed
+        unsupportedProperties[key] = jsonSchema[key];
+      }
+    }
+  }
+
+  // Ensure root $schema, title, description are captured if present and not handled by SchemaProperty directly at root
+  if (jsonSchema.$schema) unsupportedProperties.$schema = jsonSchema.$schema;
+  if (jsonSchema.title) unsupportedProperties.title = jsonSchema.title;
+
+  // Root description is often shown as overall schema description, not part of SchemaProperty array.
+  // Decide if root description needs to be stored specially or as unsupported.
+  // For now, adding to unsupported.
+  if (jsonSchema.description && !internalSchema.find((p) => p.name === 'description')) {
+    unsupportedProperties.description = jsonSchema.description;
+  }
+
+  return { internalSchema, unsupportedProperties };
+}
 
 type PayloadSchemaDrawerProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialSchema?: SchemaProperty[];
+  workflow: WorkflowForSchemaEditing;
   onSave?: (schema: SchemaProperty[]) => void;
-  workflowIdOrSlug: string;
 };
 
 export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawerProps>((props, ref) => {
-  const { open, onOpenChange, initialSchema, onSave, workflowIdOrSlug } = props;
-  const [currentSchema, setCurrentSchema] = useState<SchemaProperty[]>(initialSchema || []);
+  const { open, onOpenChange, workflow, onSave } = props;
+  const [currentSchema, setCurrentSchema] = useState<SchemaProperty[]>([]);
+  const [unsupportedProperties, setUnsupportedProperties] = useState<Record<string, any>>({});
   const { patchWorkflow, isPending: isSavingSchema } = usePatchWorkflow();
+
+  useEffect(() => {
+    if (workflow?.payloadSchema) {
+      const { internalSchema, unsupportedProperties: newUnsupportedProperties } = convertJsonSchemaToInternalSchema(
+        workflow.payloadSchema
+      );
+      setCurrentSchema(internalSchema);
+      setUnsupportedProperties(newUnsupportedProperties);
+    } else {
+      // Reset if workflow or payloadSchema is not present
+      setCurrentSchema([]);
+      setUnsupportedProperties({});
+    }
+  }, [workflow]);
 
   const handleSchemaChange = useCallback((schema: SchemaProperty[]) => {
     console.log('Schema changed in editor:', schema);
@@ -56,8 +223,8 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
   const handleSaveChanges = async () => {
     console.log('handleSaveChanges called'); // Log when function starts
 
-    if (!workflowIdOrSlug) {
-      console.error('Workflow ID/Slug is missing. Cannot save.');
+    if (!workflow.slug) {
+      console.error('Workflow slug is missing. Cannot save.');
       // toast.error('Workflow ID/Slug is missing, cannot save schema.');
       return;
     }
@@ -70,15 +237,20 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
     }
 
     console.log('Current schema state before conversion:', currentSchema);
-    const payloadSchemaForApi = convertInternalSchemaToJsonSchemaRoot(currentSchema);
+    let payloadSchemaForApi = convertInternalSchemaToJsonSchemaRoot(currentSchema);
 
-    console.log('Attempting to save schema for workflow:', workflowIdOrSlug);
+    // Merge back unsupported properties
+    if (Object.keys(unsupportedProperties).length > 0) {
+      payloadSchemaForApi = { ...payloadSchemaForApi, ...unsupportedProperties };
+    }
+
+    console.log('Attempting to save schema for workflow:', workflow.slug);
     console.log('Converted payload schema being sent to API:', JSON.stringify(payloadSchemaForApi, null, 2));
 
     try {
       console.log('Calling patchWorkflow mutation...');
       await patchWorkflow({
-        workflowSlug: workflowIdOrSlug,
+        workflowSlug: workflow.slug,
         workflow: {
           payloadSchema: payloadSchemaForApi as any,
         },

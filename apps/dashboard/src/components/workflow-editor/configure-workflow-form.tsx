@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import type { ExternalToast } from 'sonner';
@@ -70,7 +70,7 @@ import { Link } from 'react-router-dom';
 
 import { PayloadSchemaDrawer } from './payload-schema-drawer';
 import type { SchemaProperty } from '@/components/schema-editor';
-import { WorkflowOriginEnum, WorkflowResponseDto, type JSONSchemaDto, UpdateWorkflowDto } from '@novu/shared';
+import { WorkflowOriginEnum, WorkflowResponseDto, UpdateWorkflowDto } from '@novu/shared';
 
 interface ConfigureWorkflowFormProps {
   workflow: WorkflowResponseDto;
@@ -107,6 +107,12 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
       telemetryEvent: TelemetryEvent.EXPORT_TO_CODE_BANNER_REACTION,
     },
   });
+
+  useEffect(() => {
+    if (workflow.payloadSchema) {
+      setPayloadSchema(workflow.payloadSchema);
+    }
+  }, [workflow.payloadSchema]);
 
   const { deleteWorkflow, isPending: isDeleteWorkflowPending } = useDeleteWorkflow({
     onSuccess: () => {
@@ -211,7 +217,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
         isLoading={isDeleteWorkflowPending}
       />
       <PayloadSchemaDrawer
-        workflowIdOrSlug={workflow.workflowId}
+        workflow={workflow}
         open={isPayloadSchemaDrawerOpen}
         onOpenChange={setIsPayloadSchemaDrawerOpen}
         initialSchema={payloadSchema}
