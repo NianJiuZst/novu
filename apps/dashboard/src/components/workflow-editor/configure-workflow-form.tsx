@@ -69,8 +69,8 @@ import {
 import { Link } from 'react-router-dom';
 
 import { PayloadSchemaDrawer } from './payload-schema-drawer';
-import type { SchemaProperty } from '@/components/schema-editor';
-import { WorkflowOriginEnum, WorkflowResponseDto, UpdateWorkflowDto } from '@novu/shared';
+import { WorkflowOriginEnum, WorkflowResponseDto, UpdateWorkflowDto, FeatureFlagsKeysEnum } from '@novu/shared';
+import { useFeatureFlag } from '@/hooks/use-feature-flag';
 
 interface ConfigureWorkflowFormProps {
   workflow: WorkflowResponseDto;
@@ -91,13 +91,13 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
   const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isPayloadSchemaDrawerOpen, setIsPayloadSchemaDrawerOpen] = useState(false);
-  const [payloadSchema, setPayloadSchema] = useState<SchemaProperty[]>([]);
 
   const { tags } = useTags();
   const { currentEnvironment } = useEnvironment();
   const { currentOrganization } = useAuth();
   const { environments = [] } = useFetchEnvironments({ organizationId: currentOrganization?._id });
   const { safeSync, isSyncable, tooltipContent, PromoteConfirmModal } = useSyncWorkflow(workflow);
+  const isPayloadSchemaEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_PAYLOAD_SCHEMA_ENABLED);
   const { show: showComingSoonBanner } = usePromotionalBanner({
     content: {
       title: '🚧 Export to Code is on the way!',
@@ -107,12 +107,6 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
       telemetryEvent: TelemetryEvent.EXPORT_TO_CODE_BANNER_REACTION,
     },
   });
-
-  useEffect(() => {
-    if (workflow.payloadSchema) {
-      setPayloadSchema(workflow.payloadSchema);
-    }
-  }, [workflow.payloadSchema]);
 
   const { deleteWorkflow, isPending: isDeleteWorkflowPending } = useDeleteWorkflow({
     onSuccess: () => {
@@ -179,14 +173,12 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
     showComingSoonBanner();
   }
 
-  const handleSavePayloadSchema = useCallback((updatedSchema: SchemaProperty[]) => {
-    setPayloadSchema(updatedSchema);
-    console.log('Payload schema saved (client-side):', JSON.stringify(updatedSchema, null, 2));
+  const handleSavePayloadSchema = useCallback(() => {
     showToast({
       children: () => (
         <>
           <ToastIcon variant="success" />
-          <span className="text-sm">Payload schema updated (logged to console).</span>
+          <span className="text-sm">Payload schema updated.</span>
         </>
       ),
       options: toastOptions,
@@ -220,7 +212,6 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
         workflow={workflow}
         open={isPayloadSchemaDrawerOpen}
         onOpenChange={setIsPayloadSchemaDrawerOpen}
-        initialSchema={payloadSchema}
         onSave={handleSavePayloadSchema}
       />
       <PageMeta title={workflow.name} />
@@ -454,18 +445,20 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
               <span className="ml-auto" />
             </Button>
           </Link>
-          <Button
-            variant="secondary"
-            mode="outline"
-            leadingIcon={RiListView}
-            className="mt-2 flex w-full justify-start gap-1.5 p-1.5 text-xs font-medium"
-            type="button"
-            onClick={() => setIsPayloadSchemaDrawerOpen(true)}
-            trailingIcon={RiArrowRightSLine}
-          >
-            Manage payload schema
-            <span className="ml-auto" />
-          </Button>
+          {isPayloadSchemaEnabled && (
+            <Button
+              variant="secondary"
+              mode="outline"
+              leadingIcon={RiListView}
+              className="mt-2 flex w-full justify-start gap-1.5 p-1.5 text-xs font-medium"
+              type="button"
+              onClick={() => setIsPayloadSchemaDrawerOpen(true)}
+              trailingIcon={RiArrowRightSLine}
+            >
+              Manage payload schema
+              <span className="ml-auto" />
+            </Button>
+          )}
         </SidebarContent>
         <Separator />
       </motion.div>
