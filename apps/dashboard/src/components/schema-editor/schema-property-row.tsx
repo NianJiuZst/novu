@@ -140,11 +140,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
   const currentKeyName = propertyListItem.keyName;
 
   return (
-    <div
-      className={cn(
-        'flex flex-col border-b border-neutral-100 py-1 last:border-b-0' /*getMarginClassPx(indentationLevel)*/
-      )}
-    >
+    <div className={cn('flex flex-col border-b border-neutral-100 py-1 last:border-b-0')}>
       <div className={cn('flex items-center space-x-2', getMarginClassPx(indentationLevel))}>
         <PropertyNameInput fieldPath={keyNamePath} control={control} />
         <PropertyTypeSelector
@@ -204,7 +200,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
       </div>
 
       {currentType === 'enum' && (
-        <div className={cn('ml-4 mt-1 space-y-1', getMarginClassPx(indentationLevel))}>
+        <div className={cn('mt-1 space-y-1', getMarginClassPx(indentationLevel + 1))}>
           {enumFields.map((enumField, enumIndex) => {
             const enumChoicePath = `${enumArrayPath}.${enumIndex}`;
             return (
@@ -257,7 +253,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
       )}
 
       {currentType === 'object' && (
-        <div className={cn('pl-4 pt-1', getMarginClassPx(indentationLevel))}>
+        <div className={cn('pt-1', getMarginClassPx(indentationLevel + 1))}>
           {nestedFields.map((nestedField, nestedIndex) => (
             <SchemaPropertyRow
               key={(nestedField as any).nestedFieldId}
@@ -265,7 +261,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
               index={nestedIndex}
               pathPrefix={`${nestedPropertyListPath}.${nestedIndex}`}
               onDeleteProperty={() => removeNested(nestedIndex)}
-              indentationLevel={indentationLevel + 1}
+              indentationLevel={0}
             />
           ))}
           <Button
@@ -274,25 +270,24 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
             mode="outline"
             onClick={handleAddNestedProperty}
             leadingIcon={RiAddLine}
-            className="ml-4 mt-1"
+            className="mt-1"
           >
             Add Nested Property
           </Button>
         </div>
       )}
 
-      {/* Render Array item schema controls */}
       {currentType === 'array' && currentDefinition && (
         <div
           className={cn(
-            'ml-4 mt-2 rounded border border-dashed border-neutral-200 p-2',
-            getMarginClassPx(indentationLevel)
+            'mt-2 rounded border border-dashed border-neutral-200 p-2',
+            getMarginClassPx(indentationLevel + 1)
           )}
         >
           <div className="mb-1 flex items-center space-x-2">
             <Label className="text-xs font-medium text-gray-700">Array Item Type:</Label>
             <PropertyTypeSelector
-              definitionPath={itemSchemaObjectPath} // Controls the item's schema directly
+              definitionPath={itemSchemaObjectPath}
               control={control}
               setValue={setValue}
               getValues={getValues}
@@ -300,15 +295,15 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
           </div>
 
           {itemIsObject && (
-            <div className="mt-1 border-l border-neutral-200 pl-4">
+            <div className={cn('mt-1 border-l border-neutral-200', getMarginClassPx(1))}>
               {itemNestedFields.map((itemNestedField, itemNestedIndex) => (
                 <SchemaPropertyRow
-                  key={(itemNestedField as any).itemNestedFieldId} // Use RHF provided key
+                  key={(itemNestedField as any).itemNestedFieldId}
                   control={control}
                   index={itemNestedIndex}
                   pathPrefix={`${itemPropertiesListPath}.${itemNestedIndex}`}
                   onDeleteProperty={() => removeItemNested(itemNestedIndex)}
-                  indentationLevel={indentationLevel + 2} // Increase indent for item's properties
+                  indentationLevel={0}
                 />
               ))}
               <Button
@@ -323,33 +318,6 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
               </Button>
             </div>
           )}
-          {/* Further controls for non-object array items could go here if needed */}
-        </div>
-      )}
-
-      {/* Render Nested Object Properties (for the main property, not array items) */}
-      {currentType === 'object' && (
-        <div className={cn('pl-4 pt-1', getMarginClassPx(indentationLevel))}>
-          {nestedFields.map((nestedField, nestedIndex) => (
-            <SchemaPropertyRow
-              key={(nestedField as any).nestedFieldId}
-              control={control}
-              index={nestedIndex}
-              pathPrefix={`${nestedPropertyListPath}.${nestedIndex}`}
-              onDeleteProperty={() => removeNested(nestedIndex)}
-              indentationLevel={indentationLevel + 1}
-            />
-          ))}
-          <Button
-            size="2xs"
-            variant="secondary"
-            mode="outline"
-            onClick={handleAddNestedProperty}
-            leadingIcon={RiAddLine}
-            className="ml-4 mt-1"
-          >
-            Add Nested Property
-          </Button>
         </div>
       )}
     </div>
