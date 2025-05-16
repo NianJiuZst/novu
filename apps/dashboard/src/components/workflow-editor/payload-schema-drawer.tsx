@@ -1,5 +1,13 @@
 import { forwardRef, useState, useCallback } from 'react';
-import { RiListView, RiUpload2Line, RiDownload2Line } from 'react-icons/ri';
+import {
+  RiListView,
+  RiUpload2Line,
+  RiDownload2Line,
+  RiBookmarkLine,
+  RiFileMarkedLine,
+  RiInformation2Line,
+  RiInformationFill,
+} from 'react-icons/ri';
 
 import { Button } from '@/components/primitives/button';
 import {
@@ -23,6 +31,9 @@ import { convertInternalSchemaToJsonSchemaRoot } from '@/components/schema-edito
 import { ExternalLink } from '../shared/external-link';
 import { Separator } from '../primitives/separator';
 import { usePatchWorkflow } from '@/hooks/use-patch-workflow';
+import { Link } from 'react-router-dom';
+import { LinkButton } from '../primitives/button-link';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/primitives/tooltip';
 
 type PayloadSchemaDrawerProps = {
   open: boolean;
@@ -103,7 +114,7 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
   };
 
   return (
-    <Sheet modal={false} open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <div
         className={cn('fade-in animate-in fixed inset-0 z-50 bg-black/20 transition-opacity duration-300', {
           'pointer-events-none opacity-0': !open,
@@ -121,8 +132,23 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
 
         <SheetMain className="p-3">
           <div className="mb-2 flex flex-row items-center justify-between gap-2">
-            <h3 className="text-label-xs text-base font-semibold">Payload schema</h3>
-            <DropdownMenu>
+            <h3 className="text-label-xs w-full">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger className="flex cursor-default flex-row items-center gap-1">
+                    Payload schema <RiInformation2Line className="inline-block size-4 text-neutral-400" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>
+                      Validating the workflow payload content, to match a specific schema. This validation ensures
+                      content consistency.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </h3>
+
+            {/*  <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" mode="outline" leadingIcon={RiDownload2Line} size="2xs" className="text-sm">
                   Import / Export
@@ -137,20 +163,30 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
                   <RiDownload2Line className="mr-2 h-4 w-4" />
                   Export to Zod
                 </DropdownMenuItem>
-                {/* <DropdownMenuItem disabled className="cursor-not-allowed">
-                <RiUpload2Line className="mr-2 h-4 w-4" />
-                Import from JSON Schema (Soon)
-              </DropdownMenuItem> */}
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
           </div>
 
           <SchemaEditor initialSchema={currentSchema} onChange={handleSchemaChange} />
         </SheetMain>
-        <SheetFooter className="border-t border-neutral-200 p-6">
-          <Button onClick={handleSaveChanges} className="w-full" disabled={isSavingSchema || !currentSchema?.length}>
-            {isSavingSchema ? 'Saving...' : 'Save Changes'}
-          </Button>
+        <SheetFooter className="border-neutral-content-weak space-between flex border-t px-3 py-1.5">
+          <div className="flex w-full flex-row items-center justify-between gap-2">
+            <Link to="https://docs.novu.co/platform/concepts/payloads" target="_blank">
+              <Button variant="secondary" mode="ghost" size="xs" leadingIcon={RiFileMarkedLine}>
+                View Docs
+              </Button>
+            </Link>
+            <Button
+              size="xs"
+              mode="gradient"
+              variant="secondary"
+              onClick={handleSaveChanges}
+              disabled={isSavingSchema || !currentSchema?.length}
+              data-test-id="save-payload-schema-btn"
+            >
+              {isSavingSchema ? 'Saving...' : 'Save changes'}
+            </Button>
+          </div>
         </SheetFooter>
       </SheetContent>
     </Sheet>
