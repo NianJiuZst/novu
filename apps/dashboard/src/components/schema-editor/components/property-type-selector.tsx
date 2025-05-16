@@ -57,8 +57,7 @@ export function PropertyTypeSelector({
         newTransformedSchema = ensureNull(currentDef);
       } else {
         newTransformedSchema = { ...currentDef, type: newSchemaType as JSONSchema7TypeName };
-
-        delete newTransformedSchema.propertyList;
+        delete (newTransformedSchema as any).propertyList;
         delete newTransformedSchema.items;
         delete newTransformedSchema.enum;
       }

@@ -1,16 +1,14 @@
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { Controller, useFieldArray, useFormContext, useWatch, type Control, type FieldValues } from 'react-hook-form';
-import { RiAddLine, RiDeleteBin6Line, RiDeleteBinLine, RiSettings4Line, RiErrorWarningLine } from 'react-icons/ri';
+import { useCallback } from 'react';
+import { Controller, useFieldArray, useFormContext, useWatch, type Control } from 'react-hook-form';
+import { RiAddLine, RiDeleteBinLine, RiErrorWarningLine } from 'react-icons/ri';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Button } from '@/components/primitives/button';
 import { InputPure, InputRoot } from '@/components/primitives/input';
-import { Popover, PopoverTrigger } from '@/components/primitives/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/primitives/tooltip';
 import { cn } from '@/utils/ui';
 
 import type { JSONSchema7 } from './json-schema';
-import { SchemaPropertySettingsPopover } from './schema-property-settings-popover';
 import { newProperty } from './utils/json-helpers';
 import { getMarginClassPx } from './utils/ui-helpers';
 
@@ -22,6 +20,7 @@ import { Label } from '@/components/primitives/label';
 
 import type { PropertyListItem } from './utils/validation-schema';
 import { useSchemaPropertyType } from './hooks/use-schema-property-type';
+import { PropertyActions } from './components/property-actions';
 
 export interface SchemaPropertyRowProps {
   control: Control<any>;
@@ -121,8 +120,6 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
     }
   }, [itemIsObject, getValues, setValue, itemPropertiesListPath, appendItemNested]);
 
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
   if (!propertyListItem) {
     return null;
   }
@@ -141,7 +138,7 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
         />
         <div className="ml-auto flex items-center space-x-1.5">
           <Controller
-            name={isRequiredPath}
+            name={isRequiredPath as any}
             control={control}
             render={({ field }) => (
               <Checkbox
@@ -159,33 +156,12 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
             Required
           </Label>
         </div>
-        <Popover open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="secondary"
-              mode="ghost"
-              size="2xs"
-              className="p-1"
-              leadingIcon={RiSettings4Line}
-              disabled={!currentKeyName || currentKeyName.trim() === ''}
-            />
-          </PopoverTrigger>
-          <SchemaPropertySettingsPopover
-            definitionPath={definitionPath}
-            propertyKeyForDisplay={currentKeyName || ''}
-            isRequiredPath={isRequiredPath}
-            open={isSettingsOpen}
-            onOpenChange={setIsSettingsOpen}
-            onDeleteProperty={onDeleteProperty}
-          />
-        </Popover>
-        <Button
-          variant="error"
-          mode="ghost"
-          size="2xs"
-          onClick={onDeleteProperty}
-          leadingIcon={RiDeleteBinLine}
-          className="p-1"
+        <PropertyActions
+          definitionPath={definitionPath}
+          propertyKeyForDisplay={currentKeyName || ''}
+          isRequiredPath={isRequiredPath}
+          onDeleteProperty={onDeleteProperty}
+          isDisabled={!currentKeyName || currentKeyName.trim() === ''}
         />
       </div>
 

@@ -173,7 +173,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                   <FormControl>
                     <Textarea
                       {...field}
-                      value={field.value || ''}
+                      value={field.value === undefined || field.value === null ? '' : String(field.value)}
                       onChange={(e) => field.onChange(e.target.value === '' ? undefined : e.target.value)}
                       placeholder="Property description (supports Markdown)"
                       rows={3}
@@ -200,7 +200,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                           <Input
                             type="number"
                             {...field}
-                            value={field.value === undefined ? '' : field.value}
+                            value={typeof field.value === 'number' ? field.value : ''}
                             onChange={(e) =>
                               field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))
                             }
@@ -222,7 +222,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                           <Input
                             type="number"
                             {...field}
-                            value={field.value === undefined ? '' : field.value}
+                            value={typeof field.value === 'number' ? field.value : ''}
                             onChange={(e) =>
                               field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))
                             }
@@ -248,7 +248,9 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                     render={({ field }) => (
                       <FormControl>
                         <Select
-                          value={field.value || NONE_FORMAT_VALUE}
+                          value={
+                            field.value === undefined || field.value === null ? NONE_FORMAT_VALUE : String(field.value)
+                          }
                           onValueChange={(value) => field.onChange(value === NONE_FORMAT_VALUE ? undefined : value)}
                         >
                           <SelectTrigger size="2xs" className="w-full text-sm">
@@ -276,7 +278,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                       <FormControl>
                         <Input
                           {...field}
-                          value={field.value || ''}
+                          value={field.value === undefined || field.value === null ? '' : String(field.value)}
                           onChange={(e) => field.onChange(e.target.value === '' ? undefined : e.target.value)}
                           placeholder="^\\d{3}$"
                           size="2xs"
@@ -303,7 +305,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                           <Input
                             type="number"
                             {...field}
-                            value={field.value === undefined ? '' : field.value}
+                            value={typeof field.value === 'number' ? field.value : ''}
                             onChange={(e) =>
                               field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))
                             }
@@ -325,7 +327,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                           <Input
                             type="number"
                             {...field}
-                            value={field.value === undefined ? '' : field.value}
+                            value={typeof field.value === 'number' ? field.value : ''}
                             onChange={(e) =>
                               field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))
                             }

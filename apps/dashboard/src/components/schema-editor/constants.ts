@@ -1,8 +1,8 @@
-import type { SchemaValueType } from './types';
+import type { JSONSchema7TypeName } from './json-schema';
 
 export interface SchemaTypeOption {
   label: string;
-  value: SchemaValueType;
+  value: JSONSchema7TypeName | 'enum';
 }
 
 export const SCHEMA_TYPE_OPTIONS: SchemaTypeOption[] = [

@@ -8,7 +8,7 @@ function carryOverCommonKeywords(originalSchema: JSONSchema7, newSchema: Partial
   if (originalSchema.examples !== undefined) newSchema.examples = originalSchema.examples;
   if (originalSchema.$id !== undefined) newSchema.$id = originalSchema.$id;
   if (originalSchema.$schema !== undefined) newSchema.$schema = originalSchema.$schema;
-  if (originalSchema.deprecated !== undefined) newSchema.deprecated = originalSchema.deprecated;
+
   if (originalSchema.readOnly !== undefined) newSchema.readOnly = originalSchema.readOnly;
   if (originalSchema.writeOnly !== undefined) newSchema.writeOnly = originalSchema.writeOnly;
   // Keep advanced/conditional keywords as they are complex to selectively clear
@@ -23,13 +23,15 @@ function carryOverCommonKeywords(originalSchema: JSONSchema7, newSchema: Partial
   if (originalSchema.$defs !== undefined) newSchema.$defs = originalSchema.$defs;
   if (originalSchema.$ref !== undefined) newSchema.$ref = originalSchema.$ref;
   if (originalSchema.$comment !== undefined) newSchema.$comment = originalSchema.$comment;
+  if ((originalSchema as any).deprecated !== undefined)
+    (newSchema as any).deprecated = (originalSchema as any).deprecated;
 }
 
 export function newProperty(type: JSONSchema7TypeName = 'string'): JSONSchema7 {
-  const baseProperty: Partial<JSONSchema7> = { type };
+  const baseProperty: Partial<JSONSchema7 & { propertyList?: any[] }> = { type };
 
   if (type === 'object') {
-    baseProperty.properties = {};
+    baseProperty.propertyList = [];
   }
 
   if (type === 'array') {
@@ -40,14 +42,12 @@ export function newProperty(type: JSONSchema7TypeName = 'string'): JSONSchema7 {
 }
 
 export function ensureObject(schema: JSONSchema7): JSONSchema7 {
-  const newSchema: Partial<JSONSchema7> = { type: 'object' };
+  const newSchema: Partial<JSONSchema7 & { propertyList?: any[] }> = { type: 'object' };
   carryOverCommonKeywords(schema, newSchema);
-  // Object specific - carry over if present, or initialize
-  // newSchema.properties = schema.properties && typeof schema.properties === 'object' ? schema.properties : {}; // Old way
 
-  // New way: Initialize propertyList for internal editing, clear traditional properties
-  newSchema.propertyList = schema.propertyList && Array.isArray(schema.propertyList) ? schema.propertyList : [];
-  delete schema.properties; // Remove traditional properties field, it will be rebuilt from propertyList on output
+  newSchema.propertyList =
+    (schema as any).propertyList && Array.isArray((schema as any).propertyList) ? (schema as any).propertyList : [];
+  delete (newSchema as any).properties;
 
   if (schema.required !== undefined) newSchema.required = schema.required;
   if (schema.additionalProperties !== undefined) newSchema.additionalProperties = schema.additionalProperties;
@@ -59,6 +59,7 @@ export function ensureObject(schema: JSONSchema7): JSONSchema7 {
 
 export function ensureArray(schema: JSONSchema7): JSONSchema7 {
   const newSchema: Partial<JSONSchema7> = { type: 'array' };
+
   carryOverCommonKeywords(schema, newSchema);
 
   // Array specific - carry over if present, or initialize
@@ -71,8 +72,7 @@ export function ensureArray(schema: JSONSchema7): JSONSchema7 {
     newSchema.items = { type: 'string' };
   }
 
-  // Clear propertyList if switching to array type from object type
-  delete newSchema.propertyList;
+  delete (newSchema as any).propertyList;
 
   if (schema.contains !== undefined) newSchema.contains = schema.contains;
   if (schema.minItems !== undefined) newSchema.minItems = schema.minItems;
@@ -93,7 +93,7 @@ export function ensureString(schema: JSONSchema7): JSONSchema7 {
     delete newSchema.default;
   }
 
-  delete newSchema.propertyList;
+  delete (newSchema as any).propertyList;
   delete newSchema.items;
   delete newSchema.enum; // String type is not enum by default
 
@@ -113,7 +113,7 @@ export function ensureNumberOrInteger(schema: JSONSchema7, newType: 'number' | '
     delete newSchema.default;
   }
 
-  delete newSchema.propertyList;
+  delete (newSchema as any).propertyList;
   delete newSchema.items;
   delete newSchema.enum;
   return newSchema as JSONSchema7;
@@ -127,7 +127,7 @@ export function ensureBoolean(schema: JSONSchema7): JSONSchema7 {
     delete newSchema.default;
   }
 
-  delete newSchema.propertyList;
+  delete (newSchema as any).propertyList;
   delete newSchema.items;
   delete newSchema.enum;
 
@@ -142,7 +142,7 @@ export function ensureNull(schema: JSONSchema7): JSONSchema7 {
     newSchema.default = null;
   }
 
-  delete newSchema.propertyList;
+  delete (newSchema as any).propertyList;
   delete newSchema.items;
   delete newSchema.enum;
 
@@ -153,10 +153,10 @@ export function ensureEnum(schema: JSONSchema7): JSONSchema7 {
   const newSchema: Partial<JSONSchema7> = { type: 'string' };
   carryOverCommonKeywords(schema, newSchema);
 
-  if (Array.isArray(schema.enum) && schema.enum.every((val: string) => typeof val === 'string')) {
+  if (Array.isArray(schema.enum) && schema.enum.every((val): val is string => typeof val === 'string')) {
     newSchema.enum = schema.enum.length > 0 ? schema.enum : [''];
   } else {
-    delete newSchema.enum;
+    newSchema.enum = [''];
   }
 
   if (
@@ -167,7 +167,7 @@ export function ensureEnum(schema: JSONSchema7): JSONSchema7 {
     delete newSchema.default;
   }
 
-  delete newSchema.propertyList;
+  delete (newSchema as any).propertyList;
   delete newSchema.items;
 
   return newSchema as JSONSchema7;

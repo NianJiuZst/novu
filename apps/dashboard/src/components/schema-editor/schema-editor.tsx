@@ -62,12 +62,14 @@ function convertPropertyListToSchema(propertyList?: PropertyListItem[]): {
       const currentDefinition = { ...item.definition };
       let nestedRequired: string[] | undefined;
 
+      const definitionAsObjectWithList = currentDefinition as JSONSchema7 & { propertyList?: PropertyListItem[] };
+
       if (
-        currentDefinition.type === 'object' &&
-        currentDefinition.propertyList &&
-        currentDefinition.propertyList.length > 0
+        definitionAsObjectWithList.type === 'object' &&
+        definitionAsObjectWithList.propertyList &&
+        definitionAsObjectWithList.propertyList.length > 0
       ) {
-        const nestedConversion = convertPropertyListToSchema(currentDefinition.propertyList);
+        const nestedConversion = convertPropertyListToSchema(definitionAsObjectWithList.propertyList);
         currentDefinition.properties = nestedConversion.properties;
         nestedRequired = nestedConversion.required;
       } else if (currentDefinition.type === 'object' && !currentDefinition.properties) {
@@ -80,7 +82,7 @@ function convertPropertyListToSchema(propertyList?: PropertyListItem[]): {
         delete currentDefinition.required;
       }
 
-      delete currentDefinition.propertyList;
+      delete (currentDefinition as any).propertyList;
       properties[item.keyName] = currentDefinition;
 
       if (item.isRequired) {
