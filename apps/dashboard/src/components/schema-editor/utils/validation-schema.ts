@@ -1,134 +1,95 @@
 import { z } from 'zod';
 import type { JSONSchema7 } from '../json-schema'; // Import our JSONSchema7 type
 
-// Basic Zod schema for JSONSchema7. This is not exhaustive but covers core structure.
-// For full validation, a dedicated JSON Schema validator like AJV would be typically used.
-const baseJsonSchema: z.ZodType<JSONSchema7> = z.lazy(() =>
-  z
-    .object({
-      // Core Keywords
-      $id: z.string().url().optional(),
-      $schema: z.string().url().optional(),
-      title: z.string().optional(),
-      description: z.string().optional(),
-      default: z.any().optional(),
-      examples: z.array(z.any()).optional(),
-      deprecated: z.boolean().optional(),
-      readOnly: z.boolean().optional(),
-      writeOnly: z.boolean().optional(),
+// Defines the structure of the value/definition of a property
+const baseJsonSchema: z.ZodType<JSONSchema7> = z
+  .object({
+    type: z
+      .union([
+        z.literal('string'),
+        z.literal('number'),
+        z.literal('integer'),
+        z.literal('object'),
+        z.literal('array'),
+        z.literal('boolean'),
+        z.literal('null'),
+      ])
+      .optional(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    // String specific
+    minLength: z.number().int().nonnegative().optional(),
+    maxLength: z.number().int().nonnegative().optional(),
+    pattern: z.string().optional(),
+    format: z.string().optional(),
+    // Number/Integer specific
+    minimum: z.number().optional(),
+    maximum: z.number().optional(),
+    exclusiveMinimum: z.number().optional(),
+    exclusiveMaximum: z.number().optional(),
+    multipleOf: z.number().positive().optional(),
+    // Enum
+    enum: z.array(z.string().min(1, { message: 'Enum choice value cannot be empty.' })).optional(),
+    // Default value
+    default: z.any().optional(),
+    examples: z.array(z.any()).optional(),
+    deprecated: z.boolean().optional(),
+    readOnly: z.boolean().optional(),
+    writeOnly: z.boolean().optional(),
 
-      // Type-specific Keywords
-      type: z
-        .union([
-          z.literal('string'),
-          z.literal('number'),
-          z.literal('integer'),
-          z.literal('object'),
-          z.literal('array'),
-          z.literal('boolean'),
-          z.literal('null'),
-          // Support for array of types, e.g. ['string', 'null']
-          z.array(z.enum(['string', 'number', 'integer', 'object', 'array', 'boolean', 'null'])).min(1),
-        ])
-        .optional(),
+    // For type 'object': properties will be managed by a nested propertyList
+    // This field (`propertyList`) is our internal representation for editing object properties.
+    // The actual `properties` field of JSONSchema7 is constructed on output.
+    propertyList: z.array(z.lazy(() => PropertyListItemSchema)).optional(),
 
-      // String specific
-      minLength: z.number().int().nonnegative().optional(),
-      maxLength: z.number().int().nonnegative().optional(),
-      pattern: z.string().optional(), // Should be a valid regex
-      format: z.string().optional(), // date-time, email, etc.
+    // For type 'array': items schema
+    items: z.lazy(() => baseJsonSchema.optional()), // Can be a single schema
+    minItems: z.number().int().nonnegative().optional(),
+    maxItems: z.number().int().nonnegative().optional(),
+    uniqueItems: z.boolean().optional(),
 
-      // Number/Integer specific
-      minimum: z.number().optional(),
-      maximum: z.number().optional(),
-      exclusiveMinimum: z.number().optional(),
-      exclusiveMaximum: z.number().optional(),
-      multipleOf: z.number().positive().optional(),
+    // Allow other valid JSON Schema keywords by not strictly parsing them out here
+    // but they should be part of JSONSchema7 type if used.
+  })
+  .catchall(z.any()); // Allow any other keywords not explicitly defined
 
-      // Object specific
-      properties: z
-        .record(baseJsonSchema)
-        .optional()
-        .superRefine((properties, ctx) => {
-          if (!properties) return true;
-          const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Defines an item in our editable property list
+const PropertyListItemSchema = z.object({
+  id: z.string().uuid(),
+  keyName: z
+    .string()
+    .min(1, { message: 'Property name cannot be empty.' })
+    .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, {
+      message: 'Name must start with a letter or underscore, and contain only letters, numbers, or underscores.',
+    }),
+  definition: baseJsonSchema, // The schema definition for this property's value
+  isRequired: z.boolean().optional(),
+});
+export type PropertyListItem = z.infer<typeof PropertyListItemSchema>;
 
-          for (const key in properties) {
-            if (!Object.prototype.hasOwnProperty.call(properties, key)) continue;
+// This is the overall shape of the form data for the SchemaEditor
+export const SchemaEditorFormValuesSchema = z.object({
+  propertyList: z.array(PropertyListItemSchema).superRefine((list, ctx) => {
+    // Check for unique keyNames among properties
+    const names = new Set<string>();
+    list.forEach((item, index) => {
+      // Only consider non-empty keyNames for uniqueness validation
+      if (item.keyName && item.keyName.trim() !== '') {
+        if (names.has(item.keyName)) {
+          ctx.addIssue({
+            path: [index, 'keyName'], // Path to the specific duplicate keyName field
+            message: 'Property name must be unique.',
+            code: z.ZodIssueCode.custom,
+          });
+        }
 
-            const propertySchema = properties[key];
-
-            // Validation 1: Key itself cannot be an empty string AFTER a rename attempt
-            if (key.trim() === '') {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: 'Property name cannot be empty.',
-                path: [key], // Error associated with the property object at this (empty) key
-              });
-            }
-
-            // Validation 2: If key is a UUID (placeholder for a new property)
-            // and its schema is basic (e.g., no title/description), it needs to be properly named.
-            if (uuidPattern.test(key) && propertySchema && !propertySchema.title && !propertySchema.description) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: 'New property must be named.', // Specific message
-                path: [key], // Error associated with the property object at this UUID key
-              });
-            }
-            // Validation 3: Character set for property names (if not empty and not a UUID needing naming first)
-            else if (key.trim() !== '' && !uuidPattern.test(key) && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message:
-                  'Name must start with a letter or underscore, and contain only letters, numbers, or underscores.',
-                path: [key],
-              });
-            }
-          }
-        }),
-      required: z.array(z.string()).optional(),
-      additionalProperties: z.union([z.boolean(), baseJsonSchema]).optional(),
-      minProperties: z.number().int().nonnegative().optional(),
-      maxProperties: z.number().int().nonnegative().optional(),
-      patternProperties: z.record(baseJsonSchema).optional(),
-
-      // Array specific
-      items: z.union([baseJsonSchema, z.array(baseJsonSchema)]).optional(),
-      contains: baseJsonSchema.optional(),
-      minItems: z.number().int().nonnegative().optional(),
-      maxItems: z.number().int().nonnegative().optional(),
-      uniqueItems: z.boolean().optional(),
-
-      // Enum
-      enum: z.array(z.string().min(1, { message: 'Enum choice value cannot be empty.' })).optional(), // Updated for non-empty string enums
-
-      // Conditional Schemas
-      if: baseJsonSchema.optional(),
-      then: baseJsonSchema.optional(),
-      else: baseJsonSchema.optional(),
-      allOf: z.array(baseJsonSchema).optional(),
-      anyOf: z.array(baseJsonSchema).optional(),
-      oneOf: z.array(baseJsonSchema).optional(),
-      not: baseJsonSchema.optional(),
-
-      // Definitions (reusable schemas)
-      definitions: z.record(baseJsonSchema).optional(),
-      $defs: z.record(baseJsonSchema).optional(), // newer draft
-
-      // Reference
-      $ref: z.string().optional(),
-
-      // Comments
-      $comment: z.string().optional(),
-    })
-    // Allow any other properties (custom keywords, etc.)
-    .catchall(z.any())
-);
-
-export const editorSchema = z.object({
-  schema: baseJsonSchema.refine((schema) => schema.type === 'object' || (!schema.type && !!schema.properties), {
-    message: "Root schema must be of type 'object' or implicitly an object with properties.",
-    path: ['type'], // Path to the 'type' field of the root schema object
+        names.add(item.keyName);
+      }
+    });
   }),
 });
+
+export type SchemaEditorFormValues = z.infer<typeof SchemaEditorFormValuesSchema>;
+
+// Alias for SchemaEditor.tsx
+export const editorSchema = SchemaEditorFormValuesSchema;

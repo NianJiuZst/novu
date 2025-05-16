@@ -1,7 +1,5 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { forwardRef, useEffect, useMemo } from 'react';
-import { useForm, useFormContext } from 'react-hook-form';
-import { z } from 'zod';
+import { useFormContext, Controller } from 'react-hook-form';
 
 import { Button } from '@/components/primitives/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/primitives/form/form';
@@ -12,37 +10,24 @@ import { Switch } from '@/components/primitives/switch';
 import { Textarea } from '@/components/primitives/textarea';
 import { RiDeleteBin2Line } from 'react-icons/ri';
 import { Separator } from '../primitives/separator';
-import { SCHEMA_TYPE_OPTIONS } from './constants';
 import type { JSONSchema7, JSONSchema7TypeName } from './json-schema';
-
-const settingsSchema = z.object({
-  description: z.string().optional(),
-  defaultValue: z.string().optional(),
-  format: z.string().optional(),
-  minLength: z.number().int().min(0).optional(),
-  maxLength: z.number().int().min(0).optional(),
-  minimum: z.number().optional(),
-  maximum: z.number().optional(),
-  pattern: z.string().optional(),
-  _isNowRequired: z.boolean().optional(),
-});
-
-type SettingsFormData = z.infer<typeof settingsSchema>;
+import type { SchemaEditorFormValues } from './utils/validation-schema';
 
 interface SchemaPropertySettingsPopoverProps {
-  propertySchema: JSONSchema7;
-  propertyKey: string;
-  parentSchema?: JSONSchema7;
+  definitionPath: string;
+  propertyKeyForDisplay: string;
+  isRequiredPath: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updatedSettings: Partial<JSONSchema7> & { _isNowRequired?: boolean }) => void;
-  onDelete: () => void;
+  onDeleteProperty: () => void;
 }
 
-function parseDefaultValue(value: string | undefined, type: JSONSchema7TypeName | undefined): any {
+function parseDefaultValue(value: string | undefined, type: JSONSchema7TypeName | 'enum' | undefined): any {
   if (value === undefined || value === null || value.trim() === '') {
     return undefined;
   }
+
+  const lowerValue = value.toLowerCase();
 
   switch (type) {
     case 'integer': {
@@ -56,12 +41,11 @@ function parseDefaultValue(value: string | undefined, type: JSONSchema7TypeName 
     }
 
     case 'boolean':
-      if (value.toLowerCase() === 'true') return true;
-      if (value.toLowerCase() === 'false') return false;
+      if (lowerValue === 'true') return true;
+      if (lowerValue === 'false') return false;
       return value;
     case 'null':
-      if (value.toLowerCase() === 'null') return null;
-      return value;
+      return lowerValue === 'null' ? null : value;
     case 'string':
     default:
       return value;
@@ -91,100 +75,43 @@ const JSON_SCHEMA_FORMATS = [
 
 export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPropertySettingsPopoverProps>(
   (props, ref) => {
-    const { propertySchema, propertyKey, parentSchema, open, onOpenChange, onSave, onDelete } = props;
+    const { definitionPath, propertyKeyForDisplay, isRequiredPath, open, onOpenChange, onDeleteProperty } = props;
 
-    const { getValues: getMainFormValues } = useFormContext() || {};
+    const { control, setValue, getValues, watch } = useFormContext<SchemaEditorFormValues>();
 
-    const form = useForm<SettingsFormData>({
-      resolver: zodResolver(settingsSchema),
-      defaultValues: {},
-    });
+    const currentDefinition = watch(definitionPath as any) as JSONSchema7 | undefined;
+    const currentType = useMemo(() => {
+      if (!currentDefinition) return undefined;
+      if (currentDefinition.enum) return 'enum';
+      return currentDefinition.type as JSONSchema7TypeName | 'enum' | undefined;
+    }, [currentDefinition]);
 
-    const isCurrentlyRequired = useMemo(() => {
-      if (parentSchema && parentSchema.type === 'object' && parentSchema.required) {
-        return parentSchema.required.includes(propertyKey);
-      }
-
-      return false;
-    }, [parentSchema, propertyKey]);
-
-    useEffect(() => {
-      if (propertySchema && open) {
-        form.reset({
-          description: propertySchema.description || '',
-          defaultValue:
-            propertySchema.default === undefined || propertySchema.default === null
-              ? ''
-              : String(propertySchema.default),
-          format: propertySchema.format || '',
-          minLength: propertySchema.minLength,
-          maxLength: propertySchema.maxLength,
-          minimum: propertySchema.minimum,
-          maximum: propertySchema.maximum,
-          pattern: propertySchema.pattern || '',
-          _isNowRequired: isCurrentlyRequired,
-        });
-      } else if (!open) {
-        // form.reset({});
-      }
-    }, [propertySchema, form.reset, open, isCurrentlyRequired]);
-
-    const onSubmit = (data: SettingsFormData) => {
-      const { _isNowRequired, ...jsonData } = data;
-      const currentType = propertySchema.type;
-
-      const processedData: Partial<JSONSchema7> & { _isNowRequired?: boolean } = {
-        _isNowRequired: data._isNowRequired,
-      };
-
-      if (jsonData.description !== undefined) {
-        processedData.description = jsonData.description.trim() === '' ? undefined : jsonData.description.trim();
-      }
-
-      if (jsonData.defaultValue !== undefined) {
-        processedData.default = parseDefaultValue(jsonData.defaultValue, currentType as JSONSchema7TypeName);
-      }
-
-      if (currentType === 'string' || currentType === 'array') {
-        if (jsonData.minLength !== undefined) processedData.minLength = Number(jsonData.minLength);
-        if (jsonData.maxLength !== undefined) processedData.maxLength = Number(jsonData.maxLength);
-      }
-
-      if (currentType === 'string') {
-        if (jsonData.format !== undefined) {
-          processedData.format =
-            jsonData.format.trim() === '' || jsonData.format === NONE_FORMAT_VALUE ? undefined : jsonData.format.trim();
-        }
-
-        if (jsonData.pattern !== undefined) {
-          processedData.pattern = jsonData.pattern.trim() === '' ? undefined : jsonData.pattern.trim();
-        }
-      }
-
-      if (currentType === 'number' || currentType === 'integer') {
-        if (jsonData.minimum !== undefined) processedData.minimum = Number(jsonData.minimum);
-        if (jsonData.maximum !== undefined) processedData.maximum = Number(jsonData.maximum);
-      }
-
-      Object.keys(processedData).forEach((key) => {
-        if ((processedData as any)[key] === undefined) {
-          delete (processedData as any)[key];
-        }
-      });
-
-      onSave(processedData);
+    const handleApplyChanges = () => {
       onOpenChange(false);
     };
 
     const handleDelete = () => {
-      onDelete();
+      onDeleteProperty();
       onOpenChange(false);
     };
 
-    const effectiveType = propertySchema.enum ? 'enum' : propertySchema.type;
+    const effectiveType = currentType;
     const isStringType = effectiveType === 'string';
     const isArrayType = effectiveType === 'array';
     const isNumericType = effectiveType === 'integer' || effectiveType === 'number';
+
+    const descriptionPath = `${definitionPath}.description`;
+    const defaultValuePath = `${definitionPath}.default`;
+    const formatPath = `${definitionPath}.format`;
+    const patternPath = `${definitionPath}.pattern`;
+    const minLengthPath = `${definitionPath}.minLength`;
+    const maxLengthPath = `${definitionPath}.maxLength`;
+    const minimumPath = `${definitionPath}.minimum`;
+    const maximumPath = `${definitionPath}.maximum`;
+    const minItemsPath = `${definitionPath}.minItems`;
+    const maxItemsPath = `${definitionPath}.maxItems`;
+
+    if (!open) return null;
 
     return (
       <PopoverContent ref={ref} className="w-[320px] p-0" sideOffset={5}>
@@ -192,7 +119,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
           <div className="flex flex-row items-center justify-between space-y-0 px-1.5 py-1">
             <div className="flex w-full items-center justify-between gap-1">
               <span className="text-subheading-2xs text-text-soft">
-                {propertyKey ? `${propertyKey} - ` : ''} Settings
+                {propertyKeyForDisplay ? `${propertyKeyForDisplay} - ` : ''} Settings
               </span>
               <Button variant="secondary" mode="ghost" className="h-5 p-1" onClick={handleDelete}>
                 <RiDeleteBin2Line className="size-3.5 text-neutral-400" />
@@ -200,225 +127,230 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
             </div>
           </div>
         </div>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col">
-            <div className="max-h-[450px] space-y-2.5 overflow-y-auto p-3">
-              <FormField
-                control={form.control}
-                name="defaultValue"
+        <div className="flex flex-col">
+          <div className="max-h-[450px] space-y-2.5 overflow-y-auto p-3">
+            <FormItem>
+              <FormLabel className="text-xs">Default Value</FormLabel>
+              <Controller
+                name={defaultValuePath as any}
+                control={control}
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs">Default Value</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        value={field.value || ''}
-                        placeholder={`Enter default (${String(effectiveType)})`}
-                        size="2xs"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={field.value === undefined || field.value === null ? '' : String(field.value)}
+                      onChange={(e) => {
+                        const parsed = parseDefaultValue(e.target.value, currentType);
+                        field.onChange(parsed);
+                      }}
+                      placeholder={`Enter default (${String(effectiveType)})`}
+                      size="2xs"
+                    />
+                  </FormControl>
                 )}
               />
+              <FormMessage />
+            </FormItem>
 
-              <FormField
-                control={form.control}
-                name="_isNowRequired"
+            <FormItem className="flex flex-row items-center justify-between rounded-md border p-2.5">
+              <FormLabel className="text-xs">Required</FormLabel>
+              <Controller
+                name={isRequiredPath as any}
+                control={control}
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-md border p-2.5">
-                    <FormLabel className="text-xs">Required</FormLabel>
-                    <FormControl>
-                      <Switch className="mt-0" checked={field.value} onCheckedChange={field.onChange} />
-                    </FormControl>
-                  </FormItem>
+                  <FormControl>
+                    <Switch className="mt-0" checked={!!field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
                 )}
               />
+            </FormItem>
 
-              <Separator />
-
-              {(isStringType || isArrayType) && (
-                <>
-                  <FormLabel className="mb-1 block text-xs">
-                    {isArrayType ? 'Array Constraints' : 'String Constraints'}
-                  </FormLabel>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <FormField
-                      control={form.control}
-                      name="minLength"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs font-normal">
-                            {isArrayType ? 'Min Items' : 'Min Length'}
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              value={field.value === undefined ? '' : field.value}
-                              onChange={(e) =>
-                                field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))
-                              }
-                              placeholder="e.g., 0"
-                              size="2xs"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="maxLength"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs font-normal">
-                            {isArrayType ? 'Max Items' : 'Max Length'}
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              value={field.value === undefined ? '' : field.value}
-                              onChange={(e) =>
-                                field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))
-                              }
-                              placeholder="e.g., 100"
-                              size="2xs"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </>
-              )}
-
-              {isStringType && (
-                <>
-                  <FormField
-                    control={form.control}
-                    name="format"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Format</FormLabel>
-                        <FormControl>
-                          <Select
-                            value={field.value || NONE_FORMAT_VALUE}
-                            onValueChange={(value) => field.onChange(value === NONE_FORMAT_VALUE ? '' : value)}
-                          >
-                            <SelectTrigger size="2xs" className="w-full text-sm">
-                              <SelectValue placeholder="Select a format" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {JSON_SCHEMA_FORMATS.map((formatVal) => (
-                                <SelectItem key={formatVal} value={formatVal}>
-                                  {formatVal === NONE_FORMAT_VALUE ? 'None' : formatVal}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="pattern"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Pattern (Regex)</FormLabel>
-                        <FormControl>
-                          <Input {...field} value={field.value || ''} placeholder="^\\d{3}$" size="2xs" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-
-              {isNumericType && (
-                <>
-                  <FormLabel className="mb-1 block text-xs">Numeric Constraints</FormLabel>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <FormField
-                      control={form.control}
-                      name="minimum"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs font-normal">Minimum</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              value={field.value === undefined ? '' : field.value}
-                              onChange={(e) =>
-                                field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))
-                              }
-                              placeholder="e.g., 0"
-                              size="2xs"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="maximum"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs font-normal">Maximum</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              value={field.value === undefined ? '' : field.value}
-                              onChange={(e) =>
-                                field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))
-                              }
-                              placeholder="e.g., 100"
-                              size="2xs"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </>
-              )}
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs">Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        value={field.value || ''}
-                        placeholder="Property description (supports Markdown)"
-                        rows={3}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
             <Separator />
-            <div className="flex justify-end px-3 py-2">
-              <Button type="submit" size="2xs" mode="filled" variant="secondary">
-                Apply Changes
-              </Button>
-            </div>
-          </form>
-        </Form>
+
+            <FormItem>
+              <FormLabel className="text-xs">Description</FormLabel>
+              <Controller
+                name={descriptionPath as any}
+                control={control}
+                render={({ field }) => (
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value === '' ? undefined : e.target.value)}
+                      placeholder="Property description (supports Markdown)"
+                      rows={3}
+                    />
+                  </FormControl>
+                )}
+              />
+              <FormMessage />
+            </FormItem>
+
+            {(isStringType || isArrayType) && (
+              <>
+                <FormLabel className="mb-1 block text-xs">
+                  {isArrayType ? 'Array Constraints' : 'String Constraints'}
+                </FormLabel>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <FormItem>
+                    <FormLabel className="text-xs font-normal">{isArrayType ? 'Min Items' : 'Min Length'}</FormLabel>
+                    <Controller
+                      name={(isArrayType ? minItemsPath : minLengthPath) as any}
+                      control={control}
+                      render={({ field }) => (
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            value={field.value === undefined ? '' : field.value}
+                            onChange={(e) =>
+                              field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))
+                            }
+                            placeholder="e.g., 0"
+                            size="2xs"
+                          />
+                        </FormControl>
+                      )}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                  <FormItem>
+                    <FormLabel className="text-xs font-normal">{isArrayType ? 'Max Items' : 'Max Length'}</FormLabel>
+                    <Controller
+                      name={(isArrayType ? maxItemsPath : maxLengthPath) as any}
+                      control={control}
+                      render={({ field }) => (
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            value={field.value === undefined ? '' : field.value}
+                            onChange={(e) =>
+                              field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))
+                            }
+                            placeholder="e.g., 100"
+                            size="2xs"
+                          />
+                        </FormControl>
+                      )}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                </div>
+              </>
+            )}
+
+            {isStringType && (
+              <>
+                <FormItem>
+                  <FormLabel className="text-xs">Format</FormLabel>
+                  <Controller
+                    name={formatPath as any}
+                    control={control}
+                    render={({ field }) => (
+                      <FormControl>
+                        <Select
+                          value={field.value || NONE_FORMAT_VALUE}
+                          onValueChange={(value) => field.onChange(value === NONE_FORMAT_VALUE ? undefined : value)}
+                        >
+                          <SelectTrigger size="2xs" className="w-full text-sm">
+                            <SelectValue placeholder="Select a format" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {JSON_SCHEMA_FORMATS.map((formatVal) => (
+                              <SelectItem key={formatVal} value={formatVal}>
+                                {formatVal === NONE_FORMAT_VALUE ? 'None' : formatVal}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
+                  <FormMessage />
+                </FormItem>
+                <FormItem>
+                  <FormLabel className="text-xs">Pattern (Regex)</FormLabel>
+                  <Controller
+                    name={patternPath as any}
+                    control={control}
+                    render={({ field }) => (
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value === '' ? undefined : e.target.value)}
+                          placeholder="^\\d{3}$"
+                          size="2xs"
+                        />
+                      </FormControl>
+                    )}
+                  />
+                  <FormMessage />
+                </FormItem>
+              </>
+            )}
+
+            {isNumericType && (
+              <>
+                <FormLabel className="mb-1 block text-xs">Numeric Constraints</FormLabel>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <FormItem>
+                    <FormLabel className="text-xs font-normal">Minimum</FormLabel>
+                    <Controller
+                      name={minimumPath as any}
+                      control={control}
+                      render={({ field }) => (
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            value={field.value === undefined ? '' : field.value}
+                            onChange={(e) =>
+                              field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))
+                            }
+                            placeholder="e.g., 0"
+                            size="2xs"
+                          />
+                        </FormControl>
+                      )}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                  <FormItem>
+                    <FormLabel className="text-xs font-normal">Maximum</FormLabel>
+                    <Controller
+                      name={maximumPath as any}
+                      control={control}
+                      render={({ field }) => (
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            value={field.value === undefined ? '' : field.value}
+                            onChange={(e) =>
+                              field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))
+                            }
+                            placeholder="e.g., 100"
+                            size="2xs"
+                          />
+                        </FormControl>
+                      )}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                </div>
+              </>
+            )}
+          </div>
+          <Separator />
+          <div className="flex justify-end px-3 py-2">
+            <Button type="button" size="2xs" mode="filled" variant="secondary" onClick={handleApplyChanges}>
+              Done
+            </Button>
+          </div>
+        </div>
       </PopoverContent>
     );
   }

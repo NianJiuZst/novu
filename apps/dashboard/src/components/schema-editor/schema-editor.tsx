@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { RiAddLine } from 'react-icons/ri';
-import { useForm, FormProvider, type FieldValues, type Control } from 'react-hook-form';
+import { useForm, FormProvider, useFieldArray, type Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { v4 as uuidv4 } from 'uuid';
+import { RiAddLine } from 'react-icons/ri';
 
 import { Button } from '@/components/primitives/button';
 import type { JSONSchema7 } from './json-schema';
 import { SchemaPropertyRow } from './schema-property-row';
 import { newProperty } from './utils/json-helpers';
-import { editorSchema } from './utils/validation-schema';
+import { editorSchema, type SchemaEditorFormValues, type PropertyListItem } from './utils/validation-schema';
 
 interface SchemaEditorProps {
   initialSchema?: JSONSchema7;
@@ -16,223 +16,158 @@ interface SchemaEditorProps {
   onValidityChange?: (isValid: boolean) => void;
 }
 
-interface FormValues {
-  schema: JSONSchema7;
+function convertSchemaToPropertyList(
+  schemaProperties?: JSONSchema7['properties'],
+  requiredArray?: string[]
+): PropertyListItem[] {
+  if (!schemaProperties) {
+    return [];
+  }
+
+  return Object.entries(schemaProperties).map(([key, value]) => {
+    const definition = value as JSONSchema7;
+    let nestedPropertyList: PropertyListItem[] | undefined = undefined;
+    const definitionForListItem: JSONSchema7 = { ...definition };
+
+    if (definition.type === 'object' && definition.properties) {
+      nestedPropertyList = convertSchemaToPropertyList(definition.properties, definition.required);
+      delete definitionForListItem.properties;
+    }
+
+    return {
+      id: uuidv4(),
+      keyName: key,
+      definition: {
+        ...definitionForListItem,
+        ...(nestedPropertyList ? { propertyList: nestedPropertyList } : {}),
+      },
+      isRequired: requiredArray?.includes(key) || false,
+    };
+  });
 }
 
-const defaultSchema: JSONSchema7 = {
-  type: 'object',
-  properties: {},
+function convertPropertyListToSchema(propertyList?: PropertyListItem[]): {
+  properties: JSONSchema7['properties'];
+  required?: string[];
+} {
+  if (!propertyList || propertyList.length === 0) {
+    return { properties: {} };
+  }
+
+  const properties: JSONSchema7['properties'] = {};
+  const required: string[] = [];
+
+  propertyList.forEach((item) => {
+    if (item.keyName.trim() !== '') {
+      const currentDefinition = { ...item.definition };
+      let nestedRequired: string[] | undefined;
+
+      if (
+        currentDefinition.type === 'object' &&
+        currentDefinition.propertyList &&
+        currentDefinition.propertyList.length > 0
+      ) {
+        const nestedConversion = convertPropertyListToSchema(currentDefinition.propertyList);
+        currentDefinition.properties = nestedConversion.properties;
+        nestedRequired = nestedConversion.required;
+      } else if (currentDefinition.type === 'object' && !currentDefinition.properties) {
+        currentDefinition.properties = {};
+      }
+
+      if (nestedRequired && nestedRequired.length > 0) {
+        currentDefinition.required = nestedRequired;
+      } else {
+        delete currentDefinition.required;
+      }
+
+      delete currentDefinition.propertyList;
+      properties[item.keyName] = currentDefinition;
+
+      if (item.isRequired) {
+        required.push(item.keyName);
+      }
+    }
+  });
+  return { properties, ...(required.length > 0 ? { required } : {}) };
+}
+
+const defaultFormValues: SchemaEditorFormValues = {
+  propertyList: [],
 };
 
 export function SchemaEditor({ initialSchema, onChange, onValidityChange }: SchemaEditorProps) {
-  const propertyOrderRef = useRef<string[]>(initialSchema?.properties ? Object.keys(initialSchema.properties) : []);
+  const initialTransformedValues: SchemaEditorFormValues = {
+    propertyList: initialSchema?.properties
+      ? convertSchemaToPropertyList(initialSchema.properties, initialSchema.required)
+      : defaultFormValues.propertyList,
+  };
 
-  const methods = useForm<FormValues>({
-    defaultValues: {
-      schema: initialSchema && Object.keys(initialSchema).length > 0 ? initialSchema : { ...defaultSchema },
-    },
+  const methods = useForm<SchemaEditorFormValues>({
+    defaultValues: initialTransformedValues,
     resolver: zodResolver(editorSchema),
     mode: 'onChange',
   });
 
-  const { control, watch, setValue, getValues } = methods;
+  const { control, watch, formState } = methods;
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'propertyList',
+    keyName: 'fieldId',
+  });
 
   useEffect(() => {
-    const processChange = (value: FormValues['schema']) => {
-      if (onChange && value) {
-        const currentSchema = { ...value }; // clone
+    if (onValidityChange) {
+      onValidityChange(formState.isValid);
+    }
+  }, [formState.isValid, onValidityChange]);
 
-        if (currentSchema.properties && propertyOrderRef.current.length > 0) {
-          const orderedProperties: Record<string, JSONSchema7> = {};
-
-          for (const key of propertyOrderRef.current) {
-            if (currentSchema.properties[key]) {
-              orderedProperties[key] = currentSchema.properties[key];
-            }
-          }
-
-          for (const key in currentSchema.properties) {
-            if (
-              !Object.prototype.hasOwnProperty.call(orderedProperties, key) &&
-              Object.prototype.hasOwnProperty.call(currentSchema.properties, key)
-            ) {
-              orderedProperties[key] = currentSchema.properties[key];
-            }
-          }
-
-          currentSchema.properties = orderedProperties;
-        }
-
-        onChange(currentSchema);
-      }
-    };
-
+  useEffect(() => {
     let debounceTimer: NodeJS.Timeout;
-    const subscription = watch((value, { name, type }) => {
-      // console.log('[SchemaEditor] Watch triggered', { name, type, value });
+    const subscription = watch((value) => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
-        if (value.schema) {
-          processChange(value.schema);
+        if (onChange && value.propertyList) {
+          const { properties, required } = convertPropertyListToSchema(value.propertyList as PropertyListItem[]);
+
+          const outputSchema: JSONSchema7 = {
+            type: 'object',
+            properties,
+            ...(required && required.length > 0 ? { required } : {}),
+          };
+          onChange(outputSchema);
         }
-      }, 150); // Adjusted debounce time
+      }, 300);
     });
 
     return () => {
       clearTimeout(debounceTimer);
       subscription.unsubscribe();
     };
-  }, [watch, onChange, getValues, setValue]); // Removed methods.formState.isValid and onValidityChange
-
-  // Effect to report validity changes immediately
-  useEffect(() => {
-    if (onValidityChange) {
-      onValidityChange(methods.formState.isValid);
-    }
-  }, [methods.formState.isValid, onValidityChange]);
-
-  // Effect to forward Zod errors for new properties to the correct RHF input field
-  useEffect(() => {
-    const errors = methods.formState.errors.schema?.properties as FieldValues | undefined;
-
-    if (errors) {
-      const currentProperties = getValues('schema.properties') || {};
-      Object.keys(errors).forEach((propertyKey) => {
-        const errorForProperty = errors[propertyKey];
-
-        if (
-          errorForProperty &&
-          typeof errorForProperty === 'object' &&
-          'message' in errorForProperty &&
-          (errorForProperty.message === 'New property must be named.' ||
-            errorForProperty.message === 'Property name cannot be empty.' || // Already handled by Zod for empty string keys
-            errorForProperty.message ===
-              'Name must start with a letter or underscore, and contain only letters, numbers, or underscores.') &&
-          Object.prototype.hasOwnProperty.call(currentProperties, propertyKey)
-        ) {
-          const tempNameKeyPath = `schema.properties.${propertyKey}.${propertyKey}__tempNameKey`;
-          const fieldState = methods.getFieldState(tempNameKeyPath as any);
-
-          if (fieldState.error?.message !== errorForProperty.message) {
-            methods.setError(tempNameKeyPath as any, {
-              type: 'manual',
-              message: errorForProperty.message as string,
-            });
-          }
-        }
-      });
-    }
-  }, [methods.formState.errors, methods.setError, getValues, methods.getFieldState]);
+  }, [watch, onChange]);
 
   const handleAddProperty = useCallback(() => {
-    const newKey = uuidv4();
-    const currentSchema = getValues('schema');
-    const newProp = newProperty();
-    const newProperties = {
-      ...(currentSchema.properties || {}),
-      [newKey]: newProp,
-    };
-    setValue('schema.properties', newProperties, { shouldValidate: true, shouldDirty: true });
-    propertyOrderRef.current = [...propertyOrderRef.current, newKey];
-
-    // Manually trigger onChange after adding a property, as watch might not pick up structural changes immediately for debounced onChange
-    if (onChange) {
-      const updatedFullSchema = getValues('schema');
-      onChange(updatedFullSchema);
-    }
-  }, [getValues, setValue, onChange]);
-
-  const handleDeleteProperty = useCallback(
-    (keyToDelete: string) => {
-      const currentSchema = getValues('schema');
-      if (!currentSchema.properties) return;
-      const { [keyToDelete]: _, ...remainingProperties } = currentSchema.properties;
-      setValue('schema.properties', remainingProperties, { shouldValidate: true, shouldDirty: true });
-
-      if (currentSchema.required?.includes(keyToDelete)) {
-        setValue(
-          'schema.required',
-          currentSchema.required.filter((reqKey: string) => reqKey !== keyToDelete),
-          { shouldValidate: true, shouldDirty: true }
-        );
-      }
-
-      propertyOrderRef.current = propertyOrderRef.current.filter((key) => key !== keyToDelete);
-
-      if (onChange) {
-        onChange(getValues('schema'));
-      }
-    },
-    [getValues, setValue, onChange]
-  );
-
-  const handleRenamePropertyKey = useCallback(
-    (oldKey: string, newKey: string) => {
-      const currentFullSchema = getValues('schema');
-      const currentSchemaProperties = currentFullSchema.properties || {};
-
-      if (!currentSchemaProperties[oldKey] || oldKey === newKey) {
-        return;
-      }
-
-      if (currentSchemaProperties[newKey]) {
-        throw new Error(`Property with key "${newKey}" already exists. Please choose a unique name.`);
-      }
-
-      const propertiesAfterRename = { ...currentSchemaProperties };
-      const propertyToRename = propertiesAfterRename[oldKey];
-      delete propertiesAfterRename[oldKey];
-      propertiesAfterRename[newKey] = propertyToRename;
-
-      setValue('schema.properties', propertiesAfterRename, { shouldValidate: true, shouldDirty: true });
-
-      propertyOrderRef.current = propertyOrderRef.current.map((key: string) => (key === oldKey ? newKey : key));
-
-      if (currentFullSchema.required?.includes(oldKey)) {
-        const newRequired = currentFullSchema.required.map((reqKey: string) => (reqKey === oldKey ? newKey : reqKey));
-        setValue('schema.required', newRequired, { shouldValidate: true, shouldDirty: true });
-      }
-
-      if (onChange) {
-        onChange(getValues('schema'));
-      }
-    },
-    [getValues, setValue, onChange]
-  );
-
-  const latestSchema = getValues('schema');
-  const latestSchemaProperties = latestSchema?.properties || {};
-  const latestPropertyOrder = [...propertyOrderRef.current];
-
-  const orderedPropertyKeys = [
-    ...latestPropertyOrder.filter((key) => latestSchemaProperties[key] !== undefined),
-    ...Object.keys(latestSchemaProperties).filter((key) => !latestPropertyOrder.includes(key)),
-  ];
+    append({
+      id: uuidv4(),
+      keyName: '',
+      definition: newProperty('string'),
+      isRequired: false,
+    });
+  }, [append]);
 
   return (
     <FormProvider {...methods}>
       <div className="rounded-4 bg-bg-white border border-neutral-100 p-2">
-        {orderedPropertyKeys.map((propertyKeyFromMap) => {
-          const propertySchemaFragment = latestSchemaProperties[propertyKeyFromMap];
-
-          if (typeof propertySchemaFragment !== 'object' || propertySchemaFragment === null) {
-            // This might happen briefly if a key is in orderedPropertyKeys but data is removed before render
-            return null;
-          }
-
-          return (
-            <SchemaPropertyRow
-              key={propertyKeyFromMap}
-              control={control}
-              propertyKey={propertyKeyFromMap}
-              pathPrefix={`schema.properties.${propertyKeyFromMap}`}
-              onDeleteProperty={() => handleDeleteProperty(propertyKeyFromMap)}
-              onRenamePropertyKey={handleRenamePropertyKey}
-              indentationLevel={0}
-            />
-          );
-        })}
+        {fields.map((field, index) => (
+          <SchemaPropertyRow
+            key={field.fieldId}
+            control={control}
+            index={index}
+            pathPrefix={`propertyList.${index}`}
+            onDeleteProperty={() => remove(index)}
+            indentationLevel={0}
+          />
+        ))}
         <Button
           variant="secondary"
           mode="lighter"
@@ -240,10 +175,24 @@ export function SchemaEditor({ initialSchema, onChange, onValidityChange }: Sche
           onClick={handleAddProperty}
           className="mt-2"
           leadingIcon={RiAddLine}
+          disabled={!formState.isValid && fields.length > 0}
         >
           Add property
         </Button>
       </div>
+      {/* Remove the Log Form State button if it was only for debugging */}
+      {/* 
+      <Button 
+        onClick={() => {
+          console.log('Current Form Values:', getValues());
+          console.log('Errors:', formState.errors);
+          console.log('Is Form Valid:', formState.isValid);
+        }}
+        className="mt-2"
+      >
+        Log Form State
+      </Button>
+      */}
     </FormProvider>
   );
 }

@@ -5,124 +5,66 @@ import { RiErrorWarningLine } from 'react-icons/ri';
 import { InputPure, InputRoot, InputWrapper } from '@/components/primitives/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/primitives/tooltip';
 import { Code2 } from '../../icons/code-2';
-import type { JSONSchema7 } from '../json-schema'; // Import JSONSchema7 type
+import { cn } from '@/utils/ui';
 
+// path: the direct RHF path to the keyName field, e.g., "propertyList.0.keyName"
+// control: the main form's control object
 type PropertyNameInputProps = {
-  propertyKey: string; // Still needed for initial value and to detect actual change
-  pathPrefix: string; // Used to construct the field path for the controller
-  onAttemptRename: (oldKey: string, newKeyAttempt: string) => void;
-  control: Control<FieldValues>;
+  fieldPath: string;
+  control: Control<FieldValues>; // Or more specific type if SchemaEditorFormValues is accessible
   isDisabled?: boolean;
+  placeholder?: string;
 };
 
 export function PropertyNameInput({
-  propertyKey,
-  pathPrefix,
-  onAttemptRename,
+  fieldPath,
   control,
   isDisabled = false,
+  placeholder = 'Property name',
 }: PropertyNameInputProps) {
-  // The actual name field for react-hook-form will be a unique path
-  // that doesn't directly map to the schema structure, to avoid conflicts
-  // and allow RHF to manage its state independently until we commit the change.
-  // However, for validation, we need to ensure the Zod schema path is correct.
-  // This component will now primarily rely on the parent (SchemaPropertyRow) to handle the rename logic via onAttemptRename.
+  // Removed all local state, useEffect for blanking UUIDs, custom __tempNameKey logic.
+  // This component is now a simple controlled input via RHF Controller.
+  // Zod validation on PropertyListItemSchema.keyName will provide errors directly.
 
-  // We use a unique field name for react-hook-form for this input.
-  // The actual update to the schema structure (and its key) happens via `onAttemptRename`.
-  const formFieldName = `${pathPrefix}.${propertyKey}__tempNameKey` as const;
-
-  const { getFieldState, setValue, getValues } = useFormContext(); // To get errors for this specific input if needed
-
-  // If propertyKey (the actual key in the schema) changes from parent,
-  // we need to ensure the input field reflects this new key if it's being freshly rendered or re-keyed.
-  // The `defaultValue` in Controller handles initial render. If `propertyKey` itself is part of Controller's `key` prop,
-  // it would remount. Alternatively, `resetField` or `setValue` can be used.
-  useEffect(() => {
-    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    // Attempt to get the schema fragment associated with this propertyKey via pathPrefix
-    // pathPrefix would be something like `schema.properties.uuid_for_the_property`
-    // So, we use pathPrefix directly as it should point to the property's schema object.
-    const schemaFragment = getValues(pathPrefix) as JSONSchema7 | undefined;
-
-    let initialValue = propertyKey;
-
-    if (uuidPattern.test(propertyKey)) {
-      // If the key is a UUID, check if it represents a truly new, unedited property.
-      // A simple check could be if it lacks a title or description, common user-set fields.
-      // Or, if we introduce a specific marker for "newness", we check that.
-      // For now, let's assume if it's a UUID and has no title/description, it should appear empty.
-      if (!schemaFragment?.title && !schemaFragment?.description) {
-        initialValue = '';
-      }
-    }
-
-    setValue(formFieldName, initialValue, { shouldValidate: false, shouldDirty: false });
-  }, [propertyKey, pathPrefix, formFieldName, setValue, getValues]);
-
-  // This component no longer manages localName or local validation.
-  // It calls `onAttemptRename` on blur or Enter.
+  // // console.log(`[PropertyNameInput for path "${fieldPath}"] Rendering.`);
 
   return (
     <div className="flex-1 flex-col">
       <Controller
-        name={formFieldName} // Unique name for RHF to track this input field
+        name={fieldPath as any} // Path like "propertyList.0.keyName"
         control={control}
-        // defaultValue is critical for initial hydration when the controller mounts.
-        // The useEffect above handles subsequent updates if propertyKey changes or needs to be blanked out.
-        defaultValue={(() => {
-          const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-          const schemaFragment = getValues(pathPrefix) as JSONSchema7 | undefined;
-
-          if (uuidPattern.test(propertyKey) && !schemaFragment?.title && !schemaFragment?.description) {
-            return '';
-          }
-
-          return propertyKey;
-        })()}
-        // rules: {
-        //   // We could put client-side validation here if we didn't want to rely solely on Zod
-        //   // e.g., required: 'Property name cannot be empty.'
-        //   // pattern: { value: /^[a-zA-Z_][a-zA-Z0-9_]*$/, message: 'Invalid name format.' }
-        // },
-        // The Zod schema in SchemaEditor will handle the true validation upon attempted rename.
+        // defaultValue can be omitted if the parent useFieldArray/form sets initial values (e.g., keyName: '')
         render={({ field, fieldState }) => {
-          // field.value will be managed by RHF.
-          // We ensure onAttemptRename is called with the latest value.
-          const handleBlur = () => {
-            onAttemptRename(propertyKey, field.value);
-          };
-
-          const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              onAttemptRename(propertyKey, field.value);
-            }
-
-            if (e.key === 'Escape') {
-              e.preventDefault();
-              field.onChange(propertyKey); // Revert to original propertyKey
-            }
-          };
-
+          // // console.log(`[PropertyNameInput for "${fieldPath}"] fieldState.error:`, fieldState.error ? JSON.parse(JSON.stringify(fieldState.error)) : null, "Value:", field.value);
           return (
-            <InputRoot hasError={!!fieldState.error} size="2xs" className="font-mono">
+            <InputRoot
+              hasError={!!fieldState.error}
+              size="2xs"
+              className={cn(
+                'font-mono'
+                // { 'border-red-500 border-2': !!fieldState.error } // REMOVE Temporary diagnostic style
+              )}
+            >
               <InputWrapper>
                 <Code2 className="h-4 w-4 shrink-0 text-gray-500" />
                 <InputPure
-                  {...field} // spread field props
-                  onBlur={handleBlur}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Property name"
+                  {...field} // spread field props (onChange, onBlur, value, ref)
+                  placeholder={placeholder}
                   className="text-xs"
                   disabled={isDisabled}
+                  // autoFocus can be useful for newly added fields if we can detect that
                 />
                 {fieldState.error && (
                   <TooltipProvider delayDuration={0}>
-                    <Tooltip open>
+                    <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="inline-flex cursor-default items-center justify-center">
-                          <RiErrorWarningLine className="text-destructive h-4 w-4 shrink-0" />
+                        <span className="inline-flex cursor-default items-center justify-center pl-1 pr-1">
+                          <RiErrorWarningLine
+                            className={cn(
+                              'text-destructive h-4 w-4 shrink-0'
+                              // { 'bg-yellow-300': !!fieldState.error } // REMOVE Temporary diagnostic style
+                            )}
+                          />
                         </span>
                       </TooltipTrigger>
                       <TooltipContent side="top" sideOffset={5}>
