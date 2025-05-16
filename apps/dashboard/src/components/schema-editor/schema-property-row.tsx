@@ -54,7 +54,6 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
   const currentPropertySchema = useWatch({ control, name: pathPrefix }) as JSONSchema7 | undefined;
 
   const currentType = useMemo(() => {
-    //   JSON.parse(JSON.stringify(currentPropertySchema))
     if (!currentPropertySchema) return undefined;
     if (currentPropertySchema.enum) return 'enum';
     if (currentPropertySchema.properties && !currentPropertySchema.type) return 'object';
