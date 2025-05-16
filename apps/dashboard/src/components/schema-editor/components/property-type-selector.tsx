@@ -47,6 +47,10 @@ export function PropertyTypeSelector({
 
   const handleTypeChange = useCallback(
     (newSchemaType: JSONSchema7TypeName | 'enum') => {
+      console.log(
+        `[PropertyTypeSelector path="${definitionPath}"] handleTypeChange called with newSchemaType: ${newSchemaType}. Current definition about to be used for ensure<Type>:`,
+        JSON.stringify(getValues(definitionPath))
+      );
       const currentDef = (getValues(definitionPath) as JSONSchema7) || {};
 
       let newTransformedSchema: JSONSchema7;
@@ -67,14 +71,28 @@ export function PropertyTypeSelector({
       }
 
       setValue(definitionPath, newTransformedSchema, { shouldValidate: true, shouldDirty: true });
+      console.log(
+        `[PropertyTypeSelector path="${definitionPath}"] Definition AFTER setValue in handleTypeChange:`,
+        JSON.stringify(newTransformedSchema)
+      );
     },
     [getValues, setValue, definitionPath]
+  );
+
+  console.log(
+    `[PropertyTypeSelector path="${definitionPath}"] Rendering. currentType for Select value: '${currentType || ''}'. Definition:`,
+    JSON.stringify(currentDefinition)
   );
 
   return (
     <Select
       value={currentType || ''}
-      onValueChange={(newTypeValue) => handleTypeChange(newTypeValue as JSONSchema7TypeName | 'enum')}
+      onValueChange={(newTypeValue) => {
+        console.log(
+          `[PropertyTypeSelector path="${definitionPath}"] Select onValueChange triggered with: ${newTypeValue}`
+        );
+        handleTypeChange(newTypeValue as JSONSchema7TypeName | 'enum');
+      }}
       disabled={isDisabled}
     >
       <SelectTrigger className="w-[120px] text-sm" size="2xs">

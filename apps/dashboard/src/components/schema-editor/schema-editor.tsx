@@ -108,7 +108,7 @@ export function SchemaEditor({ initialSchema, onChange, onValidityChange }: Sche
     mode: 'onChange',
   });
 
-  const { control, watch, formState } = methods;
+  const { control, watch, formState, getValues } = methods;
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -147,13 +147,24 @@ export function SchemaEditor({ initialSchema, onChange, onValidityChange }: Sche
   }, [watch, onChange]);
 
   const handleAddProperty = useCallback(() => {
-    append({
+    const newItem = {
       id: uuidv4(),
       keyName: '',
       definition: newProperty('string'),
       isRequired: false,
-    });
-  }, [append]);
+    };
+    append(newItem as PropertyListItem);
+
+    const currentPropertyList = getValues('propertyList');
+
+    if (currentPropertyList && currentPropertyList.length > 0) {
+      const lastItem = currentPropertyList[currentPropertyList.length - 1];
+      console.log(
+        '[SchemaEditor handleAddProperty] Definition of new item AFTER append:',
+        JSON.stringify(lastItem.definition)
+      );
+    }
+  }, [append, getValues]);
 
   return (
     <FormProvider {...methods}>

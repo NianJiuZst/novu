@@ -73,73 +73,80 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
   const isRequiredPath = `${pathPrefix}.isRequired`;
 
   const enumArrayPath = `${definitionPath}.enum`;
-  const {
-    fields: enumFields,
-    append: appendEnumChoice,
-    remove: removeEnumChoice,
-  } = useFieldArray({
+  const enumFieldArrayHook = useFieldArray({
     control,
-    name: enumArrayPath as any,
+    name: currentType === 'enum' ? (enumArrayPath as any) : `_unused_enum_path_.${index}`,
     keyName: 'enumChoiceId',
   });
+  const enumFields = currentType === 'enum' ? enumFieldArrayHook.fields : [];
+
+  const appendEnumChoice = currentType === 'enum' ? enumFieldArrayHook.append : () => {};
+
+  const removeEnumChoice = currentType === 'enum' ? enumFieldArrayHook.remove : () => {};
 
   const nestedPropertyListPath = `${definitionPath}.propertyList`;
-  const {
-    fields: nestedFields,
-    append: appendNested,
-    remove: removeNested,
-  } = useFieldArray({
+  const objectFieldArray = useFieldArray({
     control,
-    name: nestedPropertyListPath as any,
+    name: currentType === 'object' ? (nestedPropertyListPath as any) : `_unused_object_path_.${index}`,
     keyName: 'nestedFieldId',
   });
+  const nestedFields = currentType === 'object' ? objectFieldArray.fields : [];
+
+  const appendNested = currentType === 'object' ? objectFieldArray.append : () => {};
+
+  const removeNested = currentType === 'object' ? objectFieldArray.remove : () => {};
 
   const handleAddNestedProperty = useCallback(() => {
     if (currentType !== 'object') {
       setValue(`${definitionPath}.type`, 'object', { shouldValidate: true });
-      setValue(nestedPropertyListPath, [], { shouldValidate: false });
+      setValue(nestedPropertyListPath, [], { shouldValidate: true });
+      return;
     }
 
-    appendNested({
-      id: uuidv4(),
-      keyName: '',
-      definition: newProperty('string'),
-      isRequired: false,
-    } as PropertyListItem);
-  }, [appendNested, currentType, setValue, definitionPath, nestedPropertyListPath]);
+    if (typeof appendNested === 'function') {
+      appendNested({
+        id: uuidv4(),
+        keyName: '',
+        definition: newProperty('string'),
+        isRequired: false,
+      } as PropertyListItem);
+    }
+  }, [currentType, setValue, definitionPath, nestedPropertyListPath, appendNested]);
 
   // Logic for array items of type object
   const itemSchemaObjectPath = `${definitionPath}.items`; // Path to the item's schema definition object
   const itemSchemaObject = useWatch({ control, name: itemSchemaObjectPath }) as JSONSchema7 | undefined;
-  const itemIsObject = itemSchemaObject?.type === 'object';
+  const itemIsObject = currentType === 'array' && itemSchemaObject?.type === 'object';
   const itemPropertiesListPath = `${itemSchemaObjectPath}.propertyList`; // Path to the list of properties FOR the item, if it's an object
 
-  const {
-    fields: itemNestedFields,
-    append: appendItemNested,
-    remove: removeItemNested,
-  } = useFieldArray({
+  const arrayItemObjectFieldArray = useFieldArray({
     control,
-    name: itemPropertiesListPath as any,
-    keyName: 'itemNestedFieldId', // Distinct keyName for this field array
+    name: itemIsObject ? (itemPropertiesListPath as any) : `_unused_array_item_object_path_.${index}`,
+    keyName: 'itemNestedFieldId',
   });
+  const itemNestedFields = itemIsObject ? arrayItemObjectFieldArray.fields : [];
+
+  const appendItemNested = itemIsObject ? arrayItemObjectFieldArray.append : () => {};
+
+  const removeItemNested = itemIsObject ? arrayItemObjectFieldArray.remove : () => {};
 
   const handleAddArrayItemObjectProperty = useCallback(() => {
-    // This is called when the item type IS ALREADY 'object' and we are adding a property to it.
-    // Ensure itemSchemaObject.propertyList is initialized if not present.
+    if (!itemIsObject) return;
     const currentList = getValues(itemPropertiesListPath);
 
     if (!Array.isArray(currentList)) {
       setValue(itemPropertiesListPath, [], { shouldValidate: false });
     }
 
-    appendItemNested({
-      id: uuidv4(),
-      keyName: '',
-      definition: newProperty('string'),
-      isRequired: false,
-    } as PropertyListItem);
-  }, [appendItemNested, getValues, setValue, itemPropertiesListPath]);
+    if (typeof appendItemNested === 'function') {
+      appendItemNested({
+        id: uuidv4(),
+        keyName: '',
+        definition: newProperty('string'),
+        isRequired: false,
+      } as PropertyListItem);
+    }
+  }, [itemIsObject, getValues, setValue, itemPropertiesListPath, appendItemNested]);
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
