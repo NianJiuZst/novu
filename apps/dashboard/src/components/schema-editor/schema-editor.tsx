@@ -1,83 +1,175 @@
-import { useCallback, useEffect } from 'react';
-import { RiAddLine } from 'react-icons/ri';
-import { useForm, useFieldArray, FormProvider, type Control, type FieldValues } from 'react-hook-form';
+import { useCallback, useEffect, useRef } from 'react';
+import { useForm, FormProvider, useFieldArray, type Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { v4 as uuidv4 } from 'uuid';
+import { RiAddLine } from 'react-icons/ri';
 
 import { Button } from '@/components/primitives/button';
-import type { SchemaProperty } from './types';
+import type { JSONSchema7 } from './json-schema';
 import { SchemaPropertyRow } from './schema-property-row';
-import { createNewProperty } from './utils/property-helpers';
-import { editorSchema } from './utils/validation-schema';
+import { newProperty } from './utils/json-helpers';
+import { editorSchema, type SchemaEditorFormValues, type PropertyListItem } from './utils/validation-schema';
 
 interface SchemaEditorProps {
-  initialSchema?: SchemaProperty[];
-  onChange?: (schema: SchemaProperty[]) => void;
+  initialSchema?: JSONSchema7;
+  onChange?: (schema: JSONSchema7) => void;
+  onValidityChange?: (isValid: boolean) => void;
 }
 
-interface FormValues {
-  schemaRows: SchemaProperty[];
+function convertSchemaToPropertyList(
+  schemaProperties?: JSONSchema7['properties'],
+  requiredArray?: string[]
+): PropertyListItem[] {
+  if (!schemaProperties) {
+    return [];
+  }
+
+  return Object.entries(schemaProperties).map(([key, value]) => {
+    const definition = value as JSONSchema7;
+    let nestedPropertyList: PropertyListItem[] | undefined = undefined;
+    const definitionForListItem: JSONSchema7 = { ...definition };
+
+    if (definition.type === 'object' && definition.properties) {
+      nestedPropertyList = convertSchemaToPropertyList(definition.properties, definition.required);
+      delete definitionForListItem.properties;
+    }
+
+    return {
+      id: uuidv4(),
+      keyName: key,
+      definition: {
+        ...definitionForListItem,
+        ...(nestedPropertyList ? { propertyList: nestedPropertyList } : {}),
+      },
+      isRequired: requiredArray?.includes(key) || false,
+    };
+  });
 }
 
-export function SchemaEditor({ initialSchema, onChange }: SchemaEditorProps) {
-  const methods = useForm<FormValues>({
-    defaultValues: {
-      schemaRows: initialSchema && initialSchema.length > 0 ? initialSchema : [createNewProperty()],
-    },
+function convertPropertyListToSchema(propertyList?: PropertyListItem[]): {
+  properties: JSONSchema7['properties'];
+  required?: string[];
+} {
+  if (!propertyList || propertyList.length === 0) {
+    return { properties: {} };
+  }
+
+  const properties: JSONSchema7['properties'] = {};
+  const required: string[] = [];
+
+  propertyList.forEach((item) => {
+    if (item.keyName.trim() !== '') {
+      const currentDefinition = { ...item.definition };
+      let nestedRequired: string[] | undefined;
+
+      const definitionAsObjectWithList = currentDefinition as JSONSchema7 & { propertyList?: PropertyListItem[] };
+
+      if (
+        definitionAsObjectWithList.type === 'object' &&
+        definitionAsObjectWithList.propertyList &&
+        definitionAsObjectWithList.propertyList.length > 0
+      ) {
+        const nestedConversion = convertPropertyListToSchema(definitionAsObjectWithList.propertyList);
+        currentDefinition.properties = nestedConversion.properties;
+        nestedRequired = nestedConversion.required;
+      } else if (currentDefinition.type === 'object' && !currentDefinition.properties) {
+        currentDefinition.properties = {};
+      }
+
+      if (nestedRequired && nestedRequired.length > 0) {
+        currentDefinition.required = nestedRequired;
+      } else {
+        delete currentDefinition.required;
+      }
+
+      delete (currentDefinition as any).propertyList;
+      properties[item.keyName] = currentDefinition;
+
+      if (item.isRequired) {
+        required.push(item.keyName);
+      }
+    }
+  });
+  return { properties, ...(required.length > 0 ? { required } : {}) };
+}
+
+const defaultFormValues: SchemaEditorFormValues = {
+  propertyList: [],
+};
+
+export function SchemaEditor({ initialSchema, onChange, onValidityChange }: SchemaEditorProps) {
+  const initialTransformedValues: SchemaEditorFormValues = {
+    propertyList: initialSchema?.properties
+      ? convertSchemaToPropertyList(initialSchema.properties, initialSchema.required)
+      : defaultFormValues.propertyList,
+  };
+
+  const methods = useForm<SchemaEditorFormValues>({
+    defaultValues: initialTransformedValues,
     resolver: zodResolver(editorSchema),
     mode: 'onChange',
   });
-  const {
-    control,
-    watch,
-    // formState: { errors }, // errors can be used for top-level form errors if needed
-  } = methods;
+
+  const { control, watch, formState, getValues } = methods;
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'schemaRows',
-    keyName: 'rhfId', // react-hook-form uses 'id' by default, ensure this was intended
+    name: 'propertyList',
+    keyName: 'fieldId',
   });
 
   useEffect(() => {
+    if (onValidityChange) {
+      onValidityChange(formState.isValid);
+    }
+  }, [formState.isValid, onValidityChange]);
+
+  useEffect(() => {
+    let debounceTimer: NodeJS.Timeout;
     const subscription = watch((value) => {
-      if (onChange && value.schemaRows) {
-        // TODO: ensure value.schemaRows is deeply cloned or handled if mutations are a concern downstream
-        onChange(value.schemaRows as SchemaProperty[]);
-      }
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        if (onChange && value.propertyList) {
+          const { properties, required } = convertPropertyListToSchema(value.propertyList as PropertyListItem[]);
+
+          const outputSchema: JSONSchema7 = {
+            type: 'object',
+            properties,
+            ...(required && required.length > 0 ? { required } : {}),
+          };
+          onChange(outputSchema);
+        }
+      }, 300);
     });
-    return () => subscription.unsubscribe();
+
+    return () => {
+      clearTimeout(debounceTimer);
+      subscription.unsubscribe();
+    };
   }, [watch, onChange]);
 
   const handleAddProperty = useCallback(() => {
-    append(createNewProperty());
+    append({
+      id: uuidv4(),
+      keyName: '',
+      definition: newProperty('string'),
+      isRequired: false,
+    } as PropertyListItem);
   }, [append]);
-
-  const handleDeleteProperty = useCallback(
-    (index: number) => {
-      remove(index);
-    },
-    [remove]
-  );
 
   return (
     <FormProvider {...methods}>
       <div className="rounded-4 bg-bg-white border border-neutral-100 p-2">
-        {fields.map((field, index) => {
-          const pathPrefix = `schemaRows.${index}`;
-          // Cast field to any for now to avoid excessive type errors during refactor
-          // Will be properly typed once SchemaProperty aligns with RHF field structure
-          return (
-            <SchemaPropertyRow
-              key={field.rhfId}
-              control={control as unknown as Control<FieldValues>} // Proper control typing
-              property={field as any} // Temporarily 'any', should align with Zod schema later
-              index={index}
-              pathPrefix={pathPrefix}
-              onDeleteProperty={() => handleDeleteProperty(index)}
-              indentationLevel={0}
-            />
-          );
-        })}
+        {fields.map((field, index) => (
+          <SchemaPropertyRow
+            key={field.fieldId}
+            control={control}
+            index={index}
+            pathPrefix={`propertyList.${index}`}
+            onDeleteProperty={() => remove(index)}
+            indentationLevel={0}
+          />
+        ))}
         <Button
           variant="secondary"
           mode="lighter"
@@ -85,6 +177,7 @@ export function SchemaEditor({ initialSchema, onChange }: SchemaEditorProps) {
           onClick={handleAddProperty}
           className="mt-2"
           leadingIcon={RiAddLine}
+          disabled={!formState.isValid && fields.length > 0}
         >
           Add property
         </Button>

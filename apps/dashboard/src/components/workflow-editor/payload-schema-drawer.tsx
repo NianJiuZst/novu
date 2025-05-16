@@ -12,79 +12,77 @@ import {
   SheetTitle,
 } from '@/components/primitives/sheet';
 import { cn } from '@/utils/ui';
-import { SchemaEditor, type SchemaProperty } from '@/components/schema-editor';
+import { SchemaEditor } from '@/components/schema-editor';
+import type { JSONSchema7 } from '@/components/schema-editor/json-schema';
 import { ExternalLink } from '../shared/external-link';
 import { Separator } from '../primitives/separator';
 import { usePatchWorkflow } from '@/hooks/use-patch-workflow';
 import { Link } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/primitives/tooltip';
 import type { WorkflowResponseDto as NovuWorkflowResponseDto } from '@novu/shared';
-import { SchemaConverter } from '@/components/schema-editor/utils/schema-conversion';
 
-// Define a more specific type for the workflow object expected by this drawer
 interface WorkflowForSchemaEditing extends NovuWorkflowResponseDto {
-  payloadSchema?: Record<string, any>; // Or a more specific JSON Schema type
+  payloadSchema?: JSONSchema7;
 }
 
 type PayloadSchemaDrawerProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   workflow: WorkflowForSchemaEditing;
-  onSave?: (schema: SchemaProperty[]) => void;
+  onSave?: (schema: JSONSchema7) => void;
+};
+
+const defaultEditorSchema: JSONSchema7 = {
+  type: 'object',
+  properties: {},
 };
 
 export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawerProps>((props, ref) => {
   const { open, onOpenChange, workflow, onSave } = props;
-  const [currentSchema, setCurrentSchema] = useState<SchemaProperty[]>([]);
-  const [unsupportedProperties, setUnsupportedProperties] = useState<Record<string, any>>({});
+  const [currentSchema, setCurrentSchema] = useState<JSONSchema7>(defaultEditorSchema);
+  const [isSchemaEditorFormValid, setIsSchemaEditorFormValid] = useState<boolean>(true);
   const { patchWorkflow, isPending: isSavingSchema } = usePatchWorkflow();
 
   useEffect(() => {
-    if (workflow?.payloadSchema) {
-      const { internalSchema, unsupportedRootProperties } = SchemaConverter.fromJSON(workflow.payloadSchema);
-      setCurrentSchema(internalSchema);
-      setUnsupportedProperties(unsupportedRootProperties);
+    if (workflow?.payloadSchema && typeof workflow.payloadSchema === 'object') {
+      setCurrentSchema(workflow.payloadSchema);
     } else {
-      setCurrentSchema([]);
-      setUnsupportedProperties({});
+      setCurrentSchema(defaultEditorSchema);
     }
   }, [workflow]);
 
-  const handleSchemaChange = useCallback((schema: SchemaProperty[]) => {
-    console.log('Schema changed in editor:', schema);
+  const handleSchemaChange = useCallback((schema: JSONSchema7) => {
     setCurrentSchema(schema);
   }, []);
 
-  const handleSaveChanges = async () => {
-    console.log('handleSaveChanges called');
+  const handleSchemaValidityChange = useCallback((isValid: boolean) => {
+    setIsSchemaEditorFormValid(isValid);
+  }, []);
 
+  const handleSaveChanges = async () => {
     if (!workflow.slug) {
       console.error('Workflow slug is missing. Cannot save.');
       return;
     }
 
-    if (!currentSchema && Object.keys(unsupportedProperties).length === 0) {
-      console.warn('Schema is empty and no unsupported properties. Nothing to save.');
-      return;
+    const payloadSchemaForApi = currentSchema;
+
+    if (
+      !payloadSchemaForApi ||
+      (Object.keys(payloadSchemaForApi.properties || {}).length === 0 && payloadSchemaForApi.type === 'object')
+    ) {
+      // Schema is effectively empty (default object with no properties).
+      // The API should handle this as clearing the schema or setting it to a minimal object.
+      // No special client-side action needed here beyond sending the current state.
     }
 
-    console.log('Current schema state before conversion:', currentSchema);
-    console.log('Unsupported root properties before conversion:', unsupportedProperties);
-
-    const payloadSchemaForApi = SchemaConverter.toJSON(currentSchema, unsupportedProperties);
-
-    console.log('Attempting to save schema for workflow:', workflow.slug);
-    console.log('Converted payload schema being sent to API:', JSON.stringify(payloadSchemaForApi, null, 2));
-
     try {
-      console.log('Calling patchWorkflow mutation...');
       await patchWorkflow({
         workflowSlug: workflow.slug,
         workflow: {
-          payloadSchema: payloadSchemaForApi as any,
+          payloadSchema: payloadSchemaForApi,
         },
       });
-      console.log('Payload schema saved successfully! API call succeeded.');
       onSave?.(currentSchema);
       onOpenChange(false);
     } catch (error) {
@@ -93,25 +91,23 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
   };
 
   const handleExportToJsonSchema = () => {
-    const jsonSchema = SchemaConverter.toJSON(currentSchema, unsupportedProperties);
-    const jsonString = JSON.stringify(jsonSchema, null, 2);
+    const jsonString = JSON.stringify(currentSchema, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'payload-schema.json';
+    a.download = `${workflow.slug || 'payload'}-schema.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    console.log('Exported JSON Schema:', jsonString);
   };
 
-  const handleExportToZod = () => {
-    console.log('Exporting to Zod (placeholder):', currentSchema);
-    // Actual Zod schema generation logic will go here
-    // This would also likely use a utility function, potentially part of or alongside SchemaConverter
-  };
+  const isSchemaEmpty =
+    !currentSchema ||
+    currentSchema.type !== 'object' ||
+    !currentSchema.properties ||
+    Object.keys(currentSchema.properties).length === 0;
 
   return (
     <Sheet open={open} modal={false} onOpenChange={onOpenChange}>
@@ -148,27 +144,22 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
               </TooltipProvider>
             </h3>
 
-            {/* TODO: Re-enable or reimplement Import/Export if needed, using SchemaConverter */}
-            {/* <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="secondary" mode="outline" leadingIcon={RiDownload2Line} size="2xs" className="text-sm">
-                  Import / Export
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleExportToJsonSchema} className="cursor-pointer">
-                  <RiDownload2Line className="mr-2 h-4 w-4" />
-                  Export to JSON Schema
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleExportToZod} className="cursor-pointer">
-                  <RiDownload2Line className="mr-2 h-4 w-4" />
-                  Export to Zod
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu> */}
+            <Button
+              variant="secondary"
+              mode="outline"
+              onClick={handleExportToJsonSchema}
+              size="2xs"
+              className="text-sm"
+            >
+              Export JSON
+            </Button>
           </div>
 
-          <SchemaEditor initialSchema={currentSchema} onChange={handleSchemaChange} />
+          <SchemaEditor
+            initialSchema={currentSchema}
+            onChange={handleSchemaChange}
+            onValidityChange={handleSchemaValidityChange}
+          />
         </SheetMain>
         <SheetFooter className="border-neutral-content-weak space-between flex border-t px-3 py-1.5">
           <div className="flex w-full flex-row items-center justify-between gap-2">
@@ -182,7 +173,11 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
               mode="gradient"
               variant="secondary"
               onClick={handleSaveChanges}
-              disabled={isSavingSchema || (!currentSchema?.length && Object.keys(unsupportedProperties).length === 0)}
+              disabled={
+                isSavingSchema ||
+                !isSchemaEditorFormValid ||
+                (workflow?.payloadSchema === currentSchema && !isSchemaEmpty)
+              }
               data-test-id="save-payload-schema-btn"
             >
               {isSavingSchema ? 'Saving...' : 'Save changes'}
