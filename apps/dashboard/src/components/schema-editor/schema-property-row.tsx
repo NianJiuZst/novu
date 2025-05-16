@@ -23,18 +23,17 @@ import {
   ensureBoolean,
   ensureNull,
 } from './utils/json-helpers';
+import { getMarginClassPx } from './utils/ui-helpers';
 
-const getMarginClassPx = (level: number): string => {
-  if (level <= 0) return 'ml-0';
-  if (level === 1) return 'ml-[24px]';
-  if (level === 2) return 'ml-[48px]';
-  if (level === 3) return 'ml-[72px]';
-  if (level === 4) return 'ml-[96px]';
+// Import new sub-components
+import { PropertyNameInput } from './components/property-name-input';
+import { PropertyTypeSelector } from './components/property-type-selector';
+import { PropertyActions } from './components/property-actions';
+import { EnumFieldsRenderer } from './components/enum-fields-renderer';
+import { ArrayItemSchemaRenderer } from './components/array-item-schema-renderer';
+import { ObjectPropertiesRenderer } from './components/object-properties-renderer';
 
-  return `ml-[${level * 24}px]`;
-};
-
-interface SchemaPropertyRowProps {
+export interface SchemaPropertyRowProps {
   control: Control<any>;
   propertyKey: string;
   pathPrefix: string;
@@ -44,7 +43,14 @@ interface SchemaPropertyRowProps {
 }
 
 export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
-  const { control, propertyKey, pathPrefix, onDeleteProperty, onRenamePropertyKey, indentationLevel = 0 } = props;
+  const {
+    control,
+    propertyKey,
+    pathPrefix,
+    onDeleteProperty: onDeleteThisProperty,
+    onRenamePropertyKey: onRenameThisPropertyKey,
+    indentationLevel = 0,
+  } = props;
 
   const { setValue, getValues } = useFormContext();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -137,12 +143,12 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
       }
 
       try {
-        onRenamePropertyKey(propertyKey, trimmedNewName);
+        onRenameThisPropertyKey(propertyKey, trimmedNewName);
       } catch (e: any) {
         setNameError(e.message || 'Failed to rename property.');
       }
     },
-    [propertyKey, onRenamePropertyKey]
+    [propertyKey, onRenameThisPropertyKey]
   );
 
   const handleTypeChange = useCallback(
@@ -396,103 +402,28 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
     <>
       <div className={cn('flex flex-col')}>
         <div className={cn('flex items-center space-x-2 py-0.5', getMarginClassPx(indentationLevel))}>
-          <div className="flex-1 flex-col">
-            <div className="relative">
-              <TooltipProvider delayDuration={0}>
-                <InputRoot hasError={!!nameError} size="2xs" className="font-mono">
-                  <InputWrapper>
-                    <Code2 className="h-4 w-4 shrink-0 text-gray-500" />
-                    <InputPure
-                      value={localName}
-                      onChange={(e) => {
-                        setLocalName(e.target.value);
-                        if (nameError && nameError === 'Property name cannot be empty.') setNameError(null);
-                      }}
-                      onBlur={() => handleNameChange(localName)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleNameChange(localName);
-                        }
-
-                        if (e.key === 'Escape') {
-                          e.preventDefault();
-                          setLocalName(propertyKey);
-                          setNameError(null);
-                        }
-                      }}
-                      placeholder="Property name"
-                      className="text-xs"
-                    />
-                    {nameError && (
-                      <Tooltip open>
-                        <TooltipTrigger asChild>
-                          <span className="inline-flex cursor-default items-center justify-center">
-                            <RiErrorWarningLine className="text-destructive h-4 w-4 shrink-0" />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" sideOffset={5}>
-                          <p>{nameError}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
-                  </InputWrapper>
-                </InputRoot>
-              </TooltipProvider>
-            </div>
-          </div>
-          <Controller
-            name={`${pathPrefix}.type`}
+          <PropertyNameInput
+            propertyKey={propertyKey}
+            pathPrefix={pathPrefix}
+            onRenamePropertyKey={onRenameThisPropertyKey}
+            getValues={getValues}
             control={control}
-            render={({ field: { onChange, value: RHFTypeValue, ...fieldRest } }) => {
-              return (
-                <Select
-                  value={currentType as string | undefined}
-                  onValueChange={(newTypeValue) => handleTypeChange(newTypeValue as JSONSchema7TypeName | 'enum')}
-                >
-                  <SelectTrigger className="w-[120px] text-sm" size="2xs">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SCHEMA_TYPE_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value} className="text-sm">
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              );
-            }}
           />
-          <Popover open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="secondary"
-                mode="outline"
-                size="2xs"
-                className="text-text-soft"
-                leadingIcon={RiSettings4Line}
-              />
-            </PopoverTrigger>
-            {isSettingsOpen && currentPropertySchema && (
-              <SchemaPropertySettingsPopover
-                open={isSettingsOpen}
-                onOpenChange={setIsSettingsOpen}
-                propertySchema={currentPropertySchema}
-                propertyKey={propertyKey}
-                parentSchema={
-                  pathPrefix.includes('.properties.')
-                    ? getValues(pathPrefix.substring(0, pathPrefix.lastIndexOf('.properties.')))
-                    : pathPrefix.includes('.items.properties.')
-                      ? getValues(pathPrefix.substring(0, pathPrefix.lastIndexOf('.items.properties.')) + '.items')
-                      : getValues('schema')
-                }
-                onSave={handleSaveSettings}
-                onDelete={onDeleteProperty}
-              />
-            )}
-          </Popover>
-          <Button variant="error" mode="outline" size="2xs" leadingIcon={RiDeleteBin6Line} onClick={onDeleteProperty} />
+          <PropertyTypeSelector
+            currentType={currentType}
+            pathPrefix={pathPrefix}
+            control={control}
+            setValue={setValue}
+            getValues={getValues}
+          />
+          <PropertyActions
+            pathPrefix={pathPrefix}
+            propertyKey={propertyKey}
+            currentPropertySchema={currentPropertySchema}
+            getValues={getValues}
+            setValue={setValue}
+            onDeleteProperty={onDeleteThisProperty}
+          />
         </div>
 
         {currentType === 'enum' && enumFieldArrayPath === `${pathPrefix}.enum` && currentPropertySchema?.enum && (
@@ -554,99 +485,33 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
         )}
 
         {currentType === 'array' && (
-          <div className={cn('flex flex-col space-y-1 pt-1')}>
-            <div className={cn('flex items-center space-x-2', getMarginClassPx(indentationLevel + 1))}>
-              <span className="text-sm text-gray-500">items</span>
-              <Controller
-                name={`${pathPrefix}.items.type`}
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    value={currentArrayItemType as string | undefined}
-                    onValueChange={(newItemTypeValue) =>
-                      handleArrayItemTypeChange(newItemTypeValue as JSONSchema7TypeName)
-                    }
-                  >
-                    <SelectTrigger size="2xs" className="w-[120px] text-sm">
-                      <SelectValue placeholder="Select item type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SCHEMA_TYPE_OPTIONS.filter((opt) => opt.value !== 'enum' && opt.value !== 'array').map(
-                        (option) => (
-                          <SelectItem key={option.value} value={option.value} className="text-sm">
-                            {option.label}
-                          </SelectItem>
-                        )
-                      )}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-            {currentArrayItemType === 'object' && arrayItemSchemaObject?.properties !== undefined && (
-              <div className={cn('flex flex-col space-y-1 pt-1')}>
-                {orderedArrayItemPropertyKeys.map((itemPropertyKey) => {
-                  const itemPropertySchema = arrayItemSchemaObject?.properties?.[itemPropertyKey];
-                  if (typeof itemPropertySchema !== 'object' || itemPropertySchema === null) return null;
-                  return (
-                    <SchemaPropertyRow
-                      key={itemPropertyKey}
-                      control={control}
-                      propertyKey={itemPropertyKey}
-                      pathPrefix={`${pathPrefix}.items.properties.${itemPropertyKey}`}
-                      onDeleteProperty={() => handleDeleteArrayItemProperty(itemPropertyKey)}
-                      onRenamePropertyKey={handleRenameArrayItemPropertyKey}
-                      indentationLevel={indentationLevel + 1}
-                    />
-                  );
-                })}
-                <div>
-                  <Button
-                    variant="secondary"
-                    mode="lighter"
-                    size="2xs"
-                    className={cn('mt-1', getMarginClassPx(indentationLevel + 1))}
-                    leadingIcon={RiAddLine}
-                    onClick={handleAddArrayItemProperty}
-                  >
-                    Add property to item
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
+          <ArrayItemSchemaRenderer
+            pathPrefix={pathPrefix}
+            currentPropertySchema={currentPropertySchema}
+            control={control}
+            setValue={setValue}
+            getValues={getValues}
+            indentationLevel={indentationLevel}
+            arrayItemPropertyOrderRef={arrayItemPropertyOrderRef}
+            onDeleteProperty={handleDeleteArrayItemProperty}
+            onRenamePropertyKey={handleRenameArrayItemPropertyKey}
+            RenderPropertyRowComponent={SchemaPropertyRow}
+          />
         )}
 
         {currentType === 'object' && currentPropertySchema.properties !== undefined && (
-          <div className={cn('flex flex-col space-y-1 pt-1')}>
-            {orderedChildPropertyKeys.map((childKey) => {
-              const childPropertySchema = currentPropertySchema.properties?.[childKey];
-              if (typeof childPropertySchema !== 'object' || childPropertySchema === null) return null;
-              return (
-                <SchemaPropertyRow
-                  key={childKey}
-                  control={control}
-                  propertyKey={childKey}
-                  pathPrefix={`${pathPrefix}.properties.${childKey}`}
-                  onDeleteProperty={() => handleDeleteChildProperty(childKey)}
-                  onRenamePropertyKey={handleRenameChildPropertyKey}
-                  indentationLevel={indentationLevel + 1}
-                />
-              );
-            })}
-            <div className={cn(getMarginClassPx(indentationLevel + 1))}>
-              <Button
-                variant="secondary"
-                mode="lighter"
-                size="2xs"
-                className="mt-1"
-                leadingIcon={RiAddLine}
-                onClick={handleAddChildProperty}
-              >
-                Add nested property
-              </Button>
-            </div>
-          </div>
+          <ObjectPropertiesRenderer
+            pathPrefix={pathPrefix}
+            currentPropertySchema={currentPropertySchema}
+            control={control}
+            setValue={setValue}
+            getValues={getValues}
+            indentationLevel={indentationLevel}
+            childPropertyOrderRef={childPropertyOrderRef}
+            onDeleteProperty={handleDeleteChildProperty}
+            onRenamePropertyKey={handleRenameChildPropertyKey}
+            RenderPropertyRowComponent={SchemaPropertyRow}
+          />
         )}
       </div>
     </>
