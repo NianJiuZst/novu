@@ -7,9 +7,13 @@ import { triggerBulk } from '@novu/api/funcs/triggerBulk';
 import { TriggerEventRequestDto } from '@novu/api/models/components';
 import { z } from 'zod';
 import { NovuCore } from '@novu/api/core';
-import { handleSdkError, initNovuClassSdk, initNovuFunctionSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
+import {
+  expectSdkValidationExceptionGeneric,
+  initNovuClassSdk,
+  initNovuFunctionSdk,
+} from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
-describe('Trigger bulk events - /v1/events/trigger/bulk (POST)', function () {
+describe('Trigger bulk events - /v1/events/trigger/bulk (POST) #novu-v2', function () {
   let session: UserSession;
   let template: NotificationTemplateEntity;
   let secondTemplate: NotificationTemplateEntity;
@@ -45,7 +49,7 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST)', function () {
       events: [
         {
           transactionId: '1111',
-          name: template.triggers[0].identifier,
+          workflowId: template.triggers[0].identifier,
           to: [subscriber.subscriberId],
           payload: {
             firstName: 'Testing of User Name',
@@ -54,7 +58,7 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST)', function () {
         },
         {
           transactionId: '2222',
-          name: template.triggers[0].identifier,
+          workflowId: template.triggers[0].identifier,
           to: [subscriber.subscriberId],
           payload: {
             firstName: 'Testing of User Name',
@@ -63,7 +67,7 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST)', function () {
         },
         {
           transactionId: '3333',
-          name: template.triggers[0].identifier,
+          workflowId: template.triggers[0].identifier,
           to: [subscriber.subscriberId],
           payload: {
             firstName: 'Testing of User Name',
@@ -95,11 +99,11 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST)', function () {
     expect(thirdEvent.transactionId).to.equal('3333');
   });
 
-  it('should gene?rate message and notification based on a bulk event', async function () {
+  it('should generate message and notification based on a bulk event', async function () {
     await novuClient.triggerBulk({
       events: [
         {
-          name: template.triggers[0].identifier,
+          workflowId: template.triggers[0].identifier,
           to: [
             {
               subscriberId: subscriber.subscriberId,
@@ -111,7 +115,7 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST)', function () {
           },
         },
         {
-          name: secondTemplate.triggers[0].identifier,
+          workflowId: secondTemplate.triggers[0].identifier,
           to: [
             {
               subscriberId: secondSubscriber.subscriberId,
@@ -124,8 +128,8 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST)', function () {
       ],
     });
 
-    await session.awaitRunningJobs(template._id);
-    await session.awaitRunningJobs(secondTemplate._id);
+    await session.waitForJobCompletion(template._id);
+    await session.waitForJobCompletion(secondTemplate._id);
 
     const notifications = await notificationRepository.findBySubscriberId(session.environment._id, subscriber._id);
     expect(notifications.length).to.equal(1);
@@ -198,7 +202,7 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST)', function () {
   it('should throw an error when sending more than 100 events', async function () {
     const event: TriggerEventRequestDto = {
       transactionId: '2222',
-      name: template.triggers[0].identifier,
+      workflowId: template.triggers[0].identifier,
       to: [subscriber.subscriberId],
       payload: {
         firstName: 'Testing of User Name',
@@ -206,19 +210,14 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST)', function () {
       },
     };
 
-    let error;
-    try {
-      await novuClient.triggerBulk({
+    const { error: errorDto } = await expectSdkValidationExceptionGeneric(() =>
+      novuClient.triggerBulk({
         events: Array.from({ length: 101 }, () => event),
-      });
-    } catch (e) {
-      error = e;
-    }
-    const { error: sdkError, parsedBody } = handleSdkError(error);
+      })
+    );
 
-    expect(sdkError.statusCode).to.equal(400);
-    expect(parsedBody.statusCode).to.equal(400);
-    expect(parsedBody.message[0]).to.equal('events must contain no more than 100 elements');
+    expect(errorDto?.statusCode).to.equal(422);
+    expect(errorDto?.errors.events.messages[0]).to.equal('events must contain no more than 100 elements');
   });
 
   it('should handle bulk if one of the events returns errors', async function () {
@@ -226,7 +225,7 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST)', function () {
       events: [
         {
           transactionId: '1111',
-          name: 'non-existing-trigger',
+          workflowId: 'non-existing-trigger',
           to: [subscriber.subscriberId],
           payload: {
             firstName: 'Testing of User Name',
@@ -235,7 +234,7 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST)', function () {
         },
         {
           transactionId: '2222',
-          name: template.triggers[0].identifier,
+          workflowId: template.triggers[0].identifier,
           to: [subscriber.subscriberId],
           payload: {
             firstName: 'Testing of User Name',
@@ -248,7 +247,7 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST)', function () {
             firstName: 'Testing of User Name',
             name: '',
           },
-          name: '',
+          workflowId: '',
           to: [],
         },
       ],

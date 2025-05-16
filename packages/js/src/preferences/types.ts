@@ -1,4 +1,4 @@
-import { ChannelPreference, PreferenceLevel, Workflow } from '../types';
+import { ChannelPreference, Preference, PreferenceLevel, Workflow } from '../types';
 
 export type FetchPreferencesArgs = {
   level?: PreferenceLevel;
@@ -9,13 +9,14 @@ export type ListPreferencesArgs = {
   tags?: string[];
 };
 
-export type UpdatePreferencesArgs = {
-  workflowId?: string;
-  channelPreferences: ChannelPreference;
-  preference?: {
-    level: PreferenceLevel;
-    enabled: boolean;
-    channels: ChannelPreference;
-    workflow?: Workflow;
-  };
+export type BasePreferenceArgs = {
+  workflowId: string;
+  channels: ChannelPreference;
 };
+
+export type InstancePreferenceArgs = {
+  preference: Preference;
+  channels: ChannelPreference;
+};
+
+export type UpdatePreferenceArgs = BasePreferenceArgs | InstancePreferenceArgs;

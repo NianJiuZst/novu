@@ -1,10 +1,16 @@
-import type { BuilderFieldType, BuilderGroupValues, CustomDataType, FilterParts, WorkflowTypeEnum } from '../../types';
-import type { ControlsDto } from '../../dto/controls';
-import type { JSONSchemaDto } from '../../dto/workflows';
-import type { ContentIssue, StepIssue } from '../../dto/workflows/workflow-response.dto';
+import type {
+  BuilderFieldType,
+  BuilderGroupValues,
+  CustomDataType,
+  FilterParts,
+  WorkflowOriginEnum,
+  WorkflowTypeEnum,
+} from '../../types';
+import { JSONSchemaDto } from '../../dto/workflows';
+import type { StepContentIssue, StepIntegrationIssue, StepIssue } from '../../dto/workflows/step.dto';
 import { ControlSchemas, IMessageTemplate } from '../message-template';
 import { INotificationGroup } from '../notification-group';
-import { INotificationTrigger, INotificationBridgeTrigger } from '../notification-trigger';
+import { INotificationBridgeTrigger, INotificationTrigger } from '../notification-trigger';
 import { IPreferenceChannels } from '../subscriber-preference';
 import { IWorkflowStepMetadata } from '../step';
 
@@ -32,6 +38,7 @@ export interface INotificationTemplate {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rawData?: any;
   data?: CustomDataType;
+  origin?: WorkflowOriginEnum;
 }
 
 export class IGroupedBlueprint {
@@ -44,8 +51,8 @@ export interface IBlueprint extends INotificationTemplate {
 }
 
 export class StepIssues {
-  body?: Record<string, StepIssue>;
-  controls?: Record<string, ContentIssue[]>;
+  controls?: Record<string, StepContentIssue[]>;
+  integration?: Record<string, StepIntegrationIssue[]>;
 }
 
 export interface IStepVariant {
@@ -77,7 +84,7 @@ export interface IStepVariant {
    * controlVariables exists
    * only on none production environment in order to provide stateless control variables on fly
    */
-  controlVariables?: ControlsDto;
+  controlVariables?: Record<string, unknown>;
   bridgeUrl?: string;
 }
 

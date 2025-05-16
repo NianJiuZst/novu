@@ -1,10 +1,22 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+  Headers,
+} from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { SubscriberEntity } from '@novu/dal';
 import { MessageActionStatusEnum, PreferenceLevelEnum } from '@novu/shared';
 
-import { SubscriberSessionRequestDto } from './dtos/subscriber-session-request.dto';
+import { SubscriberDto, SubscriberSessionRequestDto } from './dtos/subscriber-session-request.dto';
 import { SubscriberSessionResponseDto } from './dtos/subscriber-session-response.dto';
 import { SessionCommand } from './usecases/session/session.command';
 import { Session } from './usecases/session/session.usecase';
@@ -34,6 +46,14 @@ import { UpdatePreferencesRequestDto } from './dtos/update-preferences-request.d
 import { UpdatePreferences } from './usecases/update-preferences/update-preferences.usecase';
 import { UpdatePreferencesCommand } from './usecases/update-preferences/update-preferences.command';
 import { GetPreferencesRequestDto } from './dtos/get-preferences-request.dto';
+import { SnoozeNotificationRequestDto } from './dtos/snooze-notification-request.dto';
+import { SnoozeNotificationCommand } from './usecases/snooze-notification/snooze-notification.command';
+import { SnoozeNotification } from './usecases/snooze-notification/snooze-notification.usecase';
+import { UnsnoozeNotificationCommand } from './usecases/unsnooze-notification/unsnooze-notification.command';
+import { UnsnoozeNotification } from './usecases/unsnooze-notification/unsnooze-notification.usecase';
+import { BulkUpdatePreferencesRequestDto } from './dtos/bulk-update-preferences-request.dto';
+import { BulkUpdatePreferences } from './usecases/bulk-update-preferences/bulk-update-preferences.usecase';
+import { BulkUpdatePreferencesCommand } from './usecases/bulk-update-preferences/bulk-update-preferences.command';
 
 @ApiCommonResponses()
 @Controller('/inbox')
@@ -47,16 +67,31 @@ export class InboxController {
     private updateNotificationActionUsecase: UpdateNotificationAction,
     private updateAllNotifications: UpdateAllNotifications,
     private getInboxPreferencesUsecase: GetInboxPreferences,
-    private updatePreferencesUsecase: UpdatePreferences
+    private updatePreferencesUsecase: UpdatePreferences,
+    private bulkUpdatePreferencesUsecase: BulkUpdatePreferences,
+    private snoozeNotificationUsecase: SnoozeNotification,
+    private unsnoozeNotificationUsecase: UnsnoozeNotification
   ) {}
 
   @Post('/session')
-  async sessionInitialize(@Body() body: SubscriberSessionRequestDto): Promise<SubscriberSessionResponseDto> {
+  async sessionInitialize(
+    @Body() body: SubscriberSessionRequestDto,
+    @Headers('origin') origin: string
+  ): Promise<SubscriberSessionResponseDto> {
+    // TODO: Backward compatibility support - remove in future versions (see NV-5801)
+    const subscriber: SubscriberDto | {} =
+      typeof body.subscriber === 'string' ? { subscriberId: body.subscriber } : body.subscriber || {};
+    const subscriberId: string | undefined = body.subscriberId || (subscriber as SubscriberDto).subscriberId;
+
     return await this.initializeSessionUsecase.execute(
       SessionCommand.create({
-        subscriberId: body.subscriberId,
+        subscriber: {
+          ...subscriber,
+          subscriberId,
+        } satisfies SubscriberDto,
         applicationIdentifier: body.applicationIdentifier,
         subscriberHash: body.subscriberHash,
+        origin,
       })
     );
   }
@@ -78,6 +113,7 @@ export class InboxController {
         tags: query.tags,
         read: query.read,
         archived: query.archived,
+        snoozed: query.snoozed,
       })
     );
   }
@@ -186,6 +222,40 @@ export class InboxController {
   }
 
   @UseGuards(AuthGuard('subscriberJwt'))
+  @Patch('/notifications/:id/snooze')
+  async snoozeNotification(
+    @SubscriberSession() subscriberSession: SubscriberEntity,
+    @Param('id') notificationId: string,
+    @Body() body: SnoozeNotificationRequestDto
+  ): Promise<InboxNotification> {
+    return await this.snoozeNotificationUsecase.execute(
+      SnoozeNotificationCommand.create({
+        organizationId: subscriberSession._organizationId,
+        subscriberId: subscriberSession.subscriberId,
+        environmentId: subscriberSession._environmentId,
+        notificationId,
+        snoozeUntil: body.snoozeUntil,
+      })
+    );
+  }
+
+  @UseGuards(AuthGuard('subscriberJwt'))
+  @Patch('/notifications/:id/unsnooze')
+  async unsnoozeNotification(
+    @SubscriberSession() subscriberSession: SubscriberEntity,
+    @Param('id') notificationId: string
+  ): Promise<InboxNotification> {
+    return await this.unsnoozeNotificationUsecase.execute(
+      UnsnoozeNotificationCommand.create({
+        organizationId: subscriberSession._organizationId,
+        subscriberId: subscriberSession.subscriberId,
+        environmentId: subscriberSession._environmentId,
+        notificationId,
+      })
+    );
+  }
+
+  @UseGuards(AuthGuard('subscriberJwt'))
   @Patch('/notifications/:id/complete')
   async completeAction(
     @SubscriberSession() subscriberSession: SubscriberEntity,
@@ -245,11 +315,31 @@ export class InboxController {
     );
   }
 
+  /**
+   * IMPORTANT: Make sure this endpoint route is defined before the single workflow preference update endpoint
+   * "PATCH /preferences/:workflowIdOrIdentifier", otherwise, the single workflow preference update endpoint will be triggered instead
+   */
   @UseGuards(AuthGuard('subscriberJwt'))
-  @Patch('/preferences/:workflowId')
+  @Patch('/preferences/bulk')
+  async bulkUpdateWorkflowPreferences(
+    @SubscriberSession() subscriberSession: SubscriberEntity,
+    @Body() body: BulkUpdatePreferencesRequestDto
+  ): Promise<GetPreferencesResponseDto[]> {
+    return await this.bulkUpdatePreferencesUsecase.execute(
+      BulkUpdatePreferencesCommand.create({
+        organizationId: subscriberSession._organizationId,
+        subscriberId: subscriberSession.subscriberId,
+        environmentId: subscriberSession._environmentId,
+        preferences: body.preferences,
+      })
+    );
+  }
+
+  @UseGuards(AuthGuard('subscriberJwt'))
+  @Patch('/preferences/:workflowIdOrIdentifier')
   async updateWorkflowPreference(
     @SubscriberSession() subscriberSession: SubscriberEntity,
-    @Param('workflowId') workflowId: string,
+    @Param('workflowIdOrIdentifier') workflowIdOrIdentifier: string,
     @Body() body: UpdatePreferencesRequestDto
   ): Promise<InboxPreference> {
     return await this.updatePreferencesUsecase.execute(
@@ -263,7 +353,7 @@ export class InboxController {
         in_app: body.in_app,
         push: body.push,
         sms: body.sms,
-        workflowId,
+        workflowIdOrIdentifier,
         includeInactiveChannels: false,
       })
     );

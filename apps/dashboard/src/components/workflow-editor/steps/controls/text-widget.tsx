@@ -1,22 +1,19 @@
-import { useMemo } from 'react';
-import { type WidgetProps } from '@rjsf/utils';
-import { useFormContext } from 'react-hook-form';
-import { EditorView } from '@uiw/react-codemirror';
-import { Editor } from '@/components/primitives/editor';
+import { ControlInput } from '@/components/primitives/control-input';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/primitives/form/form';
-import { Input, InputField } from '@/components/primitives/input';
-import { completions } from '@/utils/liquid-autocomplete';
+import { Input, InputRoot, InputWrapper } from '@/components/primitives/input';
+import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
+import { useParseVariables } from '@/hooks/use-parse-variables';
 import { capitalize } from '@/utils/string';
-import { autocompletion } from '@codemirror/autocomplete';
+import { type WidgetProps } from '@rjsf/utils';
+import { useMemo } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { getFieldName } from './template-utils';
-import { parseStepVariablesToLiquidVariables } from '@/utils/parseStepVariablesToLiquidVariables';
-import { useStep } from '../step-provider';
 
 export function TextWidget(props: WidgetProps) {
   const { label, readonly, disabled, id, required } = props;
   const { control } = useFormContext();
-  const { step } = useStep();
-  const variables = useMemo(() => (step ? parseStepVariablesToLiquidVariables(step.variables) : []), [step]);
+  const { step, digestStepBeforeCurrent } = useWorkflow();
+  const { variables, isAllowedVariable } = useParseVariables(step?.variables, digestStepBeforeCurrent?.stepId);
 
   const extractedName = useMemo(() => getFieldName(id), [id]);
   const isNumberType = useMemo(() => props.schema.type === 'number', [props.schema.type]);
@@ -25,41 +22,47 @@ export function TextWidget(props: WidgetProps) {
     <FormField
       control={control}
       name={extractedName}
-      render={({ field }) => (
+      render={({ field, fieldState }) => (
         <FormItem className="w-full py-1">
           <FormLabel className="text-xs">{capitalize(label)}</FormLabel>
           <FormControl>
-            <InputField size="fit" className="w-full">
-              {isNumberType ? (
-                <Input
-                  type="number"
-                  {...field}
-                  onChange={(e) => {
-                    if (e.target.value === '') {
-                      field.onChange(undefined);
-                      return;
-                    }
-                    const val = Number(e.target.value);
-                    const isNaN = Number.isNaN(val);
-                    const finalValue = isNaN ? undefined : val;
-                    field.onChange(finalValue);
-                  }}
-                  required={required}
-                  readOnly={readonly}
-                  disabled={disabled}
-                  placeholder={capitalize(label)}
-                />
-              ) : (
-                <Editor
-                  fontFamily="inherit"
-                  placeholder={capitalize(label)}
-                  id={label}
-                  extensions={[autocompletion({ override: [completions(variables)] }), EditorView.lineWrapping]}
-                  readOnly={readonly || disabled}
-                  {...field}
-                />
-              )}
-            </InputField>
+            {isNumberType ? (
+              <Input
+                type="number"
+                {...field}
+                hasError={!!fieldState.error}
+                onChange={(e) => {
+                  if (e.target.value === '') {
+                    field.onChange('');
+                    return;
+                  }
+
+                  const val = Number(e.target.value);
+                  const isNaN = Number.isNaN(val);
+                  const finalValue = isNaN ? '' : val;
+                  field.onChange(finalValue);
+                }}
+                required={required}
+                readOnly={readonly}
+                disabled={disabled}
+                placeholder={capitalize(label)}
+              />
+            ) : (
+              <InputRoot hasError={!!fieldState.error}>
+                <InputWrapper className="flex h-full items-center p-2 py-1">
+                  <ControlInput
+                    indentWithTab={false}
+                    placeholder={capitalize(label)}
+                    id={label}
+                    value={field.value}
+                    onChange={field.onChange}
+                    variables={variables}
+                    isAllowedVariable={isAllowedVariable}
+                    size="sm"
+                  />
+                </InputWrapper>
+              </InputRoot>
+            )}
           </FormControl>
           <FormMessage />
         </FormItem>

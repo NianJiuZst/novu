@@ -1,11 +1,12 @@
-import { IsDefined, IsString, IsOptional, ValidateNested, ValidateIf, IsEnum, IsObject } from 'class-validator';
+import { IsDefined, IsEnum, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
 import {
   AddressingTypeEnum,
-  ControlsDto,
-  TriggerRecipients,
+  StatelessControls,
+  TriggerRecipientsPayload,
   TriggerRecipientSubscriber,
   TriggerRequestCategoryEnum,
   TriggerTenantContext,
+  TriggerOverrides,
 } from '@novu/shared';
 
 import { EnvironmentWithUserCommand } from '../../../shared/commands/project.command';
@@ -19,7 +20,7 @@ export class ParseEventRequestBaseCommand extends EnvironmentWithUserCommand {
   payload: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   @IsDefined()
-  overrides: Record<string, Record<string, unknown>>;
+  overrides: TriggerOverrides;
 
   @IsString()
   @IsOptional()
@@ -42,13 +43,19 @@ export class ParseEventRequestBaseCommand extends EnvironmentWithUserCommand {
   @IsString()
   @IsOptional()
   bridgeUrl?: string;
-
-  controls?: ControlsDto;
+  /**
+   * A mapping of step IDs to their corresponding data.
+   * Built for stateless triggering by the local studio, those values will not be persisted outside the job scope
+   * First key is step id, second is controlId, value is the control value
+   * @type {Record<stepId, Data>}
+   * @optional
+   */
+  controls?: StatelessControls;
 }
 
 export class ParseEventRequestMulticastCommand extends ParseEventRequestBaseCommand {
   @IsDefined()
-  to: TriggerRecipients;
+  to: TriggerRecipientsPayload;
 
   @IsEnum(AddressingTypeEnum)
   addressingType: AddressingTypeEnum.MULTICAST;

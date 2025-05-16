@@ -14,35 +14,19 @@ import {
 } from 'class-validator';
 
 import {
-  BuilderFieldType,
-  BuilderGroupValues,
-  ChannelCTATypeEnum,
-  ContentIssue as ContentIssueDto,
   CustomDataType,
-  FilterParts,
-  IMessageAction,
   INotificationGroup,
-  IStepVariant,
-  IWorkflowStepMetadata,
-  JSONSchemaDto,
-  StepContentIssueEnum,
-  StepCreateAndUpdateKeys,
-  StepIssue as StepIssueDto,
-  StepIssueEnum,
-  StepIssuesDto,
   WorkflowOriginEnum,
   WorkflowStatusEnum,
   WorkflowTypeEnum,
 } from '@novu/shared';
 
 import { Type } from 'class-transformer';
+import { RuntimeIssue } from '@novu/dal';
 import { EnvironmentWithUserCommand } from '../../commands';
+import { MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH, MAX_TAG_LENGTH } from '../workflow';
+import { ContentIssue, JSONSchema, NotificationStep } from '../../value-objects';
 import { PreferencesRequired } from '../upsert-preferences';
-import {
-  MAX_DESCRIPTION_LENGTH,
-  MAX_NAME_LENGTH,
-  MAX_TAG_LENGTH,
-} from '../workflow';
 
 export class CreateWorkflowCommand extends EnvironmentWithUserCommand {
   @IsDefined()
@@ -109,18 +93,18 @@ export class CreateWorkflowCommand extends EnvironmentWithUserCommand {
 
   @IsOptional()
   inputs?: {
-    schema: JSONSchemaDto;
+    schema: JSONSchema;
   };
   @IsOptional()
   controls?: {
-    schema: JSONSchemaDto;
+    schema: JSONSchema;
   };
 
   @IsOptional()
   rawData?: Record<string, unknown>;
 
   @IsOptional()
-  payloadSchema?: JSONSchemaDto;
+  payloadSchema?: JSONSchema;
 
   @IsEnum(WorkflowTypeEnum)
   @IsDefined()
@@ -139,145 +123,13 @@ export class CreateWorkflowCommand extends EnvironmentWithUserCommand {
   @IsOptional()
   @IsString()
   triggerIdentifier?: string;
-
+  @IsObject()
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => ContentIssue)
-  issues?: Record<string, ContentIssue[]>;
+  issues?: Record<string, RuntimeIssue>;
 
   @IsEnum(WorkflowStatusEnum)
   @IsOptional()
   status?: WorkflowStatusEnum;
-}
-
-export class ChannelCTACommand {
-  @IsEnum(ChannelCTATypeEnum)
-  type: ChannelCTATypeEnum;
-
-  @ValidateNested()
-  data: {
-    url: string;
-  };
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested()
-  action?: IMessageAction[];
-}
-
-export class ContentIssue implements ContentIssueDto {
-  @IsOptional()
-  @IsString()
-  variableName?: string;
-
-  @IsString()
-  message: string;
-
-  @IsEnum(StepContentIssueEnum)
-  issueType: StepContentIssueEnum;
-}
-
-export class StepIssue implements StepIssueDto {
-  @IsEnum(StepIssueEnum)
-  issueType: StepIssueEnum;
-
-  @IsOptional()
-  @IsString()
-  variableName?: string;
-
-  @IsString()
-  message: string;
-}
-
-export class StepIssues implements StepIssuesDto {
-  @IsOptional()
-  @IsObject()
-  @ValidateNested({ each: true })
-  @Type(() => StepIssue)
-  body?: Record<StepCreateAndUpdateKeys, StepIssue>;
-
-  @IsOptional()
-  @IsObject()
-  @ValidateNested({ each: true })
-  @Type(() => ContentIssue)
-  controls?: Record<string, ContentIssue[]>;
-}
-
-export class NotificationStepVariantCommand implements IStepVariant {
-  @IsString()
-  @IsOptional()
-  _templateId?: string;
-
-  @ValidateNested()
-  @IsOptional()
-  template?: any;
-
-  @IsOptional()
-  uuid?: string;
-
-  @IsOptional()
-  name?: string;
-
-  @IsBoolean()
-  active?: boolean;
-
-  @IsBoolean()
-  shouldStopOnFail?: boolean;
-
-  @ValidateNested()
-  @IsOptional()
-  replyCallback?: {
-    active: boolean;
-    url: string;
-  };
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested()
-  filters?: MessageFilter[];
-
-  @IsMongoId()
-  @IsOptional()
-  _id?: string;
-
-  @IsOptional()
-  metadata?: IWorkflowStepMetadata;
-
-  @IsOptional()
-  controls?: IStepControl;
-
-  @IsOptional()
-  output?: IStepControl;
-
-  @IsOptional()
-  stepId?: string;
-
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => StepIssues)
-  issues?: StepIssues;
-}
-
-export class NotificationStep extends NotificationStepVariantCommand {
-  @IsOptional()
-  @IsArray()
-  @ValidateNested()
-  variants?: NotificationStepVariantCommand[];
-}
-
-export class MessageFilter {
-  isNegated?: boolean;
-
-  @IsString()
-  type?: BuilderFieldType;
-
-  @IsString()
-  value: BuilderGroupValues;
-
-  @IsArray()
-  children: FilterParts[];
-}
-
-export interface IStepControl {
-  schema: JSONSchemaDto;
 }

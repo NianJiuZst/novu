@@ -1,12 +1,22 @@
-import { Popover, PopoverContent, PopoverTrigger, PopoverPortal } from '@/components/primitives/popover';
-import { API_HOSTNAME, APP_ID, WEBSOCKET_HOSTNAME } from '@/config';
-import { useUser } from '@clerk/clerk-react';
-import { Bell, Inbox, InboxContent, useNovu } from '@novu/react';
-import { InboxBellFilled } from './icons/inbox-bell-filled';
-import { HeaderButton } from './header-navigation/header-button';
-import { useState, useEffect } from 'react';
-import { useEnvironment } from '../context/environment/hooks';
+import { Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@/components/primitives/popover';
+import { API_HOSTNAME, APP_ID, IS_SELF_HOSTED, WEBSOCKET_HOSTNAME } from '@/config';
+import { useEnvironment } from '@/context/environment/hooks';
 import { useTestPage } from '@/hooks/use-test-page';
+import { useUser } from '@clerk/clerk-react';
+import { Bell, InboxContent, Inbox, useNovu } from '@novu/react';
+import { useEffect, useState } from 'react';
+import { HeaderButton } from './header-navigation/header-button';
+import { InboxBellFilled } from './icons/inbox-bell-filled';
+
+declare global {
+  interface Window {
+    Clerk: {
+      session: {
+        getToken: (options: { template: string }) => Promise<string>;
+      };
+    };
+  }
+}
 
 const InboxInner = () => {
   const [open, setOpen] = useState(false);
@@ -65,11 +75,7 @@ const InboxInner = () => {
         />
       </PopoverTrigger>
       <PopoverPortal>
-        <PopoverContent
-          side="bottom"
-          align="end"
-          className="h-[500px] w-[350px] overflow-y-auto p-0 [&>div:first-child]:[&>div:first-child]:h-full [&>div:first-child]:h-full"
-        >
+        <PopoverContent side="bottom" align="end" className="h-[550px] w-[350px] overflow-hidden p-0">
           <InboxContent />
         </PopoverContent>
       </PopoverPortal>
@@ -83,6 +89,10 @@ export const InboxButton = () => {
   const { isTestPage } = useTestPage();
 
   if (!user || !currentEnvironment) {
+    return null;
+  }
+
+  if (!isTestPage && IS_SELF_HOSTED) {
     return null;
   }
 
@@ -100,8 +110,13 @@ export const InboxButton = () => {
     <Inbox
       subscriberId={user.externalId ?? ''}
       applicationIdentifier={appId}
-      backendUrl={API_HOSTNAME}
-      socketUrl={WEBSOCKET_HOSTNAME}
+      /**
+       * We want to ensure our staging environment is using the production API and WebSocket endpoints.
+       */
+      backendUrl={API_HOSTNAME === 'https://api.novu-staging.co' && !isTestPage ? 'https://api.novu.co' : API_HOSTNAME}
+      socketUrl={
+        WEBSOCKET_HOSTNAME === 'https://ws.novu-staging.co' && !isTestPage ? 'https://ws.novu.co' : WEBSOCKET_HOSTNAME
+      }
       localization={{
         'inbox.filters.labels.default': `Inbox${localizationTestSuffix}`,
         'inbox.filters.labels.unread': `Unread${localizationTestSuffix}`,

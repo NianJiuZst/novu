@@ -8,15 +8,14 @@ import {
   Param,
   Post,
   Put,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ChannelTypeEnum, UserSessionData } from '@novu/shared';
+import { ChannelTypeEnum, UserSessionData, PermissionsEnum } from '@novu/shared';
 import {
   CalculateLimitNovuIntegration,
   CalculateLimitNovuIntegrationCommand,
   OtelSpan,
-  Roles,
+  RequirePermissions,
 } from '@novu/application-generic';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserSession } from '../shared/framework/user.decorator';
@@ -47,13 +46,13 @@ import { ChannelTypeLimitDto } from './dtos/get-channel-type-limit.sto';
 import { GetActiveIntegrationsCommand } from './usecases/get-active-integration/get-active-integration.command';
 import { SetIntegrationAsPrimary } from './usecases/set-integration-as-primary/set-integration-as-primary.usecase';
 import { SetIntegrationAsPrimaryCommand } from './usecases/set-integration-as-primary/set-integration-as-primary.command';
-import { UserAuthentication } from '../shared/framework/swagger/api.key.security';
+import { RequireAuthentication } from '../auth/framework/auth.decorator';
 import { SdkGroupName, SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 
 @ApiCommonResponses()
 @Controller('/integrations')
 @UseInterceptors(ClassSerializerInterceptor)
-@UserAuthentication()
+@RequireAuthentication()
 @ApiTags('Integrations')
 export class IntegrationsController {
   constructor(
@@ -79,6 +78,7 @@ export class IntegrationsController {
       'Return all the integrations the user has created for that organization. Review v.0.17.0 changelog for a breaking change',
   })
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_READ)
   async listIntegrations(@UserSession() user: UserSessionData): Promise<IntegrationResponseDto[]> {
     return await this.getIntegrationsUsecase.execute(
       GetIntegrationsCommand.create({
@@ -101,6 +101,7 @@ export class IntegrationsController {
   })
   @ExternalApiAccessible()
   @SdkMethodName('listActive')
+  @RequirePermissions(PermissionsEnum.INTEGRATION_READ)
   async getActiveIntegrations(@UserSession() user: UserSessionData): Promise<IntegrationResponseDto[]> {
     return await this.getActiveIntegrationsUsecase.execute(
       GetActiveIntegrationsCommand.create({
@@ -123,6 +124,7 @@ export class IntegrationsController {
   })
   @SdkGroupName('Integrations.Webhooks')
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_READ)
   async getWebhookSupportStatus(
     @UserSession() user: UserSessionData,
     @Param('providerOrIntegrationId') providerOrIntegrationId: string
@@ -144,6 +146,7 @@ export class IntegrationsController {
     description: 'Create an integration for the current environment the user is based on the API key provided',
   })
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_CREATE)
   async createIntegration(
     @UserSession() user: UserSessionData,
     @Body() body: CreateIntegrationRequestDto
@@ -160,7 +163,7 @@ export class IntegrationsController {
           channel: body.channel,
           credentials: body.credentials,
           active: body.active ?? false,
-          check: body.check ?? true,
+          check: body.check ?? false,
           conditions: body.conditions,
         })
       );
@@ -182,6 +185,7 @@ export class IntegrationsController {
     summary: 'Update integration',
   })
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_UPDATE)
   async updateIntegrationById(
     @UserSession() user: UserSessionData,
     @Param('integrationId') integrationId: string,
@@ -200,7 +204,7 @@ export class IntegrationsController {
           credentials: body.credentials,
           removeNovuBranding: body.removeNovuBranding,
           active: body.active,
-          check: body.check ?? true,
+          check: body.check ?? false,
           conditions: body.conditions,
         })
       );
@@ -222,6 +226,7 @@ export class IntegrationsController {
     summary: 'Set integration as primary',
   })
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_UPDATE)
   @SdkMethodName('setAsPrimary')
   setIntegrationAsPrimary(
     @UserSession() user: UserSessionData,
@@ -243,6 +248,7 @@ export class IntegrationsController {
     summary: 'Delete integration',
   })
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_DELETE)
   async removeIntegration(
     @UserSession() user: UserSessionData,
     @Param('integrationId') integrationId: string
@@ -260,6 +266,7 @@ export class IntegrationsController {
   @Get('/:channelType/limit')
   @ApiExcludeEndpoint()
   @OtelSpan()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_READ)
   async getProviderLimit(
     @UserSession() user: UserSessionData,
     @Param('channelType') channelType: ChannelTypeEnum
@@ -281,6 +288,7 @@ export class IntegrationsController {
 
   @Get('/in-app/status')
   @ApiExcludeEndpoint()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_READ)
   async getInAppActivated(@UserSession() user: UserSessionData) {
     return await this.getInAppActivatedUsecase.execute(
       GetInAppActivatedCommand.create({

@@ -1,44 +1,100 @@
-import { PatchWorkflowDto, UpdateWorkflowDto, WorkflowResponseDto } from '@novu/shared';
+import { PatchWorkflowDto, StepResponseDto, UpdateWorkflowDto, WorkflowResponseDto } from '@novu/shared';
 import { createContext, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useBlocker, useNavigate, useParams } from 'react-router-dom';
 
-import { useEnvironment } from '@/context/environment/hooks';
-import { useFetchWorkflow, useUpdateWorkflow } from '@/hooks';
-import { usePatchWorkflow } from '@/hooks/use-patch-workflow';
-import { createContextHook } from '@/utils/context';
-import { buildRoute, ROUTES } from '@/utils/routes';
-import { toast } from 'sonner';
-import { RiCloseFill } from 'react-icons/ri';
 import {
   AlertDialog,
-  AlertDialogHeader,
   AlertDialogContent,
-  AlertDialogTitle,
   AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/primitives/alert-dialog';
-import { RiAlertFill } from 'react-icons/ri';
-import { CheckCircleIcon } from 'lucide-react';
+import { useEnvironment } from '@/context/environment/hooks';
+import { useBeforeUnload } from '@/hooks/use-before-unload';
+import { useFetchWorkflow } from '@/hooks/use-fetch-workflow';
 import { useInvocationQueue } from '@/hooks/use-invocation-queue';
+import { usePatchWorkflow } from '@/hooks/use-patch-workflow';
+import { useUpdateWorkflow } from '@/hooks/use-update-workflow';
+import { createContextHook } from '@/utils/context';
+import { buildRoute, ROUTES } from '@/utils/routes';
+import { getWorkflowIdFromSlug, STEP_DIVIDER } from '@/utils/step';
+import { CheckCircleIcon } from 'lucide-react';
+import { RiAlertFill, RiCloseFill } from 'react-icons/ri';
+import { toast } from 'sonner';
 import { showErrorToast, showSavingToast, showSuccessToast } from './toasts';
+
+export type UpdateWorkflowFn = (
+  data: UpdateWorkflowDto,
+  options?: {
+    onSuccess?: (workflow: WorkflowResponseDto) => void;
+  }
+) => void;
 
 export type WorkflowContextType = {
   isPending: boolean;
   workflow?: WorkflowResponseDto;
-  update: (data: UpdateWorkflowDto) => void;
+  step?: StepResponseDto;
+  update: UpdateWorkflowFn;
   patch: (data: PatchWorkflowDto) => void;
+  digestStepBeforeCurrent?: StepResponseDto;
 };
 
 export const WorkflowContext = createContext<WorkflowContextType>({} as WorkflowContextType);
 
 export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
   const { currentEnvironment } = useEnvironment();
-  const { workflowSlug = '' } = useParams<{ workflowSlug?: string; stepSlug?: string }>();
+  const { workflowSlug = '', stepSlug = '' } = useParams<{ workflowSlug?: string; stepSlug?: string }>();
   const [toastId, setToastId] = useState<string | number>('');
   const navigate = useNavigate();
 
   const { workflow, isPending, error } = useFetchWorkflow({
     workflowSlug,
   });
+
+  const getStep = useCallback(() => {
+    return workflow?.steps.find(
+      (step) =>
+        getWorkflowIdFromSlug({ slug: stepSlug, divider: STEP_DIVIDER }) ===
+        getWorkflowIdFromSlug({ slug: step.slug, divider: STEP_DIVIDER })
+    );
+  }, [workflow, stepSlug]);
+
+  const isStepAfterDigest = useMemo(() => {
+    const step = getStep();
+    if (!step) return false;
+
+    const index = workflow?.steps.findIndex(
+      (current) =>
+        getWorkflowIdFromSlug({ slug: current.slug, divider: STEP_DIVIDER }) ===
+        getWorkflowIdFromSlug({ slug: step.slug, divider: STEP_DIVIDER })
+    );
+    /**
+     * < 1 means that the step is the first step in the workflow
+     */
+    if (index === undefined || index < 1) return false;
+
+    const hasDigestStepInBetween = workflow?.steps.slice(0, index).some((s) => s.type === 'digest');
+
+    return Boolean(hasDigestStepInBetween);
+  }, [getStep, workflow?.steps]);
+
+  const digestStepBeforeCurrent = useMemo(() => {
+    if (!workflow || !isStepAfterDigest) return undefined;
+
+    const index = workflow.steps.findIndex(
+      (step) =>
+        getWorkflowIdFromSlug({ slug: stepSlug, divider: STEP_DIVIDER }) ===
+        getWorkflowIdFromSlug({ slug: step.slug, divider: STEP_DIVIDER })
+    );
+
+    if (index === -1) return undefined;
+
+    const stepsBeforeCurrent = workflow.steps.slice(0, index);
+
+    const digestStep = stepsBeforeCurrent.reverse().find((step) => step.type === 'digest');
+
+    return digestStep;
+  }, [workflow, isStepAfterDigest, stepSlug]);
 
   const { enqueue, hasPendingItems } = useInvocationQueue();
   const blocker = useBlocker(({ nextLocation }) => {
@@ -56,54 +112,51 @@ export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
 
   const { patchWorkflow, isPending: isPatchPending } = usePatchWorkflow({
     onMutate: () => {
-      // when the navigation is blocked, we don't want to show the toast
-      if (isBlocked) {
-        return;
+      if (!isBlocked) {
+        showSavingToast(setToastId);
       }
-
-      showSavingToast(setToastId);
     },
     onSuccess: async () => {
-      // when the navigation is blocked, we don't want to show the toast
-      if (isBlocked) {
-        return;
+      if (!isBlocked) {
+        showSuccessToast(toastId);
       }
-
-      showSuccessToast(toastId);
     },
-    onError: () => {
-      showErrorToast(toastId);
+    onError: (error) => {
+      showErrorToast(toastId, error);
     },
   });
 
   const { updateWorkflow, isPending: isUpdatePending } = useUpdateWorkflow({
     onMutate: () => {
-      // when the navigation is blocked, we don't want to show the toast
-      if (isBlocked) {
-        return;
+      if (!isBlocked) {
+        showSavingToast(setToastId);
       }
-
-      showSavingToast(setToastId);
     },
     onSuccess: async () => {
-      // when the navigation is blocked, we don't want to show the toast
-      if (isBlocked) {
-        return;
+      if (!isBlocked) {
+        showSuccessToast(toastId);
       }
-
-      showSuccessToast(toastId);
     },
-    onError: () => {
-      showErrorToast(toastId);
+    onError: (error) => {
+      showErrorToast(toastId, error);
     },
   });
 
   const isUpdatePatchPending = isPatchPending || isUpdatePending || hasPendingItems;
+  /**
+   * Prevents the user from accidentally closing the tab or window
+   * while an update is in progress.
+   */
+  useBeforeUnload(isUpdatePatchPending);
 
   const update = useCallback(
-    (data: UpdateWorkflowDto) => {
+    (data: UpdateWorkflowDto, options?: { onSuccess?: (workflow: WorkflowResponseDto) => void }) => {
       if (workflow) {
-        enqueue(() => updateWorkflow({ workflowId: workflow.workflowId, workflow: { ...data } }));
+        enqueue(async () => {
+          const res = await updateWorkflow({ workflowSlug: workflow.slug, workflow: { ...data } });
+          options?.onSuccess?.(res);
+          return res;
+        });
       }
     },
     [enqueue, updateWorkflow, workflow]
@@ -112,7 +165,7 @@ export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
   const patch = useCallback(
     (data: PatchWorkflowDto) => {
       if (workflow) {
-        enqueue(() => patchWorkflow({ workflowId: workflow.workflowId, workflow: { ...data } }));
+        enqueue(() => patchWorkflow({ workflowSlug: workflow.slug, workflow: { ...data } }));
       }
     },
     [enqueue, patchWorkflow, workflow]
@@ -149,7 +202,10 @@ export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isAllowedToUnblock, blocker]);
 
-  const value = useMemo(() => ({ update, patch, isPending, workflow }), [update, patch, isPending, workflow]);
+  const value = useMemo(
+    () => ({ update, patch, isPending, workflow, step: getStep(), digestStepBeforeCurrent }),
+    [update, patch, isPending, workflow, getStep, digestStepBeforeCurrent]
+  );
 
   return (
     <>
