@@ -15,7 +15,6 @@ type URLInputProps = Omit<InputProps, 'value' | 'onChange'> & {
   };
   variables: LiquidVariable[];
   isAllowedVariable: IsAllowedVariable;
-  isVariableInSchema: (variable: LiquidVariable) => boolean;
 };
 
 export const URLInput = ({
@@ -24,8 +23,6 @@ export const URLInput = ({
   fields: { urlKey, targetKey },
   variables = [],
   isAllowedVariable,
-  isVariableInSchema,
-  ...rest
 }: URLInputProps) => {
   const { control, getFieldState } = useFormContext();
   const { saveForm } = useSaveForm();
@@ -51,7 +48,6 @@ export const URLInput = ({
                     onChange={field.onChange}
                     variables={variables}
                     isAllowedVariable={isAllowedVariable}
-                    isVariableInSchema={isVariableInSchema}
                   />
                 </FormItem>
               )}

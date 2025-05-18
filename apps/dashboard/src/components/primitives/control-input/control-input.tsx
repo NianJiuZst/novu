@@ -6,7 +6,7 @@ import { useCallback, useMemo, useRef } from 'react';
 
 import { Editor } from '@/components/primitives/editor';
 import { EditVariablePopover } from '@/components/variable/edit-variable-popover';
-import { useAutocompleteSource } from '@/hooks/use-autocomplete-source';
+import { createAutocompleteSource } from '@/utils/liquid-autocomplete';
 import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
 import { useVariables } from './hooks/use-variables';
 import { createVariableExtension } from './variable-plugin';
@@ -41,7 +41,6 @@ type ControlInputProps = {
   onChange: (value: string) => void;
   variables: LiquidVariable[];
   isAllowedVariable: IsAllowedVariable;
-  isVariableInSchema: (variable: LiquidVariable) => boolean;
   placeholder?: string;
   autoFocus?: boolean;
   size?: 'md' | 'sm' | '2xs';
@@ -62,7 +61,6 @@ export function ControlInput({
   size = 'sm',
   indentWithTab,
   isAllowedVariable,
-  isVariableInSchema,
 }: ControlInputProps) {
   const viewRef = useRef<EditorView | null>(null);
   const lastCompletionRef = useRef<CompletionRange | null>(null);
@@ -71,35 +69,34 @@ export function ControlInput({
     onChange
   );
   const isVariablePopoverOpen = !!selectedVariable;
-  const currentEditingVariable: LiquidVariable | undefined = selectedVariable
-    ? { name: selectedVariable.value }
+  const variable: LiquidVariable | undefined = selectedVariable
+    ? {
+        name: selectedVariable.value,
+      }
     : undefined;
 
   const { digestStepBeforeCurrent } = useWorkflow();
   const track = useTelemetry();
 
-  const onEditorVariableSelect = useCallback(
+  const onVariableSelect = useCallback(
     (completion: Completion) => {
       if (completion.type === 'digest') {
         const parts = completion.displayLabel?.split('.');
         const lastElement = parts?.[parts.length - 1];
 
         if (lastElement && lastElement in DIGEST_VARIABLES_FILTER_MAP) {
-          track(TelemetryEvent.DIGEST_VARIABLE_SELECTED, { variable: lastElement });
+          track(TelemetryEvent.DIGEST_VARIABLE_SELECTED, {
+            variable: lastElement,
+          });
         }
-      } else if (completion.type === 'add-new-variable') {
-        // Potentially track adding new variable here if needed
-        // track(TelemetryEvent.VARIABLE_ADDED_FROM_AUTOCOMPLETE, { variableName: completion.label }); // Removed for now
       }
-      // Call original handler passed to useAutocompleteSource if any special logic is needed for other types
     },
     [track]
   );
 
-  const completionSource = useAutocompleteSource(
-    variables,
-    (varName) => isVariableInSchema({ name: varName }),
-    onEditorVariableSelect
+  const completionSource = useMemo(
+    () => createAutocompleteSource(variables, onVariableSelect),
+    [variables, onVariableSelect]
   );
 
   const autocompletionExtension = useMemo(
@@ -135,9 +132,8 @@ export function ControlInput({
       onSelect: handleVariableSelect,
       isAllowedVariable,
       isDigestEventsVariable,
-      isVariableInSchema,
     });
-  }, [handleVariableSelect, isAllowedVariable, isDigestEventsVariable, isVariableInSchema]);
+  }, [handleVariableSelect, isAllowedVariable, isDigestEventsVariable]);
 
   const extensions = useMemo(() => {
     const baseExtensions = [...(multiline ? [EditorView.lineWrapping] : []), variablePillTheme];
@@ -174,16 +170,17 @@ export function ControlInput({
           variables={variables}
           open={isVariablePopoverOpen}
           onOpenChange={handleOpenChange}
-          variable={currentEditingVariable}
+          variable={variable}
           isAllowedVariable={isAllowedVariable}
-          isVariableInSchema={isVariableInSchema}
           onUpdate={(newValue) => {
             handleVariableUpdate(newValue);
+            // Focus back to the editor after updating the variable
             setTimeout(() => viewRef.current?.focus(), 0);
           }}
           onDeleteClick={() => {
             handleVariableUpdate('');
             setSelectedVariable(null);
+            // Focus back to the editor after updating the variable
             setTimeout(() => viewRef.current?.focus(), 0);
           }}
         >

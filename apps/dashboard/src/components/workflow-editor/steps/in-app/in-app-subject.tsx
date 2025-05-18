@@ -12,10 +12,7 @@ const subjectKey = 'subject';
 export const InAppSubject = () => {
   const { control, getValues } = useFormContext();
   const { step, digestStepBeforeCurrent } = useWorkflow();
-  const { variables, isAllowedVariable, isVariableInSchema } = useParseVariables(
-    step?.variables,
-    digestStepBeforeCurrent?.stepId
-  );
+  const { variables, isAllowedVariable } = useParseVariables(step?.variables, digestStepBeforeCurrent?.stepId);
 
   return (
     <FormField
@@ -34,7 +31,6 @@ export const InAppSubject = () => {
                 onChange={field.onChange}
                 variables={variables}
                 isAllowedVariable={isAllowedVariable}
-                isVariableInSchema={isVariableInSchema}
                 autoFocus
               />
             </InputRoot>

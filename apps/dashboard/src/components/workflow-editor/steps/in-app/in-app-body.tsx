@@ -12,10 +12,7 @@ const bodyKey = 'body';
 export const InAppBody = () => {
   const { control, getValues } = useFormContext();
   const { step, digestStepBeforeCurrent } = useWorkflow();
-  const { variables, isAllowedVariable, isVariableInSchema } = useParseVariables(
-    step?.variables,
-    digestStepBeforeCurrent?.stepId
-  );
+  const { variables, isAllowedVariable } = useParseVariables(step?.variables, digestStepBeforeCurrent?.stepId);
 
   return (
     <FormField
@@ -34,7 +31,6 @@ export const InAppBody = () => {
                 onChange={field.onChange}
                 variables={variables}
                 isAllowedVariable={isAllowedVariable}
-                isVariableInSchema={isVariableInSchema}
                 multiline
               />
             </InputRoot>

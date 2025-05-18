@@ -6,10 +6,7 @@ import { URLInput } from '../../url-input';
 
 export const InAppRedirect = () => {
   const { step, digestStepBeforeCurrent } = useWorkflow();
-  const { variables, isAllowedVariable, isVariableInSchema } = useParseVariables(
-    step?.variables,
-    digestStepBeforeCurrent?.stepId
-  );
+  const { variables, isAllowedVariable } = useParseVariables(step?.variables, digestStepBeforeCurrent?.stepId);
 
   return (
     <div className="flex flex-col gap-1">
@@ -33,7 +30,6 @@ export const InAppRedirect = () => {
         }}
         variables={variables}
         isAllowedVariable={isAllowedVariable}
-        isVariableInSchema={isVariableInSchema}
       />
       <FormMessage />
     </div>

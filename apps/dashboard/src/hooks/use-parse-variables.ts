@@ -1,24 +1,19 @@
 import { parseStepVariables } from '@/utils/parseStepVariables';
 import { type JSONSchemaDefinition } from '@novu/shared';
 import { useMemo } from 'react';
-import { usePayloadSchema } from '@/context/payload-schema';
 
-export function useParseVariables(schema?: JSONSchemaDefinition, digestStepId?: string, baseNamespace?: string) {
-  const { pendingVariables, version: payloadSchemaVersion } = usePayloadSchema();
-
+export function useParseVariables(schema?: JSONSchemaDefinition, digestStepId?: string) {
   const parsedVariables = useMemo(() => {
-    const result = schema
-      ? parseStepVariables(schema, { digestStepId, pendingVariablesSet: pendingVariables, baseNamespace })
+    return schema
+      ? parseStepVariables(schema, { digestStepId })
       : {
           variables: [],
           namespaces: [],
           primitives: [],
           arrays: [],
           isAllowedVariable: () => false,
-          isVariableInSchema: () => false,
         };
-    return result;
-  }, [schema, digestStepId, pendingVariables, payloadSchemaVersion, baseNamespace]);
+  }, [schema, digestStepId]);
 
   return parsedVariables;
 }
