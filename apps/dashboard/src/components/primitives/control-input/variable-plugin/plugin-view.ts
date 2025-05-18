@@ -65,9 +65,7 @@ export class VariablePluginView {
         continue;
       }
 
-      if (!this.isAllowedVariable({ name })) {
-        continue;
-      }
+      const isVariableDefined = this.isAllowedVariable({ name });
 
       if (name) {
         decorations.push(
@@ -79,7 +77,8 @@ export class VariablePluginView {
               end,
               filtersArray,
               this.onSelect,
-              this.isDigestEventsVariable
+              this.isDigestEventsVariable,
+              isVariableDefined
             ),
             inclusive: false,
             side: -1,

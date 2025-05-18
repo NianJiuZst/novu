@@ -44,5 +44,6 @@ export function createVariableExtension({
 
 export const VARIABLE_PILL_CLASS = 'cm-variable-pill';
 export const FILTERS_CLASS = 'has-filters';
+export const UNDEFINED_VARIABLE_PILL_CLASS = 'cm-undefined-variable-pill';
 
 export * from './types';

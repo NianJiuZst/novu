@@ -1,6 +1,7 @@
 import { validateEnhancedDigestFilters, getFirstFilterAndItsArgs } from '@/components/variable/utils';
 import { WidgetType } from '@uiw/react-codemirror';
 import { CSSProperties } from 'react';
+import { UNDEFINED_VARIABLE_PILL_CLASS, VARIABLE_PILL_CLASS } from '.';
 
 export class VariablePillWidget extends WidgetType {
   private clickHandler: (e: MouseEvent) => void;
@@ -13,7 +14,8 @@ export class VariablePillWidget extends WidgetType {
     private end: number,
     private filters: string[],
     private onSelect?: (value: string, from: number, to: number) => void,
-    private isDigestEventsVariable?: (variableName: string) => boolean
+    private isDigestEventsVariable?: (variableName: string) => boolean,
+    private isDefined: boolean = true
   ) {
     super();
 
@@ -126,8 +128,19 @@ export class VariablePillWidget extends WidgetType {
     const pillStyles = this.createPillStyles();
     Object.assign(span.style, pillStyles);
 
-    const beforeStyles = this.createBeforeStyles();
+    // Apply specific class based on whether the variable is defined in the schema
+    // and set the icon accordingly.
+    const beforeStyles = this.createBeforeStyles(); // Base icon style
     Object.assign(before.style, beforeStyles);
+
+    if (!this.isDefined) {
+      span.classList.add(UNDEFINED_VARIABLE_PILL_CLASS);
+      // Override icon for undefined variables to show a warning icon.
+      // The color will be inherited from the UNDEFINED_VARIABLE_PILL_CLASS style.
+      before.style.backgroundImage = `url("/images/error-warning-line.svg")`;
+    } else {
+      span.classList.add(VARIABLE_PILL_CLASS);
+    }
 
     const contentStyles = this.createContentStyles();
     Object.assign(content.style, contentStyles);
@@ -147,6 +160,7 @@ export class VariablePillWidget extends WidgetType {
     const hasIssues = !!this.getVariableIssues();
 
     if (hasIssues) {
+      // This will override the undefined variable's yellow warning icon with a red error icon if there's a more specific issue.
       before.style.color = 'hsl(var(--error-base))';
       before.style.backgroundImage = `url("/images/error-warning-line.svg")`;
     }

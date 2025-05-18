@@ -136,29 +136,50 @@ export const EditVariablePopover = ({
   const filteredFilters = useMemo(() => getFilteredFilters(searchQuery), [getFilteredFilters, searchQuery]);
 
   const handleOpenChange = useCallback(
-    (open: boolean) => {
+    (newOpenState: boolean) => {
       const aliasFor = calculateAliasFor(name, parsedAliasForRoot);
+      // Preserve the original variable name or use an empty string if it's a new/undefined variable being created.
+      // This is what onOpenChange will receive if closing with invalid data.
+      const originalOrEmptyName = variable?.name || '';
 
-      if (!open && !validateVariable({ name, aliasFor })) {
-        return;
+      if (!newOpenState) {
+        // Attempting to close
+        if (validateVariable({ name, aliasFor })) {
+          // If current state in popover is valid
+          const newValue = formatLiquidVariable(name, defaultVal, filters);
+          track(TelemetryEvent.VARIABLE_POPOVER_APPLIED, {
+            variableName: name,
+            hasDefaultValue: !!defaultVal,
+            filtersCount: filters.length,
+            filters: filters.map((filter) => filter.value),
+          });
+          setVariableError('');
+          onUpdate(newValue); // Apply valid changes
+          onOpenChange(false, newValue); // Propagate close with new valid value
+        } else {
+          // Variable is invalid. Do NOT call onUpdate.
+          // Call onOpenChange to signal closure to the parent (ControlInput).
+          // Pass the original variable name so ControlInput knows what was there before opening.
+          onOpenChange(false, originalOrEmptyName);
+        }
+      } else {
+        // Attempting to open
+        // When opening, the current value in the popover is based on the initially passed variable.
+        const initialValue = formatLiquidVariable(name, defaultVal, filters);
+        onOpenChange(true, initialValue); // Propagate open
       }
-
-      const newValue = formatLiquidVariable(name, defaultVal, filters);
-
-      if (!open) {
-        track(TelemetryEvent.VARIABLE_POPOVER_APPLIED, {
-          variableName: name,
-          hasDefaultValue: !!defaultVal,
-          filtersCount: filters.length,
-          filters: filters.map((filter) => filter.value),
-        });
-        setVariableError('');
-        onUpdate(newValue);
-      }
-
-      onOpenChange(open, newValue);
     },
-    [validateVariable, onOpenChange, name, defaultVal, filters, track, onUpdate, parsedAliasForRoot]
+    [
+      validateVariable,
+      onOpenChange,
+      name,
+      defaultVal,
+      filters,
+      track,
+      onUpdate,
+      parsedAliasForRoot,
+      variable?.name, // Add variable.name to dependencies for originalOrEmptyName
+    ]
   );
 
   const handleClosePopover = useCallback(() => {
