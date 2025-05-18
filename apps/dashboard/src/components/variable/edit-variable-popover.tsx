@@ -135,6 +135,15 @@ export const EditVariablePopover = ({
   const suggestedFilters = useSuggestedFilters(name, filters);
   const filteredFilters = useMemo(() => getFilteredFilters(searchQuery), [getFilteredFilters, searchQuery]);
 
+  const handleAddVariableToSchema = useCallback(() => {
+    track('variable_add_to_schema_clicked', { variableName: name });
+    // eslint-disable-next-line no-console
+    console.log(`Button "Add variable to payload schema" clicked for variable: ${name}`);
+    // In a real scenario, this would likely call a prop function:
+    // onAddVariableToSchema?.(name);
+    // And potentially trigger a re-validation once the action is complete.
+  }, [name, track]);
+
   const handleOpenChange = useCallback(
     (newOpenState: boolean) => {
       const aliasFor = calculateAliasFor(name, parsedAliasForRoot);
@@ -227,7 +236,21 @@ export const EditVariablePopover = ({
                       size="xs"
                       placeholder="Variable name (e.g. payload.name)"
                     />
-                    <FormMessagePure hasError={!!variableError}>{variableError}</FormMessagePure>
+                    {variableError === 'Not a valid variable' ? (
+                      <div>
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={handleAddVariableToSchema}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddVariableToSchema()}
+                          className="text-primary hover:text-primary/80 mt-1 cursor-pointer text-xs"
+                        >
+                          Add variable to payload schema
+                        </span>
+                      </div>
+                    ) : (
+                      <FormMessagePure hasError={!!variableError}>{variableError}</FormMessagePure>
+                    )}
                   </div>
                 </FormControl>
               </FormItem>
