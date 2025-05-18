@@ -4,23 +4,28 @@ import type { FeatureFlagContext, FeatureFlagContextBase, IFeatureFlagsService }
 
 @Injectable()
 export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
-  private client: LDClient;
+  private static client: LDClient;
+  private static isInitialized: boolean = false;
   public isEnabled: boolean;
 
   public async initialize(): Promise<void> {
-    const launchDarklySdkKey = process.env.LAUNCH_DARKLY_SDK_KEY;
-    if (!launchDarklySdkKey) {
-      throw new Error('Missing Launch Darkly SDK key');
+    if (!LaunchDarklyFeatureFlagsService.isInitialized) {
+      const launchDarklySdkKey = process.env.LAUNCH_DARKLY_SDK_KEY;
+      if (!launchDarklySdkKey) {
+        throw new Error('Missing Launch Darkly SDK key');
+      }
+      LaunchDarklyFeatureFlagsService.client = init(launchDarklySdkKey);
+      await LaunchDarklyFeatureFlagsService.client.waitForInitialization({ timeout: 10000 });
+      LaunchDarklyFeatureFlagsService.isInitialized = true;
     }
-    this.client = init(launchDarklySdkKey);
-    await this.client.waitForInitialization({ timeout: 10000 });
     this.isEnabled = true;
   }
 
   public async gracefullyShutdown(): Promise<void> {
-    if (this.client) {
-      await this.client.flush();
-      this.client.close();
+    if (LaunchDarklyFeatureFlagsService.client && LaunchDarklyFeatureFlagsService.isInitialized) {
+      await LaunchDarklyFeatureFlagsService.client.flush();
+      LaunchDarklyFeatureFlagsService.client.close();
+      LaunchDarklyFeatureFlagsService.isInitialized = false;
     }
   }
 
@@ -32,7 +37,7 @@ export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
     user,
   }: FeatureFlagContext<T_Result>): Promise<T_Result> {
     const context = this.buildLDContext({ user, organization, environment });
-    const newVar = await this.client.variation(key, context, defaultValue);
+    const newVar = await LaunchDarklyFeatureFlagsService.client.variation(key, context, defaultValue);
 
     return newVar;
   }
