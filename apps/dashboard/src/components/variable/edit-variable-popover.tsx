@@ -1,8 +1,9 @@
 import { ReactNode, useState, useCallback, useMemo, useEffect, useId, useRef } from 'react';
-import { RiDeleteBin2Line, RiQuestionLine, RiSearchLine } from 'react-icons/ri';
+import { RiAlertLine, RiDeleteBin2Line, RiQuestionLine, RiSearchLine } from 'react-icons/ri';
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/primitives/popover';
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import { LiquidVariable } from '@/utils/parseStepVariables';
+import type { IsAllowedVariable } from '@/utils/parseStepVariables';
 import {
   Command,
   CommandEmpty,
@@ -28,6 +29,7 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { EscapeKeyManagerPriority } from '@/context/escape-key-manager/priority';
 import { useEscapeKeyManager } from '@/context/escape-key-manager/hooks';
 import { Button } from '../primitives/button';
+import { usePayloadSchema } from '@/context/payload-schema';
 
 const calculateAliasFor = (name: string, parsedAliasRoot: string): string => {
   const variableRest = name.split('.').slice(1).join('.');
@@ -42,6 +44,13 @@ const calculateAliasFor = (name: string, parsedAliasRoot: string): string => {
   return aliasFor;
 };
 
+interface ValidationResult {
+  isValid: boolean;
+  isNewPending: boolean;
+  message: string;
+  isWarning: boolean;
+}
+
 type EditVariablePopoverProps = {
   variables: LiquidVariable[];
   children: ReactNode;
@@ -50,6 +59,7 @@ type EditVariablePopoverProps = {
   onOpenChange: (open: boolean, newValue: string) => void;
   onUpdate: (newValue: string) => void;
   isAllowedVariable: IsAllowedVariable;
+  isVariableInSchema: (variable: LiquidVariable) => boolean;
   onDeleteClick: () => void;
 };
 
@@ -60,7 +70,8 @@ export const EditVariablePopover = ({
   onOpenChange,
   variable,
   onUpdate,
-  isAllowedVariable,
+  isAllowedVariable: isAllowedByHook,
+  isVariableInSchema,
   onDeleteClick,
 }: EditVariablePopoverProps) => {
   const { parsedName, parsedAliasForRoot, parsedDefaultValue, parsedFilters } = useVariableParser(
@@ -70,51 +81,102 @@ export const EditVariablePopover = ({
   const id = useId();
   const nameInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(parsedName);
-  const [variableError, setVariableError] = useState<string>(() => {
-    if (!variable || !isAllowedVariable({ ...variable, name: parsedName })) {
-      return 'Not a valid variable';
-    }
+  const [variableError, setVariableError] = useState<string>('');
+  const [isWarningOnly, setIsWarningOnly] = useState<boolean>(false);
 
-    return '';
-  });
+  const payloadSchemaContext = usePayloadSchema();
+
   const [defaultVal, setDefaultVal] = useState(parsedDefaultValue);
   const [searchQuery, setSearchQuery] = useState('');
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [filters, setFilters] = useState<FilterWithParam[]>(parsedFilters || []);
   const track = useTelemetry();
 
+  const validateVariable = useCallback(
+    (variableToCheck: LiquidVariable): ValidationResult => {
+      const varNameWithoutFilters = variableToCheck.name.split('|')[0].trim();
+
+      if (!varNameWithoutFilters) {
+        return { isValid: false, isNewPending: false, message: 'Variable name cannot be empty.', isWarning: false };
+      }
+
+      if (isVariableInSchema(variableToCheck)) {
+        return { isValid: true, isNewPending: false, message: '', isWarning: false };
+      }
+
+      if (isAllowedByHook(variableToCheck)) {
+        if (payloadSchemaContext.isPendingVariable(varNameWithoutFilters)) {
+          return {
+            isValid: true,
+            isNewPending: false,
+            message: 'This variable is pending addition to the schema.',
+            isWarning: true,
+          };
+        }
+        return {
+          isValid: true,
+          isNewPending: true,
+          message: 'This variable is not in the schema and will be added as a pending variable.',
+          isWarning: true,
+        };
+      }
+      return {
+        isValid: false,
+        isNewPending: false,
+        message: 'Not a valid variable name or structure.',
+        isWarning: false,
+      };
+    },
+    [isVariableInSchema, isAllowedByHook, payloadSchemaContext.isPendingVariable]
+  );
+
+  const validateAndSetState = useCallback(
+    (varToCheck: LiquidVariable): ValidationResult => {
+      const result = validateVariable(varToCheck);
+      setVariableError(result.message);
+      setIsWarningOnly(result.isWarning);
+      if (!result.isValid && !result.isWarning) {
+        nameInputRef.current?.focus();
+      }
+      return result;
+    },
+    [validateVariable]
+  );
+
+  const validateVariableDebounced = useDebounce(validateAndSetState, 300);
+
   useEffect(() => {
     setName(parsedName);
     setDefaultVal(parsedDefaultValue);
     setFilters(parsedFilters || []);
-  }, [parsedName, parsedDefaultValue, parsedFilters]);
-
-  const validateVariable = useCallback(
-    (variable: LiquidVariable) => {
-      if (!variable || !isAllowedVariable({ ...variable })) {
-        setVariableError('Not a valid variable');
-        nameInputRef.current?.focus();
-        return false;
-      }
-
+    const initialVar = { name: parsedName, aliasFor: parsedAliasForRoot };
+    if (parsedName) {
+      const validationRes = validateVariable(initialVar);
+      setVariableError(validationRes.message);
+      setIsWarningOnly(validationRes.isWarning);
+    } else {
       setVariableError('');
-      return true;
-    },
-    [isAllowedVariable]
-  );
+      setIsWarningOnly(false);
+    }
+  }, [parsedName, parsedDefaultValue, parsedFilters, parsedAliasForRoot, validateVariable]);
 
-  const validateVariableDebounced = useDebounce(validateVariable, 2000);
-
-  // Set initial test value when popover opens
   const handlePopoverOpen = useCallback(() => {
     track(TelemetryEvent.VARIABLE_POPOVER_OPENED);
-  }, [track]);
+    const currentVarToValidate = { name, aliasFor: calculateAliasFor(name, parsedAliasForRoot) };
+    if (name) {
+      const validationRes = validateVariable(currentVarToValidate);
+      setVariableError(validationRes.message);
+      setIsWarningOnly(validationRes.isWarning);
+    } else {
+      setVariableError('');
+      setIsWarningOnly(false);
+    }
+  }, [track, name, parsedAliasForRoot, validateVariable]);
 
   const handleNameChange = useCallback(
     (newName: string) => {
-      const aliasFor = calculateAliasFor(newName, parsedAliasForRoot);
-
       setName(newName);
+      const aliasFor = calculateAliasFor(newName, parsedAliasForRoot);
       validateVariableDebounced({ name: newName, aliasFor });
     },
     [setName, validateVariableDebounced, parsedAliasForRoot]
@@ -135,40 +197,86 @@ export const EditVariablePopover = ({
   const suggestedFilters = useSuggestedFilters(name, filters);
   const filteredFilters = useMemo(() => getFilteredFilters(searchQuery), [getFilteredFilters, searchQuery]);
 
-  const handleOpenChange = useCallback(
-    (open: boolean) => {
+  const handleApplyLogic = useCallback(
+    (closePopover: boolean) => {
       const aliasFor = calculateAliasFor(name, parsedAliasForRoot);
+      const currentVarToValidate = { name, aliasFor };
+      const validationResult = validateAndSetState(currentVarToValidate);
 
-      if (!open && !validateVariable({ name, aliasFor })) {
-        return;
+      if (!validationResult.isValid && !validationResult.isWarning) {
+        if (closePopover) {
+          // If triggered by Popover's onOpenChange(false), we might not be able to prevent closing easily.
+          // But we must not call onUpdate.
+          // The original onOpenChange will be called by Popover regardless.
+          // We ensure onUpdate is not called.
+        } else {
+          // Triggered by form submit, can prevent further action.
+        }
+        return false; // Signify failure to apply
+      }
+
+      // If valid OR only a warning, proceed to update
+      if (validationResult.isNewPending) {
+        payloadSchemaContext.addPendingVariable(name.split('|')[0]);
       }
 
       const newValue = formatLiquidVariable(name, defaultVal, filters);
-
-      if (!open) {
-        track(TelemetryEvent.VARIABLE_POPOVER_APPLIED, {
-          variableName: name,
-          hasDefaultValue: !!defaultVal,
-          filtersCount: filters.length,
-          filters: filters.map((filter) => filter.value),
-        });
-        setVariableError('');
-        onUpdate(newValue);
-      }
-
-      onOpenChange(open, newValue);
+      track(TelemetryEvent.VARIABLE_POPOVER_APPLIED, {
+        variableName: name,
+        hasDefaultValue: !!defaultVal,
+        filtersCount: filters.length,
+        filters: filters.map((filter) => filter.value),
+      });
+      onUpdate(newValue);
+      return true; // Signify success
     },
-    [validateVariable, onOpenChange, name, defaultVal, filters, track, onUpdate, parsedAliasForRoot]
+    [name, parsedAliasForRoot, validateAndSetState, payloadSchemaContext, defaultVal, filters, track, onUpdate]
+  );
+
+  const handleOpenChangeCallback = useCallback(
+    (newOpenState: boolean) => {
+      let newValue = formatLiquidVariable(name, defaultVal, filters); // Current value before potential apply
+      if (!newOpenState) {
+        // Closing
+        const appliedSuccessfully = handleApplyLogic(true);
+        if (!appliedSuccessfully) {
+          // If apply failed due to hard error, we don't want to call the external onOpenChange with false.
+          // However, the Popover might close itself. The crucial part is that onUpdate was not called.
+          // To be safe, and if the popover MUST stay open, we'd call onOpenChange(true, ...)
+          // For now, assume the popover might close, but data isn't updated.
+          // Let external onOpenChange still be called to reflect popover state.
+          onOpenChange(newOpenState, newValue); // newValue here is PRE-apply attempt for consistency if apply fails.
+          return;
+        }
+        // if applied successfully, newValue for onOpenChange should be the updated one.
+        newValue = formatLiquidVariable(name, defaultVal, filters);
+      }
+      onOpenChange(newOpenState, newValue);
+    },
+    [name, defaultVal, filters, handleApplyLogic, onOpenChange]
+  );
+
+  const handleFormSubmit = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const appliedSuccessfully = handleApplyLogic(false);
+      if (appliedSuccessfully) {
+        onOpenChange(false, formatLiquidVariable(name, defaultVal, filters)); // Close popover on successful form submit + apply
+      }
+    },
+    [handleApplyLogic, onOpenChange, name, defaultVal, filters]
   );
 
   const handleClosePopover = useCallback(() => {
-    handleOpenChange(false);
-  }, [handleOpenChange]);
+    // This is for EscapeKeyManager - it should behave like clicking away
+    handleOpenChangeCallback(false);
+  }, [handleOpenChangeCallback]);
 
   useEscapeKeyManager(id, handleClosePopover, EscapeKeyManagerPriority.POPOVER, open);
 
   return (
-    <Popover open={open} onOpenChange={handleOpenChange}>
+    <Popover open={open} onOpenChange={handleOpenChangeCallback}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="min-w-[275px] max-w-[275px] p-0" align="start" onOpenAutoFocus={handlePopoverOpen}>
         <form
@@ -176,11 +284,7 @@ export const EditVariablePopover = ({
             event.preventDefault();
             event.stopPropagation();
           }}
-          onSubmit={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            handleOpenChange(false);
-          }}
+          onSubmit={handleFormSubmit}
         >
           <div className="bg-bg-weak border-b border-b-neutral-100">
             <div className="flex flex-row items-center justify-between space-y-0 px-1.5 py-1">
@@ -205,8 +309,21 @@ export const EditVariablePopover = ({
                       autoFocus
                       size="xs"
                       placeholder="Variable name (e.g. payload.name)"
+                      className={
+                        variableError && !isWarningOnly
+                          ? 'border-destructive'
+                          : isWarningOnly
+                            ? 'border-yellow-500'
+                            : ''
+                      }
                     />
-                    <FormMessagePure hasError={!!variableError}>{variableError}</FormMessagePure>
+                    <FormMessagePure
+                      hasError={!!variableError && !isWarningOnly}
+                      icon={isWarningOnly ? RiAlertLine : undefined}
+                      className={isWarningOnly ? 'text-yellow-700' : ''}
+                    >
+                      {variableError}
+                    </FormMessagePure>
                   </div>
                 </FormControl>
               </FormItem>

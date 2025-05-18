@@ -1,4 +1,4 @@
-import { IsAllowedVariable } from '@/utils/parseStepVariables';
+import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
 import { EditorView } from '@uiw/react-codemirror';
 import { MutableRefObject } from 'react';
 
@@ -7,5 +7,6 @@ export type PluginState = {
   lastCompletionRef: MutableRefObject<{ from: number; to: number } | null>;
   onSelect?: (value: string, from: number, to: number) => void;
   isAllowedVariable: IsAllowedVariable;
+  isVariableInSchema: (variable: LiquidVariable) => boolean;
   isDigestEventsVariable?: (variableName: string) => boolean;
 };

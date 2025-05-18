@@ -13,7 +13,8 @@ export class VariablePillWidget extends WidgetType {
     private end: number,
     private filters: string[],
     private onSelect?: (value: string, from: number, to: number) => void,
-    private isDigestEventsVariable?: (variableName: string) => boolean
+    private isDigestEventsVariable?: (variableName: string) => boolean,
+    private isPending?: boolean
   ) {
     super();
 
@@ -37,15 +38,22 @@ export class VariablePillWidget extends WidgetType {
   }
 
   createBeforeStyles(): CSSProperties {
-    return {
+    const baseStyles: CSSProperties = {
       width: 'calc(1rem - 2px)',
       minWidth: 'calc(1rem - 2px)',
       height: 'calc(1rem - 2px)',
-      backgroundImage: `url("/images/code.svg")`,
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'center',
       backgroundSize: 'contain',
     };
+
+    if (this.isPending) {
+      baseStyles.backgroundImage = `url("/images/alert-circle-warning-outline.svg")`;
+    } else {
+      baseStyles.backgroundImage = `url("/images/code.svg")`;
+    }
+
+    return baseStyles;
   }
 
   createAfterStyles(): CSSProperties {
@@ -59,7 +67,7 @@ export class VariablePillWidget extends WidgetType {
   }
 
   createPillStyles(): CSSProperties {
-    return {
+    const styles: CSSProperties = {
       backgroundColor: 'hsl(var(--bg-white))',
       color: 'inherit',
       border: '1px solid hsl(var(--stroke-soft))',
@@ -79,12 +87,19 @@ export class VariablePillWidget extends WidgetType {
       fontWeight: '500',
       boxSizing: 'border-box',
     };
+
+    if (this.isPending) {
+      styles.borderColor = 'hsl(var(--warning-700))';
+      styles.borderStyle = 'dashed';
+    }
+
+    return styles;
   }
 
   createContentStyles(): CSSProperties {
     return {
       lineHeight: '1.2',
-      color: 'hsl(var(--text-sub))',
+      color: this.isPending ? 'hsl(var(--warning-700))' : 'hsl(var(--text-sub))',
       maxWidth: '24ch',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
@@ -137,6 +152,10 @@ export class VariablePillWidget extends WidgetType {
     span.setAttribute('data-end', this.end.toString());
     span.setAttribute('data-display', this.variableName);
 
+    if (this.isPending) {
+      span.setAttribute('data-pending', 'true');
+    }
+
     span.appendChild(before);
     span.appendChild(content);
 
@@ -144,30 +163,48 @@ export class VariablePillWidget extends WidgetType {
 
     content.textContent = this.getDisplayVariableName();
 
-    const hasIssues = !!this.getVariableIssues();
+    const digestIssue = this.getVariableIssues();
 
-    if (hasIssues) {
+    if (digestIssue) {
       before.style.color = 'hsl(var(--error-base))';
       before.style.backgroundImage = `url("/images/error-warning-line.svg")`;
+      span.style.borderColor = 'hsl(var(--error-base))';
+      span.style.borderStyle = 'solid';
+      content.style.color = 'hsl(var(--text-sub))';
+    } else if (this.isPending) {
+      // apply pending styles if no digest issue
     }
 
     this.renderFilters(span);
 
     span.addEventListener('mouseenter', () => {
-      if (!this.tooltipElement) {
-        const issues = this.getVariableIssues();
-        if (!issues) return;
+      if (this.tooltipElement) return;
 
+      const currentDigestIssue = this.getVariableIssues();
+      let tooltipContent = '';
+      let tooltipType: 'error' | 'warning' | 'other' = 'other';
+
+      if (currentDigestIssue) {
+        tooltipContent = `${currentDigestIssue.name}: ${currentDigestIssue.message}`;
+        tooltipType = 'error';
+      } else if (this.isPending) {
+        tooltipContent = 'Variable not in schema. Click to edit or add to schema.';
+        tooltipType = 'warning';
+      }
+
+      if (tooltipContent) {
         this.tooltipElement = this.renderTooltip({
           parent: span,
-          content: `${issues.name}: ${issues.message}`,
-          type: 'error',
+          content: tooltipContent,
+          type: tooltipType,
         });
         this.tooltipElement.setAttribute('data-state', 'open');
       }
 
-      if (hasIssues) {
+      if (currentDigestIssue) {
         span.style.backgroundColor = 'hsl(var(--error-base) / 0.025)';
+      } else if (this.isPending) {
+        span.style.backgroundColor = 'hsl(var(--warning-50) / 0.1)';
       }
     });
 
@@ -207,6 +244,7 @@ export class VariablePillWidget extends WidgetType {
         argsSpan.textContent = finalParam;
         argsSpan.title = finalParam;
         Object.assign(argsSpan.style, this.createContentStyles());
+        if (this.isPending) argsSpan.style.color = 'hsl(var(--warning-700))';
         filterSpan.appendChild(argsSpan);
       }
 
@@ -259,7 +297,7 @@ export class VariablePillWidget extends WidgetType {
     parent: HTMLElement;
     prefix?: string;
     content: string;
-    type: 'error' | 'other';
+    type: 'error' | 'warning' | 'other';
   }) {
     const tooltip = document.createElement('div');
     tooltip.className =
@@ -289,6 +327,9 @@ export class VariablePillWidget extends WidgetType {
     if (type === 'error') {
       innerContainer.textContent = content;
       tooltip.style.color = 'hsl(var(--error-base))';
+    } else if (type === 'warning') {
+      innerContainer.textContent = content;
+      tooltip.style.color = 'hsl(var(--warning-700))';
     } else {
       innerContainer.textContent = prefix ?? '';
       innerContainer.style.color = 'hsl(var(--text-soft))';
@@ -316,7 +357,13 @@ export class VariablePillWidget extends WidgetType {
    * Used by CodeMirror to optimize re-rendering.
    */
   eq(other: VariablePillWidget) {
-    return other.fullVariableName === this.fullVariableName && other.start === this.start && other.end === this.end;
+    return (
+      other.fullVariableName === this.fullVariableName &&
+      other.start === this.start &&
+      other.end === this.end &&
+      other.isPending === this.isPending &&
+      JSON.stringify(other.filters) === JSON.stringify(this.filters)
+    );
   }
 
   /**

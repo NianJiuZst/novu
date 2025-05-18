@@ -207,7 +207,11 @@ const ConfigureActionPopover = (
   } = props;
   const { control } = useFormContext();
   const { step, digestStepBeforeCurrent } = useWorkflow();
-  const { variables, isAllowedVariable } = useParseVariables(step?.variables, digestStepBeforeCurrent?.stepId);
+  const { variables, isAllowedVariable, isVariableInSchema } = useParseVariables(
+    step?.variables,
+    digestStepBeforeCurrent?.stepId
+  );
+  const actionType = useWatch({ control, name: `${actionKey}.type` });
 
   return (
     <Popover>
@@ -232,6 +236,7 @@ const ConfigureActionPopover = (
                     <ControlInput
                       variables={variables}
                       isAllowedVariable={isAllowedVariable}
+                      isVariableInSchema={isVariableInSchema}
                       multiline={false}
                       indentWithTab={false}
                       placeholder={title}
@@ -254,6 +259,7 @@ const ConfigureActionPopover = (
               }}
               variables={variables}
               isAllowedVariable={isAllowedVariable}
+              isVariableInSchema={isVariableInSchema}
             />
           </div>
         </div>
