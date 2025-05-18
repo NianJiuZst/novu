@@ -28,6 +28,9 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { EscapeKeyManagerPriority } from '@/context/escape-key-manager/priority';
 import { useEscapeKeyManager } from '@/context/escape-key-manager/hooks';
 import { Button } from '../primitives/button';
+import { PayloadSchemaDrawer } from '@/components/workflow-editor/payload-schema-drawer';
+import type { WorkflowResponseDto as NovuWorkflowResponseDto } from '@novu/shared';
+import type { JSONSchema7 } from '@/components/schema-editor/json-schema';
 
 const calculateAliasFor = (name: string, parsedAliasRoot: string): string => {
   const variableRest = name.split('.').slice(1).join('.');
@@ -42,6 +45,8 @@ const calculateAliasFor = (name: string, parsedAliasRoot: string): string => {
   return aliasFor;
 };
 
+type WorkflowForSchemaEditing = NovuWorkflowResponseDto & { payloadSchema?: JSONSchema7 };
+
 type EditVariablePopoverProps = {
   variables: LiquidVariable[];
   children: ReactNode;
@@ -51,6 +56,8 @@ type EditVariablePopoverProps = {
   onUpdate: (newValue: string) => void;
   isAllowedVariable: IsAllowedVariable;
   onDeleteClick: () => void;
+  workflow?: WorkflowForSchemaEditing;
+  onWorkflowSchemaSaved?: () => Promise<void>;
 };
 
 export const EditVariablePopover = ({
@@ -62,6 +69,8 @@ export const EditVariablePopover = ({
   onUpdate,
   isAllowedVariable,
   onDeleteClick,
+  workflow,
+  onWorkflowSchemaSaved,
 }: EditVariablePopoverProps) => {
   const { parsedName, parsedAliasForRoot, parsedDefaultValue, parsedFilters } = useVariableParser(
     variable?.name || '',
@@ -81,6 +90,7 @@ export const EditVariablePopover = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [filters, setFilters] = useState<FilterWithParam[]>(parsedFilters || []);
+  const [isPayloadSchemaDrawerOpen, setIsPayloadSchemaDrawerOpen] = useState(false);
   const track = useTelemetry();
 
   useEffect(() => {
@@ -89,26 +99,25 @@ export const EditVariablePopover = ({
     setFilters(parsedFilters || []);
   }, [parsedName, parsedDefaultValue, parsedFilters]);
 
+  const handlePopoverOpen = useCallback(() => {
+    track(TelemetryEvent.VARIABLE_POPOVER_OPENED);
+  }, [track]);
+
   const validateVariable = useCallback(
-    (variable: LiquidVariable) => {
-      if (!variable || !isAllowedVariable({ ...variable })) {
+    (variableToValidate: LiquidVariable) => {
+      if (!variableToValidate || !isAllowedVariable({ ...variableToValidate })) {
         setVariableError('Not a valid variable');
-        nameInputRef.current?.focus();
         return false;
       }
 
       setVariableError('');
+
       return true;
     },
-    [isAllowedVariable]
+    [isAllowedVariable, setVariableError]
   );
 
   const validateVariableDebounced = useDebounce(validateVariable, 2000);
-
-  // Set initial test value when popover opens
-  const handlePopoverOpen = useCallback(() => {
-    track(TelemetryEvent.VARIABLE_POPOVER_OPENED);
-  }, [track]);
 
   const handleNameChange = useCallback(
     (newName: string) => {
@@ -136,25 +145,27 @@ export const EditVariablePopover = ({
   const filteredFilters = useMemo(() => getFilteredFilters(searchQuery), [getFilteredFilters, searchQuery]);
 
   const handleAddVariableToSchema = useCallback(() => {
-    track('variable_add_to_schema_clicked', { variableName: name });
-    // eslint-disable-next-line no-console
-    console.log(`Button "Add variable to payload schema" clicked for variable: ${name}`);
-    // In a real scenario, this would likely call a prop function:
-    // onAddVariableToSchema?.(name);
-    // And potentially trigger a re-validation once the action is complete.
-  }, [name, track]);
+    setIsPayloadSchemaDrawerOpen(true);
+  }, [name, track, setIsPayloadSchemaDrawerOpen]);
+
+  const handlePayloadSchemaSave = useCallback(async () => {
+    await onWorkflowSchemaSaved?.();
+
+    const aliasFor = calculateAliasFor(name, parsedAliasForRoot);
+    validateVariable({ name, aliasFor });
+  }, [onWorkflowSchemaSaved, name, parsedAliasForRoot, validateVariable]);
 
   const handleOpenChange = useCallback(
     (newOpenState: boolean) => {
+      if (isPayloadSchemaDrawerOpen && !newOpenState) {
+        return;
+      }
+
       const aliasFor = calculateAliasFor(name, parsedAliasForRoot);
-      // Preserve the original variable name or use an empty string if it's a new/undefined variable being created.
-      // This is what onOpenChange will receive if closing with invalid data.
       const originalOrEmptyName = variable?.name || '';
 
       if (!newOpenState) {
-        // Attempting to close
         if (validateVariable({ name, aliasFor })) {
-          // If current state in popover is valid
           const newValue = formatLiquidVariable(name, defaultVal, filters);
           track(TelemetryEvent.VARIABLE_POPOVER_APPLIED, {
             variableName: name,
@@ -163,19 +174,14 @@ export const EditVariablePopover = ({
             filters: filters.map((filter) => filter.value),
           });
           setVariableError('');
-          onUpdate(newValue); // Apply valid changes
-          onOpenChange(false, newValue); // Propagate close with new valid value
+          onUpdate(newValue);
+          onOpenChange(false, newValue);
         } else {
-          // Variable is invalid. Do NOT call onUpdate.
-          // Call onOpenChange to signal closure to the parent (ControlInput).
-          // Pass the original variable name so ControlInput knows what was there before opening.
           onOpenChange(false, originalOrEmptyName);
         }
       } else {
-        // Attempting to open
-        // When opening, the current value in the popover is based on the initially passed variable.
         const initialValue = formatLiquidVariable(name, defaultVal, filters);
-        onOpenChange(true, initialValue); // Propagate open
+        onOpenChange(true, initialValue);
       }
     },
     [
@@ -187,7 +193,8 @@ export const EditVariablePopover = ({
       track,
       onUpdate,
       parsedAliasForRoot,
-      variable?.name, // Add variable.name to dependencies for originalOrEmptyName
+      variable?.name,
+      isPayloadSchemaDrawerOpen,
     ]
   );
 
@@ -198,170 +205,181 @@ export const EditVariablePopover = ({
   useEscapeKeyManager(id, handleClosePopover, EscapeKeyManagerPriority.POPOVER, open);
 
   return (
-    <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="min-w-[275px] max-w-[275px] p-0" align="start" onOpenAutoFocus={handlePopoverOpen}>
-        <form
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}
-          onSubmit={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            handleOpenChange(false);
-          }}
-        >
-          <div className="bg-bg-weak border-b border-b-neutral-100">
-            <div className="flex flex-row items-center justify-between space-y-0 px-1.5 py-1">
-              <div className="flex w-full items-center justify-between gap-1">
-                <span className="text-subheading-2xs text-text-soft">CONFIGURE VARIABLE</span>
-                <Button variant="secondary" mode="ghost" className="h-5 p-1" onClick={onDeleteClick}>
-                  <RiDeleteBin2Line className="size-3.5 text-neutral-400" />
-                </Button>
+    <>
+      <Popover open={open} onOpenChange={handleOpenChange}>
+        <PopoverTrigger asChild>{children}</PopoverTrigger>
+        <PopoverContent className="min-w-[275px] max-w-[275px] p-0" align="start" onOpenAutoFocus={handlePopoverOpen}>
+          <form
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              handleOpenChange(false);
+            }}
+          >
+            <div className="bg-bg-weak border-b border-b-neutral-100">
+              <div className="flex flex-row items-center justify-between space-y-0 px-1.5 py-1">
+                <div className="flex w-full items-center justify-between gap-1">
+                  <span className="text-subheading-2xs text-text-soft">CONFIGURE VARIABLE</span>
+                  <Button variant="secondary" mode="ghost" className="h-5 p-1" onClick={onDeleteClick}>
+                    <RiDeleteBin2Line className="size-3.5 text-neutral-400" />
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="grid gap-2 p-2">
-            <div className="flex flex-col gap-1">
-              <FormItem>
-                <FormControl>
-                  <div className="grid gap-1">
-                    <label className="text-text-sub text-label-xs">Variable</label>
+            <div className="grid gap-2 p-2">
+              <div className="flex flex-col gap-1">
+                <FormItem>
+                  <FormControl>
+                    <div className="grid gap-1">
+                      <label className="text-text-sub text-label-xs">Variable</label>
+                      <Input
+                        ref={nameInputRef}
+                        value={name}
+                        onChange={(e) => handleNameChange(e.target.value)}
+                        autoFocus
+                        size="xs"
+                        placeholder="Variable name (e.g. payload.name)"
+                      />
+                      {variableError === 'Not a valid variable' ? (
+                        <div>
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            onClick={handleAddVariableToSchema}
+                            onKeyDown={(e) => e.key === 'Enter' && handleAddVariableToSchema()}
+                            className="text-primary hover:text-primary/80 mt-1 cursor-pointer text-xs"
+                          >
+                            Add variable to payload schema
+                          </span>
+                        </div>
+                      ) : (
+                        <FormMessagePure hasError={!!variableError}>{variableError}</FormMessagePure>
+                      )}
+                    </div>
+                  </FormControl>
+                </FormItem>
+
+                <FormItem>
+                  <FormControl>
                     <Input
-                      ref={nameInputRef}
-                      value={name}
-                      onChange={(e) => handleNameChange(e.target.value)}
-                      autoFocus
+                      value={defaultVal}
+                      onChange={(e) => handleDefaultValueChange(e.target.value)}
+                      placeholder="Default fallback value"
                       size="xs"
-                      placeholder="Variable name (e.g. payload.name)"
                     />
-                    {variableError === 'Not a valid variable' ? (
-                      <div>
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          onClick={handleAddVariableToSchema}
-                          onKeyDown={(e) => e.key === 'Enter' && handleAddVariableToSchema()}
-                          className="text-primary hover:text-primary/80 mt-1 cursor-pointer text-xs"
-                        >
-                          Add variable to payload schema
-                        </span>
-                      </div>
-                    ) : (
-                      <FormMessagePure hasError={!!variableError}>{variableError}</FormMessagePure>
-                    )}
-                  </div>
-                </FormControl>
-              </FormItem>
+                  </FormControl>
+                </FormItem>
+              </div>
 
-              <FormItem>
-                <FormControl>
-                  <Input
-                    value={defaultVal}
-                    onChange={(e) => handleDefaultValueChange(e.target.value)}
-                    placeholder="Default fallback value"
-                    size="xs"
-                  />
-                </FormControl>
-              </FormItem>
-            </div>
+              <div className="flex flex-col gap-1">
+                <FormItem>
+                  <FormControl>
+                    <div className="">
+                      <label className="text-text-sub text-label-xs mb-1 flex items-center gap-1">
+                        LiquidJS Filters
+                        <Tooltip>
+                          <TooltipTrigger className="relative cursor-pointer">
+                            <RiQuestionLine className="text-text-soft size-4" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            <p className="text-label-xs">
+                              LiquidJS filters modify the variable output in sequence, with each filter using the
+                              previous one's result. Reorder them by dragging and dropping.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </label>
 
-            <div className="flex flex-col gap-1">
-              <FormItem>
-                <FormControl>
-                  <div className="">
-                    <label className="text-text-sub text-label-xs mb-1 flex items-center gap-1">
-                      LiquidJS Filters
-                      <Tooltip>
-                        <TooltipTrigger className="relative cursor-pointer">
-                          <RiQuestionLine className="text-text-soft size-4" />
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <p className="text-label-xs">
-                            LiquidJS filters modify the variable output in sequence, with each filter using the previous
-                            one's result. Reorder them by dragging and dropping.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </label>
+                      <Popover open={isCommandOpen} onOpenChange={setIsCommandOpen}>
+                        <PopoverTrigger asChild>
+                          <button className="text-text-soft bg-background flex h-[30px] w-full items-center justify-between rounded-md border px-2 text-xs">
+                            <span>Add a filter</span>
+                            <RiSearchLine className="h-3 w-3" />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="min-w-[calc(275px-1rem)] max-w-[calc(275px-1rem)] p-0" align="start">
+                          <Command>
+                            <div className="p-1">
+                              <CommandInput
+                                value={searchQuery}
+                                onValueChange={setSearchQuery}
+                                placeholder="Search..."
+                                className="h-7"
+                                inputWrapperClassName="h-7 text-2xs"
+                              />
+                            </div>
 
-                    <Popover open={isCommandOpen} onOpenChange={setIsCommandOpen}>
-                      <PopoverTrigger asChild>
-                        <button className="text-text-soft bg-background flex h-[30px] w-full items-center justify-between rounded-md border px-2 text-xs">
-                          <span>Add a filter</span>
-                          <RiSearchLine className="h-3 w-3" />
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="min-w-[calc(275px-1rem)] max-w-[calc(275px-1rem)] p-0" align="start">
-                        <Command>
-                          <div className="p-1">
-                            <CommandInput
-                              value={searchQuery}
-                              onValueChange={setSearchQuery}
-                              placeholder="Search..."
-                              className="h-7"
-                              inputWrapperClassName="h-7 text-2xs"
-                            />
-                          </div>
-
-                          <CommandList className="max-h-[300px]">
-                            <CommandEmpty>No filters found</CommandEmpty>
-                            {suggestedFilters.length > 0 && !searchQuery && (
-                              <>
-                                <CommandGroup heading="Suggested">
-                                  {suggestedFilters[0].filters.map((filterItem: Filters) => (
+                            <CommandList className="max-h-[300px]">
+                              <CommandEmpty>No filters found</CommandEmpty>
+                              {suggestedFilters.length > 0 && !searchQuery && (
+                                <>
+                                  <CommandGroup heading="Suggested">
+                                    {suggestedFilters[0].filters.map((filterItem: Filters) => (
+                                      <CommandItem
+                                        key={filterItem.value}
+                                        onSelect={() => {
+                                          handleFilterToggle(filterItem.value);
+                                          setSearchQuery('');
+                                          setIsCommandOpen(false);
+                                        }}
+                                      >
+                                        <FilterItem filter={filterItem} />
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                  {suggestedFilters.length > 0 && <CommandSeparator />}
+                                </>
+                              )}
+                              {filteredFilters.length > 0 && (
+                                <CommandGroup>
+                                  {filteredFilters.map((filter) => (
                                     <CommandItem
-                                      key={filterItem.value}
+                                      key={filter.value}
                                       onSelect={() => {
-                                        handleFilterToggle(filterItem.value);
+                                        handleFilterToggle(filter.value);
                                         setSearchQuery('');
                                         setIsCommandOpen(false);
                                       }}
                                     >
-                                      <FilterItem filter={filterItem} />
+                                      <FilterItem filter={filter} />
                                     </CommandItem>
                                   ))}
                                 </CommandGroup>
-                                {suggestedFilters.length > 0 && <CommandSeparator />}
-                              </>
-                            )}
-                            {filteredFilters.length > 0 && (
-                              <CommandGroup>
-                                {filteredFilters.map((filter) => (
-                                  <CommandItem
-                                    key={filter.value}
-                                    onSelect={() => {
-                                      handleFilterToggle(filter.value);
-                                      setSearchQuery('');
-                                      setIsCommandOpen(false);
-                                    }}
-                                  >
-                                    <FilterItem filter={filter} />
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            )}
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </FormControl>
-              </FormItem>
+                              )}
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </FormControl>
+                </FormItem>
 
-              <ReorderFiltersGroup
-                variables={variables}
-                variableName={name}
-                filters={filters}
-                onReorder={handleReorder}
-                onRemove={handleFilterToggle}
-                onParamChange={handleParamChange}
-              />
+                <ReorderFiltersGroup
+                  variables={variables}
+                  variableName={name}
+                  filters={filters}
+                  onReorder={handleReorder}
+                  onRemove={handleFilterToggle}
+                  onParamChange={handleParamChange}
+                />
+              </div>
             </div>
-          </div>
-        </form>
-      </PopoverContent>
-    </Popover>
+          </form>
+        </PopoverContent>
+      </Popover>
+      {workflow && (
+        <PayloadSchemaDrawer
+          open={isPayloadSchemaDrawerOpen}
+          onOpenChange={setIsPayloadSchemaDrawerOpen}
+          workflow={workflow}
+          initialFieldPath={name}
+          onSave={handlePayloadSchemaSave}
+        />
+      )}
+    </>
   );
 };

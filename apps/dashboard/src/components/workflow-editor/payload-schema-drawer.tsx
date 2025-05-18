@@ -30,6 +30,7 @@ type PayloadSchemaDrawerProps = {
   onOpenChange: (open: boolean) => void;
   workflow: WorkflowForSchemaEditing;
   onSave?: (schema: JSONSchema7) => void;
+  initialFieldPath?: string;
 };
 
 const defaultEditorSchema: JSONSchema7 = {
@@ -37,19 +38,122 @@ const defaultEditorSchema: JSONSchema7 = {
   properties: {},
 };
 
+function initializeSchemaFromWorkflow(
+  workflow: WorkflowForSchemaEditing,
+  open: boolean,
+  initialFieldPath?: string
+): { schemaToSet: JSONSchema7; fieldToHighlight?: string } {
+  let schemaToSet = structuredClone(defaultEditorSchema);
+
+  if (workflow?.payloadSchema && typeof workflow.payloadSchema === 'object') {
+    schemaToSet = structuredClone(workflow.payloadSchema);
+  } else {
+    // Ensure schemaToSet is a fresh clone if not derived from workflow.payloadSchema
+    // This line was implicitly handled by the previous logic but is good to be explicit.
+    schemaToSet = structuredClone(defaultEditorSchema);
+  }
+
+  let fieldToHighlightOutput: string | undefined = undefined;
+
+  if (open && initialFieldPath) {
+    // Normalize path: remove leading "payload." if present
+    let path = initialFieldPath;
+
+    if (path.startsWith('payload.')) {
+      path = path.substring('payload.'.length);
+    } else if (path === 'payload') {
+      path = ''; // Treat 'payload' as root, don't add sub-property
+    }
+
+    if (path && path.trim() !== '') {
+      const pathParts = path.split('.').filter((p) => p.trim() !== ''); // Filter out empty parts
+
+      if (pathParts.length > 0) {
+        let currentLevel = schemaToSet;
+
+        // Ensure the root is an object if we are trying to add properties to it.
+        if (currentLevel.type !== 'object') {
+          console.warn('Cannot add suggested field: Root schema is not an object. Resetting to an object schema.');
+          currentLevel.type = 'object';
+          currentLevel.properties = {};
+          // Also reset other potential properties like 'items' if it was an array, etc.
+          // For simplicity, we are just ensuring it's a basic object here.
+        }
+
+        currentLevel.properties = currentLevel.properties || {};
+
+        for (let i = 0; i < pathParts.length; i++) {
+          const part = pathParts[i];
+
+          if (i === pathParts.length - 1) {
+            // Last part, set the type (e.g., string), only if it doesn't exist
+            if (!currentLevel.properties[part]) {
+              currentLevel.properties[part] = { type: 'string' };
+            }
+            // If it exists, we don't overwrite its type, just ensure it's present.
+          } else {
+            // Not the last part, ensure it's an object
+            const currentProperty = currentLevel.properties[part];
+
+            if (
+              !currentProperty ||
+              typeof currentProperty !== 'object' ||
+              !('type' in currentProperty) ||
+              currentProperty.type !== 'object'
+            ) {
+              // If it doesn't exist, or isn't an object schema, overwrite/initialize as an object schema
+              currentLevel.properties[part] = { type: 'object', properties: {} };
+            }
+
+            // Navigate deeper
+            currentLevel = currentLevel.properties[part] as JSONSchema7;
+            // Ensure the deeper level also has a properties object if we are to add to it
+            currentLevel.properties = currentLevel.properties || {};
+          }
+        }
+
+        fieldToHighlightOutput = path; // Set the path to be highlighted
+      }
+    }
+  }
+
+  return { schemaToSet, fieldToHighlight: fieldToHighlightOutput };
+}
+
 export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawerProps>((props, ref) => {
   const { open, onOpenChange, workflow, onSave } = props;
   const [currentSchema, setCurrentSchema] = useState<JSONSchema7>(defaultEditorSchema);
   const [isSchemaEditorFormValid, setIsSchemaEditorFormValid] = useState<boolean>(true);
+  const [fieldToHighlight, setFieldToHighlight] = useState<string | undefined>(undefined);
   const { patchWorkflow, isPending: isSavingSchema } = usePatchWorkflow();
 
   useEffect(() => {
-    if (workflow?.payloadSchema && typeof workflow.payloadSchema === 'object') {
-      setCurrentSchema(workflow.payloadSchema);
-    } else {
-      setCurrentSchema(defaultEditorSchema);
+    const { schemaToSet, fieldToHighlight: newFieldToHighlight } = initializeSchemaFromWorkflow(
+      workflow,
+      open,
+      props.initialFieldPath
+    );
+    setCurrentSchema(schemaToSet);
+
+    if (newFieldToHighlight) {
+      setFieldToHighlight(newFieldToHighlight);
     }
-  }, [workflow]);
+  }, [workflow, open, props.initialFieldPath]); // Rerun if workflow, open state, or initialFieldPath changes
+
+  // Effect to clear highlight after a delay
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    if (fieldToHighlight) {
+      timer = setTimeout(() => {
+        setFieldToHighlight(undefined);
+      }, 3000); // Highlight for 3 seconds
+    }
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [fieldToHighlight]);
 
   const handleSchemaChange = useCallback((schema: JSONSchema7) => {
     setCurrentSchema(schema);
@@ -159,6 +263,7 @@ export const PayloadSchemaDrawer = forwardRef<HTMLDivElement, PayloadSchemaDrawe
             initialSchema={currentSchema}
             onChange={handleSchemaChange}
             onValidityChange={handleSchemaValidityChange}
+            highlightPath={fieldToHighlight}
           />
         </SheetMain>
         <SheetFooter className="border-neutral-content-weak space-between flex border-t px-3 py-1.5">

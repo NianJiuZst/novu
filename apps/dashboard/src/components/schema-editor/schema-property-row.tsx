@@ -28,10 +28,12 @@ export interface SchemaPropertyRowProps {
   pathPrefix: string;
   onDeleteProperty: () => void;
   indentationLevel?: number;
+  highlightPath?: string;
+  currentDataPath?: string;
 }
 
 export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
-  const { control, index, pathPrefix, onDeleteProperty, indentationLevel = 0 } = props;
+  const { control, index, pathPrefix, onDeleteProperty, indentationLevel = 0, highlightPath, currentDataPath } = props;
 
   const { setValue, getValues, watch: watchForm } = useFormContext();
 
@@ -124,10 +126,14 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
     return null;
   }
 
-  const currentKeyName = propertyListItem.keyName;
+  const currentKeyName = propertyListItem.keyName.trim();
+  const itsOwnFullDataPath =
+    currentKeyName && currentDataPath ? `${currentDataPath}.${currentKeyName}` : currentKeyName || '';
+
+  const isHighlighted = !!(highlightPath && itsOwnFullDataPath && highlightPath === itsOwnFullDataPath);
 
   return (
-    <div className={cn('flex flex-col py-1')}>
+    <div className={cn('flex flex-col py-1 transition-colors duration-1000', isHighlighted ? 'bg-blue-50' : '')}>
       <div className={cn('flex items-center space-x-2', getMarginClassPx(indentationLevel))}>
         <PropertyNameInput fieldPath={keyNamePath} control={control} />
         <PropertyTypeSelector
@@ -228,6 +234,8 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
               pathPrefix={`${nestedPropertyListPath}.${nestedIndex}`}
               onDeleteProperty={() => removeNested(nestedIndex)}
               indentationLevel={0}
+              highlightPath={highlightPath}
+              currentDataPath={itsOwnFullDataPath}
             />
           ))}
           <Button
@@ -270,6 +278,8 @@ export function SchemaPropertyRow(props: SchemaPropertyRowProps) {
                   pathPrefix={`${itemPropertiesListPath}.${itemNestedIndex}`}
                   onDeleteProperty={() => removeItemNested(itemNestedIndex)}
                   indentationLevel={0}
+                  highlightPath={highlightPath}
+                  currentDataPath={itsOwnFullDataPath}
                 />
               ))}
               <Button

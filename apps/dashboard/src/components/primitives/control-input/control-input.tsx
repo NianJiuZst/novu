@@ -2,7 +2,7 @@ import { cn } from '@/utils/ui';
 import { autocompletion, Completion } from '@codemirror/autocomplete';
 import { EditorView } from '@uiw/react-codemirror';
 import { cva } from 'class-variance-authority';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 
 import { Editor } from '@/components/primitives/editor';
 import { EditVariablePopover } from '@/components/variable/edit-variable-popover';
@@ -47,6 +47,7 @@ type ControlInputProps = {
   id?: string;
   multiline?: boolean;
   indentWithTab?: boolean;
+  onWorkflowSchemaSaved?: () => Promise<void>;
 };
 
 export function ControlInput({
@@ -61,6 +62,7 @@ export function ControlInput({
   size = 'sm',
   indentWithTab,
   isAllowedVariable,
+  onWorkflowSchemaSaved,
 }: ControlInputProps) {
   const viewRef = useRef<EditorView | null>(null);
   const lastCompletionRef = useRef<CompletionRange | null>(null);
@@ -76,7 +78,15 @@ export function ControlInput({
     : undefined;
 
   const { digestStepBeforeCurrent } = useWorkflow();
+  const { workflow } = useWorkflow();
   const track = useTelemetry();
+
+  const [editorKey, setEditorKey] = useState(0);
+
+  useEffect(() => {
+    // Increment key when isAllowedVariable changes, forcing Editor to remount
+    setEditorKey((prevKey) => prevKey + 1);
+  }, [isAllowedVariable]);
 
   const onVariableSelect = useCallback(
     (completion: Completion) => {
@@ -153,6 +163,7 @@ export function ControlInput({
   return (
     <div className={cn(variants({ size }), className)}>
       <Editor
+        key={editorKey}
         fontFamily="inherit"
         multiline={multiline}
         indentWithTab={indentWithTab}
@@ -172,6 +183,8 @@ export function ControlInput({
           onOpenChange={handleOpenChange}
           variable={variable}
           isAllowedVariable={isAllowedVariable}
+          workflow={workflow}
+          onWorkflowSchemaSaved={onWorkflowSchemaSaved}
           onUpdate={(newValue) => {
             handleVariableUpdate(newValue);
             // Focus back to the editor after updating the variable

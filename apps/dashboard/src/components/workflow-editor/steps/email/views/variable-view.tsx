@@ -20,7 +20,7 @@ function InternalVariableView(props: InternalVariableViewProps) {
   const { id, aliasFor } = node.attrs;
   const [variableValue, setVariableValue] = useState(`{{${id}}}`);
   const [isOpen, setIsOpen] = useState(false);
-  const { digestStepBeforeCurrent } = useWorkflow();
+  const { digestStepBeforeCurrent, workflow } = useWorkflow();
 
   const parseVariableCallback = useCallback(
     (variable: string) => {
@@ -76,6 +76,7 @@ function InternalVariableView(props: InternalVariableViewProps) {
         variable={variable}
         variables={variables}
         isAllowedVariable={isAllowedVariable}
+        workflow={workflow}
         onUpdate={(newValue) => {
           const { fullLiquidExpression } = parseVariableCallback(newValue);
           const aliasFor = resolveRepeatBlockAlias(fullLiquidExpression, editor);

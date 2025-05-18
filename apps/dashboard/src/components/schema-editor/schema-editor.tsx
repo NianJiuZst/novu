@@ -14,6 +14,7 @@ interface SchemaEditorProps {
   initialSchema?: JSONSchema7;
   onChange?: (schema: JSONSchema7) => void;
   onValidityChange?: (isValid: boolean) => void;
+  highlightPath?: string;
 }
 
 function convertSchemaToPropertyList(
@@ -97,20 +98,20 @@ const defaultFormValues: SchemaEditorFormValues = {
   propertyList: [],
 };
 
-export function SchemaEditor({ initialSchema, onChange, onValidityChange }: SchemaEditorProps) {
-  const initialTransformedValues: SchemaEditorFormValues = {
+export function SchemaEditor({ initialSchema, onChange, onValidityChange, highlightPath }: SchemaEditorProps) {
+  const initialTransformedValuesRef = useRef<SchemaEditorFormValues>({
     propertyList: initialSchema?.properties
       ? convertSchemaToPropertyList(initialSchema.properties, initialSchema.required)
       : defaultFormValues.propertyList,
-  };
+  });
 
   const methods = useForm<SchemaEditorFormValues>({
-    defaultValues: initialTransformedValues,
+    defaultValues: initialTransformedValuesRef.current,
     resolver: zodResolver(editorSchema),
     mode: 'onChange',
   });
 
-  const { control, watch, formState, getValues } = methods;
+  const { control, watch, formState, getValues, reset } = methods;
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -148,6 +149,14 @@ export function SchemaEditor({ initialSchema, onChange, onValidityChange }: Sche
     };
   }, [watch, onChange]);
 
+  useEffect(() => {
+    const newPropertyList = initialSchema?.properties
+      ? convertSchemaToPropertyList(initialSchema.properties, initialSchema.required)
+      : defaultFormValues.propertyList;
+
+    reset({ propertyList: newPropertyList });
+  }, [initialSchema, reset]);
+
   const handleAddProperty = useCallback(() => {
     append({
       id: uuidv4(),
@@ -168,6 +177,8 @@ export function SchemaEditor({ initialSchema, onChange, onValidityChange }: Sche
             pathPrefix={`propertyList.${index}`}
             onDeleteProperty={() => remove(index)}
             indentationLevel={0}
+            highlightPath={highlightPath}
+            currentDataPath=""
           />
         ))}
         <Button

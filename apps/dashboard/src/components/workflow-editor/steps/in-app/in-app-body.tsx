@@ -6,13 +6,41 @@ import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 import { useParseVariables } from '@/hooks/use-parse-variables';
 import { capitalize, containsHTMLEntities, containsVariables } from '@/utils/string';
 import { InputRoot } from '../../../primitives/input';
+import { useQueryClient } from '@tanstack/react-query';
+import { QueryKeys } from '@/utils/query-keys';
+import { useEnvironment } from '@/context/environment/hooks';
+import { getWorkflowIdFromSlug, WORKFLOW_DIVIDER } from '@/utils/step';
 
 const bodyKey = 'body';
 
 export const InAppBody = () => {
-  const { control, getValues } = useFormContext();
-  const { step, digestStepBeforeCurrent } = useWorkflow();
+  const { control, getValues, trigger } = useFormContext();
+  const { step, digestStepBeforeCurrent, workflow } = useWorkflow();
   const { variables, isAllowedVariable } = useParseVariables(step?.variables, digestStepBeforeCurrent?.stepId);
+  const queryClient = useQueryClient();
+  const { currentEnvironment } = useEnvironment();
+
+  const handleWorkflowSchemaSaved = async () => {
+    if (!workflow?.slug || !currentEnvironment?._id) {
+      return;
+    }
+
+    const workflowId = getWorkflowIdFromSlug({ slug: workflow.slug, divider: WORKFLOW_DIVIDER });
+
+    try {
+      await queryClient.invalidateQueries({
+        queryKey: [QueryKeys.fetchWorkflow, currentEnvironment._id, workflowId],
+      });
+      await queryClient.refetchQueries({
+        queryKey: [QueryKeys.fetchWorkflow, currentEnvironment._id, workflowId],
+        exact: true,
+      });
+
+      await trigger(bodyKey);
+    } catch (error) {
+      console.error('Error during workflow refetch or field validation trigger:', error);
+    }
+  };
 
   return (
     <FormField
@@ -31,6 +59,7 @@ export const InAppBody = () => {
                 onChange={field.onChange}
                 variables={variables}
                 isAllowedVariable={isAllowedVariable}
+                onWorkflowSchemaSaved={handleWorkflowSchemaSaved}
                 multiline
               />
             </InputRoot>
