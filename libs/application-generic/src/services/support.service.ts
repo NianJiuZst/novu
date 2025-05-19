@@ -5,7 +5,7 @@ const LOG_CONTEXT = 'SupportService';
 
 export class SupportService {
   private plainClient: PlainClient;
-  private readonly plainKey: string;
+  private readonly plainKey: string | undefined;
   constructor() {
     this.plainKey = process.env.PLAIN_SUPPORT_KEY;
     if (this.plainKey) {
@@ -41,11 +41,7 @@ export class SupportService {
       },
     });
     if (res.error) {
-      Logger.error(
-        { emailAddress, fullName, error: res.error },
-        res.error.message,
-        LOG_CONTEXT,
-      );
+      Logger.error({ emailAddress, fullName, error: res.error }, res.error.message, LOG_CONTEXT);
       throw new Error(res.error.message);
     } else {
       return res;
@@ -67,11 +63,7 @@ export class SupportService {
     });
 
     if (res.error) {
-      Logger.error(
-        { plainCustomerId, threadText, error: res.error },
-        res.error.message,
-        LOG_CONTEXT,
-      );
+      Logger.error({ plainCustomerId, threadText, error: res.error }, res.error.message, LOG_CONTEXT);
       throw new Error(res.error.message);
     } else {
       return res;

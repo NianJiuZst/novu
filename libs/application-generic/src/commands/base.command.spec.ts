@@ -23,7 +23,7 @@ describe('BaseCommand', function () {
 
   it('should throw BadRequestException with error messages when field values are not valid', async function () {
     try {
-      TestCommand.create({ email: undefined, password: undefined });
+      TestCommand.create({ email: '', password: '' });
       expect(false).toBeTruthy();
     } catch (e) {
       expect((e as BadRequestException).getResponse()).toEqual({
@@ -41,7 +41,7 @@ describe('BaseCommand', function () {
 
   it('should throw BadRequestException with error message when only one field is not valid', async function () {
     try {
-      TestCommand.create({ email: 'test@test.com', password: undefined });
+      TestCommand.create({ email: 'test@test.com', password: '' });
       expect(false).toBeTruthy();
     } catch (e) {
       expect((e as BadRequestException).getResponse()).toEqual({

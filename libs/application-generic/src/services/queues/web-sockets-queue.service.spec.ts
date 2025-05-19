@@ -10,14 +10,12 @@ let webSocketsQueueService: WebSocketsQueueService;
 describe('WebSockets Queue service', () => {
   describe('General', () => {
     beforeAll(async () => {
-      webSocketsQueueService = new WebSocketsQueueService(
-        new WorkflowInMemoryProviderService(),
-      );
-      await webSocketsQueueService.queue.obliterate();
+      webSocketsQueueService = new WebSocketsQueueService(new WorkflowInMemoryProviderService());
+      await webSocketsQueueService.queue?.obliterate();
     });
 
     beforeEach(async () => {
-      await webSocketsQueueService.queue.drain();
+      await webSocketsQueueService.queue?.drain();
     });
 
     afterAll(async () => {
@@ -27,12 +25,7 @@ describe('WebSockets Queue service', () => {
     it('should be initialised properly', async () => {
       expect(webSocketsQueueService).toBeDefined();
       expect(Object.keys(webSocketsQueueService)).toEqual(
-        expect.arrayContaining([
-          'topic',
-          'DEFAULT_ATTEMPTS',
-          'instance',
-          'queue',
-        ]),
+        expect.arrayContaining(['topic', 'DEFAULT_ATTEMPTS', 'instance', 'queue'])
       );
       expect(webSocketsQueueService.DEFAULT_ATTEMPTS).toEqual(3);
       expect(webSocketsQueueService.topic).toEqual('ws_socket_queue');
@@ -44,7 +37,18 @@ describe('WebSockets Queue service', () => {
         workerIsRunning: undefined,
       });
       expect(await webSocketsQueueService.isPaused()).toEqual(false);
-      expect(webSocketsQueueService.queue.opts.prefix).toEqual('bull');
+      expect(webSocketsQueueService.queue).toMatchObject(
+        expect.objectContaining({
+          _events: {},
+          _eventsCount: 0,
+          _maxListeners: undefined,
+          name: 'ws_socket_queue',
+          jobsOpts: {
+            removeOnComplete: true,
+          },
+        })
+      );
+      expect(webSocketsQueueService.queue?.opts?.prefix).toEqual('bull');
     });
 
     it('should add a job in the queue', async () => {
@@ -65,19 +69,21 @@ describe('WebSockets Queue service', () => {
         groupId: _organizationId,
       });
 
-      expect(await webSocketsQueueService.queue.getActiveCount()).toEqual(0);
-      expect(await webSocketsQueueService.queue.getWaitingCount()).toEqual(1);
+      expect(await webSocketsQueueService.queue?.getActiveCount()).toEqual(0);
+      expect(await webSocketsQueueService.queue?.getWaitingCount()).toEqual(1);
 
-      const webSocketsQueueJobs = await webSocketsQueueService.queue.getJobs();
-      expect(webSocketsQueueJobs.length).toEqual(1);
-      const [webSocketsQueueJob] = webSocketsQueueJobs;
+      const webSocketsQueueJobs = await webSocketsQueueService.queue?.getJobs();
+      expect(webSocketsQueueJobs).toBeDefined();
+      expect(webSocketsQueueJobs?.length).toEqual(1);
+      const webSocketsQueueJob = webSocketsQueueJobs?.[0];
+      expect(webSocketsQueueJob).toBeDefined();
       expect(webSocketsQueueJob).toMatchObject(
         expect.objectContaining({
           id: '1',
           name: jobId,
           data: jobData,
           attemptsMade: 0,
-        }),
+        })
       );
     });
 
@@ -100,12 +106,14 @@ describe('WebSockets Queue service', () => {
         groupId: _organizationId,
       });
 
-      expect(await webSocketsQueueService.queue.getActiveCount()).toEqual(0);
-      expect(await webSocketsQueueService.queue.getWaitingCount()).toEqual(1);
+      expect(await webSocketsQueueService.queue?.getActiveCount()).toEqual(0);
+      expect(await webSocketsQueueService.queue?.getWaitingCount()).toEqual(1);
 
-      const webSocketsQueueJobs = await webSocketsQueueService.queue.getJobs();
-      expect(webSocketsQueueJobs.length).toEqual(1);
-      const [webSocketQueueJob] = webSocketsQueueJobs;
+      const webSocketsQueueJobs = await webSocketsQueueService.queue?.getJobs();
+      expect(webSocketsQueueJobs).toBeDefined();
+      expect(webSocketsQueueJobs?.length).toEqual(1);
+      const webSocketQueueJob = webSocketsQueueJobs?.[0];
+      expect(webSocketQueueJob).toBeDefined();
       expect(webSocketQueueJob).toMatchObject(
         expect.objectContaining({
           id: '2',
@@ -117,7 +125,7 @@ describe('WebSockets Queue service', () => {
             _userId,
           },
           attemptsMade: 0,
-        }),
+        })
       );
     });
   });
@@ -126,10 +134,8 @@ describe('WebSockets Queue service', () => {
     beforeAll(async () => {
       process.env.IS_IN_MEMORY_CLUSTER_MODE_ENABLED = 'true';
 
-      webSocketsQueueService = new WebSocketsQueueService(
-        new WorkflowInMemoryProviderService(),
-      );
-      await webSocketsQueueService.queue.obliterate();
+      webSocketsQueueService = new WebSocketsQueueService(new WorkflowInMemoryProviderService());
+      await webSocketsQueueService.queue?.obliterate();
     });
 
     afterAll(async () => {
@@ -138,9 +144,7 @@ describe('WebSockets Queue service', () => {
     });
 
     it('should have prefix in cluster mode', async () => {
-      expect(webSocketsQueueService.queue.opts.prefix).toEqual(
-        '{ws_socket_queue}',
-      );
+      expect(webSocketsQueueService.queue?.opts?.prefix).toEqual('{ws_socket_queue}');
     });
   });
 });

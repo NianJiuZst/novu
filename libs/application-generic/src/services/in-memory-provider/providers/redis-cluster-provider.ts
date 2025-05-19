@@ -15,15 +15,15 @@ const DEFAULT_KEY_PREFIX = '';
 const TTL_VARIANT_PERCENTAGE = 0.1;
 
 interface IRedisClusterConfig {
-  connectTimeout?: string;
-  family?: string;
-  host?: string;
-  keepAlive?: string;
-  keyPrefix?: string;
-  password?: string;
-  ports?: string;
+  connectTimeout: string;
+  family: string;
+  host: string;
+  keepAlive: string;
+  keyPrefix: string;
+  password: string;
+  ports: string;
   tls?: ConnectionOptions;
-  ttl?: string;
+  ttl: string;
 }
 
 export interface IRedisClusterProviderConfig {
@@ -41,14 +41,14 @@ export interface IRedisClusterProviderConfig {
 
 export const getRedisClusterProviderConfig = (): IRedisClusterProviderConfig => {
   const redisClusterConfig: IRedisClusterConfig = {
-    host: convertStringValues(process.env.REDIS_CLUSTER_SERVICE_HOST),
-    ports: convertStringValues(process.env.REDIS_CLUSTER_SERVICE_PORTS),
-    ttl: convertStringValues(process.env.REDIS_CLUSTER_TTL),
-    password: convertStringValues(process.env.REDIS_CLUSTER_PASSWORD),
-    connectTimeout: convertStringValues(process.env.REDIS_CLUSTER_CONNECTION_TIMEOUT),
-    keepAlive: convertStringValues(process.env.REDIS_CLUSTER_KEEP_ALIVE),
-    family: convertStringValues(process.env.REDIS_CLUSTER_FAMILY),
-    keyPrefix: convertStringValues(process.env.REDIS_CLUSTER_KEY_PREFIX),
+    host: convertStringValues(process.env.REDIS_CLUSTER_SERVICE_HOST || '') || '',
+    ports: convertStringValues(process.env.REDIS_CLUSTER_SERVICE_PORTS || '[]') || '[]',
+    ttl: convertStringValues(process.env.REDIS_CLUSTER_TTL || '') || '',
+    password: convertStringValues(process.env.REDIS_CLUSTER_PASSWORD || '') || '',
+    connectTimeout: convertStringValues(process.env.REDIS_CLUSTER_CONNECTION_TIMEOUT || '') || '',
+    keepAlive: convertStringValues(process.env.REDIS_CLUSTER_KEEP_ALIVE || '') || '',
+    family: convertStringValues(process.env.REDIS_CLUSTER_FAMILY || '') || '',
+    keyPrefix: convertStringValues(process.env.REDIS_CLUSTER_KEY_PREFIX || '') || '',
     tls: process.env.REDIS_CLUSTER_TLS as ConnectionOptions,
   };
 
@@ -63,7 +63,9 @@ export const getRedisClusterProviderConfig = (): IRedisClusterProviderConfig => 
   const keyPrefix = redisClusterConfig.keyPrefix ?? DEFAULT_KEY_PREFIX;
   const ttl = redisClusterConfig.ttl ? Number(redisClusterConfig.ttl) : DEFAULT_TTL_SECONDS;
 
-  const instances: ClusterNode[] = ports.map((port: number): ClusterNode => ({ host, port }));
+  const instances: ClusterNode[] = Array.isArray(ports)
+    ? ports.map((port: number): ClusterNode => ({ host, port }))
+    : [];
 
   return {
     host,
@@ -107,9 +109,10 @@ export const getRedisCluster = (enableAutoPipelining?: boolean): Cluster | undef
 export const validateRedisClusterProviderConfig = (): boolean => {
   const config = getRedisClusterProviderConfig();
 
-  const validPorts = config.ports.length > 0 && config.ports.every((port: number) => Number.isInteger(port));
+  const validPorts =
+    config.ports && config.ports.length > 0 && config.ports.every((port: number) => Number.isInteger(port));
 
-  return !!config.host && validPorts;
+  return !!config.host && !!validPorts;
 };
 
 export const isClientReady = (status: string): boolean => status === CLIENT_READY;

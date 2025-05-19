@@ -2,11 +2,13 @@ import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 
 const IV_LENGTH = 16;
 const CIPHER_ALGO = 'aes-256-cbc';
-
+const ENCRYPTION_KEY = process.env.STORE_ENCRYPTION_KEY;
+if (!ENCRYPTION_KEY) {
+  throw new Error('STORE_ENCRYPTION_KEY is not set');
+}
 export function encrypt(text) {
-  const ENCRYPTION_KEY = process.env.STORE_ENCRYPTION_KEY;
   const iv = randomBytes(IV_LENGTH);
-  const cipher = createCipheriv(CIPHER_ALGO, Buffer.from(ENCRYPTION_KEY), iv);
+  const cipher = createCipheriv(CIPHER_ALGO, Buffer.from(ENCRYPTION_KEY!), iv);
   let encrypted = cipher.update(text);
 
   encrypted = Buffer.concat([encrypted, cipher.final()]);
@@ -15,15 +17,10 @@ export function encrypt(text) {
 }
 
 export function decrypt(text) {
-  const ENCRYPTION_KEY = process.env.STORE_ENCRYPTION_KEY;
   const textParts = text.split(':');
-  const iv = Buffer.from(textParts.shift(), 'hex');
+  const iv = Buffer.from(textParts.shift()!, 'hex');
   const encryptedText = Buffer.from(textParts.join(':'), 'hex');
-  const decipher = createDecipheriv(
-    CIPHER_ALGO,
-    Buffer.from(ENCRYPTION_KEY),
-    iv,
-  );
+  const decipher = createDecipheriv(CIPHER_ALGO, Buffer.from(ENCRYPTION_KEY!), iv);
   let decrypted = decipher.update(encryptedText);
 
   decrypted = Buffer.concat([decrypted, decipher.final()]);

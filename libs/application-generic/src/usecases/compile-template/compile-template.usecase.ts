@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import Handlebars from 'handlebars';
 import { format } from 'date-fns';
 import { HandlebarHelpersEnum } from '@novu/shared';
 
 import { CompileTemplateCommand } from './compile-template.command';
-import { BadRequestException } from '@nestjs/common';
 
 const assertResult = (condition: boolean, options) => {
   const fn = condition ? options.fn : options.inverse;
@@ -81,7 +80,7 @@ function createHandlebarsInstance(i18next: any) {
 
   handlebars.registerHelper(HandlebarHelpersEnum.GROUP_BY, function (array, property) {
     if (!Array.isArray(array)) return [];
-    const map = {};
+    const map: Record<string, any[]> = {};
     array.forEach((item) => {
       if (item[property]) {
         const key = item[property];
@@ -93,7 +92,7 @@ function createHandlebarsInstance(i18next: any) {
       }
     });
 
-    const result = [];
+    const result: Array<{ key: string; items: any[] }> = [];
     for (const [key, value] of Object.entries(map)) {
       result.push({ key, items: value });
     }

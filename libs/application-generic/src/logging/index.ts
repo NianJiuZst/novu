@@ -23,7 +23,7 @@ const loggingLevelSet = {
 const loggingLevelArr = Object.keys(loggingLevelSet);
 
 export function getLogLevel() {
-  let logLevel = null;
+  let logLevel: string | undefined;
 
   if (process.env.LOGGING_LEVEL || process.env.LOG_LEVEL) {
     logLevel = process.env.LOGGING_LEVEL || process.env.LOG_LEVEL;
@@ -32,7 +32,7 @@ export function getLogLevel() {
     logLevel = 'info';
   }
 
-  if (!loggingLevelArr.includes(logLevel)) {
+  if (!loggingLevelArr.includes(logLevel || '')) {
     console.log(`${logLevel}is not a valid log level of ${loggingLevelArr}. Falling back to info level.`);
 
     return 'info';
@@ -55,8 +55,13 @@ export function createNestLoggingModuleOptions(settings: {
     redactFields = redactFields.concat(sensitiveFields.map((val) => baseArrayWildCards.repeat(i) + val));
   }
 
+  const nodeEnv = process.env.NODE_ENV;
+  if (!nodeEnv) {
+    throw new Error('NODE_ENV is not set');
+  }
+
   const configSet = {
-    transport: ['local', 'test', 'debug'].includes(process.env.NODE_ENV) ? { target: 'pino-pretty' } : undefined,
+    transport: ['local', 'test', 'debug'].includes(nodeEnv) ? { target: 'pino-pretty' } : undefined,
     platform: process.env.HOSTING_PLATFORM ?? 'Docker',
     tenant: process.env.TENANT ?? 'OS',
     level: getLogLevel(),
@@ -99,7 +104,7 @@ export function createNestLoggingModuleOptions(settings: {
         tenant: configSet.tenant,
       },
       transport: configSet.transport,
-      autoLogging: !['test'].includes(process.env.NODE_ENV),
+      autoLogging: !['test'].includes(nodeEnv),
     },
   };
 }

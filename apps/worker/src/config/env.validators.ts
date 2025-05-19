@@ -26,6 +26,7 @@ export const envValidators = {
   TZ: str({ default: 'UTC' }),
   NODE_ENV: str({ choices: ['dev', 'test', 'production', 'ci', 'local', 'staging'], default: 'local' }),
   PORT: port(),
+  LOGGING_LEVEL: str({ default: 'info' }),
   STORE_ENCRYPTION_KEY: str32(),
   STORE_NOTIFICATION_CONTENT: bool({ default: false }),
   MAX_NOVU_INTEGRATION_MAIL_REQUESTS: num({ default: 300 }),

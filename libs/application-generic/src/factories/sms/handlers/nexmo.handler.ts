@@ -9,9 +9,9 @@ export class NexmoHandler extends BaseSmsHandler {
 
   buildProvider(credentials: ICredentials) {
     this.provider = new NexmoSmsProvider({
-      apiKey: credentials.apiKey,
-      from: credentials.from,
-      apiSecret: credentials.secretKey,
+      apiKey: credentials.apiKey ?? '',
+      from: credentials.from ?? '',
+      apiSecret: credentials.secretKey ?? '',
     });
   }
 }

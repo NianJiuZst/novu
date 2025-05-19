@@ -35,7 +35,8 @@ export class CreateNotificationJobs {
     const activeSteps = this.filterActiveSteps(command.template.steps);
 
     const channels = activeSteps
-      .map((item) => item.template.type as StepTypeEnum)
+      .map((item) => item.template?.type as StepTypeEnum)
+      .filter((type): type is StepTypeEnum => type !== undefined)
       .reduce<StepTypeEnum[]>((list, channel) => {
         if (list.includes(channel) || channel === StepTypeEnum.TRIGGER) {
           return list;
@@ -91,8 +92,12 @@ export class CreateNotificationJobs {
   }
 
   private buildJobFromStep(step, command: CreateNotificationJobsCommand, notification): NotificationJob {
+    if (!step.template) {
+      throw new PlatformException('Step template was not found');
+    }
+
     const channel = STEP_TYPE_TO_CHANNEL_TYPE.get(step.template.type);
-    const providerId = command.templateProviderIds[channel];
+    const providerId = channel ? command.templateProviderIds[channel] : undefined;
 
     return {
       identifier: command.identifier,
@@ -121,6 +126,10 @@ export class CreateNotificationJobs {
     step: NotificationStepEntity,
     command: CreateNotificationJobsCommand
   ): IWorkflowStepMetadata {
+    if (!step.metadata) {
+      return { type: DigestTypeEnum.REGULAR };
+    }
+
     if (this.isIDigestBaseMetadata(step.metadata)) {
       const digestValue = this.buildDigestValue(step.metadata, command) || 'No-Value-Provided';
       const digestKey = step.metadata.digestKey || 'No-Key-Provided';
@@ -130,6 +139,7 @@ export class CreateNotificationJobs {
 
     return step.metadata;
   }
+
   private isIDigestBaseMetadata(obj: unknown): obj is IDigestBaseMetadata {
     if (typeof obj !== 'object' || obj === null) return false;
 
@@ -175,7 +185,7 @@ export class CreateNotificationJobs {
     command: CreateNotificationJobsCommand,
     notification: NotificationEntity
   ): NotificationJob | undefined {
-    const triggerStepExist = steps.some((step) => step.template.type === StepTypeEnum.TRIGGER);
+    const triggerStepExist = steps.some((step) => step.template?.type === StepTypeEnum.TRIGGER);
 
     if (triggerStepExist) {
       return undefined;

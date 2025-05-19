@@ -9,7 +9,7 @@ export abstract class BaseHandler implements IMailHandler {
 
   protected constructor(
     private providerId: EmailProviderIdEnum,
-    private channelType: string,
+    private channelType: string
   ) {}
 
   canHandle(providerId: string, channelType: ChannelTypeEnum) {
@@ -25,7 +25,7 @@ export abstract class BaseHandler implements IMailHandler {
 
     const { bridgeProviderData, ...otherOptions } = mailData;
 
-    return await this.provider.sendMessage(otherOptions, bridgeProviderData);
+    return await this.provider.sendMessage(otherOptions as any, bridgeProviderData ?? {});
   }
 
   public getProvider(): IEmailProvider {
@@ -33,24 +33,21 @@ export abstract class BaseHandler implements IMailHandler {
   }
 
   async check() {
-    const mailData: IEmailOptions = {
+    const mailData = {
       html: '<div>checking integration</div>',
       subject: 'Checking Integration',
       to: ['no-reply@novu.co'],
     };
 
-    const { message, success, code } =
-      await this.provider.checkIntegration(mailData);
+    const { message, success, code } = await this.provider.checkIntegration(mailData);
 
     if (!success) {
       throw new PlatformException(
         JSON.stringify({
           success,
           code,
-          message:
-            message ||
-            'Something went wrong! Please double check your account details(Email/API key)',
-        }),
+          message: message || 'Something went wrong! Please double check your account details(Email/API key)',
+        })
       );
     }
 

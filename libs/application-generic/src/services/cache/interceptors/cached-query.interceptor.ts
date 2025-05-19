@@ -13,9 +13,8 @@ export function CachedQuery({ builder }: { builder: (...args) => string }) {
     injectCache(target, 'cacheService');
 
     // eslint-disable-next-line no-param-reassign
-    descriptor.value = async function (...args: any[]) {
-      if (!this.cacheService?.cacheEnabled())
-        return await originalMethod.apply(this, args);
+    descriptor.value = async function newMethod(...args: any[]) {
+      if (!this.cacheService?.cacheEnabled()) return await originalMethod.apply(this, args);
 
       const cacheService = this.cacheService as CacheService;
 
@@ -34,7 +33,7 @@ export function CachedQuery({ builder }: { builder: (...args) => string }) {
         Logger.error(
           err,
           `An error has occurred when extracting "key: ${cacheKey}" in "method: ${methodName}"`,
-          LOG_CONTEXT,
+          LOG_CONTEXT
         );
       }
 
@@ -46,7 +45,7 @@ export function CachedQuery({ builder }: { builder: (...args) => string }) {
         Logger.error(
           err,
           `An error has occurred when inserting key: ${cacheKey} in method: ${methodName}`,
-          LOG_CONTEXT,
+          LOG_CONTEXT
         );
       }
 

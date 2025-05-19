@@ -32,9 +32,9 @@ export function parseErrorInformation(
         name: error.name,
         type: 'Error',
         // Optional additional properties
-        ...('cause' in error && error.cause && { cause: error.cause }),
-        ...((error as any).code && { code: (error as any).code }),
-        ...((error as any).details && { details: (error as any).details }),
+        ...('cause' in error && error.cause && typeof error.cause === 'object' ? { cause: error.cause } : {}),
+        ...((error as any).code ? { code: (error as any).code } : {}),
+        ...((error as any).details ? { details: (error as any).details } : {}),
         stack: error.stack?.split('\n').slice(0, 5),
       };
 
@@ -45,42 +45,6 @@ export function parseErrorInformation(
         context: fullContext,
       };
     }
-
-    // Handle string errors
-    if (typeof error === 'string') {
-      return {
-        level: 'error',
-        message: `String Error in ${fullContext.service}: ${error}`,
-        error: {
-          type: 'string',
-          value: error,
-        },
-        context: fullContext,
-      };
-    }
-
-    // Handle other types of errors
-    if (error !== null && error !== undefined) {
-      return {
-        level: 'error',
-        message: `Unknown Error in ${fullContext.service}`,
-        error: {
-          type: typeof error,
-          value: JSON.stringify(error, null, 2),
-        },
-        context: fullContext,
-      };
-    }
-
-    // Handle null or undefined
-    return {
-      level: 'warn',
-      message: `No error information available in ${fullContext.service}`,
-      error: {
-        type: 'null_or_undefined',
-      },
-      context: fullContext,
-    };
   } catch (formatingError) {
     // Fallback in case of formatting error
     return {
@@ -88,7 +52,7 @@ export function parseErrorInformation(
       message: 'Critical error in error formatting',
       error: {
         type: 'format_error',
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+
         details: String(formatingError),
       },
       context: {
@@ -98,4 +62,20 @@ export function parseErrorInformation(
       },
     };
   }
+
+  // Fallback for non-Error objects or other unhandled cases
+  return {
+    level: 'error',
+    message: 'An unknown error occurred',
+    error: {
+      type: 'unknown_error',
+      details: String(error),
+    },
+    context: {
+      timestamp: new Date().toISOString(),
+      service: process.env.SERVICE_NAME || 'unknown-service',
+      environment: process.env.NODE_ENV || 'unknown-env',
+      ...(context || {}),
+    },
+  };
 }

@@ -9,11 +9,11 @@ export class GenericSmsHandler extends BaseSmsHandler {
 
   buildProvider(credentials: ICredentials) {
     this.provider = new GenericSmsProvider({
-      baseUrl: credentials.baseUrl,
-      apiKey: credentials.apiKey,
-      secretKey: credentials.secretKey,
-      from: credentials.from,
-      apiKeyRequestHeader: credentials.apiKeyRequestHeader,
+      baseUrl: credentials.baseUrl ?? '',
+      apiKey: credentials.apiKey ?? '',
+      secretKey: credentials.secretKey ?? '',
+      from: credentials.from ?? '',
+      apiKeyRequestHeader: credentials.apiKeyRequestHeader ?? '',
       secretKeyRequestHeader: credentials.secretKeyRequestHeader,
       idPath: credentials.idPath,
       datePath: credentials.datePath,

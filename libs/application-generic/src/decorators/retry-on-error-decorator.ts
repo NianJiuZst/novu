@@ -18,7 +18,7 @@ export function RetryOnError(errorName: string, options: RetryOptions = {}) {
     const originalMethod = descriptor.value;
 
     // eslint-disable-next-line no-param-reassign,func-names
-    descriptor.value = async function (this: unknown, ...args: unknown[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const {
         maxRetries = 3,
         delay = 100,

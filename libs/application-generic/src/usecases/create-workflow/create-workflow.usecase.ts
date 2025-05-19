@@ -63,7 +63,7 @@ export class CreateWorkflow {
     await this.validatePayload(command);
     await this.resourceValidatorService.validateWorkflowLimit(command.environmentId);
 
-    let storedWorkflow: WorkflowWithPreferencesResponseDto;
+    let storedWorkflow: WorkflowWithPreferencesResponseDto | undefined;
     await this.notificationTemplateRepository.withTransaction(async () => {
       const triggerIdentifier = this.generateTriggerIdentifier(command);
 
@@ -76,6 +76,10 @@ export class CreateWorkflow {
 
       await this.createWorkflowChange(command, storedWorkflow, parentChangeId);
     });
+
+    if (!storedWorkflow) {
+      throw new Error('Failed to create workflow');
+    }
 
     try {
       if (
@@ -144,7 +148,7 @@ export class CreateWorkflow {
       );
     }
 
-    const variants = command.steps ? command.steps?.flatMap((step) => step.variants || []) : [];
+    const variants = command.steps?.flatMap((step) => step.variants || []) ?? [];
 
     for (const variant of variants) {
       if (isVariantEmpty(variant)) {

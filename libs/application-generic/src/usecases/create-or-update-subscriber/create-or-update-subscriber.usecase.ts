@@ -56,13 +56,13 @@ export class CreateOrUpdateSubscriberUseCase {
         data: command.data,
         subscriber: existingSubscriber,
         channels: command.channels,
-        timezone: command.timezone,
+        timezone: command.timezone || undefined,
       })
     );
   }
 
   private async getExistingSubscriber(command: CreateOrUpdateSubscriberCommand) {
-    const existingSubscriber: SubscriberEntity =
+    const existingSubscriber: SubscriberEntity | null =
       command.subscriber ??
       (await this.fetchSubscriber({
         _environmentId: command.environmentId,
@@ -85,6 +85,10 @@ export class CreateOrUpdateSubscriberUseCase {
   }
 
   private async updateCredentials(command: CreateOrUpdateSubscriberCommand) {
+    if (!command.channels) {
+      return;
+    }
+
     for (const channel of command.channels) {
       await this.updateSubscriberChannel.execute(
         UpdateSubscriberChannelCommand.create({

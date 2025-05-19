@@ -1,4 +1,4 @@
-import { ChannelTypeEnum, EmailProviderIdEnum } from '@novu/shared';
+import { ChannelTypeEnum, EmailProviderIdEnum, ICredentials } from '@novu/shared';
 import { SendgridEmailProvider } from '@novu/providers';
 
 import { BaseHandler } from './base.handler';
@@ -8,12 +8,12 @@ export class NovuEmailHandler extends BaseHandler {
     super(EmailProviderIdEnum.Novu, ChannelTypeEnum.EMAIL);
   }
 
-  buildProvider(credentials, from?: string) {
+  buildProvider(credentials: ICredentials, from?: string) {
     this.provider = new SendgridEmailProvider({
-      apiKey: credentials.apiKey,
-      from,
-      senderName: credentials.senderName,
-      ipPoolName: credentials.ipPoolName,
-    });
+      apiKey: credentials.apiKey ?? '',
+      from: from ?? '',
+      senderName: credentials.senderName ?? '',
+      ipPoolName: credentials.ipPoolName ?? '',
+    }) as any;
   }
 }

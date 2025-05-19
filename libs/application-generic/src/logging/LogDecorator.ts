@@ -18,9 +18,9 @@ export const LogDecorator = (options = DEFAULT_OPTIONS) => {
     const method = descriptor?.value;
 
     // eslint-disable-next-line no-param-reassign
-    descriptor.value = async function <T>(...args: unknown[]): Promise<T> {
+    descriptor.value = async function newValue<T>(...args: unknown[]): Promise<T> {
       const currentTime = Date.now();
-      logger.debug(
+      logger.debug?.(
         {
           input: {
             ...((options?.transform ? options?.transform(args) : args) || {}),
@@ -33,7 +33,7 @@ export const LogDecorator = (options = DEFAULT_OPTIONS) => {
 
       const executeTime = options?.timestamp ? `${Date.now() - currentTime}` : '';
 
-      logger.debug(
+      logger.debug?.(
         {
           executionTimeMs: executeTime,
           result: { ...(options?.transform ? options?.transform(data) : data) },

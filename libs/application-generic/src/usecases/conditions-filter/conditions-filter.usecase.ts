@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, BadRequestException } from '@nestjs/common';
 import axios from 'axios';
 import {
   EnvironmentRepository,
@@ -65,7 +65,7 @@ export class ConditionsFilter extends Filter {
       return {
         passed: true,
         conditions: [],
-        variables,
+        variables: variables || {},
       };
     }
 
@@ -73,7 +73,7 @@ export class ConditionsFilter extends Filter {
 
     const foundFilter = await this.findAsync(filters, async (filter) => {
       const filterProcessingDetails = new FilterProcessingDetails();
-      filterProcessingDetails.addFilter(filter, variables);
+      filterProcessingDetails.addFilter(filter, variables || {});
 
       const { children } = filter;
       const noRules = !children || (Array.isArray(children) && children.length === 0);
@@ -83,14 +83,14 @@ export class ConditionsFilter extends Filter {
 
       const singleRule = !children || (Array.isArray(children) && children.length === 1);
       if (singleRule) {
-        const result = await this.processFilter(variables, children[0], command, filterProcessingDetails);
+        const result = await this.processFilter(variables || {}, children[0], command, filterProcessingDetails);
 
         details.push(filterProcessingDetails);
 
         return result;
       }
 
-      const result = await this.handleGroupFilters(filter, variables, command, filterProcessingDetails);
+      const result = await this.handleGroupFilters(filter, variables || {}, command, filterProcessingDetails);
 
       details.push(filterProcessingDetails);
 
@@ -104,7 +104,7 @@ export class ConditionsFilter extends Filter {
     return {
       passed: !!foundFilter,
       conditions,
-      variables,
+      variables: variables || {},
     };
   }
 
@@ -135,6 +135,10 @@ export class ConditionsFilter extends Filter {
     command: ConditionsFilterCommand,
     filterProcessingDetails: FilterProcessingDetails
   ): Promise<boolean> {
+    if (!command.job) {
+      return true;
+    }
+
     const job = await this.jobRepository.findOne({
       transactionId: command.job.transactionId,
       _subscriberId: command.job._subscriberId,
@@ -211,6 +215,10 @@ export class ConditionsFilter extends Filter {
     command: ConditionsFilterCommand,
     filterProcessingDetails: FilterProcessingDetails
   ): Promise<boolean> {
+    if (!command.job) {
+      return false;
+    }
+
     const subscriber = await this.getSubscriberBySubscriberId({
       subscriberId: command.job.subscriberId,
       _environmentId: command.environmentId,
@@ -257,7 +265,7 @@ export class ConditionsFilter extends Filter {
       filter: FILTER_TO_LABEL[filter.on],
       field: subscriber?.isOnline ? 'isOnline' : 'lastOnlineAt',
       expected: subscriber?.isOnline ? 'true' : `${filter.value}`,
-      actual: `${subscriber?.isOnline ? 'true' : diff}`,
+      actual: subscriber?.isOnline ? isOnlineString : lastOnlineAtString,
       operator: filter.timeOperator,
       passed: result,
     });

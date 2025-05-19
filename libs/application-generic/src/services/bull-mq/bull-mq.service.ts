@@ -57,11 +57,11 @@ export class BullMqService {
   }
 
   public get queuePrefix(): string {
-    return this._queue.opts.prefix;
+    return this._queue.opts.prefix ?? '';
   }
 
   public get workerPrefix(): string {
-    return this._worker.opts.prefix;
+    return this._worker.opts.prefix ?? '';
   }
 
   public static haveProInstalled(): boolean {
@@ -94,7 +94,7 @@ export class BullMqService {
       return `{${prefix}}`;
     }
 
-    return undefined;
+    return '';
   }
 
   public createQueue(topic: JobTopicNameEnum, queueOptions: QueueOptions) {
@@ -130,7 +130,7 @@ export class BullMqService {
   ) {
     const WorkerClass = !BullMqService.pro ? Worker : require('@taskforcesh/bullmq-pro').WorkerPro;
 
-    const { concurrency, connection, lockDuration, settings } = workerOptions;
+    const { concurrency, connection, lockDuration, settings } = workerOptions || {};
 
     const config = {
       connection: this.workflowInMemoryProviderService.getClient(),

@@ -1,5 +1,5 @@
 import { DEFAULT_NOTIFICATION_RETENTION_DAYS, FeatureFlagsKeysEnum, StringifyEnv } from '@novu/shared';
-import { bool, CleanedEnv, cleanEnv, json, num, port, str, url, ValidatorSpec } from 'envalid';
+import { bool, CleanedEnv, cleanEnv, json, makeValidator, num, port, str, url, ValidatorSpec } from 'envalid';
 
 export function validateEnv() {
   return cleanEnv(process.env, envValidators);
@@ -8,10 +8,19 @@ export function validateEnv() {
 export type ValidatedEnv = StringifyEnv<CleanedEnv<typeof envValidators>>;
 const processEnv = process.env as Record<string, string>; // Hold the initial process.env to avoid circular reference
 
+const str32 = makeValidator((variable) => {
+  if (!(typeof variable === 'string') || variable.length !== 32) {
+    throw new Error('Expected to be string 32 char long');
+  }
+
+  return variable;
+});
+
 export const envValidators = {
   TZ: str({ default: 'UTC' }),
   NODE_ENV: str({ choices: ['dev', 'test', 'production', 'ci', 'local'], default: 'local' }),
   PORT: port(),
+  LOGGING_LEVEL: str({ default: 'info' }),
   FRONT_BASE_URL: str(),
   DISABLE_USER_REGISTRATION: bool({ default: false }),
   REDIS_HOST: str(),
@@ -25,7 +34,7 @@ export const envValidators = {
   MONGO_MIN_POOL_SIZE: num({ default: 10 }),
   MONGO_URL: str(),
   NOVU_API_KEY: str({ default: '' }),
-  STORE_ENCRYPTION_KEY: str(),
+  STORE_ENCRYPTION_KEY: str32(),
   REDIS_CACHE_SERVICE_HOST: str({ default: '' }),
   REDIS_CACHE_SERVICE_PORT: str({ default: '' }),
   REDIS_CACHE_SERVICE_TLS: json({ default: undefined }),

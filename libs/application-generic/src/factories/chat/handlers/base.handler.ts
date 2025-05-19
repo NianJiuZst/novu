@@ -7,7 +7,7 @@ export abstract class BaseChatHandler implements IChatHandler {
 
   protected constructor(
     private providerId: ChatProviderIdEnum,
-    private channelType: string,
+    private channelType: string
   ) {}
 
   canHandle(providerId: string, channelType: ChannelTypeEnum) {
@@ -23,6 +23,6 @@ export abstract class BaseChatHandler implements IChatHandler {
 
     const { bridgeProviderData, ...content } = chatContent;
 
-    return await this.provider.sendMessage(content, bridgeProviderData);
+    return await this.provider.sendMessage(content, bridgeProviderData ?? {});
   }
 }

@@ -44,15 +44,15 @@ export interface IRedisProviderConfig {
 
 export const getRedisProviderConfig = (): IRedisProviderConfig => {
   const redisConfig: IRedisConfig = {
-    db: convertStringValues(process.env.REDIS_DB_INDEX),
-    host: convertStringValues(process.env.REDIS_HOST),
-    port: convertStringValues(process.env.REDIS_PORT),
-    ttl: convertStringValues(process.env.REDIS_TTL),
-    password: convertStringValues(process.env.REDIS_PASSWORD),
-    connectTimeout: convertStringValues(process.env.REDIS_CONNECT_TIMEOUT),
-    keepAlive: convertStringValues(process.env.REDIS_KEEP_ALIVE),
-    family: convertStringValues(process.env.REDIS_FAMILY),
-    keyPrefix: convertStringValues(process.env.REDIS_PREFIX),
+    db: convertStringValues(process.env.REDIS_DB_INDEX || '') || '',
+    host: convertStringValues(process.env.REDIS_HOST || '') || '',
+    port: convertStringValues(process.env.REDIS_PORT || '') || '',
+    ttl: convertStringValues(process.env.REDIS_TTL || '') || '',
+    password: convertStringValues(process.env.REDIS_PASSWORD || '') || '',
+    connectTimeout: convertStringValues(process.env.REDIS_CONNECT_TIMEOUT || '') || '',
+    keepAlive: convertStringValues(process.env.REDIS_KEEP_ALIVE || '') || '',
+    family: convertStringValues(process.env.REDIS_FAMILY || '') || '',
+    keyPrefix: convertStringValues(process.env.REDIS_PREFIX || '') || '',
     tls: process.env.REDIS_TLS as ConnectionOptions,
   };
 

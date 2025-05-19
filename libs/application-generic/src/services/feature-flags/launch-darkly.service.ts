@@ -1,6 +1,9 @@
 import { init, LDClient, LDMultiKindContext } from '@launchdarkly/node-server-sdk';
 import { Injectable } from '@nestjs/common';
+import { EnvironmentEntity, OrganizationEntity, UserEntity } from '@novu/dal';
 import type { FeatureFlagContext, FeatureFlagContextBase, IFeatureFlagsService } from './types';
+
+type PartialWithId<T> = Partial<T> & { _id: string };
 
 @Injectable()
 export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
@@ -31,7 +34,11 @@ export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
     organization,
     user,
   }: FeatureFlagContext<T_Result>): Promise<T_Result> {
-    const context = this.buildLDContext({ user, organization, environment });
+    const context = this.buildLDContext({
+      user: user ?? ({} as PartialWithId<UserEntity>),
+      organization: organization ?? ({} as PartialWithId<OrganizationEntity>),
+      environment: environment ?? ({} as PartialWithId<EnvironmentEntity>),
+    });
     const newVar = await this.client.variation(key, context, defaultValue);
 
     return newVar;
@@ -42,7 +49,7 @@ export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
       kind: 'multi',
     };
 
-    if (environment?._id) {
+    if (environment && environment._id) {
       mappedContext.environment = {
         key: environment._id,
         createdAt: environment.createdAt,
@@ -50,7 +57,7 @@ export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
       };
     }
 
-    if (organization?._id) {
+    if (organization && organization._id) {
       mappedContext.organization = {
         key: organization._id,
         createdAt: organization.createdAt,
@@ -60,7 +67,7 @@ export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
       };
     }
 
-    if (user?._id) {
+    if (user && user._id) {
       mappedContext.user = {
         key: user._id,
         createdAt: user.createdAt,

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { merge } from 'lodash';
 import { readFile } from 'fs/promises';
 import { ModuleRef } from '@nestjs/core';
@@ -6,7 +6,6 @@ import { ModuleRef } from '@nestjs/core';
 import { IEmailBlock, CommunityOrganizationRepository } from '@novu/dal';
 
 import { CompileTemplate, CompileTemplateBase } from '../compile-template';
-import { BadRequestException } from '@nestjs/common';
 import { CompileEmailTemplateCommand } from './compile-email-template.command';
 import { LayoutDto, GetLayoutCommand, GetLayoutUseCase } from '../get-layout';
 import { VerifyPayloadService } from '../../services';
@@ -72,8 +71,8 @@ export class CompileEmailTemplate extends CompileTemplateBase {
       preheader,
       blocks: [],
       branding: {
-        logo: organization.branding?.logo,
-        color: organization.branding?.color || '#f47373',
+        logo: organization?.branding?.logo,
+        color: organization?.branding?.color || '#f47373',
       },
     };
 

@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, BadRequestException } from '@nestjs/common';
 import { differenceInMilliseconds } from 'date-fns';
 import {
   DigestUnitEnum,
@@ -11,7 +11,6 @@ import {
   IDelayRegularMetadata,
 } from '@novu/shared';
 
-import { BadRequestException } from '@nestjs/common';
 import { isRegularDigest } from '../../utils/digest';
 import { TimedDigestDelayService } from './timed-digest-delay.service';
 
@@ -53,13 +52,13 @@ export class ComputeJobWaitDurationService {
 
       const regularDigestMeta = stepMetadata as IDigestRegularMetadata;
 
-      return this.toMilliseconds(regularDigestMeta.amount, regularDigestMeta.unit);
+      return this.toMilliseconds(regularDigestMeta.amount ?? 0, regularDigestMeta.unit ?? DigestUnitEnum.MINUTES);
     } else if (digestType === DigestTypeEnum.TIMED) {
       const timedDigestMeta = stepMetadata as IDigestTimedMetadata;
 
       return TimedDigestDelayService.calculate({
-        unit: timedDigestMeta.unit,
-        amount: timedDigestMeta.amount,
+        unit: timedDigestMeta.unit ?? DigestUnitEnum.MINUTES,
+        amount: timedDigestMeta.amount ?? 0,
         timeConfig: {
           ...timedDigestMeta.timed,
         },
@@ -71,7 +70,7 @@ export class ComputeJobWaitDurationService {
 
       const regularDigestMeta = stepMetadata as IDelayRegularMetadata;
 
-      return this.toMilliseconds(regularDigestMeta.amount, regularDigestMeta.unit);
+      return this.toMilliseconds(regularDigestMeta.amount ?? 0, regularDigestMeta.unit ?? DigestUnitEnum.MINUTES);
     }
 
     return 0;

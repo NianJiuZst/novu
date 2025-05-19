@@ -59,6 +59,8 @@ export const MockCacheService = {
         return addCount;
       },
       async eval<TData = unknown>(script: string, keys: string[], args: (string | Buffer | number)[]): Promise<TData> {
+        if (!mockClient || !mockClient.eval) throw new Error('mockClient.eval is not defined');
+
         return mockClient.eval(script, keys.length, ...keys, ...args) as TData;
       },
     };

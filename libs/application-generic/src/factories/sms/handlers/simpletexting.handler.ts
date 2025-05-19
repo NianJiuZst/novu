@@ -9,8 +9,8 @@ export class SimpletextingSmsHandler extends BaseSmsHandler {
 
   buildProvider(credentials: ICredentials) {
     const config = {
-      apiKey: credentials.apiKey,
-      accountPhone: credentials.from,
+      apiKey: credentials.apiKey ?? '',
+      accountPhone: credentials.from ?? '',
     };
 
     this.provider = new SimpletextingSmsProvider(config);

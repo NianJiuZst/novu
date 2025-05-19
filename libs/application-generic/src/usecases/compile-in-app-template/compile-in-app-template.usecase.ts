@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { OrganizationEntity, CommunityOrganizationRepository } from '@novu/dal';
 import { IMessageButton } from '@novu/shared';
 import { ModuleRef } from '@nestjs/core';
 
 import { CompileTemplate, CompileTemplateBase } from '../compile-template';
-import { BadRequestException } from '@nestjs/common';
 import { CompileInAppTemplateCommand } from './compile-in-app-template.command';
 
 @Injectable()
@@ -54,7 +53,7 @@ export class CompileInAppTemplate extends CompileTemplateBase {
   private async compileInAppTemplate(
     content: string,
     payload: any,
-    organization: OrganizationEntity | null,
+    organization: OrganizationEntity | null | undefined,
     i18nInstance: any
   ): Promise<string> {
     return await this.compileTemplate.execute(

@@ -41,17 +41,17 @@ export interface IElasticacheClusterProviderConfig {
 
 export const getElasticacheClusterProviderConfig = (): IElasticacheClusterProviderConfig => {
   const redisClusterConfig: IElasticacheClusterConfig = {
-    host: convertStringValues(process.env.ELASTICACHE_CLUSTER_SERVICE_HOST),
-    port: convertStringValues(process.env.ELASTICACHE_CLUSTER_SERVICE_PORT),
-    ttl: convertStringValues(process.env.REDIS_CLUSTER_TTL),
-    password: convertStringValues(process.env.REDIS_CLUSTER_PASSWORD),
-    connectTimeout: convertStringValues(process.env.REDIS_CLUSTER_CONNECTION_TIMEOUT),
-    keepAlive: convertStringValues(process.env.REDIS_CLUSTER_KEEP_ALIVE),
-    family: convertStringValues(process.env.REDIS_CLUSTER_FAMILY),
-    keyPrefix: convertStringValues(process.env.REDIS_CLUSTER_KEY_PREFIX),
+    host: convertStringValues(process.env.ELASTICACHE_CLUSTER_SERVICE_HOST || '') || '',
+    port: convertStringValues(process.env.ELASTICACHE_CLUSTER_SERVICE_PORT || '') || '',
+    ttl: convertStringValues(process.env.REDIS_CLUSTER_TTL || '') || '',
+    password: convertStringValues(process.env.REDIS_CLUSTER_PASSWORD || '') || '',
+    connectTimeout: convertStringValues(process.env.REDIS_CLUSTER_CONNECTION_TIMEOUT || '') || '',
+    keepAlive: convertStringValues(process.env.ELASTICACHE_CLUSTER_KEEP_ALIVE || '') || '',
+    family: convertStringValues(process.env.ELASTICACHE_CLUSTER_FAMILY || '') || '',
+    keyPrefix: convertStringValues(process.env.ELASTICACHE_CLUSTER_KEY_PREFIX || '') || '',
     tls: (process.env.ELASTICACHE_CLUSTER_SERVICE_TLS as ConnectionOptions)
       ? {
-          servername: convertStringValues(process.env.ELASTICACHE_CLUSTER_SERVICE_HOST),
+          servername: convertStringValues(process.env.ELASTICACHE_CLUSTER_SERVICE_HOST || '') || '',
         }
       : {},
   };

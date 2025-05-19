@@ -1,21 +1,7 @@
 // cSpell:ignore RRULE, BYSETPOS, BYMONTHDAY, bysetpos, byweekday, bymonthday, byhour, byminute, bysecond, dtstart
-import {
-  differenceInMilliseconds,
-  addMinutes,
-  addHours,
-  addDays,
-  addWeeks,
-  addMonths,
-} from 'date-fns';
+import { differenceInMilliseconds, addMinutes, addHours, addDays, addWeeks, addMonths } from 'date-fns';
 import { RRule, Frequency, Weekday } from 'rrule';
-import {
-  DaysEnum,
-  DigestUnitEnum,
-  ITimedConfig,
-  MonthlyTypeEnum,
-  OrdinalEnum,
-  OrdinalValueEnum,
-} from '@novu/shared';
+import { DaysEnum, DigestUnitEnum, ITimedConfig, MonthlyTypeEnum, OrdinalEnum, OrdinalValueEnum } from '@novu/shared';
 
 const UNIT_TO_RRULE_FREQUENCY = {
   [DigestUnitEnum.MINUTES]: Frequency.MINUTELY,
@@ -79,18 +65,9 @@ export class TimedDigestDelayService {
     dateStart = new Date(),
     unit = DigestUnitEnum.MINUTES,
     amount,
-    timeConfig: {
-      atTime,
-      weekDays,
-      monthDays,
-      monthlyType = MonthlyTypeEnum.EACH,
-      ordinal,
-      ordinalValue,
-    } = {},
+    timeConfig: { atTime, weekDays, monthDays, monthlyType = MonthlyTypeEnum.EACH, ordinal, ordinalValue } = {},
   }: ICalculateArgs): number {
-    const [hours, minutes, seconds] = atTime
-      ? atTime.split(':').map((part) => parseInt(part, 10))
-      : [];
+    const [hours, minutes, seconds] = atTime ? atTime.split(':').map((part) => parseInt(part, 10)) : [];
 
     const { bysetpos, byweekday, bymonthday } = this.calculateByFields({
       weekDays,
@@ -122,13 +99,7 @@ export class TimedDigestDelayService {
     return differenceInMilliseconds(next, new Date());
   }
 
-  private static calculateByFields({
-    weekDays,
-    monthDays,
-    monthlyType,
-    ordinal,
-    ordinalValue,
-  }: ITimedConfig) {
+  private static calculateByFields({ weekDays, monthDays, monthlyType, ordinal, ordinalValue }: ITimedConfig) {
     let byweekday: Weekday[] | undefined;
     let bymonthday: number | number[] | undefined;
 
@@ -141,11 +112,11 @@ export class TimedDigestDelayService {
 
     switch (ordinalValue) {
       case OrdinalValueEnum.DAY: {
-        return { bymonthday: ORDINAL_TO_RRULE_BYMONTHDAY[ordinal] };
+        return { bymonthday: ORDINAL_TO_RRULE_BYMONTHDAY[ordinal ?? OrdinalEnum.FIRST] };
       }
       case OrdinalValueEnum.WEEKDAY: {
         return {
-          bysetpos: ORDINAL_TO_RRULE_BYSETPOS[ordinal],
+          bysetpos: ORDINAL_TO_RRULE_BYSETPOS[ordinal ?? OrdinalEnum.FIRST],
           byweekday: [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR],
         };
       }
@@ -164,11 +135,7 @@ export class TimedDigestDelayService {
     }
   }
 
-  private static getUntilDate(
-    dateStart: Date,
-    unit: DigestUnitEnum,
-    amount: number,
-  ): Date {
+  private static getUntilDate(dateStart: Date, unit: DigestUnitEnum, amount: number): Date {
     switch (unit) {
       case DigestUnitEnum.MINUTES:
         return addMinutes(dateStart, amount);

@@ -9,8 +9,8 @@ export class ClicksendSmsHandler extends BaseSmsHandler {
 
   buildProvider(credentials: ICredentials) {
     const config = {
-      username: credentials.user,
-      apiKey: credentials.apiKey,
+      username: credentials.user ?? '',
+      apiKey: credentials.apiKey ?? '',
     };
 
     this.provider = new ClicksendSmsProvider(config);

@@ -61,53 +61,53 @@ describe('shared cache', function () {
     it('should retrieve identifier _subscriber from Message query', async function () {
       const keyPrefix = CacheKeyPrefixEnum.FEED;
       let query: Record<string, unknown>;
-      let res: { key: string; value: string };
+      let res: { key: string | undefined; value: string };
 
       query = { _id: '123', _subscriberId: '456' };
       res = getIdentifier(keyPrefix, query);
-      expect(res.value).toEqual('456');
+      expect(res.value ?? '').toEqual('456');
 
       query = { _id: '123', subscriberId: '456' };
       res = getIdentifier(keyPrefix, query);
-      expect(res.value).toEqual('456');
+      expect(res.value ?? '').toEqual('456');
 
       query = { id: '123', _subscriberId: '456' };
       res = getIdentifier(keyPrefix, query);
-      expect(res.value).toEqual('456');
+      expect(res.value ?? '').toEqual('456');
 
       query = { id: '123', subscriberId: '456' };
       res = getIdentifier(keyPrefix, query);
-      expect(res.value).toEqual('456');
+      expect(res.value ?? '').toEqual('456');
 
       query = { dummyKey: '123' };
       res = getIdentifier(keyPrefix, query);
-      expect(res.value).toEqual(undefined);
+      expect(res.value ?? '').toEqual('');
     });
 
     it('should retrieve identifier _id from not Message query', async function () {
       const keyPrefix = 'Subscriber';
       let query: Record<string, unknown>;
-      let res: { key: string; value: string };
+      let res: { key: string | undefined; value: string };
 
       query = { _id: '123', _subscriberId: '456' };
       res = getIdentifier(keyPrefix, query);
-      expect(res.value).toEqual('123');
+      expect(res.value ?? '').toEqual('123');
 
       query = { _id: '123', subscriberId: '456' };
       res = getIdentifier(keyPrefix, query);
-      expect(res.value).toEqual('123');
+      expect(res.value ?? '').toEqual('123');
 
       query = { id: '123', _subscriberId: '456' };
       res = getIdentifier(keyPrefix, query);
-      expect(res.value).toEqual('123');
+      expect(res.value ?? '').toEqual('123');
 
       query = { id: '123', subscriberId: '456' };
       res = getIdentifier(keyPrefix, query);
-      expect(res.value).toEqual('123');
+      expect(res.value ?? '').toEqual('123');
 
       query = { dummyKey: '123' };
       res = getIdentifier(keyPrefix, query);
-      expect(res.value).toEqual(undefined);
+      expect(res.value ?? '').toEqual('');
     });
   });
 
@@ -137,18 +137,18 @@ describe('shared cache', function () {
 
   describe('getEnvironment', function () {
     it('should return environment from query', async function () {
-      let res: { key: string; value: string };
+      let res: { key: string | undefined; value: string } | undefined;
       let query: Record<string, unknown>;
 
       query = { id: '123', subscriberId: '456', _environmentId: '789' };
       res = getEnvironment(query);
-      expect(res.key).toEqual('_environmentId');
-      expect(res.value).toEqual('789');
+      expect(res?.key ?? '').toEqual('_environmentId');
+      expect(res?.value ?? '').toEqual('789');
 
       query = { id: '123', subscriberId: '456', environmentId: '789' };
       res = getEnvironment(query);
-      expect(res.key).toEqual('environmentId');
-      expect(res.value).toEqual('789');
+      expect(res?.key ?? '').toEqual('environmentId');
+      expect(res?.value ?? '').toEqual('789');
 
       query = {
         id: '123',
@@ -157,13 +157,13 @@ describe('shared cache', function () {
         _environmentId: '777',
       };
       res = getEnvironment(query);
-      expect(res.key).toEqual('_environmentId');
-      expect(res.value).toEqual('777');
+      expect(res?.key ?? '').toEqual('_environmentId');
+      expect(res?.value ?? '').toEqual('777');
 
       query = { id: '123', subscriberId: '456' };
       res = getEnvironment(query);
-      expect(res?.key).toEqual(undefined);
-      expect(res?.value).toEqual(undefined);
+      expect(res?.key ?? '').toEqual('');
+      expect(res?.value ?? '').toEqual('');
     });
   });
 
@@ -476,11 +476,7 @@ describe('shared cache', function () {
         { limit: '10', filter: true },
       ];
 
-      const credentials = getInvalidateQuery(
-        'Create',
-        createResponse,
-        queryArgs,
-      );
+      const credentials = getInvalidateQuery('Create', createResponse, queryArgs);
 
       expect(credentials._id).toEqual('createResponse_123');
       expect(credentials.subscriberId).toEqual('createResponse_333');
@@ -502,11 +498,7 @@ describe('shared cache', function () {
         { options: { limit: '10', filter: true } },
       ];
 
-      const credentials = getInvalidateQuery(
-        'update',
-        createResponse,
-        queryArgs,
-      );
+      const credentials = getInvalidateQuery('update', createResponse, queryArgs);
 
       expect(credentials._id).toEqual('queryArgs_123');
       expect(credentials.subscriberId).toEqual('queryArgs_333');
@@ -522,11 +514,7 @@ describe('shared cache', function () {
         limit: 10,
         seen: true,
       };
-      const res = buildQueryKeyPart(
-        CacheKeyPrefixEnum.MESSAGE_COUNT,
-        CacheInterceptorTypeEnum.CACHED,
-        query,
-      );
+      const res = buildQueryKeyPart(CacheKeyPrefixEnum.MESSAGE_COUNT, CacheInterceptorTypeEnum.CACHED, query);
 
       expect(res).toEqual(':limit=10:seen=true');
     });
@@ -539,11 +527,7 @@ describe('shared cache', function () {
         limit: 10,
         seen: true,
       };
-      const res = buildQueryKeyPart(
-        CacheKeyPrefixEnum.MESSAGE_COUNT,
-        CacheInterceptorTypeEnum.INVALIDATE,
-        query,
-      );
+      const res = buildQueryKeyPart(CacheKeyPrefixEnum.MESSAGE_COUNT, CacheInterceptorTypeEnum.INVALIDATE, query);
 
       expect(res).toEqual('*');
     });

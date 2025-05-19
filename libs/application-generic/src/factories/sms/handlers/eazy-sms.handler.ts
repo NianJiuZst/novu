@@ -9,8 +9,8 @@ export class EazySmsHandler extends BaseSmsHandler {
 
   buildProvider(credentials: ICredentials) {
     const config = {
-      apiKey: credentials.apiKey,
-      channelId: credentials.channelId,
+      apiKey: credentials.apiKey ?? '',
+      channelId: credentials.channelId ?? '',
     };
     this.provider = new EazySmsProvider(config);
   }

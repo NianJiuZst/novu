@@ -8,7 +8,7 @@ export class BulkSmsHandler extends BaseSmsHandler {
   }
   buildProvider(credentials: ICredentials) {
     const config = {
-      apiToken: credentials.apiToken,
+      apiToken: credentials.apiToken ?? '',
     };
     this.provider = new BulkSmsProvider(config);
   }

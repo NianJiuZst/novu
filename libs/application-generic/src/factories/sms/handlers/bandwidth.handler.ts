@@ -9,9 +9,9 @@ export class BandwidthHandler extends BaseSmsHandler {
 
   buildProvider(credentials: ICredentials) {
     const config = {
-      username: credentials.user,
-      password: credentials.password,
-      accountId: credentials.accountSid,
+      username: credentials.user ?? '',
+      password: credentials.password ?? '',
+      accountId: credentials.accountSid ?? '',
     };
 
     this.provider = new BandwidthSmsProvider(config);

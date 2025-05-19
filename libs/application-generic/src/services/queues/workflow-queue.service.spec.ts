@@ -10,14 +10,12 @@ let workflowQueueService: WorkflowQueueService;
 describe('Workflow Queue service', () => {
   describe('General', () => {
     beforeAll(async () => {
-      workflowQueueService = new WorkflowQueueService(
-        new WorkflowInMemoryProviderService(),
-      );
-      await workflowQueueService.queue.obliterate();
+      workflowQueueService = new WorkflowQueueService(new WorkflowInMemoryProviderService());
+      await workflowQueueService.queue?.obliterate();
     });
 
     beforeEach(async () => {
-      await workflowQueueService.queue.drain();
+      await workflowQueueService.queue?.drain();
     });
 
     afterAll(async () => {
@@ -27,12 +25,7 @@ describe('Workflow Queue service', () => {
     it('should be initialised properly', async () => {
       expect(workflowQueueService).toBeDefined();
       expect(Object.keys(workflowQueueService)).toEqual(
-        expect.arrayContaining([
-          'topic',
-          'DEFAULT_ATTEMPTS',
-          'instance',
-          'queue',
-        ]),
+        expect.arrayContaining(['topic', 'DEFAULT_ATTEMPTS', 'instance', 'queue'])
       );
       expect(workflowQueueService.DEFAULT_ATTEMPTS).toEqual(3);
       expect(workflowQueueService.topic).toEqual('trigger-handler');
@@ -53,9 +46,9 @@ describe('Workflow Queue service', () => {
           jobsOpts: {
             removeOnComplete: true,
           },
-        }),
+        })
       );
-      expect(workflowQueueService.queue.opts.prefix).toEqual('bull');
+      expect(workflowQueueService.queue?.opts?.prefix).toEqual('bull');
     });
 
     it('should add a job in the queue', async () => {
@@ -76,19 +69,21 @@ describe('Workflow Queue service', () => {
         groupId: _organizationId,
       });
 
-      expect(await workflowQueueService.queue.getActiveCount()).toEqual(0);
-      expect(await workflowQueueService.queue.getWaitingCount()).toEqual(1);
+      expect(await workflowQueueService.queue?.getActiveCount()).toEqual(0);
+      expect(await workflowQueueService.queue?.getWaitingCount()).toEqual(1);
 
-      const workflowQueueJobs = await workflowQueueService.queue.getJobs();
-      expect(workflowQueueJobs.length).toEqual(1);
-      const [workflowQueueJob] = workflowQueueJobs;
+      const workflowQueueJobs = await workflowQueueService.queue?.getJobs();
+      expect(workflowQueueJobs).toBeDefined();
+      expect(workflowQueueJobs?.length).toEqual(1);
+      const workflowQueueJob = workflowQueueJobs?.[0];
+      expect(workflowQueueJob).toBeDefined();
       expect(workflowQueueJob).toMatchObject(
         expect.objectContaining({
           id: '1',
           name: jobId,
           data: jobData,
           attemptsMade: 0,
-        }),
+        })
       );
     });
 
@@ -111,12 +106,14 @@ describe('Workflow Queue service', () => {
         groupId: _organizationId,
       });
 
-      expect(await workflowQueueService.queue.getActiveCount()).toEqual(0);
-      expect(await workflowQueueService.queue.getWaitingCount()).toEqual(1);
+      expect(await workflowQueueService.queue?.getActiveCount()).toEqual(0);
+      expect(await workflowQueueService.queue?.getWaitingCount()).toEqual(1);
 
-      const workflowQueueJobs = await workflowQueueService.queue.getJobs();
-      expect(workflowQueueJobs.length).toEqual(1);
-      const [workflowQueueJob] = workflowQueueJobs;
+      const workflowQueueJobs = await workflowQueueService.queue?.getJobs();
+      expect(workflowQueueJobs).toBeDefined();
+      expect(workflowQueueJobs?.length).toEqual(1);
+      const workflowQueueJob = workflowQueueJobs?.[0];
+      expect(workflowQueueJob).toBeDefined();
       expect(workflowQueueJob).toMatchObject(
         expect.objectContaining({
           id: '2',
@@ -128,7 +125,7 @@ describe('Workflow Queue service', () => {
             _userId,
           },
           attemptsMade: 0,
-        }),
+        })
       );
     });
   });
@@ -137,10 +134,8 @@ describe('Workflow Queue service', () => {
     beforeAll(async () => {
       process.env.IS_IN_MEMORY_CLUSTER_MODE_ENABLED = 'true';
 
-      workflowQueueService = new WorkflowQueueService(
-        new WorkflowInMemoryProviderService(),
-      );
-      await workflowQueueService.queue.obliterate();
+      workflowQueueService = new WorkflowQueueService(new WorkflowInMemoryProviderService());
+      await workflowQueueService.queue?.obliterate();
     });
 
     afterAll(async () => {
@@ -149,9 +144,7 @@ describe('Workflow Queue service', () => {
     });
 
     it('should have prefix in cluster mode', async () => {
-      expect(workflowQueueService.queue.opts.prefix).toEqual(
-        '{trigger-handler}',
-      );
+      expect(workflowQueueService.queue?.opts?.prefix).toEqual('{trigger-handler}');
     });
   });
 });

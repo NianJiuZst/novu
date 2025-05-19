@@ -11,13 +11,15 @@ export class InvalidateCacheService {
   constructor(@Inject(CacheService) private cacheService: CacheService) {}
 
   public async invalidateByKey({ key }: { key: string }): Promise<number> {
-    if (!this.cacheService?.cacheEnabled()) return;
+    if (!this.cacheService?.cacheEnabled()) return 0;
 
     try {
       return await this.cacheService.del(key);
     } catch (err) {
       Logger.error(err, `An error has occurred when deleting "key: ${key}",`, LOG_CONTEXT);
     }
+
+    return 0;
   }
 
   public async invalidateQuery({ key }: { key: string }): Promise<void | unknown[]> {
@@ -33,7 +35,7 @@ export class InvalidateCacheService {
   private async clearByPattern(
     storeKeyPrefix: CacheKeyPrefixEnum,
     credentials: Record<string, unknown>
-  ): Promise<unknown | undefined> {
+  ): Promise<unknown> {
     Logger.verbose(`Removing keys with prefix: ${storeKeyPrefix}`);
     Logger.debug(`storeKeyPrefix is: ${storeKeyPrefix}`);
 
@@ -42,7 +44,7 @@ export class InvalidateCacheService {
     if (!cacheKey) {
       Logger.warn('Cache key does not exist', LOG_CONTEXT);
 
-      return;
+      return undefined;
     }
 
     try {

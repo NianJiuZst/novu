@@ -1,8 +1,4 @@
-import {
-  ChannelTypeEnum,
-  EmailProviderIdEnum,
-  ICredentials,
-} from '@novu/shared';
+import { ChannelTypeEnum, EmailProviderIdEnum, ICredentials } from '@novu/shared';
 import { NodemailerProvider } from '@novu/providers';
 import { BaseHandler } from './base.handler';
 
@@ -12,8 +8,8 @@ export class NodemailerHandler extends BaseHandler {
   }
   buildProvider(credentials: ICredentials, from?: string) {
     this.provider = new NodemailerProvider({
-      from,
-      host: credentials.host,
+      from: from ?? '',
+      host: credentials.host ?? '',
       port: Number(credentials.port),
       secure: credentials.secure,
       user: credentials.user,
@@ -22,9 +18,9 @@ export class NodemailerHandler extends BaseHandler {
       ignoreTls: credentials.ignoreTls,
       tlsOptions: credentials.tlsOptions,
       dkim: {
-        domainName: credentials.domain,
-        keySelector: credentials.accountSid,
-        privateKey: credentials.secretKey,
+        domainName: credentials.domain ?? '',
+        keySelector: credentials.accountSid ?? '',
+        privateKey: credentials.secretKey ?? '',
       },
       senderName: credentials.senderName,
     });
