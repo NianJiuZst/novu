@@ -10,11 +10,13 @@ import {
   Put,
   UseInterceptors,
 } from '@nestjs/common';
-import { ChannelTypeEnum, UserSessionData } from '@novu/shared';
+import { ChannelTypeEnum, UserSessionData, PermissionsEnum, FeatureFlagsKeysEnum } from '@novu/shared';
 import {
   CalculateLimitNovuIntegration,
   CalculateLimitNovuIntegrationCommand,
+  FeatureFlagsService,
   OtelSpan,
+  RequirePermissions,
 } from '@novu/application-generic';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserSession } from '../shared/framework/user.decorator';
@@ -45,13 +47,13 @@ import { ChannelTypeLimitDto } from './dtos/get-channel-type-limit.sto';
 import { GetActiveIntegrationsCommand } from './usecases/get-active-integration/get-active-integration.command';
 import { SetIntegrationAsPrimary } from './usecases/set-integration-as-primary/set-integration-as-primary.usecase';
 import { SetIntegrationAsPrimaryCommand } from './usecases/set-integration-as-primary/set-integration-as-primary.command';
-import { UserAuthentication } from '../shared/framework/swagger/api.key.security';
+import { RequireAuthentication } from '../auth/framework/auth.decorator';
 import { SdkGroupName, SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 
 @ApiCommonResponses()
 @Controller('/integrations')
 @UseInterceptors(ClassSerializerInterceptor)
-@UserAuthentication()
+@RequireAuthentication()
 @ApiTags('Integrations')
 export class IntegrationsController {
   constructor(
@@ -63,7 +65,8 @@ export class IntegrationsController {
     private updateIntegrationUsecase: UpdateIntegration,
     private setIntegrationAsPrimaryUsecase: SetIntegrationAsPrimary,
     private removeIntegrationUsecase: RemoveIntegration,
-    private calculateLimitNovuIntegration: CalculateLimitNovuIntegration
+    private calculateLimitNovuIntegration: CalculateLimitNovuIntegration,
+    private featureFlagService: FeatureFlagsService
   ) {}
 
   @Get('/')
@@ -77,12 +80,16 @@ export class IntegrationsController {
       'Return all the integrations the user has created for that organization. Review v.0.17.0 changelog for a breaking change',
   })
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_READ)
   async listIntegrations(@UserSession() user: UserSessionData): Promise<IntegrationResponseDto[]> {
+    const canAccessCredentials = await this.canUserAccessCredentials(user);
+
     return await this.getIntegrationsUsecase.execute(
       GetIntegrationsCommand.create({
         environmentId: user.environmentId,
         organizationId: user.organizationId,
         userId: user._id,
+        returnCredentials: canAccessCredentials,
       })
     );
   }
@@ -99,12 +106,16 @@ export class IntegrationsController {
   })
   @ExternalApiAccessible()
   @SdkMethodName('listActive')
+  @RequirePermissions(PermissionsEnum.INTEGRATION_READ)
   async getActiveIntegrations(@UserSession() user: UserSessionData): Promise<IntegrationResponseDto[]> {
+    const canAccessCredentials = await this.canUserAccessCredentials(user);
+
     return await this.getActiveIntegrationsUsecase.execute(
       GetActiveIntegrationsCommand.create({
         environmentId: user.environmentId,
         organizationId: user.organizationId,
         userId: user._id,
+        returnCredentials: canAccessCredentials,
       })
     );
   }
@@ -121,6 +132,7 @@ export class IntegrationsController {
   })
   @SdkGroupName('Integrations.Webhooks')
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_READ)
   async getWebhookSupportStatus(
     @UserSession() user: UserSessionData,
     @Param('providerOrIntegrationId') providerOrIntegrationId: string
@@ -142,6 +154,7 @@ export class IntegrationsController {
     description: 'Create an integration for the current environment the user is based on the API key provided',
   })
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_CREATE)
   async createIntegration(
     @UserSession() user: UserSessionData,
     @Body() body: CreateIntegrationRequestDto
@@ -180,6 +193,7 @@ export class IntegrationsController {
     summary: 'Update integration',
   })
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_UPDATE)
   async updateIntegrationById(
     @UserSession() user: UserSessionData,
     @Param('integrationId') integrationId: string,
@@ -220,6 +234,7 @@ export class IntegrationsController {
     summary: 'Set integration as primary',
   })
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_UPDATE)
   @SdkMethodName('setAsPrimary')
   setIntegrationAsPrimary(
     @UserSession() user: UserSessionData,
@@ -241,6 +256,7 @@ export class IntegrationsController {
     summary: 'Delete integration',
   })
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_DELETE)
   async removeIntegration(
     @UserSession() user: UserSessionData,
     @Param('integrationId') integrationId: string
@@ -258,6 +274,7 @@ export class IntegrationsController {
   @Get('/:channelType/limit')
   @ApiExcludeEndpoint()
   @OtelSpan()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_READ)
   async getProviderLimit(
     @UserSession() user: UserSessionData,
     @Param('channelType') channelType: ChannelTypeEnum
@@ -279,6 +296,7 @@ export class IntegrationsController {
 
   @Get('/in-app/status')
   @ApiExcludeEndpoint()
+  @RequirePermissions(PermissionsEnum.INTEGRATION_READ)
   async getInAppActivated(@UserSession() user: UserSessionData) {
     return await this.getInAppActivatedUsecase.execute(
       GetInAppActivatedCommand.create({
@@ -286,5 +304,16 @@ export class IntegrationsController {
         environmentId: user.environmentId,
       })
     );
+  }
+
+  private async canUserAccessCredentials(user: UserSessionData): Promise<boolean> {
+    const isRbacEnabled = await this.featureFlagService.getFlag({
+      organization: { _id: user.organizationId },
+      user: { _id: user._id },
+      key: FeatureFlagsKeysEnum.IS_RBAC_ENABLED,
+      defaultValue: false,
+    });
+
+    return isRbacEnabled ? user.permissions.includes(PermissionsEnum.INTEGRATION_CREATE) : true;
   }
 }

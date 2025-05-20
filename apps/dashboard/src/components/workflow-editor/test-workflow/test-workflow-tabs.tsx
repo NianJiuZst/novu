@@ -66,7 +66,10 @@ export const TestWorkflowTabs = ({ testData }: { testData?: WorkflowTestDataResp
 
       setTransactionId(newTransactionId);
     } catch (e) {
-      showErrorToast(e instanceof Error ? e.message : 'There was an error triggering the workflow.', 'Failed to trigger workflow');
+      showErrorToast(
+        e instanceof Error ? e.message : 'There was an error triggering the workflow.',
+        'Failed to trigger workflow'
+      );
     }
   };
 
@@ -111,11 +114,7 @@ export const TestWorkflowTabs = ({ testData }: { testData?: WorkflowTestDataResp
                     </Button>
                   </div>
                 </TabsList>
-                <TabsContent
-                  value="trigger"
-                  className="mt-0 flex w-full flex-1 flex-col overflow-hidden"
-                  variant="regular"
-                >
+                <TabsContent value="trigger" className="mt-0 flex w-full flex-1 flex-col overflow-hidden">
                   <TestWorkflowForm workflow={workflow} />
                 </TabsContent>
               </Tabs>
