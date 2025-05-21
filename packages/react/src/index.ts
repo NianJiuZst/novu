@@ -17,7 +17,6 @@ export type {
   Events,
   SocketEventNames,
 } from '@novu/js';
-
 export type {
   Appearance,
   AppearanceKey,
