@@ -16,7 +16,7 @@ on:
 jobs:
   e2e_api:
     name: Test E2E
-    runs-on: blacksmith-8vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
