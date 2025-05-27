@@ -49,11 +49,11 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Update submodule to next branch
+            - name: Update submodule to next branch
         run: |
           # Make the script executable
           chmod +x .github/workflows/scripts/sync-ee-next.sh
-
+          
           # Run the sync script with auto-push enabled and PR URL
           ./.github/workflows/scripts/sync-ee-next.sh "next" "true" "${{ github.event.pull_request.html_url }}"
 

@@ -14,82 +14,70 @@ AUTO_PUSH="${2:-false}"     # Allow auto-push to be controlled
 PR_URL="${3:-}"             # Optional PR URL for commit message
 
 echo "
-🔄 Starting Enterprise Submodule Sync to '$TARGET_BRANCH' branch...
+🔄 Starting enterprise submodule sync to '$TARGET_BRANCH' branch...
 "
 
-# Step 1: Verify we're in a git repository
+# Verify we're in a git repository
 if [ ! -d ".git" ]; then
   echo "❌ Error: Not in a git repository root directory"
   echo "   Please run this script from the root of the monorepo"
   exit 1
 fi
 
-# Step 2: Verify submodule exists
+# Verify submodule exists and is initialized
+echo "📂 Checking $SOURCE_SUBMODULE submodule..."
 if [ ! -d "$SOURCE_SUBMODULE" ]; then
   echo "❌ Error: $SOURCE_SUBMODULE submodule directory not found!"
-  echo "   Please ensure submodules are initialized:"
-  echo "   git submodule init && git submodule update"
+  echo "   Please ensure:"
+  echo "   1. Submodules are properly initialized (git submodule init)"
+  echo "   2. Submodules are updated (git submodule update)"
+  echo "   3. You're in the correct directory"
+  echo ""
   exit 1
 fi
 
-# Step 3: Check if submodule is a valid git repository
-if [ ! -d "$SOURCE_SUBMODULE/.git" ]; then
-  echo "❌ Error: $SOURCE_SUBMODULE is not a valid git repository"
-  echo "   Please ensure submodules are properly initialized"
-  exit 1
-fi
-
-# Step 4: Update the submodule
-echo "📂 Updating $SOURCE_SUBMODULE submodule..."
+# Update the submodule
+echo "🔄 Updating $SOURCE_SUBMODULE submodule to '$TARGET_BRANCH' branch..."
 cd "$SOURCE_SUBMODULE"
 
-# Get current branch and commit for reference
-CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "detached")
+# Get current commit for reference
 CURRENT_COMMIT=$(git rev-parse HEAD)
 
-echo "   Current state:"
-echo "   - Branch: $CURRENT_BRANCH"
-echo "   - Commit: $CURRENT_COMMIT"
-echo ""
-
 # Fetch latest changes
-echo "📡 Fetching latest changes from remote..."
 git fetch origin
 
 # Check if target branch exists
 if ! git show-ref --verify --quiet "refs/remotes/origin/$TARGET_BRANCH"; then
   echo "❌ Error: Branch '$TARGET_BRANCH' does not exist in the remote repository"
-  echo "   Available branches:"
-  git branch -r | grep -v HEAD | sed 's/origin\///' | sed 's/^/   - /'
+  echo "   Please check that the branch exists in the enterprise repository"
+  echo ""
   exit 1
 fi
 
-# Switch to target branch
-echo "🔀 Switching to '$TARGET_BRANCH' branch..."
+# Switch to target branch and pull latest changes
 git checkout "$TARGET_BRANCH"
-
-# Pull latest changes
-echo "⬇️  Pulling latest changes from '$TARGET_BRANCH'..."
 git pull origin "$TARGET_BRANCH"
 
 # Get new commit hash
 NEW_COMMIT=$(git rev-parse HEAD)
-echo "   New commit: $NEW_COMMIT"
+echo "✅ Successfully updated to latest '$TARGET_BRANCH' branch"
+echo "   Commit hash: $NEW_COMMIT"
+echo ""
 
 # Go back to main repository
 cd ..
 
-# Step 5: Check if there are changes to commit
-echo ""
-echo "🔍 Checking for changes..."
+# Check if there are changes to commit
+echo "🔍 Checking for changes in main repository..."
 if git diff --quiet HEAD -- "$SOURCE_SUBMODULE"; then
   echo "✅ No changes detected - submodule already points to the latest '$TARGET_BRANCH' branch"
   echo "   Current commit: $NEW_COMMIT"
+  echo ""
   exit 0
 fi
 
-# Step 6: Stage and commit changes
-echo "📝 Staging submodule changes..."
+# Stage and commit changes
+echo "📝 Committing submodule changes..."
 git add "$SOURCE_SUBMODULE"
 
 # Create commit message
@@ -108,18 +96,14 @@ Previous commit: $CURRENT_COMMIT
 New commit: $NEW_COMMIT"
 fi
 
-echo "💾 Committing changes..."
 git commit -m "$COMMIT_MESSAGE"
 
 # Auto-push if requested (for GitHub Actions)
 if [ "$AUTO_PUSH" = "true" ]; then
   CURRENT_BRANCH=$(git branch --show-current)
-  echo "📤 Pushing changes to origin/$CURRENT_BRANCH..."
   git push origin "$CURRENT_BRANCH"
-  echo "✅ Successfully pushed changes!"
 fi
 
-echo ""
 echo "✅ Successfully updated submodule to '$TARGET_BRANCH' branch!"
 echo "   Previous commit: $CURRENT_COMMIT"
 echo "   New commit: $NEW_COMMIT"
