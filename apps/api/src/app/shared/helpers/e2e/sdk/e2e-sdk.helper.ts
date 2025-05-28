@@ -1,16 +1,9 @@
 import { Novu, SDKOptions } from '@novu/api';
+import { HTTPClient, HTTPClientOptions } from '@novu/api/lib/http';
+import { ErrorDto, SDKValidationError, ValidationErrorDto } from '@novu/api/models/errors';
 import { HttpRequestHeaderKeysEnum } from '@novu/application-generic';
 import { UserSession } from '@novu/testing';
 import { expect } from 'chai';
-import { HTTPClient, HTTPClientOptions } from './api-http-client';
-import {
-  ErrorDto,
-  SDKValidationError,
-  ValidationErrorDto,
-  isErrorDto,
-  isValidationErrorDto,
-  isSDKValidationError,
-} from './api-error-types';
 
 export function initNovuClassSdk(session: UserSession, shouldRetry: boolean = false): Novu {
   const options: SDKOptions = {
@@ -40,6 +33,23 @@ export function initNovuClassSdkInternalAuth(session: UserSession, shouldRetry: 
   }
 
   return new Novu(options);
+}
+
+function isErrorDto(error: unknown): error is ErrorDto {
+  return typeof error === 'object' && error !== null && 'name' in error && error.name === 'ErrorDto';
+}
+function isValidationErrorDto(error: unknown): error is ValidationErrorDto {
+  return typeof error === 'object' && error !== null && 'name' in error && error.name === 'ValidationErrorDto';
+}
+
+function isSDKValidationError(error: unknown): error is SDKValidationError {
+  return (
+    error instanceof SDKValidationError &&
+    error.name === 'SDKValidationError' &&
+    'rawValue' in error &&
+    'rawMessage' in error &&
+    'cause' in error
+  );
 }
 
 export function handleSdkError(error: unknown): ErrorDto {

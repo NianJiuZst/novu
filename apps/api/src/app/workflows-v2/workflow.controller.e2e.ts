@@ -26,7 +26,7 @@ import {
   ShortIsPrefixEnum,
   slugify,
 } from '@novu/shared';
-import { ErrorDto } from '../shared/helpers/e2e/sdk/api-error-types';
+import { ErrorDto } from '@novu/api/models/errors';
 import { buildSlug } from '../shared/helpers/build-slug';
 import { stepTypeToControlSchema } from './shared';
 import {
