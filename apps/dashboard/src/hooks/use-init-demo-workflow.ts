@@ -37,7 +37,7 @@ async function createDemoWorkflow({ environment }: { environment: IEnvironment }
           },
         },
       ],
-      __source: WorkflowCreationSourceEnum.DASHBOARD,
+      source: WorkflowCreationSourceEnum.DASHBOARD,
     },
   });
 }

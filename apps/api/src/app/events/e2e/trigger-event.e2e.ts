@@ -1,6 +1,9 @@
 import { Novu } from '@novu/api';
-import { CreateIntegrationRequestDto, TriggerEventResponseDto } from '@novu/api/models/components';
-import { SubscriberPayloadDto } from '@novu/api/src/models/components/subscriberpayloaddto';
+import {
+  CreateIntegrationRequestDto,
+  TriggerEventResponseDto,
+  SubscriberPayloadDto,
+} from '@novu/api/models/components';
 import { DetailEnum } from '@novu/application-generic';
 import {
   EnvironmentRepository,

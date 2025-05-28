@@ -1,4 +1,4 @@
-import { HTTPClient, HTTPClientOptions } from '@novu/api/lib/http';
+import { HTTPClient, HTTPClientOptions } from '../src/app/shared/helpers/e2e/sdk/api-http-client';
 
 export class MockHTTPClient extends HTTPClient {
   private mockResponses: Map<string, Array<{ response: Response; remaining: number }>> = new Map();
