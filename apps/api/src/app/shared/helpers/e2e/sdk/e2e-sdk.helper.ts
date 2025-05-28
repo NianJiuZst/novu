@@ -24,7 +24,7 @@ export function initNovuClassSdkInternalAuth(session: UserSession, shouldRetry: 
     serverURL: session.serverUrl,
     httpClient: new CustomHeaderHTTPClient({
       [HttpRequestHeaderKeysEnum.NOVU_ENVIRONMENT_ID]: session.environment._id,
-    }) as any,
+    }) as never,
     // debugLogger: console,
   };
   if (!shouldRetry) {
