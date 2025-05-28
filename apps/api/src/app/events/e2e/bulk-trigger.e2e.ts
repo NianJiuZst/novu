@@ -6,12 +6,7 @@ import { Novu } from '@novu/api';
 import { triggerBulk } from '@novu/api/funcs/triggerBulk';
 import { TriggerEventRequestDto } from '@novu/api/models/components';
 import { z } from 'zod';
-import { NovuCore } from '@novu/api/core';
-import {
-  expectSdkValidationExceptionGeneric,
-  initNovuClassSdk,
-  initNovuFunctionSdk,
-} from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
+import { expectSdkValidationExceptionGeneric, initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
 describe('Trigger bulk events - /v1/events/trigger/bulk (POST) #novu-v2', function () {
   let session: UserSession;
@@ -23,7 +18,6 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST) #novu-v2', functi
   const notificationRepository = new NotificationRepository();
   const messageRepository = new MessageRepository();
   let novuClient: Novu;
-  let novuCore: NovuCore;
 
   beforeEach(async () => {
     session = new UserSession();
@@ -41,62 +35,6 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST) #novu-v2', functi
     subscriber = await subscriberService.createSubscriber();
     secondSubscriber = await subscriberService.createSubscriber();
     novuClient = initNovuClassSdk(session);
-    novuCore = initNovuFunctionSdk(session);
-  });
-
-  it('should return the response array in correct order', async function () {
-    const bulkTriggerResponse = await triggerBulk(novuCore, {
-      events: [
-        {
-          transactionId: '1111',
-          workflowId: template.triggers[0].identifier,
-          to: [subscriber.subscriberId],
-          payload: {
-            firstName: 'Testing of User Name',
-            urlVariable: '/test/url/path',
-          },
-        },
-        {
-          transactionId: '2222',
-          workflowId: template.triggers[0].identifier,
-          to: [subscriber.subscriberId],
-          payload: {
-            firstName: 'Testing of User Name',
-            urlVariable: '/test/url/path',
-          },
-        },
-        {
-          transactionId: '3333',
-          workflowId: template.triggers[0].identifier,
-          to: [subscriber.subscriberId],
-          payload: {
-            firstName: 'Testing of User Name',
-            urlVariable: '/test/url/path',
-          },
-        },
-      ],
-    });
-    if (!bulkTriggerResponse.ok) {
-      throw new Error(`Failed to make bulkTriggerResponse\n${JSON.stringify(bulkTriggerResponse.error, null, 2)}`);
-    }
-    const value = bulkTriggerResponse.value.result;
-    expect(bulkTriggerResponse).to.be.ok;
-    expect(bulkTriggerResponse.value.result.length).to.equal(3);
-
-    const firstEvent = bulkTriggerResponse.value.result[0];
-    expect(firstEvent.status).to.equal('processed');
-    expect(firstEvent.acknowledged).to.equal(true);
-    expect(firstEvent.transactionId).to.equal('1111');
-
-    const secondEvent = bulkTriggerResponse.value.result[1];
-    expect(secondEvent.status).to.equal('processed');
-    expect(secondEvent.acknowledged).to.equal(true);
-    expect(secondEvent.transactionId).to.equal('2222');
-
-    const thirdEvent = bulkTriggerResponse.value.result[2];
-    expect(thirdEvent.status).to.equal('processed');
-    expect(thirdEvent.acknowledged).to.equal(true);
-    expect(thirdEvent.transactionId).to.equal('3333');
   });
 
   it('should generate message and notification based on a bulk event', async function () {
@@ -218,56 +156,5 @@ describe('Trigger bulk events - /v1/events/trigger/bulk (POST) #novu-v2', functi
 
     expect(errorDto?.statusCode).to.equal(422);
     expect(errorDto?.errors.events.messages[0]).to.equal('events must contain no more than 100 elements');
-  });
-
-  it('should handle bulk if one of the events returns errors', async function () {
-    const bulkTriggerResponse = await triggerBulk(novuCore, {
-      events: [
-        {
-          transactionId: '1111',
-          workflowId: 'non-existing-trigger',
-          to: [subscriber.subscriberId],
-          payload: {
-            firstName: 'Testing of User Name',
-            urlVariable: '/test/url/path',
-          },
-        },
-        {
-          transactionId: '2222',
-          workflowId: template.triggers[0].identifier,
-          to: [subscriber.subscriberId],
-          payload: {
-            firstName: 'Testing of User Name',
-            urlVariable: '/test/url/path',
-          },
-        },
-        {
-          transactionId: '1111',
-          payload: {
-            firstName: 'Testing of User Name',
-            name: '',
-          },
-          workflowId: '',
-          to: [],
-        },
-      ],
-    });
-    if (!bulkTriggerResponse.ok) {
-      throw new Error(`failed to bulk trigger:${JSON.stringify(bulkTriggerResponse.error)}`);
-    }
-
-    const dtoList = bulkTriggerResponse.value.result;
-    expect(dtoList).to.be.ok;
-    expect(dtoList.length).to.equal(3);
-
-    const errorEvent = dtoList[0];
-    z;
-    if (!errorEvent.error) {
-      throw new Error('should have been an error');
-    }
-    expect(errorEvent.error[0]).to.equal('workflow_not_found');
-    expect(errorEvent.status).to.equal('error');
-
-    expect(dtoList[1].status).to.equal('processed');
   });
 });

@@ -1,5 +1,4 @@
 import { Novu, SDKOptions } from '@novu/api';
-import { NovuCore } from '@novu/api/core';
 import { HTTPClient, HTTPClientOptions } from '@novu/api/lib/http';
 import { ErrorDto, SDKValidationError, ValidationErrorDto } from '@novu/api/models/errors';
 import { HttpRequestHeaderKeysEnum } from '@novu/application-generic';
@@ -12,12 +11,14 @@ export function initNovuClassSdk(session: UserSession, shouldRetry: boolean = fa
     serverURL: session.serverUrl,
     debugLogger: process.env.LOG_LEVEL === 'debug' ? console : undefined,
   };
+
   if (!shouldRetry) {
     options.retryConfig = { strategy: 'none' };
   }
 
   return new Novu(options);
 }
+
 export function initNovuClassSdkInternalAuth(session: UserSession, shouldRetry: boolean = false): Novu {
   const options: SDKOptions = {
     security: { bearerAuth: session.token },
@@ -32,9 +33,6 @@ export function initNovuClassSdkInternalAuth(session: UserSession, shouldRetry: 
   }
 
   return new Novu(options);
-}
-export function initNovuFunctionSdk(session: UserSession): NovuCore {
-  return new NovuCore({ security: { secretKey: session.apiKey }, serverURL: session.serverUrl });
 }
 
 function isErrorDto(error: unknown): error is ErrorDto {
