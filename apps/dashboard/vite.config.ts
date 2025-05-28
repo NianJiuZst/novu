@@ -54,13 +54,5 @@ export default defineConfig(({ mode }) => {
         'Document-Policy': 'js-profiling',
       },
     },
-    optimizeDeps: {
-      include: ['@novu/api'],
-    },
-    build: {
-      commonjsOptions: {
-        include: [/@novu\/api/, /node_modules/],
-      },
-    },
   };
 });
