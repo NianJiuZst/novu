@@ -1,6 +1,5 @@
-import { Novu } from '@novu/api';
+import { Novu, SDKOptions } from '@novu/api';
 import { NovuCore } from '@novu/api/core';
-import { SDKOptions } from '@novu/api/lib/config';
 import { HTTPClient, HTTPClientOptions } from '@novu/api/lib/http';
 import { ErrorDto, SDKValidationError, ValidationErrorDto } from '@novu/api/models/errors';
 import { HttpRequestHeaderKeysEnum } from '@novu/application-generic';
@@ -25,7 +24,7 @@ export function initNovuClassSdkInternalAuth(session: UserSession, shouldRetry: 
     serverURL: session.serverUrl,
     httpClient: new CustomHeaderHTTPClient({
       [HttpRequestHeaderKeysEnum.NOVU_ENVIRONMENT_ID]: session.environment._id,
-    }),
+    }) as any,
     // debugLogger: console,
   };
   if (!shouldRetry) {
