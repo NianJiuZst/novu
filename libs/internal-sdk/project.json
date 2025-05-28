@@ -13,6 +13,7 @@
         "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)"
       ],
       "outputs": [
+        "{projectRoot}/esm",
         "{projectRoot}/funcs",
         "{projectRoot}/hooks",
         "{projectRoot}/lib",
