@@ -10,7 +10,7 @@ import type {
 } from '@novu/shared';
 import { delV2, getV2, patchV2, post, postV2, putV2 } from './api.client';
 import { CreateWorkflowDto } from '@novu/api/models/components';
-import { initNovuSdk } from '@/api/e2e-sdk.helper.ts';
+import { initNovuSdk } from './api-internal-sdk';
 
 export const getWorkflow = async ({
   environment,
