@@ -49,11 +49,11 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-            - name: Update submodule to next branch
+      - name: Update submodule to next branch
         run: |
           # Make the script executable
           chmod +x .github/workflows/scripts/sync-ee-next.sh
-          
+
           # Run the sync script with auto-push enabled and PR URL
           ./.github/workflows/scripts/sync-ee-next.sh "next" "true" "${{ github.event.pull_request.html_url }}"
 
@@ -86,18 +86,6 @@ jobs:
               - Commit: [${shortSha}](${commitUrl})
               
               ✅ The PR branch now includes the latest enterprise code from the \`next\` branch.`
-            });
-
-      - name: Remove label after successful sync
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            await github.rest.issues.removeLabel({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'ee sync next'
             });
 
   sync-failed:
@@ -144,4 +132,22 @@ jobs:
               The \`SUBMODULES_TOKEN\` secret is not configured, so the enterprise submodule sync cannot be performed.
               
               Please contact a repository administrator to configure the required token.`
+            });
+
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: [check_submodule_token, sync-ee-next, sync-failed, no-token]
+    if: always() && contains(github.event.label.name, 'ee sync next')
+
+    steps:
+      - name: Remove label
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.removeLabel({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'ee sync next'
             });
