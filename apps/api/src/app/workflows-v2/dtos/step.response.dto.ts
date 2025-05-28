@@ -17,8 +17,9 @@ export class StepResponseDto {
   controls: ControlsMetadataDto;
 
   @ApiProperty({
-    description: 'JSON Schema for variables',
-    type: () => JSONSchemaDto, // Use arrow function for type
+    description: 'JSON Schema for variables, follows the JSON Schema standard',
+    additionalProperties: true,
+    type: () => Object, // Use arrow function for type
   })
   @ValidateNested() // Consider adding options if needed
   @Type(() => JSONSchemaDto) // Import class-transformer decorator

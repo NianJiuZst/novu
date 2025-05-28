@@ -1,16 +1,14 @@
 import { useEnvironment } from '@/context/environment/hooks';
 import { useTriggerWorkflow } from '@/hooks/use-trigger-workflow';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { IEnvironment } from '@novu/shared';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiNotification2Fill } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import { createWorkflow } from '../../api/workflows';
 import { ONBOARDING_DEMO_WORKFLOW_ID } from '../../config';
 import { useAuth } from '../../context/auth/hooks';
-import { useFetchWorkflows } from '../../hooks/use-fetch-workflows';
+import { useInitDemoWorkflow } from '../../hooks/use-init-demo-workflow';
 import { useTelemetry } from '../../hooks/use-telemetry';
 import { ROUTES } from '../../utils/routes';
 import { TelemetryEvent } from '../../utils/telemetry';
@@ -20,7 +18,6 @@ import { showErrorToast, showSuccessToast } from '../primitives/sonner-helpers';
 import { UsecasePlaygroundHeader } from '../usecase-playground-header';
 import { CustomizeInbox } from './customize-inbox-playground';
 import { InboxPreviewContent } from './inbox-preview-content';
-import { StepTypeEnum, WorkflowCreationSourceEnum } from '@novu/api/models/components';
 
 export interface ActionConfig {
   label: string;
@@ -93,30 +90,11 @@ export function InboxPlayground() {
   });
 
   const { triggerWorkflow, isPending } = useTriggerWorkflow();
-  const { data } = useFetchWorkflows({ query: ONBOARDING_DEMO_WORKFLOW_ID });
   const auth = useAuth();
   const [hasNotificationBeenSent, setHasNotificationBeenSent] = useState(false);
   const navigate = useNavigate();
   const telemetry = useTelemetry();
-
-  useEffect(() => {
-    if (!data) return;
-
-    /**
-     * We only want to create the demo workflow if it doesn't exist yet.
-     * This workflow will be used by the inbox preview examples
-     */
-    const initializeDemoWorkflow = async () => {
-      const workflow = data?.workflows.find((workflow) => workflow.workflowId?.includes(ONBOARDING_DEMO_WORKFLOW_ID));
-
-      if (!workflow) {
-        await createDemoWorkflow({ environment: currentEnvironment! });
-      }
-    };
-
-    initializeDemoWorkflow();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  useInitDemoWorkflow(currentEnvironment!);
 
   const handleSendNotification = async () => {
     try {
@@ -249,41 +227,4 @@ export function InboxPlayground() {
       </div>
     </div>
   );
-}
-
-async function createDemoWorkflow({ environment }: { environment: IEnvironment }) {
-  await createWorkflow({
-    environment,
-    workflow: {
-      name: 'Onboarding Demo Workflow',
-      description: 'A demo workflow to showcase the Inbox component',
-      workflowId: ONBOARDING_DEMO_WORKFLOW_ID,
-      steps: [
-        {
-          name: 'Inbox',
-          type: StepTypeEnum.InApp,
-          controlValues: {
-            subject: '{{payload.subject}}',
-            body: '{{payload.body}}',
-            avatar: window.location.origin + '/images/novu.svg',
-            primaryAction: {
-              label: '{{payload.primaryActionLabel}}',
-              redirect: {
-                target: '_self',
-                url: '/onboarding/inbox/embed',
-              },
-            },
-            secondaryAction: {
-              label: '{{payload.secondaryActionLabel}}',
-              redirect: {
-                target: '_self',
-                url: '/onboarding/inbox/embed',
-              },
-            },
-          },
-        },
-      ],
-      source: WorkflowCreationSourceEnum.Dashboard,
-    },
-  });
 }

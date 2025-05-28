@@ -1,11 +1,15 @@
 import { AddSubscriberIllustration } from '@/components/icons/add-subscriber-illustration';
-import { RiBookMarkedLine } from 'react-icons/ri';
+import { RiBookMarkedLine, RiRouteFill } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
 import { LinkButton } from '../primitives/button-link';
+import { PermissionButton } from '../primitives/permission-button';
+import { PermissionsEnum } from '@novu/shared';
+import { useSubscribersNavigate } from '@/components/subscribers/hooks/use-subscribers-navigate';
 
 export const SubscriberListBlank = () => {
+  const { navigateToCreateSubscriberPage } = useSubscribersNavigate();
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-6">
+    <div className="mt-[100px] flex h-full w-full flex-col items-center justify-center gap-6">
       <AddSubscriberIllustration />
       <div className="flex flex-col items-center gap-2 text-center">
         <span className="text-text-sub text-label-md block font-medium">No subscribers yet</span>
@@ -25,9 +29,15 @@ export const SubscriberListBlank = () => {
           </LinkButton>
         </Link>
 
-        {/* <Button variant="primary" leadingIcon={RiRouteFill} className="gap-2">
-        Create subscriber
-      </Button> */}
+        <PermissionButton
+          permission={PermissionsEnum.SUBSCRIBER_WRITE}
+          variant="primary"
+          leadingIcon={RiRouteFill}
+          className="gap-2"
+          onClick={navigateToCreateSubscriberPage}
+        >
+          Create subscriber
+        </PermissionButton>
       </div>
     </div>
   );

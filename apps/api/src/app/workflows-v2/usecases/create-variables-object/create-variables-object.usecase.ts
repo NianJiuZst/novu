@@ -15,7 +15,7 @@ export type ArrayVariable = {
   iterations: number;
 };
 
-export const DEFAULT_ARRAY_ELEMENTS = 3;
+export const DEFAULT_ARRAY_ELEMENTS = 5;
 /**
  * Extracts all the variables used in the step control values.
  * Then it creates the object representation of those variables.
@@ -30,13 +30,6 @@ export class CreateVariablesObject {
   @InstrumentUsecase()
   async execute(command: CreateVariablesObjectCommand): Promise<Record<string, unknown>> {
     const { userId, environmentId, organizationId } = command;
-    const isEnhancedDigestEnabled = await this.featureFlagService.getFlag({
-      user: { _id: userId } as UserEntity,
-      environment: { _id: environmentId } as EnvironmentEntity,
-      organization: { _id: organizationId } as OrganizationEntity,
-      key: FeatureFlagsKeysEnum.IS_ENHANCED_DIGEST_ENABLED,
-      defaultValue: false,
-    });
     const controlValues = await this.getControlValues(command);
 
     const variables = this.extractAllVariables(controlValues);
@@ -45,11 +38,7 @@ export class CreateVariablesObject {
 
     const variablesObject = keysToObject(variables, arrayVariables, showIfVariables);
 
-    if (isEnhancedDigestEnabled) {
-      return this.ensureEventsVariableIsAnArray(variablesObject);
-    }
-
-    return variablesObject;
+    return this.ensureEventsVariableIsAnArray(variablesObject);
   }
 
   private ensureEventsVariableIsAnArray(variablesObject: Record<string, unknown>) {
@@ -200,12 +189,10 @@ export class CreateVariablesObject {
 
   private extractArrayVariables(controlValues: unknown[]): ArrayVariable[] {
     // Extract 'Repeat' block iterable variables ('each' key) together with their set iterations
-    const eachKeyVars = this.extractMailyAttribute(controlValues, MailyAttrsEnum.EACH_KEY).map((path) => {
-      return {
-        path,
-        iterations: this.getIterationsForVariable(path, controlValues) || DEFAULT_ARRAY_ELEMENTS,
-      };
-    });
+    const eachKeyVars = this.extractMailyAttribute(controlValues, MailyAttrsEnum.EACH_KEY).map((path) => ({
+      path,
+      iterations: DEFAULT_ARRAY_ELEMENTS,
+    }));
 
     // Extract iterable variables outside of 'Repeat' blocks, always with 3 iterations
     const idVars = this.extractMailyAttribute(controlValues, MailyAttrsEnum.ID, this.extractArrayPath).map((path) => ({
@@ -223,27 +210,5 @@ export class CreateVariablesObject {
    */
   private extractArrayPath(value: string): string | undefined {
     return value.match(/([^[]+)\[\d+\]/)?.[1];
-  }
-
-  private getIterationsForVariable(variable: string, controlValues: unknown[]): number | undefined {
-    const pattern = new RegExp(
-      `"${MailyAttrsEnum.EACH_KEY}"\\s*:\\s*"${variable}"[^}]*"iterations"\\s*:\\s*(\\d+)`,
-      'g'
-    );
-
-    for (const value of controlValues) {
-      if (!isStringifiedMailyJSONContent(value)) continue;
-
-      const unescapedString = unescape(value);
-      const match = pattern.exec(unescapedString);
-      if (match) {
-        const iterations = parseInt(match[1], 10);
-        if (!Number.isNaN(iterations)) {
-          return iterations;
-        }
-      }
-    }
-
-    return undefined;
   }
 }

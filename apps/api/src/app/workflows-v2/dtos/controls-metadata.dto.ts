@@ -6,7 +6,8 @@ import { UiSchema } from './ui-schema.dto';
 export class ControlsMetadataDto {
   @ApiPropertyOptional({
     description: 'JSON Schema for data',
-    oneOf: [{ $ref: '#/components/schemas/JSONSchemaDto' }],
+    additionalProperties: true,
+    type: () => Object,
   })
   @IsOptional()
   @ValidateNested()

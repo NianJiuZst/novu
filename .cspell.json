@@ -15,6 +15,7 @@
     "adresses",
     "APIJSON",
     "sdkerror",
+    "funcs",
     "idempotancy",
     "errordto",
     "filtertopicsresponsedto",
@@ -733,7 +734,17 @@
     "oklch",
     "Duplicable",
     "Radek",
-    "automators"
+    "automators",
+    "VITE",
+    "snooze",
+    "unsnooze",
+    "snoozed",
+    "unsnoozed",
+    "automators",
+    "Svix",
+    "totp",
+    "calcom",
+    "partnerintegration"
   ],
   "flagWords": [],
   "patterns": [

@@ -1,4 +1,3 @@
-import { FilterQuery, QueryWithHelpers, Types, UpdateQuery } from 'mongoose';
 import {
   ActorTypeEnum,
   ButtonTypeEnum,
@@ -6,23 +5,54 @@ import {
   MessageActionStatusEnum,
   MessagesStatusEnum,
 } from '@novu/shared';
+import { FilterQuery, Types } from 'mongoose';
 
-import { BaseRepository } from '../base-repository';
-import { MessageDBModel, MessageEntity } from './message.entity';
-import { Message } from './message.schema';
-import { FeedRepository } from '../feed';
 import { DalException } from '../../shared';
 import { EnforceEnvId } from '../../types/enforce';
+import { BaseRepository } from '../base-repository';
+import { FeedRepository } from '../feed';
+import { MessageDBModel, MessageEntity } from './message.entity';
+import { Message } from './message.schema';
 
 type MessageQuery = FilterQuery<MessageDBModel>;
 
-const getEntries = (obj: object, prefix = '') =>
-  Object.entries(obj).flatMap(([key, value]) =>
-    Object(value) === value ? getEntries(value, `${prefix}${key}.`) : [[`${prefix}${key}`, value]]
-  );
+const MAX_PAYLOAD_QUERY_DEPTH = 3;
+
+const DANGEROUS_KEYS = ['__proto__', 'constructor', 'prototype'];
+
+const isValidKey = (key: string): boolean => {
+  // Reject keys starting with '$' or '.' to prevent MongoDB operator injection.
+  if (key.startsWith('$') || key.startsWith('.')) {
+    return false;
+  }
+
+  // Reject known prototype pollution vectors.
+  if (DANGEROUS_KEYS.includes(key)) {
+    return false;
+  }
+
+  return true;
+};
+
+const getEntries = (obj: object, prefix = '', currentDepth = 0, maxDepth: number): [string, any][] =>
+  Object.entries(obj).flatMap(([key, value]) => {
+    // Sanitize the key before using it.
+    if (!isValidKey(key)) {
+      // Skip this entry if the key is invalid to prevent pollution or injection.
+      return [];
+    }
+
+    const newKeySegment = prefix ? `${prefix}.${key}` : key;
+
+    if (currentDepth < maxDepth && typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      return getEntries(value, newKeySegment, currentDepth + 1, maxDepth);
+    } else {
+      return [[newKeySegment, value]];
+    }
+  });
 
 const getFlatObject = (obj: object) => {
-  return Object.fromEntries(getEntries(obj));
+  return Object.fromEntries(getEntries(obj, '', 0, MAX_PAYLOAD_QUERY_DEPTH));
 };
 
 export class MessageRepository extends BaseRepository<MessageDBModel, MessageEntity, EnforceEnvId> {
@@ -41,7 +71,9 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       seen?: boolean;
       read?: boolean;
       archived?: boolean;
+      snoozed?: boolean;
       payload?: object;
+      data?: Record<string, unknown>;
     } = {},
     createdAt?: {
       $gte: Date;
@@ -94,14 +126,29 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       requestQuery.archived = { $in: [true, false] };
     }
 
+    if (query.snoozed != null) {
+      if (query.snoozed) {
+        requestQuery.snoozedUntil = { $ne: null };
+      } else {
+        requestQuery.$or = [{ snoozedUntil: { $exists: false } }, { snoozedUntil: null }];
+      }
+    }
+
     if (createdAt != null) {
       requestQuery.createdAt = createdAt;
     }
 
     if (query.payload) {
       requestQuery = {
-        ...requestQuery,
         ...getFlatObject({ payload: query.payload }),
+        ...requestQuery,
+      };
+    }
+
+    if (query.data) {
+      requestQuery = {
+        ...getFlatObject({ data: query.data }),
+        ...requestQuery,
       };
     }
 
@@ -146,6 +193,8 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       tags,
       read,
       archived,
+      snoozed,
+      data,
     }: {
       environmentId: string;
       subscriberId: string;
@@ -153,10 +202,12 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       tags?: string[];
       read?: boolean;
       archived?: boolean;
+      snoozed?: boolean;
+      data?: Record<string, unknown>;
     },
     options: { limit: number; offset: number; after?: string }
   ) {
-    const query: MessageQuery & EnforceEnvId = {
+    let query: MessageQuery & EnforceEnvId = {
       _environmentId: environmentId,
       _subscriberId: subscriberId,
       channel,
@@ -180,6 +231,19 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       }
     } else {
       query.$or = [{ archived: { $exists: false } }, { archived: { $in: [true, false] } }];
+    }
+
+    if (typeof snoozed === 'boolean') {
+      query.snoozedUntil = snoozed ? { $exists: true, $ne: null } : { $eq: null };
+    }
+
+    if (data) {
+      const flatData = getFlatObject({ data });
+
+      query = {
+        ...flatData,
+        ...query,
+      };
     }
 
     return await this.cursorPagination({
@@ -214,7 +278,9 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       seen?: boolean;
       read?: boolean;
       archived?: boolean;
+      snoozed?: boolean;
       payload?: object;
+      data?: Record<string, unknown>;
     } = {},
     options: { limit: number; skip?: number } = { limit: 100, skip: 0 },
     createdAt?: {
@@ -232,6 +298,8 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
         read: query.read,
         archived: query.archived,
         payload: query.payload,
+        snoozed: query.snoozed,
+        data: query.data,
       },
       createdAt
     );
@@ -470,6 +538,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     seen,
     read,
     archived,
+    snoozedUntil,
   }: {
     environmentId: string;
     subscriberId: string;
@@ -477,6 +546,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     seen?: boolean;
     read?: boolean;
     archived?: boolean;
+    snoozedUntil?: Date | null;
   }) {
     const query: MessageQuery & EnforceEnvId = {
       _environmentId: environmentId,
@@ -493,6 +563,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       seen,
       read,
       archived,
+      snoozedUntil,
     });
   }
 
@@ -506,6 +577,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     subscriberId: string;
     from: {
       tags?: string[];
+      data?: Record<string, unknown>;
       seen?: boolean;
       read?: boolean;
       archived?: boolean;
@@ -519,7 +591,10 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     const isFromSeen = from.seen !== undefined;
     const isFromRead = from.read !== undefined;
     const isFromArchived = from.archived !== undefined;
+    const flatData = from.data ? getFlatObject({ data: from.data }) : {};
+
     const query: MessageQuery & EnforceEnvId = {
+      ...flatData,
       _environmentId: environmentId,
       _subscriberId: subscriberId,
       ...(from.tags && from.tags?.length > 0 && { tags: { $in: from.tags } }),
@@ -545,7 +620,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
 
   /**
    * Allows to update the status of queried messages at once.
-   * The status can be updated to seen, unseen, read, unread, archived or unarchived.
+   * The status can be updated to seen, unseen, read, unread, archived, unarchived, snoozed, unsnoozed.
    * Depending on the flag passed, the other flags will be updated accordingly.
    * For example:
    * seen -> { seen: true }
@@ -554,21 +629,26 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
    * unseen -> { seen: false, read: false, archived: false }
    * unread -> { seen: true, read: false, archived: false }
    * unarchived -> { seen: true, read: true, archived: false }
+   * snoozed -> { seen: true, archived: false, snoozedUntil: snoozedUntil }
+   * unsnoozed -> { seen: true, archived: false, snoozedUntil: null }
    */
   private async updateMessagesStatus({
     query,
     seen,
     read,
     archived,
+    snoozedUntil,
   }: {
     query: MessageQuery & EnforceEnvId;
     seen?: boolean;
     read?: boolean;
     archived?: boolean;
+    snoozedUntil?: Date | null;
   }) {
     const isUpdatingSeen = seen !== undefined;
     const isUpdatingRead = read !== undefined;
     const isUpdatingArchived = archived !== undefined;
+    const isUpdatingSnoozed = snoozedUntil !== undefined;
 
     let updatePayload: FilterQuery<MessageEntity> = {};
     if (isUpdatingArchived) {
@@ -597,6 +677,14 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
         lastReadDate: !seen ? null : undefined,
         archived: !seen ? false : undefined,
         archivedAt: !seen ? null : undefined,
+      };
+    } else if (isUpdatingSnoozed) {
+      updatePayload = {
+        snoozedUntil,
+        seen: true,
+        lastSeenDate: new Date(),
+        archived: false,
+        archivedAt: null,
       };
     }
 
@@ -723,8 +811,14 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       skip: options?.skip,
     })
       .read('secondaryPreferred')
-      .populate('subscriber', '_id firstName lastName avatar subscriberId')
-      .populate('actorSubscriber', '_id firstName lastName avatar subscriberId');
+      .populate(
+        'subscriber',
+        '_id firstName lastName avatar subscriberId createdAt updatedAt _organizationId _environmentId deleted'
+      )
+      .populate(
+        'actorSubscriber',
+        '_id firstName lastName avatar subscriberId createdAt updatedAt _organizationId _environmentId deleted'
+      );
 
     return this.mapEntities(data);
   }

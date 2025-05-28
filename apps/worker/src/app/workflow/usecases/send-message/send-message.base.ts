@@ -1,8 +1,6 @@
 /* eslint-disable global-require */
-import i18next from 'i18next';
-import { ModuleRef } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
-import { format } from 'date-fns';
+import { ModuleRef } from '@nestjs/core';
 import {
   IntegrationEntity,
   JobEntity,
@@ -19,6 +17,9 @@ import {
   ProvidersIdEnum,
   SmsProviderIdEnum,
 } from '@novu/shared';
+import { format } from 'date-fns';
+import i18next from 'i18next';
+import { merge } from 'lodash';
 
 import {
   CreateExecutionDetails,
@@ -30,8 +31,8 @@ import {
   SelectVariant,
   SelectVariantCommand,
 } from '@novu/application-generic';
-import { SendMessageResult, SendMessageType } from './send-message-type.usecase';
 import { PlatformException } from '../../../shared/utils';
+import { SendMessageResult, SendMessageType } from './send-message-type.usecase';
 import { SendMessageCommand } from './send-message.command';
 
 export abstract class SendMessageBase extends SendMessageType {
@@ -48,6 +49,19 @@ export abstract class SendMessageBase extends SendMessageType {
     super(messageRepository, createExecutionDetails);
   }
 
+  protected combineOverrides(
+    bridgeData: Record<string, any> | null | undefined,
+    overrides: Record<string, any> | undefined,
+    stepId: string | undefined,
+    integrationId: string
+  ): Record<string, unknown> {
+    const bridgeProviderData = bridgeData?.providers?.[integrationId] || {};
+    const workflowGlobalProviderOverrides = overrides?.providers?.[integrationId] || {};
+    const triggerOverrides = stepId ? overrides?.steps?.[stepId]?.providers[integrationId] || {} : {};
+
+    return merge({}, bridgeProviderData, workflowGlobalProviderOverrides, triggerOverrides);
+  }
+
   protected async getIntegration(params: {
     id?: string;
     providerId?: ProvidersIdEnum;
@@ -56,6 +70,7 @@ export abstract class SendMessageBase extends SendMessageType {
     environmentId: string;
     channelType: ChannelTypeEnum;
     userId: string;
+    recipientEmail?: string;
     filterData: {
       tenant: ITenantDefine | undefined;
     };
@@ -73,6 +88,7 @@ export abstract class SendMessageBase extends SendMessageType {
         environmentId: integration._environmentId,
         organizationId: integration._organizationId,
         userId: params.userId,
+        recipientEmail: params.recipientEmail,
       });
     }
 
