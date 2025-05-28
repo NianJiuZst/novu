@@ -16,10 +16,16 @@ jobs:
   check_submodule_token:
     name: Check if submodule token exists
     runs-on: ubuntu-latest
-    if: contains(github.event.label.name, 'ee sync next')
+    if: github.event.label.name == 'ee sync next'
     outputs:
       has_token: ${{ steps.secret-check.outputs.has_token }}
     steps:
+      - name: Debug label info
+        run: |
+          echo "Label name: ${{ github.event.label.name }}"
+          echo "Event action: ${{ github.event.action }}"
+          echo "PR number: ${{ github.event.pull_request.number }}"
+
       - name: Check if secret exists
         id: secret-check
         run: |
@@ -137,7 +143,7 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     needs: [check_submodule_token, sync-ee-next, sync-failed, no-token]
-    if: always() && contains(github.event.label.name, 'ee sync next')
+    if: always() && github.event.label.name == 'ee sync next'
 
     steps:
       - name: Remove label
