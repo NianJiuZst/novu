@@ -11,9 +11,7 @@ import { Maily } from './workflow-editor/steps/email/maily';
 import { InboxPreview } from './workflow-editor/steps/in-app/inbox-preview';
 import { PushPreview } from './workflow-editor/steps/push/push-preview';
 import { SmsPhone } from './workflow-editor/steps/sms/sms-phone';
-import { StepTypeEnum } from '@novu/api/models/components/steptypeenum';
-
-;
+import { StepTypeEnum } from '@novu/api/models/components';
 
 export type StepType = StepTypeEnum;
 
