@@ -1,30 +1,37 @@
 name: EE Sync Next
 
 # This workflow synchronizes the enterprise submodule to the "next" branch
-# when the "ee sync next" label is added to a PR
+# when the "ee sync next" label is added to a PR OR when changes are made to a PR that has this label
 # Logic:
-# 1. Triggers when "ee sync next" label is added to a PR
+# 1. Triggers when "ee sync next" label is added to a PR OR when PR is updated and has the label
 # 2. Checks out the PR branch with submodules
 # 3. Updates the .source submodule to point to the "next" branch
 # 4. Commits and pushes the submodule hash change
 
 on:
   pull_request:
-    types: [labeled]
+    types: [labeled, synchronize]
 
 jobs:
   check_submodule_token:
     name: Check if submodule token exists
     runs-on: ubuntu-latest
-    if: github.event.label.name == 'ee sync next'
+    if: |
+      (github.event.action == 'labeled' && github.event.label.name == 'ee sync next') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'ee sync next'))
     outputs:
       has_token: ${{ steps.secret-check.outputs.has_token }}
     steps:
-      - name: Debug label info
+      - name: Debug event info
         run: |
-          echo "Label name: ${{ github.event.label.name }}"
           echo "Event action: ${{ github.event.action }}"
           echo "PR number: ${{ github.event.pull_request.number }}"
+          if [[ "${{ github.event.action }}" == "labeled" ]]; then
+            echo "Label added: ${{ github.event.label.name }}"
+          else
+            echo "PR updated - checking for ee sync next label"
+            echo "PR labels: ${{ join(github.event.pull_request.labels.*.name, ', ') }}"
+          fi
 
       - name: Check if secret exists
         id: secret-check
@@ -79,11 +86,14 @@ jobs:
             const commitUrl = latestCommit.html_url;
             const shortSha = latestCommit.sha.substring(0, 7);
 
+            const isLabelTrigger = '${{ github.event.action }}' === 'labeled';
+            const triggerReason = isLabelTrigger ? 'label addition' : 'PR update';
+
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🔄 **Enterprise Submodule Sync Complete**
+              body: `🔄 **Enterprise Submodule Sync Complete** (triggered by ${triggerReason})
               
               The \`.source\` submodule has been successfully updated to point to the \`next\` branch.
               
@@ -105,11 +115,14 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const isLabelTrigger = '${{ github.event.action }}' === 'labeled';
+            const triggerReason = isLabelTrigger ? 'label addition' : 'PR update';
+
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `❌ **Enterprise Submodule Sync Failed**
+              body: `❌ **Enterprise Submodule Sync Failed** (triggered by ${triggerReason})
               
               The attempt to sync the \`.source\` submodule to the \`next\` branch has failed.
               
@@ -143,10 +156,16 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     needs: [check_submodule_token, sync-ee-next, sync-failed, no-token]
-    if: always() && github.event.label.name == 'ee sync next'
+    if: |
+      always() && 
+      (
+        (github.event.action == 'labeled' && github.event.label.name == 'ee sync next') ||
+        (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'ee sync next'))
+      )
 
     steps:
-      - name: Remove label
+      - name: Remove label (only on label trigger)
+        if: github.event.action == 'labeled'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
