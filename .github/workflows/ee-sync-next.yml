@@ -8,6 +8,8 @@ name: EE Sync Next
 # 3. Updates the .source submodule to point to the "next" branch
 # 4. Commits and pushes the submodule hash change
 
+# test
+
 on:
   pull_request:
     types: [labeled, synchronize]
