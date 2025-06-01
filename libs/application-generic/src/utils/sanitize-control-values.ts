@@ -46,9 +46,12 @@ function sanitizeAction(action: InAppActionType) {
 
 function sanitizeInApp(controlValues: InAppControlType) {
   const normalized: InAppControlType = {
-    subject: sanitizeEmptyInput<string>(controlValues.subject),
-    body: sanitizeEmptyInput<string>(controlValues.body),
-    avatar: sanitizeEmptyInput<string>(controlValues.avatar),
+    // Cast to trigger Ajv validation errors - possible undefined
+    subject: sanitizeEmptyInput<string>(controlValues.subject as string),
+    // Cast to trigger Ajv validation errors - possible undefined
+      body: sanitizeEmptyInput<string>(controlValues.body as string),
+    // Cast to trigger Ajv validation errors - possible undefined
+    avatar: sanitizeEmptyInput<string>(controlValues.avatar as string),
     primaryAction: undefined,
     secondaryAction: undefined,
     redirect: undefined,
@@ -131,14 +134,13 @@ function sanitizeDigest(controlValues: DigestControlSchemaType) {
     const lookBackAmount = (controlValues.lookBackWindow as LookBackWindowType)?.amount;
     const mappedValues: DigestRegularControlType = {
       // Cast to trigger Ajv validation errors - possible undefined
-      ...(parseAmount(controlValues.amount) as { amount?: number }),
+      amount: buildNumber(controlValues.amount) as number,
       unit: controlValues.unit,
       digestKey: controlValues.digestKey,
       skip: controlValues.skip,
       lookBackWindow: controlValues.lookBackWindow
         ? {
-            // Cast to trigger Ajv validation errors - possible undefined
-            ...(parseAmount(lookBackAmount) as { amount?: number }),
+            amount: buildNumber(lookBackAmount) as number,
             unit: (controlValues.lookBackWindow as LookBackWindowType).unit,
           }
         : undefined,
@@ -152,14 +154,13 @@ function sanitizeDigest(controlValues: DigestControlSchemaType) {
 
   return filterNullishValues({
     // Cast to trigger Ajv validation errors - possible undefined
-    ...(parseAmount(anyControlValues.amount) as { amount?: number }),
+    amount : buildNumber(anyControlValues.amount) as number,
     unit: anyControlValues.unit,
     digestKey: anyControlValues.digestKey,
     skip: anyControlValues.skip,
     lookBackWindow: anyControlValues.lookBackWindow
       ? {
-          // Cast to trigger Ajv validation errors - possible undefined
-          ...(parseAmount(lookBackWindow) as { amount?: number }),
+          amount: buildNumber(lookBackWindow) as number,
           unit: (anyControlValues.lookBackWindow as LookBackWindowType).unit,
         }
       : undefined,
@@ -168,8 +169,7 @@ function sanitizeDigest(controlValues: DigestControlSchemaType) {
 
 function sanitizeDelay(controlValues: DelayControlType) {
   const mappedValues: DelayControlType = {
-    // Cast to trigger Ajv validation errors - possible undefined
-    ...(parseAmount(controlValues.amount) as { amount?: number }),
+    amount: buildNumber(controlValues.amount) as number,
     type: controlValues.type,
     unit: controlValues.unit,
     skip: controlValues.skip,
@@ -178,17 +178,17 @@ function sanitizeDelay(controlValues: DelayControlType) {
   return filterNullishValues(mappedValues);
 }
 
-function parseAmount(amount?: unknown) {
+function buildNumber(num?: unknown):   number  | null {
   try {
-    if (!isNumber(amount)) {
-      return {};
+    if (!isNumber(num)) {
+      return null;
     }
 
-    const numberAmount = typeof amount === 'string' ? parseInt(amount, 10) : amount;
+    const numberAmount = typeof num === 'string' ? parseInt(num, 10) : num;
 
-    return { amount: numberAmount };
+    return numberAmount;
   } catch (error) {
-    return amount;
+    return null;
   }
 }
 

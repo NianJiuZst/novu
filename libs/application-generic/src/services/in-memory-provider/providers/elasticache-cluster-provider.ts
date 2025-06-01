@@ -83,7 +83,7 @@ export const getElasticacheClusterProviderConfig = (): IElasticacheClusterProvid
   };
 };
 
-export const getElasticacheCluster = (enableAutoPipelining?: boolean): Cluster | undefined => {
+export const getElasticacheCluster = (enableAutoPipelining?: boolean): Cluster => {
   const { instances, password, tls } = getElasticacheClusterProviderConfig();
 
   const options: ClusterOptions = {
@@ -112,7 +112,7 @@ export const getElasticacheCluster = (enableAutoPipelining?: boolean): Cluster |
     return new Redis.Cluster(instances, options);
   }
 
-  return undefined;
+  throw new Error('Missing Elasticache Cluster instances');
 };
 
 export const validateElasticacheClusterProviderConfig = (): boolean => {

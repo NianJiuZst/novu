@@ -88,7 +88,7 @@ export const getMemoryDbClusterProviderConfig = (): IMemoryDbClusterProviderConf
   };
 };
 
-export const getMemoryDbCluster = (enableAutoPipelining?: boolean): Cluster | undefined => {
+export const getMemoryDbCluster = (enableAutoPipelining?: boolean): Cluster => {
   const { instances, password, username, tls } = getMemoryDbClusterProviderConfig();
 
   const options: ClusterOptions = {
@@ -122,7 +122,7 @@ export const getMemoryDbCluster = (enableAutoPipelining?: boolean): Cluster | un
     return new Redis.Cluster(instances, options);
   }
 
-  return undefined;
+  throw new Error('Missing MemoryDB Cluster instances');
 };
 
 export const validateMemoryDbClusterProviderConfig = (): boolean => {

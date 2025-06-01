@@ -110,7 +110,7 @@ export class InMemoryProviderService {
     }
   }
 
-  private inMemoryClusterProviderSetup(provider): Cluster | undefined {
+  private inMemoryClusterProviderSetup(provider): Cluster {
     Logger.verbose(this.descriptiveLogMessage(`In-memory cluster service set up`), LOG_CONTEXT);
 
     const { getConfig, getClient, isClientReady } = getClientAndConfigForCluster(provider);
@@ -124,7 +124,11 @@ export class InMemoryProviderService {
     }
 
     const inMemoryProviderClient = getClient(this.enableAutoPipelining);
-    if (host && inMemoryProviderClient) {
+
+    if (!inMemoryProviderClient) {
+      throw new Error('InMemoryProviderClient was not initialized');
+    }
+
       Logger.log(this.descriptiveLogMessage(`Connecting to cluster at ${host}`), LOG_CONTEXT);
 
       inMemoryProviderClient.on('connect', () => {
@@ -164,10 +168,9 @@ export class InMemoryProviderService {
       });
 
       return inMemoryProviderClient;
-    }
   }
 
-  private inMemoryProviderSetup(): Redis | undefined {
+  private inMemoryProviderSetup(): Redis  {
     Logger.verbose(this.descriptiveLogMessage('In-memory service set up'), LOG_CONTEXT);
 
     const { getClient, getConfig, isClientReady } = getClientAndConfig();
@@ -181,7 +184,11 @@ export class InMemoryProviderService {
     }
 
     const inMemoryProviderClient = getClient();
-    if (host && inMemoryProviderClient) {
+
+    if (!inMemoryProviderClient) {
+      throw new Error('InMemoryProviderClient was not initialized');
+    }
+
       Logger.log(this.descriptiveLogMessage(`Connecting to ${host}:${port}`), LOG_CONTEXT);
 
       inMemoryProviderClient.on('connect', () => {
@@ -216,8 +223,7 @@ export class InMemoryProviderService {
         Logger.verbose(this.descriptiveLogMessage('Redis wait'), LOG_CONTEXT);
       });
 
-      return inMemoryProviderClient;
-    }
+    return inMemoryProviderClient;
   }
 
   public inMemoryScan(pattern: string): ScanStream {

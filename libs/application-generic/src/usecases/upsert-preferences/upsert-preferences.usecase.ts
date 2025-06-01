@@ -9,7 +9,7 @@ import { UpsertWorkflowPreferencesCommand } from './upsert-workflow-preferences.
 import { UpsertSubscriberGlobalPreferencesCommand } from './upsert-subscriber-global-preferences.command';
 import { UpsertSubscriberWorkflowPreferencesCommand } from './upsert-subscriber-workflow-preferences.command';
 import { UpsertUserWorkflowPreferencesCommand } from './upsert-user-workflow-preferences.command';
-import { deepMerge } from '../../utils';
+import { deepMerge, PlatformException } from '../../utils';
 import { Instrument } from '../../instrumentation';
 
 export type WorkflowPreferencesFull = Omit<PreferencesEntity, 'preferences'> & {
@@ -170,7 +170,13 @@ export class UpsertPreferences {
       },
     );
 
-    return await this.getPreference(command);
+    const preferences = await this.getPreference(command);
+
+    if (!preferences) {
+      throw new PlatformException('Failed to retrieve preferences after update operation. Preferences may have been deleted concurrently.');
+    }
+
+    return preferences;
   }
 
   private async deletePreferences(
@@ -187,7 +193,7 @@ export class UpsertPreferences {
 
   private async getPreference(
     command: UpsertPreferencesCommand,
-  ): Promise<PreferencesEntity | undefined> {
+  ): Promise<PreferencesEntity | null> {
     return await this.preferencesRepository.findOne({
       _subscriberId: command._subscriberId,
       _environmentId: command.environmentId,

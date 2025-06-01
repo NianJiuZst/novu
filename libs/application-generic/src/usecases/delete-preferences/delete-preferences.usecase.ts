@@ -43,7 +43,7 @@ export class DeletePreferencesUseCase {
   @Instrument()
   private async getPreference(
     command: DeletePreferencesCommand,
-  ): Promise<PreferencesEntity | undefined> {
+  ): Promise<PreferencesEntity | null> {
     return await this.preferencesRepository.findOne({
       _environmentId: command.environmentId,
       _organizationId: command.organizationId,

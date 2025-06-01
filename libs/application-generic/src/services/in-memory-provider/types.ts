@@ -9,7 +9,7 @@ import {
 
 export { Cluster, ClusterOptions, Redis, RedisOptions, ScanStream };
 
-export type InMemoryProviderClient = Redis | Cluster | undefined;
+export type InMemoryProviderClient = Redis | Cluster;
 
 export enum InMemoryProviderEnum {
   AZURE_CACHE_FOR_REDIS = 'AzureCacheForRedis',

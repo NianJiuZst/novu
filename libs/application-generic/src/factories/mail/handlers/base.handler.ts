@@ -39,7 +39,7 @@ export abstract class BaseHandler implements IMailHandler {
       to: ['no-reply@novu.co'],
     };
 
-    const { message, success, code } = await this.provider.checkIntegration(mailData);
+    const { message, success, code } = await this.provider?.checkIntegration(mailData);
 
     if (!success) {
       throw new PlatformException(

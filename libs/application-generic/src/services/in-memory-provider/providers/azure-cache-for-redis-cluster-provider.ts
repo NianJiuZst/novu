@@ -88,7 +88,7 @@ export const getAzureCacheForRedisClusterProviderConfig = (): IAzureCacheForRedi
   };
 };
 
-export const getAzureCacheForRedisCluster = (enableAutoPipelining?: boolean): Cluster | undefined => {
+export const getAzureCacheForRedisCluster = (enableAutoPipelining?: boolean): Cluster => {
   const { instances, password, tls, username } = getAzureCacheForRedisClusterProviderConfig();
 
   const options: ClusterOptions = {
@@ -117,7 +117,7 @@ export const getAzureCacheForRedisCluster = (enableAutoPipelining?: boolean): Cl
     return new Redis.Cluster(instances, options);
   }
 
-  return undefined;
+  throw new Error('Missing Azure Cache For Redis Cluster instances');
 };
 
 export const validateAzureCacheForRedisClusterProviderConfig = (): boolean => {

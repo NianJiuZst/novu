@@ -122,14 +122,14 @@ export class TimedDigestDelayService {
       }
       case OrdinalValueEnum.WEEKEND: {
         return {
-          bysetpos: ORDINAL_TO_RRULE_BYSETPOS[ordinal],
+          bysetpos: ORDINAL_TO_RRULE_BYSETPOS[ordinal ?? OrdinalEnum.FIRST],
           byweekday: [RRule.SA, RRule.SU],
         };
       }
       default: {
         return {
-          bysetpos: ORDINAL_TO_RRULE_BYSETPOS[ordinal],
-          byweekday: ORDINAL_VALUE_TO_RRULE_RRULE_DAY[ordinalValue],
+          bysetpos: ORDINAL_TO_RRULE_BYSETPOS[ordinal ?? OrdinalEnum.FIRST],
+          byweekday: ORDINAL_VALUE_TO_RRULE_RRULE_DAY[ordinalValue ?? OrdinalValueEnum.MONDAY],
         };
       }
     }

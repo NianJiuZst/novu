@@ -2,7 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { SubscriberEntity, SubscriberRepository } from '@novu/dal';
 
 import { buildSubscriberKey, CachedResponse, InvalidateCacheService } from '../../services';
-import { subscriberNeedUpdate } from '../../utils';
+import { PlatformException, subscriberNeedUpdate } from '../../utils';
 
 import { UpdateSubscriberCommand } from './update-subscriber.command';
 import { OAuthHandlerEnum, UpdateSubscriberChannel, UpdateSubscriberChannelCommand } from '../subscribers';
@@ -94,6 +94,10 @@ export class UpdateSubscriber {
         _environmentId: command.environmentId,
       });
 
+      if (!updatedSubscriber) { 
+        throw new PlatformException('Failed to retrieve subscriber after update operation. Subscriber may have been deleted concurrently.');
+      }
+
       return updatedSubscriber;
     }
 
@@ -104,7 +108,7 @@ export class UpdateSubscriber {
   }
 
   private async updateSubscriberChannels(command: UpdateSubscriberCommand, foundSubscriber: SubscriberEntity) {
-    for (const channel of command.channels) {
+    for (const channel of command.channels ?? []) {
       await this.updateSubscriberChannel.execute(
         UpdateSubscriberChannelCommand.create({
           subscriber: foundSubscriber,

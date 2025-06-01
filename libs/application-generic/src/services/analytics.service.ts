@@ -183,7 +183,7 @@ export class AnalyticsService {
     return process.env.NODE_ENV !== 'test' && this.mixpanel;
   }
 
-  private convertToIsoDate(createdAt: string | number | null): string {
+  private convertToIsoDate(createdAt: string | number | null | undefined): string {
     const createdAtNumber = Number(createdAt);
     const isEpochValidNumber = !Number.isNaN(createdAtNumber);
 

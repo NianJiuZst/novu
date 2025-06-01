@@ -12,7 +12,6 @@ import {
 } from '@novu/dal';
 import {
   ChannelTypeEnum,
-  LogCodeEnum,
   ChatProviderIdEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,

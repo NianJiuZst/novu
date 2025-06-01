@@ -52,7 +52,7 @@ export type InMemoryProviderConfig =
 const LOG_CONTEXT = 'InMemoryProviders';
 
 export const getClientAndConfig = (): {
-  getClient: () => Redis | undefined;
+  getClient: () => Redis;
   getConfig: () => IRedisProviderConfig;
   isClientReady: (string) => boolean;
   provider: InMemoryProviderEnum;

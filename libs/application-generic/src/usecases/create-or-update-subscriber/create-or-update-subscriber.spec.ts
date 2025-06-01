@@ -56,7 +56,7 @@ describe('Create Subscriber', function () {
       })
     );
 
-    expect(result.locale).toEqual(locale);
+    expect(result?.locale).toEqual(locale);
   });
 
   it('should update the subscriber when same id provided', async function () {
@@ -86,7 +86,7 @@ describe('Create Subscriber', function () {
       })
     );
 
-    expect(result.firstName).toEqual('Second Name');
-    expect(result.locale).toEqual(noLocale);
+    expect(result?.firstName).toEqual('Second Name');
+    expect(result?.locale).toEqual(noLocale);
   });
 });

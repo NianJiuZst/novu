@@ -80,7 +80,7 @@ export const getRedisClusterProviderConfig = (): IRedisClusterProviderConfig => 
   };
 };
 
-export const getRedisCluster = (enableAutoPipelining?: boolean): Cluster | undefined => {
+export const getRedisCluster = (enableAutoPipelining?: boolean): Cluster => {
   const { instances } = getRedisClusterProviderConfig();
 
   const options: ClusterOptions = {
@@ -103,7 +103,7 @@ export const getRedisCluster = (enableAutoPipelining?: boolean): Cluster | undef
     return new Redis.Cluster(instances, options);
   }
 
-  return undefined;
+  throw new Error('Missing Redis Cluster instances');
 };
 
 export const validateRedisClusterProviderConfig = (): boolean => {

@@ -45,8 +45,8 @@ export class QueuesModule implements OnApplicationShutdown {
       entities = Object.values(JobTopicNameEnum);
     }
 
-    const healthIndicators = [];
-    const tokenList = [];
+    const healthIndicators: Function[] = [];
+    const tokenList: Function[] = [];
     const DYNAMIC_PROVIDERS = [...BASE_PROVIDERS];
 
     for (const entity of entities) {

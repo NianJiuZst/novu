@@ -81,7 +81,7 @@ export const getRedisProviderConfig = (): IRedisProviderConfig => {
   };
 };
 
-export const getRedisInstance = (): Redis | undefined => {
+export const getRedisInstance = (): Redis  => {
   const { port, host, ...configOptions } = getRedisProviderConfig();
 
   const options = {
@@ -93,7 +93,10 @@ export const getRedisInstance = (): Redis | undefined => {
     showFriendlyErrorStack: process.env.NODE_ENV !== 'production',
   };
 
-  if (port && host) {
+  if (!port || !host) {
+    throw new Error('Missing Redis host or port');
+  }
+
     const redisInstance = new Redis(port, host, options);
     const isNewRelicEnabled = typeof newrelic !== 'undefined' && newrelic.instrumentDatastore;
     const isNewRelicEnvSet = process.env.NEW_RELIC_LICENSE_KEY && process.env.NEW_RELIC_APP_NAME;
@@ -103,9 +106,6 @@ export const getRedisInstance = (): Redis | undefined => {
     }
 
     return redisInstance;
-  }
-
-  return undefined;
 };
 
 export const validateRedisProviderConfig = (): boolean => {

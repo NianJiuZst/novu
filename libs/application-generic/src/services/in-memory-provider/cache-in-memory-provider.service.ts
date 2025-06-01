@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { InMemoryProviderService } from './in-memory-provider.service';
-import { InMemoryProviderEnum, InMemoryProviderClient, ScanStream } from './types';
+import { InMemoryProviderEnum, ScanStream, InMemoryProviderClient } from './types';
 import { isClusterModeEnabled } from './utils';
 
 const LOG_CONTEXT = 'CacheInMemoryProviderService';
@@ -54,6 +54,10 @@ export class CacheInMemoryProviderService {
   }
 
   public getClient(): InMemoryProviderClient {
+    if (!this.inMemoryProviderService.inMemoryProviderClient) {
+      throw new Error('InMemoryProviderClient is not ready');
+    }
+
     return this.inMemoryProviderService.inMemoryProviderClient;
   }
 
