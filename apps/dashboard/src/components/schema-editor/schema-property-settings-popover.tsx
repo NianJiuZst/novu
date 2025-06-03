@@ -8,7 +8,8 @@ import { InputPure, InputRoot, InputWrapper } from '@/components/primitives/inpu
 import { PopoverContent, Popover, PopoverTrigger } from '@/components/primitives/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/primitives/select';
 import { Switch } from '@/components/primitives/switch';
-import { RiDeleteBin2Line } from 'react-icons/ri';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/primitives/tooltip';
+import { RiDeleteBin2Line, RiInformationLine } from 'react-icons/ri';
 import { Separator } from '../primitives/separator';
 import { Code2 } from '../icons/code-2';
 import type { JSONSchema7, JSONSchema7TypeName } from './json-schema';
@@ -135,6 +136,7 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
     const isVariableInUse = variableUsageInfo?.isUsed || false;
 
     const defaultValuePath = `${definitionPath}.default`;
+    const examplePath = `${definitionPath}.example`;
     const formatPath = `${definitionPath}.format`;
     const patternPath = `${definitionPath}.pattern`;
     const minLengthPath = `${definitionPath}.minLength`;
@@ -269,6 +271,39 @@ export const SchemaPropertySettingsPopover = forwardRef<HTMLDivElement, SchemaPr
                   </FormControl>
                 )}
               />
+            </FormItem>
+
+            <FormItem>
+              <div className="flex items-center gap-1">
+                <FormLabel className="text-xs">Preview Value</FormLabel>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <RiInformationLine className="h-3 w-3 cursor-help text-neutral-400" />
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs">
+                    <p className="text-xs">This will be used by default in the preview editors</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <Controller
+                name={examplePath as Path<SchemaEditorFormValues>}
+                control={control}
+                render={({ field }) => (
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={field.value === undefined || field.value === null ? '' : String(field.value)}
+                      onChange={(e) => {
+                        const parsed = parseDefaultValue(e.target.value, currentType);
+                        field.onChange(parsed);
+                      }}
+                      placeholder={`Enter preview value (${String(effectiveType)})`}
+                      size="2xs"
+                    />
+                  </FormControl>
+                )}
+              />
+              <FormMessage />
             </FormItem>
           </div>
           <Separator />
