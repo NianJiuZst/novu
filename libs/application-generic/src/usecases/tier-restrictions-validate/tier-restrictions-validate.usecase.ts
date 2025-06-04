@@ -33,6 +33,10 @@ export class TierRestrictionsValidateUsecase {
   async execute(command: TierRestrictionsValidateCommand): Promise<TierRestrictionsValidateResponse> {
     const { stepType } = command;
 
+    if (!stepType) {
+      return [];
+    }
+
     if (!isDigestOrDelay(stepType)) {
       return [];
     }
@@ -64,6 +68,10 @@ export class TierRestrictionsValidateUsecase {
     if (isRegularDeferAction(command)) {
       const deferDurationMs = calculateDeferDuration(command);
 
+      if (!deferDurationMs) {
+        return [];
+      }
+
       if (deferDurationMs < MIN_VALIDATION_LIMITS.DEFER_DURATION_MS) {
         return [];
       }
@@ -73,7 +81,7 @@ export class TierRestrictionsValidateUsecase {
       const amountIssue = buildIssue(deferDurationMs, maxDelayMs, ErrorEnum.TIER_LIMIT_EXCEEDED, 'amount');
       const unitIssue = buildIssue(deferDurationMs, maxDelayMs, ErrorEnum.TIER_LIMIT_EXCEEDED, 'unit');
 
-      return [amountIssue, unitIssue].filter(Boolean);
+      return [amountIssue, unitIssue].filter((issue): issue is TierValidationError => issue !== null);
     }
 
     return [];
@@ -177,10 +185,10 @@ function calculateMilliseconds(amount: number, unit: DigestUnitEnum): number {
 /*
  * Cron expression is another term for a timed digest
  */
-const isCronExpression = (cron: string) => {
+const isCronExpression = (cron: string | undefined): cron is string => {
   return !!cron;
 };
-const isRegularDeferAction = (command: TierRestrictionsValidateCommand) => {
+const isRegularDeferAction = (command: TierRestrictionsValidateCommand)  => {
   if (command.deferDurationMs) {
     return true;
   }

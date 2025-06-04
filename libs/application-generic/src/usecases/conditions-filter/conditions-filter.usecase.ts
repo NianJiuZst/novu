@@ -319,6 +319,8 @@ export class ConditionsFilter extends Filter {
   private async buildPayload(variables: IFilterVariables, command: ConditionsFilterCommand) {
     if (process.env.NODE_ENV === 'test') return variables;
 
+    if (!command.job) return variables;
+
     const payload: Partial<{
       subscriber: SubscriberEntity | null;
       payload: Record<string, unknown>;
@@ -360,8 +362,9 @@ export class ConditionsFilter extends Filter {
 
     if (child.on === FilterPartTypeEnum.WEBHOOK) {
       if (process.env.NODE_ENV === 'test') return true;
+      if (!command.job) return false;
       // eslint-disable-next-line no-param-reassign
-      child.value = await this.compileFilter(child.value, variables, command.job);
+      child.value = (await this.compileFilter(child.value || '', variables, command.job)) ?? child.value;
       const res = await this.getWebhookResponse(child, variables, command);
       passed = this.processFilterEquality({ payload: undefined, webhook: res }, child, filterProcessingDetails);
     }
@@ -371,8 +374,9 @@ export class ConditionsFilter extends Filter {
       child.on === FilterPartTypeEnum.PAYLOAD ||
       child.on === FilterPartTypeEnum.SUBSCRIBER
     ) {
+      if (!command.job) return false;
       // eslint-disable-next-line no-param-reassign
-      child.value = await this.compileFilter(child.value, variables, command.job);
+      child.value = (await this.compileFilter(child.value || '', variables, command.job)) ?? child.value;
 
       passed = this.processFilterEquality(variables, child, filterProcessingDetails);
     }

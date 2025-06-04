@@ -220,10 +220,12 @@ export const mapSubscribersToJobs = (
         _subscriberSource,
         requestCategory: command.requestCategory,
         controls: command.controls,
-        bridge: {
-          url: command.bridgeUrl,
-          workflow: command.bridgeWorkflow,
-        },
+        ...(command.bridgeUrl && command.bridgeWorkflow && {
+          bridge: {
+            url: command.bridgeUrl,
+            workflow: command.bridgeWorkflow,
+          },
+        }),
         environmentName: command.environmentName,
       },
       groupId: command.organizationId,

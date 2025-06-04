@@ -52,8 +52,8 @@ export class TriggerEvent {
     try {
       const mappedCommand = {
         ...command,
-        tenant: this.mapTenant(command.tenant),
-        actor: this.mapActor(command.actor),
+        tenant: command.tenant ? this.mapTenant(command.tenant) : null,
+        actor: command.actor ? this.mapActor(command.actor) : null,
       };
 
       const { environmentId, identifier, organizationId, userId } = mappedCommand;
@@ -121,7 +121,7 @@ export class TriggerEvent {
       }
 
       // We might have a single actor for every trigger, so we only need to check for it once
-      let actorProcessed: SubscriberEntity | undefined;
+      let actorProcessed: SubscriberEntity | null = null;
       if (mappedCommand.actor) {
         this.logger.info(mappedCommand, 'Processing actor');
         actorProcessed = await this.createOrUpdateSubscriberUsecase.execute(
@@ -134,7 +134,7 @@ export class TriggerEvent {
           await this.triggerMulticast.execute(
             TriggerMulticastCommand.create({
               ...mappedCommand,
-              actor: actorProcessed,
+              actor: actorProcessed || undefined,
               environmentName: environment.name,
               template: storedWorkflow || (command.bridgeWorkflow as unknown as NotificationTemplateEntity),
             })
@@ -145,7 +145,7 @@ export class TriggerEvent {
           await this.triggerBroadcast.execute(
             TriggerBroadcastCommand.create({
               ...mappedCommand,
-              actor: actorProcessed,
+              actor: actorProcessed || undefined,
               environmentName: environment.name,
               template: storedWorkflow || (command.bridgeWorkflow as unknown as NotificationTemplateEntity),
             })
@@ -155,9 +155,9 @@ export class TriggerEvent {
         default: {
           await this.triggerMulticast.execute(
             TriggerMulticastCommand.create({
-              addressingType: AddressingTypeEnum.MULTICAST,
               ...(mappedCommand as TriggerMulticastCommand),
-              actor: actorProcessed,
+              addressingType: AddressingTypeEnum.MULTICAST,
+              actor: actorProcessed || undefined,
               environmentName: environment.name,
               template: storedWorkflow || (command.bridgeWorkflow as unknown as NotificationTemplateEntity),
             })

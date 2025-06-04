@@ -12,7 +12,7 @@ export class GetWorkflowByIdsUseCase {
   async execute(command: GetWorkflowByIdsCommand): Promise<NotificationTemplateEntity> {
     const isInternalId = NotificationTemplateRepository.isInternalId(command.workflowIdOrInternalId);
 
-    let workflowEntity: NotificationTemplateEntity;
+    let workflowEntity: NotificationTemplateEntity | null;
     if (isInternalId) {
       workflowEntity = await this.notificationTemplateRepository.findById(
         command.workflowIdOrInternalId,

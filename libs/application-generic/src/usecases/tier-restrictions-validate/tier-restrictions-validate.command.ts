@@ -1,9 +1,9 @@
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { StepTypeEnum } from '@novu/shared';
 import { Transform } from 'class-transformer';
-import { OrganizationLevelCommand } from '../../commands';
+import { EnvironmentCommand } from '../../commands';
 
-export class TierRestrictionsValidateCommand extends OrganizationLevelCommand {
+export class TierRestrictionsValidateCommand extends EnvironmentCommand {
   @IsOptional()
   @Transform(({ value }) => (value ? Number(value) : value))
   @IsNumber()

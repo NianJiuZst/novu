@@ -39,7 +39,13 @@ export abstract class BaseHandler implements IMailHandler {
       to: ['no-reply@novu.co'],
     };
 
-    const { message, success, code } = await this.provider?.checkIntegration(mailData);
+    const checkIntegrationResult = this.provider?.checkIntegration && (await this.provider?.checkIntegration(mailData));
+
+    if (!checkIntegrationResult) {
+      throw new PlatformException('Provider not initialized. Call buildProvider first.');
+    }
+
+    const { message, success, code } = checkIntegrationResult;
 
     if (!success) {
       throw new PlatformException(

@@ -21,7 +21,7 @@ export class UpsertControlValuesUseCase {
       return await this.updateControlValues(
         existingControlValues,
         command,
-        command.newControlValues,
+        command.newControlValues || {},
       );
     }
 

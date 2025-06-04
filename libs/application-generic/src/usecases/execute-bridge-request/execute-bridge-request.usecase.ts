@@ -115,8 +115,8 @@ export class ExecuteBridgeRequest {
       environment.bridge?.url || environment.echo?.url,
       command.environmentId,
       command.workflowOrigin,
+      command.action,
       command.statelessBridgeUrl,
-      command.action
     );
 
     this.logger.info(
@@ -190,6 +190,7 @@ export class ExecuteBridgeRequest {
       }).json();
     } catch (error) {
       await this.handleResponseError(error, bridgeUrl, command.processError);
+      throw new Error('Unreachable code handleResponseError always throws an exception');
     }
   }
 
@@ -246,8 +247,8 @@ export class ExecuteBridgeRequest {
     environmentBridgeUrl: string,
     environmentId: string,
     workflowOrigin: WorkflowOriginEnum,
-    statelessBridgeUrl?: string,
-    action?: PostActionEnum | GetActionEnum
+    action: PostActionEnum | GetActionEnum,
+    statelessBridgeUrl?: string
   ): string {
     if (statelessBridgeUrl) {
       return statelessBridgeUrl;
@@ -293,12 +294,12 @@ export class ExecuteBridgeRequest {
     error: unknown,
     url: string,
     processError: ExecuteBridgeRequestCommand['processError']
-  ) {
+  ): Promise<never> {
     let bridgeErrorData: Pick<BridgeError, 'data' | 'code' | 'statusCode' | 'message' | 'cause'>;
     if (error instanceof RequestError) {
       let body: Record<string, unknown>;
       try {
-        body = JSON.parse(error.response.body as string);
+        body = JSON.parse(error.response?.body as string);
       } catch (e) {
         // If the body is not valid JSON, we'll just use an empty object.
         body = {};
@@ -411,7 +412,7 @@ export class ExecuteBridgeRequest {
           code: BRIDGE_EXECUTION_ERROR.BRIDGE_METHOD_NOT_CONFIGURED.code,
           statusCode: HttpStatus.BAD_REQUEST,
         };
-      } else if (error.response.statusCode === 413) {
+      } else if (error.response?.statusCode === 413) {
         this.logger.error(`Payload too large for \`${url}\``);
         bridgeErrorData = {
           message: BRIDGE_EXECUTION_ERROR.PAYLOAD_TOO_LARGE.message(url),

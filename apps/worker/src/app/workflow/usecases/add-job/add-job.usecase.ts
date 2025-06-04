@@ -187,6 +187,7 @@ export class AddJob {
       TierRestrictionsValidateCommand.create({
         deferDurationMs: delay,
         stepType: job.type,
+        environmentId: command.environmentId,
         organizationId: command.organizationId,
         cron: cronExpression,
       })

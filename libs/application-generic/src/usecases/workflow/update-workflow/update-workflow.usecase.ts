@@ -140,7 +140,7 @@ export class UpdateWorkflow {
       existingTemplate._id
     );
 
-    let notificationTemplateWithStepTemplate: WorkflowWithPreferencesResponseDto;
+    let notificationTemplateWithStepTemplate: WorkflowWithPreferencesResponseDto = existingTemplate;
     await this.notificationTemplateRepository.withTransaction(async () => {
       if (command.steps) {
         updatePayload = this.updateTriggers(updatePayload, command.steps);
@@ -233,7 +233,7 @@ export class UpdateWorkflow {
                 readOnly: defaultCritical,
               },
             },
-            defaultUserPreferences
+            defaultUserPreferences || undefined
           );
           await this.upsertPreferences.upsertUserWorkflowPreferences(
             UpsertUserWorkflowPreferencesCommand.create({

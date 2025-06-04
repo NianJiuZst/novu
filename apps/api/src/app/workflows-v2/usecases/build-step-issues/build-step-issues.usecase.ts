@@ -254,6 +254,7 @@ export class BuildStepIssuesUsecase {
         amount: controlValues?.amount as number | undefined,
         unit: controlValues?.unit as string | undefined,
         cron: controlValues?.cron as string | undefined,
+        environmentId: user.environmentId,
         organizationId: user.organizationId,
         stepType,
       })

@@ -20,7 +20,7 @@ export class CreateOrUpdateSubscriberUseCase {
     maxRetries: 3,
     delay: 500,
   })
-  async execute(command: CreateOrUpdateSubscriberCommand) {
+  async execute(command: CreateOrUpdateSubscriberCommand) :Promise<SubscriberEntity | null> {
     const persistedSubscriber = await this.getExistingSubscriber(command);
 
     if (persistedSubscriber) {

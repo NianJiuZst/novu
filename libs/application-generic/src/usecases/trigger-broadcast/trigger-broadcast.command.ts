@@ -15,7 +15,7 @@ export class TriggerBroadcastCommand extends TriggerEventBroadcastCommand {
   template: NotificationTemplateEntity;
 
   @IsOptional()
-  actor?: SubscriberEntity | undefined;
+  actor?: SubscriberEntity;
 
   @ValidateNested()
   tenant: ITenantDefine | null;

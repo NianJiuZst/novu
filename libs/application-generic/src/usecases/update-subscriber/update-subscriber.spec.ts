@@ -66,9 +66,9 @@ describe('Update Subscriber', function () {
       _id: subscriber._id,
       _environmentId: subscriber._environmentId,
     });
-    expect(updatedSubscriber.lastName).toEqual('Test Last Name');
-    expect(updatedSubscriber.firstName).toEqual(subscriber.firstName);
-    expect(updatedSubscriber.email).toEqual(subscriber.email);
-    expect(updatedSubscriber.locale).toEqual('sv');
+    expect(updatedSubscriber?.lastName).toEqual('Test Last Name');
+    expect(updatedSubscriber?.firstName).toEqual(subscriber.firstName);
+    expect(updatedSubscriber?.email).toEqual(subscriber.email);
+    expect(updatedSubscriber?.locale).toEqual('sv');
   });
 });
