@@ -13,6 +13,7 @@ import {
   shortId,
   UpsertControlValuesUseCase,
   UpsertControlValuesCommand,
+  FeatureFlagsService,
 } from '@novu/application-generic';
 import {
   CommunityOrganizationRepository,
@@ -35,6 +36,7 @@ import {
   WorkflowOriginEnum,
   StepTypeEnum,
   PreferencesTypeEnum,
+  FeatureFlagsKeysEnum,
 } from '@novu/shared';
 import { AuthService } from '../../../auth/services/auth.service';
 import { SubscriberSessionResponseDto } from '../../dtos/subscriber-session-response.dto';
@@ -76,7 +78,8 @@ export class Session {
     private preferencesRepository: PreferencesRepository,
     private upsertControlValuesUseCase: UpsertControlValuesUseCase,
     private getOrganizationSettingsUsecase: GetOrganizationSettings,
-    private logger: PinoLogger
+    private logger: PinoLogger,
+    private featureFlagsService: FeatureFlagsService
   ) {
     this.logger.setContext(this.constructor.name);
   }
@@ -267,6 +270,16 @@ export class Session {
       throw new InternalServerErrorException('Keyless Organization not found');
     }
 
+    const isKeylessEnabled = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.IS_KEYLESS_ENVIRONMENT_CREATION_ENABLED,
+      defaultValue: false,
+      organization,
+    });
+
+    if (!isKeylessEnabled) {
+      throw new BadRequestException('Keyless environment creation is currently disabled.');
+    }
+
     const user = await this.communityUserRepository.findByEmail(process.env.KEYLESS_USER_EMAIL!);
 
     if (!user) {
@@ -304,7 +317,11 @@ export class Session {
 
     await this.createWorkflowsUsecase(environment._id, environment._organizationId, user._id);
 
-    return this.convertEnvironmentEntityToDto(environment);
+    const environmentDto = this.convertEnvironmentEntityToDto(environment);
+
+    this.logger.info('Keyless environment created successfully');
+
+    return environmentDto;
   }
 
   async createWorkflowsUsecase(environmentId: string, organizationId: string, userId: string) {
