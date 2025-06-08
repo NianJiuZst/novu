@@ -130,7 +130,7 @@ const baseTheme = (options: { multiline?: boolean }) =>
     },
     'div.cm-content': {
       padding: 0,
-      whiteSpace: 'preserve nowrap',
+      whiteSpace: options.multiline ? 'pre-wrap' : 'pre',
       width: '1px', // Any width value would do to make the editor work exactly like an input when more text than its width is added
     },
     'div.cm-gutters': {
@@ -218,7 +218,7 @@ export const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>(
   ) => {
     const onChangeRef = useDataRef(onChange);
     const extensions = useMemo(
-      () => [...(extensionsProp ?? []), baseTheme({ multiline })],
+      () => [baseTheme({ multiline }), ...(extensionsProp ?? [])],
       [extensionsProp, multiline]
     );
 
