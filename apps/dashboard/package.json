@@ -10,7 +10,7 @@
     "dev": "pnpm start",
     "build": "tsc -b && vite build",
     "docker:build": "docker buildx build --load -f ./dockerfile -t novu-dashboard ./../.. $DOCKER_BUILD_ARGUMENTS",
-    "lint": "eslint .",
+    "lint": "biome check .",
     "preview": "vite preview",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",

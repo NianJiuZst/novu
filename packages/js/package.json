@@ -75,7 +75,7 @@
     "build:watch": "concurrently \"pnpm run prebuild\" \"NODE_ENV=development pnpm run tsup:watch\" \"pnpm run start:server\"",
     "tsup:watch": "tsup --watch",
     "check-exports": "attw --pack .",
-    "lint": "eslint src",
+    "lint": "biome check src",
     "lint:fix": "pnpm lint -- --fix",
     "test": "jest",
     "publish": "pnpm publish",

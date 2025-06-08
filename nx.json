@@ -11,9 +11,9 @@
     "lint": {
       "cache": true
     },
-    "@nx/eslint:lint": {
+    "biome:check": {
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/tools/eslint-rules/**/*"]
+      "inputs": ["default", "{workspaceRoot}/biome.json"]
     }
   },
   "namedInputs": {

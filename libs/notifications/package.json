@@ -16,7 +16,7 @@
     "fix:prettier": "prettier \"src/**/*.ts\" --write",
     "fix:lint": "eslint src --ext .ts --fix",
     "test": "echo 'Not tests available'",
-    "lint": "eslint src",
+    "lint": "biome check src",
     "test:watch": "echo 'Not tests available'",
     "watch:build": "tsc -p tsconfig.json -w",
     "reset-hard": "git clean -dfx && git reset --hard && pnpm install",

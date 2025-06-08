@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "generate:provider": "pnpm nx g automation:provider",
-    "lint": "eslint src",
+    "lint": "biome check src",
     "lint:fix": "pnpm lint -- --fix"
   },
   "dependencies": {

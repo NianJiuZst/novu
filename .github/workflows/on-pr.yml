@@ -131,7 +131,7 @@ jobs:
           slim: 'true'
       - uses: mansagroup/nrwl-nx-action@v3
         with:
-          targets: lint,build,test
+          targets: biome:check,build,test
           parallel: 5
           projects: ${{join(fromJson(needs.get-affected.outputs.test-providers), ',')}}
 
@@ -169,7 +169,7 @@ jobs:
         env:
           LOG_LEVEL: 'info'
         with:
-          targets: lint,build,test
+          targets: biome:check,build,test
           projects: ${{join(fromJson(needs.get-affected.outputs.test-packages), ',')}}
 
   test_unit_libs:
@@ -188,7 +188,7 @@ jobs:
       - name: Run Lint, Build, Test
         uses: mansagroup/nrwl-nx-action@v3
         with:
-          targets: lint,build,test
+          targets: biome:check,build,test
           projects: ${{join(fromJson(needs.get-affected.outputs.test-libs), ',')}}
 
   test_unit_services:
@@ -230,7 +230,7 @@ jobs:
       - uses: mansagroup/nrwl-nx-action@v3
         name: Lint and build and test
         with:
-          targets: lint,build,test
+          targets: biome:check,build,test
           projects: ${{matrix.projectName}}
           args: ''
 

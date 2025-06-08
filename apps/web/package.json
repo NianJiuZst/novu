@@ -26,7 +26,7 @@
     "test:e2e:merge-report": "playwright merge-reports --reporter html",
     "storybook": "storybook dev -p 6006 -s public",
     "build-storybook": "storybook build -s public",
-    "lint": "eslint src",
+    "lint": "biome check src",
     "lint:fix": "pnpm lint -- --fix",
     "link:submodules": "pnpm link ../../enterprise/packages/translation-web && pnpm link ../../enterprise/packages/billing-web"
   },

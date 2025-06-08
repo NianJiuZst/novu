@@ -16,8 +16,8 @@
     "build:copy-template": "cpx \"src/**/*.handlebars\" build/main",
     "fix": "run-s fix:*",
     "fix:prettier": "prettier \"src/**/*.ts\" --write",
-    "lint:fix": "eslint src --fix",
-    "lint": "eslint src",
+    "lint:fix": "biome check --write src",
+    "lint": "biome check src",
     "watch:build": "tsc -p tsconfig.json -w",
     "watch:test": "jest src --watch",
     "reset-hard": "git clean -dfx && git reset --hard && pnpm install"

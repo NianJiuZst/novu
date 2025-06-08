@@ -19,7 +19,7 @@
     "start:debug": "nest start --debug --watch --inspect",
     "start:prod": "node dist/main.js",
     "build:metadata": "cross-env ts-node scripts/generate-metadata.ts",
-    "lint": "eslint src",
+    "lint": "biome check src",
     "lint:fix": "pnpm lint -- --fix",
     "lint:openapi": "spectral lint http://127.0.0.1:${PORT:-3000}/openapi.yaml",
     "pretest": "pnpm build:metadata",

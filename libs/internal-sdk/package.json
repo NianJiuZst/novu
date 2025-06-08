@@ -5,7 +5,7 @@
   "main": "./index.js",
   "sideEffects": false,
   "scripts": {
-    "lint": "eslint --cache --max-warnings=0 src",
+    "lint": "biome check src",
     "build": "tsc",
     "prepublishOnly": "npm run build"
   },

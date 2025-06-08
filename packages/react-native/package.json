@@ -32,7 +32,7 @@
   "scripts": {
     "build:watch": "tsup --watch",
     "build": "tsup && pnpm run check:exports",
-    "lint": "eslint src",
+    "lint": "biome check src",
     "check:exports": "attw --pack .",
     "release:preview": "pnpx pkg-pr-new publish"
   },

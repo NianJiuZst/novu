@@ -27,7 +27,7 @@ RUN --mount=type=cache,id=pnpm-store-web,target=/root/.pnpm-store\
 
 RUN pnpm add @babel/core -w
 
-COPY [".prettierrc",".prettierignore", "./"]
+COPY ["biome.json", "./"]
 
 RUN CI='' pnpm build:web --skip-nx-cache
 # end build stage

@@ -13,7 +13,7 @@
     "postbuild": "npm run check:circulars",
     "start:dev": "pnpm build:watch",
     "precommit": "lint-staged",
-    "lint": "eslint src",
+    "lint": "biome check src",
     "lint:fix": "pnpm lint -- --fix",
     "test": "vitest",
     "watch:test": "pnpm test --watch",
