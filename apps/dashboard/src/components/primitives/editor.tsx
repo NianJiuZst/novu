@@ -131,6 +131,7 @@ const baseTheme = (options: { multiline?: boolean }) =>
     'div.cm-content': {
       padding: 0,
       whiteSpace: options.multiline ? 'pre-wrap' : 'pre',
+      ...(options.multiline ? { wordBreak: 'break-word' } : {}),
       width: '1px', // Any width value would do to make the editor work exactly like an input when more text than its width is added
     },
     'div.cm-gutters': {
