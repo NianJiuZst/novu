@@ -8,6 +8,5 @@ import { Tenant } from './tenant.schema';
 export class TenantRepository extends BaseRepository<TenantDBModel, TenantEntity, EnforceEnvId> {
   constructor() {
     super(Tenant, TenantEntity);
-    this.tenant = Tenant;
   }
 }
