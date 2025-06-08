@@ -81,7 +81,7 @@ export class SubscriberRepository extends BaseRepository<SubscriberDBModel, Subs
     }
 
     const updatedSubscribers = subscribers
-      .filter((subId, index) => !indexes.includes(index))
+      .filter((_subId, index) => !indexes.includes(index))
       .map((subscriber) => {
         return mapToSubscriberObject(subscriber.subscriberId);
       });

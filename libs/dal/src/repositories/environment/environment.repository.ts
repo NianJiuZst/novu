@@ -1,6 +1,6 @@
 import { EncryptedSecret, IApiRateLimitMaximum } from '@novu/shared';
 import { BaseRepository } from '../base-repository';
-import { IApiKey, EnvironmentEntity, EnvironmentDBModel } from './environment.entity';
+import { EnvironmentDBModel, EnvironmentEntity, IApiKey } from './environment.entity';
 import { Environment } from './environment.schema';
 
 export class EnvironmentRepository extends BaseRepository<EnvironmentDBModel, EnvironmentEntity, object> {
@@ -10,7 +10,9 @@ export class EnvironmentRepository extends BaseRepository<EnvironmentDBModel, En
 
   async findEnvironmentByIdentifier(identifier: string) {
     const data = await this.MongooseModel.findOne({ identifier }).read('secondaryPreferred');
-    if (!data) return null;
+    if (!data) {
+      return null;
+    }
 
     return this.mapEntity(data.toObject());
   }
@@ -69,7 +71,9 @@ export class EnvironmentRepository extends BaseRepository<EnvironmentDBModel, En
       },
       'apiKeys'
     );
-    if (!environment) return [];
+    if (!environment) {
+      return [];
+    }
 
     return environment.apiKeys;
   }

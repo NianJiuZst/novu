@@ -8,10 +8,10 @@ import {
 } from '@novu/shared';
 import { Types } from 'mongoose';
 
-import { NotificationStepEntity } from '../notification-template';
-import type { EnvironmentId } from '../environment';
-import type { OrganizationId } from '../organization';
 import type { ChangePropsValueType } from '../../types';
+import type { EnvironmentId } from '../environment';
+import { NotificationStepEntity } from '../notification-template';
+import type { OrganizationId } from '../organization';
 
 export { JobStatusEnum };
 

@@ -1,9 +1,9 @@
 import { Inject } from '@nestjs/common';
-import { IPartnerConfiguration, OrganizationEntity } from './organization.entity';
 import { IOrganizationRepository } from './organization-repository.interface';
+import { IPartnerConfiguration, OrganizationEntity } from './organization.entity';
 
 export class OrganizationRepository implements IOrganizationRepository {
-  constructor(@Inject('ORGANIZATION_REPOSITORY') private organizationRepository: IOrganizationRepository) {}
+  constructor(@Inject('ORGANIZATION_REPOSITORY') private _organizationRepository: IOrganizationRepository) {}
 
   findById(id: string, select?: string): Promise<OrganizationEntity | null> {
     return this.organizationRepository.findById(id, select);

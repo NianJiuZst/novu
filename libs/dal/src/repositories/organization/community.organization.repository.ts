@@ -1,8 +1,8 @@
-import { IPartnerConfiguration, OrganizationDBModel, OrganizationEntity } from './organization.entity';
 import { BaseRepository } from '../base-repository';
-import { Organization } from './organization.schema';
 import { CommunityMemberRepository } from '../member';
 import { IOrganizationRepository } from './organization-repository.interface';
+import { IPartnerConfiguration, OrganizationDBModel, OrganizationEntity } from './organization.entity';
+import { Organization } from './organization.schema';
 
 export class CommunityOrganizationRepository
   extends BaseRepository<OrganizationDBModel, OrganizationEntity, object>
@@ -16,7 +16,9 @@ export class CommunityOrganizationRepository
 
   async findById(id: string, select?: string): Promise<OrganizationEntity | null> {
     const data = await this.MongooseModel.findById(id, select).read('secondaryPreferred');
-    if (!data) return null;
+    if (!data) {
+      return null;
+    }
 
     return this.mapEntity(data.toObject());
   }

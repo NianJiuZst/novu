@@ -20,9 +20,9 @@ import {
 import { Types } from 'mongoose';
 import type { ChangePropsValueType } from '../../types';
 import type { EnvironmentId } from '../environment';
+import { MessageTemplateEntity } from '../message-template';
 import { NotificationGroupEntity } from '../notification-group';
 import type { OrganizationId } from '../organization';
-import { MessageTemplateEntity } from '../message-template';
 
 export class NotificationTemplateEntity {
   _id: string;

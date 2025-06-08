@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
-import { LayoutDBModel } from './layout.entity';
 import { schemaOptions } from '../schema-default.options';
+import { LayoutDBModel } from './layout.entity';
 
 const mongooseDelete = require('mongoose-delete');
 

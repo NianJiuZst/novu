@@ -1,5 +1,5 @@
-import mongoose, { Connection, ConnectOptions } from 'mongoose';
 import { Logger } from '@nestjs/common';
+import mongoose, { Connection, ConnectOptions } from 'mongoose';
 import { AuthMechanism } from './types';
 
 const MONGODB_CONTEXT = '[@novu/dal]';
@@ -45,7 +45,9 @@ export class DalService {
   }
 
   async destroy() {
-    if (process.env.NODE_ENV !== 'test') throw new Error('Allowed only in test mode');
+    if (process.env.NODE_ENV !== 'test') {
+      throw new Error('Allowed only in test mode');
+    }
 
     await mongoose.connection.dropDatabase();
   }

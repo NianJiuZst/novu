@@ -73,7 +73,9 @@ export class NotificationTemplateRepository extends BaseRepository<
   }
 
   async findBlueprintById(id: string) {
-    if (!this.blueprintOrganizationId) throw new DalException('Blueprint environment id was not found');
+    if (!this.blueprintOrganizationId) {
+      throw new DalException('Blueprint environment id was not found');
+    }
 
     const requestQuery: NotificationTemplateQuery = {
       isBlueprint: true,
@@ -90,7 +92,9 @@ export class NotificationTemplateRepository extends BaseRepository<
   }
 
   async findBlueprintByTriggerIdentifier(identifier: string) {
-    if (!this.blueprintOrganizationId) throw new DalException('Blueprint environment id was not found');
+    if (!this.blueprintOrganizationId) {
+      throw new DalException('Blueprint environment id was not found');
+    }
 
     const requestQuery: NotificationTemplateQuery = {
       isBlueprint: true,
@@ -109,7 +113,9 @@ export class NotificationTemplateRepository extends BaseRepository<
   async findBlueprintTemplates(organizationId: string, environmentId: string): Promise<NotificationTemplateEntity[]> {
     const _organizationId = organizationId;
 
-    if (!_organizationId) throw new DalException('Blueprint environment id was not found');
+    if (!_organizationId) {
+      throw new DalException('Blueprint environment id was not found');
+    }
 
     const templates = await this.MongooseModel.find({
       isBlueprint: true,

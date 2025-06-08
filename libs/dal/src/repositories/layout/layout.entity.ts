@@ -1,3 +1,4 @@
+import type { ChangePropsValueType } from '../../types/helpers';
 import {
   ChannelTypeEnum,
   EnvironmentId,
@@ -9,7 +10,6 @@ import {
   OrganizationId,
   UserId,
 } from './types';
-import type { ChangePropsValueType } from '../../types/helpers';
 
 export class LayoutEntity {
   _id: LayoutId;

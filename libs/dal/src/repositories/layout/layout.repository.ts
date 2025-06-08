@@ -1,12 +1,12 @@
 import { FilterQuery } from 'mongoose';
 import { SoftDeleteModel } from 'mongoose-delete';
 
-import { LayoutEntity, LayoutDBModel } from './layout.entity';
-import { Layout } from './layout.schema';
-import { EnvironmentId, OrderDirectionEnum, OrganizationId, LayoutId } from './types';
-import { BaseRepository } from '../base-repository';
 import { DalException } from '../../shared';
 import { EnforceEnvOrOrgIds } from '../../types/enforce';
+import { BaseRepository } from '../base-repository';
+import { LayoutDBModel, LayoutEntity } from './layout.entity';
+import { Layout } from './layout.schema';
+import { EnvironmentId, LayoutId, OrderDirectionEnum, OrganizationId } from './types';
 
 type LayoutQuery = FilterQuery<LayoutDBModel> & EnforceEnvOrOrgIds;
 

@@ -1,10 +1,10 @@
 import { Inject } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { IUserRepository } from './user-repository.interface';
-import { UserEntity, IUserResetTokenCount } from './user.entity';
+import { IUserResetTokenCount, UserEntity } from './user.entity';
 
 export class UserRepository implements IUserRepository {
-  constructor(@Inject('USER_REPOSITORY') private userRepository: IUserRepository) {}
+  constructor(@Inject('USER_REPOSITORY') private _userRepository: IUserRepository) {}
 
   async findByEmail(email: string): Promise<UserEntity | null> {
     return this.userRepository.findByEmail(email);

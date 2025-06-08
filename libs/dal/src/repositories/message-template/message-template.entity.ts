@@ -9,8 +9,8 @@ import {
   UiSchemaProperty,
 } from '@novu/shared';
 
-import { IEmailBlock, ITemplateVariable } from './types';
 import type { ChangePropsValueType } from '../../types';
+import { IEmailBlock, ITemplateVariable } from './types';
 
 export class MessageTemplateEntity {
   _id?: string;

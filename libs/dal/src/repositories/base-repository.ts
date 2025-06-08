@@ -67,7 +67,9 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     const data = await this.MongooseModel.findOne(query, select, options.query).read(
       options.readPreference || 'primary'
     );
-    if (!data) return null;
+    if (!data) {
+      return null;
+    }
 
     return this.mapEntity(data.toObject());
   }
@@ -83,7 +85,9 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
       new: options.new || false,
     });
 
-    if (!data) return null;
+    if (!data) {
+      return null;
+    }
 
     return this.mapEntity(data.toObject());
   }
@@ -99,7 +103,9 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
 
   async findOneAndDelete(query: FilterQuery<T_DBModel> & T_Enforcement): Promise<T_MappedEntity | null> {
     const data = await this.MongooseModel.findOneAndDelete(query).lean();
-    if (!data) return null;
+    if (!data) {
+      return null;
+    }
 
     return this.mapEntity(data);
   }

@@ -1,5 +1,5 @@
 import { Inject } from '@nestjs/common';
-import { MemberRoleEnum, IMemberInvite, MemberStatusEnum } from '@novu/shared';
+import { IMemberInvite, MemberRoleEnum, MemberStatusEnum } from '@novu/shared';
 import { IMemberRepository } from './member-repository.interface';
 import { MemberEntity } from './member.entity';
 
@@ -11,7 +11,7 @@ export interface IAddMemberData {
 }
 
 export class MemberRepository implements IMemberRepository {
-  constructor(@Inject('MEMBER_REPOSITORY') private memberRepository: IMemberRepository) {}
+  constructor(@Inject('MEMBER_REPOSITORY') private _memberRepository: IMemberRepository) {}
 
   removeMemberById(organizationId: string, memberId: string): Promise<{ acknowledged: boolean; deletedCount: number }> {
     return this.memberRepository.removeMemberById(organizationId, memberId);

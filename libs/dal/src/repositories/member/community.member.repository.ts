@@ -1,11 +1,11 @@
 import { MemberRoleEnum, MemberStatusEnum } from '@novu/shared';
 import { FilterQuery } from 'mongoose';
-import { MemberEntity, MemberDBModel } from './member.entity';
-import { BaseRepository } from '../base-repository';
-import { Member } from './member.schema';
 import type { EnforceOrgId } from '../../types/enforce';
+import { BaseRepository } from '../base-repository';
 import { IMemberRepository } from './member-repository.interface';
+import { MemberDBModel, MemberEntity } from './member.entity';
 import { IAddMemberData } from './member.repository';
+import { Member } from './member.schema';
 
 type MemberQuery = FilterQuery<MemberDBModel> & EnforceOrgId;
 
@@ -53,7 +53,9 @@ export class CommunityMemberRepository
       '_userId',
       'firstName lastName email _id profilePicture createdAt'
     );
-    if (!members) return [];
+    if (!members) {
+      return [];
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const membersEntity: any = this.mapEntities(members);
@@ -86,7 +88,9 @@ export class CommunityMemberRepository
     };
 
     const members = await this.MongooseModel.find(requestQuery).populate('_userId', 'firstName lastName email _id');
-    if (!members) return [];
+    if (!members) {
+      return [];
+    }
 
     const membersEntity = this.mapEntities(members);
 
@@ -150,7 +154,9 @@ export class CommunityMemberRepository
       'invite.email': email,
     });
 
-    if (!foundMember) return null;
+    if (!foundMember) {
+      return null;
+    }
 
     return foundMember;
   }
@@ -184,7 +190,9 @@ export class CommunityMemberRepository
       _userId: userId,
     });
 
-    if (!member) return null;
+    if (!member) {
+      return null;
+    }
 
     return this.mapEntity(member) as MemberEntity;
   }
@@ -195,7 +203,9 @@ export class CommunityMemberRepository
       _id: memberId,
     });
 
-    if (!member) return null;
+    if (!member) {
+      return null;
+    }
 
     return this.mapEntity(member) as MemberEntity;
   }

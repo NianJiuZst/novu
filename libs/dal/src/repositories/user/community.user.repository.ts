@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import { BaseRepository } from '../base-repository';
 import { IUserRepository } from './user-repository.interface';
-import { IUserResetTokenCount, UserEntity, UserDBModel } from './user.entity';
+import { IUserResetTokenCount, UserDBModel, UserEntity } from './user.entity';
 import { User } from './user.schema';
 
 export class CommunityUserRepository
@@ -20,7 +20,9 @@ export class CommunityUserRepository
 
   async findById(id: string, select?: string): Promise<UserEntity | null> {
     const data = await this.MongooseModel.findById(id, select);
-    if (!data) return null;
+    if (!data) {
+      return null;
+    }
 
     return this.mapEntity(data.toObject());
   }
@@ -50,7 +52,7 @@ export class CommunityUserRepository
     );
   }
 
-  async findUserSessions(userId: string): Promise<[]> {
+  async findUserSessions(_userId: string): Promise<[]> {
     throw new Error('Not implemented');
   }
 }

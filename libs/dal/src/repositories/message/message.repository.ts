@@ -34,7 +34,7 @@ const isValidKey = (key: string): boolean => {
   return true;
 };
 
-const getEntries = (obj: object, prefix = '', currentDepth = 0, maxDepth: number): [string, any][] =>
+const getEntries = (obj: object, prefix, currentDepth, maxDepth: number): [string, any][] =>
   Object.entries(obj).flatMap(([key, value]) => {
     // Sanitize the key before using it.
     if (!isValidKey(key)) {
@@ -159,7 +159,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
    * if aggregation is needed, make sure to filter with {deleted: { $ne: true }}.
    * todo: aggregate method should be implemented after all the soft deletes are removed task nv-5688
    */
-  async aggregate(query: any[], options: { readPreference?: 'secondaryPreferred' | 'primary' } = {}): Promise<any> {
+  async aggregate(_query: any[], _options: { readPreference?: 'secondaryPreferred' | 'primary' } = {}): Promise<any> {
     throw new Error('Not implemented');
   }
 
@@ -445,7 +445,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     id: string,
     status: 'error' | 'sent' | 'warning',
     // eslint-disable-next-line
-    providerPayload: any = {},
+    providerPayload: any,
     errorId: string,
     errorText: string
   ) {

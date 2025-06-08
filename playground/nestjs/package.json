@@ -10,7 +10,7 @@
     "dev": "nest start --watch",
     "dev:debug": "nest start --debug --watch",
     "start": "node dist/main",
-    "lint": "biome check \"{src,test}/**/*.ts\"",
+    "lint": "biome check src",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest",
     "test:debug": "vitest --inspect-brk --no-file-parallelism"

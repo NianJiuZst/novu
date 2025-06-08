@@ -1,13 +1,13 @@
+import { NOVU_PROVIDERS } from '@novu/shared';
 import { FilterQuery } from 'mongoose';
 import { SoftDeleteModel } from 'mongoose-delete';
-import { NOVU_PROVIDERS } from '@novu/shared';
 
-import { IntegrationEntity, IntegrationDBModel, ProviderCount } from './integration.entity';
+import { IntegrationDBModel, IntegrationEntity, ProviderCount } from './integration.entity';
 import { Integration } from './integration.schema';
 
-import { BaseRepository } from '../base-repository';
 import { DalException } from '../../shared';
 import type { EnforceEnvOrOrgIds, IDeleteResult } from '../../types';
+import { BaseRepository } from '../base-repository';
 
 export type IntegrationQuery = FilterQuery<IntegrationDBModel> & EnforceEnvOrOrgIds;
 
