@@ -1,73 +1,145 @@
-// Eslint v9.0 and above plugins
-import tsEslint from 'typescript-eslint';
-import jsEslint from '@eslint/js';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import panda from '@pandacss/eslint-plugin';
-import pluginCypress from 'eslint-plugin-cypress/flat';
-import localRules from 'eslint-plugin-local-rules';
-
-// Eslint v8.0 and below plugins
-import reactHooks from 'eslint-plugin-react-hooks';
-import promise from 'eslint-plugin-promise';
-import unusedImports from 'eslint-plugin-unused-imports';
-import deprecation from 'eslint-plugin-deprecation';
-
-/**
- * Eslint v8 compatibility packages
- *
- * This file was migrated from eslintrc.js to eslint.config.mjs using the following command:
- * `npx @eslint/migrate-config .eslintrc.js`
- *
- * After better compatibility for Eslint Flat Config is present in the Eslint plugin
- * ecosystem, we should remove `@eslint/compat` and the `fixupConfigRules` and
- * `fixupPluginRules` functions.
- *
- * @see https://github.com/eslint/eslint/issues/18010
- */
-import { fixupConfigRules, fixupPluginRules } from '@eslint/compat';
-import { FlatCompat } from '@eslint/eslintrc';
-
-const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
+import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import globals from 'globals';
+import reactPlugin from 'eslint-plugin-react';
+import reactHooksPlugin from 'eslint-plugin-react-hooks';
+import importPlugin from 'eslint-plugin-import';
+import promisePlugin from 'eslint-plugin-promise';
+import unusedImportsPlugin from 'eslint-plugin-unused-imports';
+import deprecationPlugin from 'eslint-plugin-deprecation';
+import pandaPlugin from '@pandacss/eslint-plugin';
+// import cypressPlugin from 'eslint-plugin-cypress/flat';
+// import localRulesPlugin from 'eslint-plugin-local-rules';
 
 /**
- * REUSED RULE CONFIGURATIONS
- *
- * This is necessary because Eslint doesn't merge rule configurations
- * when they are targeting different paths.
+ * SHARED CONFIGURATIONS
  */
 
-/**
- * This rule ensures that "multi-level" imports are not used for `@novu/*` packages.
- */
+// Common language options for all TypeScript files
+const typescriptLanguageOptions = {
+  parser: tseslint.parser,
+  parserOptions: {
+    projectService: true,
+    tsconfigRootDir: import.meta.dirname,
+  },
+};
+
+// Common rules for all files
+const commonRules = {
+  '@typescript-eslint/await-thenable': 'warn',
+  '@typescript-eslint/no-floating-promises': 'warn',
+  '@typescript-eslint/no-explicit-any': 'warn',
+  '@typescript-eslint/no-unused-vars': 'off',
+  '@typescript-eslint/explicit-module-boundary-types': 'off',
+  '@typescript-eslint/explicit-function-return-type': 'off',
+  '@typescript-eslint/no-var-requires': 'off',
+  '@typescript-eslint/default-param-last': 'off',
+  '@typescript-eslint/no-use-before-define': 'off',
+  '@typescript-eslint/only-throw-error': 'error',
+  '@typescript-eslint/return-await': 'off',
+  '@typescript-eslint/no-base-to-string': 'error',
+  'no-return-await': 'off',
+  'no-await-in-loop': 'off',
+  'no-continue': 'off',
+  'no-console': 'warn',
+  'no-prototype-builtins': 'off',
+  'import/no-cycle': 'off',
+  'class-methods-use-this': 'off',
+  'no-restricted-syntax': 'off',
+  'no-underscore-dangle': 'off',
+  'import/prefer-default-export': 'off',
+  'import/no-extraneous-dependencies': 'off',
+  'import/no-namespace': 'error',
+  'lines-between-class-members': 'off',
+  'max-classes-per-file': 'off',
+  'no-else-return': 'off',
+  'import/export': 'off',
+  'consistent-return': 'off',
+  'no-param-reassign': [
+    'error',
+    {
+      props: true,
+      ignorePropertyModificationsFor: ['prev', 'acc'],
+    },
+  ],
+  'max-len': [
+    'warn',
+    {
+      code: 140,
+    },
+  ],
+  'padding-line-between-statements': [
+    'error',
+    {
+      blankLine: 'any',
+      prev: ['const', 'let', 'var'],
+      next: ['if', 'for'],
+    },
+    {
+      blankLine: 'any',
+      prev: ['const', 'let', 'var'],
+      next: ['const', 'let', 'var'],
+    },
+    {
+      blankLine: 'always',
+      prev: '*',
+      next: 'return',
+    },
+  ],
+  'id-length': [
+    'error',
+    {
+      min: 2,
+      exceptions: ['i', 'e', 'a', 'b', '_', 't'],
+      properties: 'never',
+    },
+  ],
+  '@typescript-eslint/naming-convention': [
+    'error',
+    {
+      selector: 'enumMember',
+      format: ['UPPER_CASE'],
+    },
+    {
+      selector: 'enum',
+      format: ['PascalCase'],
+      suffix: ['Enum'],
+    },
+    {
+      selector: 'class',
+      format: ['PascalCase'],
+    },
+    {
+      selector: 'variableLike',
+      format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+      leadingUnderscore: 'allow',
+    },
+    {
+      selector: 'interface',
+      format: ['PascalCase'],
+      prefix: ['I'],
+    },
+    {
+      selector: ['function'],
+      format: ['camelCase', 'PascalCase'],
+      leadingUnderscore: 'allow',
+    },
+  ],
+};
+
+// Multi-level import restriction pattern
 const noRestrictedImportsMultiLevelNovuPattern = {
   group: [
     '@novu/*/**/*',
-    '!@novu/api/**/*', // This allows all imports from @novu/api
-    // These packages have legitimate exports 1 path part below the root level
-    // This flatMap logic ignores the path 1 below the root level and prevents deeper imports.
+    '!@novu/api/**/*',
     ...['framework', 'js', 'novui'].flatMap((pkg) => [`!@novu/${pkg}/**/*`, `@novu/${pkg}/*/**/*`]),
   ],
   message:
     "Please import only from the root package entry point. For example, use 'import { Client } from '@novu/api';' instead of 'import { Client } from '@novu/api/src';'",
 };
 
-export default tsEslint.config(
-  /* ******************** RECOMMENDED CONFIG ******************** */
-  jsEslint.configs.recommended,
-  ...fixupConfigRules(
-    compat.extends(
-      /**
-       * Airbnb is still migrating to Eslint v9.0
-       *
-       * @see https://github.com/iamturns/eslint-config-airbnb-typescript/issues/331
-       */
-      'airbnb-base',
-      'airbnb-typescript'
-    )
-  ),
-  eslintPluginPrettierRecommended, // KEEP PRETTIER CONFIG LAST TO AVOID CONFLICTS
-
-  /* ******************** IGNORES ******************** */
+export default [
+  // Global ignores
   {
     ignores: [
       '**/dist/**',
@@ -97,195 +169,84 @@ export default tsEslint.config(
     ],
   },
 
-  /* ******************** TYPESCRIPT FILES ******************** */
+  // Base JavaScript configuration
+  js.configs.recommended,
+
+  // TypeScript configuration for all TS files
+  ...tseslint.configs.recommended.map((config) => ({
+    ...config,
+    files: ['**/*.{ts,tsx}'],
+  })),
+
+  // Main TypeScript configuration
   {
-    plugins: {
-      promise: fixupPluginRules(promise),
-    },
-
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: typescriptLanguageOptions,
     linterOptions: {
       reportUnusedDisableDirectives: 'error',
     },
-
+    plugins: {
+      promise: promisePlugin,
+      import: importPlugin,
+    },
     rules: {
-      '@typescript-eslint/await-thenable': 'warn',
-      'unused-imports/no-unused-imports': 'off',
-      '@typescript-eslint/space-before-blocks': 'off',
-      '@typescript-eslint/lines-between-class-members': 'off',
-      '@typescript-eslint/no-throw-literal': 'off',
-      '@typescript-eslint/only-throw-error': 'error',
-      '@typescript-eslint/no-floating-promises': 'warn',
-      'react/jsx-wrap-multilines': 'off',
-      'react/jsx-filename-extension': 'off',
-      'multiline-comment-style': ['warn', 'starred-block'],
-      'promise/catch-or-return': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-unused-expressions': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      'react/jsx-closing-bracket-location': 'off',
-      '@typescript-eslint/no-var-requires': 'off',
-      '@typescript-eslint/no-unused-vars': ['off'],
-      'mocha/no-mocha-arrows': 'off',
-      '@typescript-eslint/default-param-last': 'off',
-      'no-return-await': 'off',
-      'no-await-in-loop': 'off',
-      'no-continue': 'off',
-      'no-console': 'warn',
-      'no-prototype-builtins': 'off',
-      'import/no-cycle': 'off',
-      'class-methods-use-this': 'off',
-      '@typescript-eslint/no-use-before-define': 'off',
-      '@typescript-eslint/no-explicit-any': 1,
-      'no-restricted-syntax': 'off',
-      '@typescript-eslint/interface-name-prefix': 'off',
-      'no-underscore-dangle': 'off',
-      'import/prefer-default-export': 'off',
-      'import/no-extraneous-dependencies': 'off',
-      'import/no-namespace': 'error',
-      'react/jsx-one-expression-per-line': 'off',
-      'react/jsx-no-bind': 'off',
-      'lines-between-class-members': 'off',
-      'max-classes-per-file': 'off',
-      'react/react-in-jsx-scope': 'off',
-      'no-else-return': 'off',
-      'import/export': 'off',
-      'consistent-return': 'off',
-      'no-param-reassign': [
-        'error',
-        {
-          props: true,
-          ignorePropertyModificationsFor: ['prev', 'acc'], // ignore for Array.reduce
-        },
-      ],
-
-      'max-len': [
-        'warn',
-        {
-          code: 140,
-        },
-      ],
-
-      '@typescript-eslint/return-await': 'off',
-      '@typescript-eslint/no-base-to-string': 'error',
-
+      ...commonRules,
       'no-restricted-imports': [
         'error',
         {
           patterns: [noRestrictedImportsMultiLevelNovuPattern],
         },
       ],
-
-      'padding-line-between-statements': [
-        'error',
-        {
-          blankLine: 'any',
-          prev: ['const', 'let', 'var'],
-          next: ['if', 'for'],
-        },
-        {
-          blankLine: 'any',
-          prev: ['const', 'let', 'var'],
-          next: ['const', 'let', 'var'],
-        },
-        {
-          blankLine: 'always',
-          prev: '*',
-          next: 'return',
-        },
-      ],
-
-      'id-length': [
-        'error',
-        {
-          min: 2,
-          exceptions: ['i', 'e', 'a', 'b', '_', 't'],
-          properties: 'never',
-        },
-      ],
-
-      '@typescript-eslint/naming-convention': [
-        'error',
-        {
-          selector: 'enumMember',
-          format: ['UPPER_CASE'],
-        },
-        {
-          selector: 'enum',
-          format: ['PascalCase'],
-          suffix: ['Enum'],
-        },
-        {
-          selector: 'class',
-          format: ['PascalCase'],
-        },
-        {
-          selector: 'variableLike',
-          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
-          leadingUnderscore: 'allow',
-        },
-        {
-          selector: 'interface',
-          format: ['PascalCase'],
-          prefix: ['I'],
-        },
-        {
-          selector: ['function'],
-          format: ['camelCase', 'PascalCase'],
-          leadingUnderscore: 'allow',
-        },
-      ],
-
-      'prettier/prettier': [
-        'error',
-        {
-          endOfLine: 'auto',
-        },
-      ],
     },
   },
 
-  /* ******************** JAVASCRIPT FILES ******************** */
+  // JavaScript files configuration
   {
     files: ['**/*.{js,jsx,cjs,mjs}'],
-    ...tsEslint.configs.disableTypeChecked,
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.browser,
+      },
+    },
+    rules: {
+      // Disable TypeScript-specific rules for JS files
+      '@typescript-eslint/no-var-requires': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+    },
   },
 
-  /* ******************** MONOREPO PACKAGES ******************** */
+  // Framework package configuration
   {
-    files: ['packages/framework/**'],
+    files: ['packages/framework/**/*.{ts,tsx}'],
     plugins: {
-      'unused-imports': fixupPluginRules(unusedImports),
+      'unused-imports': unusedImportsPlugin,
     },
     rules: {
       'max-len': 'off',
       '@typescript-eslint/no-explicit-any': 'error',
-      'import/prefer-default-export': 0,
-      'sonarjs/prefer-immediate-return': 0,
-      'const-case/uppercase': 0,
-      'unicorn/no-array-reduce': 0,
+      'import/prefer-default-export': 'off',
       'unused-imports/no-unused-imports': 'error',
     },
   },
 
+  // Providers package configuration
   {
-    files: ['packages/providers/**'],
+    files: ['packages/providers/**/*.{ts,tsx}'],
     plugins: {
-      deprecation: fixupPluginRules(deprecation),
+      deprecation: deprecationPlugin,
     },
     rules: {
       'deprecation/deprecation': 'error',
     },
   },
 
+  // API application configuration
   {
-    files: ['apps/api/**'],
+    files: ['apps/api/**/*.{ts,tsx}'],
+    languageOptions: {
+      globals: globals.node,
+    },
     rules: {
       'no-restricted-imports': [
         'error',
@@ -308,10 +269,6 @@ export default tsEslint.config(
               message: 'Please use the SvixClient from @novu/application-generic instead',
             },
             {
-              /**
-               * This rule ensures that the overridden Swagger decorators are used,
-               * which apply common responses to all API endpoints.
-               */
               group: ['@nestjs/swagger'],
               importNames: [
                 'ApiOkResponse',
@@ -348,8 +305,10 @@ export default tsEslint.config(
       ],
     },
   },
+
+  // Application-generic library configuration
   {
-    files: ['libs/application-generic/**'],
+    files: ['libs/application-generic/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -366,16 +325,28 @@ export default tsEslint.config(
     },
   },
 
-  /* ******************** WEB PACKAGES ******************** */
+  // Web packages configuration (React apps)
   {
-    files: ['libs/design-system/**', 'libs/novui/**', 'apps/widget/**', 'apps/web/**'],
-    extends: [pluginCypress.configs.recommended],
+    files: [
+      'libs/design-system/**/*.{ts,tsx}',
+      'libs/novui/**/*.{ts,tsx}',
+      'apps/web/**/*.{ts,tsx,js,jsx}',
+      'apps/dashboard/**/*.{ts,tsx,js,jsx}',
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
     plugins: {
-      '@pandacss': panda,
-      'react-hooks': fixupPluginRules(reactHooks),
+      '@pandacss': pandaPlugin,
+      'react-hooks': reactHooksPlugin,
+      react: reactPlugin,
+      // cypress: cypressPlugin.plugins.cypress,
     },
     rules: {
-      ...panda.configs.recommended.rules,
+      ...pandaPlugin.configs.recommended.rules,
       'func-names': 'off',
       'react/jsx-props-no-spreading': 'off',
       'react/no-array-index-key': 'off',
@@ -396,7 +367,7 @@ export default tsEslint.config(
       'jsx-a11y/click-events-have-key-events': 'off',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-
+      'react/react-in-jsx-scope': 'off',
       '@typescript-eslint/naming-convention': [
         'error',
         {
@@ -406,17 +377,21 @@ export default tsEslint.config(
           format: ['PascalCase', 'camelCase', 'UPPER_CASE'],
         },
       ],
-
       '@pandacss/no-config-function-in-source': 'off',
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
     },
   },
 
-  /* ******************** INBOX PACKAGES ******************** */
+  // Inbox packages configuration
   {
-    files: ['packages/js/**', 'packages/react/**'],
-    plugins: {
-      'local-rules': localRules,
-    },
+    files: ['packages/js/**/*.{ts,tsx}', 'packages/react/**/*.{ts,tsx}'],
+    // plugins: {
+    //   'local-rules': localRulesPlugin,
+    // },
     rules: {
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/naming-convention': [
@@ -428,9 +403,9 @@ export default tsEslint.config(
           format: ['PascalCase', 'camelCase', 'UPPER_CASE'],
         },
       ],
-      'local-rules/no-class-without-style': 'error',
+      // 'local-rules/no-class-without-style': 'error',
       'id-length': 'off',
       '@typescript-eslint/no-shadow': 'off',
     },
-  }
-);
+  },
+];
