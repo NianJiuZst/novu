@@ -14,5 +14,6 @@ export const variablePillTheme = EditorView.baseTheme({
   },
   '.cm-line': {
     paddingLeft: 0,
+    wordBreak: 'break-word',
   },
 });

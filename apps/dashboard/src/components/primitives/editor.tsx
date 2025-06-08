@@ -127,6 +127,7 @@ const baseTheme = (options: { multiline?: boolean }) =>
     '.cm-line': {
       marginLeft: '1px',
       lineHeight: '20px',
+      ...(options.multiline ? { wordBreak: 'break-word' } : {}),
     },
     'div.cm-content': {
       padding: 0,
