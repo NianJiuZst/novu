@@ -10,7 +10,7 @@ runs:
       env:
         PORT: '1336'
       with:
-        targets: biome:check
+        targets: lint
         projects: '@novu/api-service'
 
     - name: Kill port for api 1336 for unit tests

@@ -9,9 +9,10 @@
       "cache": true
     },
     "lint": {
-      "cache": true
-    },
-    "biome:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome check --write"
+      },
       "cache": true,
       "inputs": ["default", "{workspaceRoot}/biome.json"]
     }
