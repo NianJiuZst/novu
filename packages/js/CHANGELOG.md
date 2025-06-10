@@ -1,3 +1,44 @@
+## v3.5.1-nightly.20250610 (2025-06-10)
+
+### 🚀 Features
+
+- **react,js,nextjs,react-native:** create new inbox session on subscriber change ([#8417](https://github.com/novuhq/novu/pull/8417))
+- **dashboard:** payload schema management UI ([#8315](https://github.com/novuhq/novu/pull/8315))
+- add build scripts for pnpm ([4c0093dc67](https://github.com/novuhq/novu/commit/4c0093dc67))
+- **api-service:** adjust locale testing groups to v2 ([#8388](https://github.com/novuhq/novu/pull/8388))
+- **inbox:** backwards compatible inbox keyless ([b6b42a9f43](https://github.com/novuhq/novu/commit/b6b42a9f43))
+- **root:** create keyless environment ([#8276](https://github.com/novuhq/novu/pull/8276))
+- **root:** upgrade nx to v21.0.4 and update nx.json configuration ([#8361](https://github.com/novuhq/novu/pull/8361))
+- **api-service:** add data attribute filtering for inbox notifications ([#8338](https://github.com/novuhq/novu/pull/8338))
+- **api-service:** Webhook management ([#8300](https://github.com/novuhq/novu/pull/8300))
+
+### 🩹 Fixes
+
+- **root:** resurrecting eslint ([#8483](https://github.com/novuhq/novu/pull/8483))
+- **novui:** broken link on CONTRIBUTION.md ([#8466](https://github.com/novuhq/novu/pull/8466))
+- **root:** update nx packages and override path-to-regexp to fix CVE-2024-45296 ([#8438](https://github.com/novuhq/novu/pull/8438))
+- **root:** update systeminformation to fix vulnerability ([#8436](https://github.com/novuhq/novu/pull/8436))
+- **root:** upgrade @nestjs/platform-express to resolve multer DoS vulnerability ([#8434](https://github.com/novuhq/novu/pull/8434))
+- **js:** increase bottom padding for inbox preferences to prevent footer gradient clickability issues NV-6005 ([#8428](https://github.com/novuhq/novu/pull/8428))
+- **root:** update tar-fs to resolve security vulnerabilities ([#8431](https://github.com/novuhq/novu/pull/8431))
+- **react-native:** update widget_jwt_expiration_time default value to fix session initialized ([#8401](https://github.com/novuhq/novu/pull/8401))
+- pnpm approved builds ([80df2481f6](https://github.com/novuhq/novu/commit/80df2481f6))
+- version bump react packages ([62ff7ee154](https://github.com/novuhq/novu/commit/62ff7ee154))
+- **inbox:** change redirect urls for keyless ([d663dfa5bc](https://github.com/novuhq/novu/commit/d663dfa5bc))
+- pnpm 10 repo ([65109279ef](https://github.com/novuhq/novu/commit/65109279ef))
+- **api:** Update mocha configuration to use SWC instead of ts-node ([#8363](https://github.com/novuhq/novu/pull/8363))
+- novu react rc 4 release ([b737df7335](https://github.com/novuhq/novu/commit/b737df7335))
+- **api, ws, dashboard, worker:** new release v2.2.0 ([#8334](https://github.com/novuhq/novu/pull/8334))
+
+### ❤️ Thank You
+
+- Dima Grossman @scopsy
+- George Djabarov @djabarovgeorge
+- Himanshu Garg @merrcury
+- Natnael Yilma @TaduJR
+- Paweł Tymczuk @LetItRock
+- Trần Thăng Long @longtranthang
+
 ## v3.4.0 (2025-05-16)
 
 ### 🚀 Features
