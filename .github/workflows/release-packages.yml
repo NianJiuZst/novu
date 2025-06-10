@@ -47,12 +47,13 @@ jobs:
       - name: Set version for nightly
         if: ${{ github.event.inputs.nightly }}
         run: |
-          echo "NIGHTLY_VERSION=${{ github.event.inputs.version }}-nightly.$(date +'%Y%m%d')" >> $GITHUB_ENV
+          DATE=$(date +'%Y%m%d')
+          echo "NIGHTLY_VERSION=${{ github.event.inputs.version }}-nightly-$DATE" >> $GITHUB_ENV
 
       - name: Release version
         run: |
           if [ "${{ github.event.inputs.nightly }}" = "true" ]; then
-            pnpm nx release version ${{ env.NIGHTLY_VERSION }} --projects=${{ github.event.inputs.packages }}
+            pnpm nx release version ${{ env.NIGHTLY_VERSION }} --projects=${{ github.event.inputs.packages }} --preid nightly
           else
             pnpm nx release version ${{ github.event.inputs.version }} --projects=${{ github.event.inputs.packages }}
           fi
