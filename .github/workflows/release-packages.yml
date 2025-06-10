@@ -13,6 +13,11 @@ on:
         required: true
         type: string
         default: 'v3.0.0'
+      previous_tag:
+        description: 'Previous tag to generate changelog from (e.g., @novu/js@v3.4.0)'
+        required: true
+        type: string
+        default: '@novu/js@v3.4.0'
       nightly:
         description: 'Publish as nightly release'
         required: false
@@ -62,29 +67,13 @@ jobs:
             pnpm nx release version ${{ github.event.inputs.version }} --projects=${{ github.event.inputs.packages }} --verbose
           fi
 
-      - name: Get previous tags
-        id: prev_tags
-        run: |
-          IFS=',' read -ra PACKAGES <<< "${{ github.event.inputs.packages }}"
-          PREV_TAGS=()
-          for PACKAGE in "${PACKAGES[@]}"; do
-            PREV_TAG=$(git tag | grep "$PACKAGE@" | sort -V | tail -n 2 | head -n 1)
-            PREV_TAGS+=("$PREV_TAG")
-          done
-          echo "previous_tags=${PREV_TAGS[*]}" >> $GITHUB_OUTPUT
-
       - name: Generate changelog
         run: |
-          IFS=',' read -ra PACKAGES <<< "${{ github.event.inputs.packages }}"
-          IFS=' ' read -ra PREV_TAGS <<< "${{ steps.prev_tags.outputs.previous_tags }}"
-          
-          for i in "${!PACKAGES[@]}"; do
-            if [ "${{ github.event.inputs.nightly }}" = "true" ]; then
-              pnpm nx release changelog ${{ env.NIGHTLY_VERSION }} --projects=${PACKAGES[$i]} --from=${PREV_TAGS[$i]}
-            else
-              pnpm nx release changelog ${{ github.event.inputs.version }} --projects=${PACKAGES[$i]} --from=${PREV_TAGS[$i]}
-            fi
-          done
+          if [ "${{ github.event.inputs.nightly }}" = "true" ]; then
+            pnpm nx release changelog ${{ env.NIGHTLY_VERSION }} --projects=${{ github.event.inputs.packages }} --from=${{ github.event.inputs.previous_tag }}
+          else
+            pnpm nx release changelog ${{ github.event.inputs.version }} --projects=${{ github.event.inputs.packages }} --from=${{ github.event.inputs.previous_tag }}
+          fi
 
       - name: Build packages
         run: pnpm run build:packages
