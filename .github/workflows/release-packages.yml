@@ -42,20 +42,26 @@ jobs:
 
       - name: Install Dependencies
         shell: bash
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm nx --version
+          pnpm list nx
 
       - name: Set version for nightly
         if: ${{ github.event.inputs.nightly }}
         run: |
           DATE=$(date +'%Y%m%d')
           echo "NIGHTLY_VERSION=${{ github.event.inputs.version }}-nightly-$DATE" >> $GITHUB_ENV
+          echo "Using nightly version: $NIGHTLY_VERSION"
 
       - name: Release version
         run: |
           if [ "${{ github.event.inputs.nightly }}" = "true" ]; then
-            pnpm nx release version ${{ env.NIGHTLY_VERSION }} --projects=${{ github.event.inputs.packages }} --preid nightly
+            echo "Running nightly release with version: ${{ env.NIGHTLY_VERSION }}"
+            pnpm nx release version ${{ env.NIGHTLY_VERSION }} --projects=${{ github.event.inputs.packages }} --preid nightly --verbose
           else
-            pnpm nx release version ${{ github.event.inputs.version }} --projects=${{ github.event.inputs.packages }}
+            echo "Running regular release with version: ${{ github.event.inputs.version }}"
+            pnpm nx release version ${{ github.event.inputs.version }} --projects=${{ github.event.inputs.packages }} --verbose
           fi
 
       - name: Generate changelog
