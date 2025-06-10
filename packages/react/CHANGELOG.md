@@ -1,3 +1,85 @@
+## v3.6.0 (2025-06-10)
+
+### 🚀 Features
+
+- **react,js,nextjs,react-native:** create new inbox session on subscriber change ([#8417](https://github.com/novuhq/novu/pull/8417))
+- **dashboard:** payload schema management UI ([#8315](https://github.com/novuhq/novu/pull/8315))
+- add build scripts for pnpm ([4c0093dc67](https://github.com/novuhq/novu/commit/4c0093dc67))
+- **api-service:** adjust locale testing groups to v2 ([#8388](https://github.com/novuhq/novu/pull/8388))
+- **root:** create keyless environment ([#8276](https://github.com/novuhq/novu/pull/8276))
+- **root:** upgrade nx to v21.0.4 and update nx.json configuration ([#8361](https://github.com/novuhq/novu/pull/8361))
+- **api-service:** add data attribute filtering for inbox notifications ([#8338](https://github.com/novuhq/novu/pull/8338))
+- **api-service:** Webhook management ([#8300](https://github.com/novuhq/novu/pull/8300))
+- **js,react:** inbox preference grouping ([#8310](https://github.com/novuhq/novu/pull/8310))
+- **js,react:** inbox and styles under the shadow root ([#8262](https://github.com/novuhq/novu/pull/8262))
+- **js:** override icon set for inbox component ([#8293](https://github.com/novuhq/novu/pull/8293))
+- **api:** OSS sign in flows ([#8274](https://github.com/novuhq/novu/pull/8274))
+- **dashboard,api-service:** add self-hosted-auth ([#7755](https://github.com/novuhq/novu/pull/7755))
+- **js,react:** add snooze functionality ([#8230](https://github.com/novuhq/novu/pull/8230))
+- **repo:** Polish changelogs for packages ([a932bd38e4](https://github.com/novuhq/novu/commit/a932bd38e4))
+- **react:** upsert firstName, lastName, and email on session init ([#8142](https://github.com/novuhq/novu/pull/8142))
+- **api-service,dashboard,framework:** expose digest eventCount and events variables ([#8089](https://github.com/novuhq/novu/pull/8089))
+- **react,nextjs:** better dist folders structure and tsup config improvements ([#7914](https://github.com/novuhq/novu/pull/7914))
+- **js,react:** inbox subject, body render props ([#7886](https://github.com/novuhq/novu/pull/7886))
+- **js:** Inbox retheme ([#7759](https://github.com/novuhq/novu/pull/7759))
+- **api-service:** system limits & update pricing pages ([#7718](https://github.com/novuhq/novu/pull/7718))
+- **root:** add no only github action ([#7692](https://github.com/novuhq/novu/pull/7692))
+
+### 🩹 Fixes
+
+- **root:** resurrecting eslint ([#8483](https://github.com/novuhq/novu/pull/8483))
+- **novui:** broken link on CONTRIBUTION.md ([#8466](https://github.com/novuhq/novu/pull/8466))
+- **root:** update nx packages and override path-to-regexp to fix CVE-2024-45296 ([#8438](https://github.com/novuhq/novu/pull/8438))
+- **root:** update systeminformation to fix vulnerability ([#8436](https://github.com/novuhq/novu/pull/8436))
+- **root:** upgrade @nestjs/platform-express to resolve multer DoS vulnerability ([#8434](https://github.com/novuhq/novu/pull/8434))
+- **root:** update tar-fs to resolve security vulnerabilities ([#8431](https://github.com/novuhq/novu/pull/8431))
+- **react-native:** update widget_jwt_expiration_time default value to fix session initialized ([#8401](https://github.com/novuhq/novu/pull/8401))
+- pnpm approved builds ([80df2481f6](https://github.com/novuhq/novu/commit/80df2481f6))
+- version bump react packages ([62ff7ee154](https://github.com/novuhq/novu/commit/62ff7ee154))
+- pnpm 10 repo ([65109279ef](https://github.com/novuhq/novu/commit/65109279ef))
+- **api:** Update mocha configuration to use SWC instead of ts-node ([#8363](https://github.com/novuhq/novu/pull/8363))
+- novu react rc 4 release ([b737df7335](https://github.com/novuhq/novu/commit/b737df7335))
+- **api, ws, dashboard, worker:** new release v2.2.0 ([#8334](https://github.com/novuhq/novu/pull/8334))
+- **react:** inbox hydration issue for shadow root detector ([#8321](https://github.com/novuhq/novu/pull/8321))
+- **root:** .env example to support migration ([#8311](https://github.com/novuhq/novu/pull/8311))
+- **api:** Add created_at to the Workflow DTO allowed values ([#8182](https://github.com/novuhq/novu/pull/8182))
+- **api-service:** move workflow dto from shared to api ([#8009](https://github.com/novuhq/novu/pull/8009))
+- **ws:** docker image file and other ide settings ([#8157](https://github.com/novuhq/novu/pull/8157))
+- **application-generic:** logging levels ([#8111](https://github.com/novuhq/novu/pull/8111))
+- **js,react,nextjs:** Named type exports ([#8084](https://github.com/novuhq/novu/pull/8084))
+- **js:** Fix event triggering ([#8102](https://github.com/novuhq/novu/pull/8102))
+- **react:** apiUrl prop passing to novu/js ([#8104](https://github.com/novuhq/novu/pull/8104))
+- **root:** Add our first cursor rule ([23f8cb097c](https://github.com/novuhq/novu/commit/23f8cb097c))
+- **js,react,next:** Named type exports" ([#8083](https://github.com/novuhq/novu/pull/8083))
+- **js,react,next:** Named type exports ([#8080](https://github.com/novuhq/novu/pull/8080))
+- **api-service:** Remove lock from cached entity 2nd try ([#7979](https://github.com/novuhq/novu/pull/7979))
+- **root:** simplify service dependencies in docker-compose.yml ([#7993](https://github.com/novuhq/novu/pull/7993))
+- **root:** Stop updating lock-file when releasing new packages ([2107336ae2](https://github.com/novuhq/novu/commit/2107336ae2))
+- **api-service:** remove-lock-from-cached-entity ([#7923](https://github.com/novuhq/novu/pull/7923))
+- **root:** add NEW_RELIC_ENABLED to docker community ([#7943](https://github.com/novuhq/novu/pull/7943))
+- **root:** remove healthcheck option in docker-compose.yml ([#7929](https://github.com/novuhq/novu/pull/7929))
+- **react,nextjs:** Add use-client to exports ([#7934](https://github.com/novuhq/novu/pull/7934))
+- **react:** use counts hooks used with not existing tags ([#7933](https://github.com/novuhq/novu/pull/7933))
+- **api-service:** Remove redlock ([#7845](https://github.com/novuhq/novu/pull/7845))
+- **api-service:** fix idices not created in mongo-test ([#7857](https://github.com/novuhq/novu/pull/7857))
+- **root:** unhandled promise reject and undefined ff kind ([#7732](https://github.com/novuhq/novu/pull/7732))
+- **api-service:** remove only on e2e ([#7691](https://github.com/novuhq/novu/pull/7691))
+
+### ❤️ Thank You
+
+- Aaron Ritter @Aaron-Ritter
+- Adam Chmara @ChmaraX
+- Dima Grossman @scopsy
+- GalTidhar @tatarco
+- George Desipris @desiprisg
+- George Djabarov @djabarovgeorge
+- Himanshu Garg @merrcury
+- Natnael Yilma @TaduJR
+- Pawan Jain
+- Paweł Tymczuk @LetItRock
+- Sokratis Vidros @SokratisVidros
+- Trần Thăng Long @longtranthang
+
 ## v3.4.0 (2025-05-16)
 
 ### 🚀 Features
