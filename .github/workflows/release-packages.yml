@@ -62,13 +62,29 @@ jobs:
             pnpm nx release version ${{ github.event.inputs.version }} --projects=${{ github.event.inputs.packages }} --verbose
           fi
 
+      - name: Get previous tags
+        id: prev_tags
+        run: |
+          IFS=',' read -ra PACKAGES <<< "${{ github.event.inputs.packages }}"
+          PREV_TAGS=()
+          for PACKAGE in "${PACKAGES[@]}"; do
+            PREV_TAG=$(git tag | grep "$PACKAGE@" | sort -V | tail -n 2 | head -n 1)
+            PREV_TAGS+=("$PREV_TAG")
+          done
+          echo "previous_tags=${PREV_TAGS[*]}" >> $GITHUB_OUTPUT
+
       - name: Generate changelog
         run: |
-          if [ "${{ github.event.inputs.nightly }}" = "true" ]; then
-            pnpm nx release changelog ${{ env.NIGHTLY_VERSION }} --projects=${{ github.event.inputs.packages }}
-          else
-            pnpm nx release changelog ${{ github.event.inputs.version }} --projects=${{ github.event.inputs.packages }}
-          fi
+          IFS=',' read -ra PACKAGES <<< "${{ github.event.inputs.packages }}"
+          IFS=' ' read -ra PREV_TAGS <<< "${{ steps.prev_tags.outputs.previous_tags }}"
+          
+          for i in "${!PACKAGES[@]}"; do
+            if [ "${{ github.event.inputs.nightly }}" = "true" ]; then
+              pnpm nx release changelog ${{ env.NIGHTLY_VERSION }} --projects=${PACKAGES[$i]} --from=${PREV_TAGS[$i]}
+            else
+              pnpm nx release changelog ${{ github.event.inputs.version }} --projects=${PACKAGES[$i]} --from=${PREV_TAGS[$i]}
+            fi
+          done
 
       - name: Build packages
         run: pnpm run build:packages
