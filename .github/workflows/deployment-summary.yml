@@ -60,7 +60,6 @@ jobs:
           
           echo "$prs_json" > /tmp/recent_prs.json
           
-          pr_content=""
           for pr in $(echo "$prs_json" | jq -r '.[] | @base64'); do
             pr_data=$(echo "$pr" | base64 --decode)
             pr_number=$(echo "$pr_data" | jq -r '.number')
@@ -72,21 +71,11 @@ jobs:
             
             files_changed=$(gh pr view $pr_number --json files --jq '.files[].path' | head -10 | tr '\n' ', ' | sed 's/,$//')
             
-            pr_content="${pr_content}## PR #${pr_number}: ${pr_title}
-Author: @${pr_author}
-Merged: ${pr_merged_at}
-Labels: ${pr_labels}
-Files changed: ${files_changed}
-
-Description:
-${pr_body}
-
----
-
-"
+            printf "## PR #%s: %s\nAuthor: @%s\nMerged: %s\nLabels: %s\nFiles changed: %s\n\nDescription:\n%s\n\n---\n\n" \
+              "$pr_number" "$pr_title" "$pr_author" "$pr_merged_at" "$pr_labels" "$files_changed" "$pr_body" >> /tmp/pr_content.txt
           done
           
-          echo "$pr_content" > /tmp/pr_content.txt
+
           echo "pr_count=$(echo "$prs_json" | jq length)" >> "$GITHUB_OUTPUT"
 
       - name: Create AI prompt
