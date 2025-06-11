@@ -72,14 +72,14 @@ jobs:
             
             files_changed=$(gh pr view $pr_number --json files --jq '.files[].path' | head -10 | tr '\n' ', ' | sed 's/,$//')
             
-            pr_content+="## PR #$pr_number: $pr_title
-Author: @$pr_author
-Merged: $pr_merged_at
-Labels: $pr_labels
-Files changed: $files_changed
+            pr_content="${pr_content}## PR #${pr_number}: ${pr_title}
+Author: @${pr_author}
+Merged: ${pr_merged_at}
+Labels: ${pr_labels}
+Files changed: ${files_changed}
 
 Description:
-$pr_body
+${pr_body}
 
 ---
 
