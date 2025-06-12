@@ -48,6 +48,7 @@ const CardContent = ({
             events/month.
           </span>
         </TooltipContent>
+
       </Tooltip>
     </div>
     <span className="text-foreground-600 text-xs">
