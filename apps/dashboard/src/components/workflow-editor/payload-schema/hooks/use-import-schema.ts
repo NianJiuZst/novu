@@ -83,6 +83,10 @@ export function useImportSchema(workflow?: WorkflowResponseDto, formMethods?: an
         propertyList,
       });
 
+      // Trigger validation for all fields to show any validation errors immediately
+      // This is important when property names contain invalid characters (dots, spaces, etc.)
+      formMethods.trigger();
+
       // Exit import mode
       handleBackToManual();
     } catch (error) {

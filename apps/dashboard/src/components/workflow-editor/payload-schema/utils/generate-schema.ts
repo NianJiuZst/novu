@@ -20,7 +20,65 @@ export type SchemaGenerationOptions = {
    * for marking a field as required (0-1, default: 0.8)
    */
   heuristicThreshold?: number;
+  /**
+   * Whether to sanitize property names to make them valid identifiers
+   * Defaults to true to ensure generated schemas have valid property names
+   */
+  sanitizePropertyNames?: boolean;
 };
+
+/**
+ * Sanitizes a property name to conform to validation rules:
+ * - Must start with a letter or underscore
+ * - Can only contain letters, numbers, or underscores
+ * - Preserves the original meaning as much as possible
+ */
+export function sanitizePropertyName(name: string): string {
+  if (!name || typeof name !== 'string') {
+    return 'property';
+  }
+
+  // Replace invalid characters with underscores
+  let sanitized = name.replace(/[^a-zA-Z0-9_]/g, '_');
+  
+  // Ensure it starts with a letter or underscore
+  if (!/^[a-zA-Z_]/.test(sanitized)) {
+    sanitized = '_' + sanitized;
+  }
+  
+  // Remove consecutive underscores
+  sanitized = sanitized.replace(/_+/g, '_');
+  
+  // Remove trailing underscores
+  sanitized = sanitized.replace(/_+$/, '');
+  
+  // Ensure it's not empty
+  return sanitized || 'property';
+}
+
+/**
+ * Ensures property names are unique by appending numbers to duplicates
+ */
+export function ensureUniquePropertyNames(names: string[]): Record<string, string> {
+  const mapping: Record<string, string> = {};
+  const usedNames = new Set<string>();
+  
+  for (const originalName of names) {
+    const sanitized = sanitizePropertyName(originalName);
+    let uniqueName = sanitized;
+    let counter = 1;
+    
+    while (usedNames.has(uniqueName)) {
+      uniqueName = `${sanitized}_${counter}`;
+      counter++;
+    }
+    
+    usedNames.add(uniqueName);
+    mapping[originalName] = uniqueName;
+  }
+  
+  return mapping;
+}
 
 /**
  * Removes internal keys from the payload that shouldn't be part of the schema
@@ -132,23 +190,49 @@ function determineSchemaType(value: unknown, options: SchemaGenerationOptions = 
     case 'object': {
       const properties: { [key: string]: JSONSchema7 } = {};
       const objValue = value as Record<string, unknown>;
+      const shouldSanitize = options.sanitizePropertyNames !== false; // Default to true
 
-      for (const [key, val] of Object.entries(objValue)) {
-        properties[key] = determineSchemaType(val, options);
+      if (shouldSanitize) {
+        // Handle sanitization with duplicate prevention
+        const originalKeys = Object.keys(objValue);
+        const nameMapping = ensureUniquePropertyNames(originalKeys);
+        
+        for (const [originalKey, val] of Object.entries(objValue)) {
+          const sanitizedKey = nameMapping[originalKey];
+          properties[sanitizedKey] = determineSchemaType(val, options);
+        }
+        
+        const requiredFields = determineRequiredFields(
+          objValue,
+          options.requiredFieldStrategy || 'heuristic',
+          options.customRequiredFields,
+          options.heuristicThreshold
+        ).map(field => nameMapping[field]).filter(Boolean);
+
+        return {
+          type: 'object',
+          properties,
+          ...(requiredFields.length > 0 && { required: requiredFields }),
+        };
+      } else {
+        // Original behavior without sanitization
+        for (const [key, val] of Object.entries(objValue)) {
+          properties[key] = determineSchemaType(val, options);
+        }
+
+        const requiredFields = determineRequiredFields(
+          objValue,
+          options.requiredFieldStrategy || 'heuristic',
+          options.customRequiredFields,
+          options.heuristicThreshold
+        );
+
+        return {
+          type: 'object',
+          properties,
+          ...(requiredFields.length > 0 && { required: requiredFields }),
+        };
       }
-
-      const requiredFields = determineRequiredFields(
-        objValue,
-        options.requiredFieldStrategy || 'heuristic',
-        options.customRequiredFields,
-        options.heuristicThreshold
-      );
-
-      return {
-        type: 'object',
-        properties,
-        ...(requiredFields.length > 0 && { required: requiredFields }),
-      };
     }
 
     default:
