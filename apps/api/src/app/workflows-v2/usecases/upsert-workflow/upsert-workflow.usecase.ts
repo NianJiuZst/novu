@@ -158,6 +158,8 @@ export class UpsertWorkflowUseCase {
       defaultPreferences: workflowDto.preferences?.workflow ?? DEFAULT_WORKFLOW_PREFERENCES,
       triggerIdentifier: preserveWorkflowId ? workflowDto.workflowId : slugify(workflowDto.name),
       status: computeWorkflowStatus(isWorkflowActive, steps),
+      payloadSchema: workflowDto.payloadSchema,
+      validatePayload: workflowDto.validatePayload,
     };
   }
 
@@ -184,6 +186,8 @@ export class UpsertWorkflowUseCase {
       tags: workflowDto.tags,
       active: workflowActive,
       status: computeWorkflowStatus(workflowActive, steps),
+      payloadSchema: workflowDto.payloadSchema,
+      validatePayload: workflowDto.validatePayload,
     };
   }
 
@@ -355,7 +359,9 @@ export class UpsertWorkflowUseCase {
             },
           })
         );
-        emailControlValues.body = (result.preview as EmailRenderOutput).body;
+        let htmlBody = (result.preview as EmailRenderOutput).body ?? '';
+        htmlBody = this.removeBrandingFromHtml(htmlBody);
+        emailControlValues.body = htmlBody;
       } else if (emailControlValues.editorType === 'block' && !isMaily) {
         emailControlValues.body = '';
       }
@@ -393,6 +399,14 @@ export class UpsertWorkflowUseCase {
     if (!commandStep) return null;
 
     return commandStep.controlValues;
+  }
+
+  private removeBrandingFromHtml(html: string): string {
+    try {
+      return html.replace(/<table[^>]*data-novu-branding[^>]*>[\s\S]*?<\/table>(\s*)/gi, '');
+    } catch (error) {
+      return html;
+    }
   }
 
   private mixpanelTrack(command: UpsertWorkflowCommand, eventName: string) {
