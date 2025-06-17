@@ -1,74 +1,62 @@
-# Dockerfile for Novu Development Environment - Ultra-optimized for Cursor AI Agent
-# This creates the smallest possible image while maintaining full Novu development capability
+# Dockerfile for Novu Development Environment - Optimized for Cursor AI Agent
+# Ubuntu-based for full Cursor compatibility while maintaining significant optimizations
 # Usage: docker build -t novu-cursor . && docker run -it --name novu-cursor -p 3000:3000 -p 4000:4000 -p 27017:27017 -p 6379:6379 novu-cursor
 
-# Use Alpine for much smaller base image
-FROM node:20-alpine3.19 AS builder
+FROM ubuntu:22.04
 
-# Install minimal build dependencies for native modules
-RUN apk add --no-cache \
-    g++ \
-    make \
-    python3 \
-    py3-pip \
-    git \
-    curl
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Install pnpm and essential Node.js tools
-RUN npm --no-update-notifier --no-fund --global install \
-    pnpm@10.11.0 \
-    typescript@5.6.2 \
-    && npm cache clean --force
-
-# === RUNTIME STAGE ===
-FROM node:20-alpine3.19 AS runtime
-
-# Install runtime dependencies (including GNU coreutils for Cursor compatibility)
-RUN apk add --no-cache \
-    git \
+# Install essential dependencies and MongoDB/Redis in a single layer
+RUN apt-get update && apt-get install -y \
+    # Essential tools
     curl \
     wget \
+    git \
     bash \
-    supervisor \
-    redis \
+    ca-certificates \
     gnupg \
-    coreutils \
-    # Build tools needed for native modules
-    g++ \
-    make \
+    lsb-release \
+    # Build tools for native modules
+    build-essential \
     python3 \
-    py3-pip \
-    && rm -rf /var/cache/apk/*
+    python3-pip \
+    # Process management
+    supervisor \
+    # Clean up immediately
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Install MongoDB - use a working approach for both x86_64 and ARM64
-RUN set -eux; \
-    ARCH="$(apk --print-arch)"; \
-    case "$ARCH" in \
-        x86_64) MONGODB_ARCH='x86_64' ;; \
-        aarch64) MONGODB_ARCH='aarch64' ;; \
-        *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
-    esac; \
-    MONGODB_VERSION='7.0.14'; \
-    wget -O mongodb.tgz "https://fastdl.mongodb.org/linux/mongodb-linux-${MONGODB_ARCH}-ubuntu2204-${MONGODB_VERSION}.tgz"; \
-    tar -xzf mongodb.tgz; \
-    mv mongodb-linux-*-${MONGODB_VERSION}/bin/* /usr/local/bin/; \
-    rm -rf mongodb.tgz mongodb-linux-*-${MONGODB_VERSION}; \
-    adduser -D -s /bin/false mongodb
+# Install Node.js 20 using NodeSource repository (faster than using Node image)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install pnpm and TypeScript directly in runtime stage
+# Install MongoDB and Redis from official repositories
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | apt-key add - \
+    && echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list \
+    && apt-get update \
+    && apt-get install -y \
+        mongodb-org \
+        redis-server \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Install pnpm and TypeScript globally
 RUN npm --no-update-notifier --no-fund --global install \
     pnpm@10.11.0 \
     typescript@5.6.2 \
     && npm cache clean --force
 
-# Set up optimized environment
+# Set up optimized environment variables
 ENV NX_DAEMON=false \
     NODE_ENV=local \
     PNPM_STORE_DIR="/tmp/.pnpm-store" \
     PNPM_CACHE_DIR="/tmp/.pnpm-cache" \
     NODE_OPTIONS="--max-old-space-size=4096"
 
-# Create minimal directory structure
+# Create minimal directory structure and set permissions
 RUN mkdir -p \
     /var/log/supervisor \
     /etc/supervisor/conf.d \
@@ -76,8 +64,9 @@ RUN mkdir -p \
     /data/redis \
     /workspace \
     /tmp/.pnpm-store \
-    && chown -R mongodb:mongodb /data/db \
-    && chown -R redis:redis /data/redis
+    && chown mongodb:mongodb /data/db \
+    && chown redis:redis /data/redis \
+    && chmod 755 /data/db /data/redis
 
 # Configure pnpm for speed and efficiency
 RUN pnpm config set store-dir /tmp/.pnpm-store \
@@ -85,9 +74,8 @@ RUN pnpm config set store-dir /tmp/.pnpm-store \
     && pnpm config set network-timeout 60000 \
     && pnpm config set fetch-retries 3
 
-# Create ultra-lightweight supervisor config
-RUN mkdir -p /etc/supervisor/conf.d \
-    && printf '[supervisord]\n\
+# Create optimized supervisor configuration
+RUN printf '[supervisord]\n\
 nodaemon=false\n\
 silent=true\n\
 logfile=/dev/null\n\
@@ -128,15 +116,15 @@ echo "🚀 Quick start: git clone https://github.com/novuhq/novu.git /workspace/
 exec /bin/bash\n' > /usr/local/bin/start-dev.sh \
     && chmod +x /usr/local/bin/start-dev.sh
 
-# Keep workspace as working directory
+# Set workspace as working directory
 WORKDIR /workspace
 
 # Expose all necessary ports
 EXPOSE 3000 4000 27017 6379
 
-# Labels
-LABEL version="cursor-1.3.0" \
-      description="Complete Novu environment for Cursor AI with MongoDB & Redis"
+# Labels for identification
+LABEL version="cursor-2.0.0" \
+      description="Optimized Novu environment for Cursor AI with full Ubuntu compatibility"
 
 # Health check for both services
 HEALTHCHECK --interval=60s --timeout=5s --start-period=30s --retries=2 \
