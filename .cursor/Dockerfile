@@ -23,7 +23,7 @@ RUN npm --no-update-notifier --no-fund --global install \
 # === RUNTIME STAGE ===
 FROM node:20-alpine3.19 AS runtime
 
-# Install runtime dependencies
+# Install runtime dependencies (including GNU coreutils for Cursor compatibility)
 RUN apk add --no-cache \
     git \
     curl \
@@ -32,6 +32,7 @@ RUN apk add --no-cache \
     supervisor \
     redis \
     gnupg \
+    coreutils \
     # Build tools needed for native modules
     g++ \
     make \
