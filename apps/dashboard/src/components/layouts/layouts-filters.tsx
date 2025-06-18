@@ -19,6 +19,7 @@ export function LayoutsFilters(props: LayoutsFiltersProps) {
   const { onFiltersChange, filterValues, onReset, className, isFetching, ...rest } = props;
 
   const form = useForm<LayoutsFilter>({
+    values: filterValues,
     defaultValues: {
       ...filterValues,
     },

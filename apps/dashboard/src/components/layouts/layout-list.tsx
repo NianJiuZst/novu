@@ -12,7 +12,7 @@ import {
   useLayoutsUrlState,
 } from '@/components/layouts/hooks/use-layouts-url-state';
 import { LayoutListBlank } from '@/components/layouts/layout-list-blank';
-import { LayoutListNoResults } from '@/components/layouts/layout-list-no-results';
+import { ListNoResults } from '@/components/list-no-results';
 import { LayoutRow, LayoutRowSkeleton } from '@/components/layouts/layout-row';
 import { LayoutsFilters } from '@/components/layouts/layouts-filters';
 import { useFetchLayouts } from '@/hooks/use-fetch-layouts';
@@ -162,7 +162,11 @@ export const LayoutList = (props: LayoutListProps) => {
         isFetching={isFetching}
         {...props}
       >
-        <LayoutListNoResults />
+        <ListNoResults
+          title="No layouts found"
+          description="We couldn't find any layouts that match your search criteria. Try adjusting your filters or create a new layout."
+          onClearFilters={resetFilters}
+        />
       </LayoutListWrapper>
     );
   }
