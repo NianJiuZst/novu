@@ -21,7 +21,7 @@ import { StepTypeEnum } from '@/utils/enums';
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { Step } from '@/utils/types';
 import { useUser } from '@clerk/clerk-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { NODE_HEIGHT, NODE_WIDTH } from './base-node';
 import { AddNodeEdge, AddNodeEdgeType } from './edges';
 import {
@@ -146,6 +146,7 @@ const WorkflowCanvasChild = ({
   const { currentEnvironment } = useEnvironment();
   const { workflow: currentWorkflow } = useWorkflow();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useUser();
 
   const [nodes, edges] = useMemo(() => {
@@ -260,12 +261,27 @@ const WorkflowCanvasChild = ({
 
           // unselect node if clicked on background
           if (currentEnvironment?.slug && currentWorkflow?.slug) {
-            navigate(
-              buildRoute(ROUTES.EDIT_WORKFLOW, {
-                environmentSlug: currentEnvironment.slug,
-                workflowSlug: currentWorkflow.slug,
-              })
-            );
+            const triggerRoute = buildRoute(ROUTES.TRIGGER_WORKFLOW, {
+              environmentSlug: currentEnvironment.slug,
+              workflowSlug: currentWorkflow.slug,
+            });
+            
+            if (location.pathname === triggerRoute) {
+              navigate(
+                buildRoute(ROUTES.EDIT_WORKFLOW, {
+                  environmentSlug: currentEnvironment.slug,
+                  workflowSlug: currentWorkflow.slug,
+                }),
+                { replace: true }
+              );
+            } else {
+              navigate(
+                buildRoute(ROUTES.EDIT_WORKFLOW, {
+                  environmentSlug: currentEnvironment.slug,
+                  workflowSlug: currentWorkflow.slug,
+                })
+              );
+            }
           }
         }}
       >
