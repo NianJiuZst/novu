@@ -1,0 +1,33 @@
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CustomNotificationResponseDto {
+  @ApiProperty({
+    description: 'Unique identifier of the custom notification',
+    example: '507f1f77bcf86cd799439011',
+  })
+  _id: string;
+
+  @ApiProperty({
+    description: 'The custom notification query describing what the user wants to be notified about',
+    example: 'Notify me about critical security issues in production environments',
+  })
+  query: string;
+
+  @ApiProperty({
+    description: 'Whether this custom notification is enabled',
+    example: true,
+  })
+  enabled: boolean;
+
+  @ApiProperty({
+    description: 'When this custom notification was created',
+    example: '2023-12-01T10:00:00.000Z',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    description: 'When this custom notification was last updated',
+    example: '2023-12-01T10:00:00.000Z',
+  })
+  updatedAt: Date;
+}

@@ -1,7 +1,7 @@
-import { createSignal, createMemo, Show, For } from 'solid-js';
+import { createSignal, createMemo, Show, For, onMount } from 'solid-js';
 import { JSX } from 'solid-js/jsx-runtime';
 
-import { useLocalization } from '../../../context';
+import { useLocalization, useNovu } from '../../../context';
 import { useStyle } from '../../../helpers';
 import { Sparkle, ArrowRight } from '../../../icons';
 import { Button } from '../../primitives/Button';
@@ -10,19 +10,24 @@ import { Badge } from '../../primitives/Badge';
 import { Motion } from '../../primitives/Motion';
 
 type CustomNotification = {
-  id: string;
+  _id: string;
   query: string;
+  enabled: boolean;
   createdAt: Date;
+  updatedAt: Date;
 };
 
 export const MyNotifications = () => {
   const style = useStyle();
   const { t } = useLocalization();
+  const novu = useNovu();
 
   const [customNotifications, setCustomNotifications] = createSignal<CustomNotification[]>([]);
   const [newQuery, setNewQuery] = createSignal('');
   const [isSubmitting, setIsSubmitting] = createSignal(false);
   const [showForm, setShowForm] = createSignal(false);
+  const [isLoading, setIsLoading] = createSignal(true);
+  const [error, setError] = createSignal<string | null>(null);
 
   const canSubmit = createMemo(() => {
     const query = newQuery().trim();
@@ -35,41 +40,159 @@ export const MyNotifications = () => {
     setNewQuery(target.value);
   };
 
+  const loadCustomNotifications = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Call the custom notifications API
+      const response = await fetch('/v1/inbox/custom-notifications', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${novu.session?.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load custom notifications');
+      }
+
+      const notifications = await response.json();
+      setCustomNotifications(
+        notifications.map((n: any) => ({
+          ...n,
+          createdAt: new Date(n.createdAt),
+          updatedAt: new Date(n.updatedAt),
+        }))
+      );
+    } catch (error) {
+      console.error('Failed to load custom notifications:', error);
+      setError('Failed to load custom notifications');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!canSubmit()) return;
 
     setIsSubmitting(true);
+    setError(null);
 
     try {
-      // TODO: Replace with actual API call to create custom notification preference
-      const newNotification: CustomNotification = {
-        id: crypto.randomUUID(),
-        query: newQuery().trim(),
-        createdAt: new Date(),
-      };
+      const response = await fetch('/v1/inbox/custom-notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${novu.session?.token}`,
+        },
+        body: JSON.stringify({
+          query: newQuery().trim(),
+          enabled: true,
+        }),
+      });
 
-      setCustomNotifications((prev) => [...prev, newNotification]);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create custom notification');
+      }
+
+      const newNotification = await response.json();
+      setCustomNotifications((prev) => [
+        ...prev,
+        {
+          ...newNotification,
+          createdAt: new Date(newNotification.createdAt),
+          updatedAt: new Date(newNotification.updatedAt),
+        },
+      ]);
+
       setNewQuery('');
       setShowForm(false);
-
-      // TODO: Create preference entry for 'my-notifications' workflow
-      console.log('Creating custom notification:', newNotification);
     } catch (error) {
       console.error('Failed to create custom notification:', error);
+      setError(error instanceof Error ? error.message : 'Failed to create custom notification');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleRemove = (id: string) => {
-    setCustomNotifications((prev) => prev.filter((n) => n.id !== id));
-    // TODO: Remove from preferences API
+  const handleRemove = async (id: string) => {
+    try {
+      const response = await fetch(`/v1/inbox/custom-notifications/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${novu.session?.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete custom notification');
+      }
+
+      setCustomNotifications((prev) => prev.filter((n) => n._id !== id));
+    } catch (error) {
+      console.error('Failed to delete custom notification:', error);
+      setError('Failed to delete custom notification');
+    }
   };
+
+  const handleToggleEnabled = async (id: string, enabled: boolean) => {
+    try {
+      const response = await fetch(`/v1/inbox/custom-notifications/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${novu.session?.token}`,
+        },
+        body: JSON.stringify({ enabled }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update custom notification');
+      }
+
+      const updatedNotification = await response.json();
+      setCustomNotifications((prev) =>
+        prev.map((n) =>
+          n._id === id
+            ? {
+                ...updatedNotification,
+                createdAt: new Date(updatedNotification.createdAt),
+                updatedAt: new Date(updatedNotification.updatedAt),
+              }
+            : n
+        )
+      );
+    } catch (error) {
+      console.error('Failed to update custom notification:', error);
+      setError('Failed to update custom notification');
+    }
+  };
+
+  // Load custom notifications on mount
+  onMount(() => {
+    loadCustomNotifications();
+  });
 
   const sparkleIconClass = style('myNotifications__sparkleIcon', 'nt-text-primary nt-size-4');
 
   return (
     <div class={style('myNotificationsContainer', 'nt-space-y-4')}>
+      {/* Error Message */}
+      <Show when={error()}>
+        <div
+          class={style(
+            'myNotificationsError',
+            'nt-p-3 nt-bg-destructive/10 nt-border nt-border-destructive/20 nt-rounded-lg'
+          )}
+        >
+          <p class={style('myNotificationsErrorText', 'nt-text-sm nt-text-destructive')}>{error()}</p>
+        </div>
+      </Show>
+
       {/* Header Section */}
       <div
         class={style(
@@ -103,7 +226,7 @@ export const MyNotifications = () => {
           </div>
         </div>
 
-        <Show when={!showForm()}>
+        <Show when={!showForm() && !isLoading()}>
           <Button
             class={style(
               'myNotificationsAddButton',
@@ -172,6 +295,7 @@ export const MyNotifications = () => {
               onClick={() => {
                 setShowForm(false);
                 setNewQuery('');
+                setError(null);
               }}
               disabled={isSubmitting()}
             >
@@ -202,8 +326,15 @@ export const MyNotifications = () => {
         </Motion.div>
       </Show>
 
+      {/* Loading State */}
+      <Show when={isLoading()}>
+        <div class={style('myNotificationsLoading', 'nt-text-center nt-py-8 nt-text-foreground-alpha-500')}>
+          <p class={style('myNotificationsLoadingText', 'nt-text-sm')}>Loading custom notifications...</p>
+        </div>
+      </Show>
+
       {/* Custom Notifications List */}
-      <Show when={customNotifications().length > 0}>
+      <Show when={customNotifications().length > 0 && !isLoading()}>
         <div class={style('myNotificationsList', 'nt-space-y-3')}>
           <h4 class={style('myNotificationsListTitle', 'nt-text-sm nt-font-medium nt-text-foreground nt-px-1')}>
             {t('myNotifications.list.title')} ({customNotifications().length})
@@ -229,11 +360,29 @@ export const MyNotifications = () => {
                     <p class={style('myNotificationsListItemDate', 'nt-text-xs nt-text-foreground-alpha-500 nt-mt-1')}>
                       {t('myNotifications.list.createdAt')} {notification.createdAt.toLocaleDateString()}
                     </p>
+                    <div class={style('myNotificationsListItemActions', 'nt-flex nt-items-center nt-gap-2 nt-mt-2')}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleToggleEnabled(notification._id, !notification.enabled)}
+                        class={style('myNotificationsListItemToggle', 'nt-text-xs nt-px-2 nt-py-1')}
+                      >
+                        {notification.enabled ? 'Disable' : 'Enable'}
+                      </Button>
+                      <span
+                        class={style(
+                          'myNotificationsListItemStatus',
+                          `nt-text-xs ${notification.enabled ? 'nt-text-green-600' : 'nt-text-gray-500'}`
+                        )}
+                      >
+                        {notification.enabled ? 'Active' : 'Disabled'}
+                      </span>
+                    </div>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleRemove(notification.id)}
+                    onClick={() => handleRemove(notification._id)}
                     class={style(
                       'myNotificationsListItemRemove',
                       'nt-opacity-0 group-hover:nt-opacity-100 nt-transition-opacity nt-text-destructive nt-hover:bg-destructive/10'
@@ -249,7 +398,7 @@ export const MyNotifications = () => {
       </Show>
 
       {/* Empty State */}
-      <Show when={customNotifications().length === 0 && !showForm()}>
+      <Show when={customNotifications().length === 0 && !showForm() && !isLoading()}>
         <div class={style('myNotificationsEmpty', 'nt-text-center nt-py-8 nt-text-foreground-alpha-500')}>
           <p class={style('myNotificationsEmptyText', 'nt-text-sm')}>{t('myNotifications.empty')}</p>
         </div>
