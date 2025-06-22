@@ -64,6 +64,15 @@ const preferencesSchema = new Schema<PreferencesDBModel>(
           },
         },
       },
+      aiPreference: {
+        enabled: {
+          type: Schema.Types.Boolean,
+          default: false,
+        },
+        prompt: {
+          type: Schema.Types.String,
+        },
+      },
     },
   },
   { ...schemaOptions, minimize: false }

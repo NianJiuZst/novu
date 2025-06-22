@@ -1,12 +1,12 @@
 import { InboxService } from '../api';
 
 import { NovuEventEmitter } from '../event-emitter';
-import { ChannelPreference, PreferenceLevel, Result, Workflow, Prettify } from '../types';
+import { AIPreference, ChannelPreference, PreferenceLevel, Result, Workflow, Prettify } from '../types';
 import { updatePreference } from './helpers';
 import { PreferencesCache } from '../cache/preferences-cache';
 import { UpdatePreferenceArgs } from './types';
 
-type PreferenceLike = Pick<Preference, 'level' | 'enabled' | 'channels' | 'workflow'>;
+type PreferenceLike = Pick<Preference, 'level' | 'enabled' | 'channels' | 'workflow' | 'aiPreference'>;
 
 export class Preference {
   #emitter: NovuEventEmitter;
@@ -18,6 +18,7 @@ export class Preference {
   readonly enabled: boolean;
   readonly channels: ChannelPreference;
   readonly workflow?: Workflow;
+  readonly aiPreference?: AIPreference;
 
   constructor(
     preference: PreferenceLike,
@@ -41,15 +42,18 @@ export class Preference {
     this.enabled = preference.enabled;
     this.channels = preference.channels;
     this.workflow = preference.workflow;
+    this.aiPreference = preference.aiPreference;
   }
 
   update({
     channels,
     channelPreferences,
+    aiPreference,
   }: Prettify<
     Pick<UpdatePreferenceArgs, 'channels'> & {
       /** @deprecated Use channels instead */
       channelPreferences?: ChannelPreference;
+      aiPreference?: AIPreference;
     }
   >): Result<Preference> {
     return updatePreference({
@@ -60,6 +64,7 @@ export class Preference {
       args: {
         workflowId: this.workflow?.id,
         channels: channels || channelPreferences,
+        aiPreference,
         preference: this,
       },
     });

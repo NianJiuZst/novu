@@ -1,4 +1,15 @@
-import { IsBoolean, IsOptional } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class AIPreferenceDto {
+  @IsOptional()
+  @IsBoolean()
+  readonly enabled?: boolean;
+
+  @IsOptional()
+  @IsString()
+  readonly prompt?: string;
+}
 
 export class UpdatePreferencesRequestDto {
   @IsOptional()
@@ -20,4 +31,9 @@ export class UpdatePreferencesRequestDto {
   @IsOptional()
   @IsBoolean()
   readonly push?: boolean;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AIPreferenceDto)
+  readonly aiPreference?: AIPreferenceDto;
 }

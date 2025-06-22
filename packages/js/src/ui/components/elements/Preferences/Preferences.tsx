@@ -1,7 +1,7 @@
 import { createEffect, createMemo, Show } from 'solid-js';
 
 import { Preference } from '../../../../preferences/preference';
-import { ChannelPreference, PreferenceLevel } from '../../../../types';
+import { AIPreference, ChannelPreference, PreferenceLevel } from '../../../../types';
 import { usePreferences } from '../../../api';
 import { setDynamicLocalization } from '../../../config';
 import { useInboxContext, useNovu } from '../../../context';
@@ -41,6 +41,13 @@ export const Preferences = () => {
   const updatePreference = (preference?: Preference) => async (channels: ChannelPreference) => {
     await preference?.update({
       channels,
+    });
+  };
+
+  const updateAIPreference = (preference?: Preference) => async (aiPreference: AIPreference) => {
+    await preference?.update({
+      channels: preference.channels,
+      aiPreference,
     });
   };
 
@@ -106,6 +113,7 @@ export const Preferences = () => {
         iconKey="cogs"
         preference={allPreferences().globalPreference}
         onChange={() => updatePreference(allPreferences().globalPreference)}
+        onAIPreferenceChange={() => updateAIPreference(allPreferences().globalPreference)}
       />
       <Show
         when={groupedPreferences().length > 0}
@@ -118,6 +126,7 @@ export const Preferences = () => {
               workflowPreferences={allPreferences().workflowPreferences}
               loading={loading()}
               updatePreference={updatePreference}
+              updateAIPreference={updateAIPreference}
             />
           </Show>
         }

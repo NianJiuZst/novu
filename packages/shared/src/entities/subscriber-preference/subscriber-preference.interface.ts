@@ -20,10 +20,16 @@ export interface ISubscriberPreferenceResponse {
   type: PreferencesTypeEnum;
 }
 
+export interface IAIPreference {
+  enabled: boolean;
+  prompt?: string;
+}
+
 interface IPreferenceResponse {
   enabled: boolean;
   channels: IPreferenceChannels;
   overrides: IPreferenceOverride[];
+  aiPreference?: IAIPreference;
 }
 
 export interface ITemplateConfiguration {

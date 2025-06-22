@@ -180,6 +180,7 @@ export const appearanceKeys = [
   'workflowContainerRight__icon',
   'workflowArrow__icon',
   'workflowDescription',
+  'workflowExpandedContent',
 
   // preference groups
   'preferencesGroupContainer',
@@ -238,4 +239,28 @@ export const appearanceKeys = [
   'notificationSnoozedUntil__icon',
   // Text formatting
   'strong',
+
+  // AI Preferences
+  'aiPreferenceContainer',
+  'aiPreferenceHeader',
+  'aiPreferenceLabelContainer',
+  'aiPreferenceIconContainer',
+  'aiPreferenceIcon',
+  'aiPreferenceContent',
+  'aiPreferenceTitle',
+  'aiPreferenceLabel',
+  'aiPreferenceBadge',
+  'aiPreferenceDescription',
+  'aiPreferenceSwitchContainer',
+  'aiPreferencePromptContainer',
+  'aiPreferencePromptLabel',
+  'aiPreferencePromptInput',
+  'aiPreferencePromptHint',
+
+  // Demo
+  'preferencesDemo',
+  'preferencesDemoTitle',
+  'preferencesDemoInfo',
+  'preferencesDemoInfoTitle',
+  'preferencesDemoInfoList',
 ] as const;

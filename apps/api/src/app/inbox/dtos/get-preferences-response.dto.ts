@@ -1,6 +1,15 @@
 import { IPreferenceChannels, PreferenceLevelEnum } from '@novu/shared';
-import { IsDefined, IsEnum, IsOptional } from 'class-validator';
+import { IsDefined, IsEnum, IsOptional, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import type { Workflow } from '../utils/types';
+
+export class AIPreferenceResponseDto {
+  @IsDefined()
+  enabled: boolean;
+
+  @IsOptional()
+  prompt?: string;
+}
 
 export class GetPreferencesResponseDto {
   @IsDefined()
@@ -17,4 +26,9 @@ export class GetPreferencesResponseDto {
 
   @IsDefined()
   channels: IPreferenceChannels;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AIPreferenceResponseDto)
+  aiPreference?: AIPreferenceResponseDto;
 }

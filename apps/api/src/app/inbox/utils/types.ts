@@ -54,9 +54,15 @@ export type Workflow = {
   data?: CustomDataType;
 };
 
+export type AIPreference = {
+  enabled: boolean;
+  prompt?: string;
+};
+
 export type InboxPreference = {
   level: PreferenceLevelEnum;
   enabled: boolean;
   channels: IPreferenceChannels;
   workflow?: Workflow;
+  aiPreference?: AIPreference;
 };

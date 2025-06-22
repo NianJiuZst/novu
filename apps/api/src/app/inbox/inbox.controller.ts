@@ -314,6 +314,7 @@ export class InboxController {
         in_app: body.in_app,
         push: body.push,
         sms: body.sms,
+        aiPreference: body.aiPreference,
         includeInactiveChannels: false,
       })
     );
@@ -357,6 +358,7 @@ export class InboxController {
         in_app: body.in_app,
         push: body.push,
         sms: body.sms,
+        aiPreference: body.aiPreference,
         workflowIdOrIdentifier,
         includeInactiveChannels: false,
       })

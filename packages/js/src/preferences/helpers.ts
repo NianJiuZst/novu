@@ -1,6 +1,6 @@
 import { InboxService } from '../api';
 import type { NovuEventEmitter } from '../event-emitter';
-import type { ChannelPreference, Result } from '../types';
+import type { AIPreference, ChannelPreference, Result } from '../types';
 import { ChannelType, PreferenceLevel } from '../types';
 import { Preference } from './preference';
 import type { UpdatePreferenceArgs } from './types';
@@ -30,7 +30,7 @@ export const updatePreference = async ({
   useCache,
   args,
 }: UpdatePreferenceParams): Result<Preference> => {
-  const { channels } = args;
+  const { channels, aiPreference } = args;
   const workflowId = 'workflowId' in args ? args.workflowId : args.preference.workflow?.id;
 
   try {
@@ -45,6 +45,7 @@ export const updatePreference = async ({
                   ...args.preference.channels,
                   ...channels,
                 },
+                aiPreference: aiPreference ?? args.preference.aiPreference,
               },
               {
                 emitterInstance: emitter,
@@ -58,10 +59,14 @@ export const updatePreference = async ({
 
     let response;
     if (workflowId) {
-      response = await apiService.updateWorkflowPreferences({ workflowId, channels });
+      response = await apiService.updateWorkflowPreferences({
+        workflowId,
+        channels,
+        aiPreference,
+      });
     } else {
       optimisticUpdateWorkflowPreferences({ emitter, apiService, cache, useCache, args });
-      response = await apiService.updateGlobalPreferences(channels);
+      response = await apiService.updateGlobalPreferences(channels, aiPreference);
     }
 
     const preference = new Preference(response, {
@@ -103,6 +108,7 @@ export const bulkUpdatePreference = async ({
                   ...arg.preference.channels,
                   ...arg.channels,
                 },
+                aiPreference: arg.aiPreference ?? arg.preference.aiPreference,
               },
               {
                 emitterInstance: emitter,
@@ -126,6 +132,7 @@ export const bulkUpdatePreference = async ({
           ? arg.workflowId
           : (arg.preference.workflow?.id ?? arg.preference.workflow?.identifier ?? ''),
       ...arg.channels,
+      ...(arg.aiPreference && { aiPreference: arg.aiPreference }),
     }));
     const response = await apiService.bulkUpdatePreferences(preferencesToUpdate);
 
@@ -167,6 +174,7 @@ const optimisticUpdateWorkflowPreferences = ({
 
           return acc;
         }, {} as ChannelPreference),
+        aiPreference: args.aiPreference ?? el.aiPreference,
       };
       const updatedPreference =
         'preference' in args
@@ -183,6 +191,7 @@ const optimisticUpdateWorkflowPreferences = ({
           args: {
             workflowId: el.workflow?.id ?? '',
             channels: updatedPreference.channels,
+            aiPreference: updatedPreference.aiPreference,
           },
           data: updatedPreference,
         });

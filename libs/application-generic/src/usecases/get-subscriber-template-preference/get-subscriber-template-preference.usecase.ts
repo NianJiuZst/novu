@@ -74,6 +74,7 @@ export class GetSubscriberTemplatePreference {
         enabled: subscriberWorkflowPreference.enabled,
         channels,
         overrides,
+        aiPreference: subscriberWorkflowPreference.aiPreference,
       },
       type: subscriberWorkflowPreference.type,
     };
@@ -88,6 +89,7 @@ export class GetSubscriberTemplatePreference {
     critical?: boolean;
     type: PreferencesTypeEnum;
     enabled: boolean;
+    aiPreference?: any;
   }> {
     const subscriberWorkflowPreference = await this.getPreferences.safeExecute({
       environmentId: command.environmentId,
@@ -102,12 +104,14 @@ export class GetSubscriberTemplatePreference {
     const subscriberPreferenceType = subscriberWorkflowPreference.type;
     const critical = subscriberWorkflowPreference.preferences?.all?.readOnly;
     const enabled = true;
+    const aiPreference = subscriberWorkflowPreference.preferences?.aiPreference;
 
     return {
       channels: subscriberWorkflowChannels,
       critical,
       type: subscriberPreferenceType,
       enabled,
+      aiPreference,
     };
   }
 

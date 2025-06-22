@@ -74,7 +74,8 @@ export type IconKey =
   | 'arrowDown'
   | 'routeFill'
   | 'info'
-  | 'nodeTree';
+  | 'nodeTree'
+  | 'sparkle';
 
 export type IconRenderer = (el: HTMLDivElement, props: { class?: string }) => () => void;
 

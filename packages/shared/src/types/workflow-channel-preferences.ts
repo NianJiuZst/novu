@@ -20,6 +20,20 @@ export enum PreferencesTypeEnum {
 }
 
 /**
+ * AI preference configuration for intelligent notification filtering
+ */
+export type AIPreference = {
+  /**
+   * Whether AI-based notification filtering is enabled
+   */
+  enabled: boolean;
+  /**
+   * Custom prompt describing when the user wants to receive notifications
+   */
+  prompt?: string;
+};
+
+/**
  * A preference for a notification delivery workflow.
  *
  * This provides a shortcut to setting all channels to the same preference.
@@ -45,12 +59,12 @@ export type WorkflowPreference = {
   readOnly: boolean;
 };
 
-/** A preference for a notification delivery channel. */
+/**
+ * A preference for a notification delivery channel.
+ */
 export type ChannelPreference = {
   /**
    * A flag specifying if notification delivery is enabled for the channel.
-   *
-   * If `true`, notification delivery is enabled.
    *
    * @default true
    */
@@ -70,6 +84,10 @@ export type WorkflowPreferences = {
    * If no preference is specified for a channel, the `all` preference will be used.
    */
   channels: Record<ChannelTypeEnum, ChannelPreference>;
+  /**
+   * AI preference configuration for intelligent notification filtering
+   */
+  aiPreference?: AIPreference;
 };
 
 /** A partial set of workflow preferences. */

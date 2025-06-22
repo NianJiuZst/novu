@@ -6,6 +6,7 @@ import type {
   PreferencesResponse,
   Session,
   Subscriber,
+  AIPreference,
 } from '../types';
 import { HttpClient, HttpClientOptions } from './http-client';
 
@@ -191,24 +192,35 @@ export class InboxService {
     preferences: Array<
       {
         workflowId: string;
+        aiPreference?: AIPreference;
       } & ChannelPreference
     >
   ): Promise<PreferencesResponse[]> {
     return this.#httpClient.patch(`${INBOX_ROUTE}/preferences/bulk`, { preferences });
   }
 
-  updateGlobalPreferences(channels: ChannelPreference): Promise<PreferencesResponse> {
-    return this.#httpClient.patch(`${INBOX_ROUTE}/preferences`, channels);
+  updateGlobalPreferences(channels: ChannelPreference, aiPreference?: AIPreference): Promise<PreferencesResponse> {
+    const body = {
+      ...channels,
+      ...(aiPreference && { aiPreference }),
+    };
+    return this.#httpClient.patch(`${INBOX_ROUTE}/preferences`, body);
   }
 
   updateWorkflowPreferences({
     workflowId,
     channels,
+    aiPreference,
   }: {
     workflowId: string;
     channels: ChannelPreference;
+    aiPreference?: AIPreference;
   }): Promise<PreferencesResponse> {
-    return this.#httpClient.patch(`${INBOX_ROUTE}/preferences/${workflowId}`, channels);
+    const body = {
+      ...channels,
+      ...(aiPreference && { aiPreference }),
+    };
+    return this.#httpClient.patch(`${INBOX_ROUTE}/preferences/${workflowId}`, body);
   }
 
   triggerHelloWorldEvent(): Promise<any> {

@@ -20,7 +20,7 @@ import {
 } from '@novu/shared';
 import { AnalyticsEventsEnum } from '../../utils';
 import { InboxPreference } from '../../utils/types';
-import { UpdatePreferencesCommand } from './update-preferences.command';
+import { UpdatePreferencesCommand, AIPreferenceCommand } from './update-preferences.command';
 import {
   GetSubscriberGlobalPreference,
   GetSubscriberGlobalPreferenceCommand,
@@ -77,6 +77,7 @@ export class UpdatePreferences {
 
     await this.storePreferences({
       channels: channelPreferences,
+      aiPreference: command.aiPreference,
       organizationId: command.organizationId,
       environmentId: command.environmentId,
       _subscriberId: subscriber._id,
@@ -89,6 +90,7 @@ export class UpdatePreferences {
       _workflowId: command.workflowIdOrIdentifier,
       level: command.level,
       channels: channelPreferences,
+      aiPreference: command.aiPreference,
     });
   }
 
@@ -139,6 +141,7 @@ export class UpdatePreferences {
           tags: workflow.tags,
           data: workflow.data,
         },
+        aiPreference: preference.aiPreference,
       };
     }
 
@@ -155,12 +158,14 @@ export class UpdatePreferences {
       level: PreferenceLevelEnum.GLOBAL,
       enabled: preference.enabled,
       channels: preference.channels,
+      aiPreference: preference.aiPreference,
     };
   }
 
   @Instrument()
   private async storePreferences(item: {
     channels: IPreferenceChannels;
+    aiPreference?: AIPreferenceCommand;
     organizationId: string;
     _subscriberId: string;
     environmentId: string;
@@ -174,6 +179,12 @@ export class UpdatePreferences {
         }),
         {} as WorkflowPreferences['channels']
       ),
+      ...(item.aiPreference && {
+        aiPreference: {
+          enabled: item.aiPreference.enabled ?? false,
+          prompt: item.aiPreference.prompt,
+        },
+      }),
     };
 
     if (item.workflowId) {

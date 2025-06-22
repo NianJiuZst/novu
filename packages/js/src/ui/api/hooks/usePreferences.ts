@@ -27,9 +27,39 @@ export const usePreferences = (options?: FetchPreferencesArgs) => {
       mutate(data);
     };
 
-    const cleanup = novu.on('preferences.list.updated', listener);
+    const singlePreferenceListener = ({ data }: { data?: Preference }) => {
+      if (!data) {
+        return;
+      }
 
-    onCleanup(() => cleanup());
+      // Update the specific preference in the list
+      const currentPreferences = preferences();
+      if (currentPreferences) {
+        const updatedPreferences = currentPreferences.map((pref) => {
+          // For global preferences, match by level
+          if (data.level === 'global' && pref.level === 'global') {
+            return data;
+          }
+          // For workflow preferences, match by workflow ID
+          if (data.workflow?.id && pref.workflow?.id === data.workflow.id) {
+            return data;
+          }
+
+          return pref;
+        });
+        mutate(updatedPreferences);
+      }
+    };
+
+    const listCleanup = novu.on('preferences.list.updated', listener);
+    const updateCleanup = novu.on('preference.update.resolved', singlePreferenceListener);
+    const pendingCleanup = novu.on('preference.update.pending', singlePreferenceListener);
+
+    onCleanup(() => {
+      listCleanup();
+      updateCleanup();
+      pendingCleanup();
+    });
   });
 
   createEffect(() => {

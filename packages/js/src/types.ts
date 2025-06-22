@@ -139,12 +139,9 @@ export type ChannelPreference = {
   push?: boolean;
 };
 
-export type PaginatedResponse<T = unknown> = {
-  data: T[];
-  hasMore: boolean;
-  totalCount: number;
-  pageSize: number;
-  page: number;
+export type AIPreference = {
+  enabled: boolean;
+  prompt?: string;
 };
 
 export type PreferencesResponse = {
@@ -153,6 +150,7 @@ export type PreferencesResponse = {
   channels: ChannelPreference;
   overrides?: IPreferenceOverride[];
   workflow?: Workflow;
+  aiPreference?: AIPreference;
 };
 
 export enum PreferenceOverrideSourceEnum {

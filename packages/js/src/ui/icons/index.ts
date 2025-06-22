@@ -19,5 +19,6 @@ export * from './Novu';
 export * from './Push';
 export * from './Cogs';
 export * from './Sms';
+export * from './Sparkle';
 export * from './Unread';
 export * from './Unsnooze';

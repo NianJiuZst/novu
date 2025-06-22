@@ -2,7 +2,7 @@ import { createMemo, createSignal, Index, JSXElement, Show } from 'solid-js';
 import { JSX } from 'solid-js/jsx-runtime';
 
 import { RouteFill } from 'src/ui/icons/RouteFill';
-import { ChannelPreference, ChannelType, Preference } from '../../../../types';
+import { AIPreference, ChannelPreference, ChannelType, Preference } from '../../../../types';
 import { StringLocalizationKey, useLocalization } from '../../../context';
 import { cn, useStyle } from '../../../helpers';
 import { Cogs, ArrowDropDown as DefaultArrowDropDown } from '../../../icons';
@@ -11,6 +11,7 @@ import { Collapsible } from '../../primitives/Collapsible';
 import { ChannelRow, getLabel } from './ChannelRow';
 import { SwitchState } from '../../primitives/Switch';
 import { IconRendererWrapper } from '../../shared/IconRendererWrapper';
+import { AIPreferenceRow } from './AIPreferenceRow';
 
 type IconComponentType = (props?: JSX.HTMLAttributes<SVGSVGElement>) => JSXElement;
 
@@ -23,6 +24,7 @@ export const PreferencesRow = (props: {
   iconKey: IconKey;
   preference?: Preference;
   onChange: (workflowIdentifier?: string) => (channels: ChannelPreference) => void;
+  onAIPreferenceChange?: (workflowIdentifier?: string) => (aiPreference: AIPreference) => void;
 }) => {
   const style = useStyle();
   const [isOpenChannels, setIsOpenChannels] = createSignal(false);
@@ -106,21 +108,35 @@ export const PreferencesRow = (props: {
           </span>
         </div>
         <Collapsible open={isOpenChannels()}>
-          <div
-            class={style(
-              'channelsContainer',
-              'nt-flex nt-bg-background nt-border nt-border-neutral-alpha-200 nt-rounded-lg nt-p-2 nt-flex-col nt-gap-1 nt-overflow-hidden'
-            )}
-          >
-            <Index each={channels()}>
-              {(channel) => (
-                <ChannelRow
-                  channel={channel()}
-                  workflowId={props.preference?.workflow?.id}
-                  onChange={props.onChange(props.preference?.workflow?.identifier)}
-                />
+          <div class={style('workflowExpandedContent', 'nt-flex nt-flex-col nt-gap-2')}>
+            <div
+              class={style(
+                'channelsContainer',
+                'nt-flex nt-bg-background nt-border nt-border-neutral-alpha-200 nt-rounded-lg nt-p-2 nt-flex-col nt-gap-1 nt-overflow-hidden'
               )}
-            </Index>
+            >
+              <Index each={channels()}>
+                {(channel) => (
+                  <ChannelRow
+                    channel={channel()}
+                    workflowId={props.preference?.workflow?.id}
+                    onChange={props.onChange(props.preference?.workflow?.identifier)}
+                  />
+                )}
+              </Index>
+            </div>
+
+            <Show when={props.onAIPreferenceChange}>
+              <AIPreferenceRow
+                aiPreference={props.preference?.aiPreference}
+                workflowName={props.preference?.workflow?.name}
+                workflowIdentifier={props.preference?.workflow?.identifier}
+                onChange={(aiPreference: AIPreference) => {
+                  const callback = props.onAIPreferenceChange!(props.preference?.workflow?.identifier);
+                  callback(aiPreference);
+                }}
+              />
+            </Show>
           </div>
         </Collapsible>
       </div>

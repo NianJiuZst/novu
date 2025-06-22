@@ -1,7 +1,18 @@
-import { IsBoolean, IsDefined, IsEnum, IsOptional, ValidateIf } from 'class-validator';
+import { IsBoolean, IsDefined, IsEnum, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
 import { PreferenceLevelEnum } from '@novu/shared';
+import { Type } from 'class-transformer';
 
 import { EnvironmentWithSubscriber } from '../../../shared/commands/project.command';
+
+export class AIPreferenceCommand {
+  @IsOptional()
+  @IsBoolean()
+  readonly enabled?: boolean;
+
+  @IsOptional()
+  @IsString()
+  readonly prompt?: string;
+}
 
 export class UpdatePreferencesCommand extends EnvironmentWithSubscriber {
   @IsOptional()
@@ -35,4 +46,9 @@ export class UpdatePreferencesCommand extends EnvironmentWithSubscriber {
   @IsDefined()
   @IsBoolean()
   readonly includeInactiveChannels: boolean;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AIPreferenceCommand)
+  readonly aiPreference?: AIPreferenceCommand;
 }
