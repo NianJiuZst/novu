@@ -43,6 +43,25 @@ export const defaultLocalization = {
   'snooze.options.customTime': 'Custom time...',
   'snooze.options.inOneDay': 'Tomorrow',
   'snooze.options.inOneWeek': 'Next week',
+
+  // My Notifications
+  'myNotifications.title': 'My notifications',
+  'myNotifications.badge': 'New',
+  'myNotifications.description':
+    'Create custom notifications based on what matters to you. AI will match system events against your preferences.',
+  'myNotifications.addButton': 'Add Custom Notification',
+  'myNotifications.form.title': 'Describe your notification',
+  'myNotifications.form.description': 'Tell us what you want to be notified about. Be specific about your preferences.',
+  'myNotifications.form.label': 'What do you want to be notified about?',
+  'myNotifications.form.placeholder':
+    'Example: "Notify me about critical security issues in production" or "Alert me when my team is mentioned in any discussion"',
+  'myNotifications.form.hint': 'Be specific to get better matches',
+  'myNotifications.form.cancel': 'Cancel',
+  'myNotifications.form.submit': 'Create Notification',
+  'myNotifications.form.submitting': 'Creating...',
+  'myNotifications.list.title': 'Your Custom Notifications',
+  'myNotifications.list.createdAt': 'Created',
+  'myNotifications.empty': 'No custom notifications yet. Create your first one above!',
 } as const;
 
 export const [dynamicLocalization, setDynamicLocalization] = createSignal<Record<string, string>>({});
