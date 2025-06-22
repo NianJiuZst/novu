@@ -52,6 +52,7 @@ import { Digest } from './digest';
 import { ExecuteStepCustom } from './execute-step-custom.usecase';
 import { ExecuteBridgeJob } from '../execute-bridge-job';
 import { SendMessageResult } from './send-message-type.usecase';
+import { EvaluateAIPreference, AIEvaluationResult } from './evaluate-ai-preference.usecase';
 
 @Injectable()
 export class SendMessage {
@@ -73,7 +74,8 @@ export class SendMessage {
     private tenantRepository: TenantRepository,
     private analyticsService: AnalyticsService,
     private normalizeVariablesUsecase: NormalizeVariables,
-    private executeBridgeJob: ExecuteBridgeJob
+    private executeBridgeJob: ExecuteBridgeJob,
+    private evaluateAIPreference: EvaluateAIPreference
   ) {}
 
   @InstrumentUsecase()
@@ -300,7 +302,7 @@ export class SendMessage {
     });
     if (!subscriber) throw new PlatformException(`Subscriber not found with id ${job._subscriberId}`);
 
-    let subscriberPreference: { enabled: boolean; channels: IPreferenceChannels };
+    let subscriberPreference: { enabled: boolean; channels: IPreferenceChannels; aiPreference?: any };
     let subscriberPreferenceType: PreferencesTypeEnum;
     if (command.statelessPreferences) {
       /*
@@ -337,20 +339,13 @@ export class SendMessage {
       subscriberPreferenceType = type;
     }
 
-    const result = this.stepPreferred(subscriberPreference, job);
+    const channelPreferenceResult = this.stepPreferred(subscriberPreference, job);
 
-    const preferenceDetailFromPreferenceType: Record<PreferencesTypeEnum, DetailEnum> = {
-      [PreferencesTypeEnum.WORKFLOW_RESOURCE]: DetailEnum.STEP_FILTERED_BY_WORKFLOW_RESOURCE_PREFERENCES,
-      [PreferencesTypeEnum.SUBSCRIBER_WORKFLOW]: DetailEnum.STEP_FILTERED_BY_SUBSCRIBER_WORKFLOW_PREFERENCES,
-      [PreferencesTypeEnum.SUBSCRIBER_GLOBAL]: DetailEnum.STEP_FILTERED_BY_SUBSCRIBER_GLOBAL_PREFERENCES,
-      [PreferencesTypeEnum.USER_WORKFLOW]: DetailEnum.STEP_FILTERED_BY_USER_WORKFLOW_PREFERENCES,
-    };
-
-    if (!result) {
+    if (!channelPreferenceResult) {
       await this.createExecutionDetails.execute(
         CreateExecutionDetailsCommand.create({
           ...CreateExecutionDetailsCommand.getDetailsFromJob(job),
-          detail: preferenceDetailFromPreferenceType[subscriberPreferenceType],
+          detail: this.getPreferenceDetailFromType(subscriberPreferenceType),
           source: ExecutionDetailsSourceEnum.INTERNAL,
           status: ExecutionDetailsStatusEnum.SUCCESS,
           isTest: false,
@@ -358,9 +353,82 @@ export class SendMessage {
           raw: JSON.stringify(subscriberPreference),
         })
       );
+
+      return false;
     }
 
-    return result;
+    // If channel preference passes and AI preference is enabled, evaluate AI preference
+    if (subscriberPreference.aiPreference?.enabled && subscriberPreference.aiPreference?.prompt) {
+      const aiEvaluationResult = await this.evaluateAIPreferenceForNotification(
+        command,
+        subscriberPreference.aiPreference.prompt,
+        workflow?.name
+      );
+
+      if (!aiEvaluationResult.shouldSend) {
+        await this.createExecutionDetails.execute(
+          CreateExecutionDetailsCommand.create({
+            ...CreateExecutionDetailsCommand.getDetailsFromJob(job),
+            detail: DetailEnum.STEP_FILTERED_BY_AI_PREFERENCE,
+            source: ExecutionDetailsSourceEnum.INTERNAL,
+            status: ExecutionDetailsStatusEnum.SUCCESS,
+            isTest: false,
+            isRetry: false,
+            raw: JSON.stringify({
+              aiPreference: subscriberPreference.aiPreference,
+              aiEvaluation: aiEvaluationResult,
+            }),
+          })
+        );
+
+        return false;
+      } else {
+        // Log execution details when AI preference passes
+        await this.createExecutionDetails.execute(
+          CreateExecutionDetailsCommand.create({
+            ...CreateExecutionDetailsCommand.getDetailsFromJob(job),
+            detail: DetailEnum.STEP_PASSED_AI_PREFERENCE,
+            source: ExecutionDetailsSourceEnum.INTERNAL,
+            status: ExecutionDetailsStatusEnum.SUCCESS,
+            isTest: false,
+            isRetry: false,
+            raw: JSON.stringify({
+              aiPreference: subscriberPreference.aiPreference,
+              aiEvaluation: aiEvaluationResult,
+            }),
+          })
+        );
+      }
+    }
+
+    return true;
+  }
+
+  @Instrument()
+  private async evaluateAIPreferenceForNotification(
+    command: SendMessageCommand,
+    prompt: string,
+    workflowName?: string
+  ): Promise<AIEvaluationResult> {
+    const context = await this.buildCompileContext(command);
+
+    return await this.evaluateAIPreference.execute({
+      prompt,
+      context,
+      workflowName,
+      stepType: command.step?.template?.type,
+    });
+  }
+
+  private getPreferenceDetailFromType(type: PreferencesTypeEnum): DetailEnum {
+    const preferenceDetailFromPreferenceType: Record<PreferencesTypeEnum, DetailEnum> = {
+      [PreferencesTypeEnum.WORKFLOW_RESOURCE]: DetailEnum.STEP_FILTERED_BY_WORKFLOW_RESOURCE_PREFERENCES,
+      [PreferencesTypeEnum.SUBSCRIBER_WORKFLOW]: DetailEnum.STEP_FILTERED_BY_SUBSCRIBER_WORKFLOW_PREFERENCES,
+      [PreferencesTypeEnum.SUBSCRIBER_GLOBAL]: DetailEnum.STEP_FILTERED_BY_SUBSCRIBER_GLOBAL_PREFERENCES,
+      [PreferencesTypeEnum.USER_WORKFLOW]: DetailEnum.STEP_FILTERED_BY_USER_WORKFLOW_PREFERENCES,
+    };
+
+    return preferenceDetailFromPreferenceType[type];
   }
 
   @Instrument()

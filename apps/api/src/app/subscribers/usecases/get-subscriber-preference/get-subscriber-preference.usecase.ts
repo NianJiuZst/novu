@@ -177,6 +177,7 @@ export class GetSubscriberPreference {
             channels,
             enabled: true,
             overrides,
+            aiPreference: merged.preferences?.aiPreference,
           },
           template: mapTemplateConfiguration({
             ...workflow,

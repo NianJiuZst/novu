@@ -42,6 +42,7 @@ export class GetSubscriberGlobalPreference {
       preference: {
         enabled: subscriberGlobalPreference.enabled,
         channels,
+        aiPreference: subscriberGlobalPreference.aiPreference,
       },
     };
   }
@@ -53,12 +54,17 @@ export class GetSubscriberGlobalPreference {
   ): Promise<{
     channels: IPreferenceChannels;
     enabled: boolean;
+    aiPreference?: any;
   }> {
-    const subscriberGlobalChannels = await this.getPreferences.getPreferenceChannels({
+    const subscriberGlobalPreferences = await this.getPreferences.safeExecute({
       environmentId: command.environmentId,
       organizationId: command.organizationId,
       subscriberId,
     });
+
+    const subscriberGlobalChannels = GetPreferences.mapWorkflowPreferencesToChannelPreferences(
+      subscriberGlobalPreferences?.preferences
+    );
 
     return {
       channels: subscriberGlobalChannels ?? {
@@ -69,6 +75,7 @@ export class GetSubscriberGlobalPreference {
         push: true,
       },
       enabled: true,
+      aiPreference: subscriberGlobalPreferences?.preferences?.aiPreference,
     };
   }
 

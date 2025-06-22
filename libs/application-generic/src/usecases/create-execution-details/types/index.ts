@@ -39,6 +39,8 @@ export enum DetailEnum {
   STEP_FILTERED_BY_SUBSCRIBER_GLOBAL_PREFERENCES = 'Step filtered by subscriber global preferences',
   STEP_FILTERED_BY_WORKFLOW_RESOURCE_PREFERENCES = 'Step filtered by workflow preferences',
   STEP_FILTERED_BY_USER_WORKFLOW_PREFERENCES = 'Step filtered by user preferences',
+  STEP_FILTERED_BY_AI_PREFERENCE = 'Step filtered by AI preference',
+  STEP_PASSED_AI_PREFERENCE = 'Step passed AI preference evaluation',
   WEBHOOK_FILTER_FAILED_RETRY = 'Webhook filter failed, retry will be executed',
   WEBHOOK_FILTER_FAILED_LAST_RETRY = 'Failed to get response from remote webhook filter on last retry',
   DIGEST_MERGED = 'Digest was merged with other digest',
