@@ -31,6 +31,7 @@ import {
   PlatformException,
 } from '@novu/application-generic';
 import {
+  CustomNotificationsRepository,
   JobEntity,
   JobRepository,
   JobStatusEnum,
@@ -53,6 +54,10 @@ import { ExecuteStepCustom } from './execute-step-custom.usecase';
 import { ExecuteBridgeJob } from '../execute-bridge-job';
 import { SendMessageResult } from './send-message-type.usecase';
 import { EvaluateAIPreference, AIEvaluationResult } from './evaluate-ai-preference.usecase';
+import {
+  EvaluateCustomNotifications,
+  CustomNotificationEvaluationResult,
+} from './evaluate-custom-notifications.usecase';
 
 @Injectable()
 export class SendMessage {
@@ -75,7 +80,9 @@ export class SendMessage {
     private analyticsService: AnalyticsService,
     private normalizeVariablesUsecase: NormalizeVariables,
     private executeBridgeJob: ExecuteBridgeJob,
-    private evaluateAIPreference: EvaluateAIPreference
+    private evaluateAIPreference: EvaluateAIPreference,
+    private customNotificationsRepository: CustomNotificationsRepository,
+    private evaluateCustomNotifications: EvaluateCustomNotifications
   ) {}
 
   @InstrumentUsecase()
@@ -104,6 +111,66 @@ export class SendMessage {
       });
     }
     const isBridgeSkipped = bridgeResponse?.options?.skip;
+
+    // Handle custom notifications workflow
+    const workflow = await this.getWorkflow({
+      _id: command.job._templateId,
+      environmentId: command.environmentId,
+    });
+
+    if (workflow?.triggers?.[0]?.identifier === 'my-notifications') {
+      const customNotificationResult = await this.evaluateCustomNotificationsForWorkflow(command, variables);
+
+      if (!customNotificationResult.shouldSend) {
+        await this.jobRepository.updateStatus(command.environmentId, command.jobId, JobStatusEnum.CANCELED);
+
+        await this.createExecutionDetails.execute(
+          CreateExecutionDetailsCommand.create({
+            ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
+            detail: DetailEnum.FILTER_STEPS,
+            source: ExecutionDetailsSourceEnum.INTERNAL,
+            status: ExecutionDetailsStatusEnum.SUCCESS,
+            isTest: false,
+            isRetry: false,
+            raw: JSON.stringify({
+              customNotifications: {
+                totalMatches: customNotificationResult.totalMatches,
+                evaluatedRules: customNotificationResult.matches.length,
+                reason: 'No custom notification rules matched the event',
+              },
+            }),
+          })
+        );
+
+        return { status: 'canceled' };
+      }
+
+      // Log successful custom notification matches
+      await this.createExecutionDetails.execute(
+        CreateExecutionDetailsCommand.create({
+          ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
+          detail: DetailEnum.STEP_CREATED,
+          source: ExecutionDetailsSourceEnum.INTERNAL,
+          status: ExecutionDetailsStatusEnum.SUCCESS,
+          isTest: false,
+          isRetry: false,
+          raw: JSON.stringify({
+            customNotifications: {
+              totalMatches: customNotificationResult.totalMatches,
+              evaluatedRules: customNotificationResult.matches.length,
+              matchingRules: customNotificationResult.matches
+                .filter((match) => match.shouldSend)
+                .map((match) => ({
+                  id: match.notification._id,
+                  query: match.notification.query,
+                  reason: match.reason,
+                })),
+            },
+          }),
+        })
+      );
+    }
+
     const { stepCondition, channelPreference } = await this.evaluateFilters(isBridgeSkipped, command, variables);
 
     if (!command.payload?.$on_boarding_trigger) {
@@ -554,6 +621,25 @@ export class SendMessage {
     }
 
     return tenant;
+  }
+
+  @Instrument()
+  private async evaluateCustomNotificationsForWorkflow(
+    command: SendMessageCommand,
+    variables: IFilterVariables
+  ): Promise<CustomNotificationEvaluationResult> {
+    // Extract event name and context from payload
+    const eventName = command.payload?.eventName || command.payload?.event || 'unknown';
+    const eventContext = command.payload?.eventContext || command.payload?.context || command.payload || {};
+
+    return await this.evaluateCustomNotifications.execute({
+      environmentId: command.environmentId,
+      organizationId: command.organizationId,
+      subscriberId: command.subscriberId,
+      eventName,
+      eventContext,
+      context: variables,
+    });
   }
 }
 
