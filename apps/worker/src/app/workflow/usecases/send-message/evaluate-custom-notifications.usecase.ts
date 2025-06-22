@@ -18,6 +18,7 @@ export interface CustomNotificationMatch {
   notification: CustomNotificationEntity;
   shouldSend: boolean;
   reason: string;
+  contentPrompt?: string;
 }
 
 export interface CustomNotificationEvaluationResult {
@@ -62,6 +63,7 @@ export class EvaluateCustomNotifications {
             notification,
             shouldSend: evaluationResult.shouldSend,
             reason: evaluationResult.reason,
+            contentPrompt: evaluationResult.shouldSend ? notification.content : undefined,
           });
         } catch (error) {
           this.logger.error(`Failed to evaluate custom notification ${notification._id}`, error);
@@ -70,6 +72,7 @@ export class EvaluateCustomNotifications {
             notification,
             shouldSend: false,
             reason: 'Evaluation failed, defaulting to not send',
+            contentPrompt: undefined,
           });
         }
       }

@@ -56,6 +56,10 @@ export const defaultLocalization = {
   'myNotifications.form.placeholder':
     'Example: "Notify me about critical security issues in production" or "Alert me when my team is mentioned in any discussion"',
   'myNotifications.form.hint': 'Be specific to get better matches',
+  'myNotifications.form.contentLabel': 'Email content prompt',
+  'myNotifications.form.contentPlaceholder':
+    'Example: "Create a professional security alert email with details about the issue and recommended actions" or "Generate a friendly team mention notification with context about the discussion"',
+  'myNotifications.form.contentHint': 'Describe how you want the email to look and what information to include',
   'myNotifications.form.cancel': 'Cancel',
   'myNotifications.form.submit': 'Create Notification',
   'myNotifications.form.submitting': 'Creating...',

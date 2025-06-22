@@ -23,6 +23,11 @@ export class CustomNotificationEntity {
   query: string;
 
   /**
+   * The content template for the notification that will be delivered to the user
+   */
+  content: string;
+
+  /**
    * Whether this custom notification is active/enabled
    */
   enabled: boolean;

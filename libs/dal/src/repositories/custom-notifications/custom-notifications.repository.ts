@@ -61,6 +61,7 @@ export class CustomNotificationsRepository extends BaseRepository<
     _organizationId: OrganizationId;
     _subscriberId: SubscriberId;
     query: string;
+    content: string;
     enabled?: boolean;
   }): Promise<CustomNotificationEntity> {
     return this.create({
@@ -76,7 +77,7 @@ export class CustomNotificationsRepository extends BaseRepository<
     environmentId: EnvironmentId,
     organizationId: OrganizationId,
     subscriberId: SubscriberId,
-    updateData: { query?: string; enabled?: boolean }
+    updateData: { query?: string; content?: string; enabled?: boolean }
   ): Promise<CustomNotificationEntity | null> {
     return this.findOneAndUpdate(
       {

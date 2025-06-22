@@ -18,8 +18,8 @@ export class UpdateCustomNotificationUseCase {
     }
 
     // Check if at least one field is provided for update
-    if (!command.query && command.enabled === undefined) {
-      throw new BadRequestException('At least one field (query or enabled) must be provided for update');
+    if (!command.query && !command.content && command.enabled === undefined) {
+      throw new BadRequestException('At least one field (query, content, or enabled) must be provided for update');
     }
 
     // Update the custom notification
@@ -30,6 +30,7 @@ export class UpdateCustomNotificationUseCase {
       command.subscriberId,
       {
         ...(command.query && { query: command.query }),
+        ...(command.content && { content: command.content }),
         ...(command.enabled !== undefined && { enabled: command.enabled }),
       }
     );

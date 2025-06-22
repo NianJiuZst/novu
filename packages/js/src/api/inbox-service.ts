@@ -247,6 +247,7 @@ export class InboxService {
     Array<{
       _id: string;
       query: string;
+      content: string;
       enabled: boolean;
       createdAt: string;
       updatedAt: string;
@@ -255,9 +256,10 @@ export class InboxService {
     return this.#httpClient.get(`${INBOX_ROUTE}/custom-notifications`);
   }
 
-  createCustomNotification(data: { query: string; enabled?: boolean }): Promise<{
+  createCustomNotification(data: { query: string; content: string; enabled?: boolean }): Promise<{
     _id: string;
     query: string;
+    content: string;
     enabled: boolean;
     createdAt: string;
     updatedAt: string;
@@ -269,11 +271,13 @@ export class InboxService {
     id: string,
     data: {
       query?: string;
+      content?: string;
       enabled?: boolean;
     }
   ): Promise<{
     _id: string;
     query: string;
+    content: string;
     enabled: boolean;
     createdAt: string;
     updatedAt: string;

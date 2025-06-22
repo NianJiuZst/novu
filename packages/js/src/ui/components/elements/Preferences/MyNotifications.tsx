@@ -12,6 +12,7 @@ import { Motion } from '../../primitives/Motion';
 type CustomNotification = {
   _id: string;
   query: string;
+  content: string;
   enabled: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -24,6 +25,7 @@ export const MyNotifications = () => {
 
   const [customNotifications, setCustomNotifications] = createSignal<CustomNotification[]>([]);
   const [newQuery, setNewQuery] = createSignal('');
+  const [newContent, setNewContent] = createSignal('');
   const [isSubmitting, setIsSubmitting] = createSignal(false);
   const [showForm, setShowForm] = createSignal(false);
   const [isLoading, setIsLoading] = createSignal(true);
@@ -31,13 +33,19 @@ export const MyNotifications = () => {
 
   const canSubmit = createMemo(() => {
     const query = newQuery().trim();
+    const content = newContent().trim();
 
-    return query.length >= 10 && query.length <= 500;
+    return query.length >= 10 && query.length <= 500 && content.length >= 5 && content.length <= 1000;
   });
 
   const handleQueryChange = (event: Event) => {
     const target = event.target as HTMLTextAreaElement;
     setNewQuery(target.value);
+  };
+
+  const handleContentChange = (event: Event) => {
+    const target = event.target as HTMLTextAreaElement;
+    setNewContent(target.value);
   };
 
   const loadCustomNotifications = async () => {
@@ -71,6 +79,7 @@ export const MyNotifications = () => {
     try {
       const newNotification = await novu.inboxService.createCustomNotification({
         query: newQuery().trim(),
+        content: newContent().trim(),
         enabled: true,
       });
 
@@ -84,6 +93,7 @@ export const MyNotifications = () => {
       ]);
 
       setNewQuery('');
+      setNewContent('');
       setShowForm(false);
     } catch (error) {
       console.error('Failed to create custom notification:', error);
@@ -239,6 +249,34 @@ export const MyNotifications = () => {
             </div>
           </div>
 
+          <div class={style('myNotificationsFormField', 'nt-space-y-2')}>
+            <label class={style('myNotificationsFormLabel', 'nt-block nt-text-xs nt-font-medium nt-text-foreground')}>
+              {t('myNotifications.form.contentLabel')}
+            </label>
+            <Textarea
+              value={newContent()}
+              onInput={handleContentChange}
+              placeholder={t('myNotifications.form.contentPlaceholder')}
+              class={style('myNotificationsFormTextarea', 'nt-w-full nt-min-h-[80px] nt-text-sm nt-resize-none')}
+              disabled={isSubmitting()}
+            />
+            <div class={style('myNotificationsFormMeta', 'nt-flex nt-justify-between nt-items-center nt-text-xs')}>
+              <span class={style('myNotificationsFormHint', 'nt-text-foreground-alpha-500')}>
+                {t('myNotifications.form.contentHint')}
+              </span>
+              <span
+                class={style(
+                  'myNotificationsFormCounter',
+                  newContent().length > 900
+                    ? 'nt-text-foreground-alpha-500 nt-text-destructive'
+                    : 'nt-text-foreground-alpha-500'
+                )}
+              >
+                {newContent().length}/1000
+              </span>
+            </div>
+          </div>
+
           <div class={style('myNotificationsFormActions', 'nt-flex nt-gap-2 nt-justify-end')}>
             <Button
               variant="ghost"
@@ -246,6 +284,7 @@ export const MyNotifications = () => {
               onClick={() => {
                 setShowForm(false);
                 setNewQuery('');
+                setNewContent('');
                 setError(null);
               }}
               disabled={isSubmitting()}
@@ -305,8 +344,21 @@ export const MyNotifications = () => {
                   class={style('myNotificationsListItemContent', 'nt-flex nt-justify-between nt-items-start nt-gap-3')}
                 >
                   <div class={style('myNotificationsListItemText', 'nt-flex-1 nt-min-w-0')}>
-                    <p class={style('myNotificationsListItemQuery', 'nt-text-sm nt-text-foreground nt-break-words')}>
+                    <p
+                      class={style(
+                        'myNotificationsListItemQuery',
+                        'nt-text-sm nt-text-foreground nt-break-words nt-font-medium'
+                      )}
+                    >
                       "{notification.query}"
+                    </p>
+                    <p
+                      class={style(
+                        'myNotificationsListItemContent',
+                        'nt-text-xs nt-text-foreground-alpha-700 nt-mt-1 nt-break-words'
+                      )}
+                    >
+                      Email prompt: "{notification.content}"
                     </p>
                     <p class={style('myNotificationsListItemDate', 'nt-text-xs nt-text-foreground-alpha-500 nt-mt-1')}>
                       {t('myNotifications.list.createdAt')} {notification.createdAt.toLocaleDateString()}

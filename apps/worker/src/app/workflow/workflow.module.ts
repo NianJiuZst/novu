@@ -67,6 +67,7 @@ import { InboundEmailParse } from './usecases/inbound-email-parse/inbound-email-
 import { ExecuteStepCustom } from './usecases/send-message/execute-step-custom.usecase';
 import { EvaluateAIPreference } from './usecases/send-message/evaluate-ai-preference.usecase';
 import { EvaluateCustomNotifications } from './usecases/send-message/evaluate-custom-notifications.usecase';
+import { GenerateCustomEmailContent } from './usecases/send-message/generate-custom-email-content.usecase';
 import { StoreSubscriberJobs } from './usecases/store-subscriber-jobs';
 import { SubscriberJobBound } from './usecases/subscriber-job-bound/subscriber-job-bound.usecase';
 
@@ -137,6 +138,7 @@ const USE_CASES = [
   ExecuteStepCustom,
   EvaluateAIPreference,
   EvaluateCustomNotifications,
+  GenerateCustomEmailContent,
   StoreSubscriberJobs,
   SetJobAsCompleted,
   SetJobAsFailed,

@@ -14,6 +14,12 @@ export class CustomNotificationResponseDto {
   query: string;
 
   @ApiProperty({
+    description: 'The content template for the notification that will be delivered to the user',
+    example: 'Security Alert: {{eventContext.alertType}} detected in {{eventContext.environment}}',
+  })
+  content: string;
+
+  @ApiProperty({
     description: 'Whether this custom notification is enabled',
     example: true,
   })

@@ -308,6 +308,7 @@ export const appearanceKeys = [
   'myNotificationsListItemContent',
   'myNotificationsListItemText',
   'myNotificationsListItemQuery',
+  'myNotificationsListItemContent',
   'myNotificationsListItemDate',
   'myNotificationsListItemActions',
   'myNotificationsListItemToggle',

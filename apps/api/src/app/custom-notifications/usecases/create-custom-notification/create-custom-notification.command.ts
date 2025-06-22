@@ -7,6 +7,11 @@ export class CreateCustomNotificationCommand extends EnvironmentWithSubscriber {
   @MaxLength(500, { message: 'Query must not exceed 500 characters' })
   query: string;
 
+  @IsString()
+  @MinLength(5, { message: 'Content must be at least 5 characters long' })
+  @MaxLength(1000, { message: 'Content must not exceed 1000 characters' })
+  content: string;
+
   @IsBoolean()
   @IsOptional()
   enabled?: boolean;

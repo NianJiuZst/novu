@@ -35,6 +35,7 @@ export class CreateCustomNotificationUseCase {
       _organizationId: command.organizationId,
       _subscriberId: command.subscriberId,
       query: command.query,
+      content: command.content,
       enabled: command.enabled ?? true,
     });
 

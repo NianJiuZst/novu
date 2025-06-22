@@ -58,6 +58,7 @@ import {
   EvaluateCustomNotifications,
   CustomNotificationEvaluationResult,
 } from './evaluate-custom-notifications.usecase';
+import { GenerateCustomEmailContent, GeneratedEmailContent } from './generate-custom-email-content.usecase';
 
 @Injectable()
 export class SendMessage {
@@ -82,7 +83,8 @@ export class SendMessage {
     private executeBridgeJob: ExecuteBridgeJob,
     private evaluateAIPreference: EvaluateAIPreference,
     private customNotificationsRepository: CustomNotificationsRepository,
-    private evaluateCustomNotifications: EvaluateCustomNotifications
+    private evaluateCustomNotifications: EvaluateCustomNotifications,
+    private generateCustomEmailContent: GenerateCustomEmailContent
   ) {}
 
   @InstrumentUsecase()
@@ -145,6 +147,38 @@ export class SendMessage {
         return { status: 'canceled' };
       }
 
+      // Generate custom email content for matching notifications
+      const matchingNotifications = customNotificationResult.matches.filter((match) => match.shouldSend);
+      let generatedContent: GeneratedEmailContent | null = null;
+
+      if (matchingNotifications.length > 0) {
+        // Use the first matching notification's content prompt to generate email
+        const firstMatch = matchingNotifications[0];
+        if (firstMatch.contentPrompt) {
+          const eventName = command.payload?.eventName || command.payload?.event || 'unknown';
+          const eventContext = command.payload?.eventContext || command.payload?.context || command.payload || {};
+
+          generatedContent = await this.generateCustomEmailContent.execute({
+            contentPrompt: firstMatch.contentPrompt,
+            context: variables,
+            eventName,
+            eventContext,
+            workflowName: workflow?.name,
+          });
+
+          // Store the generated content in the command payload for email step to use
+          command.payload = {
+            ...command.payload,
+            customEmailContent: {
+              subject: generatedContent.subject,
+              body: generatedContent.body,
+              generated: generatedContent.success,
+              reason: generatedContent.reason,
+            },
+          };
+        }
+      }
+
       // Log successful custom notification matches
       await this.createExecutionDetails.execute(
         CreateExecutionDetailsCommand.create({
@@ -158,13 +192,20 @@ export class SendMessage {
             customNotifications: {
               totalMatches: customNotificationResult.totalMatches,
               evaluatedRules: customNotificationResult.matches.length,
-              matchingRules: customNotificationResult.matches
-                .filter((match) => match.shouldSend)
-                .map((match) => ({
-                  id: match.notification._id,
-                  query: match.notification.query,
-                  reason: match.reason,
-                })),
+              matchingRules: matchingNotifications.map((match) => ({
+                id: match.notification._id,
+                query: match.notification.query,
+                reason: match.reason,
+                contentPrompt: match.contentPrompt,
+              })),
+              generatedContent: generatedContent
+                ? {
+                    subject: generatedContent.subject,
+                    bodyLength: generatedContent.body.length,
+                    success: generatedContent.success,
+                    reason: generatedContent.reason,
+                  }
+                : null,
             },
           }),
         })

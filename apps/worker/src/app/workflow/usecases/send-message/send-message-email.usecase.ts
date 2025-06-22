@@ -172,6 +172,10 @@ export class SendMessageEmail extends SendMessageBase {
     let content;
     let senderName;
 
+    // Check if this is a custom notification with generated content
+    const customEmailContent = command.payload?.customEmailContent;
+    const isCustomNotification = customEmailContent && customEmailContent.generated;
+
     const payload = {
       senderName: step.template.senderName,
       subject,
@@ -225,6 +229,7 @@ export class SendMessageEmail extends SendMessageBase {
       );
 
       if (!command.bridgeData) {
+        // Use the regular template compilation
         ({ html, content, subject, senderName } = await this.compileEmailTemplateUsecase.execute(
           CompileEmailTemplateCommand.create({
             environmentId: command.environmentId,
@@ -244,8 +249,11 @@ export class SendMessageEmail extends SendMessageBase {
           user: { _id: command.userId } as UserEntity,
         });
 
-        if (!shouldDisableInlineCss) {
-          // this is causing rendering issues in Gmail (especially when media queries are used), so we are disabling it
+        if (!shouldDisableInlineCss && !isCustomNotification) {
+          /*
+           * Skip inline CSS for custom content as it's already formatted HTML
+           * this is causing rendering issues in Gmail (especially when media queries are used), so we are disabling it
+           */
           html = await inlineCss(html, {
             // Used for style sheet links that starts with / so should not be needed in our case.
             url: ' ',
@@ -304,11 +312,38 @@ export class SendMessageEmail extends SendMessageBase {
         }
     );
 
+    if (isCustomNotification) {
+      // Use the AI-generated custom content
+      subject = customEmailContent.subject;
+      html = customEmailContent.body;
+      content = customEmailContent.body;
+      senderName = step.template.senderName; // Keep the original sender name
+
+      // Log that we're using custom generated content
+      await this.createExecutionDetails.execute(
+        CreateExecutionDetailsCommand.create({
+          ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
+          detail: DetailEnum.CUSTOM_EMAIL_CONTENT_GENERATED,
+          source: ExecutionDetailsSourceEnum.INTERNAL,
+          status: ExecutionDetailsStatusEnum.SUCCESS,
+          isTest: false,
+          isRetry: false,
+          raw: JSON.stringify({
+            customContent: {
+              subject: customEmailContent.subject,
+              bodyLength: customEmailContent.body.length,
+              reason: customEmailContent.reason,
+            },
+          }),
+        })
+      );
+    }
+
     const mailData: IEmailOptions = createMailData(
       {
         to: email,
         subject,
-        html: (bridgeOutputs as EmailOutput)?.body || html,
+        html: isCustomNotification ? html : (bridgeOutputs as EmailOutput)?.body || html,
         from: integration?.credentials.from || 'no-reply@novu.co',
         attachments,
         senderName,

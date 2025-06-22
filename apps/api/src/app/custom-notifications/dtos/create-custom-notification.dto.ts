@@ -14,6 +14,17 @@ export class CreateCustomNotificationDto {
   query: string;
 
   @ApiProperty({
+    description: 'The content template for the notification that will be delivered to the user',
+    example: 'Security Alert: {{eventContext.alertType}} detected in {{eventContext.environment}}',
+    minLength: 5,
+    maxLength: 1000,
+  })
+  @IsString()
+  @MinLength(5, { message: 'Content must be at least 5 characters long' })
+  @MaxLength(1000, { message: 'Content must not exceed 1000 characters' })
+  content: string;
+
+  @ApiProperty({
     description: 'Whether this custom notification is enabled',
     example: true,
     default: true,

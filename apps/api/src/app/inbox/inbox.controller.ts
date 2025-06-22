@@ -474,6 +474,7 @@ export class InboxController {
     return customNotifications.map((notification) => ({
       _id: notification._id,
       query: notification.query,
+      content: notification.content,
       enabled: notification.enabled,
       createdAt: notification.createdAt,
       updatedAt: notification.updatedAt,
@@ -492,6 +493,7 @@ export class InboxController {
         environmentId: subscriberSession._environmentId,
         subscriberId: subscriberSession.subscriberId,
         query: body.query,
+        content: body.content,
         enabled: body.enabled,
       })
     );
@@ -499,6 +501,7 @@ export class InboxController {
     return {
       _id: customNotification._id,
       query: customNotification.query,
+      content: customNotification.content,
       enabled: customNotification.enabled,
       createdAt: customNotification.createdAt,
       updatedAt: customNotification.updatedAt,
@@ -519,6 +522,7 @@ export class InboxController {
         subscriberId: subscriberSession.subscriberId,
         id,
         query: body.query,
+        content: body.content,
         enabled: body.enabled,
       })
     );
@@ -526,6 +530,7 @@ export class InboxController {
     return {
       _id: customNotification._id,
       query: customNotification.query,
+      content: customNotification.content,
       enabled: customNotification.enabled,
       createdAt: customNotification.createdAt,
       updatedAt: customNotification.updatedAt,

@@ -30,6 +30,12 @@ const customNotificationsSchema = new Schema<CustomNotificationDBModel>(
       minlength: 10,
       maxlength: 500,
     },
+    content: {
+      type: Schema.Types.String,
+      required: true,
+      minlength: 5,
+      maxlength: 1000,
+    },
     enabled: {
       type: Schema.Types.Boolean,
       default: true,
