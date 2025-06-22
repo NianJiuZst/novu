@@ -45,20 +45,8 @@ export const MyNotifications = () => {
       setIsLoading(true);
       setError(null);
 
-      // Call the custom notifications API
-      const response = await fetch('/v1/inbox/custom-notifications', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${novu.session?.token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to load custom notifications');
-      }
-
-      const notifications = await response.json();
+      // Call the custom notifications API using the proper Novu service
+      const notifications = await novu.inboxService.fetchCustomNotifications();
       setCustomNotifications(
         notifications.map((n: any) => ({
           ...n,
@@ -81,24 +69,11 @@ export const MyNotifications = () => {
     setError(null);
 
     try {
-      const response = await fetch('/v1/inbox/custom-notifications', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${novu.session?.token}`,
-        },
-        body: JSON.stringify({
-          query: newQuery().trim(),
-          enabled: true,
-        }),
+      const newNotification = await novu.inboxService.createCustomNotification({
+        query: newQuery().trim(),
+        enabled: true,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create custom notification');
-      }
-
-      const newNotification = await response.json();
       setCustomNotifications((prev) => [
         ...prev,
         {
@@ -120,18 +95,7 @@ export const MyNotifications = () => {
 
   const handleRemove = async (id: string) => {
     try {
-      const response = await fetch(`/v1/inbox/custom-notifications/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${novu.session?.token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete custom notification');
-      }
-
+      await novu.inboxService.deleteCustomNotification(id);
       setCustomNotifications((prev) => prev.filter((n) => n._id !== id));
     } catch (error) {
       console.error('Failed to delete custom notification:', error);
@@ -141,20 +105,7 @@ export const MyNotifications = () => {
 
   const handleToggleEnabled = async (id: string, enabled: boolean) => {
     try {
-      const response = await fetch(`/v1/inbox/custom-notifications/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${novu.session?.token}`,
-        },
-        body: JSON.stringify({ enabled }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update custom notification');
-      }
-
-      const updatedNotification = await response.json();
+      const updatedNotification = await novu.inboxService.updateCustomNotification(id, { enabled });
       setCustomNotifications((prev) =>
         prev.map((n) =>
           n._id === id

@@ -241,4 +241,47 @@ export class InboxService {
 
     return this.#httpClient.post('/inbox/events', payload);
   }
+
+  // Custom Notifications methods
+  fetchCustomNotifications(): Promise<
+    Array<{
+      _id: string;
+      query: string;
+      enabled: boolean;
+      createdAt: string;
+      updatedAt: string;
+    }>
+  > {
+    return this.#httpClient.get(`${INBOX_ROUTE}/custom-notifications`);
+  }
+
+  createCustomNotification(data: { query: string; enabled?: boolean }): Promise<{
+    _id: string;
+    query: string;
+    enabled: boolean;
+    createdAt: string;
+    updatedAt: string;
+  }> {
+    return this.#httpClient.post(`${INBOX_ROUTE}/custom-notifications`, data);
+  }
+
+  updateCustomNotification(
+    id: string,
+    data: {
+      query?: string;
+      enabled?: boolean;
+    }
+  ): Promise<{
+    _id: string;
+    query: string;
+    enabled: boolean;
+    createdAt: string;
+    updatedAt: string;
+  }> {
+    return this.#httpClient.patch(`${INBOX_ROUTE}/custom-notifications/${id}`, data);
+  }
+
+  deleteCustomNotification(id: string): Promise<{ success: boolean }> {
+    return this.#httpClient.delete(`${INBOX_ROUTE}/custom-notifications/${id}`);
+  }
 }

@@ -32,6 +32,14 @@ export class Novu implements Pick<NovuEventEmitter, 'on'> {
     return this.#session.subscriberId;
   }
 
+  public get session() {
+    return this.#session;
+  }
+
+  public get inboxService() {
+    return this.#inboxService;
+  }
+
   constructor(options: NovuOptions) {
     this.#inboxService = new InboxService({
       apiUrl: options.apiUrl || options.backendUrl,
