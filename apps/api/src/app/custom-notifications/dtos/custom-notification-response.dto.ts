@@ -26,6 +26,19 @@ export class CustomNotificationResponseDto {
   enabled: boolean;
 
   @ApiProperty({
+    description: 'Whether this is a one-time notification that will be deactivated after being triggered',
+    example: false,
+  })
+  isOneTime: boolean;
+
+  @ApiProperty({
+    description: 'When this one-time notification was completed/triggered (null if not completed)',
+    example: null,
+    nullable: true,
+  })
+  completedAt: Date | null;
+
+  @ApiProperty({
     description: 'When this custom notification was created',
     example: '2023-12-01T10:00:00.000Z',
   })

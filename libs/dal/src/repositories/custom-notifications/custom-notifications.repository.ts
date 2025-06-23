@@ -28,6 +28,21 @@ export class CustomNotificationsRepository extends BaseRepository<
     });
   }
 
+  async findEnabledBySubscriberId(
+    environmentId: EnvironmentId,
+    organizationId: OrganizationId,
+    subscriberId: SubscriberId
+  ): Promise<CustomNotificationEntity[]> {
+    return this.find({
+      _environmentId: environmentId,
+      _organizationId: organizationId,
+      _subscriberId: subscriberId,
+      enabled: true,
+      deleted: { $ne: true },
+      $or: [{ isOneTime: false }, { isOneTime: true, completedAt: null }],
+    });
+  }
+
   async findByIdAndSubscriberId(
     id: string,
     environmentId: EnvironmentId,
@@ -63,34 +78,79 @@ export class CustomNotificationsRepository extends BaseRepository<
     query: string;
     content: string;
     enabled?: boolean;
+    isOneTime?: boolean;
   }): Promise<CustomNotificationEntity> {
     return this.create({
       ...data,
       enabled: data.enabled ?? true,
+      isOneTime: data.isOneTime ?? false,
+      completedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
   }
 
-  async updateCustomNotification(
-    id: string,
+  async markAsCompleted(
     environmentId: EnvironmentId,
     organizationId: OrganizationId,
     subscriberId: SubscriberId,
-    updateData: { query?: string; content?: string; enabled?: boolean }
+    customNotificationId: string
   ): Promise<CustomNotificationEntity | null> {
+    return this.findOneAndUpdate(
+      {
+        _id: customNotificationId,
+        _environmentId: environmentId,
+        _organizationId: organizationId,
+        _subscriberId: subscriberId,
+        isOneTime: true,
+        completedAt: null,
+      },
+      {
+        $set: {
+          enabled: false,
+          completedAt: new Date(),
+          updatedAt: new Date(),
+        },
+      },
+      { new: true }
+    );
+  }
+
+  async updateCustomNotification(
+    environmentId: EnvironmentId,
+    organizationId: OrganizationId,
+    subscriberId: SubscriberId,
+    id: string,
+    updates: {
+      query?: string;
+      content?: string;
+      enabled?: boolean;
+      isOneTime?: boolean;
+    }
+  ): Promise<CustomNotificationEntity | null> {
+    const updateData: any = {
+      updatedAt: new Date(),
+    };
+
+    if (updates.query !== undefined) updateData.query = updates.query;
+    if (updates.content !== undefined) updateData.content = updates.content;
+    if (updates.enabled !== undefined) updateData.enabled = updates.enabled;
+    if (updates.isOneTime !== undefined) {
+      updateData.isOneTime = updates.isOneTime;
+      // If changing from one-time to regular, reset completedAt
+      if (!updates.isOneTime) {
+        updateData.completedAt = null;
+      }
+    }
+
     return this.findOneAndUpdate(
       {
         _id: id,
         _environmentId: environmentId,
         _organizationId: organizationId,
         _subscriberId: subscriberId,
-        deleted: { $ne: true },
       },
-      {
-        ...updateData,
-        updatedAt: new Date(),
-      },
+      { $set: updateData },
       { new: true }
     );
   }

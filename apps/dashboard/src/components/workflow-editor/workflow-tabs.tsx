@@ -69,6 +69,7 @@ export const WorkflowTabs = () => {
               </TabsTrigger>
             </Protect>
           )}
+
           {isV2TemplateEditorEnabled && (
             <div className="my-auto ml-auto flex items-center gap-2">
               <Protect permission={PermissionsEnum.EVENT_WRITE}>

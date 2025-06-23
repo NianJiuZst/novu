@@ -249,6 +249,8 @@ export class InboxService {
       query: string;
       content: string;
       enabled: boolean;
+      isOneTime: boolean;
+      completedAt: string | null;
       createdAt: string;
       updatedAt: string;
     }>
@@ -256,11 +258,13 @@ export class InboxService {
     return this.#httpClient.get(`${INBOX_ROUTE}/custom-notifications`);
   }
 
-  createCustomNotification(data: { query: string; content: string; enabled?: boolean }): Promise<{
+  createCustomNotification(data: { query: string; content: string; enabled?: boolean; isOneTime?: boolean }): Promise<{
     _id: string;
     query: string;
     content: string;
     enabled: boolean;
+    isOneTime: boolean;
+    completedAt: string | null;
     createdAt: string;
     updatedAt: string;
   }> {
@@ -273,12 +277,15 @@ export class InboxService {
       query?: string;
       content?: string;
       enabled?: boolean;
+      isOneTime?: boolean;
     }
   ): Promise<{
     _id: string;
     query: string;
     content: string;
     enabled: boolean;
+    isOneTime: boolean;
+    completedAt: string | null;
     createdAt: string;
     updatedAt: string;
   }> {

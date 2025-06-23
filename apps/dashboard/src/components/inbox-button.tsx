@@ -3,7 +3,7 @@ import { API_HOSTNAME, APP_ID, IS_SELF_HOSTED, WEBSOCKET_HOSTNAME } from '@/conf
 import { useEnvironment } from '@/context/environment/hooks';
 import { useWorkflowEditorPage } from '@/hooks/use-workflow-editor-page';
 import { useUser } from '@clerk/clerk-react';
-import { Bell, InboxContent, Inbox, useNovu } from '@novu/react';
+import { Bell, InboxContent, Inbox, useNovu, Notify } from '@novu/react';
 import { useEffect, useState } from 'react';
 import { HeaderButton } from './header-navigation/header-button';
 import { InboxBellFilled } from './icons/inbox-bell-filled';
@@ -109,25 +109,51 @@ export const InboxButton = () => {
   const localizationTestSuffix = isTestPage ? ' (Test)' : '';
 
   return (
-    <Inbox
-      subscriberId={isTestPage ? user.externalId : `org_${currentOrganization._id}:user_${user.externalId}`}
-      applicationIdentifier={appId}
-      /**
-       * We want to ensure our staging environment is using the production API and WebSocket endpoints.
-       */
-      backendUrl={API_HOSTNAME === 'https://api.novu-staging.co' && !isTestPage ? 'https://api.novu.co' : API_HOSTNAME}
-      socketUrl={
-        WEBSOCKET_HOSTNAME === 'https://ws.novu-staging.co' && !isTestPage ? 'https://ws.novu.co' : WEBSOCKET_HOSTNAME
-      }
-      localization={{
-        'inbox.filters.labels.default': `Inbox${localizationTestSuffix}`,
-        'inbox.filters.labels.unread': `Unread${localizationTestSuffix}`,
-        'inbox.filters.labels.archived': `Archived${localizationTestSuffix}`,
-        'preferences.title': `Preferences${localizationTestSuffix}`,
-        'notifications.emptyNotice': `${isTestPage ? 'This is a test inbox. Send a notification to preview it in real-time.' : 'No notifications'}`,
-      }}
-    >
-      <InboxInner />
-    </Inbox>
+    <div className="flex items-center gap-[300px]">
+      <Inbox
+        subscriberId={isTestPage ? user.externalId : `org_${currentOrganization._id}:user_${user.externalId}`}
+        applicationIdentifier={appId}
+        backendUrl={
+          API_HOSTNAME === 'https://api.novu-staging.co' && !isTestPage ? 'https://api.novu.co' : API_HOSTNAME
+        }
+        socketUrl={
+          WEBSOCKET_HOSTNAME === 'https://ws.novu-staging.co' && !isTestPage ? 'https://ws.novu.co' : WEBSOCKET_HOSTNAME
+        }
+      >
+        <Notify
+          size="sm"
+          variant="outline"
+          onSuccess={(notification) => {
+            console.log('Smart notification created:', notification);
+          }}
+          onError={(error) => {
+            console.error('Failed to create notification:', error);
+          }}
+          placement="bottom-start"
+        />
+      </Inbox>
+      <Inbox
+        subscriberId={isTestPage ? user.externalId : `org_${currentOrganization._id}:user_${user.externalId}`}
+        applicationIdentifier={appId}
+        /**
+         * We want to ensure our staging environment is using the production API and WebSocket endpoints.
+         */
+        backendUrl={
+          API_HOSTNAME === 'https://api.novu-staging.co' && !isTestPage ? 'https://api.novu.co' : API_HOSTNAME
+        }
+        socketUrl={
+          WEBSOCKET_HOSTNAME === 'https://ws.novu-staging.co' && !isTestPage ? 'https://ws.novu.co' : WEBSOCKET_HOSTNAME
+        }
+        localization={{
+          'inbox.filters.labels.default': `Inbox${localizationTestSuffix}`,
+          'inbox.filters.labels.unread': `Unread${localizationTestSuffix}`,
+          'inbox.filters.labels.archived': `Archived${localizationTestSuffix}`,
+          'preferences.title': `Preferences${localizationTestSuffix}`,
+          'notifications.emptyNotice': `${isTestPage ? 'This is a test inbox. Send a notification to preview it in real-time.' : 'No notifications'}`,
+        }}
+      >
+        <InboxInner />
+      </Inbox>
+    </div>
   );
 };

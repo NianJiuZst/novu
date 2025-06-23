@@ -35,10 +35,17 @@ export type {
   Variables,
 } from '@novu/js/ui';
 
-export { Inbox, Bell, InboxContent, Notifications, NovuProvider, Preferences } from './components';
+export { Inbox, Bell, InboxContent, Notifications, NovuProvider, Preferences, Notify } from './components';
 export { useNovu, useCounts, useNotifications, usePreferences } from './hooks';
 
-export type { InboxProps, BellProps, InboxContentProps, NotificationProps, NovuProviderProps } from './components';
+export type {
+  InboxProps,
+  BellProps,
+  InboxContentProps,
+  NotificationProps,
+  NovuProviderProps,
+  NotifyProps,
+} from './components';
 
 export type {
   UseCountsProps,

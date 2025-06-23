@@ -14,6 +14,8 @@ type CustomNotification = {
   query: string;
   content: string;
   enabled: boolean;
+  isOneTime: boolean;
+  completedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -26,6 +28,7 @@ export const MyNotifications = () => {
   const [customNotifications, setCustomNotifications] = createSignal<CustomNotification[]>([]);
   const [newQuery, setNewQuery] = createSignal('');
   const [newContent, setNewContent] = createSignal('');
+  const [isOneTime, setIsOneTime] = createSignal(false);
   const [isSubmitting, setIsSubmitting] = createSignal(false);
   const [showForm, setShowForm] = createSignal(false);
   const [isLoading, setIsLoading] = createSignal(true);
@@ -48,6 +51,11 @@ export const MyNotifications = () => {
     setNewContent(target.value);
   };
 
+  const handleOneTimeChange = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    setIsOneTime(target.checked);
+  };
+
   const loadCustomNotifications = async () => {
     try {
       setIsLoading(true);
@@ -60,6 +68,7 @@ export const MyNotifications = () => {
           ...n,
           createdAt: new Date(n.createdAt),
           updatedAt: new Date(n.updatedAt),
+          completedAt: n.completedAt ? new Date(n.completedAt) : null,
         }))
       );
     } catch (error) {
@@ -81,6 +90,7 @@ export const MyNotifications = () => {
         query: newQuery().trim(),
         content: newContent().trim(),
         enabled: true,
+        isOneTime: isOneTime(),
       });
 
       setCustomNotifications((prev) => [
@@ -89,11 +99,13 @@ export const MyNotifications = () => {
           ...newNotification,
           createdAt: new Date(newNotification.createdAt),
           updatedAt: new Date(newNotification.updatedAt),
+          completedAt: newNotification.completedAt ? new Date(newNotification.completedAt) : null,
         },
       ]);
 
       setNewQuery('');
       setNewContent('');
+      setIsOneTime(false);
       setShowForm(false);
     } catch (error) {
       console.error('Failed to create custom notification:', error);
@@ -123,6 +135,7 @@ export const MyNotifications = () => {
                 ...updatedNotification,
                 createdAt: new Date(updatedNotification.createdAt),
                 updatedAt: new Date(updatedNotification.updatedAt),
+                completedAt: updatedNotification.completedAt ? new Date(updatedNotification.completedAt) : null,
               }
             : n
         )
@@ -131,6 +144,17 @@ export const MyNotifications = () => {
       console.error('Failed to update custom notification:', error);
       setError('Failed to update custom notification');
     }
+  };
+
+  const getNotificationStatus = (notification: CustomNotification) => {
+    if (notification.completedAt) {
+      return { text: 'Completed', color: 'nt-text-blue-600' };
+    }
+    if (!notification.enabled) {
+      return { text: 'Disabled', color: 'nt-text-gray-500' };
+    }
+
+    return { text: 'Active', color: 'nt-text-green-600' };
   };
 
   // Load custom notifications on mount
@@ -277,6 +301,31 @@ export const MyNotifications = () => {
             </div>
           </div>
 
+          <div class={style('myNotificationsFormField', 'nt-space-y-2')}>
+            <div class={style('myNotificationsFormCheckbox', 'nt-flex nt-items-center nt-gap-2')}>
+              <input
+                type="checkbox"
+                id="oneTime"
+                checked={isOneTime()}
+                onChange={handleOneTimeChange}
+                disabled={isSubmitting()}
+                class={style('myNotificationsFormCheckboxInput', 'nt-w-4 nt-h-4 nt-text-primary nt-rounded')}
+              />
+              <label
+                for="oneTime"
+                class={style(
+                  'myNotificationsFormCheckboxLabel',
+                  'nt-text-xs nt-font-medium nt-text-foreground nt-cursor-pointer'
+                )}
+              >
+                {t('myNotifications.form.oneTimeLabel')}
+              </label>
+            </div>
+            <p class={style('myNotificationsFormCheckboxHint', 'nt-text-xs nt-text-foreground-alpha-500 nt-ml-6')}>
+              {t('myNotifications.form.oneTimeHint')}
+            </p>
+          </div>
+
           <div class={style('myNotificationsFormActions', 'nt-flex nt-gap-2 nt-justify-end')}>
             <Button
               variant="ghost"
@@ -285,6 +334,7 @@ export const MyNotifications = () => {
                 setShowForm(false);
                 setNewQuery('');
                 setNewContent('');
+                setIsOneTime(false);
                 setError(null);
               }}
               disabled={isSubmitting()}
@@ -330,72 +380,93 @@ export const MyNotifications = () => {
             {t('myNotifications.list.title')} ({customNotifications().length})
           </h4>
           <For each={customNotifications()}>
-            {(notification) => (
-              <Motion.div
-                animate={{ opacity: 1, x: 0 }}
-                initial={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.3, easing: 'ease-out' }}
-                class={style(
-                  'myNotificationsListItem',
-                  'nt-p-3 nt-bg-neutral-alpha-25 nt-border nt-border-border nt-rounded-lg nt-group nt-hover:bg-neutral-alpha-50 nt-transition-colors'
-                )}
-              >
-                <div
-                  class={style('myNotificationsListItemContent', 'nt-flex nt-justify-between nt-items-start nt-gap-3')}
+            {(notification) => {
+              const status = getNotificationStatus(notification);
+
+              return (
+                <Motion.div
+                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.3, easing: 'ease-out' }}
+                  class={style(
+                    'myNotificationsListItem',
+                    'nt-p-3 nt-bg-neutral-alpha-25 nt-border nt-border-border nt-rounded-lg nt-group nt-hover:bg-neutral-alpha-50 nt-transition-colors'
+                  )}
                 >
-                  <div class={style('myNotificationsListItemText', 'nt-flex-1 nt-min-w-0')}>
-                    <p
-                      class={style(
-                        'myNotificationsListItemQuery',
-                        'nt-text-sm nt-text-foreground nt-break-words nt-font-medium'
-                      )}
-                    >
-                      "{notification.query}"
-                    </p>
-                    <p
-                      class={style(
-                        'myNotificationsListItemContent',
-                        'nt-text-xs nt-text-foreground-alpha-700 nt-mt-1 nt-break-words'
-                      )}
-                    >
-                      Email prompt: "{notification.content}"
-                    </p>
-                    <p class={style('myNotificationsListItemDate', 'nt-text-xs nt-text-foreground-alpha-500 nt-mt-1')}>
-                      {t('myNotifications.list.createdAt')} {notification.createdAt.toLocaleDateString()}
-                    </p>
-                    <div class={style('myNotificationsListItemActions', 'nt-flex nt-items-center nt-gap-2 nt-mt-2')}>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleToggleEnabled(notification._id, !notification.enabled)}
-                        class={style('myNotificationsListItemToggle', 'nt-text-xs nt-px-2 nt-py-1')}
-                      >
-                        {notification.enabled ? 'Disable' : 'Enable'}
-                      </Button>
-                      <span
-                        class={style(
-                          'myNotificationsListItemStatus',
-                          `nt-text-xs ${notification.enabled ? 'nt-text-green-600' : 'nt-text-gray-500'}`
-                        )}
-                      >
-                        {notification.enabled ? 'Active' : 'Disabled'}
-                      </span>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemove(notification._id)}
+                  <div
                     class={style(
-                      'myNotificationsListItemRemove',
-                      'nt-opacity-0 group-hover:nt-opacity-100 nt-transition-opacity nt-text-destructive nt-hover:bg-destructive/10'
+                      'myNotificationsListItemContent',
+                      'nt-flex nt-justify-between nt-items-start nt-gap-3'
                     )}
                   >
-                    ×
-                  </Button>
-                </div>
-              </Motion.div>
-            )}
+                    <div class={style('myNotificationsListItemText', 'nt-flex-1 nt-min-w-0')}>
+                      <div class={style('myNotificationsListItemHeader', 'nt-flex nt-items-center nt-gap-2 nt-mb-1')}>
+                        <p
+                          class={style(
+                            'myNotificationsListItemQuery',
+                            'nt-text-sm nt-text-foreground nt-break-words nt-font-medium'
+                          )}
+                        >
+                          "{notification.query}"
+                        </p>
+                        <Show when={notification.isOneTime}>
+                          <Badge
+                            class={style(
+                              'myNotificationsOneTimeBadge',
+                              'nt-px-2 nt-py-0.5 nt-text-xs nt-bg-blue-alpha-100 nt-text-blue-600 nt-font-medium'
+                            )}
+                          >
+                            One-time
+                          </Badge>
+                        </Show>
+                      </div>
+                      <p
+                        class={style(
+                          'myNotificationsListItemContent',
+                          'nt-text-xs nt-text-foreground-alpha-700 nt-mt-1 nt-break-words'
+                        )}
+                      >
+                        Email prompt: "{notification.content}"
+                      </p>
+                      <p
+                        class={style('myNotificationsListItemDate', 'nt-text-xs nt-text-foreground-alpha-500 nt-mt-1')}
+                      >
+                        {t('myNotifications.list.createdAt')} {notification.createdAt.toLocaleDateString()}
+                        <Show when={notification.completedAt}>
+                          {` • Completed on ${notification.completedAt!.toLocaleDateString()}`}
+                        </Show>
+                      </p>
+                      <div class={style('myNotificationsListItemActions', 'nt-flex nt-items-center nt-gap-2 nt-mt-2')}>
+                        <Show when={!notification.completedAt}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleToggleEnabled(notification._id, !notification.enabled)}
+                            class={style('myNotificationsListItemToggle', 'nt-text-xs nt-px-2 nt-py-1')}
+                          >
+                            {notification.enabled ? 'Disable' : 'Enable'}
+                          </Button>
+                        </Show>
+                        <span class={style('myNotificationsListItemStatus', `nt-text-xs ${status.color}`)}>
+                          {status.text}
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemove(notification._id)}
+                      class={style(
+                        'myNotificationsListItemRemove',
+                        'nt-opacity-0 group-hover:nt-opacity-100 nt-transition-opacity nt-text-destructive nt-hover:bg-destructive/10'
+                      )}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                </Motion.div>
+              );
+            }}
           </For>
         </div>
       </Show>

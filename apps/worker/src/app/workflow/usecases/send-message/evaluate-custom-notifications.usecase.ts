@@ -36,16 +36,14 @@ export class EvaluateCustomNotifications {
   @InstrumentUsecase()
   public async execute(command: CustomNotificationEvaluationCommand): Promise<CustomNotificationEvaluationResult> {
     try {
-      // Fetch all enabled custom notifications for the subscriber
-      const customNotifications = await this.customNotificationsRepository.findBySubscriberId(
+      // Fetch all enabled custom notifications for the subscriber (excludes completed one-time notifications)
+      const customNotifications = await this.customNotificationsRepository.findEnabledBySubscriberId(
         command.environmentId,
         command.organizationId,
         command.subscriberId
       );
 
-      const enabledNotifications = customNotifications.filter((notification) => notification.enabled);
-
-      if (enabledNotifications.length === 0) {
+      if (customNotifications.length === 0) {
         return {
           matches: [],
           shouldSend: false,
@@ -56,7 +54,7 @@ export class EvaluateCustomNotifications {
       // Evaluate each custom notification
       const matches: CustomNotificationMatch[] = [];
 
-      for (const notification of enabledNotifications) {
+      for (const notification of customNotifications) {
         try {
           const evaluationResult = await this.evaluateNotification(notification, command);
           matches.push({
@@ -175,6 +173,33 @@ Full context:
 ${JSON.stringify(eventInfo, null, 2)}
 
 Based on the user's custom notification rule and the event information above, should this notification be sent?`;
+  }
+
+  @InstrumentUsecase()
+  public async markOneTimeNotificationsAsCompleted(
+    environmentId: string,
+    organizationId: string,
+    subscriberId: string,
+    notificationIds: string[]
+  ): Promise<string[]> {
+    const completedIds: string[] = [];
+
+    for (const notificationId of notificationIds) {
+      try {
+        await this.customNotificationsRepository.markAsCompleted(
+          environmentId,
+          organizationId,
+          subscriberId,
+          notificationId
+        );
+        completedIds.push(notificationId);
+        this.logger.log(`Marked one-time notification ${notificationId} as completed after successful send`);
+      } catch (error) {
+        this.logger.error(`Failed to mark one-time notification ${notificationId} as completed`, error);
+      }
+    }
+
+    return completedIds;
   }
 
   @Instrument()

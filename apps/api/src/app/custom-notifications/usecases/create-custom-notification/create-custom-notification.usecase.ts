@@ -37,6 +37,7 @@ export class CreateCustomNotificationUseCase {
       query: command.query,
       content: command.content,
       enabled: command.enabled ?? true,
+      isOneTime: command.isOneTime ?? false,
     });
 
     return customNotification;

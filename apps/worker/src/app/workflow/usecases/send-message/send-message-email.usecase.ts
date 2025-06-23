@@ -42,6 +42,7 @@ import { PlatformException } from '../../../shared/utils';
 import { SendMessageResult } from './send-message-type.usecase';
 import { SendMessageBase } from './send-message.base';
 import { SendMessageCommand } from './send-message.command';
+import { EvaluateCustomNotifications } from './evaluate-custom-notifications.usecase';
 
 const LOG_CONTEXT = 'SendMessageEmail';
 
@@ -60,7 +61,8 @@ export class SendMessageEmail extends SendMessageBase {
     protected getNovuProviderCredentials: GetNovuProviderCredentials,
     protected selectVariant: SelectVariant,
     protected moduleRef: ModuleRef,
-    private featureFlagService: FeatureFlagsService
+    private featureFlagService: FeatureFlagsService,
+    private evaluateCustomNotifications: EvaluateCustomNotifications
   ) {
     super(
       messageRepository,
@@ -536,6 +538,42 @@ export class SendMessageEmail extends SendMessageBase {
           },
         }
       );
+
+      // Mark one-time custom notifications as completed after successful send
+      if (command.oneTimeNotificationIds && command.oneTimeNotificationIds.length > 0) {
+        try {
+          const completedIds = await this.evaluateCustomNotifications.markOneTimeNotificationsAsCompleted(
+            command.environmentId,
+            command.organizationId,
+            command.subscriberId,
+            command.oneTimeNotificationIds
+          );
+
+          if (completedIds.length > 0) {
+            await this.createExecutionDetails.execute(
+              CreateExecutionDetailsCommand.create({
+                ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
+                messageId: message._id,
+                detail: DetailEnum.CUSTOM_NOTIFICATION_ONE_TIME_COMPLETED,
+                source: ExecutionDetailsSourceEnum.INTERNAL,
+                status: ExecutionDetailsStatusEnum.SUCCESS,
+                isTest: false,
+                isRetry: false,
+                raw: JSON.stringify({
+                  completedOneTimeNotifications: completedIds,
+                }),
+              })
+            );
+          }
+        } catch (error) {
+          // Log error but don't fail the email sending
+          Logger.error(
+            { error, oneTimeNotificationIds: command.oneTimeNotificationIds },
+            'Failed to mark one-time notifications as completed after successful email send',
+            LOG_CONTEXT
+          );
+        }
+      }
 
       return {
         status: 'success',

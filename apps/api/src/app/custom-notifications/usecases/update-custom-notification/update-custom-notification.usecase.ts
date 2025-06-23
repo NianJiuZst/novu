@@ -24,14 +24,15 @@ export class UpdateCustomNotificationUseCase {
 
     // Update the custom notification
     const updatedNotification = await this.customNotificationsRepository.updateCustomNotification(
-      command.id,
       command.environmentId,
       command.organizationId,
       command.subscriberId,
+      command.id,
       {
-        ...(command.query && { query: command.query }),
-        ...(command.content && { content: command.content }),
-        ...(command.enabled !== undefined && { enabled: command.enabled }),
+        query: command.query,
+        content: command.content,
+        enabled: command.enabled,
+        isOneTime: command.isOneTime,
       }
     );
 

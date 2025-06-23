@@ -54,4 +54,7 @@ export class SendMessageCommand extends EnvironmentWithUserCommand {
 
   @IsOptional()
   statelessPreferences?: WorkflowPreferences;
+
+  @IsOptional()
+  oneTimeNotificationIds?: string[];
 }

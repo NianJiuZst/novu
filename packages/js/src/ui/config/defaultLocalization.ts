@@ -27,7 +27,8 @@ export const defaultLocalization = {
   'notification.snoozedUntil': 'Snoozed until',
   'preferences.title': 'Preferences',
   'preferences.emptyNotice': 'No notification specific preferences yet.',
-  'preferences.global': 'Global Preferences',
+  'preferences.global': 'Global preferences',
+  'preferences.workflow': 'Workflow preferences',
   'preferences.workflow.disabled.notice':
     'Contact admin to enable subscription management for this critical notification.',
   'preferences.workflow.disabled.tooltip': 'Contact admin to edit',
@@ -46,26 +47,52 @@ export const defaultLocalization = {
 
   // My Notifications
   'myNotifications.title': 'My notifications',
-  'myNotifications.badge': 'New',
+  'myNotifications.badge': 'AI',
   'myNotifications.description':
-    'Create custom notifications based on what matters to you. AI will match system events against your preferences.',
-  'myNotifications.addButton': 'Add Custom Notification',
-  'myNotifications.form.title': 'Describe your notification',
-  'myNotifications.form.description': 'Tell us what you want to be notified about. Be specific about your preferences.',
+    'Create custom notification rules using natural language. AI will match system events against your preferences and send personalized notifications.',
+  'myNotifications.addButton': 'Add custom notification',
+  'myNotifications.form.title': 'Create Custom Notification',
+  'myNotifications.form.description': 'Describe what you want to be notified about and how you want to be notified.',
   'myNotifications.form.label': 'What do you want to be notified about?',
-  'myNotifications.form.placeholder':
-    'Example: "Notify me about critical security issues in production" or "Alert me when my team is mentioned in any discussion"',
-  'myNotifications.form.hint': 'Be specific to get better matches',
-  'myNotifications.form.contentLabel': 'Email content prompt',
-  'myNotifications.form.contentPlaceholder':
-    'Example: "Create a professional security alert email with details about the issue and recommended actions" or "Generate a friendly team mention notification with context about the discussion"',
-  'myNotifications.form.contentHint': 'Describe how you want the email to look and what information to include',
+  'myNotifications.form.placeholder': 'e.g., "Notify me about critical security issues in production"',
+  'myNotifications.form.hint': 'Be specific about the events or conditions you care about',
+  'myNotifications.form.contentLabel': 'How should we notify you?',
+  'myNotifications.form.contentPlaceholder': 'e.g., "Security Alert: Critical issue detected in {{environment}}"',
+  'myNotifications.form.contentHint': 'This template will be used to generate your notification content',
+  'myNotifications.form.oneTimeLabel': 'One-time notification',
+  'myNotifications.form.oneTimeHint': 'This notification will be automatically deactivated after being triggered once',
   'myNotifications.form.cancel': 'Cancel',
-  'myNotifications.form.submit': 'Create Notification',
+  'myNotifications.form.submit': 'Create notification',
   'myNotifications.form.submitting': 'Creating...',
-  'myNotifications.list.title': 'Your Custom Notifications',
+  'myNotifications.list.title': 'Your custom notifications',
   'myNotifications.list.createdAt': 'Created',
   'myNotifications.empty': 'No custom notifications yet. Create your first one above!',
+
+  // Notify Component
+  'notify.button': 'Smart Notify',
+  'notify.tooltip': 'Create AI-powered notifications',
+  'notify.form.title': 'Smart Notification',
+  'notify.form.description':
+    "Describe what you want to be notified about and we'll create a smart notification for you.",
+  'notify.form.success': 'Notification created successfully!',
+  'notify.form.error': 'Failed to create notification. Please try again.',
+
+  'inbox.status.options.unread': 'Unread',
+  'inbox.status.options.unreadRead': 'All',
+  'inbox.status.options.archived': 'Archived',
+  'inbox.status.options.snoozed': 'Snoozed',
+  'preferences.channels.email': 'Email',
+  'preferences.channels.sms': 'SMS',
+  'preferences.channels.in_app': 'In-App',
+  'preferences.channels.chat': 'Chat',
+  'preferences.channels.push': 'Push',
+  'preferences.channels.aiPreference': 'AI Preference',
+  'preferences.channels.aiPreference.enabled': 'Enabled',
+  'preferences.channels.aiPreference.disabled': 'Disabled',
+  'preferences.channels.aiPreference.prompt': 'Custom prompt',
+  'preferences.channels.aiPreference.promptPlaceholder': 'Describe when you want to receive notifications...',
+  'preferences.channels.aiPreference.description':
+    'AI will intelligently filter notifications based on your custom criteria.',
 } as const;
 
 export const [dynamicLocalization, setDynamicLocalization] = createSignal<Record<string, string>>({});

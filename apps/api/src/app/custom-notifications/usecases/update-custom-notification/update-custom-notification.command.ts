@@ -20,4 +20,8 @@ export class UpdateCustomNotificationCommand extends EnvironmentWithSubscriber {
   @IsBoolean()
   @IsOptional()
   enabled?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  isOneTime?: boolean;
 }

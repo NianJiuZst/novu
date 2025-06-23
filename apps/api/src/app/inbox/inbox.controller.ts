@@ -476,6 +476,8 @@ export class InboxController {
       query: notification.query,
       content: notification.content,
       enabled: notification.enabled,
+      isOneTime: notification.isOneTime,
+      completedAt: notification.completedAt,
       createdAt: notification.createdAt,
       updatedAt: notification.updatedAt,
     }));
@@ -495,6 +497,7 @@ export class InboxController {
         query: body.query,
         content: body.content,
         enabled: body.enabled,
+        isOneTime: body.isOneTime,
       })
     );
 
@@ -503,6 +506,8 @@ export class InboxController {
       query: customNotification.query,
       content: customNotification.content,
       enabled: customNotification.enabled,
+      isOneTime: customNotification.isOneTime,
+      completedAt: customNotification.completedAt,
       createdAt: customNotification.createdAt,
       updatedAt: customNotification.updatedAt,
     };
@@ -524,6 +529,7 @@ export class InboxController {
         query: body.query,
         content: body.content,
         enabled: body.enabled,
+        isOneTime: body.isOneTime,
       })
     );
 
@@ -532,6 +538,8 @@ export class InboxController {
       query: customNotification.query,
       content: customNotification.content,
       enabled: customNotification.enabled,
+      isOneTime: customNotification.isOneTime,
+      completedAt: customNotification.completedAt,
       createdAt: customNotification.createdAt,
       updatedAt: customNotification.updatedAt,
     };

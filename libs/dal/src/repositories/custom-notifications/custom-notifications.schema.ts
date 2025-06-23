@@ -40,6 +40,14 @@ const customNotificationsSchema = new Schema<CustomNotificationDBModel>(
       type: Schema.Types.Boolean,
       default: true,
     },
+    isOneTime: {
+      type: Schema.Types.Boolean,
+      default: false,
+    },
+    completedAt: {
+      type: Schema.Types.Date,
+      default: null,
+    },
   },
   { ...schemaOptions, minimize: false }
 );
@@ -58,6 +66,14 @@ customNotificationsSchema.index({
   _environmentId: 1,
   _organizationId: 1,
   enabled: 1,
+});
+
+// Index for finding one-time notifications that haven't been completed
+customNotificationsSchema.index({
+  _environmentId: 1,
+  _subscriberId: 1,
+  isOneTime: 1,
+  completedAt: 1,
 });
 
 export const CustomNotification = mongoose.model<CustomNotificationDBModel>(

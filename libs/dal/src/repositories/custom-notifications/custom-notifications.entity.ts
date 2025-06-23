@@ -33,6 +33,16 @@ export class CustomNotificationEntity {
   enabled: boolean;
 
   /**
+   * Whether this is a one-time notification that should be deactivated after being triggered
+   */
+  isOneTime: boolean;
+
+  /**
+   * When this one-time notification was completed/triggered (null if not completed)
+   */
+  completedAt?: Date | null;
+
+  /**
    * When this custom notification was created
    */
   createdAt: Date;

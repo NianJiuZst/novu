@@ -32,4 +32,13 @@ export class CreateCustomNotificationDto {
   @IsBoolean()
   @IsOptional()
   enabled?: boolean;
+
+  @ApiProperty({
+    description: 'Whether this is a one-time notification that will be deactivated after being triggered',
+    example: false,
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isOneTime?: boolean;
 }

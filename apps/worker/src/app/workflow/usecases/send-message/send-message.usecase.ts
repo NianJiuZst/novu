@@ -179,6 +179,14 @@ export class SendMessage {
         }
       }
 
+      // Store matching notifications for later completion marking
+      const oneTimeNotificationIds = matchingNotifications
+        .filter((match) => match.notification.isOneTime)
+        .map((match) => match.notification._id);
+
+      // Store this in the command for later use after successful send
+      command.oneTimeNotificationIds = oneTimeNotificationIds;
+
       // Log successful custom notification matches
       await this.createExecutionDetails.execute(
         CreateExecutionDetailsCommand.create({
@@ -197,6 +205,7 @@ export class SendMessage {
                 query: match.notification.query,
                 reason: match.reason,
                 contentPrompt: match.contentPrompt,
+                isOneTime: match.notification.isOneTime,
               })),
               generatedContent: generatedContent
                 ? {

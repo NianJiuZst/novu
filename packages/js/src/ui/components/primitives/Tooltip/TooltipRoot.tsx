@@ -55,7 +55,7 @@ export function TooltipRoot(props: TooltipRootProps) {
 
   const setOpenSetter: Setter<boolean> = (valueOrFn) => {
     if (props.open === undefined) {
-      setUncontrolledOpen(valueOrFn);
+      setUncontrolledOpen(valueOrFn as any);
     }
   };
 
