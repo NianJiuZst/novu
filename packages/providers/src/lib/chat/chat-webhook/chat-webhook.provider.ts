@@ -1,53 +1,44 @@
-import { ChannelTypeEnum, IPushOptions, IPushProvider, ISendMessageSuccessResponse } from '@novu/stateless';
+import { ChannelTypeEnum, IChatOptions, IChatProvider, ISendMessageSuccessResponse } from '@novu/stateless';
 import crypto from 'crypto';
 import axios from 'axios';
-import { PushProviderIdEnum } from '@novu/shared';
+import { ChatProviderIdEnum } from '@novu/shared';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
 import { WithPassthrough } from '../../../utils/types';
 
-export class PushWebhookPushProvider extends BaseProvider implements IPushProvider {
+export class ChatWebhookProvider extends BaseProvider implements IChatProvider {
   protected casing: CasingEnum = CasingEnum.CAMEL_CASE;
-  readonly id = PushProviderIdEnum.PushWebhook;
-  channelType = ChannelTypeEnum.PUSH as ChannelTypeEnum.PUSH;
+  readonly id = ChatProviderIdEnum.ChatWebhook;
+  channelType = ChannelTypeEnum.CHAT as ChannelTypeEnum.CHAT;
 
   constructor(
     private config: {
       hmacSecretKey?: string;
-      webhookUrl: string;
     }
   ) {
     super();
   }
 
   async sendMessage(
-    options: IPushOptions,
+    options: IChatOptions,
     bridgeProviderData: WithPassthrough<Record<string, unknown>> = {}
   ): Promise<ISendMessageSuccessResponse> {
-    const { subscriber, step, payload, ...rest } = options;
+    const { content, webhookUrl, channel, phoneNumber } = options;
     const data = this.transform(bridgeProviderData, {
-      ...rest,
-      payload: {
-        ...payload,
-        subscriber,
-        step,
-      },
+      content,
+      webhookUrl,
+      channel,
+      phoneNumber,
     });
+    const body = this.createBody(data.body);
 
     const hmacSecretKey = (data.body.hmacSecretKey as string) || this.config.hmacSecretKey;
-    const webhookUrl = (data.body.webhookUrl as string) || this.config.webhookUrl;
-
-    // Clean up override fields from the body before sending
-    if (data.body.hmacSecretKey) {
-      delete data.body.hmacSecretKey;
-    }
-    if (data.body.webhookUrl) {
-      delete data.body.webhookUrl;
-    }
-
-    const body = this.createBody(data.body);
     const hmacValue = this.computeHmac(body, hmacSecretKey);
 
-    const response = await axios.create().post(webhookUrl, body, {
+    if (data.body.hmacSecretKey as string) {
+      delete data.body.hmacSecretKey;
+    }
+
+    const response = await axios.create().post((data?.body?.webhookUrl as string) || webhookUrl, body, {
       headers: {
         'content-type': 'application/json',
         'X-Novu-Signature': hmacValue,
@@ -65,8 +56,11 @@ export class PushWebhookPushProvider extends BaseProvider implements IPushProvid
     return JSON.stringify(options);
   }
 
-  computeHmac(payload: string, hmacSecretKey: string): string {
+  computeHmac(payload: string, hmacSecretKey?: string): string {
     const secretKey = hmacSecretKey;
+    if (!secretKey) {
+      return;
+    }
 
     return crypto.createHmac('sha256', secretKey).update(payload, 'utf-8').digest('hex');
   }
