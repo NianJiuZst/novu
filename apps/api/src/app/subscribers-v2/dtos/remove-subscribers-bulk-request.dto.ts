@@ -4,7 +4,7 @@ import { ArrayMaxSize, ArrayNotEmpty, IsArray, IsString } from 'class-validator'
 export class RemoveSubscribersBulkRequestDto {
   @ApiProperty({
     description: 'Array of subscriber IDs to delete',
-    isArray: true,
+    type: [String],
     example: ['subscriber1', 'subscriber2'],
   })
   @IsArray()
