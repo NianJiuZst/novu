@@ -36,6 +36,7 @@ import { GetSubscriber } from './usecases/get-subscriber/get-subscriber.usecase'
 import { ListSubscribersUseCase } from './usecases/list-subscribers/list-subscribers.usecase';
 import { PatchSubscriber } from './usecases/patch-subscriber/patch-subscriber.usecase';
 import { RemoveSubscriber } from './usecases/remove-subscriber/remove-subscriber.usecase';
+import { RemoveSubscribersBulk } from './usecases/remove-subscribers-bulk/remove-subscribers-bulk.usecase';
 import { UpdateSubscriberPreferences } from './usecases/update-subscriber-preferences/update-subscriber-preferences.usecase';
 
 const USE_CASES = [
@@ -53,6 +54,7 @@ const USE_CASES = [
   GetSubscriber,
   PatchSubscriber,
   RemoveSubscriber,
+  RemoveSubscribersBulk,
   GetSubscriberPreferences,
   GetSubscriberGlobalPreference,
   GetSubscriberPreference,

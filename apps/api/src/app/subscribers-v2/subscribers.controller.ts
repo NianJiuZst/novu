@@ -4,6 +4,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -41,6 +43,8 @@ import { ListSubscribersResponseDto } from './dtos/list-subscribers-response.dto
 import { PatchSubscriberPreferencesDto } from './dtos/patch-subscriber-preferences.dto';
 import { PatchSubscriberRequestDto } from './dtos/patch-subscriber.dto';
 import { RemoveSubscriberResponseDto } from './dtos/remove-subscriber.dto';
+import { RemoveSubscribersBulkRequestDto } from './dtos/remove-subscribers-bulk-request.dto';
+import { RemoveSubscribersBulkResponseDto } from './dtos/remove-subscribers-bulk-response.dto';
 import { GetSubscriberPreferencesCommand } from './usecases/get-subscriber-preferences/get-subscriber-preferences.command';
 import { GetSubscriberPreferences } from './usecases/get-subscriber-preferences/get-subscriber-preferences.usecase';
 import { GetSubscriberCommand } from './usecases/get-subscriber/get-subscriber.command';
@@ -52,6 +56,8 @@ import { PatchSubscriberCommand } from './usecases/patch-subscriber/patch-subscr
 import { PatchSubscriber } from './usecases/patch-subscriber/patch-subscriber.usecase';
 import { RemoveSubscriberCommand } from './usecases/remove-subscriber/remove-subscriber.command';
 import { RemoveSubscriber } from './usecases/remove-subscriber/remove-subscriber.usecase';
+import { RemoveSubscribersBulkCommand } from './usecases/remove-subscribers-bulk/remove-subscribers-bulk.command';
+import { RemoveSubscribersBulk } from './usecases/remove-subscribers-bulk/remove-subscribers-bulk.usecase';
 import { UpdateSubscriberPreferencesCommand } from './usecases/update-subscriber-preferences/update-subscriber-preferences.command';
 import { UpdateSubscriberPreferences } from './usecases/update-subscriber-preferences/update-subscriber-preferences.usecase';
 
@@ -68,6 +74,7 @@ export class SubscribersController {
     private getSubscriberUsecase: GetSubscriber,
     private patchSubscriberUsecase: PatchSubscriber,
     private removeSubscriberUsecase: RemoveSubscriber,
+    private removeSubscribersBulkUsecase: RemoveSubscribersBulk,
     private getSubscriberPreferencesUsecase: GetSubscriberPreferences,
     private updateSubscriberPreferencesUsecase: UpdateSubscriberPreferences,
     private createOrUpdateSubscriberUsecase: CreateOrUpdateSubscriberUseCase,
@@ -211,6 +218,30 @@ export class SubscribersController {
         environmentId: user.environmentId,
         organizationId: user.organizationId,
         subscriberId,
+      })
+    );
+  }
+
+  @Post('/bulk/delete')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse(RemoveSubscribersBulkResponseDto, 200)
+  @ExternalApiAccessible()
+  @ApiOperation({
+    summary: 'Delete subscribers in bulk',
+    description: `Deletes multiple subscriber entities from the Novu platform along with their associated messages, preferences, and topic subscriptions. 
+      Maximum of 100 subscriber IDs can be deleted in a single request.`,
+  })
+  @SdkMethodName('deleteBulk')
+  @RequirePermissions(PermissionsEnum.SUBSCRIBER_WRITE)
+  async removeSubscribersBulk(
+    @UserSession() user: UserSessionData,
+    @Body() body: RemoveSubscribersBulkRequestDto
+  ): Promise<RemoveSubscribersBulkResponseDto> {
+    return await this.removeSubscribersBulkUsecase.execute(
+      RemoveSubscribersBulkCommand.create({
+        environmentId: user.environmentId,
+        organizationId: user.organizationId,
+        subscriberIds: body.subscriberIds,
       })
     );
   }
