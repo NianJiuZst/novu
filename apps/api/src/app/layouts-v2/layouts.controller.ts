@@ -22,6 +22,7 @@ import {
 import { ApiRateLimitCategoryEnum, DirectionEnum, UserSessionData, PermissionsEnum } from '@novu/shared';
 import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
+import { SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 import {
   CreateLayoutDto,
   DuplicateLayoutDto,
@@ -171,6 +172,7 @@ export class LayoutsController {
     description: 'Retrieves a list of layouts with optional filtering and pagination',
   })
   @ApiResponse(ListLayoutResponseDto)
+  @SdkMethodName('list')
   @RequirePermissions(PermissionsEnum.LAYOUT_READ)
   async list(
     @UserSession(ParseSlugEnvironmentIdPipe) user: UserSessionData,
