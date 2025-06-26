@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { LayoutEntity, LayoutRepository } from '@novu/dal';
 import { InstrumentUsecase } from '@novu/application-generic';
-import { DirectionEnum, OrderDirectionEnum, ResourceOriginEnum, ResourceTypeEnum } from '@novu/shared';
+import { DirectionEnum, OrderDirectionEnum } from '@novu/shared';
 
 import { ListLayoutsCommand } from './list-layouts.command';
 import { ListLayoutResponseDto, LayoutResponseDto } from '../../dtos';
