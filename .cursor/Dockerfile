@@ -188,6 +188,57 @@ RUN pnpm config set store-dir /home/ubuntu/.pnpm-store \
     && pnpm config set network-timeout 60000 \
     && pnpm config set fetch-retries 3
 
+# Add MongoDB and Redis binaries to PATH and create helpful aliases
+RUN echo 'export PATH="/usr/bin:$PATH"' >> /home/ubuntu/.bashrc \
+    && echo 'alias redis="redis-cli"' >> /home/ubuntu/.bashrc \
+    && echo 'alias mongodb="mongosh"' >> /home/ubuntu/.bashrc \
+    && echo 'alias mongo="mongosh"' >> /home/ubuntu/.bashrc \
+    && echo 'alias check-services="check-services.sh"' >> /home/ubuntu/.bashrc \
+    && echo 'echo "🚀 Novu Development Environment"' >> /home/ubuntu/.bashrc \
+    && echo 'echo "📊 Service Status: sudo supervisorctl status"' >> /home/ubuntu/.bashrc \
+    && echo 'echo "🔗 MongoDB: mongosh (or just: mongo)"' >> /home/ubuntu/.bashrc \
+    && echo 'echo "🔗 Redis: redis-cli (or just: redis)"' >> /home/ubuntu/.bashrc \
+    && echo 'echo "🔍 Check Services: check-services"' >> /home/ubuntu/.bashrc \
+    && echo 'echo "📁 Workspace: /workspace"' >> /home/ubuntu/.bashrc
+
+# Switch back to root to create service check script
+USER root
+
+# Create a service status check script
+RUN echo '#!/bin/bash' > /usr/local/bin/check-services.sh \
+    && echo 'echo "🔍 Checking Novu Development Services..."' >> /usr/local/bin/check-services.sh \
+    && echo 'echo ""' >> /usr/local/bin/check-services.sh \
+    && echo 'echo "📊 Supervisor Status:"' >> /usr/local/bin/check-services.sh \
+    && echo 'sudo supervisorctl status' >> /usr/local/bin/check-services.sh \
+    && echo 'echo ""' >> /usr/local/bin/check-services.sh \
+    && echo 'echo "🍃 MongoDB Connection Test:"' >> /usr/local/bin/check-services.sh \
+    && echo 'if mongosh --quiet --eval "db.runCommand({ping: 1})" >/dev/null 2>&1; then' >> /usr/local/bin/check-services.sh \
+    && echo '    echo "✅ MongoDB is running and accessible"' >> /usr/local/bin/check-services.sh \
+    && echo '    echo "   Connection: mongosh mongodb://localhost:27017"' >> /usr/local/bin/check-services.sh \
+    && echo 'else' >> /usr/local/bin/check-services.sh \
+    && echo '    echo "❌ MongoDB connection failed"' >> /usr/local/bin/check-services.sh \
+    && echo '    echo "   Try: sudo supervisorctl restart mongodb"' >> /usr/local/bin/check-services.sh \
+    && echo 'fi' >> /usr/local/bin/check-services.sh \
+    && echo 'echo ""' >> /usr/local/bin/check-services.sh \
+    && echo 'echo "🔴 Redis Connection Test:"' >> /usr/local/bin/check-services.sh \
+    && echo 'if redis-cli ping >/dev/null 2>&1; then' >> /usr/local/bin/check-services.sh \
+    && echo '    echo "✅ Redis is running and accessible"' >> /usr/local/bin/check-services.sh \
+    && echo '    echo "   Connection: redis-cli -h localhost -p 6379"' >> /usr/local/bin/check-services.sh \
+    && echo 'else' >> /usr/local/bin/check-services.sh \
+    && echo '    echo "❌ Redis connection failed"' >> /usr/local/bin/check-services.sh \
+    && echo '    echo "   Try: sudo supervisorctl restart redis"' >> /usr/local/bin/check-services.sh \
+    && echo 'fi' >> /usr/local/bin/check-services.sh \
+    && echo 'echo ""' >> /usr/local/bin/check-services.sh \
+    && echo 'echo "💡 Usage Commands:"' >> /usr/local/bin/check-services.sh \
+    && echo 'echo "  MongoDB: mongosh (or mongo)"' >> /usr/local/bin/check-services.sh \
+    && echo 'echo "  Redis: redis-cli (or redis)"' >> /usr/local/bin/check-services.sh \
+    && echo 'echo "  Services: sudo supervisorctl status|start|stop|restart <service>"' >> /usr/local/bin/check-services.sh \
+    && echo 'echo "  Logs: sudo tail -f /var/log/supervisor/<service>.log"' >> /usr/local/bin/check-services.sh \
+    && chmod +x /usr/local/bin/check-services.sh
+
+# Switch back to ubuntu user
+USER ubuntu
+
 # Set workspace as working directory
 WORKDIR /workspace
 
