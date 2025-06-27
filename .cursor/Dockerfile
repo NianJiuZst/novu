@@ -50,11 +50,23 @@ RUN npm --no-update-notifier --no-fund --global install \
     typescript@5.6.2 \
     && npm cache clean --force
 
+# Create system directories first (as root)
+RUN mkdir -p \
+    /var/log/supervisor \
+    /etc/supervisor/conf.d \
+    /data/db \
+    /data/redis \
+    /workspace \
+    /tmp/.pnpm-store \
+    && chown mongodb:mongodb /data/db \
+    && chown redis:redis /data/redis \
+    && chmod 755 /data/db /data/redis
+
 # Create non-root user as recommended for background agents
 RUN useradd -m -s /bin/bash ubuntu \
     && echo "ubuntu ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
     && mkdir -p /home/ubuntu/.pnpm-store /home/ubuntu/.pnpm-cache \
-    && chown -R ubuntu:ubuntu /home/ubuntu
+    && chown -R ubuntu:ubuntu /home/ubuntu /workspace
 
 # Switch to non-root user
 USER ubuntu
@@ -68,23 +80,8 @@ ENV NX_DAEMON=false \
     PNPM_STORE_DIR="/home/ubuntu/.pnpm-store" \
     PNPM_CACHE_DIR="/home/ubuntu/.pnpm-cache"
 
-# Create minimal directory structure and set permissions
-RUN mkdir -p \
-    /var/log/supervisor \
-    /etc/supervisor/conf.d \
-    /data/db \
-    /data/redis \
-    /workspace \
-    /tmp/.pnpm-store \
-    && chown mongodb:mongodb /data/db \
-    && chown redis:redis /data/redis \
-    && chmod 755 /data/db /data/redis
-
-# Configure pnpm for speed and efficiency
-RUN pnpm config set store-dir /home/ubuntu/.pnpm-store \
-    && pnpm config set cache-dir /home/ubuntu/.pnpm-cache \
-    && pnpm config set network-timeout 60000 \
-    && pnpm config set fetch-retries 3
+# Switch back to root temporarily for system configuration
+USER root
 
 # Create optimized supervisor configuration
 RUN printf '[supervisord]\n\
@@ -113,7 +110,7 @@ stdout_logfile=/dev/null\n' > /etc/supervisor/conf.d/services.conf
 RUN printf '#!/bin/bash\n\
 set -e\n\
 echo "🚀 Novu Cursor Environment"\n\
-supervisord -c /etc/supervisor/supervisord.conf\n\
+sudo supervisord -c /etc/supervisor/supervisord.conf\n\
 timeout=15\n\
 while ! mongosh --eval "db.runCommand('\''ping'\'')" >/dev/null 2>&1 && [ $timeout -gt 0 ]; do\n\
     sleep 1; timeout=$((timeout-1))\n\
@@ -127,6 +124,15 @@ echo "✅ MongoDB & Redis ready!"\n\
 echo "🚀 Quick start: git clone https://github.com/novuhq/novu.git /workspace/novu"\n\
 exec /bin/bash\n' > /usr/local/bin/start-dev.sh \
     && chmod +x /usr/local/bin/start-dev.sh
+
+# Switch back to ubuntu user
+USER ubuntu
+
+# Configure pnpm for speed and efficiency
+RUN pnpm config set store-dir /home/ubuntu/.pnpm-store \
+    && pnpm config set cache-dir /home/ubuntu/.pnpm-cache \
+    && pnpm config set network-timeout 60000 \
+    && pnpm config set fetch-retries 3
 
 # Set workspace as working directory
 WORKDIR /workspace
