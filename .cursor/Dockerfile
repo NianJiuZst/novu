@@ -83,6 +83,12 @@ ENV NX_DAEMON=false \
 # Switch back to root temporarily for system configuration
 USER root
 
+# Create log files with proper permissions first
+RUN touch /var/log/mongodb.log /var/log/redis.log \
+    && chown mongodb:mongodb /var/log/mongodb.log \
+    && chown redis:redis /var/log/redis.log \
+    && chmod 644 /var/log/mongodb.log /var/log/redis.log
+
 # Create optimized supervisor configuration
 RUN printf '[supervisord]\n\
 nodaemon=false\n\
@@ -107,7 +113,7 @@ supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
 [include]\n\
 files = /etc/supervisor/conf.d/*.conf\n' > /etc/supervisor/supervisord.conf \
     && printf '[program:mongodb]\n\
-command=mongod --dbpath /data/db --bind_ip_all --port 27017 --replSet rs0 --logpath /var/log/mongodb.log\n\
+command=mongod --dbpath /data/db --bind_ip_all --port 27017 --logpath /var/log/mongodb.log\n\
 user=mongodb\n\
 autostart=true\n\
 autorestart=true\n\
@@ -148,7 +154,6 @@ RUN echo '#!/bin/bash' > /usr/local/bin/start-dev.sh && \
     echo '' >> /usr/local/bin/start-dev.sh && \
     echo 'if [ $timeout -gt 0 ]; then' >> /usr/local/bin/start-dev.sh && \
     echo '    echo "✅ MongoDB is ready!"' >> /usr/local/bin/start-dev.sh && \
-    echo '    mongosh --quiet --eval "try { rs.initiate() } catch(e) { if (e.code !== 23) throw e }" >/dev/null 2>&1 || true' >> /usr/local/bin/start-dev.sh && \
     echo 'else' >> /usr/local/bin/start-dev.sh && \
     echo '    echo "❌ MongoDB failed to start"' >> /usr/local/bin/start-dev.sh && \
     echo 'fi' >> /usr/local/bin/start-dev.sh && \
