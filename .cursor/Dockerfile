@@ -126,58 +126,62 @@ redirect_stderr=true\n\
 stdout_logfile=/var/log/supervisor/redis.log\n\
 stderr_logfile=/var/log/supervisor/redis_err.log\n' > /etc/supervisor/conf.d/services.conf
 
-# Create optimized startup script
-RUN printf '#!/bin/bash\n\
-set -e\n\
-echo "🚀 Novu Cursor Environment"\n\
-\n\
-# Start supervisor in background\n\
-sudo supervisord -c /etc/supervisor/supervisord.conf\n\
-sleep 2\n\
-\n\
-# Wait for MongoDB to be ready\n\
-echo "⏳ Waiting for MongoDB..."\n\
-timeout=30\n\
-while ! mongosh --quiet --eval "db.runCommand('\''ping'\'')" >/dev/null 2>&1 && [ $timeout -gt 0 ]; do\n\
-    sleep 1; timeout=$((timeout-1))\n\
-    if [ $((timeout % 5)) -eq 0 ]; then\n\
-        echo "   Still waiting for MongoDB... ($timeout seconds left)"\n\
-    fi\n\
-done\n\
-\n\
-if [ $timeout -gt 0 ]; then\n\
-    echo "✅ MongoDB is ready!"\n\
-    # Initialize replica set if needed\n\
-    mongosh --quiet --eval "try { rs.initiate() } catch(e) { if (e.code !== 23) throw e }" >/dev/null 2>&1 || true\n\
-else\n\
-    echo "❌ MongoDB failed to start"\n\
-fi\n\
-\n\
-# Wait for Redis to be ready\n\
-echo "⏳ Waiting for Redis..."\n\
-timeout=15\n\
-while ! redis-cli ping >/dev/null 2>&1 && [ $timeout -gt 0 ]; do\n\
-    sleep 1; timeout=$((timeout-1))\n\
-done\n\
-\n\
-if [ $timeout -gt 0 ]; then\n\
-    echo "✅ Redis is ready!"\n\
-else\n\
-    echo "❌ Redis failed to start"\n\
-fi\n\
-\n\
-# Show service status\n\
-echo "📊 Service Status:"\n\
-sudo supervisorctl status\n\
-\n\
-echo "🚀 Environment ready for development!"\n\
-echo "📁 Workspace: /workspace"\n\
-echo "🔗 MongoDB: localhost:27017"\n\
-echo "🔗 Redis: localhost:6379"\n\
-\n\
-# Keep container running and start bash\n\
-exec /bin/bash\n' > /usr/local/bin/start-dev.sh \
-    && chmod +x /usr/local/bin/start-dev.sh
+# Create optimized startup script using cat with heredoc to avoid printf escaping issues
+RUN cat > /usr/local/bin/start-dev.sh << 'EOF'
+#!/bin/bash
+set -e
+echo "🚀 Novu Cursor Environment"
+
+# Start supervisor in background
+sudo supervisord -c /etc/supervisor/supervisord.conf
+sleep 2
+
+# Wait for MongoDB to be ready
+echo "⏳ Waiting for MongoDB..."
+timeout=30
+while ! mongosh --quiet --eval "db.runCommand('ping')" >/dev/null 2>&1 && [ $timeout -gt 0 ]; do
+    sleep 1; timeout=$((timeout-1))
+    if [ $((timeout % 5)) -eq 0 ]; then
+        echo "   Still waiting for MongoDB... ($timeout seconds left)"
+    fi
+done
+
+if [ $timeout -gt 0 ]; then
+    echo "✅ MongoDB is ready!"
+    # Initialize replica set if needed
+    mongosh --quiet --eval "try { rs.initiate() } catch(e) { if (e.code !== 23) throw e }" >/dev/null 2>&1 || true
+else
+    echo "❌ MongoDB failed to start"
+fi
+
+# Wait for Redis to be ready
+echo "⏳ Waiting for Redis..."
+timeout=15
+while ! redis-cli ping >/dev/null 2>&1 && [ $timeout -gt 0 ]; do
+    sleep 1; timeout=$((timeout-1))
+done
+
+if [ $timeout -gt 0 ]; then
+    echo "✅ Redis is ready!"
+else
+    echo "❌ Redis failed to start"
+fi
+
+# Show service status
+echo "📊 Service Status:"
+sudo supervisorctl status
+
+echo "🚀 Environment ready for development!"
+echo "📁 Workspace: /workspace"
+echo "🔗 MongoDB: localhost:27017"
+echo "🔗 Redis: localhost:6379"
+
+# Keep container running and start bash
+exec /bin/bash
+EOF
+
+# Make the script executable
+RUN chmod +x /usr/local/bin/start-dev.sh
 
 # Switch back to ubuntu user
 USER ubuntu
