@@ -86,42 +86,96 @@ USER root
 # Create optimized supervisor configuration
 RUN printf '[supervisord]\n\
 nodaemon=false\n\
-silent=true\n\
-logfile=/dev/null\n\
+silent=false\n\
+logfile=/var/log/supervisor/supervisord.log\n\
+logfile_maxbytes=10MB\n\
+logfile_backups=2\n\
+loglevel=info\n\
 pidfile=/var/run/supervisord.pid\n\
+childlogdir=/var/log/supervisor\n\
+\n\
+[unix_http_server]\n\
+file=/var/run/supervisor.sock\n\
+chmod=0700\n\
+\n\
+[supervisorctl]\n\
+serverurl=unix:///var/run/supervisor.sock\n\
+\n\
+[rpcinterface:supervisor]\n\
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface\n\
 \n\
 [include]\n\
 files = /etc/supervisor/conf.d/*.conf\n' > /etc/supervisor/supervisord.conf \
     && printf '[program:mongodb]\n\
-command=mongod --dbpath /data/db --bind_ip_all --port 27017 --replSet rs0 --quiet\n\
+command=mongod --dbpath /data/db --bind_ip_all --port 27017 --replSet rs0 --logpath /var/log/mongodb.log\n\
 user=mongodb\n\
+autostart=true\n\
 autorestart=true\n\
+startretries=3\n\
 redirect_stderr=true\n\
-stdout_logfile=/dev/null\n\
+stdout_logfile=/var/log/supervisor/mongodb.log\n\
+stderr_logfile=/var/log/supervisor/mongodb_err.log\n\
 \n\
 [program:redis]\n\
-command=redis-server --bind 0.0.0.0 --port 6379 --dir /data/redis --save "" --logfile ""\n\
+command=redis-server --bind 0.0.0.0 --port 6379 --dir /data/redis --save "" --logfile /var/log/redis.log\n\
 user=redis\n\
+autostart=true\n\
 autorestart=true\n\
+startretries=3\n\
 redirect_stderr=true\n\
-stdout_logfile=/dev/null\n' > /etc/supervisor/conf.d/services.conf
+stdout_logfile=/var/log/supervisor/redis.log\n\
+stderr_logfile=/var/log/supervisor/redis_err.log\n' > /etc/supervisor/conf.d/services.conf
 
 # Create optimized startup script
 RUN printf '#!/bin/bash\n\
 set -e\n\
 echo "🚀 Novu Cursor Environment"\n\
+\n\
+# Start supervisor in background\n\
 sudo supervisord -c /etc/supervisor/supervisord.conf\n\
-timeout=15\n\
-while ! mongosh --eval "db.runCommand('\''ping'\'')" >/dev/null 2>&1 && [ $timeout -gt 0 ]; do\n\
+sleep 2\n\
+\n\
+# Wait for MongoDB to be ready\n\
+echo "⏳ Waiting for MongoDB..."\n\
+timeout=30\n\
+while ! mongosh --quiet --eval "db.runCommand('\''ping'\'')" >/dev/null 2>&1 && [ $timeout -gt 0 ]; do\n\
     sleep 1; timeout=$((timeout-1))\n\
+    if [ $((timeout % 5)) -eq 0 ]; then\n\
+        echo "   Still waiting for MongoDB... ($timeout seconds left)"\n\
+    fi\n\
 done\n\
-[ $timeout -gt 0 ] && mongosh --eval "try { rs.initiate() } catch(e) {}" >/dev/null 2>&1 || true\n\
-timeout=10\n\
+\n\
+if [ $timeout -gt 0 ]; then\n\
+    echo "✅ MongoDB is ready!"\n\
+    # Initialize replica set if needed\n\
+    mongosh --quiet --eval "try { rs.initiate() } catch(e) { if (e.code !== 23) throw e }" >/dev/null 2>&1 || true\n\
+else\n\
+    echo "❌ MongoDB failed to start"\n\
+fi\n\
+\n\
+# Wait for Redis to be ready\n\
+echo "⏳ Waiting for Redis..."\n\
+timeout=15\n\
 while ! redis-cli ping >/dev/null 2>&1 && [ $timeout -gt 0 ]; do\n\
     sleep 1; timeout=$((timeout-1))\n\
 done\n\
-echo "✅ MongoDB & Redis ready!"\n\
-echo "🚀 Quick start: git clone https://github.com/novuhq/novu.git /workspace/novu"\n\
+\n\
+if [ $timeout -gt 0 ]; then\n\
+    echo "✅ Redis is ready!"\n\
+else\n\
+    echo "❌ Redis failed to start"\n\
+fi\n\
+\n\
+# Show service status\n\
+echo "📊 Service Status:"\n\
+sudo supervisorctl status\n\
+\n\
+echo "🚀 Environment ready for development!"\n\
+echo "📁 Workspace: /workspace"\n\
+echo "🔗 MongoDB: localhost:27017"\n\
+echo "🔗 Redis: localhost:6379"\n\
+\n\
+# Keep container running and start bash\n\
 exec /bin/bash\n' > /usr/local/bin/start-dev.sh \
     && chmod +x /usr/local/bin/start-dev.sh
 
