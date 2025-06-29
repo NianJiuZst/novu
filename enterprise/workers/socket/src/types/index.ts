@@ -19,3 +19,38 @@ export interface IWebSocketRoom {
 	getActiveConnectionsForUser(userId: string): number;
 	getConnectedUsers(): string[];
 }
+
+export interface IBulkMessage {
+	userId: string;
+	event: string;
+	data?: any;
+}
+
+export interface IBulkSendRequest {
+	messages: IBulkMessage[];
+	environmentId: string;
+}
+
+export interface IBulkMessageResult {
+	index: number;
+	success: true;
+	roomId: string;
+	userId: string;
+	event: string;
+}
+
+export interface IBulkMessageError {
+	index: number;
+	error: string;
+	message: IBulkMessage;
+}
+
+export interface IBulkSendResponse {
+	success: boolean;
+	processed: number;
+	failed: number;
+	total: number;
+	timestamp: string;
+	results: IBulkMessageResult[];
+	errors?: IBulkMessageError[];
+}

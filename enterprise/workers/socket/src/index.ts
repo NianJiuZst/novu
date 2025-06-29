@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { authenticateJWT } from './middleware/auth';
 import { authenticateInternalAPI } from './middleware/internal-auth';
-import { handleWebSocketUpgrade, handleSendMessage } from './handlers/websocket';
+import { handleWebSocketUpgrade, handleSendMessage, handleSendBulkMessages } from './handlers/websocket';
 import { WebSocketRoom } from './durable-objects/websocket-room';
 import type { IEnv } from './types';
 
@@ -10,6 +10,8 @@ const app = new Hono<{ Bindings: IEnv }>();
 app.get('/', authenticateJWT, handleWebSocketUpgrade);
 
 app.post('/send', authenticateInternalAPI, handleSendMessage);
+
+app.post('/send/bulk', authenticateInternalAPI, handleSendBulkMessages);
 
 app.get('/health', (context) => context.text('OK'));
 
