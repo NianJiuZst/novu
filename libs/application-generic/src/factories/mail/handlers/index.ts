@@ -1,5 +1,6 @@
 export * from './sendgrid.handler';
 export * from './mailgun.handler';
+export * from './dyspatch.handler';
 export * from './emailjs.handler';
 export * from './mailjet.handler';
 export * from './mailtrap.handler';

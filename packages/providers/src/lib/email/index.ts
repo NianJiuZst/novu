@@ -1,5 +1,6 @@
 export * from './braze/braze.provider';
 export * from './brevo/brevo.provider';
+export * from './dyspatch/dyspatch.provider';
 export * from './email-webhook/email-webhook.provider';
 export * from './emailjs/emailjs.config';
 export * from './emailjs/emailjs.provider';

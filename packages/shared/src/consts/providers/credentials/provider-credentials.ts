@@ -1212,3 +1212,13 @@ export const afroSmsConfig: IConfigCredentials[] = [
   },
   ...smsConfigBase,
 ];
+
+export const dyspatchConfig: IConfigCredentials[] = [
+  {
+    key: CredentialsKeyEnum.ApiKey,
+    displayName: 'API Key',
+    type: 'string',
+    required: true,
+  },
+  ...mailConfigBase,
+];

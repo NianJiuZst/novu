@@ -31,6 +31,7 @@ const providers: Record<ChannelTypeEnum, ProvidersIdEnum[]> = {
     EmailProviderIdEnum.Outlook365,
     EmailProviderIdEnum.Resend,
     EmailProviderIdEnum.Infobip,
+    EmailProviderIdEnum.Dyspatch,
     ...[
       EmailProviderIdEnum.CustomSMTP,
       EmailProviderIdEnum.NetCore,

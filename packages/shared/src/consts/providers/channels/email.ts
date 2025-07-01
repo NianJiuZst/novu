@@ -17,6 +17,7 @@ import {
   sparkpostConfig,
   emailWebhookConfig,
   brazeEmailConfig,
+  dyspatchConfig,
 } from '../credentials';
 import { IProviderConfig } from '../provider.interface';
 import { ChannelTypeEnum, EmailProviderIdEnum } from '../../../types';
@@ -175,5 +176,13 @@ export const emailProviders: IProviderConfig[] = [
     betaVersion: true,
     docReference: `https://docs.novu.co/channels/email/email-webhook${UTM_CAMPAIGN_QUERY_PARAM}`,
     logoFileName: { light: 'email_webhook.svg', dark: 'email_webhook.svg' },
+  },
+  {
+    id: EmailProviderIdEnum.Dyspatch,
+    displayName: 'Dyspatch',
+    channel: ChannelTypeEnum.EMAIL,
+    credentials: dyspatchConfig,
+    docReference: 'https://support.sendwithus.com/api/',
+    logoFileName: { light: 'dyspatch.svg', dark: 'dyspatch.svg' },
   },
 ];
