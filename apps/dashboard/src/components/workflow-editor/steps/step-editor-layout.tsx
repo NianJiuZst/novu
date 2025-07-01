@@ -19,6 +19,7 @@ import { parseJsonValue } from '@/components/workflow-editor/steps/utils/preview
 import { LocaleSelect } from '@/components/primitives/locale-select';
 import { useFetchTranslations, type FetchTranslationsParams } from '@/hooks/use-fetch-translations';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
+import { useFormContext } from 'react-hook-form';
 
 type StepEditorLayoutProps = {
   workflow: WorkflowResponseDto;
@@ -129,9 +130,12 @@ function StepEditorContent() {
 }
 
 export function StepEditorLayout({ workflow, step, className }: StepEditorLayoutProps) {
+  const form = useFormContext();
+  const controlValues = form.watch();
+
   return (
     <div className={cn('h-full w-full', className)}>
-      <StepEditorProvider workflow={workflow} step={step}>
+      <StepEditorProvider workflow={workflow} step={step} controlValues={controlValues}>
         <StepEditorContent />
       </StepEditorProvider>
     </div>

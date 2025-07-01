@@ -31,11 +31,10 @@ type StepEditorProviderProps = {
   children: ReactNode;
   workflow: WorkflowResponseDto;
   step: StepResponseDto;
+  controlValues: Record<string, unknown>;
 };
 
-export function StepEditorProvider({ children, workflow, step }: StepEditorProviderProps) {
-  const form = useFormContext();
-  const controlValues = form.watch();
+export function StepEditorProvider({ children, workflow, step, controlValues }: StepEditorProviderProps) {
   const [selectedLocale, setSelectedLocale] = useState<string>(DEFAULT_LOCALE);
 
   const { editorValue, setEditorValue, previewData, isPreviewPending, isFetching } = useEditorPreview({
