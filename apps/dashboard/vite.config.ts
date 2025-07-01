@@ -1,6 +1,6 @@
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react-oxc';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import tailwindcss from 'tailwindcss';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
     ],
     css: {
       postcss: {
-        plugins: [tailwindcss()],
+        plugins: [tailwindcss as any],
       },
     },
     resolve: {
@@ -65,6 +65,7 @@ export default defineConfig(({ mode }) => {
       commonjsOptions: {
         include: [/@novu\/api/, /node_modules/],
       },
+      cssMinify: 'esbuild',
     },
   };
 });
