@@ -8,6 +8,7 @@ import {
   nodemailerConfig,
   postmarkConfig,
   sendgridConfig,
+  sendwithusConfig,
   sendinblueConfig,
   sesConfig,
   outlook365Config,
@@ -78,6 +79,14 @@ export const emailProviders: IProviderConfig[] = [
     credentials: sendgridConfig,
     docReference: `https://docs.novu.co/integrations/providers/email/sendgrid${UTM_CAMPAIGN_QUERY_PARAM}`,
     logoFileName: { light: 'sendgrid.png', dark: 'sendgrid.png' },
+  },
+  {
+    id: 'sendwithus' as EmailProviderIdEnum,
+    displayName: 'Sendwithus',
+    channel: ChannelTypeEnum.EMAIL,
+    credentials: sendwithusConfig,
+    docReference: `https://support.sendwithus.com/api/`,
+    logoFileName: { light: 'sendwithus.png', dark: 'sendwithus.png' },
   },
   {
     id: EmailProviderIdEnum.Sendinblue,

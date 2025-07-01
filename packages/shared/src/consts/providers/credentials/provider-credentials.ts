@@ -210,6 +210,16 @@ export const sendgridConfig: IConfigCredentials[] = [
   ...mailConfigBase,
 ];
 
+export const sendwithusConfig: IConfigCredentials[] = [
+  {
+    key: CredentialsKeyEnum.ApiKey,
+    displayName: 'API Key',
+    type: 'string',
+    required: true,
+  },
+  ...mailConfigBase,
+];
+
 export const resendConfig: IConfigCredentials[] = [
   {
     key: CredentialsKeyEnum.ApiKey,

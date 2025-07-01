@@ -1,6 +1,7 @@
 import { IntegrationEntity } from '@novu/dal';
 import {
   SendgridHandler,
+  SendwithusHandler,
   MailgunHandler,
   EmailJsHandler,
   MailjetHandler,
@@ -26,6 +27,7 @@ import { IMailHandler } from './interfaces/send.handler.interface';
 export class MailFactory {
   handlers: IMailHandler[] = [
     new SendgridHandler(),
+    new SendwithusHandler(),
     new MailgunHandler(),
     new NetCoreHandler(),
     new EmailJsHandler(),

@@ -16,6 +16,7 @@ export * from './plunk/plunk.provider';
 export * from './postmark/postmark.provider';
 export * from './resend/resend.provider';
 export * from './sendgrid/sendgrid.provider';
+export * from './sendwithus/sendwithus.provider';
 export * from './ses/ses.config';
 export * from './ses/ses.provider';
 export * from './sparkpost/sparkpost.error';
