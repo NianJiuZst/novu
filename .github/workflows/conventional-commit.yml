@@ -61,9 +61,12 @@ jobs:
       - name: Extract Linear ticket from branch and auto-fix PR title
         id: auto_fix_linear_ticket
         if: steps.check_team_member.outputs.is_team_member == 'true'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
         run: |
-          branch_name="${{ github.event.pull_request.head.ref }}"
-          pr_title="${{ github.event.pull_request.title }}"
+          branch_name="$BRANCH_NAME"
+          pr_title="$PR_TITLE"
 
           echo "Branch name: $branch_name"
           echo "Current PR title: $pr_title"
@@ -74,13 +77,13 @@ jobs:
             echo "Found ticket ID in branch: $ticket_id"
             
             # Check if PR title already has the Linear ticket format
-            if [[ "$pr_title" =~ fixes\ \[[A-Z]+-[0-9]+\]$ ]]; then
+            if [[ "$pr_title" =~ fixes\ [A-Z]+-[0-9]+$ ]]; then
               echo "PR title already contains Linear ticket ID"
               echo "needs_update=false" >> $GITHUB_OUTPUT
               echo "linear_ticket_valid=true" >> $GITHUB_OUTPUT
             else
               # Auto-append the Linear ticket ID
-              new_title="$pr_title fixes [$ticket_id]"
+              new_title="$pr_title fixes $ticket_id"
               echo "Auto-fixing PR title to: $new_title"
               
               # Update PR title using GitHub API
@@ -88,7 +91,7 @@ jobs:
                 -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                 -H "Accept: application/vnd.github.v3+json" \
                 "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" \
-                -d "{\"title\": \"$new_title\"}"
+                -d "$(jq -n --arg title "$new_title" '{title: $title}')"
               
               echo "needs_update=true" >> $GITHUB_OUTPUT
               echo "linear_ticket_valid=true" >> $GITHUB_OUTPUT
@@ -97,11 +100,11 @@ jobs:
           else
             echo "No Linear ticket ID found in branch name"
             # Check if title has Linear ticket format manually added
-            if [[ "$pr_title" =~ fixes\ \[[A-Z]+-[0-9]+\]$ ]]; then
+            if [[ "$pr_title" =~ fixes\ [A-Z]+-[0-9]+$ ]]; then
               echo "linear_ticket_valid=true" >> $GITHUB_OUTPUT
             else
               echo "linear_ticket_valid=false" >> $GITHUB_OUTPUT
-              echo "linear_error_message=PR title must end with 'fixes [TICKET-ID]' (e.g., 'fixes [NOV-123]') or include ticket ID in branch name" >> $GITHUB_OUTPUT
+              echo "linear_error_message=PR title must end with 'fixes TICKET-ID' (e.g., 'fixes NOV-123') or include ticket ID in branch name" >> $GITHUB_OUTPUT
             fi
             echo "needs_update=false" >> $GITHUB_OUTPUT
           fi
@@ -109,18 +112,20 @@ jobs:
       - name: Validate Linear ticket ID for team members (fallback)
         id: validate_linear_ticket
         if: steps.check_team_member.outputs.is_team_member == 'true' && steps.auto_fix_linear_ticket.outputs.linear_ticket_valid != 'true'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          pr_title="${{ github.event.pull_request.title }}"
+          pr_title="$PR_TITLE"
           echo "Validating Linear ticket ID in PR title: $pr_title"
 
-          # Check if title ends with "fixes [TICKET-ID]" pattern
-          if [[ "$pr_title" =~ fixes\ \[[A-Z]+-[0-9]+\]$ ]]; then
+          # Check if title ends with "fixes TICKET-ID" pattern
+          if [[ "$pr_title" =~ fixes\ [A-Z]+-[0-9]+$ ]]; then
             echo "linear_ticket_valid=true" >> $GITHUB_OUTPUT
             echo "Linear ticket ID format is valid"
           else
             echo "linear_ticket_valid=false" >> $GITHUB_OUTPUT
             echo "Linear ticket ID format is invalid"
-            echo "linear_error_message=PR title must end with 'fixes [TICKET-ID]' (e.g., 'fixes [NOV-123]') or include ticket ID in branch name" >> $GITHUB_OUTPUT
+            echo "linear_error_message=PR title must end with 'fixes TICKET-ID' (e.g., 'fixes NOV-123') or include ticket ID in branch name" >> $GITHUB_OUTPUT
           fi
 
       - uses: amannn/action-semantic-pull-request@v5
@@ -158,9 +163,9 @@ jobs:
 
             **Requirements:**
             1. Follow the [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/)
-            2. ${{ steps.check_team_member.outputs.is_team_member == 'true' && 'As a team member, include Linear ticket ID at the end: `fixes [TICKET-ID]` or include it in your branch name' || '' }}
+            2. ${{ steps.check_team_member.outputs.is_team_member == 'true' && 'As a team member, include Linear ticket ID at the end: `fixes TICKET-ID` or include it in your branch name' || '' }}
 
-            **Expected format:** `feat(scope): Add fancy new feature${{ steps.check_team_member.outputs.is_team_member == 'true' && ' fixes [NOV-123]' || '' }}`
+            **Expected format:** `feat(scope): Add fancy new feature${{ steps.check_team_member.outputs.is_team_member == 'true' && ' fixes NOV-123' || '' }}`
 
             **Details:**
             ${{ steps.lint_pr_title.outputs.error_message != null && steps.lint_pr_title.outputs.error_message || '' }}
