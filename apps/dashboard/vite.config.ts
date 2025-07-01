@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
     ],
     css: {
       postcss: {
-        plugins: [tailwindcss as any],
+        plugins: [tailwindcss],
       },
     },
     resolve: {
