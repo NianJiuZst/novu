@@ -2,12 +2,13 @@ import sinon from 'sinon';
 import { expect } from 'chai';
 import { JSONContent as MailyJSONContent } from '@maily-to/render';
 import { FeatureFlagsService, PinoLogger } from '@novu/application-generic';
-import { ControlValuesRepository, LayoutRepository } from '@novu/dal';
-import { ChannelTypeEnum, ControlValuesLevelEnum, ResourceOriginEnum, ResourceTypeEnum } from '@novu/shared';
+import { ControlValuesRepository } from '@novu/dal';
+import { ControlValuesLevelEnum } from '@novu/shared';
 import { ModuleRef } from '@nestjs/core';
-import { EmailOutputRendererUsecase } from './email-output-renderer.usecase';
+import { EmailOutputRendererCommand, EmailOutputRendererUsecase } from './email-output-renderer.usecase';
 import { FullPayloadForRender } from './render-command';
 import { GetOrganizationSettings } from '../../../organization/usecases/get-organization-settings/get-organization-settings.usecase';
+import { GetLayoutUseCase } from '../../../layouts-v2/usecases/get-layout';
 
 describe('EmailOutputRendererUsecase', () => {
   let featureFlagsServiceMock: sinon.SinonStubbedInstance<FeatureFlagsService>;
@@ -15,7 +16,7 @@ describe('EmailOutputRendererUsecase', () => {
   let getOrganizationSettingsMock: sinon.SinonStubbedInstance<GetOrganizationSettings>;
   let pinoLoggerMock: sinon.SinonStubbedInstance<PinoLogger>;
   let controlValuesRepositoryMock: sinon.SinonStubbedInstance<ControlValuesRepository>;
-  let layoutRepositoryMock: sinon.SinonStubbedInstance<LayoutRepository>;
+  let getLayoutUseCase: sinon.SinonStubbedInstance<GetLayoutUseCase>;
   let emailOutputRendererUsecase: EmailOutputRendererUsecase;
 
   beforeEach(async () => {
@@ -25,10 +26,12 @@ describe('EmailOutputRendererUsecase', () => {
     getOrganizationSettingsMock = sinon.createStubInstance(GetOrganizationSettings);
     getOrganizationSettingsMock.execute.resolves({
       removeNovuBranding: false,
+      defaultLocale: 'en_US',
+      translationsEnabled: false,
     });
     pinoLoggerMock = sinon.createStubInstance(PinoLogger);
     controlValuesRepositoryMock = sinon.createStubInstance(ControlValuesRepository);
-    layoutRepositoryMock = sinon.createStubInstance(LayoutRepository);
+    getLayoutUseCase = sinon.createStubInstance(GetLayoutUseCase);
 
     emailOutputRendererUsecase = new EmailOutputRendererUsecase(
       getOrganizationSettingsMock as any,
@@ -36,7 +39,7 @@ describe('EmailOutputRendererUsecase', () => {
       pinoLoggerMock as any,
       featureFlagsServiceMock as any,
       controlValuesRepositoryMock as any,
-      layoutRepositoryMock as any
+      getLayoutUseCase as any
     );
   });
 
@@ -54,11 +57,12 @@ describe('EmailOutputRendererUsecase', () => {
     _id: 'fake_workflow_id',
     _organizationId: 'fake_org_id',
     _environmentId: 'fake_env_id',
+    _creatorId: 'fake_creator_id',
   } as any;
 
   describe('general flow', () => {
     it('should return subject and body when body is not string', async () => {
-      let renderCommand = {
+      let renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -66,7 +70,7 @@ describe('EmailOutputRendererUsecase', () => {
           body: undefined,
         },
         fullPayloadForRender: mockFullPayload,
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       let result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -84,7 +88,7 @@ describe('EmailOutputRendererUsecase', () => {
           body: 123 as any,
         },
         fullPayloadForRender: mockFullPayload,
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -111,7 +115,7 @@ describe('EmailOutputRendererUsecase', () => {
         ],
       };
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -122,7 +126,7 @@ describe('EmailOutputRendererUsecase', () => {
           ...mockFullPayload,
           payload: { name: 'John' },
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -147,7 +151,7 @@ describe('EmailOutputRendererUsecase', () => {
         ],
       };
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -161,7 +165,7 @@ describe('EmailOutputRendererUsecase', () => {
             order: { id: '12345', status: 'shipped' },
           },
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -188,7 +192,7 @@ describe('EmailOutputRendererUsecase', () => {
         ],
       };
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -199,7 +203,7 @@ describe('EmailOutputRendererUsecase', () => {
           ...mockFullPayload,
           payload: {},
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -252,7 +256,7 @@ describe('EmailOutputRendererUsecase', () => {
         ],
       };
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -269,7 +273,7 @@ describe('EmailOutputRendererUsecase', () => {
             },
           },
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -332,7 +336,7 @@ describe('EmailOutputRendererUsecase', () => {
         ],
       };
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -343,7 +347,7 @@ describe('EmailOutputRendererUsecase', () => {
           ...mockFullPayload,
           payload: {}, // Empty payload to test fallback values
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -375,7 +379,7 @@ describe('EmailOutputRendererUsecase', () => {
             },
           },
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const resultWithPartialData = await emailOutputRendererUsecase.execute(renderCommandWithPartialData);
@@ -441,7 +445,7 @@ describe('EmailOutputRendererUsecase', () => {
 
       truthyValues.forEach(({ value, desc }) => {
         it(`should render content when showIfKey is ${desc}`, async () => {
-          const renderCommand = {
+          const renderCommand: EmailOutputRendererCommand = {
             environmentId: 'fake_env_id',
             organizationId: 'fake_org_id',
             controlValues: {
@@ -454,7 +458,7 @@ describe('EmailOutputRendererUsecase', () => {
                 isPremium: value,
               },
             },
-            dbWorkflow: mockDbWorkflow,
+            workflowId: mockDbWorkflow._id,
           };
 
           const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -514,7 +518,7 @@ describe('EmailOutputRendererUsecase', () => {
 
       falsyValues.forEach(({ value, desc }) => {
         it(`should not render content when showIfKey is ${desc}`, async () => {
-          const renderCommand = {
+          const renderCommand: EmailOutputRendererCommand = {
             environmentId: 'fake_env_id',
             organizationId: 'fake_org_id',
             controlValues: {
@@ -527,7 +531,7 @@ describe('EmailOutputRendererUsecase', () => {
                 isPremium: value,
               },
             },
-            dbWorkflow: mockDbWorkflow,
+            workflowId: mockDbWorkflow._id,
           };
 
           const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -585,7 +589,7 @@ describe('EmailOutputRendererUsecase', () => {
         ],
       };
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -599,7 +603,7 @@ describe('EmailOutputRendererUsecase', () => {
             isPremium: true,
           },
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       let result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -675,7 +679,7 @@ describe('EmailOutputRendererUsecase', () => {
         ],
       };
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -690,7 +694,7 @@ describe('EmailOutputRendererUsecase', () => {
             comments: [{ author: 'John' }, { author: 'Jane' }],
           },
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
       const result = await emailOutputRendererUsecase.execute(renderCommand);
       expect(result.body).to.include('This is an author: <!-- -->John<!-- -->Post Title');
@@ -735,7 +739,7 @@ describe('EmailOutputRendererUsecase', () => {
         ],
       };
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -748,7 +752,7 @@ describe('EmailOutputRendererUsecase', () => {
             names: ['John', 'Jane'],
           },
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
       const result = await emailOutputRendererUsecase.execute(renderCommand);
       expect(result.body).to.include('John');
@@ -794,7 +798,7 @@ describe('EmailOutputRendererUsecase', () => {
         ],
       };
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -807,7 +811,7 @@ describe('EmailOutputRendererUsecase', () => {
             items: ['item1', 'item2', 'item3', 'item4'],
           },
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -858,7 +862,7 @@ describe('EmailOutputRendererUsecase', () => {
         ],
       };
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -871,7 +875,7 @@ describe('EmailOutputRendererUsecase', () => {
             items: ['item1', 'item2', 'item3'],
           },
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -921,7 +925,7 @@ describe('EmailOutputRendererUsecase', () => {
         ],
       };
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -934,7 +938,7 @@ describe('EmailOutputRendererUsecase', () => {
             linkUrl: 'https://example.com',
           },
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -962,7 +966,7 @@ describe('EmailOutputRendererUsecase', () => {
         ],
       };
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -975,7 +979,7 @@ describe('EmailOutputRendererUsecase', () => {
             imageUrl: 'https://example.com/image.jpg',
           },
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1007,7 +1011,7 @@ describe('EmailOutputRendererUsecase', () => {
         ],
       };
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -1020,7 +1024,7 @@ describe('EmailOutputRendererUsecase', () => {
             href: 'https://example.com',
           },
         },
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1033,28 +1037,26 @@ describe('EmailOutputRendererUsecase', () => {
     const layoutContent = '<html><body><div class="layout">{{content}}</div></body></html>';
 
     let mockControlValuesEntity: any;
-    let mockLayoutEntity: any;
+    let mockLayoutDto: any;
 
     beforeEach(() => {
       // Reset mocks
       mockControlValuesEntity = {
         controls: {
           email: {
-            content: layoutContent,
+            body: layoutContent,
           },
         },
       };
 
-      mockLayoutEntity = {
+      mockLayoutDto = {
         _id: 'default_layout_id',
-        _organizationId: 'fake_org_id',
-        _environmentId: 'fake_env_id',
         isDefault: true,
       };
 
       // Set default stub returns
       controlValuesRepositoryMock.findOne.resolves(mockControlValuesEntity as any);
-      layoutRepositoryMock.findOne.resolves(mockLayoutEntity as any);
+      getLayoutUseCase.execute.resolves(mockLayoutDto as any);
     });
 
     afterEach(() => {
@@ -1067,7 +1069,7 @@ describe('EmailOutputRendererUsecase', () => {
       });
 
       it('should render without layout when feature flag is disabled', async () => {
-        const renderCommand = {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
@@ -1079,7 +1081,7 @@ describe('EmailOutputRendererUsecase', () => {
             ...mockFullPayload,
             payload: { name: 'John' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
 
         const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1090,7 +1092,7 @@ describe('EmailOutputRendererUsecase', () => {
 
         // Verify that repository methods were not called when feature flag is disabled
         expect(controlValuesRepositoryMock.findOne.called).to.be.false;
-        expect(layoutRepositoryMock.findOne.called).to.be.false;
+        expect(getLayoutUseCase.execute.called).to.be.false;
       });
     });
 
@@ -1100,7 +1102,7 @@ describe('EmailOutputRendererUsecase', () => {
       });
 
       it('should render with specified layout when layoutId is provided', async () => {
-        const renderCommand = {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
@@ -1112,8 +1114,9 @@ describe('EmailOutputRendererUsecase', () => {
             ...mockFullPayload,
             payload: { name: 'John' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
+        getLayoutUseCase.execute.resolves({ _id: 'test_layout_id', isDefault: false } as any);
 
         const result = await emailOutputRendererUsecase.execute(renderCommand);
 
@@ -1131,24 +1134,23 @@ describe('EmailOutputRendererUsecase', () => {
           level: ControlValuesLevelEnum.LAYOUT_CONTROLS,
         });
 
-        // Layout repository should not be called when layoutId is provided
-        expect(layoutRepositoryMock.findOne.called).to.be.false;
+        expect(getLayoutUseCase.execute.called).to.be.true;
       });
 
-      it('should use default layout when layoutId is undefined', async () => {
-        const renderCommand = {
+      it('should use default layout when layoutId is null', async () => {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
             subject: 'Layout Test',
             body: simpleBodyContent,
-            // layoutId is undefined
+            layoutId: null,
           },
           fullPayloadForRender: {
             ...mockFullPayload,
             payload: { name: 'John' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
 
         const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1158,14 +1160,11 @@ describe('EmailOutputRendererUsecase', () => {
         expect(result.body).to.include('<html>');
 
         // Verify layout repository was called first to find default layout
-        expect(layoutRepositoryMock.findOne.calledOnce).to.be.true;
-        expect(layoutRepositoryMock.findOne.firstCall.args[0]).to.deep.eq({
-          _organizationId: 'fake_org_id',
-          _environmentId: 'fake_env_id',
-          origin: ResourceOriginEnum.NOVU_CLOUD,
-          type: ResourceTypeEnum.BRIDGE,
-          isDefault: true,
-          channel: ChannelTypeEnum.EMAIL,
+        expect(getLayoutUseCase.execute.calledOnce).to.be.true;
+        expect(getLayoutUseCase.execute.firstCall.args[0]).to.deep.eq({
+          organizationId: 'fake_org_id',
+          environmentId: 'fake_env_id',
+          skipAdditionalFields: true,
         });
 
         // Then control values repository should be called with the default layout ID
@@ -1178,11 +1177,11 @@ describe('EmailOutputRendererUsecase', () => {
         });
       });
 
-      it('should render without layout when no layout is found', async () => {
+      it('should render without layout when no layout controls are found', async () => {
         controlValuesRepositoryMock.findOne.resolves(null);
-        layoutRepositoryMock.findOne.resolves(null);
+        getLayoutUseCase.execute.resolves({ _id: 'non_existent_layout_id' } as any);
 
-        const renderCommand = {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
@@ -1194,7 +1193,7 @@ describe('EmailOutputRendererUsecase', () => {
             ...mockFullPayload,
             payload: { name: 'John' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
 
         const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1208,21 +1207,21 @@ describe('EmailOutputRendererUsecase', () => {
       });
 
       it('should render without layout when default layout does not exist', async () => {
-        layoutRepositoryMock.findOne.resolves(null);
+        getLayoutUseCase.execute.resolves(undefined);
 
-        const renderCommand = {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
             subject: 'Layout Test',
             body: simpleBodyContent,
-            // layoutId is undefined, should look for default
+            layoutId: null,
           },
           fullPayloadForRender: {
             ...mockFullPayload,
             payload: { name: 'John' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
 
         const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1232,7 +1231,7 @@ describe('EmailOutputRendererUsecase', () => {
         expect(result.body).to.not.include('<html>');
 
         // Verify layout repository was called but returned null
-        expect(layoutRepositoryMock.findOne.calledOnce).to.be.true;
+        expect(getLayoutUseCase.execute.calledOnce).to.be.true;
         // Control values repository should not be called when default layout is not found
         expect(controlValuesRepositoryMock.findOne.called).to.be.false;
       });
@@ -1240,7 +1239,7 @@ describe('EmailOutputRendererUsecase', () => {
       it('should clean step content before injecting into layout', async () => {
         const bodyWithDoctype = '<!DOCTYPE html><p>Content</p><!--/$-->';
 
-        const renderCommand = {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
@@ -1252,7 +1251,7 @@ describe('EmailOutputRendererUsecase', () => {
             ...mockFullPayload,
             payload: { name: 'John' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
 
         const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1277,12 +1276,12 @@ describe('EmailOutputRendererUsecase', () => {
           priority: 0,
           controls: {
             email: {
-              content: layoutWithVariables,
+              body: layoutWithVariables,
             },
           },
         });
 
-        const renderCommand = {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
@@ -1294,7 +1293,7 @@ describe('EmailOutputRendererUsecase', () => {
             ...mockFullPayload,
             payload: { name: 'John', title: 'Welcome' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
 
         const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1336,7 +1335,7 @@ describe('EmailOutputRendererUsecase', () => {
           priority: 0,
           controls: {
             email: {
-              content: mailyLayoutContent,
+              body: mailyLayoutContent,
             },
           },
         });
@@ -1356,7 +1355,7 @@ describe('EmailOutputRendererUsecase', () => {
           ],
         });
 
-        const renderCommand = {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
@@ -1368,7 +1367,7 @@ describe('EmailOutputRendererUsecase', () => {
             ...mockFullPayload,
             payload: { name: 'John' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
 
         const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1391,7 +1390,7 @@ describe('EmailOutputRendererUsecase', () => {
           },
         });
 
-        const renderCommand = {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
@@ -1403,7 +1402,7 @@ describe('EmailOutputRendererUsecase', () => {
             ...mockFullPayload,
             payload: { name: 'John' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
 
         const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1414,7 +1413,7 @@ describe('EmailOutputRendererUsecase', () => {
       });
 
       it('should pass correct repository query parameters for specific layout', async () => {
-        const renderCommand = {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
@@ -1426,8 +1425,10 @@ describe('EmailOutputRendererUsecase', () => {
             ...mockFullPayload,
             payload: { name: 'John' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
+
+        getLayoutUseCase.execute.resolves({ _id: 'specific_layout_id', isDefault: false } as any);
 
         await emailOutputRendererUsecase.execute(renderCommand);
 
@@ -1441,31 +1442,28 @@ describe('EmailOutputRendererUsecase', () => {
       });
 
       it('should pass correct repository query parameters for default layout', async () => {
-        const renderCommand = {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
             subject: 'Layout Test',
             body: simpleBodyContent,
-            // layoutId is undefined
+            layoutId: null,
           },
           fullPayloadForRender: {
             ...mockFullPayload,
             payload: { name: 'John' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
 
         await emailOutputRendererUsecase.execute(renderCommand);
 
-        expect(layoutRepositoryMock.findOne.calledOnce).to.be.true;
-        expect(layoutRepositoryMock.findOne.firstCall.args[0]).to.deep.eq({
-          _organizationId: 'fake_org_id',
-          _environmentId: 'fake_env_id',
-          origin: ResourceOriginEnum.NOVU_CLOUD,
-          type: ResourceTypeEnum.BRIDGE,
-          isDefault: true,
-          channel: ChannelTypeEnum.EMAIL,
+        expect(getLayoutUseCase.execute.calledOnce).to.be.true;
+        expect(getLayoutUseCase.execute.firstCall.args[0]).to.deep.eq({
+          organizationId: 'fake_org_id',
+          environmentId: 'fake_env_id',
+          skipAdditionalFields: true,
         });
 
         expect(controlValuesRepositoryMock.findOne.calledOnce).to.be.true;
@@ -1477,25 +1475,24 @@ describe('EmailOutputRendererUsecase', () => {
         });
       });
 
-      it('should not call layout repository when layoutId is explicitly set to null', async () => {
-        const renderCommand = {
+      it('should not call layout repository when layoutId is undefined', async () => {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
             subject: 'Layout Test',
             body: simpleBodyContent,
-            layoutId: null, // explicitly set to null
           },
           fullPayloadForRender: {
             ...mockFullPayload,
             payload: { name: 'John' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
 
         const result = await emailOutputRendererUsecase.execute(renderCommand);
 
-        expect(layoutRepositoryMock.findOne.called).to.be.false;
+        expect(getLayoutUseCase.execute.called).to.be.false;
         expect(controlValuesRepositoryMock.findOne.called).to.be.false;
         expect(result.body).to.include('Step content John');
         expect(result.body).to.not.include('class="layout"');
@@ -1515,7 +1512,7 @@ describe('EmailOutputRendererUsecase', () => {
           },
         });
 
-        const renderCommand = {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
@@ -1527,7 +1524,7 @@ describe('EmailOutputRendererUsecase', () => {
             ...mockFullPayload,
             payload: { name: 'John' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
 
         const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1538,25 +1535,25 @@ describe('EmailOutputRendererUsecase', () => {
       });
 
       it('should call repository methods in correct order for default layout', async () => {
-        const renderCommand = {
+        const renderCommand: EmailOutputRendererCommand = {
           environmentId: 'fake_env_id',
           organizationId: 'fake_org_id',
           controlValues: {
             subject: 'Layout Test',
             body: simpleBodyContent,
-            // layoutId is undefined
+            layoutId: null,
           },
           fullPayloadForRender: {
             ...mockFullPayload,
             payload: { name: 'John' },
           },
-          dbWorkflow: mockDbWorkflow,
+          workflowId: mockDbWorkflow._id,
         };
 
         await emailOutputRendererUsecase.execute(renderCommand);
 
         // Verify call order: layout repository should be called before control values repository
-        expect(layoutRepositoryMock.findOne.calledBefore(controlValuesRepositoryMock.findOne)).to.be.true;
+        expect(getLayoutUseCase.execute.calledBefore(controlValuesRepositoryMock.findOne)).to.be.true;
       });
     });
   });
@@ -1572,9 +1569,11 @@ describe('EmailOutputRendererUsecase', () => {
     it('should add Novu branding when removeNovuBranding is false', async () => {
       getOrganizationSettingsMock.execute.resolves({
         removeNovuBranding: false,
+        defaultLocale: 'en_US',
+        translationsEnabled: false,
       });
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -1582,7 +1581,7 @@ describe('EmailOutputRendererUsecase', () => {
           body: simpleHtmlBody,
         },
         fullPayloadForRender: mockFullPayload,
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1595,9 +1594,11 @@ describe('EmailOutputRendererUsecase', () => {
     it('should not add Novu branding when removeNovuBranding is true', async () => {
       getOrganizationSettingsMock.execute.resolves({
         removeNovuBranding: true,
+        defaultLocale: 'en_US',
+        translationsEnabled: false,
       });
 
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -1605,7 +1606,7 @@ describe('EmailOutputRendererUsecase', () => {
           body: simpleHtmlBody,
         },
         fullPayloadForRender: mockFullPayload,
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1616,10 +1617,12 @@ describe('EmailOutputRendererUsecase', () => {
     it('should properly insert branding into HTML with body tag', async () => {
       getOrganizationSettingsMock.execute.resolves({
         removeNovuBranding: false,
+        defaultLocale: 'en_US',
+        translationsEnabled: false,
       });
 
       const htmlWithBodyTag = '<html><body><p>Content</p></body></html>';
-      const renderCommand = {
+      const renderCommand: EmailOutputRendererCommand = {
         environmentId: 'fake_env_id',
         organizationId: 'fake_org_id',
         controlValues: {
@@ -1627,7 +1630,7 @@ describe('EmailOutputRendererUsecase', () => {
           body: htmlWithBodyTag,
         },
         fullPayloadForRender: mockFullPayload,
-        dbWorkflow: mockDbWorkflow,
+        workflowId: mockDbWorkflow._id,
       };
 
       const result = await emailOutputRendererUsecase.execute(renderCommand);
@@ -1639,6 +1642,123 @@ describe('EmailOutputRendererUsecase', () => {
       const brandingIndex = result.body.indexOf('data-novu-branding');
       const bodyCloseIndex = result.body.indexOf('</body>');
       expect(brandingIndex).to.be.lessThan(bodyCloseIndex);
+    });
+  });
+
+  describe('Gmail clipping prevention', () => {
+    beforeEach(() => {
+      // Ensure layouts feature flag is disabled for these tests
+      featureFlagsServiceMock.getFlag.resolves(false);
+      getOrganizationSettingsMock.execute.resolves({
+        removeNovuBranding: false,
+        defaultLocale: 'en_US',
+        translationsEnabled: false,
+      });
+    });
+
+    it('should convert paragraphs with only whitespace to empty paragraphs', async () => {
+      const mockTipTapNode: MailyJSONContent = {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Hello World',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            // Empty paragraph that Maily renderer will add space to
+          },
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'End content',
+              },
+            ],
+          },
+        ],
+      };
+
+      const renderCommand: EmailOutputRendererCommand = {
+        environmentId: 'fake_env_id',
+        organizationId: 'fake_org_id',
+        controlValues: {
+          subject: 'Gmail Clipping Test',
+          body: JSON.stringify(mockTipTapNode),
+        },
+        fullPayloadForRender: mockFullPayload,
+        workflowId: mockDbWorkflow._id,
+      };
+
+      const result = await emailOutputRendererUsecase.execute(renderCommand);
+
+      expect(result.body).to.include('Hello World');
+      expect(result.body).to.include('End content');
+
+      // Should not contain paragraphs with only basic whitespace
+      expect(result.body).to.not.match(/<p[^>]*>\s+<\/p>/);
+
+      // Should contain empty paragraphs instead
+      expect(result.body).to.match(/<p[^>]*><\/p>/);
+    });
+
+    it('should preserve paragraph styling when cleaning whitespace', async () => {
+      // Simulate HTML that would be generated by Maily with styled empty paragraphs
+      const htmlWithWhitespaceParas = `<p style="margin:0 0 20px 0">Content before</p><p style="margin:0 0 20px 0;color:#374151"> </p><p style="margin:0 0 20px 0">Content after</p>`;
+
+      const renderCommand: EmailOutputRendererCommand = {
+        environmentId: 'fake_env_id',
+        organizationId: 'fake_org_id',
+        controlValues: {
+          subject: 'Styling Test',
+          body: htmlWithWhitespaceParas,
+        },
+        fullPayloadForRender: mockFullPayload,
+        workflowId: mockDbWorkflow._id,
+      };
+
+      const result = await emailOutputRendererUsecase.execute(renderCommand);
+
+      expect(result.body).to.include('Content before');
+      expect(result.body).to.include('Content after');
+
+      // Should preserve styles but remove whitespace content
+      expect(result.body).to.include('style="margin:0 0 20px 0;color:#374151"></p>');
+
+      // Should not contain basic whitespace content
+      expect(result.body).to.not.include('> </p>');
+    });
+
+    it('should not modify paragraphs with actual text content', async () => {
+      const htmlWithMixedContent = `<p>This has real content</p><p> </p><p>This also has real content with spaces</p><p>More real content</p>`;
+
+      const renderCommand: EmailOutputRendererCommand = {
+        environmentId: 'fake_env_id',
+        organizationId: 'fake_org_id',
+        controlValues: {
+          subject: 'Mixed Content Test',
+          body: htmlWithMixedContent,
+        },
+        fullPayloadForRender: mockFullPayload,
+        workflowId: mockDbWorkflow._id,
+      };
+
+      const result = await emailOutputRendererUsecase.execute(renderCommand);
+
+      // Should preserve all actual text content
+      expect(result.body).to.include('This has real content');
+      expect(result.body).to.include('This also has real content with spaces');
+      expect(result.body).to.include('More real content');
+
+      // Should have converted whitespace-only paragraphs to empty ones
+      expect(result.body).to.not.include('> </p>');
+      expect(result.body).to.include('<p></p>');
     });
   });
 });
