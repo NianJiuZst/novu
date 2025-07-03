@@ -1,4 +1,5 @@
 import { ChannelTypeEnum, IEmailBlock, ITemplateVariable, ResourceOriginEnum, ResourceTypeEnum } from '../../types';
+import { Controls } from '../workflows';
 import { RuntimeIssueDto } from '../workflows/workflow.dto';
 
 export class LayoutDto {
@@ -57,6 +58,7 @@ export type LayoutResponseDto = {
   origin: ResourceOriginEnum;
   type: ResourceTypeEnum;
   issues?: Record<LayoutCreateAndUpdateKeys, RuntimeIssueDto>;
+  controls: Controls;
 };
 
 export type ListLayoutsResponse = {

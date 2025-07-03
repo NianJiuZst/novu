@@ -2,15 +2,15 @@ import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';
 import { RiInformationLine, RiRefreshLine } from 'react-icons/ri';
 import { useState } from 'react';
-import { EditableJsonViewer } from '../shared/editable-json-viewer/editable-json-viewer';
+import { EditableJsonViewer } from './workflow-editor/steps/shared/editable-json-viewer/editable-json-viewer';
 import { SubscriberAutocomplete } from '@/components/subscribers/subscriber-autocomplete';
-import { SubscriberSectionProps } from '../types/preview-context.types';
-import { ACCORDION_STYLES } from '../constants/preview-context.constants';
-import { Button } from '../../../primitives/button';
+import { SubscriberSectionProps } from './workflow-editor/steps/types/preview-context.types';
+import { ACCORDION_STYLES } from './workflow-editor/steps/constants/preview-context.constants';
+import { Button } from './primitives/button';
 
 export function PreviewSubscriberSection({
-  errors,
-  localParsedData,
+  error,
+  subscriber,
   onUpdate,
   onSubscriberSelect,
   onClearPersisted,
@@ -71,11 +71,11 @@ export function PreviewSubscriberSection({
         />
         <div className="flex flex-1 flex-col gap-2 overflow-auto">
           <EditableJsonViewer
-            value={localParsedData.subscriber}
+            value={subscriber}
             onChange={(updatedData) => onUpdate('subscriber', updatedData)}
             className={ACCORDION_STYLES.jsonViewer}
           />
-          {errors.subscriber && <p className="text-destructive text-xs">{errors.subscriber}</p>}
+          {error && <p className="text-destructive text-xs">{error}</p>}
         </div>
         <div className="text-text-soft flex items-center gap-1.5 text-[10px] font-normal leading-[13px]">
           <RiInformationLine className="h-3 w-3 flex-shrink-0" />
