@@ -479,6 +479,12 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
   }) {
     const updatePayload = this.getReadSeenUpdatePayload(markAs);
 
+    // Validate that all messageIds are valid MongoDB ObjectIds
+    const invalidIds = messageIds.filter(id => !Types.ObjectId.isValid(id));
+    if (invalidIds.length > 0) {
+      throw new Error(`Invalid ObjectId(s) provided: ${invalidIds.join(', ')}`);
+    }
+
     await this.update(
       {
         _environmentId: environmentId,
@@ -516,6 +522,12 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       requestQuery.lastReadDate = new Date();
     }
 
+    // Validate that all messageIds are valid MongoDB ObjectIds
+    const invalidIds = messageIds.filter(id => !Types.ObjectId.isValid(id));
+    if (invalidIds.length > 0) {
+      throw new Error(`Invalid ObjectId(s) provided: ${invalidIds.join(', ')}`);
+    }
+
     await this.update(
       {
         _environmentId: environmentId,
@@ -549,6 +561,12 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     archived?: boolean;
     snoozedUntil?: Date | null;
   }) {
+    // Validate that all ids are valid MongoDB ObjectIds
+    const invalidIds = ids.filter(id => !Types.ObjectId.isValid(id));
+    if (invalidIds.length > 0) {
+      throw new Error(`Invalid ObjectId(s) provided: ${invalidIds.join(', ')}`);
+    }
+
     const query: MessageQuery & EnforceEnvId = {
       _environmentId: environmentId,
       _subscriberId: subscriberId,

@@ -1,8 +1,9 @@
-import { IsArray, IsDefined } from 'class-validator';
+import { IsArray, IsDefined, IsMongoId } from 'class-validator';
 import { EnvironmentWithSubscriber } from '../../../shared/commands/project.command';
 
 export class MarkMessageAsCommand extends EnvironmentWithSubscriber {
   @IsArray()
+  @IsMongoId({ each: true })
   messageIds: string[];
 
   @IsDefined()
