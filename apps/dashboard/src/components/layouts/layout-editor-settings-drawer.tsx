@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { RiDeleteBin2Line } from 'react-icons/ri';
-import { useQueryClient } from '@tanstack/react-query';
 import { ExternalToast } from 'sonner';
 
 import { Button } from '@/components/primitives/button';
@@ -29,10 +28,9 @@ import { Input } from '@/components/primitives/input';
 import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner-helpers';
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { useLayoutEditor } from './layout-editor-provider';
-import { useEnvironment } from '@/context/environment/hooks';
-import { updateLayout, deleteLayout } from '@/api/layouts';
 import { useLayoutsNavigate } from './hooks/use-layouts-navigate';
-import { QueryKeys } from '@/utils/query-keys';
+import { useUpdateLayout } from '@/hooks/use-update-layout';
+import { useDeleteLayout } from '@/hooks/use-delete-layout';
 import { cn } from '@/utils/ui';
 
 const LayoutSettingsFormSchema = z.object({
@@ -56,12 +54,30 @@ type LayoutEditorSettingsDrawerProps = {
 export const LayoutEditorSettingsDrawer = forwardRef<HTMLDivElement, LayoutEditorSettingsDrawerProps>(
   ({ isOpen, onOpenChange }, forwardedRef) => {
     const { layout } = useLayoutEditor();
-    const { currentEnvironment } = useEnvironment();
     const { navigateToLayoutsPage } = useLayoutsNavigate();
-    const queryClient = useQueryClient();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isUpdating, setIsUpdating] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
+
+    const { updateLayout, isPending: isUpdating } = useUpdateLayout({
+      onSuccess: () => {
+        showSuccessToast('Layout updated successfully', '', toastOptions);
+        onOpenChange(false);
+      },
+      onError: () => {
+        showErrorToast('Failed to update layout', 'Please try again later.', toastOptions);
+      },
+    });
+
+    const { deleteLayout, isPending: isDeleting } = useDeleteLayout({
+      onSuccess: () => {
+        showSuccessToast('Layout deleted successfully', '', toastOptions);
+        navigateToLayoutsPage();
+        setIsDeleteModalOpen(false);
+      },
+      onError: () => {
+        showErrorToast('Failed to delete layout', 'Please try again later.', toastOptions);
+        setIsDeleteModalOpen(false);
+      },
+    });
 
     const form = useForm<LayoutSettingsFormData>({
       resolver: zodResolver(LayoutSettingsFormSchema),
@@ -74,54 +90,23 @@ export const LayoutEditorSettingsDrawer = forwardRef<HTMLDivElement, LayoutEdito
     });
 
     const onSubmit = async (data: LayoutSettingsFormData) => {
-      if (!layout || !currentEnvironment) return;
+      if (!layout) return;
 
-      setIsUpdating(true);
-      try {
-        await updateLayout({
-          environment: currentEnvironment,
-          layout: {
-            name: data.name,
-            controlValues: layout.controls.values || {},
-          },
-          layoutSlug: layout.slug,
-        });
-
-        await queryClient.invalidateQueries({
-          queryKey: [QueryKeys.fetchLayout, currentEnvironment._id],
-        });
-
-        showSuccessToast('Layout updated successfully', '', toastOptions);
-        onOpenChange(false);
-      } catch (error) {
-        showErrorToast('Failed to update layout', 'Please try again later.', toastOptions);
-      } finally {
-        setIsUpdating(false);
-      }
+      await updateLayout({
+        layout: {
+          name: data.name,
+          controlValues: layout.controls.values || {},
+        },
+        layoutSlug: layout.slug,
+      });
     };
 
     const handleDeleteLayout = async () => {
-      if (!layout || !currentEnvironment) return;
+      if (!layout) return;
 
-      setIsDeleting(true);
-      try {
-        await deleteLayout({
-          environment: currentEnvironment,
-          layoutSlug: layout.slug,
-        });
-
-        await queryClient.invalidateQueries({
-          queryKey: [QueryKeys.fetchLayouts, currentEnvironment._id],
-        });
-
-        showSuccessToast('Layout deleted successfully', '', toastOptions);
-        navigateToLayoutsPage();
-      } catch (error) {
-        showErrorToast('Failed to delete layout', 'Please try again later.', toastOptions);
-      } finally {
-        setIsDeleting(false);
-        setIsDeleteModalOpen(false);
-      }
+      await deleteLayout({
+        layoutSlug: layout.slug,
+      });
     };
 
     if (!layout) {
