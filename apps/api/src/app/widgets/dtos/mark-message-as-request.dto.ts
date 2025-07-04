@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsMongoId, ValidateIf } from 'class-validator';
+import { IsMongoId } from 'class-validator';
 
 class MarkMessageFields {
   @ApiPropertyOptional({
@@ -25,10 +25,7 @@ export class MarkMessageAsRequestDto {
       },
     ],
   })
-  @ValidateIf((o) => Array.isArray(o.messageId))
   @IsMongoId({ each: true })
-  @ValidateIf((o) => typeof o.messageId === 'string')
-  @IsMongoId()
   messageId: string | string[];
 
   @ApiProperty({
