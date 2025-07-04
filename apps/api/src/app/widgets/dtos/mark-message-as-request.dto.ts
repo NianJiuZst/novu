@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ValidateBy } from 'class-validator';
+import { ValidateBy, IsDefined } from 'class-validator';
 import { Types } from 'mongoose';
 
 // Custom validator for messageId that can be string or string[]
@@ -47,6 +47,7 @@ export class MarkMessageAsRequestDto {
       },
     ],
   })
+  @IsDefined()
   @IsMessageId()
   messageId: string | string[];
 

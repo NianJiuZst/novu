@@ -36,6 +36,7 @@ export class MessageMarkAsRequestDto {
       },
     ],
   })
+  @IsDefined()
   @IsMessageId()
   messageId: string | string[];
 
