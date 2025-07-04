@@ -19,28 +19,28 @@ You can open a new issue with this [issue form](https://github.com/novuhq/novu/i
 
 ### Requirements
 
-- Node.js v20.19.0 (LTS)
+- Node.js v23.11.1 (LTS)
 
-  - To install Node.js v20.19.0 (LTS) through NVM (Node Version Manager), follow these steps:
+  - To install Node.js v23.11.1 (LTS) through NVM (Node Version Manager), follow these steps:
 
     1. Open your terminal.
 
     2. Install NVM if you haven't already. You can install NVM by following the instructions at [NVM GitHub](https://github.com/nvm-sh/nvm).
 
-    3. Once NVM is installed, run the following command to install and use Node.js v20.19.0:
+    3. Once NVM is installed, run the following command to install and use Node.js v23.11.1:
 
-       ```bash
-       nvm install 20.19.0
+   ```bash
+   nvm install 23.11.1
+   
+   nvm use 23.11.1
+   
+   node -v # output: v23.11.1
+   ```
+   
+4. You can set Node.js v23.11.1 as your default version with the following command:
 
-       nvm use 20.19.0
-
-       node -v # output: v20.19.0
-       ```
-
-    4. You can set Node.js v20.19.0 as your default version with the following command:
-
-       ```bash
-       nvm alias default 20.19.0
+   ```bash
+   nvm alias default 23.11.1
 
        ```
 

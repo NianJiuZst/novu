@@ -1,5 +1,5 @@
 # start build stage
-FROM node:20-alpine3.19 AS builder
+FROM node:23-alpine3.19 AS builder
 RUN apk add g++ make py3-pip
 ENV NX_DAEMON=false
 
@@ -33,7 +33,7 @@ RUN CI='' pnpm build:web --skip-nx-cache
 # end build stage
 
 # start production stage
-FROM node:20-alpine
+FROM node:23-alpine
 
 RUN apk add --no-cache bash
 RUN npm install -g pnpm@10.11.0 http-server --loglevel notice

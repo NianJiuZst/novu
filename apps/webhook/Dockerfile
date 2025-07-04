@@ -1,5 +1,5 @@
 # Use the base image for development
-FROM node:20-alpine3.19 AS dev_base
+FROM node:23-alpine3.19 AS dev_base
 RUN apk add --no-cache g++ make py3-pip
 ENV NX_DAEMON=false
 
