@@ -6,19 +6,7 @@ function isLaunchDarklyEnabled() {
   return !!LAUNCH_DARKLY_CLIENT_SIDE_ID;
 }
 
-export const useFeatureFlagMap = (defaultValue = false): FeatureFlags => {
-  const flags = useFlags();
-
-  return Object.keys(flags).reduce((acc: FeatureFlags, flag: string) => {
-    acc[flag as keyof FeatureFlags] = flags[flag] ?? defaultValue;
-
-    return acc;
-  }, {} as FeatureFlags);
-};
-
 export const useFeatureFlag = (key: FeatureFlagsKeysEnum, defaultValue = false): boolean => {
-  const flags = useFlags();
-
   if (!isLaunchDarklyEnabled()) {
     const envValue =
       // Check if the feature flag is exported as an environment variable
@@ -29,5 +17,25 @@ export const useFeatureFlag = (key: FeatureFlagsKeysEnum, defaultValue = false):
     return prepareBooleanStringFeatureFlag(envValue, defaultValue);
   }
 
-  return flags[key] ?? defaultValue;
+  try {
+    const flags = useFlags();
+    return flags[key] ?? defaultValue;
+  } catch (error) {
+    console.error(`Error retrieving feature flag '${key}', returning default value:`, error);
+    return defaultValue;
+  }
+};
+
+export const useFeatureFlags = (): Partial<FeatureFlags> => {
+  if (!isLaunchDarklyEnabled()) {
+    return {};
+  }
+
+  try {
+    const flags = useFlags();
+    return flags as Partial<FeatureFlags>;
+  } catch (error) {
+    console.error('Error retrieving feature flags, returning empty object:', error);
+    return {};
+  }
 };

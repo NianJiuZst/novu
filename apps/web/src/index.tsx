@@ -15,21 +15,26 @@ import '@novu/novui/styles.css';
   let FeatureFlagsProvider = ({ children }) => <>{children}</>;
 
   if (LAUNCH_DARKLY_CLIENT_SIDE_ID) {
-    FeatureFlagsProvider = await asyncWithLDProvider({
-      clientSideID: LAUNCH_DARKLY_CLIENT_SIDE_ID,
-      reactOptions: {
-        useCamelCaseFlagKeys: false,
-      },
-      user: {
-        kind: 'user',
-        anonymous: true,
-      },
-      options: {
-        // eslint-disable-next-line max-len
-        // https://docs.launchdarkly.com/sdk/features/bootstrapping#:~:text=Alternatively%2C%20you%20can%20bootstrap%20feature%20flags%20from%20local%20storage%3A
-        bootstrap: 'localStorage',
-      },
-    });
+    try {
+      FeatureFlagsProvider = await asyncWithLDProvider({
+        clientSideID: LAUNCH_DARKLY_CLIENT_SIDE_ID,
+        reactOptions: {
+          useCamelCaseFlagKeys: false,
+        },
+        user: {
+          kind: 'user',
+          anonymous: true,
+        },
+        options: {
+          // eslint-disable-next-line max-len
+          // https://docs.launchdarkly.com/sdk/features/bootstrapping#:~:text=Alternatively%2C%20you%20can%20bootstrap%20feature%20flags%20from%20local%20storage%3A
+          bootstrap: 'localStorage',
+        },
+      });
+    } catch (error) {
+      console.error('Failed to initialize LaunchDarkly provider:', error);
+      // Keep the fallback provider that doesn't use LaunchDarkly
+    }
   }
 
   const container = document.getElementById('root');
@@ -46,11 +51,9 @@ import '@novu/novui/styles.css';
       </FeatureFlagsProvider>
     </React.StrictMode>
   );
-})();
 
-/*
- * If you want to start measuring performance in your app, pass a function
- * to log results (for example: reportWebVitals(console.log))
- * or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals .
- */
-reportWebVitals();
+  // If you want to start measuring performance in your app, pass a function
+  // to log results (for example: reportWebVitals(console.log))
+  // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+  reportWebVitals();
+})();

@@ -7,11 +7,15 @@ function isLaunchDarklyEnabled() {
 }
 
 export const useFeatureFlag = (key: FeatureFlagsKeysEnum, defaultValue = false): boolean => {
-  const flags = useFlags();
-
   if (!isLaunchDarklyEnabled()) {
     return prepareBooleanStringFeatureFlag(window._env_[key] || process.env[key], defaultValue);
   }
 
-  return flags[key] ?? defaultValue;
+  try {
+    const flags = useFlags();
+    return flags[key] ?? defaultValue;
+  } catch (error) {
+    console.error(`Error retrieving feature flag '${key}', returning default value:`, error);
+    return defaultValue;
+  }
 };

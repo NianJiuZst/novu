@@ -23,15 +23,23 @@ const AsyncFeatureFlagsProvider = lazy(async () => {
     };
   }
 
-  const LaunchDarklyProvider = await asyncWithLDProvider(LD_CONFIG);
-  return {
-    default: ({ children }: { children: React.ReactNode }) => <LaunchDarklyProvider>{children}</LaunchDarklyProvider>,
-  };
+  try {
+    const LaunchDarklyProvider = await asyncWithLDProvider(LD_CONFIG);
+    return {
+      default: ({ children }: { children: React.ReactNode }) => <LaunchDarklyProvider>{children}</LaunchDarklyProvider>,
+    };
+  } catch (error) {
+    console.error('Failed to initialize LaunchDarkly provider:', error);
+    // Return a fallback provider that doesn't use LaunchDarkly
+    return {
+      default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+  }
 });
 
 export function FeatureFlagsProvider({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense>
+    <Suspense fallback={<div>Loading feature flags...</div>}>
       <AsyncFeatureFlagsProvider>{children}</AsyncFeatureFlagsProvider>
     </Suspense>
   );

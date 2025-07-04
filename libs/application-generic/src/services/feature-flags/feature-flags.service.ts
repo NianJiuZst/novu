@@ -24,6 +24,8 @@ export class FeatureFlagsService {
         (error as Error).stack || (error as Error).message,
         LOG_CONTEXT
       );
+      // Don't rethrow to prevent application startup failure
+      // The service will fall back to default values
     }
   }
 
@@ -35,8 +37,18 @@ export class FeatureFlagsService {
       Logger.error(error, 'Feature Flags service has failed when shut down', LOG_CONTEXT);
     }
   }
+
   // the T_Result is inferred from the usage within the context.defaultValue in FeatureFlagContext
   public async getFlag<T_Result>(context: FeatureFlagContext<T_Result>): Promise<T_Result> {
-    return this.service.getFlag(context);
+    try {
+      return await this.service.getFlag(context);
+    } catch (error) {
+      Logger.error(
+        `Error retrieving feature flag '${context.key}', returning default value`,
+        (error as Error).stack || (error as Error).message,
+        LOG_CONTEXT
+      );
+      return context.defaultValue;
+    }
   }
 }
