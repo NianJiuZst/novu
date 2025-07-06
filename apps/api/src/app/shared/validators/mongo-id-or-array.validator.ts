@@ -11,8 +11,9 @@ export function IsMongoIdOrArray() {
           return Types.ObjectId.isValid(value);
         }
         if (Array.isArray(value)) {
-          return value.every(id => typeof id === 'string' && Types.ObjectId.isValid(id));
+          return value.every((id) => typeof id === 'string' && Types.ObjectId.isValid(id));
         }
+
         return false;
       },
       defaultMessage(): string {
