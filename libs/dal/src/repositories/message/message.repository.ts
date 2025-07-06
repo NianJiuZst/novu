@@ -480,7 +480,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     const updatePayload = this.getReadSeenUpdatePayload(markAs);
 
     // Validate that all messageIds are valid MongoDB ObjectIds
-    const invalidIds = messageIds.filter(id => !Types.ObjectId.isValid(id));
+    const invalidIds = messageIds.filter((id) => !Types.ObjectId.isValid(id));
     if (invalidIds.length > 0) {
       throw new Error(`Invalid ObjectId(s) provided: ${invalidIds.join(', ')}`);
     }
@@ -523,7 +523,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     }
 
     // Validate that all messageIds are valid MongoDB ObjectIds
-    const invalidIds = messageIds.filter(id => !Types.ObjectId.isValid(id));
+    const invalidIds = messageIds.filter((id) => !Types.ObjectId.isValid(id));
     if (invalidIds.length > 0) {
       throw new Error(`Invalid ObjectId(s) provided: ${invalidIds.join(', ')}`);
     }
@@ -562,7 +562,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     snoozedUntil?: Date | null;
   }) {
     // Validate that all ids are valid MongoDB ObjectIds
-    const invalidIds = ids.filter(id => !Types.ObjectId.isValid(id));
+    const invalidIds = ids.filter((id) => !Types.ObjectId.isValid(id));
     if (invalidIds.length > 0) {
       throw new Error(`Invalid ObjectId(s) provided: ${invalidIds.join(', ')}`);
     }
