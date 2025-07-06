@@ -15,7 +15,7 @@ export class MessageMarkAsRequestDto {
       },
     ],
   })
-  @IsDefined()
+  @IsDefined({ message: 'messageId is required' })
   @IsMongoIdOrArray()
   messageId: string | string[];
 
