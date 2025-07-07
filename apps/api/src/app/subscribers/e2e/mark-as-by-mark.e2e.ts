@@ -170,7 +170,7 @@ describe('Mark as Seen - /widgets/messages/mark-as (POST) #novu-v2', async () =>
       )
     );
 
-    expect(error?.message).to.equal('messageId is required');
+    expect(error?.message).to.equal('Validation Error');
     expect(error?.statusCode).to.equal(400);
   });
 });

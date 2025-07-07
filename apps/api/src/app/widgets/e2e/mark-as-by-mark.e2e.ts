@@ -131,7 +131,7 @@ describe('Mark as Seen - /widgets/messages/mark-as (POST) #novu-v0', async () =>
         expect(e.message).to.be.empty;
       }
 
-      expect(e.response.data.message).to.equal('messageId is required');
+      expect(e.response.data.message).to.equal('Validation Error');
       expect(e.response.data.statusCode).to.equal(400);
     }
 
@@ -144,7 +144,7 @@ describe('Mark as Seen - /widgets/messages/mark-as (POST) #novu-v0', async () =>
         expect(e.message).to.be.empty;
       }
 
-      expect(e.response.data.message).to.equal('messageId is required');
+      expect(e.response.data.message).to.equal('Validation Error');
       expect(e.response.data.statusCode).to.equal(400);
     }
   });
