@@ -3,8 +3,6 @@ import { format } from 'prettier';
 
 import {
   AnalyticsService,
-  CreateChange,
-  CreateChangeCommand,
   GetWorkflowByIdsCommand,
   GetWorkflowByIdsUseCase,
   Instrument,
@@ -21,16 +19,13 @@ import {
 import {
   ControlSchemas,
   ControlValuesRepository,
-  NotificationGroupEntity,
   NotificationGroupRepository,
   NotificationStepEntity,
   NotificationTemplateEntity,
 } from '@novu/dal';
 import {
-  ChangeEntityTypeEnum,
   ControlValuesLevelEnum,
   DEFAULT_WORKFLOW_PREFERENCES,
-  isBridgeWorkflow,
   slugify,
   StepTypeEnum,
   WebhookEventEnum,
@@ -75,7 +70,6 @@ export class UpsertWorkflowUseCase {
     private analyticsService: AnalyticsService,
     private featureFlagsService: FeatureFlagsService,
     private logger: PinoLogger,
-    private createChange: CreateChange,
     @Optional()
     private sendWebhookMessage?: SendWebhookMessage
   ) {}
@@ -150,7 +144,7 @@ export class UpsertWorkflowUseCase {
   private async buildCreateWorkflowCommand(command: UpsertWorkflowCommand): Promise<CreateWorkflowCommand> {
     const { user, workflowDto, preserveWorkflowId } = command;
     const isWorkflowActive = workflowDto?.active ?? true;
-    const notificationGroupId = await this.getNotificationGroup(command.user.environmentId, command.user.organizationId, command.user._id);
+    const notificationGroupId = await this.getNotificationGroup(command.user.environmentId, command.user.organizationId);
     const steps = await this.buildSteps(command);
 
     return {
@@ -306,38 +300,10 @@ export class UpsertWorkflowUseCase {
     return finalStepId;
   }
 
-  private async getNotificationGroup(environmentId: string, organizationId: string, userId: string): Promise<string> {
-    let notificationGroup = await this.notificationGroupRepository.findOne({
-      name: 'General',
-      _environmentId: environmentId,
-      _organizationId: organizationId,
-    });
-
-    if (!notificationGroup) {
-      notificationGroup = await this.notificationGroupRepository.create({
-        _environmentId: environmentId,
-        _organizationId: organizationId,
-        name: 'General',
-      });
-
-      // Create change for the new notification group (only for non-bridge workflows)
-      // Since this is v2 UpsertWorkflow which creates bridge workflows, we don't create change
-      // Bridge workflows don't require change tracking as they sync directly
-      if (!isBridgeWorkflow(ResourceTypeEnum.BRIDGE)) {
-        await this.createChange.execute(
-          CreateChangeCommand.create({
-            item: notificationGroup,
-            environmentId: environmentId,
-            organizationId: organizationId,
-            userId: userId,
-            type: ChangeEntityTypeEnum.NOTIFICATION_GROUP,
-            changeId: NotificationGroupRepository.createObjectId(),
-          })
-        );
-      }
-    }
-
-    return notificationGroup._id;
+  private async getNotificationGroup(environmentId: string, organizationId: string): Promise<string | undefined> {
+    // In v2, notification groups are no longer utilized, so we return undefined
+    // This allows workflows to be created without requiring notification groups
+    return undefined;
   }
 
   @Instrument()

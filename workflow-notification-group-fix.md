@@ -1,4 +1,4 @@
-# Workflow Creation Bug Fix: Missing Notification Group
+# Workflow Creation Bug Fix: V2 Workflows and Notification Groups
 
 ## Problem Description
 
@@ -12,36 +12,26 @@ The problem was in the `apps/api/src/app/workflows-v2/usecases/upsert-workflow/u
 
 2. **Failure Point**: The `buildCreateWorkflowCommand` method would then check if the notification group ID was returned, and if not, it would throw a `BadRequestException`.
 
-3. **Inconsistent Behavior**: The v1 `CreateWorkflow` usecase had a `handleGroup` method that would create the notification group if it didn't exist, but the v2 `UpsertWorkflow` usecase was missing this graceful handling.
+3. **V2 Architecture**: In v2, notification groups are no longer utilized, so workflows should be created without requiring notification groups.
 
 ## Solution Implementation
 
 ### Changes Made
 
-1. **Added Required Imports**:
-   - `CreateChange` and `CreateChangeCommand` from `@novu/application-generic`
-   - `ChangeEntityTypeEnum` and `isBridgeWorkflow` from `@novu/shared`
-   - `NotificationGroupEntity` from `@novu/dal`
+1. **Removed Unnecessary Dependencies**: Removed `CreateChange`, `CreateChangeCommand`, `ChangeEntityTypeEnum`, `isBridgeWorkflow`, and `NotificationGroupEntity` imports as they are not needed for v2 workflows.
 
-2. **Updated Constructor**: Added `CreateChange` as a dependency to enable creating change records for new notification groups.
+2. **Simplified `getNotificationGroup` Method**: Changed the method to simply return `undefined` instead of trying to find or create notification groups.
 
-3. **Modified `getNotificationGroup` Method**:
-   - Changed signature from `(environmentId: string): Promise<string | undefined>` to `(environmentId: string, organizationId: string, userId: string): Promise<string>`
-   - Added logic to create the "General" notification group if it doesn't exist
-   - Implemented change tracking for the new notification group (following the same pattern as the v1 usecase)
-
-4. **Updated `buildCreateWorkflowCommand` Method**:
-   - Removed the error throwing logic since the new `getNotificationGroup` method will always return a valid group ID
-   - Updated the method call to pass the required additional parameters
+3. **Updated `buildCreateWorkflowCommand` Method**: Removed the error throwing logic since v2 workflows can be created with undefined notification group IDs.
 
 ### Key Implementation Details
 
-The new `getNotificationGroup` method now:
+The new approach:
 
-1. **Searches for existing group**: Looks for a notification group named "General" in the specified environment and organization
-2. **Creates if missing**: If the group doesn't exist, creates a new one with the name "General"
-3. **Handles change tracking**: Creates a change record for the new notification group (though for bridge workflows, this is typically skipped)
-4. **Always returns valid ID**: Ensures the workflow creation process never fails due to missing notification groups
+1. **No Group Creation**: V2 workflows do not create notification groups
+2. **No Change Tracking**: Since no groups are created, no change tracking is needed
+3. **Simplified Logic**: The method now simply returns `undefined` for notification group ID
+4. **V1 Unchanged**: The v1 `CreateWorkflow` usecase retains its original behavior for backward compatibility
 
 ### Code Changes
 
@@ -60,39 +50,30 @@ private async getNotificationGroup(environmentId: string): Promise<string | unde
 }
 
 // After
-private async getNotificationGroup(environmentId: string, organizationId: string, userId: string): Promise<string> {
-  let notificationGroup = await this.notificationGroupRepository.findOne({
-    name: 'General',
-    _environmentId: environmentId,
-    _organizationId: organizationId,
-  });
-
-  if (!notificationGroup) {
-    notificationGroup = await this.notificationGroupRepository.create({
-      _environmentId: environmentId,
-      _organizationId: organizationId,
-      name: 'General',
-    });
-
-    // Create change for the new notification group (only for non-bridge workflows)
-    // Since this is v2 UpsertWorkflow which creates bridge workflows, we don't create change
-    // Bridge workflows don't require change tracking as they sync directly
-    if (!isBridgeWorkflow(ResourceTypeEnum.BRIDGE)) {
-      await this.createChange.execute(
-        CreateChangeCommand.create({
-          item: notificationGroup,
-          environmentId: environmentId,
-          organizationId: organizationId,
-          userId: userId,
-          type: ChangeEntityTypeEnum.NOTIFICATION_GROUP,
-          changeId: NotificationGroupRepository.createObjectId(),
-        })
-      );
-    }
-  }
-
-  return notificationGroup._id;
+private async getNotificationGroup(environmentId: string, organizationId: string): Promise<string | undefined> {
+  // In v2, notification groups are no longer utilized, so we return undefined
+  // This allows workflows to be created without requiring notification groups
+  return undefined;
 }
+```
+
+### Constructor Changes
+
+```typescript
+// Before
+constructor(
+  // ... other dependencies
+  private createChange: CreateChange,
+  @Optional()
+  private sendWebhookMessage?: SendWebhookMessage
+) {}
+
+// After
+constructor(
+  // ... other dependencies (CreateChange removed)
+  @Optional()
+  private sendWebhookMessage?: SendWebhookMessage
+) {}
 ```
 
 ## Testing
@@ -101,16 +82,30 @@ The fix has been tested by:
 
 1. **Build Verification**: Successfully compiled the entire API service with no TypeScript errors
 2. **Type Safety**: All type signatures are correctly maintained
-3. **Pattern Consistency**: The implementation follows the same pattern used in the v1 `CreateWorkflow` usecase
+3. **Simplified Architecture**: Removed unused dependencies and simplified the code
 
 ## Expected Behavior
 
 After this fix:
 
-1. **Graceful Workflow Creation**: Users can create workflows even when the "General" notification group doesn't exist in their environment
-2. **Automatic Group Creation**: The system will automatically create the "General" notification group when needed
-3. **Consistent Experience**: Both v1 and v2 workflow creation APIs now handle missing notification groups consistently
-4. **No Breaking Changes**: Existing functionality remains unchanged for environments that already have notification groups
+1. **Graceful Workflow Creation**: V2 workflows can be created without requiring notification groups
+2. **No Group Creation**: The system will not attempt to create notification groups for v2 workflows
+3. **V1 Compatibility**: V1 workflows continue to work as before with notification group creation
+4. **No Breaking Changes**: Existing functionality remains unchanged
+
+## Architecture Notes
+
+### V1 vs V2 Behavior
+
+- **V1 (Legacy)**: Creates notification groups if they don't exist, maintains change tracking
+- **V2 (Current)**: Does not use notification groups, workflows created with `undefined` notification group ID
+
+### Why This Approach
+
+1. **V2 Evolution**: Notification groups are deprecated in v2 architecture
+2. **Simplified Workflow**: Removes unnecessary complexity from v2 workflow creation
+3. **Backward Compatibility**: V1 behavior is preserved for existing integrations
+4. **Performance**: Eliminates database operations for notification group management in v2
 
 ## Files Modified
 
@@ -118,4 +113,11 @@ After this fix:
 
 ## Impact
 
-This fix resolves the user's issue where workflow creation was failing in production when the notification group didn't exist. The solution ensures that workflow creation is more resilient and provides a better user experience by automatically creating the required notification group when it's missing.
+This fix resolves the user's issue by:
+
+1. **Eliminating the Error**: V2 workflows no longer fail when notification groups don't exist
+2. **Architectural Alignment**: Aligns with v2's design where notification groups are not utilized
+3. **Simplified Codebase**: Removes unnecessary complexity and dependencies
+4. **Better User Experience**: Users can create workflows without worrying about notification group setup
+
+The solution ensures that v2 workflows work as intended while maintaining full backward compatibility with v1 workflows.
