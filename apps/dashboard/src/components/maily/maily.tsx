@@ -198,6 +198,7 @@ export const Maily = ({
         {...rest}
       >
         <MailyEditor
+          key={value}
           config={DEFAULT_EDITOR_CONFIG}
           blocks={blocks}
           extensions={extensions}
