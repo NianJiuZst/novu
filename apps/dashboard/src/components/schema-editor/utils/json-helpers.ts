@@ -13,6 +13,7 @@ function carryOverCommonKeywords(originalSchema: JSONSchema7, newSchema: Partial
   if (originalSchema.writeOnly !== undefined) newSchema.writeOnly = originalSchema.writeOnly;
   // Keep advanced/conditional keywords as they are complex to selectively clear
   if (originalSchema.if !== undefined) newSchema.if = originalSchema.if;
+  // biome-ignore lint/suspicious/noThenProperty: This is a JSON Schema 'then' property, not a Promise then method
   if (originalSchema.then !== undefined) newSchema.then = originalSchema.then;
   if (originalSchema.else !== undefined) newSchema.else = originalSchema.else;
   if (originalSchema.allOf !== undefined) newSchema.allOf = originalSchema.allOf;

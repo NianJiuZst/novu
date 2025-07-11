@@ -3,13 +3,11 @@ import { Badge } from '@/components/primitives/badge';
 import { DEFAULT_LOCALE } from '@novu/shared';
 
 interface NewTranslationKeyPreviewProps {
-  onCreateClick?: () => void;
   locale?: string;
   translationsUrl?: string;
 }
 
 export function NewTranslationKeyPreview({
-  onCreateClick,
   locale = DEFAULT_LOCALE,
   translationsUrl = '/translations',
 }: NewTranslationKeyPreviewProps) {
@@ -29,28 +27,14 @@ export function NewTranslationKeyPreview({
             <li>Translating the new key(s)</li>
             <li>Re-uploading each localized file</li>
           </ul>
-          {onCreateClick && (
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                onCreateClick();
-              }}
-              className="text-text-sub mt-2 block text-[10px] font-medium leading-normal underline"
-            >
-              Insert & manage translations ↗
-            </a>
-          )}
-          {!onCreateClick && (
-            <a
-              href={translationsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-text-sub mt-2 block text-[10px] font-medium leading-normal underline"
-            >
-              Manage translations ↗
-            </a>
-          )}
+          <a
+            href={translationsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-text-sub mt-2 block text-[10px] font-medium leading-normal underline"
+          >
+            Manage translations ↗
+          </a>
         </div>
       </VariablePreview.Content>
     </VariablePreview>

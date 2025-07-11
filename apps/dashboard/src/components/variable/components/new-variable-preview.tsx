@@ -18,13 +18,13 @@ export function NewVariablePreview({ onCreateClick }: INewVariablePreviewProps) 
           </p>
 
           {onCreateClick && (
-            <a
-              href="#"
+            <button
+              type="button"
               onClick={onCreateClick}
               className="text-text-sub mt-2 block text-[10px] font-medium leading-normal underline"
             >
               Insert & manage schema ↗
-            </a>
+            </button>
           )}
         </div>
       </VariablePreview.Content>

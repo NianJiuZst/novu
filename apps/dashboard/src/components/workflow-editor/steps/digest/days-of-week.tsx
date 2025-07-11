@@ -39,7 +39,7 @@ const Day = ({
         checked={checked}
         data-id={dataId}
       />
-      <label className={labelClassName} role="checkbox" tabIndex={0} htmlFor={id} onKeyDown={onKeyDown}>
+      <label className={labelClassName} htmlFor={id} onKeyDown={onKeyDown}>
         {children}
       </label>
     </div>

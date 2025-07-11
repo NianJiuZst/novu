@@ -13,7 +13,6 @@ import { Link, type LinkProps } from 'react-router-dom';
 
 const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
   <nav
-    role="navigation"
     aria-label="pagination"
     className={cn('text-foreground-600 mx-auto flex w-fit justify-center overflow-hidden rounded-md border', className)}
     {...props}

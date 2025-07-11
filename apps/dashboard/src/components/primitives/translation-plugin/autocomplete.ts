@@ -61,11 +61,7 @@ function createNewKeySuggestion(
     ...option,
     info: () => {
       const dom = createInfoPanel({
-        component: React.createElement(NewTranslationKeyPreview, {
-          onCreateClick: () => {
-            onCreateNewTranslationKey?.(trimmedSearch);
-          },
-        }),
+        component: React.createElement(NewTranslationKeyPreview),
       });
       return {
         dom,

@@ -88,7 +88,7 @@ export const EmailEditorPreview = ({
               transition={{ duration: 0.2 }}
               className="h-full"
             >
-              {previewData?.result?.type == ChannelTypeEnum.EMAIL ? (
+              {previewData?.result?.type === ChannelTypeEnum.EMAIL ? (
                 <>
                   <TabsContent value="mobile">
                     <div className="w-full bg-neutral-100">
