@@ -1,19 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException, UnprocessableEntityException } from '@nestjs/common';
-import { AnalyticsService, InstrumentUsecase } from '@novu/application-generic';
+import { BadRequestException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { type AnalyticsService, InstrumentUsecase } from '@novu/application-generic';
 import {
-  NotificationTemplateEntity,
-  NotificationTemplateRepository,
-  SubscriberRepository,
   BaseRepository,
+  type NotificationTemplateEntity,
+  type NotificationTemplateRepository,
+  type SubscriberRepository,
 } from '@novu/dal';
 import { PreferenceLevelEnum } from '@novu/shared';
-
+import type { BulkUpdatePreferenceItemDto } from '../../dtos/bulk-update-preferences-request.dto';
 import { AnalyticsEventsEnum } from '../../utils';
-import { InboxPreference } from '../../utils/types';
-import { BulkUpdatePreferencesCommand } from './bulk-update-preferences.command';
-import { UpdatePreferences } from '../update-preferences/update-preferences.usecase';
+import type { InboxPreference } from '../../utils/types';
 import { UpdatePreferencesCommand } from '../update-preferences/update-preferences.command';
-import { BulkUpdatePreferenceItemDto } from '../../dtos/bulk-update-preferences-request.dto';
+import type { UpdatePreferences } from '../update-preferences/update-preferences.usecase';
+import type { BulkUpdatePreferencesCommand } from './bulk-update-preferences.command';
 
 const MAX_BULK_LIMIT = 100;
 

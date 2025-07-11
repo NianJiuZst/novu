@@ -1,6 +1,6 @@
 import { EnvironmentWithUserCommand } from '@novu/application-generic';
-import { JobStatusEnum, ResourceOriginEnum } from '@novu/shared';
-import { SubscriberResponseDtoOptional } from '../../../subscribers/dtos';
+import type { JobStatusEnum, ResourceOriginEnum } from '@novu/shared';
+import type { SubscriberResponseDtoOptional } from '../../../subscribers/dtos';
 
 export class PreviewStepCommand extends EnvironmentWithUserCommand {
   workflowId: string;

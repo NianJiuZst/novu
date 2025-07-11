@@ -1,6 +1,6 @@
+import { TeamMembersPage } from './page-models/teamMembersPage';
 import { test } from './utils/baseTest';
 import { initializeSession } from './utils/browser';
-import { TeamMembersPage } from './page-models/teamMembersPage';
 
 test.beforeEach(async ({ page }) => {
   await initializeSession(page);

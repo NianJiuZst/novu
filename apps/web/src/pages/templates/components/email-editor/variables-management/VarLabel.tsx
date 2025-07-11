@@ -1,6 +1,6 @@
+import { Center, Collapse, UnstyledButton } from '@mantine/core';
+import { ChevronDown, ChevronUp, colors } from '@novu/design-system';
 import { useState } from 'react';
-import { colors, ChevronUp, ChevronDown } from '@novu/design-system';
-import { Collapse, UnstyledButton, Center } from '@mantine/core';
 
 export const VarLabel = ({ label, children, Icon }) => {
   const [open, setOpen] = useState(false);

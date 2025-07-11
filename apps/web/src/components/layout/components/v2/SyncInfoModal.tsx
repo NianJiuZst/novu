@@ -1,18 +1,16 @@
-import { FC, useState } from 'react';
-import { QueryObserverResult } from '@tanstack/react-query';
 import { showNotification } from '@mantine/notifications';
 // TODO: replace with Novui Code Block when available
 import { Prism } from '@mantine/prism';
-
 // TODO: replace with Novui Modal when available
 import { Modal } from '@novu/design-system';
 import { Button, Input, Tabs, Text, Title } from '@novu/novui';
 import { css } from '@novu/novui/css';
-
-import { useBridgeURL } from '../../../../studio/hooks/useBridgeURL';
-import { API_ROOT, ENV } from '../../../../config';
-import { useStudioState } from '../../../../studio/StudioStateProvider';
+import type { QueryObserverResult } from '@tanstack/react-query';
+import { type FC, useState } from 'react';
 import { buildApiHttpClient } from '../../../../api';
+import { API_ROOT, ENV } from '../../../../config';
+import { useBridgeURL } from '../../../../studio/hooks/useBridgeURL';
+import { useStudioState } from '../../../../studio/StudioStateProvider';
 
 export type SyncInfoModalProps = {
   isOpen: boolean;
@@ -94,6 +92,7 @@ export const SyncInfoModal: FC<SyncInfoModalProps> = ({ isOpen, toggleOpen, refe
               className={css({
                 textDecoration: '!important underline',
               })}
+              rel="noopener"
             >
               our docs.
             </a>

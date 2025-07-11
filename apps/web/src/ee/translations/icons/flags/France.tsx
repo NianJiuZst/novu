@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 export function France(props: React.SVGProps<SVGSVGElement>) {
   return (

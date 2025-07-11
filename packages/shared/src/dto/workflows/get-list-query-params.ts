@@ -1,5 +1,5 @@
 import { LimitOffsetPaginationDto } from '../../types';
-import { WorkflowResponseDto } from './workflow.dto';
+import type { WorkflowResponseDto } from './workflow.dto';
 
 export class GetListQueryParams extends LimitOffsetPaginationDto<
   WorkflowResponseDto,

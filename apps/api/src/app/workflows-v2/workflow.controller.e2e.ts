@@ -1,27 +1,25 @@
-import chai, { expect } from 'chai';
-import chaiSubset from 'chai-subset';
-import { UserSession } from '@novu/testing';
-import { PreferencesRepository } from '@novu/dal';
-import { Novu } from '@novu/api';
+import type { Novu } from '@novu/api';
 import {
-  CreateWorkflowDto,
-  DigestStepUpsertDto,
-  EmailStepResponseDto,
-  EmailStepUpsertDto,
-  InAppStepResponseDto,
-  InAppStepUpsertDto,
-  JSONSchemaDto,
-  ListWorkflowResponse,
+  type CreateWorkflowDto,
+  type DigestStepUpsertDto,
+  type EmailStepResponseDto,
+  type EmailStepUpsertDto,
+  type InAppStepResponseDto,
+  type InAppStepUpsertDto,
+  type JSONSchemaDto,
+  type ListWorkflowResponse,
+  ResourceOriginEnum,
   StepContentIssueEnum,
   StepTypeEnum,
-  UpdateWorkflowDto,
-  UpdateWorkflowDtoSteps,
+  type UpdateWorkflowDto,
+  type UpdateWorkflowDtoSteps,
   WorkflowCreationSourceEnum,
-  WorkflowListResponseDto,
-  ResourceOriginEnum,
+  type WorkflowListResponseDto,
   WorkflowStatusEnum,
 } from '@novu/api/models/components';
-import { WorkflowResponseDto } from '@novu/api/src/models/components';
+import type { ErrorDto } from '@novu/api/models/errors';
+import type { WorkflowResponseDto } from '@novu/api/src/models/components';
+import { PreferencesRepository } from '@novu/dal';
 import {
   ApiServiceLevelEnum,
   DEFAULT_WORKFLOW_PREFERENCES,
@@ -30,7 +28,9 @@ import {
   ShortIsPrefixEnum,
   slugify,
 } from '@novu/shared';
-import { ErrorDto } from '@novu/api/models/errors';
+import { UserSession } from '@novu/testing';
+import chai, { expect } from 'chai';
+import chaiSubset from 'chai-subset';
 import { buildSlug } from '../shared/helpers/build-slug';
 import {
   expectSdkExceptionGeneric,

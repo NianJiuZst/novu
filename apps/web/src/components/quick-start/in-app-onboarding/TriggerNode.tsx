@@ -1,30 +1,30 @@
-import { Handle, Position } from 'react-flow-renderer';
-import { BoltOutlinedGradient, Button, colors, Playground, shadows, Text, Title } from '@novu/design-system';
 import styled from '@emotion/styled';
 import { createStyles, Group, Popover, Stack, useMantineColorScheme } from '@mantine/core';
+import { BoltOutlinedGradient, Button, colors, Playground, shadows, Text, Title } from '@novu/design-system';
 import type { INotificationTemplate, IResponseError } from '@novu/shared';
 import {
   ActorTypeEnum,
-  ICreateNotificationTemplateDto,
+  type ICreateNotificationTemplateDto,
   StepTypeEnum,
   SystemAvatarIconEnum,
   WorkflowCreationSourceEnum,
 } from '@novu/shared';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { Handle, Position } from 'react-flow-renderer';
 import { useParams } from 'react-router-dom';
 
 import { createTemplate, testTrigger } from '../../../api/notification-templates';
+import { FIRST_100_WORKFLOWS } from '../../../constants/workflowConstants';
 import { useEffectOnce, useNotificationGroup, useTemplates } from '../../../hooks';
 import {
   inAppSandboxSubscriberId,
   notificationTemplateName,
   OnBoardingAnalyticsEnum,
 } from '../../../pages/quick-start/consts';
-import { NodeStep } from '../../workflow';
-import { useSegment } from '../../providers/SegmentProvider';
 import { errorMessage } from '../../../utils/notifications';
-import { FIRST_100_WORKFLOWS } from '../../../constants/workflowConstants';
+import { useSegment } from '../../providers/SegmentProvider';
+import { NodeStep } from '../../workflow';
 
 const useStyles = createStyles((theme) => ({
   dropdown: {

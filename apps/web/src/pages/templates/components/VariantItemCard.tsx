@@ -1,22 +1,22 @@
 import styled from '@emotion/styled';
-import { FilterPartTypeEnum, StepTypeEnum, STEP_TYPE_TO_CHANNEL_TYPE } from '@novu/shared';
-import { MouseEventHandler, useEffect, useRef, useState } from 'react';
+import { Check, Conditions as ConditionsIcon, colors } from '@novu/design-system';
+import { FilterPartTypeEnum, STEP_TYPE_TO_CHANNEL_TYPE, type StepTypeEnum } from '@novu/shared';
+import { type MouseEventHandler, useEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { colors, Check, Conditions as ConditionsIcon } from '@novu/design-system';
 
 import { Conditions } from '../../../components/conditions';
 import { When } from '../../../components/utils/When';
 import { stepIcon } from '../constants';
 import { useBasePath } from '../hooks/useBasePath';
 import { useFilterPartsList } from '../hooks/useFilterPartsList';
-import { useStepSubtitle } from '../hooks/useStepSubtitle';
-import { NodeType, WorkflowNode } from '../workflow/workflow/node-types/WorkflowNode';
-import { DeleteConfirmModal } from './DeleteConfirmModal';
-import { IForm, IFormStep, IVariantStep } from './formTypes';
-import { useTemplateEditorForm } from './TemplateEditorFormProvider';
-import { NODE_ERROR_TYPES } from '../workflow/workflow/node-types/utils';
 import { useNavigateToVariantPreview } from '../hooks/useNavigateToVariantPreview';
+import { useStepSubtitle } from '../hooks/useStepSubtitle';
+import type { NODE_ERROR_TYPES } from '../workflow/workflow/node-types/utils';
+import { type NodeType, WorkflowNode } from '../workflow/workflow/node-types/WorkflowNode';
+import { DeleteConfirmModal } from './DeleteConfirmModal';
+import type { IForm, IFormStep, IVariantStep } from './formTypes';
+import { useTemplateEditorForm } from './TemplateEditorFormProvider';
 
 const VariantItemCardHolder = styled.div`
   display: grid;

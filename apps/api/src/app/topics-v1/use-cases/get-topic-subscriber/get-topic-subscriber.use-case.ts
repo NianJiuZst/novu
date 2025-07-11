@@ -1,9 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { TopicSubscribersEntity, TopicSubscribersRepository } from '@novu/dal';
-
-import { GetTopicSubscriberCommand } from './get-topic-subscriber.command';
-
-import { TopicSubscriberDto } from '../../dtos';
+import type { TopicSubscribersEntity, TopicSubscribersRepository } from '@novu/dal';
+import type { TopicSubscriberDto } from '../../dtos';
+import type { GetTopicSubscriberCommand } from './get-topic-subscriber.command';
 
 @Injectable()
 export class GetTopicSubscriberUseCase {

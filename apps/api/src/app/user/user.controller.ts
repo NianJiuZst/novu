@@ -1,26 +1,26 @@
 import { Body, ClassSerializerInterceptor, Controller, Get, Put, UseInterceptors } from '@nestjs/common';
-import { UserSessionData } from '@novu/shared';
 import { ApiExcludeController, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { PinoLogger } from '@novu/application-generic';
-import { UserSession } from '../shared/framework/user.decorator';
-import { GetMyProfileUsecase } from './usecases/get-my-profile/get-my-profile.usecase';
-import { GetMyProfileCommand } from './usecases/get-my-profile/get-my-profile.dto';
-import { UserResponseDto } from './dtos/user-response.dto';
-import { UpdateOnBoardingCommand } from './usecases/update-on-boarding/update-on-boarding.command';
-import { UpdateOnBoardingUsecase } from './usecases/update-on-boarding/update-on-boarding.usecase';
-import { UserOnboardingRequestDto } from './dtos/user-onboarding-request.dto';
-import { ExternalApiAccessible } from '../auth/framework/external-api.decorator';
-import { ChangeProfileEmailDto } from './dtos/change-profile-email.dto';
-import { UpdateProfileEmail } from './usecases/update-profile-email/update-profile-email.usecase';
-import { UpdateProfileEmailCommand } from './usecases/update-profile-email/update-profile-email.command';
-import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
-import { UserOnboardingTourRequestDto } from './dtos/user-onboarding-tour-request.dto';
-import { UpdateOnBoardingTourUsecase } from './usecases/update-on-boarding-tour/update-on-boarding-tour.usecase';
-import { UpdateOnBoardingTourCommand } from './usecases/update-on-boarding-tour/update-on-boarding-tour.command';
-import { UpdateNameAndProfilePicture } from './usecases/update-name-and-profile-picture/update-name-and-profile-picture.usecase';
-import { UpdateNameAndProfilePictureCommand } from './usecases/update-name-and-profile-picture/update-name-and-profile-picture.command';
-import { UpdateProfileRequestDto } from './dtos/update-profile-request.dto';
+import type { PinoLogger } from '@novu/application-generic';
+import type { UserSessionData } from '@novu/shared';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
+import { ExternalApiAccessible } from '../auth/framework/external-api.decorator';
+import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
+import { UserSession } from '../shared/framework/user.decorator';
+import type { ChangeProfileEmailDto } from './dtos/change-profile-email.dto';
+import type { UpdateProfileRequestDto } from './dtos/update-profile-request.dto';
+import type { UserOnboardingRequestDto } from './dtos/user-onboarding-request.dto';
+import type { UserOnboardingTourRequestDto } from './dtos/user-onboarding-tour-request.dto';
+import { UserResponseDto } from './dtos/user-response.dto';
+import { GetMyProfileCommand } from './usecases/get-my-profile/get-my-profile.dto';
+import type { GetMyProfileUsecase } from './usecases/get-my-profile/get-my-profile.usecase';
+import { UpdateNameAndProfilePictureCommand } from './usecases/update-name-and-profile-picture/update-name-and-profile-picture.command';
+import type { UpdateNameAndProfilePicture } from './usecases/update-name-and-profile-picture/update-name-and-profile-picture.usecase';
+import { UpdateOnBoardingCommand } from './usecases/update-on-boarding/update-on-boarding.command';
+import type { UpdateOnBoardingUsecase } from './usecases/update-on-boarding/update-on-boarding.usecase';
+import { UpdateOnBoardingTourCommand } from './usecases/update-on-boarding-tour/update-on-boarding-tour.command';
+import type { UpdateOnBoardingTourUsecase } from './usecases/update-on-boarding-tour/update-on-boarding-tour.usecase';
+import { UpdateProfileEmailCommand } from './usecases/update-profile-email/update-profile-email.command';
+import type { UpdateProfileEmail } from './usecases/update-profile-email/update-profile-email.usecase';
 
 @ApiCommonResponses()
 @Controller('/users')

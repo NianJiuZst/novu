@@ -1,71 +1,71 @@
-import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/primitives/sheet';
-import { VisuallyHidden } from '@/components/primitives/visually-hidden';
-import { UnsavedChangesAlertDialog } from '@/components/unsaved-changes-alert-dialog';
-import type { TranslationGroup } from '@/api/translations';
-import { TranslationDrawerContent, type TranslationDrawerContentRef } from './translation-drawer-content';
-import { useState, useRef, useCallback } from 'react';
+import { useCallback, useRef, useState } from "react";
+import type { TranslationGroup } from "@/api/translations";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/primitives/sheet";
+import { VisuallyHidden } from "@/components/primitives/visually-hidden";
+import { UnsavedChangesAlertDialog } from "@/components/unsaved-changes-alert-dialog";
+import { TranslationDrawerContent, type TranslationDrawerContentRef } from "./translation-drawer-content";
 
 type TranslationDrawerProps = {
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
-  translationGroup: TranslationGroup | null;
+	isOpen: boolean;
+	onOpenChange: (isOpen: boolean) => void;
+	translationGroup: TranslationGroup | null;
 };
 
 export function TranslationDrawer({ isOpen, onOpenChange, translationGroup }: TranslationDrawerProps) {
-  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const drawerContentRef = useRef<TranslationDrawerContentRef>(null);
+	const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+	const drawerContentRef = useRef<TranslationDrawerContentRef>(null);
 
-  const handleCloseAttempt = useCallback(
-    (event?: Event | KeyboardEvent) => {
-      event?.preventDefault();
+	const handleCloseAttempt = useCallback(
+		(event?: Event | KeyboardEvent) => {
+			event?.preventDefault();
 
-      if (drawerContentRef.current?.hasUnsavedChanges()) {
-        setShowUnsavedDialog(true);
-      } else {
-        onOpenChange(false);
-      }
-    },
-    [onOpenChange]
-  );
+			if (drawerContentRef.current?.hasUnsavedChanges()) {
+				setShowUnsavedDialog(true);
+			} else {
+				onOpenChange(false);
+			}
+		},
+		[onOpenChange]
+	);
 
-  const handleConfirmClose = useCallback(() => {
-    setShowUnsavedDialog(false);
-    onOpenChange(false);
-  }, [onOpenChange]);
+	const handleConfirmClose = useCallback(() => {
+		setShowUnsavedDialog(false);
+		onOpenChange(false);
+	}, [onOpenChange]);
 
-  return (
-    <>
-      <Sheet open={isOpen} onOpenChange={onOpenChange}>
-        <SheetContent
-          side="right"
-          className="w-[1100px] !max-w-none"
-          onInteractOutside={handleCloseAttempt}
-          onEscapeKeyDown={handleCloseAttempt}
-        >
-          <VisuallyHidden>
-            <SheetTitle />
-            <SheetDescription />
-          </VisuallyHidden>
-          {translationGroup ? (
-            <TranslationDrawerContent
-              key={`${translationGroup.resourceId}-${translationGroup.updatedAt}`}
-              translationGroup={translationGroup}
-              ref={drawerContentRef}
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center">
-              <p className="text-sm text-neutral-500">No translation group selected</p>
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
+	return (
+		<>
+			<Sheet open={isOpen} onOpenChange={onOpenChange}>
+				<SheetContent
+					side="right"
+					className="w-[1100px] !max-w-none"
+					onInteractOutside={handleCloseAttempt}
+					onEscapeKeyDown={handleCloseAttempt}
+				>
+					<VisuallyHidden>
+						<SheetTitle />
+						<SheetDescription />
+					</VisuallyHidden>
+					{translationGroup ? (
+						<TranslationDrawerContent
+							key={`${translationGroup.resourceId}-${translationGroup.updatedAt}`}
+							translationGroup={translationGroup}
+							ref={drawerContentRef}
+						/>
+					) : (
+						<div className="flex h-full items-center justify-center">
+							<p className="text-sm text-neutral-500">No translation group selected</p>
+						</div>
+					)}
+				</SheetContent>
+			</Sheet>
 
-      <UnsavedChangesAlertDialog
-        show={showUnsavedDialog}
-        description="You have unsaved changes to the current translation. These changes will be lost if you close the drawer."
-        onCancel={() => setShowUnsavedDialog(false)}
-        onProceed={handleConfirmClose}
-      />
-    </>
-  );
+			<UnsavedChangesAlertDialog
+				show={showUnsavedDialog}
+				description="You have unsaved changes to the current translation. These changes will be lost if you close the drawer."
+				onCancel={() => setShowUnsavedDialog(false)}
+				onProceed={handleConfirmClose}
+			/>
+		</>
+	);
 }

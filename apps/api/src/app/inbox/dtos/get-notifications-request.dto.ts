@@ -1,9 +1,9 @@
-import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
-import { Transform } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 
 import { CursorPaginationRequestDto } from '../../shared/dtos/cursor-pagination-request';
-import { NotificationFilter } from '../utils/types';
+import type { NotificationFilter } from '../utils/types';
 
 const LIMIT = {
   DEFAULT: 10,

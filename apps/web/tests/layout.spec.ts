@@ -1,5 +1,5 @@
-import { test } from './utils/baseTest';
 import { LayoutsPage } from './page-models/layoutsPage';
+import { test } from './utils/baseTest';
 import { initializeSession } from './utils/browser';
 
 test.beforeEach(async ({ page }) => {

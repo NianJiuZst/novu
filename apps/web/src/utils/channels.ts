@@ -1,6 +1,5 @@
-import { ChannelTypeEnum, StepTypeEnum } from '@novu/shared';
-import React from 'react';
 import {
+  Bolt,
   ChatFilled,
   DelayAction,
   DigestAction,
@@ -8,8 +7,9 @@ import {
   InAppFilled,
   PushFilled,
   SmsFilled,
-  Bolt,
 } from '@novu/design-system';
+import { ChannelTypeEnum, StepTypeEnum } from '@novu/shared';
+import type React from 'react';
 
 export enum NodeTypeEnum {
   CHANNEL = 'channel',

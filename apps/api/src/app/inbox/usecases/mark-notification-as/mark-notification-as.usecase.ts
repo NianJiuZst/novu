@@ -1,14 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { AnalyticsService } from '@novu/application-generic';
-import { MessageEntity, MessageRepository } from '@novu/dal';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import type { AnalyticsService } from '@novu/application-generic';
+import type { MessageEntity, MessageRepository } from '@novu/dal';
 
-import { GetSubscriber } from '../../../subscribers/usecases/get-subscriber';
+import type { GetSubscriber } from '../../../subscribers/usecases/get-subscriber';
 import { AnalyticsEventsEnum } from '../../utils';
 import { mapToDto } from '../../utils/notification-mapper';
-import { InboxNotification } from '../../utils/types';
+import type { InboxNotification } from '../../utils/types';
 import { MarkManyNotificationsAsCommand } from '../mark-many-notifications-as/mark-many-notifications-as.command';
-import { MarkManyNotificationsAs } from '../mark-many-notifications-as/mark-many-notifications-as.usecase';
-import { MarkNotificationAsCommand } from './mark-notification-as.command';
+import type { MarkManyNotificationsAs } from '../mark-many-notifications-as/mark-many-notifications-as.usecase';
+import type { MarkNotificationAsCommand } from './mark-notification-as.command';
 
 @Injectable()
 export class MarkNotificationAs {

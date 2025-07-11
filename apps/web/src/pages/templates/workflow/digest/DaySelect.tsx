@@ -1,4 +1,4 @@
-import { Grid, UnstyledButton, createStyles, MantineTheme } from '@mantine/core';
+import { createStyles, Grid, type MantineTheme, UnstyledButton } from '@mantine/core';
 import { colors } from '@novu/design-system';
 
 const useStyles = createStyles<string, { active: boolean; disabled: boolean }>((theme: MantineTheme, _params) => {

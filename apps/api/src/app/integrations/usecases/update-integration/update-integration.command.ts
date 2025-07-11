@@ -1,6 +1,6 @@
+import type { MessageFilter } from '@novu/application-generic';
+import type { ICredentialsDto } from '@novu/shared';
 import { IsArray, IsDefined, IsMongoId, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { ICredentialsDto } from '@novu/shared';
-import { MessageFilter } from '@novu/application-generic';
 
 import { OrganizationCommand } from '../../../shared/commands/organization.command';
 

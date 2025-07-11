@@ -1,6 +1,6 @@
+import type { StepTypeEnum } from '@novu/shared';
 import { useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { StepTypeEnum } from '@novu/shared';
 import { ROUTES } from '../../../constants/routes';
 
 import { parseUrl } from '../../../utils/routeUtils';
@@ -15,14 +15,7 @@ export const useNavigateToVariantPreview = () => {
   const navigate = useNavigate();
 
   const navigateToVariantPreview = useCallback(
-    (
-      params: {
-        templateId?: string;
-        channel?: StepTypeEnum;
-        stepUuid?: string;
-        variantUuid?: string;
-      } = {}
-    ) => {
+    (params: { templateId?: string; channel?: StepTypeEnum; stepUuid?: string; variantUuid?: string } = {}) => {
       navigate(
         parseUrl(ROUTES.WORKFLOWS_VARIANT_PREVIEW, {
           templateId: params.templateId ?? templateId,

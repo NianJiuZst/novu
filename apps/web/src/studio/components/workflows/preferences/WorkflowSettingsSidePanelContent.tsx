@@ -1,16 +1,15 @@
-import { FC } from 'react';
-
 import { Loader } from '@mantine/core';
 import { Tabs, Text } from '@novu/novui';
 import { IconDynamicFeed, IconManageAccounts } from '@novu/novui/icons';
 import { Grid, Stack } from '@novu/novui/jsx';
 import { token } from '@novu/novui/tokens';
+import { isBridgeWorkflow, type ResourceTypeEnum, type WorkflowPreferences } from '@novu/shared';
+import type { FC } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { isBridgeWorkflow, WorkflowPreferences, ResourceTypeEnum } from '@novu/shared';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useStudioState } from '../../../StudioStateProvider';
-import { WorkflowDetailFormContext } from './WorkflowDetailFormContextProvider';
-import { WorkflowGeneralSettingsFieldName, WorkflowGeneralSettingsForm } from './WorkflowGeneralSettingsForm';
+import type { WorkflowDetailFormContext } from './WorkflowDetailFormContextProvider';
+import { type WorkflowGeneralSettingsFieldName, WorkflowGeneralSettingsForm } from './WorkflowGeneralSettingsForm';
 import { WorkflowSubscriptionPreferences } from './WorkflowSubscriptionPreferences';
 
 export enum WorkflowSettingsPanelTab {

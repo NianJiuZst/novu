@@ -1,6 +1,6 @@
+import type { MessageFilter } from '@novu/application-generic';
+import { ChannelTypeEnum, type ICredentialsDto } from '@novu/shared';
 import { IsArray, IsDefined, IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { ChannelTypeEnum, ICredentialsDto } from '@novu/shared';
-import { MessageFilter } from '@novu/application-generic';
 
 import { EnvironmentCommand } from '../../../shared/commands/project.command';
 

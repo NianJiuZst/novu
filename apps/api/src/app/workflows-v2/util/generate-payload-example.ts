@@ -1,4 +1,4 @@
-import { NotificationTemplateEntity } from '@novu/dal';
+import type { NotificationTemplateEntity } from '@novu/dal';
 import { createMockObjectFromSchema, FeatureFlagsKeysEnum, ResourceOriginEnum } from '@novu/shared';
 import { JsonSchemaMock } from './json-schema-mock';
 

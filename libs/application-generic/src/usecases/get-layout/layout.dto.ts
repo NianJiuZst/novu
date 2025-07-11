@@ -1,8 +1,8 @@
-import { ApiProperty, ApiPropertyOptional, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
-import { ChannelTypeEnum, ITemplateVariable, JsonSchemaFormatEnum, JsonSchemaTypeEnum } from '@novu/dal';
-import { ResourceOriginEnum, ResourceTypeEnum, UiSchemaGroupEnum, UiSchemaProperty } from '@novu/shared';
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import { type ChannelTypeEnum, type ITemplateVariable, JsonSchemaFormatEnum, JsonSchemaTypeEnum } from '@novu/dal';
+import { type ResourceOriginEnum, type ResourceTypeEnum, UiSchemaGroupEnum, UiSchemaProperty } from '@novu/shared';
 import { Type } from 'class-transformer';
-import { IsOptional, ValidateNested, IsArray, IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 @ApiExtraModels()
 export class JSONSchemaDto {

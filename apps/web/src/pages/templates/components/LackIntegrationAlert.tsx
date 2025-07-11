@@ -1,16 +1,15 @@
 /* eslint-disable max-len */
-import { useState } from 'react';
+
 import styled from '@emotion/styled';
-
-import { ChannelTypeEnum } from '@novu/shared';
-
-import { colors, Text, ErrorIcon, WarningIcon, CircleArrowRight } from '@novu/design-system';
 import { Group } from '@mantine/core';
+import { CircleArrowRight, colors, ErrorIcon, Text, WarningIcon } from '@novu/design-system';
+import type { ChannelTypeEnum } from '@novu/shared';
+import { useState } from 'react';
 import { useSegment } from '../../../components/providers/SegmentProvider';
-import { stepNames, TemplateEditorAnalyticsEnum } from '../constants';
 import { useEnvironment } from '../../../hooks';
-import { IntegrationsListModal } from '../../integrations/IntegrationsListModal';
 import { useSelectPrimaryIntegrationModal } from '../../integrations/components/multi-provider/useSelectPrimaryIntegrationModal';
+import { IntegrationsListModal } from '../../integrations/IntegrationsListModal';
+import { stepNames, TemplateEditorAnalyticsEnum } from '../constants';
 
 type alertType = 'error' | 'warning';
 

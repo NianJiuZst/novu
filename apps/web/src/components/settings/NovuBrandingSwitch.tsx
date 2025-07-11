@@ -1,11 +1,11 @@
-import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { Group } from '@mantine/core';
-import { Switch, Text, Button, Popover } from '@novu/design-system';
+import { Button, Popover, Switch, Text } from '@novu/design-system';
+import { ApiServiceLevelEnum } from '@novu/shared';
+import { useNavigate } from 'react-router-dom';
 import { IS_SELF_HOSTED } from '../../config';
 import { ROUTES } from '../../constants/routes';
 import { useSubscription } from '../../ee/billing/hooks/useSubscription';
-import { ApiServiceLevelEnum } from '@novu/shared';
 
 const SwitchWrapper = styled.div`
   display: flex;

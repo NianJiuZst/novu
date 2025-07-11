@@ -1,2 +1,2 @@
-export * from './PushPreview';
 export * from './PushBasePreview';
+export * from './PushPreview';

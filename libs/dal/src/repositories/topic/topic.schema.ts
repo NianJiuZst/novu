@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
 import { schemaOptions } from '../schema-default.options';
-import { TopicDBModel } from './topic.entity';
+import type { TopicDBModel } from './topic.entity';
 
 const topicSchema = new Schema<TopicDBModel>(
   {

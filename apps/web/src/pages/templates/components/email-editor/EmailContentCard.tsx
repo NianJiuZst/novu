@@ -1,14 +1,13 @@
+import { Tabs } from '@novu/design-system';
+import type { IOrganizationEntity } from '@novu/shared';
 import { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { IOrganizationEntity } from '@novu/shared';
-import { Tabs } from '@novu/design-system';
-
-import { useStepFormPath } from '../../hooks/useStepFormPath';
 import { useActiveIntegrations, useEnvironment } from '../../../../hooks';
-import { EmailInboxContent } from './EmailInboxContent';
-import { EmailMessageEditor } from './EmailMessageEditor';
+import { useStepFormPath } from '../../hooks/useStepFormPath';
 import { CustomCodeEditor } from '../CustomCodeEditor';
 import { useTemplateEditorForm } from '../TemplateEditorFormProvider';
+import { EmailInboxContent } from './EmailInboxContent';
+import { EmailMessageEditor } from './EmailMessageEditor';
 
 const EDITOR = 'Editor';
 const CUSTOM_CODE = 'Custom Code';

@@ -1,11 +1,10 @@
+import { NewDashboardOptInStatusEnum } from '@novu/shared';
 import { useCallback, useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { NewDashboardOptInStatusEnum } from '@novu/shared';
-
-import { useNewDashboardOptIn } from './useNewDashboardOptIn';
-import { ROUTES } from '../constants/routes';
 import { IS_EE_AUTH_ENABLED, NEW_DASHBOARD_URL } from '../config';
+import { ROUTES } from '../constants/routes';
 import { useEnvironment } from './useEnvironment';
+import { useNewDashboardOptIn } from './useNewDashboardOptIn';
 
 export const useOptInRedirect = () => {
   const { pathname } = useLocation();

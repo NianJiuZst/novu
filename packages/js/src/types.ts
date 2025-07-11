@@ -1,7 +1,6 @@
-import { NovuError } from './utils/errors';
+import type { NovuError } from './utils/errors';
 
-export { type FiltersCountResponse, type ListNotificationsResponse } from './notifications';
-export type { Notification } from './notifications';
+export type { FiltersCountResponse, ListNotificationsResponse, Notification } from './notifications';
 export type { Preference } from './preferences/preference';
 export type { NovuError } from './utils/errors';
 

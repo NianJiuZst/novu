@@ -1,12 +1,12 @@
+import type { MantineTheme } from '@mantine/core';
 import { Text, Title } from '@novu/novui';
-import { MantineTheme } from '@mantine/core';
 import { css } from '@novu/novui/css';
 import { ApiServiceLevelEnum } from '@novu/shared';
-import { UsageProgress } from './UsageProgress';
-import { useSubscriptionContext, type UseSubscriptionType } from './SubscriptionProvider';
 import { capitalizeFirstLetter } from '../../../utils/string';
 import { Badge } from './Badge';
 import { PlanActionButton } from './PlanActionButton';
+import { type UseSubscriptionType, useSubscriptionContext } from './SubscriptionProvider';
+import { UsageProgress } from './UsageProgress';
 
 type BillingInterval = 'month' | 'year';
 

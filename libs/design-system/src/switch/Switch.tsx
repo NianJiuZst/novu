@@ -1,5 +1,5 @@
-import React, { ChangeEvent } from 'react';
 import { Switch as MantineSwitch } from '@mantine/core';
+import React, { type ChangeEvent } from 'react';
 import useStyles from './Switch.styles';
 
 interface ISwitchProps {

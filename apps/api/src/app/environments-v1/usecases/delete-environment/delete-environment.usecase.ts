@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { EnvironmentRepository, IntegrationRepository } from '@novu/dal';
-import { EnvironmentEnum, PROTECTED_ENVIRONMENTS } from '@novu/shared';
+import type { EnvironmentRepository, IntegrationRepository } from '@novu/dal';
+import { type EnvironmentEnum, PROTECTED_ENVIRONMENTS } from '@novu/shared';
 import { RemoveIntegrationCommand } from '../../../integrations/usecases/remove-integration/remove-integration.command';
-import { RemoveIntegration } from '../../../integrations/usecases/remove-integration/remove-integration.usecase';
-import { DeleteEnvironmentCommand } from './delete-environment.command';
+import type { RemoveIntegration } from '../../../integrations/usecases/remove-integration/remove-integration.usecase';
+import type { DeleteEnvironmentCommand } from './delete-environment.command';
 
 @Injectable()
 export class DeleteEnvironment {

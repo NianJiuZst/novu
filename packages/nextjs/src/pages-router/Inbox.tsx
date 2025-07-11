@@ -1,8 +1,8 @@
 'use client';
 
-import { InboxProps, Inbox as RInbox } from '@novu/react';
-import { useRouter as useAppRouter } from 'next/navigation';
+import { type InboxProps, Inbox as RInbox } from '@novu/react';
 import { useRouter } from 'next/compat/router';
+import { useRouter as useAppRouter } from 'next/navigation';
 
 function AppRouterInbox(props: InboxProps) {
   const router = useAppRouter();
@@ -49,4 +49,4 @@ function buildSubscriber(subscriberId: string | undefined, subscriber: any | str
   return subscriberObj;
 }
 
-export { Bell, Preferences, Notifications, InboxContent, NovuProvider } from '@novu/react';
+export { Bell, InboxContent, Notifications, NovuProvider, Preferences } from '@novu/react';

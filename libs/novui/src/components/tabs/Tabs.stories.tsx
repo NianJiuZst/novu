@@ -1,7 +1,7 @@
-import { StoryFn, Meta } from '@storybook/react';
-import React, { ReactNode } from 'react';
+import type { Meta, StoryFn } from '@storybook/react';
+import React, { type ReactNode } from 'react';
 import { IconOutlineCode, IconOutlineMiscellaneousServices, IconOutlineVisibility } from '../../icons';
-import { LocalizedMessage } from '../../types';
+import type { LocalizedMessage } from '../../types';
 
 import { Tabs } from './Tabs';
 

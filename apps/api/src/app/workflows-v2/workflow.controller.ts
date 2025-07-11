@@ -14,59 +14,59 @@ import {
 import { ApiBody, ApiExcludeEndpoint, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   ExternalApiAccessible,
-  UserSession,
-  RequirePermissions,
   ParseSlugEnvironmentIdPipe,
   ParseSlugIdPipe,
+  RequirePermissions,
+  UserSession,
 } from '@novu/application-generic';
 import {
   ApiRateLimitCategoryEnum,
   DirectionEnum,
-  UserSessionData,
-  ResourceOriginEnum,
   PermissionsEnum,
+  ResourceOriginEnum,
+  type UserSessionData,
 } from '@novu/shared';
-import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
-import {
-  BuildStepDataCommand,
-  BuildStepDataUsecase,
-  BuildWorkflowTestDataUseCase,
-  DuplicateWorkflowCommand,
-  DuplicateWorkflowUseCase,
-  GetWorkflowCommand,
-  GetWorkflowUseCase,
-  ListWorkflowsCommand,
-  ListWorkflowsUseCase,
-  PreviewCommand,
-  PreviewUsecase,
-  SyncToEnvironmentCommand,
-  SyncToEnvironmentUseCase,
-  UpsertWorkflowCommand,
-  UpsertWorkflowUseCase,
-  WorkflowTestDataCommand,
-  UpsertStepDataCommand,
-} from './usecases';
-import { PatchWorkflowCommand, PatchWorkflowUsecase } from './usecases/patch-workflow';
+import { ThrottlerCategory } from '../rate-limiting/guards/throttler.decorator';
+import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
 import { SdkGroupName, SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
+import { DeleteWorkflowCommand } from '../workflows-v1/usecases/delete-workflow/delete-workflow.command';
+import type { DeleteWorkflowUseCase } from '../workflows-v1/usecases/delete-workflow/delete-workflow.usecase';
 import {
   CreateWorkflowDto,
   DuplicateWorkflowDto,
   GeneratePreviewRequestDto,
   GeneratePreviewResponseDto,
-  GetListQueryParamsDto,
+  type GetListQueryParamsDto,
   ListWorkflowResponse,
   PatchWorkflowDto,
   StepResponseDto,
+  type StepUpsertDto,
   SyncWorkflowDto,
   UpdateWorkflowDto,
   WorkflowResponseDto,
   WorkflowTestDataResponseDto,
-  StepUpsertDto,
 } from './dtos';
-import { ThrottlerCategory } from '../rate-limiting/guards/throttler.decorator';
-import { DeleteWorkflowCommand } from '../workflows-v1/usecases/delete-workflow/delete-workflow.command';
-import { DeleteWorkflowUseCase } from '../workflows-v1/usecases/delete-workflow/delete-workflow.usecase';
+import {
+  BuildStepDataCommand,
+  type BuildStepDataUsecase,
+  type BuildWorkflowTestDataUseCase,
+  DuplicateWorkflowCommand,
+  type DuplicateWorkflowUseCase,
+  GetWorkflowCommand,
+  type GetWorkflowUseCase,
+  ListWorkflowsCommand,
+  type ListWorkflowsUseCase,
+  PreviewCommand,
+  type PreviewUsecase,
+  SyncToEnvironmentCommand,
+  type SyncToEnvironmentUseCase,
+  type UpsertStepDataCommand,
+  UpsertWorkflowCommand,
+  type UpsertWorkflowUseCase,
+  WorkflowTestDataCommand,
+} from './usecases';
+import { PatchWorkflowCommand, type PatchWorkflowUsecase } from './usecases/patch-workflow';
 
 @ThrottlerCategory(ApiRateLimitCategoryEnum.CONFIGURATION)
 @ApiCommonResponses()

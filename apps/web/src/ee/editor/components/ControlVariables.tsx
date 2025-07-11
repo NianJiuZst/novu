@@ -1,7 +1,7 @@
-import validator from '@rjsf/validator-ajv8';
-import Form from '@rjsf/core';
-import React, { useEffect, useState } from 'react';
 import { Stack } from '@mantine/core';
+import Form from '@rjsf/core';
+import validator from '@rjsf/validator-ajv8';
+import React, { useEffect, useState } from 'react';
 
 export const ControlVariables = ({ schema = {}, onChange = (values) => {}, defaults = {} }) => {
   const [values, setValues] = useState(defaults);

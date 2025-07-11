@@ -1,11 +1,10 @@
-import { Injectable, NotFoundException, Scope, BadRequestException } from '@nestjs/common';
-import { IAddMemberData, MemberRepository, OrganizationRepository, UserRepository } from '@novu/dal';
-import { MemberRoleEnum, MemberStatusEnum } from '@novu/shared';
-import { AnalyticsService } from '@novu/application-generic';
-
+import { BadRequestException, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { Novu } from '@novu/api';
-import { InviteMemberCommand } from './invite-member.command';
+import type { AnalyticsService } from '@novu/application-generic';
+import type { IAddMemberData, MemberRepository, OrganizationRepository, UserRepository } from '@novu/dal';
+import { type MemberRoleEnum, MemberStatusEnum } from '@novu/shared';
 import { capitalize, createGuid } from '../../../shared/services/helper/helper.service';
+import type { InviteMemberCommand } from './invite-member.command';
 
 @Injectable({
   scope: Scope.REQUEST,

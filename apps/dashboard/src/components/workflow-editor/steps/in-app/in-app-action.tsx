@@ -1,8 +1,8 @@
-import { useSaveForm } from '@/components/workflow-editor/steps/save-form-context';
-import { InAppActionDropdown } from '@/components/in-app-action-dropdown';
+import { InAppActionDropdown } from "@/components/in-app-action-dropdown";
+import { useSaveForm } from "@/components/workflow-editor/steps/save-form-context";
 
 export const InAppAction = () => {
-  const { saveForm } = useSaveForm();
+	const { saveForm } = useSaveForm();
 
-  return <InAppActionDropdown onMenuItemClick={saveForm} />;
+	return <InAppActionDropdown onMenuItemClick={saveForm} />;
 };

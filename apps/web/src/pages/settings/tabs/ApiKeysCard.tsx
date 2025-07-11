@@ -1,21 +1,21 @@
+import styled from '@emotion/styled';
 import { ActionIcon, Input as MantineInput } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import styled from '@emotion/styled';
 
 import {
-  Input,
-  Tooltip,
-  colors,
   Check,
   Copy,
-  inputStyles,
+  colors,
   IconOutlineVisibility,
   IconOutlineVisibilityOff,
+  Input,
+  inputStyles,
+  Tooltip,
 } from '@novu/design-system';
 import { useState } from 'react';
+import { When } from '../../../components/utils/When';
 import { useAPIKeys, useEnvironment } from '../../../hooks';
 import { Regenerate } from './components/Regenerate';
-import { When } from '../../../components/utils/When';
 
 export const ApiKeysCard = () => {
   const clipboardApiKey = useClipboard({ timeout: 1000 });

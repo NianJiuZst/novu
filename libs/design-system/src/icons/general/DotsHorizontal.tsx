@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 /* eslint-disable */
 export function DotsHorizontal(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (

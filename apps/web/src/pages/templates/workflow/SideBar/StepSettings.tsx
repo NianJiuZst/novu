@@ -1,14 +1,13 @@
 import { Group } from '@mantine/core';
-import { useParams } from 'react-router-dom';
 import { StepTypeEnum } from '@novu/shared';
-
-import { StepActiveSwitch } from '../StepActiveSwitch';
-import { ShouldStopOnFailSwitch } from '../ShouldStopOnFailSwitch';
-import { ReplyCallback, ReplyCallbackSwitch } from '../ReplyCallback';
+import { useParams } from 'react-router-dom';
 import { When } from '../../../../components/utils/When';
-import { UpdateButton } from '../../components/UpdateButton';
 import { useEnvironment } from '../../../../hooks';
 import { useTemplateEditorForm } from '../../components/TemplateEditorFormProvider';
+import { UpdateButton } from '../../components/UpdateButton';
+import { ReplyCallback, ReplyCallbackSwitch } from '../ReplyCallback';
+import { ShouldStopOnFailSwitch } from '../ShouldStopOnFailSwitch';
+import { StepActiveSwitch } from '../StepActiveSwitch';
 
 export function StepSettings() {
   const { channel: channelType } = useParams<{

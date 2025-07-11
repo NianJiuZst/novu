@@ -1,33 +1,33 @@
+import { type CallHandler, type ExecutionContext, Injectable, type NestInterceptor } from '@nestjs/common';
+import type { Reflector } from '@nestjs/core';
 import {
   InjectThrottlerOptions,
   InjectThrottlerStorage,
   ThrottlerException,
   ThrottlerGuard,
-  ThrottlerModuleOptions,
-  ThrottlerRequest,
-  ThrottlerStorage,
+  type ThrottlerModuleOptions,
+  type ThrottlerRequest,
+  type ThrottlerStorage,
 } from '@nestjs/throttler';
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { getClientIp } from 'request-ip';
 import {
-  Instrument,
+  type FeatureFlagsService,
   HttpRequestHeaderKeysEnum,
   HttpResponseHeaderKeysEnum,
-  FeatureFlagsService,
-  PinoLogger,
+  Instrument,
+  type PinoLogger,
 } from '@novu/application-generic';
+import type { EnvironmentEntity, OrganizationEntity, UserEntity } from '@novu/dal';
 import {
   ApiAuthSchemeEnum,
   ApiRateLimitCategoryEnum,
   ApiRateLimitCostEnum,
   FeatureFlagsKeysEnum,
-  UserSessionData,
+  type UserSessionData,
 } from '@novu/shared';
-import { UserEntity, OrganizationEntity, EnvironmentEntity } from '@novu/dal';
-import { ThrottlerCategory, ThrottlerCost } from './throttler.decorator';
-import { EvaluateApiRateLimit, EvaluateApiRateLimitCommand } from '../usecases/evaluate-api-rate-limit';
+import { getClientIp } from 'request-ip';
 import { checkIsKeylessHeader } from '../../shared/utils/auth.utils';
+import { type EvaluateApiRateLimit, EvaluateApiRateLimitCommand } from '../usecases/evaluate-api-rate-limit';
+import { ThrottlerCategory, ThrottlerCost } from './throttler.decorator';
 
 export const THROTTLED_EXCEPTION_MESSAGE = 'API rate limit exceeded';
 export const ALLOWED_AUTH_SCHEMES = [ApiAuthSchemeEnum.API_KEY, ApiAuthSchemeEnum.KEYLESS];

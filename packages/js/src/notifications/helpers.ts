@@ -1,6 +1,8 @@
-import { Action, ActionTypeEnum, NotificationFilter, Result } from '../types';
 import type { InboxService } from '../api';
+import type { NotificationsCache } from '../cache';
 import type { NovuEventEmitter } from '../event-emitter';
+import { Action, ActionTypeEnum, type NotificationFilter, type Result } from '../types';
+import { NovuError } from '../utils/errors';
 import { Notification } from './notification';
 import type {
   ArchivedArgs,
@@ -12,8 +14,6 @@ import type {
   UnreadArgs,
   UnsnoozeArgs,
 } from './types';
-import { NovuError } from '../utils/errors';
-import type { NotificationsCache } from '../cache';
 
 export const read = async ({
   emitter,

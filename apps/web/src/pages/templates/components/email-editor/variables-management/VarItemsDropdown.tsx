@@ -1,6 +1,6 @@
+import { Center, Collapse, Highlight, UnstyledButton } from '@mantine/core';
+import { ChevronDown, ChevronUp, colors, Folder } from '@novu/design-system';
 import { useState } from 'react';
-import { Collapse, UnstyledButton, Center, Highlight } from '@mantine/core';
-import { ChevronUp, ChevronDown, colors, Folder } from '@novu/design-system';
 import { VarItem } from './VarItem';
 import { VarItemTooltip } from './VarItemTooltip';
 

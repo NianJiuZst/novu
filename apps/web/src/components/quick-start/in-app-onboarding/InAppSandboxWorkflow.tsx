@@ -1,11 +1,9 @@
-import ReactFlow, { Background, BackgroundVariant, Edge, Node } from 'react-flow-renderer';
-
 import { useMantineColorScheme } from '@mantine/core';
-
 import { colors } from '@novu/design-system';
+import ReactFlow, { Background, BackgroundVariant, type Edge, type Node } from 'react-flow-renderer';
+import { WorkflowWrapper } from '../common';
 import { InAppNode } from './InAppNode';
 import { TriggerNode } from './TriggerNode';
-import { WorkflowWrapper } from '../common';
 
 export default function InAppSandboxWorkflow() {
   const { colorScheme } = useMantineColorScheme();

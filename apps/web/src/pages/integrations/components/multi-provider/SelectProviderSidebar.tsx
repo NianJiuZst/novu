@@ -1,32 +1,32 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 import { Group, Image, Space, Stack, Tabs, useMantineColorScheme } from '@mantine/core';
-import { ChannelTypeEnum, InAppProviderIdEnum } from '@novu/shared';
 import {
-  colors,
-  Sidebar,
   Button,
+  colors,
+  getGradient,
   Input,
+  Search,
+  Sidebar,
+  Text,
   Title,
   Tooltip,
-  Text,
-  getGradient,
-  Search,
   useTabsStyles,
 } from '@novu/design-system';
+import { ChannelTypeEnum, InAppProviderIdEnum } from '@novu/shared';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useDebounce } from '../../../../hooks';
-import { ChannelTitle } from '../../../templates/components/ChannelTitle';
-import type { IIntegratedProvider } from '../../types';
-import { CHANNELS_ORDER } from '../IntegrationsListNoData';
-import { CHANNEL_TYPE_TO_STRING } from '../../../../utils/channels';
-import { getLogoFileName, initialProvidersList } from '../../../../utils/providers';
-import { sortProviders } from './sort-providers';
 import { When } from '../../../../components/utils/When';
 import { CONTEXT_PATH } from '../../../../config';
-import { useProviders } from '../../useProviders';
 import { ROUTES } from '../../../../constants/routes';
+import { useDebounce } from '../../../../hooks';
+import { CHANNEL_TYPE_TO_STRING } from '../../../../utils/channels';
+import { getLogoFileName, initialProvidersList } from '../../../../utils/providers';
+import { ChannelTitle } from '../../../templates/components/ChannelTitle';
+import type { IIntegratedProvider } from '../../types';
+import { useProviders } from '../../useProviders';
+import { CHANNELS_ORDER } from '../IntegrationsListNoData';
+import { sortProviders } from './sort-providers';
 
 const filterSearch = (list, search: string) =>
   list.filter((prov) => prov.displayName.toLowerCase().includes(search.toLowerCase()));

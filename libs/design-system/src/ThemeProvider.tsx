@@ -1,12 +1,11 @@
-import { ReactNode } from 'react';
-import { MantineProvider, Global, ColorSchemeProvider, MantineTheme } from '@mantine/core';
+import { ColorSchemeProvider, Global, MantineProvider, type MantineTheme } from '@mantine/core';
 import { NotificationsProvider } from '@mantine/notifications';
-
-import { mantineConfig } from './config/theme.config';
+import type { ReactNode } from 'react';
+import { useColorScheme } from './color-scheme';
 import { colors, shadows } from './config';
+import { mantineConfig } from './config/theme.config';
 import { ChevronDown } from './icons';
 import { IconProvider } from './iconsV2/IconProvider';
-import { useColorScheme } from './color-scheme';
 
 const accordionStyles = (theme: MantineTheme) => ({
   item: {
@@ -61,7 +60,7 @@ export function ThemeProvider({
   shouldDisableGlobals,
 }: {
   children: ReactNode | ReactNode[];
-  shouldDisableGlobals?: Boolean;
+  shouldDisableGlobals?: boolean;
 }) {
   const { colorScheme, toggleColorScheme } = useColorScheme();
 

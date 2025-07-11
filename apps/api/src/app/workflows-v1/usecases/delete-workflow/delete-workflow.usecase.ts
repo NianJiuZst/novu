@@ -1,25 +1,24 @@
 import { Injectable, Optional } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
+import type { ModuleRef } from '@nestjs/core';
 import {
-  ControlValuesRepository,
-  LocalizationResourceEnum,
-  MessageTemplateRepository,
-  NotificationTemplateEntity,
-  NotificationTemplateRepository,
-} from '@novu/dal';
-import { PreferencesTypeEnum, WebhookEventEnum, WebhookObjectTypeEnum } from '@novu/shared';
-
-import {
-  GetWorkflowByIdsUseCase,
-  DeletePreferencesUseCase,
   DeletePreferencesCommand,
+  type DeletePreferencesUseCase,
+  type GetWorkflowByIdsUseCase,
   Instrument,
   InstrumentUsecase,
-  SendWebhookMessage,
-  PinoLogger,
+  type PinoLogger,
+  type SendWebhookMessage,
 } from '@novu/application-generic';
-import { DeleteWorkflowCommand } from './delete-workflow.command';
+import {
+  type ControlValuesRepository,
+  LocalizationResourceEnum,
+  type MessageTemplateRepository,
+  type NotificationTemplateEntity,
+  type NotificationTemplateRepository,
+} from '@novu/dal';
+import { PreferencesTypeEnum, WebhookEventEnum, WebhookObjectTypeEnum } from '@novu/shared';
 import { GetWorkflowWithPreferencesCommand } from '../get-workflow-with-preferences/get-workflow-with-preferences.command';
+import type { DeleteWorkflowCommand } from './delete-workflow.command';
 
 @Injectable()
 export class DeleteWorkflowUseCase {

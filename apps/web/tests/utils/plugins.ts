@@ -1,15 +1,15 @@
 import {
   DalService,
+  type EnvironmentEntity,
   IntegrationRepository,
   NotificationGroupRepository,
-  NotificationTemplateEntity,
-  EnvironmentEntity,
-  OrganizationEntity,
-  UserEntity,
+  type NotificationTemplateEntity,
+  type OrganizationEntity,
+  type UserEntity,
 } from '@novu/dal';
-import { ChannelTypeEnum, getPopularTemplateIds, MemberStatusEnum, ProvidersIdEnum } from '@novu/shared';
+import { type ChannelTypeEnum, getPopularTemplateIds, MemberStatusEnum, type ProvidersIdEnum } from '@novu/shared';
 import {
-  CreateTemplatePayload,
+  type CreateTemplatePayload,
   EnvironmentService,
   JobsService,
   NotificationsService,
@@ -19,7 +19,7 @@ import {
   UserService,
   UserSession,
 } from '@novu/testing';
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 export interface SessionData {
   token: string;

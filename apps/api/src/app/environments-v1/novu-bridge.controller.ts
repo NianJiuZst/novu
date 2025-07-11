@@ -1,8 +1,8 @@
-import { Controller, Req, Res, Inject, Get, Post, Options } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import { Controller, Get, Inject, Options, Post, Req, Res } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { NovuClient } from '@novu/framework/nest';
-import { NovuBridgeClient } from './novu-bridge-client';
+import type { Request, Response } from 'express';
+import type { NovuBridgeClient } from './novu-bridge-client';
 
 @Controller('/environments/:environmentId/bridge')
 @ApiExcludeController()

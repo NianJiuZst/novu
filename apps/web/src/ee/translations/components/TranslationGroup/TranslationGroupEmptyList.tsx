@@ -1,6 +1,6 @@
 import { Group, Stack } from '@mantine/core';
 import { Button, colors, Text, Title } from '@novu/design-system';
-import { TranslationFileIcon, TranslationFolderIcon, TranslationVariablesIcon, AddGroupIcon } from '../../icons';
+import { AddGroupIcon, TranslationFileIcon, TranslationFolderIcon, TranslationVariablesIcon } from '../../icons';
 
 export function TranslationGroupEmptyList({
   handleAddGroupButtonClick,

@@ -1,8 +1,8 @@
-import { expect, test } from 'vitest';
+import type { IChatOptions } from '@novu/stateless';
 import { nanoid } from 'nanoid';
-import { IChatOptions } from '@novu/stateless';
-import { WhatsappBusinessChatProvider } from './whatsapp-business.provider';
+import { expect, test } from 'vitest';
 import { axiosSpy } from '../../../utils/test/spy-axios';
+import { WhatsappBusinessChatProvider } from './whatsapp-business.provider';
 
 const mockProviderConfig = {
   accessToken: 'my-access-token',

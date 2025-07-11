@@ -1,4 +1,4 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { type DynamicModule, Module } from '@nestjs/common';
 import { OpenTelemetryModule } from 'nestjs-otel';
 import { TracingService } from './tracing.service';
 

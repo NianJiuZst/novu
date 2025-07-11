@@ -1,9 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { FeedRepository, ChangeRepository, DalException } from '@novu/dal';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { type CreateChange, CreateChangeCommand } from '@novu/application-generic';
+import { type ChangeRepository, DalException, type FeedRepository } from '@novu/dal';
 import { ChangeEntityTypeEnum } from '@novu/shared';
-
-import { CreateChange, CreateChangeCommand } from '@novu/application-generic';
-import { DeleteFeedCommand } from './delete-feed.command';
+import type { DeleteFeedCommand } from './delete-feed.command';
 
 @Injectable()
 export class DeleteFeed {

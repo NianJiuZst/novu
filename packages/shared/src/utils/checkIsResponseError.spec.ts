@@ -1,6 +1,6 @@
-import { expect, describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import type { IResponseError } from '../types';
 import { checkIsResponseError } from './checkIsResponseError';
-import { IResponseError } from '../types';
 
 describe('checkIsResponseError', () => {
   it('should return true for a valid IResponseError object', () => {

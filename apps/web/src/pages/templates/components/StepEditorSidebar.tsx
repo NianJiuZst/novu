@@ -1,15 +1,14 @@
 import { Sidebar } from '@novu/design-system';
 import { StepTypeEnum } from '@novu/shared';
-import { ReactNode } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-
+import type { ReactNode } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useBasePath } from '../hooks/useBasePath';
 import { useNavigateToVariantPreview } from '../hooks/useNavigateToVariantPreview';
 import { useStepIndex } from '../hooks/useStepIndex';
 import { useStepVariantsCount } from '../hooks/useStepVariantsCount';
 import { EditorSidebarHeaderActions } from './EditorSidebarHeaderActions';
-import { IForm } from './formTypes';
+import type { IForm } from './formTypes';
 import { StepName } from './StepName';
 import { useTemplateEditorForm } from './TemplateEditorFormProvider';
 

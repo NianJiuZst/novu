@@ -1,8 +1,8 @@
 import { UserButton } from '@clerk/clerk-react';
 import { IconBolt } from '@novu/novui/icons';
+import { WEB_APP_URL } from '../../../config';
 import { ROUTES } from '../../../constants/routes';
 import { useNewDashboardOptIn } from '../../../hooks/useNewDashboardOptIn';
-import { WEB_APP_URL } from '../../../config';
 
 export function UserProfileButton() {
   const { optIn } = useNewDashboardOptIn();

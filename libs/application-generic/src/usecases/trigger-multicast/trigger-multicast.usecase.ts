@@ -1,20 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { TopicEntity, TopicRepository, TopicSubscribersRepository } from '@novu/dal';
+import type { TopicEntity, TopicRepository, TopicSubscribersRepository } from '@novu/dal';
 import {
-  ISubscribersDefine,
-  ITopic,
+  type ISubscribersDefine,
+  type ITopic,
   SubscriberSourceEnum,
-  TriggerRecipient,
+  type TriggerRecipient,
+  type TriggerRecipientSubscriber,
   TriggerRecipientsTypeEnum,
-  TriggerRecipientSubscriber,
 } from '@novu/shared';
 
-import { PinoLogger } from 'nestjs-pino';
+import type { PinoLogger } from 'nestjs-pino';
 import { InstrumentUsecase } from '../../instrumentation';
-import { SubscriberProcessQueueService } from '../../services/queues/subscriber-process-queue.service';
+import type { CacheService, FeatureFlagsService } from '../../services';
+import type { SubscriberProcessQueueService } from '../../services/queues/subscriber-process-queue.service';
 import { TriggerBase } from '../trigger-base';
-import { TriggerMulticastCommand } from './trigger-multicast.command';
-import { CacheService, FeatureFlagsService } from '../../services';
+import type { TriggerMulticastCommand } from './trigger-multicast.command';
 
 const QUEUE_CHUNK_SIZE = Number(process.env.MULTICAST_QUEUE_CHUNK_SIZE) || 100;
 const SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE = Number(process.env.SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE) || 100;

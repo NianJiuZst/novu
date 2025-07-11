@@ -1,18 +1,17 @@
-import { useState } from 'react';
 import { useMantineColorScheme } from '@mantine/core';
-import { ChannelTypeEnum } from '@novu/shared';
 import { When } from '@novu/design-system';
-
-import { PhonePlatformSwitch } from './PhonePlatformSwitch';
+import { ChannelTypeEnum } from '@novu/shared';
+import { useState } from 'react';
+import { AndroidIndicatorsIcon, AndroidKeyboard, IOSIndicatorsIcon, IOSKeyboard } from '../icons';
 import {
+  Camera,
   IndicatorsContainer,
   MobileSimulatorBody,
   Notch,
   SwitchContainer,
   TimeIconStyled,
-  Camera,
 } from './MobileSimulator.styles';
-import { AndroidIndicatorsIcon, IOSIndicatorsIcon, IOSKeyboard, AndroidKeyboard } from '../icons';
+import { PhonePlatformSwitch } from './PhonePlatformSwitch';
 
 export const MobileSimulator = ({
   children,

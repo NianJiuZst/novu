@@ -1,9 +1,13 @@
-import { ChannelTypeEnum, ISendMessageSuccessResponse, ISmsOptions, ISmsProvider } from '@novu/stateless';
-
-import { Client, ApiController, MessageRequest } from '@bandwidth/messaging';
+import { ApiController, Client, type MessageRequest } from '@bandwidth/messaging';
 import { SmsProviderIdEnum } from '@novu/shared';
+import {
+  ChannelTypeEnum,
+  type ISendMessageSuccessResponse,
+  type ISmsOptions,
+  type ISmsProvider,
+} from '@novu/stateless';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export class BandwidthSmsProvider extends BaseProvider implements ISmsProvider {
   id = SmsProviderIdEnum.Bandwidth;

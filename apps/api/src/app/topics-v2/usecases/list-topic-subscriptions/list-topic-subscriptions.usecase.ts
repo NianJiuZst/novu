@@ -1,17 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InstrumentUsecase } from '@novu/application-generic';
-import {
+import type {
   SubscriberRepository,
   TopicEntity,
   TopicRepository,
   TopicSubscribersEntity,
   TopicSubscribersRepository,
 } from '@novu/dal';
-import { DirectionEnum, EnvironmentId } from '@novu/shared';
-import { ListTopicSubscriptionsResponseDto } from '../../dtos/list-topic-subscriptions-response.dto';
-import { TopicSubscriptionResponseDto } from '../../dtos/topic-subscription-response.dto';
+import { DirectionEnum, type EnvironmentId } from '@novu/shared';
+import type { ListTopicSubscriptionsResponseDto } from '../../dtos/list-topic-subscriptions-response.dto';
+import type { TopicSubscriptionResponseDto } from '../../dtos/topic-subscription-response.dto';
 import { mapTopicSubscriptionsToDto } from '../list-topics/map-topic-entity-to.dto';
-import { ListTopicSubscriptionsCommand } from './list-topic-subscriptions.command';
+import type { ListTopicSubscriptionsCommand } from './list-topic-subscriptions.command';
 
 @Injectable()
 export class ListTopicSubscriptionsUseCase {

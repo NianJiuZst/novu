@@ -1,17 +1,16 @@
+import { Injectable, Logger } from '@nestjs/common';
 import {
   BullMqService,
   getInboundParseMailWorkerOptions,
-  IInboundParseDataDto,
+  type IInboundParseDataDto,
   IInboundParseJobDto,
   WorkerBaseService,
-  WorkerOptions,
-  WorkflowInMemoryProviderService,
+  type WorkerOptions,
+  type WorkflowInMemoryProviderService,
 } from '@novu/application-generic';
 import { JobTopicNameEnum } from '@novu/shared';
-import { Injectable, Logger } from '@nestjs/common';
-
-import { InboundEmailParse } from '../usecases/inbound-email-parse/inbound-email-parse.usecase';
 import { InboundEmailParseCommand } from '../usecases/inbound-email-parse/inbound-email-parse.command';
+import type { InboundEmailParse } from '../usecases/inbound-email-parse/inbound-email-parse.usecase';
 
 const LOG_CONTEXT = 'InboundParseQueueService';
 

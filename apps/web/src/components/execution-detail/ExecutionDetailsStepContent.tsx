@@ -1,12 +1,11 @@
-import { useState } from 'react';
-import { Container, Grid } from '@mantine/core';
 import styled from '@emotion/styled';
-
+import { Container, Grid } from '@mantine/core';
 import { colors, Text } from '@novu/design-system';
+import { useState } from 'react';
+import { When } from '../utils/When';
 import { ExecutionDetail } from './ExecutionDetail';
 import { ExecutionDetailRawSnippet } from './ExecutionDetailShowRaw';
 import { ExecutionDetailTrigger } from './ExecutionDetailTrigger';
-import { When } from '../utils/When';
 
 const ExecutionDetailsStepContentWrapper = styled.div`
   margin: 0;

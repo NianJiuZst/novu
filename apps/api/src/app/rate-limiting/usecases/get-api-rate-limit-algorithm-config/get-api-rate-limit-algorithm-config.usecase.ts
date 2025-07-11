@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import {
   ApiRateLimitAlgorithmEnum,
-  ApiRateLimitAlgorithmEnvVarFormat,
+  type ApiRateLimitAlgorithmEnvVarFormat,
   DEFAULT_API_RATE_LIMIT_ALGORITHM_CONFIG,
-  IApiRateLimitAlgorithm,
+  type IApiRateLimitAlgorithm,
 } from '@novu/shared';
 
 @Injectable()

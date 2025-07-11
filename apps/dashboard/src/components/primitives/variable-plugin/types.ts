@@ -1,12 +1,12 @@
-import type { IsAllowedVariable } from '@/utils/parseStepVariables';
-import type { EditorView } from '@uiw/react-codemirror';
-import type { MutableRefObject } from 'react';
+import type { EditorView } from "@uiw/react-codemirror";
+import type { MutableRefObject } from "react";
+import type { IsAllowedVariable } from "@/utils/parseStepVariables";
 
 export type PluginState = {
-  viewRef: MutableRefObject<EditorView | null>;
-  lastCompletionRef: MutableRefObject<{ from: number; to: number } | null>;
-  onSelect?: (value: string, from: number, to: number) => void;
-  isAllowedVariable: IsAllowedVariable;
-  isDigestEventsVariable?: (variableName: string) => boolean;
-  isCustomHtmlEditorEnabled: boolean;
+	viewRef: MutableRefObject<EditorView | null>;
+	lastCompletionRef: MutableRefObject<{ from: number; to: number } | null>;
+	onSelect?: (value: string, from: number, to: number) => void;
+	isAllowedVariable: IsAllowedVariable;
+	isDigestEventsVariable?: (variableName: string) => boolean;
+	isCustomHtmlEditorEnabled: boolean;
 };

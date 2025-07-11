@@ -1,9 +1,9 @@
-import { useEffect, useMemo } from 'react';
-import { useMutation, useQuery, UseQueryResult } from '@tanstack/react-query';
 import type { DiscoverWorkflowOutput, Event, HealthCheck } from '@novu/framework/internal';
+import { type UseQueryResult, useMutation, useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo } from 'react';
+import { api as cloudApi } from '../../api';
 import { buildBridgeHTTPClient, type TriggerParams } from '../../bridgeApi/bridgeApi.client';
 import { useStudioState } from '../StudioStateProvider';
-import { api as cloudApi } from '../../api';
 
 export function useBridgeAPI() {
   const { bridgeURL } = useStudioState();

@@ -1,10 +1,6 @@
-import {
-  HealthCheckError,
-  HealthIndicator,
-  HealthIndicatorResult,
-} from '@nestjs/terminus';
 import { Injectable } from '@nestjs/common';
-import { CacheService } from '../services/cache';
+import { HealthCheckError, HealthIndicator, type HealthIndicatorResult } from '@nestjs/terminus';
+import type { CacheService } from '../services/cache';
 
 @Injectable()
 export class CacheServiceHealthIndicator extends HealthIndicator {

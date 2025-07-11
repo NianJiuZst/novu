@@ -1,24 +1,23 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  JobEntity,
+  type JobEntity,
   JobStatusEnum,
-  NotificationEntity,
-  NotificationRepository,
-  NotificationStepEntity,
+  type NotificationEntity,
+  type NotificationRepository,
+  type NotificationStepEntity,
 } from '@novu/dal';
 import {
-  DigestTypeEnum,
-  IDigestBaseMetadata,
-  IWorkflowStepMetadata,
+  type DigestTypeEnum,
+  type IDigestBaseMetadata,
+  type IWorkflowStepMetadata,
   STEP_TYPE_TO_CHANNEL_TYPE,
   StepTypeEnum,
 } from '@novu/shared';
-
-import { DigestFilterSteps, DigestFilterStepsCommand } from '../digest-filter-steps';
 import { InstrumentUsecase } from '../../instrumentation';
-import { CreateNotificationJobsCommand } from './create-notification-jobs.command';
-import { PlatformException } from '../../utils/exceptions';
 import { getNestedValue } from '../../utils';
+import { PlatformException } from '../../utils/exceptions';
+import { type DigestFilterSteps, DigestFilterStepsCommand } from '../digest-filter-steps';
+import type { CreateNotificationJobsCommand } from './create-notification-jobs.command';
 
 const LOG_CONTEXT = 'CreateNotificationUseCase';
 type NotificationJob = Omit<JobEntity, '_id' | 'createdAt' | 'updatedAt'>;

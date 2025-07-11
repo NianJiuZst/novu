@@ -1,4 +1,4 @@
-import { RetryOnError, RetryOptions } from './retry-on-error-decorator';
+import { RetryOnError, type RetryOptions } from './retry-on-error-decorator';
 
 // Mock console.warn to verify logging
 const mockConsoleWarn = jest.spyOn(console, 'warn');

@@ -1,4 +1,4 @@
-import { MemberRoleEnum } from '../entities/organization/member.enum';
+import type { MemberRoleEnum } from '../entities/organization/member.enum';
 
 export enum SignUpOriginEnum {
   WEB = 'web',

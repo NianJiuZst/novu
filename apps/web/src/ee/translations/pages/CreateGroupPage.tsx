@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '../routes';
 import { CreateGroupSidebar } from '../components/CreateGroupSidebar';
+import { ROUTES } from '../routes';
 
 export function CreateGroupPage() {
   const navigate = useNavigate();

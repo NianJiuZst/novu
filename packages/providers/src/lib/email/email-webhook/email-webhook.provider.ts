@@ -1,18 +1,17 @@
+import { EmailProviderIdEnum } from '@novu/shared';
 import {
   ChannelTypeEnum,
-  ISendMessageSuccessResponse,
-  IEmailOptions,
-  IEmailProvider,
-  ICheckIntegrationResponse,
   CheckIntegrationResponseEnum,
+  type ICheckIntegrationResponse,
+  type IEmailOptions,
+  type IEmailProvider,
+  type ISendMessageSuccessResponse,
 } from '@novu/stateless';
-
-import crypto from 'crypto';
 import axios from 'axios';
+import crypto from 'crypto';
 import { setTimeout } from 'timers/promises';
-import { EmailProviderIdEnum } from '@novu/shared';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export class EmailWebhookProvider extends BaseProvider implements IEmailProvider {
   protected casing: CasingEnum = CasingEnum.CAMEL_CASE;

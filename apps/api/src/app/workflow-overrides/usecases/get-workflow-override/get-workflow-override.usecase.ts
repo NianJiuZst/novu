@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { TenantRepository, WorkflowOverrideRepository } from '@novu/dal';
-import { GetWorkflowOverrideResponseDto } from '../../dtos/get-workflow-override-response.dto';
-import { GetWorkflowOverrideCommand } from './get-workflow-override.command';
+import type { TenantRepository, WorkflowOverrideRepository } from '@novu/dal';
+import type { GetWorkflowOverrideResponseDto } from '../../dtos/get-workflow-override-response.dto';
+import type { GetWorkflowOverrideCommand } from './get-workflow-override.command';
 
 @Injectable()
 export class GetWorkflowOverride {

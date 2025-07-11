@@ -1,5 +1,5 @@
 import type { ChangePropsValueType } from '../../types/helpers';
-import {
+import type {
   EnvironmentId,
   ExternalSubscriberId,
   OrganizationId,

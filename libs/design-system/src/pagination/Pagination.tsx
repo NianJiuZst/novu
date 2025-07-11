@@ -1,16 +1,16 @@
 import styled from '@emotion/styled';
-import { PropsWithChildren } from 'react';
-import { clamp } from '../utils';
+import type { PropsWithChildren } from 'react';
 import { colors } from '../config';
 import { mantineConfig } from '../config/theme.config';
+import { clamp } from '../utils';
 import { ControlBar } from './ControlBar';
 import { ControlButton } from './ControlButton';
 import { GoToPageInput } from './GoToPageInput';
+import { IconControlButton } from './IconControlButton';
 import { PageSizeSelect } from './PageSizeSelect';
 import { FIRST_PAGE_NUMBER } from './Pagination.const';
-import { IPaginationContext, PaginationContext } from './PaginationContext';
+import { type IPaginationContext, PaginationContext } from './PaginationContext';
 import { clampPageNumber } from './util';
-import { IconControlButton } from './IconControlButton';
 
 const PaginationWrapper = styled.div(
   ({ theme }) => `

@@ -1,14 +1,14 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type {
-  IResponseError,
   ICreateNotificationTemplateDto,
   INotificationTemplate,
+  IResponseError,
   IUpdateNotificationTemplateDto,
 } from '@novu/shared';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useTemplateFetcher } from '../../../api/hooks';
-import { QueryKeys } from '../../../api/query.keys';
 import { createTemplate, deleteTemplateById, updateTemplate } from '../../../api/notification-templates';
+import { QueryKeys } from '../../../api/query.keys';
 
 export function useTemplateController(
   templateId?: string,

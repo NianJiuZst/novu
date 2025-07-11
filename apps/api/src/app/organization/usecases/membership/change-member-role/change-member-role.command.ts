@@ -1,4 +1,4 @@
-import { MemberRoleEnum } from '@novu/shared';
+import type { MemberRoleEnum } from '@novu/shared';
 import { IsDefined, IsEnum, IsMongoId } from 'class-validator';
 import { OrganizationCommand } from '../../../../shared/commands/organization.command';
 

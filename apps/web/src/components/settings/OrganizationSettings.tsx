@@ -1,11 +1,11 @@
 import { OrganizationProfile } from '@clerk/clerk-react';
-import { Appearance } from '@clerk/types';
+import type { Appearance } from '@clerk/types';
 import styled from '@emotion/styled';
 import { Stack } from '@mantine/core';
 import { Text } from '@novu/design-system';
-import { IS_EE_AUTH_ENABLED } from '../../config';
 import { useFetchOrganizationSettings } from '../../api/hooks/useFetchOrganizationSettings';
 import { useUpdateOrganizationSettings } from '../../api/hooks/useUpdateOrganizationSettings';
+import { IS_EE_AUTH_ENABLED } from '../../config';
 import { NovuBrandingSwitch } from './NovuBrandingSwitch';
 
 const SectionTitle = styled(Text)`

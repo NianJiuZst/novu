@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { Accordion, Group, Indicator, Stack, createStyles } from '@mantine/core';
-import { Text, Tooltip, colors } from '@novu/design-system';
+import { Accordion, createStyles, Group, Indicator, Stack } from '@mantine/core';
+import { colors, Text, Tooltip } from '@novu/design-system';
 import React, { useState } from 'react';
 import { useFieldArray, useWatch } from 'react-hook-form';
 import { useEnvironment } from '../../../../hooks';

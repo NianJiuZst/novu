@@ -1,6 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-
 import { NotificationBadge } from '@novu/design-system';
+import { useQuery } from '@tanstack/react-query';
 import { getChangesCount } from '../../../api/changes';
 import { QueryKeys } from '../../../api/query.keys';
 

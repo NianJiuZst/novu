@@ -1,8 +1,8 @@
-import React from 'react';
 import styled from '@emotion/styled';
 import { Stack, Text, useMantineColorScheme } from '@mantine/core';
+import { Close, colors } from '@novu/design-system';
 import { ChannelTypeEnum, UTM_CAMPAIGN_QUERY_PARAM } from '@novu/shared';
-import { colors, Close } from '@novu/design-system';
+import type React from 'react';
 
 import { When } from '../../../components/utils/When';
 import { CONTEXT_PATH } from '../../../config';

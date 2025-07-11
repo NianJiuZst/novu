@@ -1,18 +1,18 @@
+import { EmailProviderIdEnum } from '@novu/shared';
 import {
   ChannelTypeEnum,
-  IEmailOptions,
-  IEmailProvider,
-  ISendMessageSuccessResponse,
-  ICheckIntegrationResponse,
   CheckIntegrationResponseEnum,
-  IEmailEventBody,
+  type ICheckIntegrationResponse,
+  type IEmailEventBody,
+  type IEmailOptions,
+  type IEmailProvider,
+  type ISendMessageSuccessResponse,
 } from '@novu/stateless';
 // @ts-ignore CJS importing an ESM module, this fails only during the CJS build
-import type { Message, SMTPClient, MessageAttachment } from 'emailjs';
-import { EmailProviderIdEnum } from '@novu/shared';
-import { IEmailJsConfig } from './emailjs.config';
+import type { Message, MessageAttachment, SMTPClient } from 'emailjs';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
 import { WithPassthrough } from '../../../utils/types';
+import type { IEmailJsConfig } from './emailjs.config';
 
 export class EmailJsProvider extends BaseProvider implements IEmailProvider {
   protected casing: CasingEnum = CasingEnum.KEBAB_CASE;

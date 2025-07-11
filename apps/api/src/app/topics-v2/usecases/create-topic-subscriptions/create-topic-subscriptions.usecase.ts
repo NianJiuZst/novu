@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InstrumentUsecase } from '@novu/application-generic';
-import {
+import type {
   CreateTopicSubscribersEntity,
   SubscriberEntity,
   SubscriberRepository,
@@ -9,13 +9,13 @@ import {
   TopicSubscribersEntity,
   TopicSubscribersRepository,
 } from '@novu/dal';
-import {
+import type {
   CreateTopicSubscriptionsResponseDto,
   SubscriptionDto,
   SubscriptionErrorDto,
 } from '../../dtos/create-topic-subscriptions-response.dto';
-import { UpsertTopicUseCase } from '../upsert-topic/upsert-topic.usecase';
-import { CreateTopicSubscriptionsCommand } from './create-topic-subscriptions.command';
+import type { UpsertTopicUseCase } from '../upsert-topic/upsert-topic.usecase';
+import type { CreateTopicSubscriptionsCommand } from './create-topic-subscriptions.command';
 
 @Injectable()
 export class CreateTopicSubscriptionsUsecase {

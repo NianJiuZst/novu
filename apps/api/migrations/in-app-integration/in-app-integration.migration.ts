@@ -1,8 +1,8 @@
 import '../../src/config';
-import { OrganizationRepository, EnvironmentRepository, IntegrationRepository, ChannelTypeEnum } from '@novu/dal';
-import { InAppProviderIdEnum } from '@novu/shared';
-import { encryptCredentials } from '@novu/application-generic';
 import { NestFactory } from '@nestjs/core';
+import { encryptCredentials } from '@novu/application-generic';
+import { ChannelTypeEnum, EnvironmentRepository, IntegrationRepository, OrganizationRepository } from '@novu/dal';
+import { InAppProviderIdEnum } from '@novu/shared';
 import { AppModule } from '../../src/app.module';
 
 const organizationRepository = new OrganizationRepository();

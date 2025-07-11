@@ -1,7 +1,6 @@
-import { ComponentProps, PropsWithChildren } from 'react';
-import { Tooltip, Button, IButtonProps } from '@novu/design-system';
-
+import { Button, type IButtonProps, Tooltip } from '@novu/design-system';
 import { css, cx } from '@novu/novui/css';
+import type { ComponentProps, PropsWithChildren } from 'react';
 import { useHover } from '../hooks';
 
 // Mantine styles take precedence over Panda :(, so have to use !important

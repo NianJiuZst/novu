@@ -1,6 +1,6 @@
 import { Center, Loader } from '@mantine/core';
-import { Outlet } from 'react-router-dom';
 import { colors } from '@novu/design-system';
+import { Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
 export function SettingsPageNew() {

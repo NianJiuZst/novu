@@ -1,8 +1,7 @@
-import React from 'react';
-import { Menu, MenuProps } from '@mantine/core';
-
-import useStyles from './Dropdown.styles';
+import { Menu, type MenuProps } from '@mantine/core';
+import type React from 'react';
 import { shadows } from '../config';
+import useStyles from './Dropdown.styles';
 
 export interface IDropdownProps
   extends Pick<

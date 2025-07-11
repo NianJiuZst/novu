@@ -1,6 +1,6 @@
-import { autoUpdate, flip, offset, OffsetOptions, Placement, shift } from '@floating-ui/dom';
+import { autoUpdate, flip, type OffsetOptions, offset, type Placement, shift } from '@floating-ui/dom';
 import { useFloating } from 'solid-floating-ui';
-import { Accessor, createContext, createMemo, createSignal, JSX, Setter, useContext } from 'solid-js';
+import { type Accessor, createContext, createMemo, createSignal, type JSX, type Setter, useContext } from 'solid-js';
 
 type PopoverRootProps = {
   open?: boolean;

@@ -1,7 +1,7 @@
-import { ButtonTypeEnum, IMessageButton, darkButtonStyle, lightButtonStyle } from '@novu/shared';
 import styled from '@emotion/styled';
 import { Divider, useMantineTheme } from '@mantine/core';
 import { Button } from '@novu/design-system';
+import { ButtonTypeEnum, darkButtonStyle, type IMessageButton, lightButtonStyle } from '@novu/shared';
 
 interface IButtonsTemplatesProps {
   setTemplateSelected: (boolean) => void;

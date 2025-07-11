@@ -1,8 +1,13 @@
-import { expect } from 'chai';
-import { UserSession } from '@novu/testing';
-import { MessageRepository, NotificationTemplateEntity, SubscriberEntity, SubscriberRepository } from '@novu/dal';
+import type { Novu } from '@novu/api';
+import {
+  MessageRepository,
+  type NotificationTemplateEntity,
+  type SubscriberEntity,
+  SubscriberRepository,
+} from '@novu/dal';
 import { ActorTypeEnum, ChannelTypeEnum, StepTypeEnum, SystemAvatarIconEnum } from '@novu/shared';
-import { Novu } from '@novu/api';
+import { UserSession } from '@novu/testing';
+import { expect } from 'chai';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
 describe('Snooze and Unsnooze Notifications - /inbox/notifications/:id/{snooze,unsnooze} (PATCH) #novu-v2', () => {

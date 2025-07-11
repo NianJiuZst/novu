@@ -1,19 +1,18 @@
-import { useInputState } from '@mantine/hooks';
 import { ActionIcon, Divider } from '@mantine/core';
-import { Controller, useFormContext } from 'react-hook-form';
-import { useEffect, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInputState } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
-import type { IResponseError, IFeedEntity } from '@novu/shared';
-
 import { Checkbox, colors, Input, PlusGradient } from '@novu/design-system';
-import { useEnvironment } from '../../../../hooks';
+import type { IFeedEntity, IResponseError } from '@novu/shared';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import { createFeed, getFeeds } from '../../../../api/feeds';
 import { QueryKeys } from '../../../../api/query.keys';
-import { FeedItems } from './FeedItems';
-import { EnableAvatarSwitch } from './EnableAvatarSwitch';
-import type { IForm } from '../formTypes';
+import { useEnvironment } from '../../../../hooks';
 import { useStepFormPath } from '../../hooks/useStepFormPath';
+import type { IForm } from '../formTypes';
+import { EnableAvatarSwitch } from './EnableAvatarSwitch';
+import { FeedItems } from './FeedItems';
 
 export const AvatarFeedFields = () => {
   const queryClient = useQueryClient();

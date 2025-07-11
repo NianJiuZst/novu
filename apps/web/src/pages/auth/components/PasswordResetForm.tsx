@@ -1,15 +1,15 @@
-import { useNavigate } from 'react-router-dom';
+import { showNotification } from '@mantine/notifications';
+import { Button, colors, PasswordInput, Text } from '@novu/design-system';
+import type { IResponseError } from '@novu/shared';
+import { passwordConstraints } from '@novu/shared';
+import { captureException } from '@sentry/react';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { captureException } from '@sentry/react';
-import { showNotification } from '@mantine/notifications';
-import { passwordConstraints } from '@novu/shared';
-import type { IResponseError } from '@novu/shared';
-import { PasswordInput, Button, colors, Text } from '@novu/design-system';
-import { useAuth } from '../../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../../api/api.client';
-import { PasswordRequirementPopover } from './PasswordRequirementPopover';
 import { ROUTES } from '../../../constants/routes';
+import { useAuth } from '../../../hooks/useAuth';
+import { PasswordRequirementPopover } from './PasswordRequirementPopover';
 
 type Props = {
   token: string;

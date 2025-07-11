@@ -1,28 +1,28 @@
-import { useEffect, useState } from 'react';
 import { ActionIcon, Header } from '@mantine/core';
+import { Dropdown, Tooltip } from '@novu/design-system';
+import { css } from '@novu/novui/css';
 import {
   IconHelpOutline,
   IconOutlineChat,
-  IconOutlineLibraryBooks,
   IconOutlineGroup,
+  IconOutlineLibraryBooks,
   IconOutlineMail,
 } from '@novu/novui/icons';
-import { Tooltip, Dropdown } from '@novu/design-system';
-import { css } from '@novu/novui/css';
 import { HStack } from '@novu/novui/jsx';
 import { captureException } from '@sentry/react';
+import { useEffect, useState } from 'react';
 import { IS_EE_AUTH_ENABLED, IS_NOVU_PROD_STAGING } from '../../../../config';
+import { UserProfileButton } from '../../../../ee/clerk';
 import { useBootIntercom } from '../../../../hooks';
+import { useAuth } from '../../../../hooks/useAuth';
 import useThemeChange from '../../../../hooks/useThemeChange';
 import { discordInviteUrl } from '../../../../pages/quick-start/consts';
-import { useAuth } from '../../../../hooks/useAuth';
 import { HEADER_NAV_HEIGHT } from '../../constants';
 import { NotificationCenterWidget } from '../NotificationCenterWidget';
-import { HeaderMenuItems } from './HeaderMenuItems';
-import { UserProfileButton } from '../../../../ee/clerk';
-import { BridgeMenuItems } from './BridgeMenuItems';
-import { WorkflowHeaderBackButton } from './WorkflowHeaderBackButton';
 import { SupportModal } from '../SupportModal';
+import { BridgeMenuItems } from './BridgeMenuItems';
+import { HeaderMenuItems } from './HeaderMenuItems';
+import { WorkflowHeaderBackButton } from './WorkflowHeaderBackButton';
 
 export function HeaderNav() {
   const { currentUser, currentOrganization } = useAuth();

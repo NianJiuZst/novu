@@ -1,11 +1,11 @@
+import type { EnforceEnvOrOrgIds } from '../../types/enforce';
 import { BaseRepository } from '../base-repository';
 import {
+  type LocalizationGroupDBModel,
   LocalizationGroupEntity,
-  LocalizationGroupDBModel,
-  LocalizationResourceEnum,
+  type LocalizationResourceEnum,
 } from './localization-group.entity';
 import { LocalizationGroup } from './localization-group.schema';
-import type { EnforceEnvOrOrgIds } from '../../types/enforce';
 
 export class LocalizationGroupRepository extends BaseRepository<
   LocalizationGroupDBModel,

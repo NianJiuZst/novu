@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
-
-import { JobStatusEnum, JobRepository, JobEntity } from '@novu/dal';
-import { StepTypeEnum } from '@novu/shared';
 import { isActionStepType, isMainDigest } from '@novu/application-generic';
+import { type JobEntity, type JobRepository, JobStatusEnum } from '@novu/dal';
+import { StepTypeEnum } from '@novu/shared';
 
-import { CancelDelayedCommand } from './cancel-delayed.command';
+import type { CancelDelayedCommand } from './cancel-delayed.command';
 
 type PartialJob = Pick<JobEntity, '_id' | 'type' | 'status' | '_environmentId' | '_subscriberId'>;
 

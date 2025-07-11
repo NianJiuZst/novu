@@ -1,15 +1,14 @@
-import _ from 'lodash';
 import { Injectable } from '@nestjs/common';
+import { type FeatureFlagsService, Instrument, InstrumentUsecase } from '@novu/application-generic';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
-import { FeatureFlagsService, Instrument, InstrumentUsecase } from '@novu/application-generic';
-
-import { collectKeys, keysToObject } from '../../../workflows-v2/util/utils';
+import _ from 'lodash';
 import { buildVariables } from '../../../workflows-v2/util/build-variables';
-import { CreateVariablesObjectCommand } from './create-variables-object.command';
+import { JsonSchemaMock } from '../../../workflows-v2/util/json-schema-mock';
+import { collectKeys, keysToObject } from '../../../workflows-v2/util/utils';
+import type { JSONSchemaDto } from '../../dtos/json-schema.dto';
 import { MailyAttrsEnum } from '../../helpers/maily.types';
 import { isStringifiedMailyJSONContent } from '../../helpers/maily-utils';
-import { JsonSchemaMock } from '../../../workflows-v2/util/json-schema-mock';
-import { JSONSchemaDto } from '../../dtos/json-schema.dto';
+import type { CreateVariablesObjectCommand } from './create-variables-object.command';
 
 export type ArrayVariable = {
   path: string;

@@ -1,11 +1,11 @@
 import { Badge, Text } from '@mantine/core';
-import { useQuery } from '@tanstack/react-query';
-import { Popover } from '@novu/design-system';
 import { useDisclosure } from '@mantine/hooks';
+import { Popover } from '@novu/design-system';
 import type { HealthCheck } from '@novu/framework/internal';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '../../../api/api.client';
-import { useEnvironment } from '../../../hooks';
 import { IS_SELF_HOSTED } from '../../../config';
+import { useEnvironment } from '../../../hooks';
 
 export function BridgeStatus() {
   const [opened, { close, open }] = useDisclosure(false);

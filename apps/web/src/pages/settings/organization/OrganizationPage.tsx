@@ -1,6 +1,6 @@
 import { Stack } from '@novu/novui/jsx';
-import { useAuth } from '../../../hooks/useAuth';
 import { COMPANY_LOGO_PATH } from '../../../constants/assets';
+import { useAuth } from '../../../hooks/useAuth';
 import { SettingsPageContainer } from '../SettingsPageContainer';
 import { OrganizationLogo } from './OrganizationLogo';
 import { OrganizationName } from './OrganizationName';

@@ -1,3 +1,3 @@
 export * from './Sidebar';
-export * from './SidebarFormless';
 export * from './Sidebar.const';
+export * from './SidebarFormless';

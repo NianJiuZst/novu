@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiExtension, ApiParam, ApiProperty } from '@nestjs/swagger';
-import { ApiParamOptions } from '@nestjs/swagger/dist/decorators/api-param.decorator';
-import { ApiPropertyOptions } from '@nestjs/swagger/dist/decorators/api-property.decorator';
+import type { ApiParamOptions } from '@nestjs/swagger/dist/decorators/api-param.decorator';
+import type { ApiPropertyOptions } from '@nestjs/swagger/dist/decorators/api-property.decorator';
 
 /**
  * Sets the method name for the SDK.

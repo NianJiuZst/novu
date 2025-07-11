@@ -1,5 +1,5 @@
-import { useMantineColorScheme } from '@mantine/core';
 import styled from '@emotion/styled';
+import { useMantineColorScheme } from '@mantine/core';
 import { providers } from '@novu/shared';
 import { CONTEXT_PATH } from '../../../config';
 

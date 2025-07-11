@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
-import { IsArray, IsDefined, ValidateNested, IsBoolean, IsOptional, IsString, ArrayMaxSize } from 'class-validator';
 import { plainToClass, Transform, Type } from 'class-transformer';
-import { NotificationFilter } from '../utils/types';
+import { ArrayMaxSize, IsArray, IsBoolean, IsDefined, IsOptional, IsString, ValidateNested } from 'class-validator';
+import type { NotificationFilter } from '../utils/types';
 
 export class NotificationsFilter implements NotificationFilter {
   @IsOptional()

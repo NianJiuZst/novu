@@ -1,8 +1,8 @@
-import { vi, describe, test, expect, afterEach } from 'vitest';
+import { fail } from 'assert';
 
 import nodemailer from 'nodemailer';
-import { ConnectionOptions } from 'tls';
-import { fail } from 'assert';
+import type { ConnectionOptions } from 'tls';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { NodemailerProvider } from './nodemailer.provider';
 
 const sendMailMock = vi.fn().mockReturnValue(() => {

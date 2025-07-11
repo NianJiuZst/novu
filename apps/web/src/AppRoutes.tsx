@@ -2,7 +2,10 @@ import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { PrivatePageLayout } from './components/layout/components/PrivatePageLayout';
 import { PublicPageLayout } from './components/layout/components/PublicPageLayout';
+import { IS_EE_AUTH_ENABLED } from './config/index';
 import { ROUTES } from './constants/routes';
+import { EnterprisePrivatePageLayout } from './ee/clerk/components/EnterprisePrivatePageLayout';
+import { EnterpriseAuthRoutes } from './ee/clerk/EnterpriseAuthRoutes';
 import { useFeatureFlag } from './hooks';
 import { ActivitiesPage } from './pages/activities/ActivitiesPage';
 import InvitationPage from './pages/auth/InvitationPage';
@@ -12,20 +15,27 @@ import SignUpPage from './pages/auth/SignUpPage';
 import { BrandingPage } from './pages/brand/BrandingPage';
 import { PromoteChangesPage } from './pages/changes/PromoteChangesPage';
 import HomePage from './pages/HomePage';
-import {
-  ApiKeysPage,
-  WebhookPage,
-  AccessSecurityPage,
-  BillingPage,
-  TeamPage,
-  UserProfilePage,
-} from './pages/settings/index';
-import { SelectProviderPage } from './pages/integrations/components/SelectProviderPage';
 import { CreateProviderPage } from './pages/integrations/CreateProviderPage';
+import { SelectProviderPage } from './pages/integrations/components/SelectProviderPage';
 import { IntegrationsListPage } from './pages/integrations/IntegrationsListPage';
 import { UpdateProviderPage } from './pages/integrations/UpdateProviderPage';
 import { MembersInvitePage } from './pages/invites/MembersInvitePage';
+import { LayoutsPage } from './pages/layouts/LayoutsPage';
+import {
+  AccessSecurityPage,
+  ApiKeysPage,
+  BillingPage,
+  TeamPage,
+  UserProfilePage,
+  WebhookPage,
+} from './pages/settings/index';
+import { OrganizationPage } from './pages/settings/organization';
+import { SettingsPageNew as SettingsPage } from './pages/settings/SettingsPageNew';
+import { StudioOnboarding } from './pages/studio-onboarding/index';
+import { StudioOnboardingPreview } from './pages/studio-onboarding/preview';
+import { StudioOnboardingSuccess } from './pages/studio-onboarding/success';
 import SubscribersList from './pages/subscribers/SubscribersListPage';
+import { TranslationRoutes } from './pages/TranslationPages';
 import { ChannelPreview } from './pages/templates/components/ChannelPreview';
 import { ChannelStepEditor } from './pages/templates/components/ChannelStepEditor';
 import { ProvidersPage } from './pages/templates/components/ProvidersPage';
@@ -35,28 +45,18 @@ import { TestWorkflowPage } from './pages/templates/components/TestWorkflowPage'
 import { UserPreference } from './pages/templates/components/UserPreference';
 import { VariantsPage } from './pages/templates/components/VariantsPage';
 import TemplateEditorPage from './pages/templates/editor/TemplateEditorPage';
+import { WorkflowsStepEditorPageV2 } from './pages/templates/editor_v2/TemplateStepEditorV2';
 import { TemplatesDigestPlaygroundPage } from './pages/templates/TemplatesDigestPlaygroundPage';
-import { Sidebar } from './pages/templates/workflow/SideBar/Sidebar';
 import WorkflowListPage from './pages/templates/WorkflowListPage';
+import { Sidebar } from './pages/templates/workflow/SideBar/Sidebar';
 import { CreateTenantPage } from './pages/tenants/CreateTenantPage';
 import { TenantsPage } from './pages/tenants/TenantsPage';
 import { UpdateTenantPage } from './pages/tenants/UpdateTenantPage';
-import { TranslationRoutes } from './pages/TranslationPages';
-import { StudioOnboarding } from './pages/studio-onboarding/index';
-import { StudioOnboardingPreview } from './pages/studio-onboarding/preview';
-import { StudioOnboardingSuccess } from './pages/studio-onboarding/success';
-import { SettingsPageNew as SettingsPage } from './pages/settings/SettingsPageNew';
-import { OrganizationPage } from './pages/settings/organization';
-import { LayoutsPage } from './pages/layouts/LayoutsPage';
-import { StudioPageLayout } from './studio/StudioPageLayout';
-import { LocalStudioAuthenticator } from './studio/LocalStudioAuthenticator';
 import { LocalStudioWorkflowLandingPage, WorkflowsDetailPage, WorkflowsTestPage } from './studio/components/workflows';
-import { WorkflowsStepEditorPageV2 } from './pages/templates/editor_v2/TemplateStepEditorV2';
-import { IS_EE_AUTH_ENABLED } from './config/index';
-import { EnterpriseAuthRoutes } from './ee/clerk/EnterpriseAuthRoutes';
-import { novuOnboardedCookie } from './utils/cookies';
-import { EnterprisePrivatePageLayout } from './ee/clerk/components/EnterprisePrivatePageLayout';
+import { LocalStudioAuthenticator } from './studio/LocalStudioAuthenticator';
 import { StudioStepEditorPage } from './studio/pages/StudioStepEditorPage';
+import { StudioPageLayout } from './studio/StudioPageLayout';
+import { novuOnboardedCookie } from './utils/cookies';
 
 const AuthRoutes = () => {
   const CommunityAuthRoutes = () => (

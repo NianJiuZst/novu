@@ -34,12 +34,12 @@ export function normalizeEmail(email: string): string {
   let username = emailParts[0];
   let domain = emailParts[1];
 
-  if (normalizableProviders.hasOwnProperty(domain)) {
-    if (normalizableProviders[domain].hasOwnProperty('cut')) {
+  if (Object.hasOwn(normalizableProviders, domain)) {
+    if (Object.hasOwn(normalizableProviders[domain], 'cut')) {
       username = username.replace(normalizableProviders[domain].cut, '');
     }
 
-    if (normalizableProviders[domain].hasOwnProperty('aliasOf')) {
+    if (Object.hasOwn(normalizableProviders[domain], 'aliasOf')) {
       domain = normalizableProviders[domain].aliasOf;
     }
   }

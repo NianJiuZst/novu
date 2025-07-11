@@ -1,6 +1,6 @@
-import { css } from '@novu/novui/css';
-import { Text } from '@novu/novui';
 import styled from '@emotion/styled';
+import { Text } from '@novu/novui';
+import { css } from '@novu/novui/css';
 import { ApiServiceLevelEnum } from '@novu/shared';
 
 const Cell = styled.div`

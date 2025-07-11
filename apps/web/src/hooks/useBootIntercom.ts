@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useIntercom } from 'react-use-intercom';
-import { useAuth } from './useAuth';
 import { INTERCOM_APP_ID } from '../config';
+import { useAuth } from './useAuth';
 
 export function useBootIntercom() {
   const { currentOrganization, currentUser } = useAuth();

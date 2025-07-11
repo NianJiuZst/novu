@@ -1,9 +1,8 @@
-import { useFormContext } from 'react-hook-form';
-import capitalize from 'lodash.capitalize';
 import { useMantineColorScheme } from '@mantine/core';
-import { DigestUnitEnum, MonthlyTypeEnum } from '@novu/shared';
-
 import { colors } from '@novu/design-system';
+import { DigestUnitEnum, MonthlyTypeEnum } from '@novu/shared';
+import capitalize from 'lodash.capitalize';
+import { useFormContext } from 'react-hook-form';
 import { pluralizeTime } from '../../../../utils';
 
 const Highlight = ({ children, isHighlight }) => {

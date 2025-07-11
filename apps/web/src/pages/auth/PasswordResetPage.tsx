@@ -1,10 +1,10 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { Button, colors, PageMeta, Text } from '@novu/design-system';
 import { useState } from 'react';
-import { Button, colors, Text, PageMeta } from '@novu/design-system';
+import { useNavigate, useParams } from 'react-router-dom';
 import AuthLayout from '../../components/layout/components/AuthLayout';
-import { PasswordResetRequestForm } from './components/PasswordResetRequestForm';
-import { PasswordResetForm } from './components/PasswordResetForm';
 import { ROUTES } from '../../constants/routes';
+import { PasswordResetForm } from './components/PasswordResetForm';
+import { PasswordResetRequestForm } from './components/PasswordResetRequestForm';
 
 const title = 'Reset password';
 

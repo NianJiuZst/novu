@@ -1,6 +1,6 @@
 import { IsArray, IsDefined, IsString } from 'class-validator';
-import { ExternalSubscriberId, TopicKey } from '../../types';
 import { EnvironmentWithUserCommand } from '../../../shared/commands/project.command';
+import type { ExternalSubscriberId, TopicKey } from '../../types';
 
 export class AddSubscribersCommand extends EnvironmentWithUserCommand {
   @IsString()

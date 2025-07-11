@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ExecutionDetailsEntity } from '@novu/dal';
+import type { ExecutionDetailsEntity } from '@novu/dal';
 
-import { CreateExecutionDetailsCommand } from '../create-execution-details.command';
+import type { CreateExecutionDetailsCommand } from '../create-execution-details.command';
 
 export class CreateExecutionDetailsResponseDto {
   @ApiProperty()
@@ -12,7 +12,7 @@ export class CreateExecutionDetailsResponseDto {
 }
 
 export const mapExecutionDetailsCommandToEntity = (
-  command: CreateExecutionDetailsCommand,
+  command: CreateExecutionDetailsCommand
 ): Omit<ExecutionDetailsEntity, '_id' | 'createdAt'> => {
   const {
     jobId: _jobId,

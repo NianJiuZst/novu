@@ -1,6 +1,6 @@
-import { ActionTypeEnum, ChannelTypeEnum } from '../../types';
-import { SubscriberDto } from '../subscriber';
-import { JSONSchemaDto } from './json-schema-dto';
+import type { ActionTypeEnum, ChannelTypeEnum } from '../../types';
+import type { SubscriberDto } from '../subscriber';
+import type { JSONSchemaDto } from './json-schema-dto';
 
 export class RenderOutput {}
 

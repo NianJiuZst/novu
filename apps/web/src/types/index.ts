@@ -1,2 +1,2 @@
-export * from './FCWithChildren';
 export * from './FCBase';
+export * from './FCWithChildren';

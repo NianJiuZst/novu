@@ -1,9 +1,8 @@
+import { type JobEntity, type NotificationStepEntity, TenantEntity } from '@novu/dal';
 import { IsDefined } from 'class-validator';
 
-import { NotificationStepEntity, TenantEntity, JobEntity } from '@novu/dal';
-
 import { EnvironmentWithUserCommand } from '../../commands';
-import { IFilterVariables } from '../../utils/filter-processing-details';
+import type { IFilterVariables } from '../../utils/filter-processing-details';
 
 export class SelectVariantCommand extends EnvironmentWithUserCommand {
   @IsDefined()

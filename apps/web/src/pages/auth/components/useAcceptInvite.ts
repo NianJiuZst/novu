@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { captureException } from '@sentry/react';
 import type { IResponseError } from '@novu/shared';
+import { captureException } from '@sentry/react';
+import { useMutation } from '@tanstack/react-query';
+import { useCallback } from 'react';
 
 import { api } from '../../../api/api.client';
 import { errorMessage } from '../../../utils/notifications';

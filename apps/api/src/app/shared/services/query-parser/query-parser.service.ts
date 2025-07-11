@@ -1,4 +1,4 @@
-import jsonLogic, { AdditionalOperation, RulesLogic } from 'json-logic-js';
+import jsonLogic, { type AdditionalOperation, type RulesLogic } from 'json-logic-js';
 
 type RangeValidation =
   | {

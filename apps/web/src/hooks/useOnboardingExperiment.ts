@@ -1,7 +1,6 @@
 import { ChannelTypeEnum, EmailProviderIdEnum } from '@novu/shared';
-
-import { useIntegrations } from './integrations';
 import { IS_SELF_HOSTED } from '../config';
+import { useIntegrations } from './integrations';
 
 export function useOnboardingExperiment() {
   const { integrations, loading: areIntegrationsLoading } = useIntegrations();

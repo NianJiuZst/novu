@@ -1,13 +1,12 @@
-import {
-  ICreateNotificationTemplateDto,
-  INotificationTemplate,
-  IGroupedBlueprint,
-  IPaginationWithQueryParams,
+import type {
   IBlueprint,
+  ICreateNotificationTemplateDto,
+  IGroupedBlueprint,
+  INotificationTemplate,
+  IPaginationWithQueryParams,
 } from '@novu/shared';
-
-import { api } from './api.client';
 import { BLUEPRINTS_API_URL } from '../config';
+import { api } from './api.client';
 
 export function getNotificationsList({ page = 0, limit = 10, query }: IPaginationWithQueryParams) {
   const params = { page, limit, ...(query && { query }) };

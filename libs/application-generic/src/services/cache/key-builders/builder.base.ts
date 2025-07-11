@@ -1,4 +1,4 @@
-import { CacheKeyPrefixEnum, CacheKeyTypeEnum, IdentifierPrefixEnum, OrgScopePrefixEnum } from './identifiers';
+import type { CacheKeyPrefixEnum, CacheKeyTypeEnum, IdentifierPrefixEnum, OrgScopePrefixEnum } from './identifiers';
 
 /**
  * Wraps the entire prefix string with curly braces. This has the effect of ensuring

@@ -2,7 +2,7 @@ import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 import { EnvironmentCommand } from '../../../shared/commands/project.command';
 
-import { OrderDirectionEnum } from '../../types';
+import type { OrderDirectionEnum } from '../../types';
 
 export class FilterLayoutsCommand extends EnvironmentCommand {
   @IsNumber()

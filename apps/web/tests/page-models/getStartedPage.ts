@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 export enum Tab {
   IN_APP = 'In-app',

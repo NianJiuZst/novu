@@ -1,29 +1,28 @@
-import axios from 'axios';
-import { expect } from 'chai';
-import sinon from 'sinon';
-import getPort from 'get-port';
-
-import { SubscribersService, UserSession } from '@novu/testing';
+import { DetailEnum } from '@novu/application-generic';
 import {
   ExecutionDetailsRepository,
   JobRepository,
   MessageRepository,
   NotificationTemplateRepository,
-  SubscriberEntity,
+  type SubscriberEntity,
 } from '@novu/dal';
+import { workflow } from '@novu/framework';
 import {
   ChannelTypeEnum,
-  CreateWorkflowDto,
+  type CreateWorkflowDto,
   ExecutionDetailsStatusEnum,
   JobStatusEnum,
   MessagesStatusEnum,
   StepTypeEnum,
   WorkflowCreationSourceEnum,
-  WorkflowResponseDto,
+  type WorkflowResponseDto,
 } from '@novu/shared';
-import { workflow } from '@novu/framework';
 
-import { DetailEnum } from '@novu/application-generic';
+import { SubscribersService, UserSession } from '@novu/testing';
+import axios from 'axios';
+import { expect } from 'chai';
+import getPort from 'get-port';
+import sinon from 'sinon';
 import { TestBridgeServer } from '../../../../e2e/test-bridge-server';
 
 const eventTriggerPath = '/v1/events/trigger';
@@ -35,7 +34,7 @@ const contexts: Context[] = [
 ];
 
 contexts.forEach((context: Context) => {
-  describe('Self-Hosted Bridge Trigger #novu-v2', async function () {
+  describe('Self-Hosted Bridge Trigger #novu-v2', async () => {
     let session: UserSession;
     let bridgeServer: TestBridgeServer;
     const messageRepository = new MessageRepository();
@@ -60,7 +59,7 @@ contexts.forEach((context: Context) => {
       await bridgeServer.stop();
     });
 
-    it(`should trigger the bridge workflow with sync [${context.name}]`, async function () {
+    it(`should trigger the bridge workflow with sync [${context.name}]`, async () => {
       const workflowId = `hello-world-${`${context.name}`}`;
       const newWorkflow = workflow(
         workflowId,
@@ -1613,7 +1612,7 @@ contexts.forEach((context: Context) => {
       expect(emailMessages[0].subject).to.include('Welcome to Novu Jane Doe');
     });
 
-    it(`should succeed workflow if delay step is skipped via payload [${context.name}]`, async function () {
+    it(`should succeed workflow if delay step is skipped via payload [${context.name}]`, async () => {
       const workflowId = `delay-skip-causes-failure-${context.name}`;
       const delayStepId = 'delay-step-under-test'; // Used for clarity, not directly in queries
       const inAppStep1Name = 'in-app-before-delay';

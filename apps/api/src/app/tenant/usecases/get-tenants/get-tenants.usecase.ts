@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { TenantRepository } from '@novu/dal';
-import { GetTenantsCommand } from './get-tenants.command';
+import type { TenantRepository } from '@novu/dal';
+import type { GetTenantsCommand } from './get-tenants.command';
 
 @Injectable()
 export class GetTenants {

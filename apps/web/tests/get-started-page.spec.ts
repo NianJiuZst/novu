@@ -1,6 +1,6 @@
+import { GetStartedPage, Tab } from './page-models/getStartedPage';
 import { test } from './utils/baseTest';
 import { initializeSession } from './utils/browser';
-import { GetStartedPage, Tab } from './page-models/getStartedPage';
 
 test.beforeEach(async ({ context, page }) => {
   await initializeSession(page, { noTemplates: true });

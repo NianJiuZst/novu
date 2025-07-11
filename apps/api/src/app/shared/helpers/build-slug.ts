@@ -1,5 +1,5 @@
-import { ShortIsPrefixEnum, Slug, slugify } from '@novu/shared';
 import { encodeBase62 } from '@novu/application-generic';
+import { type ShortIsPrefixEnum, type Slug, slugify } from '@novu/shared';
 
 const SLUG_DELIMITER = '_';
 

@@ -1,13 +1,14 @@
-import { TopicSubscribersRepository, TopicEntity, TopicRepository, CreateTopicSubscribersEntity } from '@novu/dal';
-import { SubscriberDto } from '@novu/shared';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ExternalSubscriberId } from '../../types';
+import type { CreateTopicSubscribersEntity, TopicEntity, TopicRepository, TopicSubscribersRepository } from '@novu/dal';
+import type { SubscriberDto } from '@novu/shared';
+import {
+  type SearchByExternalSubscriberIds,
+  SearchByExternalSubscriberIdsCommand,
+} from '../../../subscribers/usecases';
+import type { ExternalSubscriberId } from '../../types';
 
-import { AddSubscribersCommand } from './add-subscribers.command';
-
-import { CreateTopicUseCase, CreateTopicCommand } from '../create-topic';
-
-import { SearchByExternalSubscriberIds, SearchByExternalSubscriberIdsCommand } from '../../../subscribers/usecases';
+import { CreateTopicCommand, type CreateTopicUseCase } from '../create-topic';
+import type { AddSubscribersCommand } from './add-subscribers.command';
 
 interface ISubscriberGroups {
   existingExternalSubscribers: ExternalSubscriberId[];

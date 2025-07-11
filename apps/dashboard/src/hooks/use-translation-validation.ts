@@ -1,55 +1,55 @@
-import { useMemo } from 'react';
-import type { TranslationKey } from '@/types/translations';
+import { useMemo } from "react";
+import type { TranslationKey } from "@/types/translations";
 
 export interface TranslationValidationResult {
-  hasError: boolean;
-  errorMessage: string;
-  isValidKey: boolean;
+	hasError: boolean;
+	errorMessage: string;
+	isValidKey: boolean;
 }
 
 export interface UseTranslationValidationParams {
-  translationKey: string;
-  availableKeys: TranslationKey[];
-  isLoading?: boolean;
-  allowEmpty?: boolean;
+	translationKey: string;
+	availableKeys: TranslationKey[];
+	isLoading?: boolean;
+	allowEmpty?: boolean;
 }
 
 export const useTranslationValidation = ({
-  translationKey,
-  availableKeys,
-  isLoading = false,
-  allowEmpty = false,
+	translationKey,
+	availableKeys,
+	isLoading = false,
+	allowEmpty = false,
 }: UseTranslationValidationParams): TranslationValidationResult => {
-  return useMemo((): TranslationValidationResult => {
-    const trimmedKey = translationKey.trim();
+	return useMemo((): TranslationValidationResult => {
+		const trimmedKey = translationKey.trim();
 
-    // Don't show error while loading
-    if (isLoading) {
-      return { hasError: false, errorMessage: '', isValidKey: false };
-    }
+		// Don't show error while loading
+		if (isLoading) {
+			return { hasError: false, errorMessage: "", isValidKey: false };
+		}
 
-    // Handle empty key
-    if (!trimmedKey) {
-      return {
-        hasError: !allowEmpty,
-        errorMessage: allowEmpty ? '' : 'Translation key is required',
-        isValidKey: false,
-      };
-    }
+		// Handle empty key
+		if (!trimmedKey) {
+			return {
+				hasError: !allowEmpty,
+				errorMessage: allowEmpty ? "" : "Translation key is required",
+				isValidKey: false,
+			};
+		}
 
-    if (!availableKeys || availableKeys.length === 0) {
-      return { hasError: true, errorMessage: 'Translation key not found in default locale.', isValidKey: false };
-    }
+		if (!availableKeys || availableKeys.length === 0) {
+			return { hasError: true, errorMessage: "Translation key not found in default locale.", isValidKey: false };
+		}
 
-    const existingKeys = availableKeys.map((key) => key.name);
-    const isValidKey = existingKeys.includes(trimmedKey);
+		const existingKeys = availableKeys.map((key) => key.name);
+		const isValidKey = existingKeys.includes(trimmedKey);
 
-    return {
-      hasError: !isValidKey,
-      errorMessage: isValidKey ? '' : 'Translation key not found in default locale.',
-      isValidKey,
-    };
-  }, [translationKey, availableKeys, isLoading, allowEmpty]);
+		return {
+			hasError: !isValidKey,
+			errorMessage: isValidKey ? "" : "Translation key not found in default locale.",
+			isValidKey,
+		};
+	}, [translationKey, availableKeys, isLoading, allowEmpty]);
 };
 
 /**
@@ -57,28 +57,28 @@ export const useTranslationValidation = ({
  * Used by the translation plugin's class-based components
  */
 export const validateTranslationKey = (
-  translationKey: string,
-  availableKeys: TranslationKey[],
-  isLoading = false
+	translationKey: string,
+	availableKeys: TranslationKey[],
+	isLoading = false
 ): TranslationValidationResult => {
-  const trimmedKey = translationKey.trim();
+	const trimmedKey = translationKey.trim();
 
-  // Don't show error while loading or empty key
-  if (isLoading || !trimmedKey) {
-    return { hasError: false, errorMessage: '', isValidKey: false };
-  }
+	// Don't show error while loading or empty key
+	if (isLoading || !trimmedKey) {
+		return { hasError: false, errorMessage: "", isValidKey: false };
+	}
 
-  // If no translation keys are provided, show error
-  if (!availableKeys || availableKeys.length === 0) {
-    return { hasError: true, errorMessage: 'Translation key not found in default locale.', isValidKey: false };
-  }
+	// If no translation keys are provided, show error
+	if (!availableKeys || availableKeys.length === 0) {
+		return { hasError: true, errorMessage: "Translation key not found in default locale.", isValidKey: false };
+	}
 
-  const existingKeys = availableKeys.map((key) => key.name);
-  const isValidKey = existingKeys.includes(trimmedKey);
+	const existingKeys = availableKeys.map((key) => key.name);
+	const isValidKey = existingKeys.includes(trimmedKey);
 
-  return {
-    hasError: !isValidKey,
-    errorMessage: isValidKey ? '' : 'Translation key not found in default locale.',
-    isValidKey,
-  };
+	return {
+		hasError: !isValidKey,
+		errorMessage: isValidKey ? "" : "Translation key not found in default locale.",
+		isValidKey,
+	};
 };

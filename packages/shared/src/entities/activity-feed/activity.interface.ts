@@ -1,8 +1,8 @@
-import { ChannelTypeEnum } from '../../types';
-import { IExecutionDetail } from '../execution-details';
-import { IJob as IJobBase } from '../job';
-import { INotificationTemplate } from '../notification-template';
-import { ISubscriber } from '../subscriber';
+import type { ChannelTypeEnum } from '../../types';
+import type { IExecutionDetail } from '../execution-details';
+import type { IJob as IJobBase } from '../job';
+import type { INotificationTemplate } from '../notification-template';
+import type { ISubscriber } from '../subscriber';
 
 export interface IActivityJob extends IJobBase {
   executionDetails: IExecutionDetail[];

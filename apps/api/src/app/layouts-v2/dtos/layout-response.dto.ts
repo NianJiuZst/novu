@@ -1,13 +1,12 @@
 import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, IsBoolean } from 'class-validator';
+import { ResourceOriginEnum, ResourceTypeEnum, type Slug } from '@novu/shared';
 import { Type } from 'class-transformer';
-import { ResourceOriginEnum, ResourceTypeEnum, Slug } from '@novu/shared';
-
-import { RuntimeIssueDto } from '../../workflows-v2/dtos/runtime-issue.dto';
-import { CreateLayoutDto } from './create-layout.dto';
-import { UpdateLayoutDto } from './update-layout.dto';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { ControlsMetadataDto } from '../../workflows-v2/dtos/controls-metadata.dto';
-import { LayoutControlValuesDto } from './layout-controls.dto';
+import { RuntimeIssueDto } from '../../workflows-v2/dtos/runtime-issue.dto';
+import type { CreateLayoutDto } from './create-layout.dto';
+import type { LayoutControlValuesDto } from './layout-controls.dto';
+import type { UpdateLayoutDto } from './update-layout.dto';
 
 export type LayoutCreateAndUpdateKeys = keyof CreateLayoutDto | keyof UpdateLayoutDto;
 

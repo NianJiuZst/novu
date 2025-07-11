@@ -1,4 +1,5 @@
 export * from './integrations';
+export * from './useApiKey';
 export * from './useApiKeys';
 export * from './useAuth';
 export * from './useBlueprint';
@@ -31,4 +32,3 @@ export * from './useSubscribers';
 export * from './useTemplates';
 export * from './useThemeChange';
 export * from './useVariablesManager';
-export * from './useApiKey';

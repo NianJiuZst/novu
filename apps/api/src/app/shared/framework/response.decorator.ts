@@ -1,4 +1,4 @@
-import { applyDecorators, Type } from '@nestjs/common';
+import { applyDecorators, type Type } from '@nestjs/common';
 import {
   ApiExpectationFailedResponse,
   ApiExtraModels,
@@ -12,16 +12,15 @@ import {
   ApiProxyAuthenticationRequiredResponse,
   ApiRequestedRangeNotSatisfiableResponse,
   ApiResetContentResponse,
-  ApiResponseOptions,
+  type ApiResponseOptions,
   ApiSeeOtherResponse,
   ApiUriTooLongResponse,
   getSchemaPath,
 } from '@nestjs/swagger';
+import { ErrorDto, ValidationErrorDto } from '../../../error-dto';
 import { DataWrapperDto } from '../dtos/data-wrapper-dto';
 import { COMMON_RESPONSES } from './constants/responses.schema';
 import { customResponseDecorators } from './swagger/responses.decorator';
-
-import { ErrorDto, ValidationErrorDto } from '../../../error-dto';
 
 export const { ApiOkResponse }: { ApiOkResponse: (options?: ApiResponseOptions) => MethodDecorator } =
   customResponseDecorators;

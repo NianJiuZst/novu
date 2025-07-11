@@ -1,20 +1,20 @@
 import styled from '@emotion/styled';
 import { Divider, Group, useMantineColorScheme } from '@mantine/core';
-import { ChannelTypeEnum, providers, StepTypeEnum } from '@novu/shared';
-import React, { MouseEventHandler, useEffect, useState } from 'react';
-import { useViewport } from 'react-flow-renderer';
-import { useFormContext } from 'react-hook-form';
-
 import {
   Button,
   colors,
-  IDropdownProps,
+  ErrorIcon,
+  type IDropdownProps,
   ProviderMissing,
   Text,
   useTemplateButtonStyles,
   VariantsFile,
-  ErrorIcon,
 } from '@novu/design-system';
+import { type ChannelTypeEnum, providers, type StepTypeEnum } from '@novu/shared';
+import type React from 'react';
+import { type MouseEventHandler, useEffect, useState } from 'react';
+import { useViewport } from 'react-flow-renderer';
+import { useFormContext } from 'react-hook-form';
 import { useSegment } from '../../../../../components/providers/SegmentProvider';
 import { When } from '../../../../../components/utils/When';
 import { CONTEXT_PATH } from '../../../../../config';
@@ -22,13 +22,13 @@ import { useEnvironment, useGetPrimaryIntegration, useHasActiveIntegrations } fr
 import { CHANNEL_TYPE_TO_STRING } from '../../../../../utils/channels';
 import { useSelectPrimaryIntegrationModal } from '../../../../integrations/components/multi-provider/useSelectPrimaryIntegrationModal';
 import { IntegrationsListModal } from '../../../../integrations/IntegrationsListModal';
+import { useTemplateEditorForm } from '../../../components/TemplateEditorFormProvider';
 import { TemplateEditorAnalyticsEnum } from '../../../constants';
 import { getFormattedStepErrors, hasGroupError } from '../../../shared/errors';
 import { DisplayPrimaryProviderIcon } from '../../DisplayPrimaryProviderIcon';
 import { NodeErrorPopover } from '../../NodeErrorPopover';
 import { NODE_ERROR_TYPES } from './utils';
 import { WorkflowNodeActions } from './WorkflowNodeActions';
-import { useTemplateEditorForm } from '../../../components/TemplateEditorFormProvider';
 
 export type NodeType = 'step' | 'stepRoot' | 'variant' | 'variantRoot';
 

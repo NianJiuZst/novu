@@ -1,6 +1,5 @@
-import { ICredentials } from '../../entities/integration';
-import type { EnvironmentId } from '../../types';
-import { BuilderFieldType, BuilderGroupValues, FilterParts } from '../../types';
+import type { ICredentials } from '../../entities/integration';
+import type { BuilderFieldType, BuilderGroupValues, EnvironmentId, FilterParts } from '../../types';
 
 export type ICredentialsDto = ICredentials;
 

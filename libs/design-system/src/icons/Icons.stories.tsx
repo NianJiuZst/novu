@@ -1,8 +1,8 @@
+import { ActionIcon, Code, Grid, Group, Text } from '@mantine/core';
 import React, { useState } from 'react';
-import { Group, Code, ActionIcon, Text, Grid } from '@mantine/core';
+import { Input } from '../input/Input';
 // eslint-disable-next-line import/no-namespace
 import * as allIcons from '.';
-import { Input } from '../input/Input';
 
 export default {
   title: 'Icons/Icons',

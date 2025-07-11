@@ -1,7 +1,6 @@
-import { useRef } from 'react';
 import styled from '@emotion/styled';
-
 import { colors } from '@novu/design-system';
+import { useRef } from 'react';
 
 const IndicatorHolder = styled.span<{ isShown }>`
   display: flex;

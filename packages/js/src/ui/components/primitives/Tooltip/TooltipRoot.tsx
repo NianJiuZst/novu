@@ -1,6 +1,15 @@
-import { autoUpdate, flip, offset, Placement, shift } from '@floating-ui/dom';
+import { autoUpdate, flip, offset, type Placement, shift } from '@floating-ui/dom';
 import { useFloating } from 'solid-floating-ui';
-import { Accessor, createContext, createSignal, JSX, Setter, useContext, createMemo, createEffect } from 'solid-js';
+import {
+  type Accessor,
+  createContext,
+  createEffect,
+  createMemo,
+  createSignal,
+  type JSX,
+  type Setter,
+  useContext,
+} from 'solid-js';
 import { useAppearance } from '../../../context';
 
 type TooltipRootProps = {

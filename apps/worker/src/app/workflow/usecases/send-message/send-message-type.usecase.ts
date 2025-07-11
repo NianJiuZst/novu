@@ -1,7 +1,7 @@
+import type { CreateExecutionDetails } from '@novu/application-generic';
+import type { MessageEntity, MessageRepository } from '@novu/dal';
 import { captureException } from '@sentry/node';
-import { MessageEntity, MessageRepository } from '@novu/dal';
-import { CreateExecutionDetails } from '@novu/application-generic';
-import { SendMessageCommand } from './send-message.command';
+import type { SendMessageCommand } from './send-message.command';
 
 export type SendMessageResult = {
   status: 'success' | 'failed' | 'canceled';

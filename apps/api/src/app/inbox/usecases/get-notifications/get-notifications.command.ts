@@ -1,7 +1,7 @@
 import { IsArray, IsBoolean, IsDefined, IsInt, IsMongoId, IsOptional, IsString, Max, Min } from 'class-validator';
 
 import { EnvironmentWithSubscriber } from '../../../shared/commands/project.command';
-import { CursorPaginationParams } from '../../../shared/types';
+import type { CursorPaginationParams } from '../../../shared/types';
 
 export class GetNotificationsCommand extends EnvironmentWithSubscriber implements CursorPaginationParams {
   @IsInt()

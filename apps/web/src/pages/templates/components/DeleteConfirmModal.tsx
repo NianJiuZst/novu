@@ -1,5 +1,5 @@
 import { Alert, Group, Modal, useMantineTheme } from '@mantine/core';
-import { Button, colors, shadows, Title, Text, IconOutlineWarning } from '@novu/design-system';
+import { Button, colors, IconOutlineWarning, shadows, Text, Title } from '@novu/design-system';
 
 export function DeleteConfirmModal({
   target,

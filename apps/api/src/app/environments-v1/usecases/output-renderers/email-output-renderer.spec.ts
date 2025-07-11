@@ -1,14 +1,14 @@
-import sinon from 'sinon';
-import { expect } from 'chai';
-import { JSONContent as MailyJSONContent } from '@maily-to/render';
+import type { JSONContent as MailyJSONContent } from '@maily-to/render';
+import { ModuleRef } from '@nestjs/core';
 import { FeatureFlagsService, PinoLogger } from '@novu/application-generic';
 import { ControlValuesRepository } from '@novu/dal';
 import { ControlValuesLevelEnum } from '@novu/shared';
-import { ModuleRef } from '@nestjs/core';
-import { EmailOutputRendererCommand, EmailOutputRendererUsecase } from './email-output-renderer.usecase';
-import { FullPayloadForRender } from './render-command';
-import { GetOrganizationSettings } from '../../../organization/usecases/get-organization-settings/get-organization-settings.usecase';
+import { expect } from 'chai';
+import sinon from 'sinon';
 import { GetLayoutUseCase } from '../../../layouts-v2/usecases/get-layout';
+import { GetOrganizationSettings } from '../../../organization/usecases/get-organization-settings/get-organization-settings.usecase';
+import { type EmailOutputRendererCommand, EmailOutputRendererUsecase } from './email-output-renderer.usecase';
+import type { FullPayloadForRender } from './render-command';
 
 describe('EmailOutputRendererUsecase', () => {
   let featureFlagsServiceMock: sinon.SinonStubbedInstance<FeatureFlagsService>;

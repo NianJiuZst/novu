@@ -1,25 +1,23 @@
-import { useMemo, useEffect, useState } from 'react';
 import { Group, JsonInput, Text } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useWatch } from 'react-hook-form';
-
-import { useMutation } from '@tanstack/react-query';
-import { captureException } from '@sentry/react';
-import capitalize from 'lodash.capitalize';
 import { useDisclosure } from '@mantine/hooks';
-import { IUserEntity, INotificationTriggerVariable } from '@novu/shared';
 import { Button, colors, inputStyles } from '@novu/design-system';
-
-import { errorMessage, successMessage } from '../../../utils/notifications';
-import { useAuth } from '../../../hooks/useAuth';
-import { getSubscriberValue, getPayloadValue } from './TriggerSnippetTabs';
+import type { INotificationTriggerVariable, IUserEntity } from '@novu/shared';
+import { captureException } from '@sentry/react';
+import { useMutation } from '@tanstack/react-query';
+import capitalize from 'lodash.capitalize';
+import { useEffect, useMemo, useState } from 'react';
+import { useWatch } from 'react-hook-form';
 import { testTrigger } from '../../../api/notification-templates';
+import { useSegment } from '../../../components/providers/SegmentProvider';
+import { useAuth } from '../../../hooks/useAuth';
+import { useOnboardingExperiment } from '../../../hooks/useOnboardingExperiment';
+import { errorMessage, successMessage } from '../../../utils/notifications';
+import { OnBoardingAnalyticsEnum } from '../../quick-start/consts';
 import { ExecutionDetailsModalWrapper } from './ExecutionDetailsModalWrapper';
 import { TriggerSegmentControl } from './TriggerSegmentControl';
+import { getPayloadValue, getSubscriberValue } from './TriggerSnippetTabs';
 import { WorkflowSidebar } from './WorkflowSidebar';
-import { useSegment } from '../../../components/providers/SegmentProvider';
-import { useOnboardingExperiment } from '../../../hooks/useOnboardingExperiment';
-import { OnBoardingAnalyticsEnum } from '../../quick-start/consts';
 
 const makeToValue = (subscriberVariables: INotificationTriggerVariable[], currentUser?: IUserEntity | null) => {
   const subsVars = getSubscriberValue(

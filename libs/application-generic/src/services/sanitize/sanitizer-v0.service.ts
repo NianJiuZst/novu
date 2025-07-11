@@ -1,5 +1,5 @@
-import sanitizeTypes, { IOptions } from 'sanitize-html';
-import { IEmailBlock } from '@novu/shared';
+import type { IEmailBlock } from '@novu/shared';
+import sanitizeTypes, { type IOptions } from 'sanitize-html';
 
 /**
  * Options for the sanitize-html library.

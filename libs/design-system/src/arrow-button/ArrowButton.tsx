@@ -1,7 +1,6 @@
 import { Center } from '@mantine/core';
-
-import { ArrowLeft } from '../icons';
 import { colors } from '../config';
+import { ArrowLeft } from '../icons';
 import { Text } from '../typography/text/Text';
 
 export function ArrowButton({

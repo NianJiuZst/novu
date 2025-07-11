@@ -1,4 +1,4 @@
-import { expect, Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { SettingsMenuPage } from './settingsMenuPage';
 
 export class BillingPage {

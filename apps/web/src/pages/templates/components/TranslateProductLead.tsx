@@ -1,5 +1,5 @@
-import { CSSProperties } from 'react';
 import { Translate } from '@novu/design-system';
+import type { CSSProperties } from 'react';
 import { ProductLead, ProductLeadVariants } from '../../../components/utils/ProductLead';
 
 export const TranslateProductLead = ({ id, style = {} }: { id: string; style?: CSSProperties }) => {

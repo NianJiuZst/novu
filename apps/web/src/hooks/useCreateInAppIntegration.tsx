@@ -1,5 +1,5 @@
+import type { ICreateIntegrationBodyDto, IResponseError } from '@novu/shared';
 import { ChannelTypeEnum, InAppProviderIdEnum } from '@novu/shared';
-import type { IResponseError, ICreateIntegrationBodyDto } from '@novu/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { createIntegration } from '../api/integration';

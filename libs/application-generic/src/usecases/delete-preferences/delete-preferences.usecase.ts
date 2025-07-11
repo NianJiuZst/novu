@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PreferencesEntity, PreferencesRepository } from '@novu/dal';
-import { DeletePreferencesCommand } from './delete-preferences.command';
+import type { PreferencesEntity, PreferencesRepository } from '@novu/dal';
 import { Instrument, InstrumentUsecase } from '../../instrumentation';
+import type { DeletePreferencesCommand } from './delete-preferences.command';
 
 @Injectable()
 export class DeletePreferencesUseCase {
@@ -27,10 +27,7 @@ export class DeletePreferencesUseCase {
   }
 
   @Instrument()
-  private async deletePreferences(
-    command: DeletePreferencesCommand,
-    preferencesId: string,
-  ) {
+  private async deletePreferences(command: DeletePreferencesCommand, preferencesId: string) {
     return await this.preferencesRepository.delete({
       _id: preferencesId,
       _environmentId: command.environmentId,
@@ -41,9 +38,7 @@ export class DeletePreferencesUseCase {
   }
 
   @Instrument()
-  private async getPreference(
-    command: DeletePreferencesCommand,
-  ): Promise<PreferencesEntity | undefined> {
+  private async getPreference(command: DeletePreferencesCommand): Promise<PreferencesEntity | undefined> {
     return await this.preferencesRepository.findOne({
       _environmentId: command.environmentId,
       _organizationId: command.organizationId,

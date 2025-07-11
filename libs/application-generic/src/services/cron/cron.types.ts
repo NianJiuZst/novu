@@ -1,4 +1,4 @@
-import { JobCronNameEnum, Timezone } from '@novu/shared';
+import type { JobCronNameEnum, Timezone } from '@novu/shared';
 
 export type CronOptions = {
   /** Max number of locked jobs of this kind */
@@ -25,9 +25,7 @@ export type CronJobData<TData> = {
   data: TData;
 };
 
-export type CronJobProcessor<TData> = (
-  job: CronJobData<TData>,
-) => Promise<void>;
+export type CronJobProcessor<TData> = (job: CronJobData<TData>) => Promise<void>;
 
 export type CronMetrics = Record<
   JobCronNameEnum,

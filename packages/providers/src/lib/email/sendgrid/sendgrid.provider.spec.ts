@@ -1,5 +1,5 @@
-import { expect, test, vi } from 'vitest';
 import { MailService } from '@sendgrid/mail';
+import { expect, test, vi } from 'vitest';
 import { SendgridEmailProvider } from './sendgrid.provider';
 
 const mockConfig = {

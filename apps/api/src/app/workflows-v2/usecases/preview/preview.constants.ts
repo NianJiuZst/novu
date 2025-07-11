@@ -1,4 +1,4 @@
-import { JSONContent as MailyJSONContent } from '@maily-to/render';
+import type { JSONContent as MailyJSONContent } from '@maily-to/render';
 
 export const LOG_CONTEXT = 'GeneratePreviewUsecase';
 

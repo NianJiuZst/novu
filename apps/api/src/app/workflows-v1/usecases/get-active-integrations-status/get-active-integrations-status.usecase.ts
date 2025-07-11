@@ -1,22 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import {
+  type CalculateLimitNovuIntegration,
+  CalculateLimitNovuIntegrationCommand,
+  type NotificationStep,
+} from '@novu/application-generic';
+import {
   ChannelTypeEnum,
   EmailProviderIdEnum,
   SmsProviderIdEnum,
   StepTypeEnum,
-  WorkflowChannelsIntegrationStatus,
+  type WorkflowChannelsIntegrationStatus,
 } from '@novu/shared';
-import {
-  CalculateLimitNovuIntegration,
-  CalculateLimitNovuIntegrationCommand,
-  NotificationStep,
-} from '@novu/application-generic';
+import type { IntegrationResponseDto } from '../../../integrations/dtos/integration-response.dto';
 import { GetActiveIntegrationsCommand } from '../../../integrations/usecases/get-active-integration/get-active-integration.command';
-import { GetActiveIntegrations } from '../../../integrations/usecases/get-active-integration/get-active-integration.usecase';
-import { GetActiveIntegrationsStatusCommand } from './get-active-integrations-status.command';
-
-import { IntegrationResponseDto } from '../../../integrations/dtos/integration-response.dto';
-import { WorkflowResponse } from '../../dtos/workflow-response.dto';
+import type { GetActiveIntegrations } from '../../../integrations/usecases/get-active-integration/get-active-integration.usecase';
+import type { WorkflowResponse } from '../../dtos/workflow-response.dto';
+import type { GetActiveIntegrationsStatusCommand } from './get-active-integrations-status.command';
 
 /**
  * @deprecated use usecases in /workflows directory

@@ -1,10 +1,9 @@
 import { Group, Stack, useMantineColorScheme } from '@mantine/core';
+import { colors, ErrorIcon, Text } from '@novu/design-system';
 import { ChannelTypeEnum } from '@novu/shared';
-
-import { ErrorIcon, colors, Text } from '@novu/design-system';
-import { LimitBar } from '../LimitBar';
 import { useIntegrationLimit } from '../../../../hooks';
 import type { IIntegratedProvider } from '../../types';
+import { LimitBar } from '../LimitBar';
 
 export const NovuProviderSidebarContent = ({ provider }: { provider: IIntegratedProvider | null }) => {
   const {

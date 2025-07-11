@@ -1,4 +1,4 @@
-import { ChatProviderIdEnum } from '../../../shared';
+import type { ChatProviderIdEnum } from '../../../shared';
 import type { JsonSchema } from '../../../types/schema.types';
 import { genericProviderSchemas } from '../generic.schema';
 import { slackProviderSchemas } from './slack.schema';

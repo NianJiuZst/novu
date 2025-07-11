@@ -128,7 +128,7 @@ function buildTitle(html: string, titleLines: string[]) {
 
   resHtml += '<div class="tooltip-title">';
 
-  titleLines.forEach(function (title) {
+  titleLines.forEach((title) => {
     const displayTitle = buildDisplayTitle(title);
 
     resHtml += `<span >${displayTitle}</th></tr>`;
@@ -142,7 +142,7 @@ function buildBody(html: string, bodyLines) {
   let resHtml = html;
 
   resHtml += '<div class="tooltip-body">';
-  bodyLines.forEach(function (body) {
+  bodyLines.forEach((body) => {
     const bodyText: string | string[] = getBodyText(body) || '';
 
     resHtml += `<span >${bodyText} Total</span>`;

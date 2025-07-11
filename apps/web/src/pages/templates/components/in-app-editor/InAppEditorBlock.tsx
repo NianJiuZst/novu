@@ -1,14 +1,14 @@
+import { Center, Loader } from '@mantine/core';
+import { colors, errorMessage } from '@novu/design-system';
+import { type IMessageAction, MessageActionStatusEnum } from '@novu/shared';
+import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { IMessageAction, MessageActionStatusEnum } from '@novu/shared';
-import { colors, errorMessage } from '@novu/design-system';
-import { useMutation } from '@tanstack/react-query';
-import { Center, Loader } from '@mantine/core';
-import { InAppWidgetPreview } from './preview/InAppWidgetPreview';
-import type { IForm } from '../formTypes';
-import { useStepFormPath } from '../../hooks/useStepFormPath';
 import { previewInApp } from '../../../../api/content-templates';
+import { useStepFormPath } from '../../hooks/useStepFormPath';
 import { CustomCodeEditor } from '../CustomCodeEditor';
+import type { IForm } from '../formTypes';
+import { InAppWidgetPreview } from './preview/InAppWidgetPreview';
 
 export function InAppEditorBlock({
   readonly,

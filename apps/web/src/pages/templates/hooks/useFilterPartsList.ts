@@ -1,5 +1,5 @@
+import { FILTER_TO_LABEL, FilterPartTypeEnum } from '@novu/shared';
 import { useMemo } from 'react';
-import { FilterPartTypeEnum, FILTER_TO_LABEL } from '@novu/shared';
 
 import type { DataSelect, IFilterTypeList } from '../../../components/conditions';
 import { channels } from '../../../utils/channels';

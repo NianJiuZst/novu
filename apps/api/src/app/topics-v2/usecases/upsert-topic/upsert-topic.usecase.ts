@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InstrumentUsecase } from '@novu/application-generic';
-import { TopicRepository } from '@novu/dal';
+import type { TopicRepository } from '@novu/dal';
 import { VALID_ID_REGEX } from '@novu/shared';
-import { TopicResponseDto } from '../../dtos/topic-response.dto';
+import type { TopicResponseDto } from '../../dtos/topic-response.dto';
 import { mapTopicEntityToDto } from '../list-topics/map-topic-entity-to.dto';
-import { UpsertTopicCommand } from './upsert-topic.command';
+import type { UpsertTopicCommand } from './upsert-topic.command';
 
 @Injectable()
 export class UpsertTopicUseCase {

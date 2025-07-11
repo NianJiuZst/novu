@@ -1,4 +1,4 @@
 export enum ActionType {
-  BUTTON = 'button',
-  CONTACT = 'contact',
+	BUTTON = "button",
+	CONTACT = "contact",
 }

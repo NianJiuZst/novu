@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
 import { UnstyledButton } from '@mantine/core';
-import React, { useState } from 'react';
-import { When } from '../when';
+import type React from 'react';
+import { useState } from 'react';
 import { colors } from '../config';
 import { Drag } from '../icons/general/Drag';
+import { When } from '../when';
 import { useTemplateButtonStyles } from './TemplateButton.styles';
 
 interface IDragButtonProps {

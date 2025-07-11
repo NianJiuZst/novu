@@ -1,9 +1,9 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { MessageRepository, SubscriberRepository } from '@novu/dal';
-import { ChannelTypeEnum } from '@novu/shared';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { buildMessageCountKey, CachedQuery, InstrumentUsecase } from '@novu/application-generic';
+import type { MessageRepository, SubscriberRepository } from '@novu/dal';
+import { ChannelTypeEnum } from '@novu/shared';
 
-import { GetFeedCountCommand } from './get-feed-count.command';
+import type { GetFeedCountCommand } from './get-feed-count.command';
 
 @Injectable()
 export class GetFeedCount {

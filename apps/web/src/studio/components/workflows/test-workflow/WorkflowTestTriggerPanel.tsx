@@ -1,17 +1,17 @@
 import { Box } from '@mantine/core';
 import { Prism } from '@mantine/prism';
-import { IconOutlineBolt } from '@novu/novui/icons';
 import { Tabs, Title } from '@novu/novui';
+import { IconOutlineBolt } from '@novu/novui/icons';
 import { HStack } from '@novu/novui/jsx';
-import { FC } from 'react';
-import { Language } from 'prism-react-renderer';
+import type { Language } from 'prism-react-renderer';
+import type { FC } from 'react';
 import {
-  createNodeSnippet,
+  type CodeSnippetProps,
   createCurlSnippet,
-  createPhpSnippet,
   createGoSnippet,
+  createNodeSnippet,
+  createPhpSnippet,
   createPythonSnippet,
-  CodeSnippetProps,
 } from '../../../../utils/codeSnippets';
 
 type Snippet = {

@@ -1,6 +1,6 @@
 import type {
-  UserPublicMetadata as _UserPublicMetadata,
   OrganizationPublicMetadata as _OrganizationPublicMetadata,
+  UserPublicMetadata as _UserPublicMetadata,
 } from '@novu/shared';
 
 declare global {

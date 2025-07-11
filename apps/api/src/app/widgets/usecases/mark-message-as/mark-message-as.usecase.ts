@@ -1,17 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { MessageEntity, MessageRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
-import { INVITE_TEAM_MEMBER_NUDGE_PAYLOAD_KEY, WebSocketEventEnum } from '@novu/shared';
 import {
-  AnalyticsService,
+  type AnalyticsService,
   buildFeedKey,
   buildMessageCountKey,
   buildSubscriberKey,
   CachedResponse,
-  InvalidateCacheService,
-  WebSocketsQueueService,
+  type InvalidateCacheService,
+  type WebSocketsQueueService,
 } from '@novu/application-generic';
+import type { MessageEntity, MessageRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
+import { INVITE_TEAM_MEMBER_NUDGE_PAYLOAD_KEY, WebSocketEventEnum } from '@novu/shared';
 
-import { MarkEnum, MarkMessageAsCommand } from './mark-message-as.command';
+import { MarkEnum, type MarkMessageAsCommand } from './mark-message-as.command';
 
 @Injectable()
 export class MarkMessageAs {

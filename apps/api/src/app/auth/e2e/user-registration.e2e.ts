@@ -1,8 +1,8 @@
 import { CommunityOrganizationRepository, EnvironmentRepository } from '@novu/dal';
+import { MemberRoleEnum, type UserSessionData } from '@novu/shared';
 import { UserSession } from '@novu/testing';
-import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
-import { MemberRoleEnum, UserSessionData } from '@novu/shared';
+import jwt from 'jsonwebtoken';
 
 describe('User registration - /auth/register (POST) #novu-v0-os', async () => {
   let session: UserSession;

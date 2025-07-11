@@ -1,4 +1,8 @@
-import { ApiServiceLevelEnum, productFeatureEnabledForServiceLevel, ProductFeatureKeyEnum } from '@novu/shared';
+import {
+  type ApiServiceLevelEnum,
+  type ProductFeatureKeyEnum,
+  productFeatureEnabledForServiceLevel,
+} from '@novu/shared';
 import { useEffect, useState } from 'react';
 import { useAuth } from './useAuth';
 

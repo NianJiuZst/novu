@@ -1,15 +1,15 @@
-import { expect, Page } from '@playwright/test';
-import { test } from './utils/baseTest';
+import { expect, type Page } from '@playwright/test';
+import { type CodeSnippetSidePanelPageModel, SNIPPET_TAB } from './page-models/codeSnippetSidePanelPageModel';
+import { EditorState } from './page-models/editorState';
+import { TimeUnit } from './page-models/nodeDigestEditorPageModal';
+import { NodeEmailEditorPageModal } from './page-models/nodeEmailEditorPageModal';
+import type { NodeSmsEditingModalPageModel } from './page-models/nodeSmsEditingModalPageModel';
 import { WorkflowEditorPage } from './page-models/workflowEditorPage';
+import type { WorkflowSettingsSidePanel } from './page-models/workflowSettingsSidePanel';
+import { WorkflowsPage } from './page-models/workflowsPage';
+import { test } from './utils/baseTest';
 import { initializeSession } from './utils/browser';
 import { ChannelType } from './utils/ChannelType';
-import { CodeSnippetSidePanelPageModel, SNIPPET_TAB } from './page-models/codeSnippetSidePanelPageModel';
-import { NodeEmailEditorPageModal } from './page-models/nodeEmailEditorPageModal';
-import { NodeSmsEditingModalPageModel } from './page-models/nodeSmsEditingModalPageModel';
-import { TimeUnit } from './page-models/nodeDigestEditorPageModal';
-import { WorkflowsPage } from './page-models/workflowsPage';
-import { WorkflowSettingsSidePanel } from './page-models/workflowSettingsSidePanel';
-import { EditorState } from './page-models/editorState';
 
 test.describe('Creation functionality', () => {
   test.beforeEach(async ({ page }) => {

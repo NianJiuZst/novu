@@ -1,34 +1,32 @@
-import { useWatch } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
-import set from 'lodash.set';
 import styled from '@emotion/styled';
 import { Group, useMantineColorScheme } from '@mantine/core';
-
 import {
-  Translation,
-  colors,
-  NovuIcon,
-  Search,
-  Input,
-  Workflow,
-  shadows,
-  EmptySearch,
   ActionButton,
-  PencilOutlined,
   Close,
+  colors,
+  EmptySearch,
+  Input,
+  NovuIcon,
+  PencilOutlined,
+  Search,
+  shadows,
   Text,
+  Translation,
+  Workflow,
 } from '@novu/design-system';
-
-import { VarItemsDropdown } from './VarItemsDropdown';
-import { VarLabel } from './VarLabel';
-import { useDebounce, useProcessVariables } from '../../../../../hooks';
-import { VarItemTooltip } from './VarItemTooltip';
-import { When } from '../../../../../components/utils/When';
+import set from 'lodash.set';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { useWatch } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { useWorkflowVariables } from '../../../../../api/hooks';
-
-import { ROUTES } from '../../../../../constants/routes';
 import { UpgradePlanBanner } from '../../../../../components/layout/components/UpgradePlanBanner';
+import { When } from '../../../../../components/utils/When';
+import { ROUTES } from '../../../../../constants/routes';
+import { useDebounce, useProcessVariables } from '../../../../../hooks';
+import { VarItemsDropdown } from './VarItemsDropdown';
+import { VarItemTooltip } from './VarItemTooltip';
+import { VarLabel } from './VarLabel';
 
 interface IVariablesList {
   translations: Record<string, any>;

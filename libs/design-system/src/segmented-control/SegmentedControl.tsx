@@ -1,14 +1,14 @@
-import React from 'react';
-import {
-  SegmentedControl as MantineSegmentedControl,
-  SegmentedControlProps,
-  SegmentedControlItem,
-  LoadingOverlay,
-  Sx,
-} from '@mantine/core';
 import styled from '@emotion/styled';
-import useStyles from './SegmentedControl.styles';
+import {
+  LoadingOverlay,
+  SegmentedControl as MantineSegmentedControl,
+  type SegmentedControlItem,
+  type SegmentedControlProps,
+  type Sx,
+} from '@mantine/core';
+import React from 'react';
 import { colors } from '../config';
+import useStyles from './SegmentedControl.styles';
 
 interface ISegmentedControlProps {
   data: string[] | SegmentedControlItem[];

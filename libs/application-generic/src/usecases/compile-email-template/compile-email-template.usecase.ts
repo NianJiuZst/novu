@@ -1,15 +1,13 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { merge } from 'lodash';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import type { ModuleRef } from '@nestjs/core';
+import type { CommunityOrganizationRepository, IEmailBlock } from '@novu/dal';
 import { readFile } from 'fs/promises';
-import { ModuleRef } from '@nestjs/core';
-
-import { IEmailBlock, CommunityOrganizationRepository } from '@novu/dal';
-
-import { CompileTemplate, CompileTemplateBase } from '../compile-template';
-import { CompileEmailTemplateCommand } from './compile-email-template.command';
-import { LayoutDto, GetLayoutCommand, GetLayoutUseCase } from '../get-layout';
+import { merge } from 'lodash';
 import { VerifyPayloadService } from '../../services';
-import { GetNovuLayout } from '../get-novu-layout';
+import { type CompileTemplate, CompileTemplateBase } from '../compile-template';
+import { GetLayoutCommand, type GetLayoutUseCase, type LayoutDto } from '../get-layout';
+import type { GetNovuLayout } from '../get-novu-layout';
+import type { CompileEmailTemplateCommand } from './compile-email-template.command';
 
 @Injectable()
 export class CompileEmailTemplate extends CompileTemplateBase {
@@ -148,7 +146,7 @@ export class CompileEmailTemplate extends CompileTemplateBase {
     // "&nbsp;&zwnj;&nbsp;&zwnj;" is needed to spacing away the rest of the email from the preheader area in email clients
     return content?.replace(
       // eslint-disable-next-line no-useless-escape
-      /<body\b[^\<\>]*?>/,
+      /<body\b[^<>]*?>/,
       `$&{{#if preheader}}
           <div style="display: none; max-height: 0px; overflow: hidden;">
             {{preheader}}

@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { Skeleton } from '@mantine/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Skeleton } from '@mantine/core';
 
 import { colors } from '@novu/design-system';
 

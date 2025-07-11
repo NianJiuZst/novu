@@ -1,18 +1,18 @@
 import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
+import type { ModuleRef } from '@nestjs/core';
 import {
-  ExecuteBridgeRequest,
+  type ExecuteBridgeRequest,
   ExecuteBridgeRequestCommand,
-  ExecuteBridgeRequestDto,
-  FeatureFlagsService,
+  type ExecuteBridgeRequestDto,
+  type FeatureFlagsService,
   Instrument,
   InstrumentUsecase,
-  IWorkflowDataDto,
-  PinoLogger,
-  StorageHelperService,
-  WorkflowQueueService,
+  type IWorkflowDataDto,
+  type PinoLogger,
+  type StorageHelperService,
+  type WorkflowQueueService,
 } from '@novu/application-generic';
-import {
+import type {
   CommunityOrganizationRepository,
   EnvironmentEntity,
   EnvironmentRepository,
@@ -25,30 +25,30 @@ import {
   WorkflowOverrideEntity,
   WorkflowOverrideRepository,
 } from '@novu/dal';
-import { DiscoverWorkflowOutput, GetActionEnum } from '@novu/framework/internal';
+import { type DiscoverWorkflowOutput, GetActionEnum } from '@novu/framework/internal';
 import {
   FeatureFlagsKeysEnum,
   ReservedVariablesMap,
-  TriggerContextTypeEnum,
-  TriggerEventStatusEnum,
-  TriggerRecipientsPayload,
   ResourceOriginEnum,
+  type TriggerContextTypeEnum,
+  TriggerEventStatusEnum,
+  type TriggerRecipientsPayload,
 } from '@novu/shared';
 import { addBreadcrumb } from '@sentry/node';
+import Ajv, { ErrorObject } from 'ajv';
+import addFormats from 'ajv-formats';
 import { randomBytes } from 'crypto';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import Ajv, { ErrorObject } from 'ajv';
-import addFormats from 'ajv-formats';
+import { generateTransactionId } from '../../../shared/helpers';
 import { PayloadValidationException } from '../../exceptions/payload-validation-exception';
 import { RecipientSchema, RecipientsSchema } from '../../utils/trigger-recipient-validation';
-import { VerifyPayload, VerifyPayloadCommand } from '../verify-payload';
-import {
+import { type VerifyPayload, VerifyPayloadCommand } from '../verify-payload';
+import type {
   ParseEventRequestBroadcastCommand,
   ParseEventRequestCommand,
   ParseEventRequestMulticastCommand,
 } from './parse-event-request.command';
-import { generateTransactionId } from '../../../shared/helpers';
 
 @Injectable()
 export class ParseEventRequest {

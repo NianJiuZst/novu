@@ -1,7 +1,11 @@
 import { ApiExtraModels, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  type CustomDataType,
+  type INotificationTemplate,
+  TriggerTypeEnum,
+  type WorkflowIntegrationStatus,
+} from '@novu/shared';
 import { IsOptional } from 'class-validator';
-
-import { CustomDataType, INotificationTemplate, TriggerTypeEnum, WorkflowIntegrationStatus } from '@novu/shared';
 
 import { NotificationStepDto } from '../../shared/dtos/notification-step-dto';
 import { SubscriberPreferenceChannels } from '../../shared/dtos/preference-channels';

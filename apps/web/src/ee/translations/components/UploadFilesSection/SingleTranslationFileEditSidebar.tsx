@@ -1,19 +1,18 @@
 import styled from '@emotion/styled';
 import { ActionIcon, FileButton, Group, Stack } from '@mantine/core';
+import { Button, colors, Sidebar, Text, Title, Tooltip, Trash, When } from '@novu/design-system';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, colors, Sidebar, Text, Title, Tooltip, Trash, When } from '@novu/design-system';
 import { useEnvironment } from '../../../../hooks';
-
-import { useFetchLocales, useFetchTranslation } from '../../hooks';
 import { useEditTranslationFileContext } from '../../context/useEditTranslationFileContext';
+import { useFetchLocales, useFetchTranslation } from '../../hooks';
 import { ReuploadIcon } from '../../icons';
 import { FlagIcon } from '../shared';
+import { DeleteTranslationModal } from '../TranslationGroup/DeleteTranslationModal';
 import { FileEditEditor } from './FileEditEditor';
 import { FileNameInput } from './FileNameInput';
 import { FilesDiffSection } from './FilesDiffSection';
 import { ReUploadConfirmationModal } from './ReUploadConfirmationModal';
-import { DeleteTranslationModal } from '../TranslationGroup/DeleteTranslationModal';
 
 export function SingleTranslationFileEditSidebar({
   identifier,

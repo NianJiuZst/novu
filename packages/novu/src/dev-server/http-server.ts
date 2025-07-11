@@ -1,8 +1,7 @@
 import http from 'node:http';
-import { AddressInfo } from 'net';
-
 import getPort from 'get-port';
-import { DevCommandOptions } from '../commands';
+import type { AddressInfo } from 'net';
+import type { DevCommandOptions } from '../commands';
 
 export const WELL_KNOWN_ROUTE = '/.well-known/novu';
 export const STUDIO_PATH = '/studio';

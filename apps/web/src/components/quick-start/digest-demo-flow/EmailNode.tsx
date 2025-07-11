@@ -1,10 +1,9 @@
-import { Handle, Position } from 'react-flow-renderer';
-
 import { EmailFilled } from '@novu/design-system';
-import { NodeStepWithPopover } from './NodeStepWithPopover';
+import { Handle, Position } from 'react-flow-renderer';
+import { useAuth } from '../../../hooks/useAuth';
 import { useDigestDemoFlowContext } from './DigestDemoFlowProvider';
 import { Indicator } from './Indicator';
-import { useAuth } from '../../../hooks/useAuth';
+import { NodeStepWithPopover } from './NodeStepWithPopover';
 
 export function EmailNode({ data, id }: { data: any; id: string }) {
   const { currentUser } = useAuth();

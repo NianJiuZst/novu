@@ -1,5 +1,6 @@
-import React, { ChangeEvent } from 'react';
-import { Radio as MantineRadio, RadioProps as MantineRadioProps } from '@mantine/core';
+import { Radio as MantineRadio, type RadioProps as MantineRadioProps } from '@mantine/core';
+import type React from 'react';
+import type { ChangeEvent } from 'react';
 import useStyles from './Radio.styles';
 
 export interface RadioProps extends MantineRadioProps {

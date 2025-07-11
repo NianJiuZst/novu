@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
-import { useLDClient } from 'launchdarkly-react-client-sdk';
 import {
-  setUser as sentrySetUser,
   configureScope as sentryConfigureScope,
+  setUser as sentrySetUser,
   setTags as setSentryTags,
 } from '@sentry/react';
+import { useLDClient } from 'launchdarkly-react-client-sdk';
+import { useEffect } from 'react';
 import { useSegment } from '../components/providers/SegmentProvider';
 import { useAuth } from './useAuth';
 

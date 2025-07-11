@@ -1,11 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { HealthIndicatorResult, HealthIndicatorStatus } from '@nestjs/terminus';
+import type { HealthIndicatorResult, HealthIndicatorStatus } from '@nestjs/terminus';
 import { setTimeout } from 'timers/promises';
-
-import { Worker } from '../bull-mq';
-
-import { IHealthIndicator } from '../../health';
-import { IDestroy } from '../../modules';
+import type { IHealthIndicator } from '../../health';
+import type { IDestroy } from '../../modules';
+import type { Worker } from '../bull-mq';
 
 export interface INovuWorker extends IDestroy {
   readonly DEFAULT_ATTEMPTS: number;

@@ -1,8 +1,8 @@
-import { SubscriberCustomData, UserSessionData } from '@novu/shared';
 import { CreateOrUpdateSubscriberCommand } from '@novu/application-generic';
-import { IChannelCredentials, IChannelSettings, SubscriberEntity } from '@novu/dal';
-import { ChannelSettingsDto, SubscriberResponseDto } from '../../subscribers/dtos';
-import { ChannelCredentials } from '../../shared/dtos/subscriber-channel';
+import type { IChannelCredentials, IChannelSettings, SubscriberEntity } from '@novu/dal';
+import { SubscriberCustomData, UserSessionData } from '@novu/shared';
+import type { ChannelCredentials } from '../../shared/dtos/subscriber-channel';
+import type { ChannelSettingsDto, SubscriberResponseDto } from '../../subscribers/dtos';
 
 export function mapSubscriberEntityToResponseDto(entity: SubscriberEntity): SubscriberResponseDto {
   return {

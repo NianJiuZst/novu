@@ -1,7 +1,7 @@
 import { Injectable, Scope } from '@nestjs/common';
-import { MemberRepository } from '@novu/dal';
+import type { MemberRepository } from '@novu/dal';
 import { MemberRoleEnum, MemberStatusEnum } from '@novu/shared';
-import { GetMembersCommand } from './get-members.command';
+import type { GetMembersCommand } from './get-members.command';
 
 @Injectable({
   scope: Scope.REQUEST,

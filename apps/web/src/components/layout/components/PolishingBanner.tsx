@@ -1,7 +1,7 @@
-import { useMantineTheme } from '@mantine/core';
-import { Close } from '@novu/design-system';
 import styled from '@emotion/styled';
+import { useMantineTheme } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
+import { Close } from '@novu/design-system';
 import { useSegment } from '../../providers/SegmentProvider';
 
 export function PolishingBanner() {

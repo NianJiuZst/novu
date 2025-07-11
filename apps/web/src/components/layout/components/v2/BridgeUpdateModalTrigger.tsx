@@ -1,13 +1,13 @@
-import { FC, useState } from 'react';
 import { Tooltip } from '@novu/design-system';
-import { Text, Button } from '@novu/novui';
+import { Button, Text } from '@novu/novui';
 import { css } from '@novu/novui/css';
 import { IconEdit, IconLink, IconLinkOff } from '@novu/novui/icons';
 import { HStack } from '@novu/novui/jsx';
+import { type FC, useState } from 'react';
 import { useHover } from '../../../../hooks/useHover';
+import { useBridgeConnectionStatus } from '../../../../studio/hooks';
 import { BridgeUpdateModal } from './BridgeUpdateModal';
 import { ConnectionStatusIndicator } from './ConnectionStatusIndicator';
-import { useBridgeConnectionStatus } from '../../../../studio/hooks';
 
 export const BridgeUpdateModalTrigger: FC = () => {
   const [showBridgeUpdateModal, setShowBridgeUpdateModal] = useState<boolean>(false);

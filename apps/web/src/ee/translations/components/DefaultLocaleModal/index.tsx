@@ -1,26 +1,25 @@
-import { useEffect } from 'react';
 import { Group, Stack } from '@mantine/core';
-import { Controller, useForm } from 'react-hook-form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Modal,
-  Title,
-  Text,
-  colors,
   Button,
-  Select,
+  colors,
   errorMessage,
+  Modal,
+  Select,
   successMessage,
+  Text,
+  Title,
   WarningIcon,
   When,
 } from '@novu/design-system';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { api } from '../../../../api';
 import { useAuth } from '../../../../hooks/useAuth';
-
-import { LocaleIcon } from '../../icons/LocaleIcon';
 import { useFetchLocales, useGetDefaultLocale } from '../../hooks';
-import { FlagIcon, SelectItem } from '../shared';
 import { GlobeIcon } from '../../icons/GlobeIcon';
+import { LocaleIcon } from '../../icons/LocaleIcon';
+import { FlagIcon, SelectItem } from '../shared';
 
 export const DefaultLocaleModal = ({
   open,

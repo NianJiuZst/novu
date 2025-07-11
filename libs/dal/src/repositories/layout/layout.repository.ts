@@ -1,13 +1,12 @@
-import { FilterQuery } from 'mongoose';
-import { SoftDeleteModel } from 'mongoose-delete';
-
 import { DirectionEnum, ResourceOriginEnum, ResourceTypeEnum } from '@novu/shared';
-import { LayoutEntity, LayoutDBModel } from './layout.entity';
-import { Layout } from './layout.schema';
-import { EnvironmentId, OrderDirectionEnum, OrganizationId, LayoutId } from './types';
-import { BaseRepository } from '../base-repository';
+import type { FilterQuery } from 'mongoose';
+import type { SoftDeleteModel } from 'mongoose-delete';
 import { DalException } from '../../shared';
-import { EnforceEnvOrOrgIds } from '../../types/enforce';
+import type { EnforceEnvOrOrgIds } from '../../types/enforce';
+import { BaseRepository } from '../base-repository';
+import { type LayoutDBModel, LayoutEntity } from './layout.entity';
+import { Layout } from './layout.schema';
+import { type EnvironmentId, type LayoutId, OrderDirectionEnum, type OrganizationId } from './types';
 
 type LayoutQuery = FilterQuery<LayoutDBModel> & EnforceEnvOrOrgIds;
 

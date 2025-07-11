@@ -1,12 +1,12 @@
 import { expect } from '@playwright/test';
-import { test } from './utils/baseTest';
 import { AuthLoginPage } from './page-models/authLoginPage';
 import { HeaderPage } from './page-models/headerPage';
 import { SidebarPage } from './page-models/sidebarPage';
 import { SignUpPage } from './page-models/signupPage';
+import { test } from './utils/baseTest';
 import { initializeSession } from './utils/browser';
 import { logout } from './utils/commands';
-import { createUser, randomEmail, testPassword, inviteUser, SessionData } from './utils/plugins';
+import { createUser, inviteUser, randomEmail, type SessionData, testPassword } from './utils/plugins';
 
 let session: SessionData;
 

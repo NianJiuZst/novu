@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { LayoutEntity, LayoutRepository } from '@novu/dal';
+import type { LayoutEntity, LayoutRepository } from '@novu/dal';
 
-import { PromoteTypeChangeCommand } from '../promote-type-change.command';
+import type { PromoteTypeChangeCommand } from '../promote-type-change.command';
 
 @Injectable()
 export class PromoteLayoutChange {

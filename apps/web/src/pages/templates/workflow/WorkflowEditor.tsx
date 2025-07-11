@@ -1,35 +1,34 @@
 import { Container, Group, Stack } from '@mantine/core';
-import { ComponentType, useCallback, useState } from 'react';
+import { useDidUpdate, useTimeout } from '@mantine/hooks';
+import { Bolt, Button, Settings } from '@novu/design-system';
+import { FilterPartTypeEnum, StepTypeEnum } from '@novu/shared';
+import { type ComponentType, useCallback, useState } from 'react';
+import type { Node, NodeProps } from 'react-flow-renderer';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { Link, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Node, NodeProps } from 'react-flow-renderer';
-import { useDidUpdate, useTimeout } from '@mantine/hooks';
-import { FilterPartTypeEnum, StepTypeEnum } from '@novu/shared';
-import { Bolt, Button, Settings } from '@novu/design-system';
-import { useAuth, useEnvironment } from '../../../hooks';
 import { useSegment } from '../../../components/providers/SegmentProvider';
-
 import { When } from '../../../components/utils/When';
 import type { IFlowEditorProps } from '../../../components/workflow';
 import { FlowEditor } from '../../../components/workflow';
+import { type NodeData, NodeType } from '../../../components/workflow/types';
+import { useAuth, useEnvironment } from '../../../hooks';
+import { useOnboardingExperiment } from '../../../hooks/useOnboardingExperiment';
 import { channels } from '../../../utils/channels';
 import { errorMessage } from '../../../utils/notifications';
+import { OnBoardingAnalyticsEnum } from '../../quick-start/consts';
 import { DeleteConfirmModal } from '../components/DeleteConfirmModal';
 import type { IForm } from '../components/formTypes';
 import { useTemplateEditorForm } from '../components/TemplateEditorFormProvider';
 import { UpdateButton } from '../components/UpdateButton';
 import { useBasePath } from '../hooks/useBasePath';
+import { useNavigateToVariantPreview } from '../hooks/useNavigateToVariantPreview';
+import { useStepInfoPath } from '../hooks/useStepInfoPath';
 import { getFormattedStepErrors } from '../shared/errors';
 import { NameInput } from './NameInput';
 import { AddNodeEdge } from './workflow/edge-types/AddNodeEdge';
 import AddNode from './workflow/node-types/AddNode';
 import ChannelNode from './workflow/node-types/ChannelNode';
 import TriggerNode from './workflow/node-types/TriggerNode';
-import { NodeType, NodeData } from '../../../components/workflow/types';
-import { useStepInfoPath } from '../hooks/useStepInfoPath';
-import { useNavigateToVariantPreview } from '../hooks/useNavigateToVariantPreview';
-import { useOnboardingExperiment } from '../../../hooks/useOnboardingExperiment';
-import { OnBoardingAnalyticsEnum } from '../../quick-start/consts';
 
 export const TOP_ROW_HEIGHT = 74;
 

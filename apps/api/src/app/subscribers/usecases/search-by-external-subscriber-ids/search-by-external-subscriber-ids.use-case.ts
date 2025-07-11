@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { IExternalSubscribersEntity, SubscriberEntity, SubscriberRepository } from '@novu/dal';
-import { SubscriberDto } from '@novu/shared';
+import type { IExternalSubscribersEntity, SubscriberEntity, SubscriberRepository } from '@novu/dal';
+import type { SubscriberDto } from '@novu/shared';
 
-import { SearchByExternalSubscriberIdsCommand } from './search-by-external-subscriber-ids.command';
+import type { SearchByExternalSubscriberIdsCommand } from './search-by-external-subscriber-ids.command';
 
 @Injectable()
 export class SearchByExternalSubscriberIds {

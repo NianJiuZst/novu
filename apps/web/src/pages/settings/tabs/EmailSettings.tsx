@@ -1,27 +1,26 @@
-import { useEffect } from 'react';
-import { ActionIcon, Center, Input as MantineInput } from '@mantine/core';
-import { Control, Controller, useForm } from 'react-hook-form';
-import { useClipboard } from '@mantine/hooks';
 import styled from '@emotion/styled';
+import { ActionIcon, Center, Input as MantineInput } from '@mantine/core';
+import { useClipboard } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import {
-  colors,
-  Text,
-  Input,
-  Tooltip,
   Button,
   Check,
   CheckCircle,
   Copy,
-  WarningIcon,
+  colors,
+  Input,
   inputStyles,
+  Text,
+  Tooltip,
+  WarningIcon,
 } from '@novu/design-system';
-
-import Card from '../../../components/layout/components/Card';
-import { useEffectOnce, useEnvironment } from '../../../hooks';
+import { useEffect } from 'react';
+import { type Control, Controller, useForm } from 'react-hook-form';
 import { updateDnsSettings } from '../../../api/environment';
 import { validateMxRecord } from '../../../api/inbound-parse';
+import Card from '../../../components/layout/components/Card';
 import { MAIL_SERVER_DOMAIN } from '../../../config';
+import { useEffectOnce, useEnvironment } from '../../../hooks';
 
 export const EmailSettings = () => {
   const mailServerDomain = `10 ${MAIL_SERVER_DOMAIN}`;

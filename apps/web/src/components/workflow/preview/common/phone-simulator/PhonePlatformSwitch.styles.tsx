@@ -1,6 +1,6 @@
-import { CSSProperties } from 'react';
 import styled from '@emotion/styled';
-import { colors, shadows, AppleIcon, AndroidIcon } from '@novu/design-system';
+import { AndroidIcon, AppleIcon, colors, shadows } from '@novu/design-system';
+import type { CSSProperties } from 'react';
 
 const SWITCH_CONTAINER_PADDING = 0.3125;
 const THUMB_WIDTH = 3;

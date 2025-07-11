@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { FeedRepository, FeedEntity } from '@novu/dal';
-import { GetFeedsCommand } from './get-feeds.command';
+import type { FeedEntity, FeedRepository } from '@novu/dal';
+import type { GetFeedsCommand } from './get-feeds.command';
 
 @Injectable()
 export class GetFeeds {

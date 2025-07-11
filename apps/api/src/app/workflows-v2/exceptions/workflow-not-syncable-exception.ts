@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { WorkflowResponseDto } from '@novu/shared';
+import type { WorkflowResponseDto } from '@novu/shared';
 import { SYNCABLE_WORKFLOW_ORIGINS } from '../usecases/sync-to-environment/sync-to-environment.usecase';
 
 export class WorkflowNotSyncableException extends BadRequestException {

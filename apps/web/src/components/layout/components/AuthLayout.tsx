@@ -1,5 +1,5 @@
-import React from 'react';
-import { Title, Container } from '@novu/design-system';
+import { Container, Title } from '@novu/design-system';
+import type React from 'react';
 
 export default function AuthLayout({ title = '', children }: { title?: string; children: React.ReactNode }) {
   return (

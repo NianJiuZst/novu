@@ -1,14 +1,14 @@
-import { PackageManager } from "../helpers/get-pkg-manager";
+import type { PackageManager } from '../helpers/get-pkg-manager';
 
 export enum TemplateTypeEnum {
-  DEFAULT = "default",
-  APP = "app",
-  DEFAULT_REACT_EMAIL = "default-react-email",
-  APP_REACT_EMAIL = "app-react-email",
+  DEFAULT = 'default',
+  APP = 'app',
+  DEFAULT_REACT_EMAIL = 'default-react-email',
+  APP_REACT_EMAIL = 'app-react-email',
 }
 
 export type TemplateType = `${TemplateTypeEnum}`;
-export type TemplateMode = "js" | "ts";
+export type TemplateMode = 'js' | 'ts';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export interface GetTemplateFileArgs {

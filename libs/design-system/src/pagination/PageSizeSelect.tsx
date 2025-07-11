@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
 import { Input, useMantineTheme } from '@mantine/core';
 import { forwardRef, useContext, useMemo } from 'react';
-import { ISelectProps } from '../select/Select.types';
+import { colors } from '../config';
 import { Select } from '../select/Select';
+import type { ISelectProps } from '../select/Select.types';
 import { DEFAULT_PAGINATION_PAGE_SIZES } from './Pagination.const';
 import { PaginationContext } from './PaginationContext';
 import { getPageNumberForNewPageSize } from './util';
-import { colors } from '../config';
 
 const InputWrapper = styled(Input.Wrapper)(({ theme }) => {
   return `

@@ -1,8 +1,8 @@
 // August 14th, 2023
 
-import shortid from 'shortid';
 import { LayoutRepository, OrganizationRepository } from '@novu/dal';
 import { slugify } from '@novu/shared';
+import shortid from 'shortid';
 
 export async function addLayoutIdentifierMigration() {
   // eslint-disable-next-line no-console
@@ -23,27 +23,25 @@ export async function addLayoutIdentifierMigration() {
       identifier: { $exists: false, $eq: null },
     });
 
-    const bulkWriteOps = layouts
-      .map((layout) => {
-        const { _id, name } = layout;
-        const identifier = `${slugify(name)}-${shortid.generate()}`;
+    const bulkWriteOps = layouts.flatMap((layout) => {
+      const { _id, name } = layout;
+      const identifier = `${slugify(name)}-${shortid.generate()}`;
 
-        return [
-          {
-            updateOne: {
-              filter: { _id, _organizationId: organization._id },
-              update: { $set: { identifier } },
-            },
+      return [
+        {
+          updateOne: {
+            filter: { _id, _organizationId: organization._id },
+            update: { $set: { identifier } },
           },
-          {
-            updateOne: {
-              filter: { _parentId: _id, _organizationId: organization._id },
-              update: { $set: { identifier } },
-            },
+        },
+        {
+          updateOne: {
+            filter: { _parentId: _id, _organizationId: organization._id },
+            update: { $set: { identifier } },
           },
-        ];
-      })
-      .flat();
+        },
+      ];
+    });
 
     let bulkResponse;
     try {

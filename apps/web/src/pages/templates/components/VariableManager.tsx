@@ -1,9 +1,8 @@
-import { TemplateVariableTypeEnum, TemplateSystemVariables } from '@novu/shared';
-import { Controller, useWatch } from 'react-hook-form';
-import { Code, Space, Table } from '@mantine/core';
 import styled from '@emotion/styled';
-
+import { Code, Space, Table } from '@mantine/core';
 import { colors, Input, Switch, Text } from '@novu/design-system';
+import { TemplateSystemVariables, TemplateVariableTypeEnum } from '@novu/shared';
+import { Controller, useWatch } from 'react-hook-form';
 import { When } from '../../../components/utils/When';
 import { useEnvironment } from '../../../hooks';
 

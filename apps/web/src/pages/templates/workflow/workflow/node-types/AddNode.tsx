@@ -1,21 +1,20 @@
-import { memo } from 'react';
-import { ActionIcon, useMantineTheme } from '@mantine/core';
 import styled from '@emotion/styled';
-
+import { ActionIcon, useMantineTheme } from '@mantine/core';
 import {
+  Chat,
+  colors,
   Digest,
+  Dropdown,
+  InApp,
   Mail,
   Mobile,
   PlusCircleOutlined,
-  Chat,
   Sms,
-  InApp,
-  Timer,
-  colors,
-  Dropdown,
   Text,
+  Timer,
 } from '@novu/design-system';
 import { StepTypeEnum } from '@novu/shared';
+import { memo } from 'react';
 
 interface NodeData {
   addNewNode: (parentId: string, type: string, childId?: string) => void;

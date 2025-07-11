@@ -1,8 +1,8 @@
-import mongoose, { Schema } from 'mongoose';
 import { ApiServiceLevelEnum } from '@novu/shared';
+import mongoose, { Schema } from 'mongoose';
 
 import { schemaOptions } from '../schema-default.options';
-import { OrganizationDBModel, PartnerTypeEnum } from './organization.entity';
+import { type OrganizationDBModel, PartnerTypeEnum } from './organization.entity';
 
 const organizationSchema = new Schema<OrganizationDBModel>(
   {

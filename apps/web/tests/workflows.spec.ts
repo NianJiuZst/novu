@@ -1,10 +1,9 @@
 import { TriggerTypeEnum } from '@novu/shared';
 import { expect } from '@playwright/test';
-import { test } from './utils/baseTest';
-
 import { WorkflowsPage } from './page-models/workflowsPage';
+import { test } from './utils/baseTest';
 import { initializeSession } from './utils/browser';
-import { createWorkflows, SessionData } from './utils/plugins';
+import { createWorkflows, type SessionData } from './utils/plugins';
 
 let session: SessionData;
 

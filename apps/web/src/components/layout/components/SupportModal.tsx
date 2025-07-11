@@ -1,9 +1,9 @@
 import { errorMessage, Modal, successMessage } from '@novu/design-system';
+import { Button, Textarea, Title } from '@novu/novui';
 import { css } from '@novu/novui/css';
-import { Button, Title, Textarea } from '@novu/novui';
-import { HStack, Box } from '@novu/novui/jsx';
-import { FC } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { Box, HStack } from '@novu/novui/jsx';
+import type { FC } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { createThread } from '../../../api/support';
 
 export type SupportModalProps = {

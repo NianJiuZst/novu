@@ -1,23 +1,22 @@
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  CommunityOrganizationRepository,
-  IntegrationEntity,
-  IntegrationRepository,
-  OrganizationEntity,
-} from '@novu/dal';
-import {
-  AnalyticsService,
+  type AnalyticsService,
   buildIntegrationKey,
   encryptCredentials,
-  InvalidateCacheService,
-  FeatureFlagsService,
-  PinoLogger,
+  type FeatureFlagsService,
+  type InvalidateCacheService,
+  type PinoLogger,
 } from '@novu/application-generic';
+import {
+  CommunityOrganizationRepository,
+  type IntegrationEntity,
+  type IntegrationRepository,
+  type OrganizationEntity,
+} from '@novu/dal';
 import { CHANNELS_WITH_PRIMARY, FeatureFlagsKeysEnum } from '@novu/shared';
-
-import { UpdateIntegrationCommand } from './update-integration.command';
-import { CheckIntegration } from '../check-integration/check-integration.usecase';
 import { CheckIntegrationCommand } from '../check-integration/check-integration.command';
+import type { CheckIntegration } from '../check-integration/check-integration.usecase';
+import type { UpdateIntegrationCommand } from './update-integration.command';
 
 @Injectable()
 export class UpdateIntegration {

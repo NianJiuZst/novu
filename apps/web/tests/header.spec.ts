@@ -1,11 +1,9 @@
+import type { OrganizationEntity, UserEntity } from '@novu/dal';
 import { expect } from '@playwright/test';
-
-import { OrganizationEntity, UserEntity } from '@novu/dal';
-
+import { HeaderPage } from './page-models/headerPage';
 import { test } from './utils/baseTest';
 import { initializeSession } from './utils/browser';
-import { HeaderPage } from './page-models/headerPage';
-import { SessionData } from './utils/plugins';
+import type { SessionData } from './utils/plugins';
 
 let user: UserEntity;
 let organization: OrganizationEntity;

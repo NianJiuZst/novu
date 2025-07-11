@@ -1,5 +1,5 @@
+import type { UserSessionData } from '@novu/shared';
 import { Analytics } from '@segment/analytics-node';
-import { UserSessionData } from '@novu/shared';
 import { ANALYTICS_ENABLED, SEGMENTS_WRITE_KEY } from '../constants';
 
 export enum AnalyticsEventEnum {

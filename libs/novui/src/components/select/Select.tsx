@@ -1,13 +1,13 @@
-import { Loader, Select as ExternalSelect } from '@mantine/core';
-import { forwardRef, ReactNode } from 'react';
-import { IconArrowDropDown } from '../../icons';
+import { Select as ExternalSelect, Loader } from '@mantine/core';
+import { forwardRef, type ReactNode } from 'react';
 import { css, cx } from '../../../styled-system/css';
 import { splitCssProps } from '../../../styled-system/jsx';
 import { select } from '../../../styled-system/recipes';
 import { token } from '../../../styled-system/tokens';
-import { JsxStyleProps } from '../../../styled-system/types';
-import { PolymorphicRef } from '../../types/props-helpers';
-import { CoreProps, LocalizedMessage, LocalizedString } from '../../types';
+import type { JsxStyleProps } from '../../../styled-system/types';
+import { IconArrowDropDown } from '../../icons';
+import type { CoreProps, LocalizedMessage, LocalizedString } from '../../types';
+import type { PolymorphicRef } from '../../types/props-helpers';
 
 export type SelectItem<TItem extends string = string> = {
   value: TItem;

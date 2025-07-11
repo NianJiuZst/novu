@@ -1,12 +1,12 @@
-import { cyan, green, red, bold } from 'picocolors';
-import path from 'path';
-import prompts from 'prompts';
-import type { InitialReturnValue } from 'prompts';
 import fs from 'fs';
-import { createApp } from './create-app';
-import { validateNpmName } from './helpers/validate-pkg';
-import { isFolderEmpty } from './helpers/is-folder-empty';
+import path from 'path';
+import { bold, cyan, green, red } from 'picocolors';
+import type { InitialReturnValue } from 'prompts';
+import prompts from 'prompts';
 import { AnalyticService } from '../../services/analytics.service';
+import { createApp } from './create-app';
+import { isFolderEmpty } from './helpers/is-folder-empty';
+import { validateNpmName } from './helpers/validate-pkg';
 
 const analytics = new AnalyticService();
 

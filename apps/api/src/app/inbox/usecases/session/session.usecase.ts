@@ -1,66 +1,66 @@
 import {
-  Injectable,
-  NotFoundException,
   BadRequestException,
+  Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { createHash } from 'crypto';
-import { differenceInHours } from 'date-fns';
 import {
-  AnalyticsService,
+  type AnalyticsService,
   CreateOrUpdateSubscriberCommand,
-  CreateOrUpdateSubscriberUseCase,
+  type CreateOrUpdateSubscriberUseCase,
   encryptApiKey,
+  type FeatureFlagsService,
+  generateTimestampHex,
   LogDecorator,
-  PinoLogger,
-  SelectIntegration,
+  type PinoLogger,
+  type SelectIntegration,
   SelectIntegrationCommand,
   shortId,
-  UpsertControlValuesUseCase,
   UpsertControlValuesCommand,
-  FeatureFlagsService,
-  generateTimestampHex,
+  type UpsertControlValuesUseCase,
 } from '@novu/application-generic';
-import {
+import type {
   CommunityOrganizationRepository,
   CommunityUserRepository,
   EnvironmentEntity,
   EnvironmentRepository,
   IntegrationRepository,
-  NotificationTemplateRepository,
   MessageTemplateRepository,
+  NotificationTemplateRepository,
   PreferencesRepository,
 } from '@novu/dal';
 import {
   ApiServiceLevelEnum,
   ChannelTypeEnum,
+  ControlValuesLevelEnum,
+  type CustomDataType,
+  FeatureFlagsKeysEnum,
   FeatureNameEnum,
   getFeatureForTierAsNumber,
   InAppProviderIdEnum,
-  CustomDataType,
-  ResourceTypeEnum,
-  ResourceOriginEnum,
-  StepTypeEnum,
   PreferencesTypeEnum,
-  FeatureFlagsKeysEnum,
-  ControlValuesLevelEnum,
+  ResourceOriginEnum,
+  ResourceTypeEnum,
+  StepTypeEnum,
 } from '@novu/shared';
-import { AuthService } from '../../../auth/services/auth.service';
-import { SubscriberSessionResponseDto } from '../../dtos/subscriber-session-response.dto';
-import { SubscriberDto, SubscriberSessionRequestDto } from '../../dtos/subscriber-session-request.dto';
+import { createHash } from 'crypto';
+import { differenceInHours } from 'date-fns';
+import type { AuthService } from '../../../auth/services/auth.service';
+import { EnvironmentResponseDto } from '../../../environments-v1/dtos/environment-response.dto';
+import type { GenerateUniqueApiKey } from '../../../environments-v1/usecases/generate-unique-api-key/generate-unique-api-key.usecase';
+import { CreateNovuIntegrationsCommand } from '../../../integrations/usecases/create-novu-integrations/create-novu-integrations.command';
+import type { CreateNovuIntegrations } from '../../../integrations/usecases/create-novu-integrations/create-novu-integrations.usecase';
+import { GetOrganizationSettingsCommand } from '../../../organization/usecases/get-organization-settings/get-organization-settings.command';
+import type { GetOrganizationSettings } from '../../../organization/usecases/get-organization-settings/get-organization-settings.usecase';
+import { isHmacValid } from '../../../shared/helpers/is-valid-hmac';
+import type { SubscriberDto, SubscriberSessionRequestDto } from '../../dtos/subscriber-session-request.dto';
+import type { SubscriberSessionResponseDto } from '../../dtos/subscriber-session-response.dto';
 import { AnalyticsEventsEnum } from '../../utils';
 import { validateHmacEncryption } from '../../utils/encryption';
 import { NotificationsCountCommand } from '../notifications-count/notifications-count.command';
-import { NotificationsCount } from '../notifications-count/notifications-count.usecase';
-import { SessionCommand } from './session.command';
-import { isHmacValid } from '../../../shared/helpers/is-valid-hmac';
-import { EnvironmentResponseDto } from '../../../environments-v1/dtos/environment-response.dto';
-import { CreateNovuIntegrations } from '../../../integrations/usecases/create-novu-integrations/create-novu-integrations.usecase';
-import { GenerateUniqueApiKey } from '../../../environments-v1/usecases/generate-unique-api-key/generate-unique-api-key.usecase';
-import { CreateNovuIntegrationsCommand } from '../../../integrations/usecases/create-novu-integrations/create-novu-integrations.command';
-import { GetOrganizationSettings } from '../../../organization/usecases/get-organization-settings/get-organization-settings.usecase';
-import { GetOrganizationSettingsCommand } from '../../../organization/usecases/get-organization-settings/get-organization-settings.command';
+import type { NotificationsCount } from '../notifications-count/notifications-count.usecase';
+import type { SessionCommand } from './session.command';
 
 const ALLOWED_ORIGINS_REGEX = new RegExp(process.env.FRONT_BASE_URL || '');
 const KEYLESS_RETENTION_TIME_IN_HOURS = parseInt(process.env.KEYLESS_RETENTION_TIME_IN_HOURS || '', 10) || 24;

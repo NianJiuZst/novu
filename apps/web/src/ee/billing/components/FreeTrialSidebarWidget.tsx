@@ -1,11 +1,11 @@
-import { Box, MantineColor, Progress, Text } from '@mantine/core';
-import { colors, Button } from '@novu/design-system';
+import { Box, type MantineColor, Progress, Text } from '@mantine/core';
+import { Button, colors } from '@novu/design-system';
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSubscription } from '../hooks/useSubscription';
-import { pluralizeDaysLeft, COLOR_WARNING, WARNING_LIMIT_DAYS } from '../utils/freeTrial.constants';
 import { IS_EE_AUTH_ENABLED } from '../../../config/index';
 import { ROUTES } from '../../../constants/routes';
+import { useSubscription } from '../hooks/useSubscription';
+import { COLOR_WARNING, pluralizeDaysLeft, WARNING_LIMIT_DAYS } from '../utils/freeTrial.constants';
 
 export const FreeTrialSidebarWidget = () => {
   const { trial } = useSubscription();

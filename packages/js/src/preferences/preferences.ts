@@ -1,11 +1,11 @@
-import { InboxService } from '../api';
-import { NovuEventEmitter } from '../event-emitter';
+import type { InboxService } from '../api';
 import { BaseModule } from '../base-module';
+import { PreferencesCache } from '../cache/preferences-cache';
+import type { NovuEventEmitter } from '../event-emitter';
+import type { Result } from '../types';
+import { bulkUpdatePreference, updatePreference } from './helpers';
 import { Preference } from './preference';
 import type { BasePreferenceArgs, InstancePreferenceArgs, ListPreferencesArgs, UpdatePreferenceArgs } from './types';
-import { Result } from '../types';
-import { PreferencesCache } from '../cache/preferences-cache';
-import { bulkUpdatePreference, updatePreference } from './helpers';
 
 export class Preferences extends BaseModule {
   #useCache: boolean;

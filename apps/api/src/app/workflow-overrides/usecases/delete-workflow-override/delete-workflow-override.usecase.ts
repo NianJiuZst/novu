@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { WorkflowOverrideRepository } from '@novu/dal';
-import { DeleteWorkflowOverrideCommand } from './delete-workflow-override.command';
+import type { WorkflowOverrideRepository } from '@novu/dal';
+import type { DeleteWorkflowOverrideCommand } from './delete-workflow-override.command';
 
 @Injectable()
 export class DeleteWorkflowOverride {

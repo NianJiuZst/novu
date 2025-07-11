@@ -1,11 +1,11 @@
 import { Grid } from '@mantine/core';
-import { Control, Controller } from 'react-hook-form';
-import { FilterPartTypeEnum, TimeOperatorEnum } from '@novu/shared';
 import { Input, Select } from '@novu/design-system';
+import { FilterPartTypeEnum, TimeOperatorEnum } from '@novu/shared';
+import { type Control, Controller } from 'react-hook-form';
 
 import { RightSectionError } from './Conditions';
-import { IConditionsForm, IConditionsProps } from './types';
 import { DefaultTimeOperatorData } from './constants';
+import type { IConditionsForm, IConditionsProps } from './types';
 
 export function OnlineConditionRow({
   fieldOn,

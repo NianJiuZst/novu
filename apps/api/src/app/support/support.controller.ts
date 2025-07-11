@@ -2,12 +2,12 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { Novu } from '@novu/api';
 import { UserSession } from '@novu/application-generic';
-import { UserSessionData } from '@novu/shared';
+import type { UserSessionData } from '@novu/shared';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
-import { CreateSupportThreadDto } from './dtos/create-thread.dto';
-import { PlainCardRequestDto } from './dtos/plain-card.dto';
+import type { CreateSupportThreadDto } from './dtos/create-thread.dto';
+import type { PlainCardRequestDto } from './dtos/plain-card.dto';
 import { PlainCardsGuard } from './guards/plain-cards.guard';
-import { CreateSupportThreadUsecase, PlainCardsUsecase } from './usecases';
+import type { CreateSupportThreadUsecase, PlainCardsUsecase } from './usecases';
 import { CreateSupportThreadCommand } from './usecases/create-thread.command';
 import { PlainCardsCommand } from './usecases/plain-cards.command';
 

@@ -1,8 +1,8 @@
 import { Modal } from '@novu/design-system';
-import { FC } from 'react';
 import { Button, Text, Title } from '@novu/novui';
 import { css } from '@novu/novui/css';
 import { HStack, Stack } from '@novu/novui/jsx';
+import type { FC } from 'react';
 import { CodeSnippet } from '../../pages/studio-onboarding/components/CodeSnippet';
 import { useNavigateToLocalStudio } from '../hooks/useNavigateToLocalStudio';
 

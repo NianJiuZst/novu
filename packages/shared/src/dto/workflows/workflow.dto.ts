@@ -1,8 +1,8 @@
-import { StepTypeEnum, WorkflowCreationSourceEnum, ResourceOriginEnum, WorkflowPreferences } from '../../types';
-import { Slug } from '../../types/utils';
+import type { ResourceOriginEnum, StepTypeEnum, WorkflowCreationSourceEnum, WorkflowPreferences } from '../../types';
+import type { Slug } from '../../types/utils';
 import type { JSONSchemaDto } from './json-schema-dto';
-import { StepCreateDto, StepResponseDto, StepUpdateDto } from './step.dto';
-import { WorkflowStatusEnum } from './workflow-status-enum';
+import type { StepCreateDto, StepResponseDto, StepUpdateDto } from './step.dto';
+import type { WorkflowStatusEnum } from './workflow-status-enum';
 
 export class ControlsSchema {
   schema: JSONSchemaDto;

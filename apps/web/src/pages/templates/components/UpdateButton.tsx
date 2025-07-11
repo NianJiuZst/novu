@@ -1,7 +1,7 @@
 import { Button } from '@novu/design-system';
 import { useFormContext } from 'react-hook-form';
-import { IForm } from './formTypes';
 import { useEnvironment } from '../../../hooks';
+import type { IForm } from './formTypes';
 import { useTemplateEditorForm } from './TemplateEditorFormProvider';
 
 export const UpdateButton = () => {

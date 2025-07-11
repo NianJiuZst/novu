@@ -1,4 +1,4 @@
-import { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { Grid } from '../../../styled-system/jsx';
 import { Icon123, IconSettings } from '../../icons';

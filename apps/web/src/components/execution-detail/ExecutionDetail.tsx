@@ -1,12 +1,10 @@
-import { Container, Grid, useMantineTheme } from '@mantine/core';
-import { format, parseISO } from 'date-fns';
 import styled from '@emotion/styled';
-
+import { Container, Grid, useMantineTheme } from '@mantine/core';
 import { colors, Text } from '@novu/design-system';
-import { ExecutionDetailShowRaw } from './ExecutionDetailShowRaw';
-import { getColorByStatus, getLogoByType, getLogoByStatus } from './helpers';
-
+import { format, parseISO } from 'date-fns';
 import { When } from '../utils/When';
+import { ExecutionDetailShowRaw } from './ExecutionDetailShowRaw';
+import { getColorByStatus, getLogoByStatus, getLogoByType } from './helpers';
 
 const ExecutionDetailStatusWrapper = styled(Container)`
   padding: 2px;

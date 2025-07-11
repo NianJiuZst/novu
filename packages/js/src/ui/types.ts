@@ -1,9 +1,9 @@
 import type { JSXElement } from 'solid-js';
 import type { Notification } from '../notifications';
-import { Novu } from '../novu';
+import type { Novu } from '../novu';
 import type { NotificationFilter, NovuOptions, Preference } from '../types';
-import { appearanceKeys } from './config';
-import { Localization } from './context/LocalizationContext';
+import type { appearanceKeys } from './config';
+import type { Localization } from './context/LocalizationContext';
 
 export type NotificationClickHandler = (notification: Notification) => void;
 export type NotificationActionClickHandler = (notification: Notification) => void;

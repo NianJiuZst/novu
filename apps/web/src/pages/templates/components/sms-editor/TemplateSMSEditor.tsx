@@ -1,25 +1,24 @@
-import { Controller, useFormContext } from 'react-hook-form';
-import { ChannelTypeEnum } from '@novu/shared';
-
-import { useState } from 'react';
 import { Grid, SegmentedControl, Stack, useMantineTheme } from '@mantine/core';
 import { When } from '@novu/design-system';
-import { LackIntegrationAlert } from '../LackIntegrationAlert';
+import { ChannelTypeEnum } from '@novu/shared';
+import { useState } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
+import { SmsPreview } from '../../../../components/workflow/preview';
 import {
   useEnvironment,
-  useHasActiveIntegrations,
   useGetPrimaryIntegration,
+  useHasActiveIntegrations,
   useVariablesManager,
 } from '../../../../hooks';
-import { StepSettings } from '../../workflow/SideBar/StepSettings';
-import { useStepFormPath } from '../../hooks/useStepFormPath';
 import { useEditTemplateContent } from '../../hooks/useEditTemplateContent';
-import { VariableManagementButton } from '../VariableManagementButton';
-import { CustomCodeEditor } from '../CustomCodeEditor';
-import { SmsPreview } from '../../../../components/workflow/preview';
-import { EditVariablesModal } from '../EditVariablesModal';
-import { useTemplateEditorForm } from '../TemplateEditorFormProvider';
+import { useStepFormPath } from '../../hooks/useStepFormPath';
+import { StepSettings } from '../../workflow/SideBar/StepSettings';
 import { ControlVariablesForm } from '../ControlVariablesForm';
+import { CustomCodeEditor } from '../CustomCodeEditor';
+import { EditVariablesModal } from '../EditVariablesModal';
+import { LackIntegrationAlert } from '../LackIntegrationAlert';
+import { useTemplateEditorForm } from '../TemplateEditorFormProvider';
+import { VariableManagementButton } from '../VariableManagementButton';
 
 const templateFields = ['content'];
 

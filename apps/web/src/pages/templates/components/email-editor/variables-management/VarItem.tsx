@@ -1,4 +1,4 @@
-import { useMantineTheme, Highlight } from '@mantine/core';
+import { Highlight, useMantineTheme } from '@mantine/core';
 import { colors } from '@novu/design-system';
 
 export const VarItem = ({

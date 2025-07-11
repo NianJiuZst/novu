@@ -1,7 +1,6 @@
 import { Group } from '@mantine/core';
-import { FieldErrors, useFormContext } from 'react-hook-form';
-
-import { Button, Title, Text, Modal } from '@novu/design-system';
+import { Button, Modal, Text, Title } from '@novu/design-system';
+import { type FieldErrors, useFormContext } from 'react-hook-form';
 import type { IForm } from './formTypes';
 
 export function SaveChangesModal({

@@ -1,15 +1,15 @@
 import '../../src/config';
+import { NestFactory } from '@nestjs/core';
 import {
-  MessageRepository,
-  NotificationRepository,
+  EnvironmentRepository,
   ExecutionDetailsRepository,
   JobRepository,
-  OrganizationRepository,
-  EnvironmentRepository,
   JobStatusEnum,
+  MessageRepository,
+  NotificationRepository,
+  OrganizationRepository,
 } from '@novu/dal';
-import { addMinutes, addDays } from 'date-fns';
-import { NestFactory } from '@nestjs/core';
+import { addDays, addMinutes } from 'date-fns';
 import { AppModule } from '../../src/app.module';
 
 const messageRepository = new MessageRepository();

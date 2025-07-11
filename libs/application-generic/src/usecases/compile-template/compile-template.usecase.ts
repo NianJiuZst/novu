@@ -1,10 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import Handlebars from 'handlebars';
-import { format } from 'date-fns';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { HandlebarHelpersEnum } from '@novu/shared';
-
-import { CompileTemplateCommand } from './compile-template.command';
-import { BadRequestException } from '@nestjs/common';
+import { format } from 'date-fns';
+import Handlebars from 'handlebars';
+import type { CompileTemplateCommand } from './compile-template.command';
 
 const assertResult = (condition: boolean, options) => {
   const fn = condition ? options.fn : options.inverse;
@@ -15,9 +13,7 @@ const assertResult = (condition: boolean, options) => {
 function createHandlebarsInstance(i18next: any) {
   const handlebars = Handlebars.create();
 
-  handlebars.registerHelper('json', function (context) {
-    return JSON.stringify(context);
-  });
+  handlebars.registerHelper('json', (context) => JSON.stringify(context));
 
   if (i18next) {
     handlebars.registerHelper(HandlebarHelpersEnum.I18N, function (key, { hash, data, fn }) {
@@ -51,26 +47,22 @@ function createHandlebarsInstance(i18next: any) {
     return arg1 == arg2 ? options.fn(this) : options.inverse(this);
   });
 
-  handlebars.registerHelper(HandlebarHelpersEnum.TITLECASE, function (value) {
-    return value
+  handlebars.registerHelper(HandlebarHelpersEnum.TITLECASE, (value) =>
+    value
       ?.split(' ')
       .map((letter) => letter.charAt(0).toUpperCase() + letter.slice(1).toLowerCase())
-      .join(' ');
-  });
+      .join(' ')
+  );
 
-  handlebars.registerHelper(HandlebarHelpersEnum.UPPERCASE, function (value) {
-    return value?.toUpperCase();
-  });
+  handlebars.registerHelper(HandlebarHelpersEnum.UPPERCASE, (value) => value?.toUpperCase());
 
-  handlebars.registerHelper(HandlebarHelpersEnum.LOWERCASE, function (value) {
-    return value?.toLowerCase();
-  });
+  handlebars.registerHelper(HandlebarHelpersEnum.LOWERCASE, (value) => value?.toLowerCase());
 
-  handlebars.registerHelper(HandlebarHelpersEnum.PLURALIZE, function (number, single, plural) {
-    return number === 1 ? single : plural;
-  });
+  handlebars.registerHelper(HandlebarHelpersEnum.PLURALIZE, (number, single, plural) =>
+    number === 1 ? single : plural
+  );
 
-  handlebars.registerHelper(HandlebarHelpersEnum.DATEFORMAT, function (date, dateFormat) {
+  handlebars.registerHelper(HandlebarHelpersEnum.DATEFORMAT, (date, dateFormat) => {
     // Format date if parameters are valid
     if (date && dateFormat && !Number.isNaN(Date.parse(date))) {
       return format(new Date(date), dateFormat);
@@ -79,7 +71,7 @@ function createHandlebarsInstance(i18next: any) {
     return date;
   });
 
-  handlebars.registerHelper(HandlebarHelpersEnum.GROUP_BY, function (array, property) {
+  handlebars.registerHelper(HandlebarHelpersEnum.GROUP_BY, (array, property) => {
     if (!Array.isArray(array)) return [];
     const map = {};
     array.forEach((item) => {
@@ -101,7 +93,7 @@ function createHandlebarsInstance(i18next: any) {
     return result;
   });
 
-  handlebars.registerHelper(HandlebarHelpersEnum.UNIQUE, function (array, property) {
+  handlebars.registerHelper(HandlebarHelpersEnum.UNIQUE, (array, property) => {
     if (!Array.isArray(array)) return '';
 
     return (
@@ -116,11 +108,11 @@ function createHandlebarsInstance(i18next: any) {
     );
   });
 
-  handlebars.registerHelper(HandlebarHelpersEnum.SORT_BY, function (array, property) {
+  handlebars.registerHelper(HandlebarHelpersEnum.SORT_BY, (array, property) => {
     if (!Array.isArray(array)) return '';
     if (!property) return array.sort();
 
-    return array.sort(function (a, b) {
+    return array.sort((a, b) => {
       const _x = a[property];
       const _y = b[property];
 
@@ -130,7 +122,7 @@ function createHandlebarsInstance(i18next: any) {
   });
 
   // based on: https://gist.github.com/DennyLoko/61882bc72176ca74a0f2
-  handlebars.registerHelper(HandlebarHelpersEnum.NUMBERFORMAT, function (number, options) {
+  handlebars.registerHelper(HandlebarHelpersEnum.NUMBERFORMAT, (number, options) => {
     if (Number.isNaN(number)) {
       return number;
     }
@@ -149,29 +141,17 @@ function createHandlebarsInstance(i18next: any) {
     return (decimalSep ? num.replace('.', decimalSep) : num).replace(new RegExp(re, 'g'), `$&${thousandsSep}`);
   });
 
-  handlebars.registerHelper(HandlebarHelpersEnum.GT, function (arg1, arg2, options) {
-    return assertResult(arg1 > arg2, options);
-  });
+  handlebars.registerHelper(HandlebarHelpersEnum.GT, (arg1, arg2, options) => assertResult(arg1 > arg2, options));
 
-  handlebars.registerHelper(HandlebarHelpersEnum.GTE, function (arg1, arg2, options) {
-    return assertResult(arg1 >= arg2, options);
-  });
+  handlebars.registerHelper(HandlebarHelpersEnum.GTE, (arg1, arg2, options) => assertResult(arg1 >= arg2, options));
 
-  handlebars.registerHelper(HandlebarHelpersEnum.LT, function (arg1, arg2, options) {
-    return assertResult(arg1 < arg2, options);
-  });
+  handlebars.registerHelper(HandlebarHelpersEnum.LT, (arg1, arg2, options) => assertResult(arg1 < arg2, options));
 
-  handlebars.registerHelper(HandlebarHelpersEnum.LTE, function (arg1, arg2, options) {
-    return assertResult(arg1 <= arg2, options);
-  });
+  handlebars.registerHelper(HandlebarHelpersEnum.LTE, (arg1, arg2, options) => assertResult(arg1 <= arg2, options));
 
-  handlebars.registerHelper(HandlebarHelpersEnum.EQ, function (arg1, arg2, options) {
-    return assertResult(arg1 === arg2, options);
-  });
+  handlebars.registerHelper(HandlebarHelpersEnum.EQ, (arg1, arg2, options) => assertResult(arg1 === arg2, options));
 
-  handlebars.registerHelper(HandlebarHelpersEnum.NE, function (arg1, arg2, options) {
-    return assertResult(arg1 !== arg2, options);
-  });
+  handlebars.registerHelper(HandlebarHelpersEnum.NE, (arg1, arg2, options) => assertResult(arg1 !== arg2, options));
 
   return handlebars;
 }

@@ -1,8 +1,7 @@
-import { Group, Stack } from '@mantine/core';
-import { useEffect } from 'react';
-
 import styled from '@emotion/styled';
-import { Button, colors, Text, Label } from '@novu/design-system';
+import { Group, Stack } from '@mantine/core';
+import { Button, colors, Label, Text } from '@novu/design-system';
+import { useEffect } from 'react';
 import { When } from '../../../../../components/utils/When';
 import { useDataRef } from '../../../../../hooks';
 

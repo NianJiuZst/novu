@@ -3,30 +3,25 @@
  */
 
 import {
-  InvalidateQueryFilters,
-  QueryClient,
-  QueryFunctionContext,
-  QueryKey,
+  type InvalidateQueryFilters,
+  type QueryClient,
+  type QueryFunctionContext,
+  type QueryKey,
+  type UseQueryResult,
+  type UseSuspenseQueryResult,
   useQuery,
-  UseQueryResult,
   useSuspenseQuery,
-  UseSuspenseQueryResult,
-} from "@tanstack/react-query";
-import { NovuCore } from "../core.js";
-import { workflowsGet } from "../funcs/workflowsGet.js";
-import { combineSignals } from "../lib/primitives.js";
-import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
-import { unwrapAsync } from "../types/fp.js";
-import { useNovuContext } from "./_context.js";
-import {
-  QueryHookOptions,
-  SuspenseQueryHookOptions,
-  TupleToPrefixes,
-} from "./_types.js";
+} from '@tanstack/react-query';
+import type { NovuCore } from '../core.js';
+import { workflowsGet } from '../funcs/workflowsGet.js';
+import { combineSignals } from '../lib/primitives.js';
+import type { RequestOptions } from '../lib/sdks.js';
+import type * as operations from '../models/operations/index.js';
+import { unwrapAsync } from '../types/fp.js';
+import { useNovuContext } from './_context.js';
+import type { QueryHookOptions, SuspenseQueryHookOptions, TupleToPrefixes } from './_types.js';
 
-export type WorkflowsGetQueryData =
-  operations.WorkflowControllerGetWorkflowResponse;
+export type WorkflowsGetQueryData = operations.WorkflowControllerGetWorkflowResponse;
 
 /**
  * Retrieve a workflow
@@ -38,17 +33,11 @@ export function useWorkflowsGet(
   workflowId: string,
   environmentId?: string | undefined,
   idempotencyKey?: string | undefined,
-  options?: QueryHookOptions<WorkflowsGetQueryData>,
+  options?: QueryHookOptions<WorkflowsGetQueryData>
 ): UseQueryResult<WorkflowsGetQueryData, Error> {
   const client = useNovuContext();
   return useQuery({
-    ...buildWorkflowsGetQuery(
-      client,
-      workflowId,
-      environmentId,
-      idempotencyKey,
-      options,
-    ),
+    ...buildWorkflowsGetQuery(client, workflowId, environmentId, idempotencyKey, options),
     ...options,
   });
 }
@@ -63,17 +52,11 @@ export function useWorkflowsGetSuspense(
   workflowId: string,
   environmentId?: string | undefined,
   idempotencyKey?: string | undefined,
-  options?: SuspenseQueryHookOptions<WorkflowsGetQueryData>,
+  options?: SuspenseQueryHookOptions<WorkflowsGetQueryData>
 ): UseSuspenseQueryResult<WorkflowsGetQueryData, Error> {
   const client = useNovuContext();
   return useSuspenseQuery({
-    ...buildWorkflowsGetQuery(
-      client,
-      workflowId,
-      environmentId,
-      idempotencyKey,
-      options,
-    ),
+    ...buildWorkflowsGetQuery(client, workflowId, environmentId, idempotencyKey, options),
     ...options,
   });
 }
@@ -83,15 +66,10 @@ export function prefetchWorkflowsGet(
   client$: NovuCore,
   workflowId: string,
   environmentId?: string | undefined,
-  idempotencyKey?: string | undefined,
+  idempotencyKey?: string | undefined
 ): Promise<void> {
   return queryClient.prefetchQuery({
-    ...buildWorkflowsGetQuery(
-      client$,
-      workflowId,
-      environmentId,
-      idempotencyKey,
-    ),
+    ...buildWorkflowsGetQuery(client$, workflowId, environmentId, idempotencyKey),
   });
 }
 
@@ -104,7 +82,7 @@ export function setWorkflowsGetData(
       idempotencyKey?: string | undefined;
     },
   ],
-  data: WorkflowsGetQueryData,
+  data: WorkflowsGetQueryData
 ): WorkflowsGetQueryData | undefined {
   const key = queryKeyWorkflowsGet(...queryKeyBase);
 
@@ -122,21 +100,21 @@ export function invalidateWorkflowsGet(
       },
     ]
   >,
-  filters?: Omit<InvalidateQueryFilters, "queryKey" | "predicate" | "exact">,
+  filters?: Omit<InvalidateQueryFilters, 'queryKey' | 'predicate' | 'exact'>
 ): Promise<void> {
   return client.invalidateQueries({
     ...filters,
-    queryKey: ["@novu/api", "Workflows", "get", ...queryKeyBase],
+    queryKey: ['@novu/api', 'Workflows', 'get', ...queryKeyBase],
   });
 }
 
 export function invalidateAllWorkflowsGet(
   client: QueryClient,
-  filters?: Omit<InvalidateQueryFilters, "queryKey" | "predicate" | "exact">,
+  filters?: Omit<InvalidateQueryFilters, 'queryKey' | 'predicate' | 'exact'>
 ): Promise<void> {
   return client.invalidateQueries({
     ...filters,
-    queryKey: ["@novu/api", "Workflows", "get"],
+    queryKey: ['@novu/api', 'Workflows', 'get'],
   });
 }
 
@@ -145,7 +123,7 @@ export function buildWorkflowsGetQuery(
   workflowId: string,
   environmentId?: string | undefined,
   idempotencyKey?: string | undefined,
-  options?: RequestOptions,
+  options?: RequestOptions
 ): {
   queryKey: QueryKey;
   queryFn: (context: QueryFunctionContext) => Promise<WorkflowsGetQueryData>;
@@ -155,22 +133,14 @@ export function buildWorkflowsGetQuery(
       environmentId,
       idempotencyKey,
     }),
-    queryFn: async function workflowsGetQueryFn(
-      ctx,
-    ): Promise<WorkflowsGetQueryData> {
+    queryFn: async function workflowsGetQueryFn(ctx): Promise<WorkflowsGetQueryData> {
       const sig = combineSignals(ctx.signal, options?.fetchOptions?.signal);
       const mergedOptions = {
         ...options,
         fetchOptions: { ...options?.fetchOptions, signal: sig },
       };
 
-      return unwrapAsync(workflowsGet(
-        client$,
-        workflowId,
-        environmentId,
-        idempotencyKey,
-        mergedOptions,
-      ));
+      return unwrapAsync(workflowsGet(client$, workflowId, environmentId, idempotencyKey, mergedOptions));
     },
   };
 }
@@ -180,7 +150,7 @@ export function queryKeyWorkflowsGet(
   parameters: {
     environmentId?: string | undefined;
     idempotencyKey?: string | undefined;
-  },
+  }
 ): QueryKey {
-  return ["@novu/api", "Workflows", "get", workflowId, parameters];
+  return ['@novu/api', 'Workflows', 'get', workflowId, parameters];
 }

@@ -1,14 +1,14 @@
-import { Flex, Group, Skeleton, Stack, useMantineColorScheme } from '@mantine/core';
 import styled from '@emotion/styled';
+import { Flex, Group, Skeleton, Stack, useMantineColorScheme } from '@mantine/core';
 import { colors, Text } from '@novu/design-system';
 import { useHover } from '../../../../hooks';
+import { LocaleSelect, NovuGreyIcon, PreviewEditOverlay } from '../common';
 import {
   ContentAndOVerlayWrapperStyled,
   ContentHeaderStyled,
   ContentStyled,
   ContentWrapperStyled,
 } from './Content.styles';
-import { LocaleSelect, NovuGreyIcon, PreviewEditOverlay } from '../common';
 
 const Skeletons = () => {
   return (

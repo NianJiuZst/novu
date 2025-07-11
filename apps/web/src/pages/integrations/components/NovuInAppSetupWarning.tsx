@@ -1,6 +1,6 @@
-import { SetupWarning } from './SetupWarning';
 import { useInAppActivated } from '../../../api/hooks';
 import type { IIntegratedProvider } from '../types';
+import { SetupWarning } from './SetupWarning';
 
 export const NovuInAppSetupWarning = ({ provider }: { provider: IIntegratedProvider | null }) => {
   const { isInAppActive } = useInAppActivated();

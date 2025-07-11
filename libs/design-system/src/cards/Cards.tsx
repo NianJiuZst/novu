@@ -1,11 +1,10 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Grid, Stack, useMantineColorScheme } from '@mantine/core';
 import styled from '@emotion/styled';
-
-import { When } from '../when';
+import { Grid, Stack, useMantineColorScheme } from '@mantine/core';
+import type React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { colors, shadows } from '../config';
 import { Text } from '../typography/text/Text';
+import { When } from '../when';
 
 interface ICardCell {
   navIcon?: (props: React.ComponentPropsWithoutRef<'svg'>) => JSX.Element | React.ReactNode;

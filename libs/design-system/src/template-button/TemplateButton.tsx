@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
-import { Popover, createStyles, UnstyledButton, UnstyledButtonProps, createPolymorphicComponent } from '@mantine/core';
 import styled from '@emotion/styled';
+import {
+  createPolymorphicComponent,
+  createStyles,
+  Popover,
+  UnstyledButton,
+  type UnstyledButtonProps,
+} from '@mantine/core';
+import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-
-import { Text } from '../typography/text/Text';
-import { Switch } from '../switch/Switch';
-import { useTemplateButtonStyles } from './TemplateButton.styles';
 import { colors } from '../config';
+import { Switch } from '../switch/Switch';
+import { Text } from '../typography/text/Text';
 import { IconWrapper } from './IconWrapper';
+import { useTemplateButtonStyles } from './TemplateButton.styles';
 
 const Button = createPolymorphicComponent<'button', UnstyledButtonProps>(
   React.forwardRef<HTMLButtonElement, UnstyledButtonProps>((props, ref) => {

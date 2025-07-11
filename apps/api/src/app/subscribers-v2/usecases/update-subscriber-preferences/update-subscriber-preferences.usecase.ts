@@ -1,14 +1,12 @@
-import { plainToInstance } from 'class-transformer';
 import { Injectable } from '@nestjs/common';
+import { GetWorkflowByIdsCommand, type GetWorkflowByIdsUseCase } from '@novu/application-generic';
 import { PreferenceLevelEnum } from '@novu/shared';
-import { GetWorkflowByIdsCommand, GetWorkflowByIdsUseCase } from '@novu/application-generic';
-
-import { UpdateSubscriberPreferencesCommand } from './update-subscriber-preferences.command';
-import { UpdatePreferences } from '../../../inbox/usecases/update-preferences/update-preferences.usecase';
+import { plainToInstance } from 'class-transformer';
 import { UpdatePreferencesCommand } from '../../../inbox/usecases/update-preferences/update-preferences.command';
-import { GetSubscriberPreferences } from '../get-subscriber-preferences/get-subscriber-preferences.usecase';
-
+import type { UpdatePreferences } from '../../../inbox/usecases/update-preferences/update-preferences.usecase';
 import { GetSubscriberPreferencesDto } from '../../dtos/get-subscriber-preferences.dto';
+import type { GetSubscriberPreferences } from '../get-subscriber-preferences/get-subscriber-preferences.usecase';
+import type { UpdateSubscriberPreferencesCommand } from './update-subscriber-preferences.command';
 
 @Injectable()
 export class UpdateSubscriberPreferences {

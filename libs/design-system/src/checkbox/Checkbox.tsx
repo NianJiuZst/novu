@@ -1,5 +1,6 @@
-import React, { ChangeEvent } from 'react';
-import { Checkbox as MantineCheckbox, CheckboxProps } from '@mantine/core';
+import { type CheckboxProps, Checkbox as MantineCheckbox } from '@mantine/core';
+import type React from 'react';
+import type { ChangeEvent } from 'react';
 import useStyles from './Checkbox.styles';
 
 interface ICheckboxProps extends CheckboxProps {

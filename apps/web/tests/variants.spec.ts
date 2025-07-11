@@ -1,13 +1,13 @@
-import { expect, Page } from '@playwright/test';
-import { test } from './utils/baseTest';
+import { expect, type Page } from '@playwright/test';
+import { ChangesPage } from './page-models/changesPage';
+import { EditorState } from './page-models/editorState';
+import { SidebarPage } from './page-models/sidebarPage';
 import { VARIANT_NAMES, VariantPreviewModalPage } from './page-models/variantPreviewModalPage';
 import { WorkflowEditorPage } from './page-models/workflowEditorPage';
+import { WorkflowsPage } from './page-models/workflowsPage';
+import { test } from './utils/baseTest';
 import { initializeSession, waitForNetworkIdle } from './utils/browser';
 import { ChannelType } from './utils/ChannelType';
-import { EditorState } from './page-models/editorState';
-import { ChangesPage } from './page-models/changesPage';
-import { SidebarPage } from './page-models/sidebarPage';
-import { WorkflowsPage } from './page-models/workflowsPage';
 import { addConditions } from './utils/commands';
 
 test.beforeEach(async ({ page }) => {

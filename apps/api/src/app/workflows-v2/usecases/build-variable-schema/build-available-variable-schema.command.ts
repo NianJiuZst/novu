@@ -1,6 +1,6 @@
 import { EnvironmentWithUserCommand } from '@novu/application-generic';
-import { NotificationTemplateEntity } from '@novu/dal';
-import { StepTypeEnum } from '@novu/shared';
+import type { NotificationTemplateEntity } from '@novu/dal';
+import type { StepTypeEnum } from '@novu/shared';
 import { IsDefined, IsOptional, IsString } from 'class-validator';
 
 // Type for optimistic step data used during sync

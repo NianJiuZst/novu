@@ -1,5 +1,5 @@
+import type { DigestOutput, DigestRegularOutput, DigestTimedOutput } from '@novu/framework/internal';
 import { DigestTypeEnum } from '@novu/shared';
-import { DigestOutput, DigestRegularOutput, DigestTimedOutput } from '@novu/framework/internal';
 
 export function getDigestType(outputs: DigestOutput): DigestTypeEnum {
   if (isTimedDigestOutput(outputs)) {

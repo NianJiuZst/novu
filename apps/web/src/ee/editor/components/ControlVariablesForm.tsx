@@ -1,10 +1,10 @@
+import { Accordion, Code, Group } from '@mantine/core';
+import { useDebouncedState, useDisclosure } from '@mantine/hooks';
+import { Button, Text } from '@novu/design-system';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
-import { useDebouncedState, useDisclosure } from '@mantine/hooks';
-import { Accordion, Code, Group } from '@mantine/core';
-import { Button, Text } from '@novu/design-system';
-import { ControlVariables } from './ControlVariables';
 import { api } from '../../../api/index';
+import { ControlVariables } from './ControlVariables';
 
 export const ControlVariablesForm = ({ schema, payloadSchema, formData, onChange }) => {
   const [value, setValue] = useDebouncedState<any>({}, 500);

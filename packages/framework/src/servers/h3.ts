@@ -1,7 +1,7 @@
 import { getHeader, getQuery, type H3Event, readBody, send, setHeaders } from 'h3';
 
 import { NovuRequestHandler, type ServeHandlerOptions } from '../handler';
-import { type SupportedFrameworkName } from '../types';
+import type { SupportedFrameworkName } from '../types';
 
 /*
  * Re-export all top level exports from the main package.

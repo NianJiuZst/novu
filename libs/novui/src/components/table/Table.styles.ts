@@ -1,4 +1,4 @@
-import { type TableStylesNames } from '@mantine/core';
+import type { TableStylesNames } from '@mantine/core';
 import { css } from '../../../styled-system/css';
 
 const tableStyles: Partial<Record<TableStylesNames, string>> = {

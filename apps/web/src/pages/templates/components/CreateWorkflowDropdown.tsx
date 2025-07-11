@@ -1,21 +1,20 @@
-import { useEffect } from 'react';
-import { Skeleton } from '@mantine/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import styled from '@emotion/styled';
 import { faFile } from '@fortawesome/free-regular-svg-icons';
 import { faDiagramNext } from '@fortawesome/free-solid-svg-icons';
-import styled from '@emotion/styled';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Skeleton } from '@mantine/core';
 import { Dropdown, PlusButton, Popover } from '@novu/design-system';
-import { FeatureFlagsKeysEnum, WorkflowCreationSourceEnum } from '@novu/shared';
 import { Button } from '@novu/novui';
 import { IconOutlineAdd } from '@novu/novui/icons';
+import { FeatureFlagsKeysEnum, WorkflowCreationSourceEnum } from '@novu/shared';
+import { useEffect } from 'react';
 
-import { IBlueprintTemplate } from '../../../api/types';
+import type { IBlueprintTemplate } from '../../../api/types';
+import { PATHS } from '../../../components/docs/docs.const';
+import { useDocsModal } from '../../../components/docs/useDocsModal';
 import { useSegment } from '../../../components/providers/SegmentProvider';
 import { useFeatureFlag, useHoverOverItem } from '../../../hooks';
 import { FrameworkProjectDropDownItem } from './FrameworkProjectWaitList';
-import { useDocsModal } from '../../../components/docs/useDocsModal';
-import { PATHS } from '../../../components/docs/docs.const';
 
 const WIDTH = 172;
 

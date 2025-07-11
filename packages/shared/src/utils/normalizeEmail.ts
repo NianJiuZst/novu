@@ -40,7 +40,7 @@ export function normalizeEmail(email: string): string {
   let username = emailParts[0] || '';
   let domain = emailParts[1] || '';
 
-  if (normalizableProviders.hasOwnProperty(domain)) {
+  if (Object.hasOwn(normalizableProviders, domain)) {
     if (normalizableProviders[domain as NormalizableProvider].cut) {
       username = username.replace(normalizableProviders[domain as NormalizableProvider].cut, '');
     }

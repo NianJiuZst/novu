@@ -7,7 +7,7 @@ import type {
   Session,
   Subscriber,
 } from '../types';
-import { HttpClient, HttpClientOptions } from './http-client';
+import { HttpClient, type HttpClientOptions } from './http-client';
 
 export type InboxServiceOptions = HttpClientOptions;
 

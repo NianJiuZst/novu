@@ -1,7 +1,7 @@
 import { LoadingOverlay, useMantineTheme } from '@mantine/core';
 import { colors } from '@novu/design-system';
-import { useNotifications } from '../../../hooks/useNovuAPI';
 import { ExecutionDetailsModal } from '../../../components/execution-detail/ExecutionDetailsModal';
+import { useNotifications } from '../../../hooks/useNovuAPI';
 
 interface Props {
   transactionId: string;

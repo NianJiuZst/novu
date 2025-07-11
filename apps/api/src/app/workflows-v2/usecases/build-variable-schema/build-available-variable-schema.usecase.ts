@@ -1,21 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import {
-  ControlValuesRepository,
-  JsonSchemaTypeEnum,
-  NotificationStepEntity,
-  NotificationTemplateEntity,
-} from '@novu/dal';
 import { Instrument } from '@novu/application-generic';
-import { ControlValuesLevelEnum, StepTypeEnum } from '@novu/shared';
-
-import { computeResultSchema } from '../../shared';
-import { BuildVariableSchemaCommand, IOptimisticStepInfo } from './build-available-variable-schema.command';
-import { parsePayloadSchema } from '../../shared/parse-payload-schema';
+import {
+  type ControlValuesRepository,
+  JsonSchemaTypeEnum,
+  type NotificationStepEntity,
+  type NotificationTemplateEntity,
+} from '@novu/dal';
+import { ControlValuesLevelEnum, type StepTypeEnum } from '@novu/shared';
+import type { JSONSchemaDto } from '../../../shared/dtos/json-schema.dto';
 import { CreateVariablesObjectCommand } from '../../../shared/usecases/create-variables-object/create-variables-object.command';
-import { CreateVariablesObject } from '../../../shared/usecases/create-variables-object/create-variables-object.usecase';
-import { emptyJsonSchema } from '../../util/jsonToSchema';
+import type { CreateVariablesObject } from '../../../shared/usecases/create-variables-object/create-variables-object.usecase';
 import { buildSubscriberSchema, buildVariablesSchema } from '../../../shared/utils/create-schema';
-import { JSONSchemaDto } from '../../../shared/dtos/json-schema.dto';
+import { computeResultSchema } from '../../shared';
+import { parsePayloadSchema } from '../../shared/parse-payload-schema';
+import { emptyJsonSchema } from '../../util/jsonToSchema';
+import type { BuildVariableSchemaCommand, IOptimisticStepInfo } from './build-available-variable-schema.command';
 
 @Injectable()
 export class BuildVariableSchemaUsecase {
@@ -43,10 +42,7 @@ export class BuildVariableSchemaUsecase {
         }
       );
 
-      workflowControlValues = controls
-        .map((item) => item.controls)
-        .flat()
-        .flatMap((obj) => Object.values(obj));
+      workflowControlValues = controls.flatMap((item) => item.controls).flatMap((obj) => Object.values(obj));
     }
 
     const optimisticControlValues = Object.values(command.optimisticControlValues || {});

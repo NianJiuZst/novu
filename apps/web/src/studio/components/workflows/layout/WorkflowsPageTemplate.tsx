@@ -1,9 +1,9 @@
 import { css, cx } from '@novu/novui/css';
-import { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { PageContainer } from '../../../layout/PageContainer';
 import { PageMeta } from '../../../layout/PageMeta';
 import { WORKFLOW_NODE_STEP_ICON_DICTIONARY } from '../node-view/WorkflowNodes';
-import { WorkflowsPageHeader, type IWorkflowsPageHeaderProps } from './WorkflowsPageHeader';
+import { type IWorkflowsPageHeaderProps, WorkflowsPageHeader } from './WorkflowsPageHeader';
 
 export type IWorkflowsPageTemplateProps = IWorkflowsPageHeaderProps;
 

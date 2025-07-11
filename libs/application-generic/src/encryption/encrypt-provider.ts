@@ -1,4 +1,4 @@
-import { EncryptedSecret, ICredentialsDto, NOVU_ENCRYPTION_SUB_MASK, secureCredentials } from '@novu/shared';
+import { type EncryptedSecret, type ICredentialsDto, NOVU_ENCRYPTION_SUB_MASK, secureCredentials } from '@novu/shared';
 
 import { decrypt, encrypt } from './cipher';
 

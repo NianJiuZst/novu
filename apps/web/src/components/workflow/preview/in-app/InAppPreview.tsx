@@ -1,18 +1,18 @@
 import { Grid, JsonInput, useMantineTheme } from '@mantine/core';
 import { Button, colors, inputStyles, When } from '@novu/design-system';
+import { type IMessageButton, inAppMessageFromBridgeOutputs } from '@novu/shared';
+import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useMutation } from '@tanstack/react-query';
-import { IMessageButton, inAppMessageFromBridgeOutputs } from '@novu/shared';
-import { IForm } from '../../../../pages/templates/components/formTypes';
+import { api } from '../../../../api';
+import { useProcessVariables } from '../../../../hooks';
+import { useEnvironment } from '../../../../hooks/useEnvironment';
+import { ControlVariablesForm } from '../../../../pages/templates/components/ControlVariablesForm';
+import type { IForm } from '../../../../pages/templates/components/formTypes';
+import { useTemplateEditorForm } from '../../../../pages/templates/components/TemplateEditorFormProvider';
 import { usePreviewInAppTemplate } from '../../../../pages/templates/hooks/usePreviewInAppTemplate';
 import { useStepFormPath } from '../../../../pages/templates/hooks/useStepFormPath';
 import { useTemplateLocales } from '../../../../pages/templates/hooks/useTemplateLocales';
-import { useProcessVariables } from '../../../../hooks';
-import { api } from '../../../../api';
-import { useEnvironment } from '../../../../hooks/useEnvironment';
-import { useTemplateEditorForm } from '../../../../pages/templates/components/TemplateEditorFormProvider';
-import { ControlVariablesForm } from '../../../../pages/templates/components/ControlVariablesForm';
 import { InAppBasePreview } from './InAppBasePreview';
 
 export function InAppPreview({ showVariables = true }: { showVariables?: boolean }) {

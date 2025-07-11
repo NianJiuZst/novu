@@ -1,4 +1,4 @@
-import { ThemeVarsPartial } from '@storybook/theming';
+import type { ThemeVarsPartial } from '@storybook/theming';
 import { create } from '@storybook/theming/create';
 
 const themeBase: ThemeVarsPartial = {

@@ -1,25 +1,25 @@
-import { parseStepVariables, type EnhancedParsedVariables } from '@/utils/parseStepVariables';
-import type { JSONSchemaDefinition } from '@novu/shared';
-import type { JSONSchema7 } from 'json-schema';
-import { useMemo } from 'react';
+import type { JSONSchemaDefinition } from "@novu/shared";
+import type { JSONSchema7 } from "json-schema";
+import { useMemo } from "react";
+import { type EnhancedParsedVariables, parseStepVariables } from "@/utils/parseStepVariables";
 
 export function useParseVariables(
-  schema?: JSONSchemaDefinition | JSONSchema7,
-  digestStepId?: string,
-  isPayloadSchemaEnabled?: boolean
+	schema?: JSONSchemaDefinition | JSONSchema7,
+	digestStepId?: string,
+	isPayloadSchemaEnabled?: boolean
 ): EnhancedParsedVariables {
-  const parsedVariables = useMemo(() => {
-    return schema
-      ? parseStepVariables(schema, { digestStepId, isPayloadSchemaEnabled })
-      : {
-          variables: [],
-          namespaces: [],
-          primitives: [],
-          arrays: [],
-          enhancedVariables: [],
-          isAllowedVariable: () => false,
-        };
-  }, [schema, digestStepId, isPayloadSchemaEnabled]);
+	const parsedVariables = useMemo(() => {
+		return schema
+			? parseStepVariables(schema, { digestStepId, isPayloadSchemaEnabled })
+			: {
+					variables: [],
+					namespaces: [],
+					primitives: [],
+					arrays: [],
+					enhancedVariables: [],
+					isAllowedVariable: () => false,
+				};
+	}, [schema, digestStepId, isPayloadSchemaEnabled]);
 
-  return parsedVariables;
+	return parsedVariables;
 }

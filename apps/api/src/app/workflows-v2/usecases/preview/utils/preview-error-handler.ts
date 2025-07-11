@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import type { PinoLogger } from '@novu/application-generic';
 import { captureException } from '@sentry/node';
-import { PinoLogger } from '@novu/application-generic';
-import { GeneratePreviewResponseDto } from '../../../dtos';
-import { FrameworkError, GeneratePreviewError } from '../preview.types';
+import type { GeneratePreviewResponseDto } from '../../../dtos';
 import { LOG_CONTEXT } from '../preview.constants';
+import { type FrameworkError, GeneratePreviewError } from '../preview.types';
 
 @Injectable()
 export class PreviewErrorHandler {

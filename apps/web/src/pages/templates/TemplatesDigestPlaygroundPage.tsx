@@ -1,16 +1,15 @@
-import { useCallback } from 'react';
-import { Stack } from '@mantine/core';
 import styled from '@emotion/styled';
+import { Stack } from '@mantine/core';
+import { ArrowButton, Button, colors, Text, Title } from '@novu/design-system';
+import { UTM_CAMPAIGN_QUERY_PARAM } from '@novu/shared';
+import { useCallback } from 'react';
 import { ReactFlowProvider } from 'react-flow-renderer';
 import { useNavigate, useParams } from 'react-router-dom';
-import { UTM_CAMPAIGN_QUERY_PARAM } from '@novu/shared';
-import { ArrowButton, colors, Title, Text, Button } from '@novu/design-system';
-
-import PageContainer from '../../components/layout/components/PageContainer';
-import { parseUrl } from '../../utils/routeUtils';
-import { ROUTES } from '../../constants/routes';
 import { DigestDemoFlow } from '../../components';
+import PageContainer from '../../components/layout/components/PageContainer';
 import { useSegment } from '../../components/providers/SegmentProvider';
+import { ROUTES } from '../../constants/routes';
+import { parseUrl } from '../../utils/routeUtils';
 import { DigestPlaygroundAnalyticsEnum } from './constants';
 import { useTourStorage } from './hooks/useTourStorage';
 

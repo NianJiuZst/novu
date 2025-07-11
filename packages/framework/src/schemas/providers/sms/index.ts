@@ -1,4 +1,4 @@
-import { SmsProviderIdEnum } from '../../../shared';
+import type { SmsProviderIdEnum } from '../../../shared';
 import type { JsonSchema } from '../../../types/schema.types';
 import { genericProviderSchemas } from '../generic.schema';
 import { novuSmsProviderSchemas } from './novu-sms.schema';

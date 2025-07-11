@@ -1,14 +1,13 @@
-import { Avatar, Divider, Container, LoadingOverlay, Stack, Text } from '@mantine/core';
 import styled from '@emotion/styled';
-import capitalize from 'lodash.capitalize';
+import { Avatar, Container, Divider, LoadingOverlay, Stack, Text } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
+import { colors, DotsHorizontal, Dropdown, Mail, Tag, Trash, useTextStyles } from '@novu/design-system';
 import { MemberRoleEnum, MemberStatusEnum } from '@novu/shared';
-
-import { DotsHorizontal, Mail, Trash, useTextStyles, colors, Dropdown, Tag } from '@novu/design-system';
-import { MemberRole } from './MemberRole';
+import capitalize from 'lodash.capitalize';
 import { When } from '../../../components/utils/When';
-import { parseUrl } from '../../../utils/routeUtils';
 import { ROUTES } from '../../../constants/routes';
+import { parseUrl } from '../../../utils/routeUtils';
+import { MemberRole } from './MemberRole';
 
 export function MembersTable({
   members,

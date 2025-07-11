@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import { useLocalThemePreference } from '@novu/design-system';
 import { addons } from '@storybook/preview-api';
+import type { Decorator, Parameters } from '@storybook/react';
+import React, { useEffect } from 'react';
 import { DARK_MODE_EVENT_NAME } from 'storybook-dark-mode';
 import { ThemeProvider } from '../src/ThemeProvider';
-import { useLocalThemePreference } from '@novu/design-system';
-import { lightTheme, darkTheme } from './NovuTheme';
-import { Parameters, Decorator } from '@storybook/react';
+import { darkTheme, lightTheme } from './NovuTheme';
 
 export const parameters: Parameters = {
   layout: 'fullscreen',

@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 export function ArrowForward(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (

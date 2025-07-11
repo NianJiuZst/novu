@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { initializeSession } from './utils/browser';
-import { test } from './utils/baseTest';
 import { SidebarPage } from './page-models/sidebarPage';
+import { test } from './utils/baseTest';
+import { initializeSession } from './utils/browser';
 
 test.describe('Main Nav (Sidebar)', () => {
   test.beforeEach(async ({ page, context }) => {

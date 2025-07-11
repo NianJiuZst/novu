@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
+import { IsString, ValidateNested } from 'class-validator';
 import { LayoutControlValuesDto } from './layout-controls.dto';
 
 export class UpdateLayoutDto {

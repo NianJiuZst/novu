@@ -1,17 +1,16 @@
-import { UnstyledButton } from '@mantine/core';
 import styled from '@emotion/styled';
-import { TooltipRenderProps } from 'react-joyride';
-import { useFormContext } from 'react-hook-form';
-import { useNavigate, useParams } from 'react-router-dom';
+import { UnstyledButton } from '@mantine/core';
+import { BellWithNotification, Button, Clock, colors, DotsNavigation, LetterOpened } from '@novu/design-system';
 import { StepTypeEnum } from '@novu/shared';
-
-import { Button, colors, DotsNavigation, Clock, LetterOpened, BellWithNotification } from '@novu/design-system';
-import { useTour } from './TourProvider';
-import { IForm } from '../components/formTypes';
+import { useFormContext } from 'react-hook-form';
+import type { TooltipRenderProps } from 'react-joyride';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useSegment } from '../../../components/providers/SegmentProvider';
+import type { IForm } from '../components/formTypes';
 import { DigestWorkflowTourAnalyticsEnum, HINT_INDEX_TO_CLICK_ANALYTICS, ordinalNumbers } from '../constants';
 import { useBasePath } from '../hooks/useBasePath';
 import { useTourStorage } from '../hooks/useTourStorage';
+import { useTour } from './TourProvider';
 
 const ICONS = [Clock, LetterOpened, BellWithNotification];
 const TITLE = ['Set-up time interval', 'Set-up email content', 'Test your workflow'];

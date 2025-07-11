@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { schemaOptions } from '../schema-default.options';
-import { LocalizationGroupDBModel, LocalizationResourceEnum } from './localization-group.entity';
+import { type LocalizationGroupDBModel, LocalizationResourceEnum } from './localization-group.entity';
 
 const localizationGroupSchema = new Schema<LocalizationGroupDBModel>(
   {

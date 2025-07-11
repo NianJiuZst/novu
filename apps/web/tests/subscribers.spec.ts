@@ -1,5 +1,5 @@
-import { test } from './utils/baseTest';
 import { SubscribersPage } from './page-models/subscribers';
+import { test } from './utils/baseTest';
 import { initializeSession } from './utils/browser';
 
 test.beforeEach(async ({ page }) => {

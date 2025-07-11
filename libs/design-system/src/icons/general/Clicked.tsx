@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 /* eslint-disable */
 export function Clicked(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (

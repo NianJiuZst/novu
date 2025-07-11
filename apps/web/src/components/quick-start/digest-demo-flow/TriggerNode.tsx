@@ -1,6 +1,5 @@
+import { BoltOutlinedGradient, Button } from '@novu/design-system';
 import { Handle, Position } from 'react-flow-renderer';
-
-import { Button, BoltOutlinedGradient } from '@novu/design-system';
 import { useDigestDemoFlowContext } from './DigestDemoFlowProvider';
 import { NodeStepWithPopover } from './NodeStepWithPopover';
 

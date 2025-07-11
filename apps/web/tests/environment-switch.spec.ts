@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
+import { Environment, SidebarPage } from './page-models/sidebarPage';
 import { test } from './utils/baseTest';
 import { initializeSession } from './utils/browser';
-import { Environment, SidebarPage } from './page-models/sidebarPage';
 
 test.beforeEach(async ({ page }) => {
   await initializeSession(page);

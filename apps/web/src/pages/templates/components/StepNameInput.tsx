@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
 import { TextInput, useMantineColorScheme } from '@mantine/core';
-import { Controller, useFormContext } from 'react-hook-form';
 import { colors } from '@novu/design-system';
+import type { ReactNode } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 
 import { useEnvironment } from '../../../hooks';
 import type { IForm } from './formTypes';

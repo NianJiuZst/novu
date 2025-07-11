@@ -1,17 +1,16 @@
+import {
+  type IActor,
+  type IEmailBlock,
+  type IMessageCTA,
+  type ITemplateVariable,
+  type MessageTemplateContentType,
+  ResourceTypeEnum,
+  StepTypeEnum,
+} from '@novu/shared';
 import { IsDefined, IsEnum, IsMongoId, IsOptional, IsString, ValidateNested } from 'class-validator';
 
-import {
-  IActor,
-  IEmailBlock,
-  IMessageCTA,
-  ITemplateVariable,
-  MessageTemplateContentType,
-  StepTypeEnum,
-  ResourceTypeEnum,
-} from '@novu/shared';
-
 import { EnvironmentWithUserCommand } from '../../../commands';
-import { JSONSchema } from '../../../value-objects';
+import type { JSONSchema } from '../../../value-objects';
 
 export class CreateMessageTemplateCommand extends EnvironmentWithUserCommand {
   @IsDefined()

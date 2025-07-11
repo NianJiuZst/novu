@@ -1,32 +1,31 @@
-import { ReactNode, useMemo, useState } from 'react';
 import { Group, useMantineTheme } from '@mantine/core';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { CHANNELS_WITH_PRIMARY } from '@novu/shared';
 import {
   ActionButton,
   Button,
   colors,
+  DotsHorizontal,
   Dropdown,
   Modal,
   NameInput,
+  StarEmpty,
   Text,
   Title,
-  DotsHorizontal,
-  StarEmpty,
   Trash,
   When,
 } from '@novu/design-system';
-
+import { CHANNELS_WITH_PRIMARY } from '@novu/shared';
+import { type ReactNode, useMemo, useState } from 'react';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { useDeleteIntegration } from '../../../api/hooks';
+import { useMakePrimaryIntegration } from '../../../api/hooks/useMakePrimaryIntegration';
 import { useEnvironment } from '../../../hooks';
-import { ProviderImage } from './multi-provider/SelectProviderSidebar';
+import { errorMessage, successMessage } from '../../../utils/notifications';
 import type { IIntegratedProvider, IntegrationEntity } from '../types';
 import { useProviders } from '../useProviders';
-import { useDeleteIntegration } from '../../../api/hooks';
-import { errorMessage, successMessage } from '../../../utils/notifications';
-import { ProviderInfo } from './multi-provider/ProviderInfo';
-import { useSelectPrimaryIntegrationModal } from './multi-provider/useSelectPrimaryIntegrationModal';
-import { useMakePrimaryIntegration } from '../../../api/hooks/useMakePrimaryIntegration';
 import { ConditionIconButton } from './ConditionIconButton';
+import { ProviderInfo } from './multi-provider/ProviderInfo';
+import { ProviderImage } from './multi-provider/SelectProviderSidebar';
+import { useSelectPrimaryIntegrationModal } from './multi-provider/useSelectPrimaryIntegrationModal';
 import { PrimaryIconButton } from './PrimaryIconButton';
 
 export const UpdateIntegrationSidebarHeader = ({

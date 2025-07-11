@@ -1,23 +1,23 @@
 export type VariableMatch = {
-  fullLiquidExpression: string;
-  liquidVariable: string;
-  name: string;
-  nameRoot: string;
-  filtersArray: string[];
-  filters: string;
+	fullLiquidExpression: string;
+	liquidVariable: string;
+	name: string;
+	nameRoot: string;
+	filtersArray: string[];
+	filters: string;
 };
 
-export const VARIABLE_REGEX_STRING = '{{([^{}]+)}}';
+export const VARIABLE_REGEX_STRING = "{{([^{}]+)}}";
 
 const stripBrackets = (value: string): string => {
-  return value.replace(/[{}]/g, '').trim();
+	return value.replace(/[{}]/g, "").trim();
 };
 
 // Function to normalize variable syntax by reducing multiple brackets to two
 const normalizeVariableSyntax = (value: string): string => {
-  const strippedValue = stripBrackets(value);
+	const strippedValue = stripBrackets(value);
 
-  return `{{${strippedValue}}}`;
+	return `{{${strippedValue}}}`;
 };
 
 /**
@@ -42,25 +42,25 @@ const normalizeVariableSyntax = (value: string): string => {
  * }
  */
 export function parseVariable(variable: string): VariableMatch | undefined {
-  const liquidVariable = variable.match(/^\{+.*\}+$/) ? normalizeVariableSyntax(variable) : `{{${variable}}}`;
-  const regex = new RegExp(VARIABLE_REGEX_STRING, 'g');
-  const match = regex.exec(liquidVariable);
+	const liquidVariable = variable.match(/^\{+.*\}+$/) ? normalizeVariableSyntax(variable) : `{{${variable}}}`;
+	const regex = new RegExp(VARIABLE_REGEX_STRING, "g");
+	const match = regex.exec(liquidVariable);
 
-  if (!match) {
-    return;
-  }
+	if (!match) {
+		return;
+	}
 
-  const fullLiquidExpression = match[1].trim();
-  const parts = fullLiquidExpression.split('|').map((part) => part.trim());
-  const name = parts[0];
-  const hasFilters = parts.length > 1;
+	const fullLiquidExpression = match[1].trim();
+	const parts = fullLiquidExpression.split("|").map((part) => part.trim());
+	const name = parts[0];
+	const hasFilters = parts.length > 1;
 
-  return {
-    fullLiquidExpression: name ? fullLiquidExpression : '',
-    liquidVariable,
-    name,
-    nameRoot: name.trim().split('.')[0],
-    filtersArray: hasFilters ? parts.slice(1) : [],
-    filters: hasFilters ? `| ${parts.slice(1).join(' | ')}` : '',
-  };
+	return {
+		fullLiquidExpression: name ? fullLiquidExpression : "",
+		liquidVariable,
+		name,
+		nameRoot: name.trim().split(".")[0],
+		filtersArray: hasFilters ? parts.slice(1) : [],
+		filters: hasFilters ? `| ${parts.slice(1).join(" | ")}` : "",
+	};
 }

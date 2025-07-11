@@ -1,8 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { Skeleton, useMantineTheme } from '@mantine/core';
-
 import { colors } from '@novu/design-system';
+import { useQuery } from '@tanstack/react-query';
 import { getActivityStats } from '../../../api/activity';
 import { formatNumber } from '../../../utils';
 

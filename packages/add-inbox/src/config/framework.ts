@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { FRAMEWORKS, type FrameworkType } from '../constants';
 import logger from '../utils/logger';
-import { FRAMEWORKS, FrameworkType } from '../constants';
 
 export interface IFramework {
   framework: FrameworkType;

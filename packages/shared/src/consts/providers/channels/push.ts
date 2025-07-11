@@ -1,3 +1,5 @@
+import { ChannelTypeEnum, PushProviderIdEnum } from '../../../types';
+import { UTM_CAMPAIGN_QUERY_PARAM } from '../../../ui';
 import {
   apnsConfig,
   expoConfig,
@@ -7,9 +9,7 @@ import {
   pushpadConfig,
   pushWebhookConfig,
 } from '../credentials';
-import { IProviderConfig } from '../provider.interface';
-import { ChannelTypeEnum, PushProviderIdEnum } from '../../../types';
-import { UTM_CAMPAIGN_QUERY_PARAM } from '../../../ui';
+import type { IProviderConfig } from '../provider.interface';
 
 export const pushProviders: IProviderConfig[] = [
   {

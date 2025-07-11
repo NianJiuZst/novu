@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Client } from './client';
+import { PostActionEnum } from './constants';
 import {
   ExecutionEventPayloadInvalidError,
   ExecutionStateCorruptError,
@@ -10,8 +11,7 @@ import {
   WorkflowNotFoundError,
 } from './errors';
 import { workflow } from './resources';
-import { Event, Step } from './types';
-import { PostActionEnum } from './constants';
+import type { Event, Step } from './types';
 
 describe('Novu Client', () => {
   let client: Client;

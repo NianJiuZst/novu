@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-namespace
-import * as nestSwagger from '@nestjs/swagger';
-import { ApiHeaderOptions } from '@nestjs/swagger';
+import type * as nestSwagger from '@nestjs/swagger';
+import type { ApiHeaderOptions } from '@nestjs/swagger';
 
 export enum HttpResponseHeaderKeysEnum {
   CONTENT_TYPE = 'Content-Type',

@@ -1,17 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PreferencesTypeEnum, WorkflowCreationSourceEnum, ResourceOriginEnum, WorkflowStatusEnum } from '@novu/shared';
-import { PreferencesEntity, PreferencesRepository } from '@novu/dal';
 import { Instrument, InstrumentUsecase } from '@novu/application-generic';
-import { SyncToEnvironmentCommand } from './sync-to-environment.command';
-import { GetWorkflowCommand, GetWorkflowUseCase } from '../get-workflow';
-import {
-  UpsertStepDataCommand,
-  UpsertWorkflowCommand,
-  UpsertWorkflowDataCommand,
-  UpsertWorkflowUseCase,
-} from '../upsert-workflow';
-import { StepResponseDto, WorkflowPreferencesDto, WorkflowResponseDto } from '../../dtos';
+import type { PreferencesEntity, PreferencesRepository } from '@novu/dal';
+import { PreferencesTypeEnum, ResourceOriginEnum, WorkflowCreationSourceEnum, WorkflowStatusEnum } from '@novu/shared';
+import type { StepResponseDto, WorkflowPreferencesDto, WorkflowResponseDto } from '../../dtos';
 import { WorkflowNotSyncableException } from '../../exceptions/workflow-not-syncable-exception';
+import { GetWorkflowCommand, type GetWorkflowUseCase } from '../get-workflow';
+import {
+  type UpsertStepDataCommand,
+  UpsertWorkflowCommand,
+  type UpsertWorkflowDataCommand,
+  type UpsertWorkflowUseCase,
+} from '../upsert-workflow';
+import type { SyncToEnvironmentCommand } from './sync-to-environment.command';
 
 export const SYNCABLE_WORKFLOW_ORIGINS = [ResourceOriginEnum.NOVU_CLOUD];
 

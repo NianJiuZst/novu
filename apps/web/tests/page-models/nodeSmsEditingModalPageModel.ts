@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { WorkflowBaseSidePanelPage } from './workflowSettingsSidePanel';
 import { fillTextInAMonacoEditor } from '../utils/browser';
 import { VariantPreviewModalPage } from './variantPreviewModalPage';
+import { WorkflowBaseSidePanelPage } from './workflowSettingsSidePanel';
 
 export class NodeSmsEditingModalPageModel extends WorkflowBaseSidePanelPage {
   async updateSmsData(smsBody: string) {

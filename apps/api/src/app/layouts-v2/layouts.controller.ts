@@ -11,35 +11,35 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common/decorators';
-import { ApiExcludeController, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiExcludeController, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ExternalApiAccessible,
-  UserSession,
-  RequirePermissions,
   ParseSlugEnvironmentIdPipe,
   ParseSlugIdPipe,
+  RequirePermissions,
+  UserSession,
 } from '@novu/application-generic';
-import { ApiRateLimitCategoryEnum, DirectionEnum, UserSessionData, PermissionsEnum } from '@novu/shared';
-import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
+import { ApiRateLimitCategoryEnum, DirectionEnum, PermissionsEnum, type UserSessionData } from '@novu/shared';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
+import { ThrottlerCategory } from '../rate-limiting/guards/throttler.decorator';
+import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
+import { SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 import {
   CreateLayoutDto,
   DuplicateLayoutDto,
-  GetLayoutListQueryParamsDto,
+  type GetLayoutListQueryParamsDto,
   LayoutResponseDto,
-  UpdateLayoutDto,
   ListLayoutResponseDto,
+  UpdateLayoutDto,
 } from './dtos';
-import { ThrottlerCategory } from '../rate-limiting/guards/throttler.decorator';
-import { UpsertLayoutCommand, UpsertLayoutUseCase } from './usecases/upsert-layout';
-import { GetLayoutCommand, GetLayoutUseCase } from './usecases/get-layout';
-import { DeleteLayoutCommand, DeleteLayoutUseCase } from './usecases/delete-layout';
-import { DuplicateLayoutCommand, DuplicateLayoutUseCase } from './usecases/duplicate-layout';
-import { ListLayoutsCommand, ListLayoutsUseCase } from './usecases/list-layouts';
-import { LayoutPreviewRequestDto } from './dtos/layout-preview-request.dto';
 import { GenerateLayoutPreviewResponseDto } from './dtos/generate-layout-preview-response.dto';
-import { PreviewLayoutCommand, PreviewLayoutUsecase } from './usecases/preview-layout';
-import { SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
+import { LayoutPreviewRequestDto } from './dtos/layout-preview-request.dto';
+import { DeleteLayoutCommand, type DeleteLayoutUseCase } from './usecases/delete-layout';
+import { DuplicateLayoutCommand, type DuplicateLayoutUseCase } from './usecases/duplicate-layout';
+import { GetLayoutCommand, type GetLayoutUseCase } from './usecases/get-layout';
+import { ListLayoutsCommand, type ListLayoutsUseCase } from './usecases/list-layouts';
+import { PreviewLayoutCommand, type PreviewLayoutUsecase } from './usecases/preview-layout';
+import { UpsertLayoutCommand, type UpsertLayoutUseCase } from './usecases/upsert-layout';
 
 @ThrottlerCategory(ApiRateLimitCategoryEnum.CONFIGURATION)
 @ApiCommonResponses()

@@ -1,5 +1,5 @@
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { INotificationTemplate } from '@novu/shared';
+import type { INotificationTemplate } from '@novu/shared';
+import { type UseQueryOptions, useQuery } from '@tanstack/react-query';
 
 import { getTemplateById } from '../../notification-templates';
 import { QueryKeys } from '../../query.keys';

@@ -1,12 +1,12 @@
 import { Show } from 'solid-js';
+import { useInboxContext, useNovu } from '../../context';
 import { useLocalization } from '../../context/LocalizationContext';
 import { useStyle } from '../../helpers/useStyle';
-import { Motion } from '../primitives/Motion';
-import { SkeletonAvatar, SkeletonText } from '../primitives/Skeleton';
-import { useInboxContext, useNovu } from '../../context';
-import { Button } from '../primitives/Button';
 import { Bell } from '../../icons';
 import { Key } from '../../icons/Key';
+import { Button } from '../primitives/Button';
+import { Motion } from '../primitives/Motion';
+import { SkeletonAvatar, SkeletonText } from '../primitives/Skeleton';
 
 type NotificationListSkeletonProps = {
   loading?: boolean;

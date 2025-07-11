@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import got, { HTTPError, RequestError } from 'got';
+import type { MessageRepository } from '@novu/dal';
 import { ChannelTypeEnum, FeatureFlagsKeysEnum, WebSocketEventEnum } from '@novu/shared';
-import { MessageRepository } from '@novu/dal';
+import got, { HTTPError, RequestError } from 'got';
 
-import { FeatureFlagsService } from '../feature-flags';
+import type { FeatureFlagsService } from '../feature-flags';
 
 const LOG_CONTEXT = 'SocketWorkerService';
 

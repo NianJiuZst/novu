@@ -1,7 +1,7 @@
-import { useCallback, useMemo } from 'react';
+import type { INotificationTemplate, IPaginationWithQueryParams } from '@novu/shared';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import * as mixpanel from 'mixpanel-browser';
-import { INotificationTemplate, IPaginationWithQueryParams } from '@novu/shared';
+import { useCallback, useMemo } from 'react';
 import { buildApiHttpClient } from '../api/api.client';
 
 import { useStudioState } from '../studio/StudioStateProvider';

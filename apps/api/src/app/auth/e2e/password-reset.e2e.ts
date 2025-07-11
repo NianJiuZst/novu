@@ -1,10 +1,10 @@
 import { CommunityUserRepository } from '@novu/dal';
-import { UserSession } from '@novu/testing';
-import { v4 as uuidv4 } from 'uuid';
-import { expect } from 'chai';
-import { stub, SinonStubbedMember } from 'sinon';
-import { subDays, subMinutes } from 'date-fns';
 import { PasswordResetFlowEnum } from '@novu/shared';
+import { UserSession } from '@novu/testing';
+import { expect } from 'chai';
+import { subDays, subMinutes } from 'date-fns';
+import { type SinonStubbedMember, stub } from 'sinon';
+import { v4 as uuidv4 } from 'uuid';
 
 describe('Password reset - /auth/reset (POST) #novu-v0-os', async () => {
   let session: UserSession;

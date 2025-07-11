@@ -1,12 +1,12 @@
-import { expect, Page } from '@playwright/test';
-import { test } from './utils/baseTest';
+import { expect, type Page } from '@playwright/test';
 import { ChangesPage } from './page-models/changesPage';
 import { SidebarPage } from './page-models/sidebarPage';
 import { WorkflowEditorPage } from './page-models/workflowEditorPage';
 import { WorkflowsPage } from './page-models/workflowsPage';
+import { test } from './utils/baseTest';
 
 import { initializeSession } from './utils/browser';
-import { SessionData } from './utils/plugins';
+import type { SessionData } from './utils/plugins';
 
 let session: SessionData;
 test.beforeEach(async ({ page }) => {

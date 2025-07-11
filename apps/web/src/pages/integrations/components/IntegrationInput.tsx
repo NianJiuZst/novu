@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { CredentialsKeyEnum, IConfigCredentials, secureCredentials } from '@novu/shared';
-import { Input, PasswordInput, Switch, Textarea, Tooltip, Select } from '@novu/design-system';
+import { Input, PasswordInput, Select, Switch, Textarea, Tooltip } from '@novu/design-system';
+import { type CredentialsKeyEnum, type IConfigCredentials, secureCredentials } from '@novu/shared';
 import { IntegrationSecretTextarea } from './IntegrationSecretTextarea';
 
 const SwitchWrapper = styled.div`

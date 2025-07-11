@@ -1,6 +1,5 @@
+import { DirectionEnum, type KeysOfT, type UserSessionData } from '@novu/shared';
 import { IsDefined, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
-
-import { DirectionEnum, KeysOfT, UserSessionData } from '@novu/shared';
 
 import { BaseCommand } from './base.command';
 

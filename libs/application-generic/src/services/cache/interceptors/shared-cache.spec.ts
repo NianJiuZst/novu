@@ -1,4 +1,6 @@
 /* eslint-disable prefer-destructuring */
+
+import { CacheKeyPrefixEnum } from '../key-builders';
 import {
   buildCachedQuery,
   buildCredentialsKeyPart,
@@ -13,11 +15,10 @@ import {
   getQueryParams,
   validateCredentials,
 } from './shared-cache';
-import { CacheKeyPrefixEnum } from '../key-builders';
 
-describe('shared cache', function () {
-  describe('validateCredentials', function () {
-    it('should validate the credentials for Message entity', function () {
+describe('shared cache', () => {
+  describe('validateCredentials', () => {
+    it('should validate the credentials for Message entity', () => {
       const keyPrefix = CacheKeyPrefixEnum.FEED;
       let credentials: string;
       let res: boolean;
@@ -38,7 +39,7 @@ describe('shared cache', function () {
       res = validateCredentials(keyPrefix, credentials);
       expect(res).toEqual(false);
     });
-    it('should validate the credentials for not Message entity', function () {
+    it('should validate the credentials for not Message entity', () => {
       const keyPrefix = CacheKeyPrefixEnum.USER;
       let credentials: string;
       let res: boolean;
@@ -57,8 +58,8 @@ describe('shared cache', function () {
     });
   });
 
-  describe('getIdentifier', function () {
-    it('should retrieve identifier _subscriber from Message query', async function () {
+  describe('getIdentifier', () => {
+    it('should retrieve identifier _subscriber from Message query', async () => {
       const keyPrefix = CacheKeyPrefixEnum.FEED;
       let query: Record<string, unknown>;
       let res: { key: string; value: string };
@@ -84,7 +85,7 @@ describe('shared cache', function () {
       expect(res.value).toEqual(undefined);
     });
 
-    it('should retrieve identifier _id from not Message query', async function () {
+    it('should retrieve identifier _id from not Message query', async () => {
       const keyPrefix = 'Subscriber';
       let query: Record<string, unknown>;
       let res: { key: string; value: string };
@@ -111,8 +112,8 @@ describe('shared cache', function () {
     });
   });
 
-  describe('buildCredentialsKeyPart', function () {
-    it('should build key part for Message entity', async function () {
+  describe('buildCredentialsKeyPart', () => {
+    it('should build key part for Message entity', async () => {
       const keyPrefix = CacheKeyPrefixEnum.FEED;
       let query: Record<string, unknown>;
       let res: string;
@@ -126,7 +127,7 @@ describe('shared cache', function () {
       expect(res).toEqual(':s=456');
     });
 
-    it('should build key part for not Message entity', async function () {
+    it('should build key part for not Message entity', async () => {
       const keyPrefix = 'Subscriber';
 
       const query = { id: '123', subscriberId: '456', _environmentId: '789' };
@@ -135,8 +136,8 @@ describe('shared cache', function () {
     });
   });
 
-  describe('getEnvironment', function () {
-    it('should return environment from query', async function () {
+  describe('getEnvironment', () => {
+    it('should return environment from query', async () => {
       let res: { key: string; value: string };
       let query: Record<string, unknown>;
 
@@ -167,8 +168,8 @@ describe('shared cache', function () {
     });
   });
 
-  describe('getCredentialWithContext', function () {
-    it('should return credential with context', async function () {
+  describe('getCredentialWithContext', () => {
+    it('should return credential with context', async () => {
       let key: string;
       let value: string;
       let res: string;
@@ -205,8 +206,8 @@ describe('shared cache', function () {
     });
   });
 
-  describe('buildKey', function () {
-    it('should build cache key with only id for environment query by api', function () {
+  describe('buildKey', () => {
+    it('should build cache key with only id for environment query by api', () => {
       const interceptorType = CacheInterceptorTypeEnum.CACHED;
       const prefixKey = CacheKeyPrefixEnum.ENVIRONMENT_BY_API_KEY;
       const keyConfig = { _id: '123' };
@@ -215,7 +216,7 @@ describe('shared cache', function () {
       expect(res).toEqual('environment_by_api_key:i=123');
     });
 
-    it('should build cache key from prefix with config', async function () {
+    it('should build cache key from prefix with config', async () => {
       const interceptorType = CacheInterceptorTypeEnum.CACHED;
       let prefixKey: CacheKeyPrefixEnum;
       let keyConfig: Record<string, unknown>;
@@ -246,7 +247,7 @@ describe('shared cache', function () {
       expect(res).toEqual('');
     });
 
-    it('should build invalidate key from prefix with config', async function () {
+    it('should build invalidate key from prefix with config', async () => {
       const interceptorType = CacheInterceptorTypeEnum.INVALIDATE;
       let prefixKey: CacheKeyPrefixEnum;
       let keyConfig: Record<string, unknown>;
@@ -278,8 +279,8 @@ describe('shared cache', function () {
     });
   });
 
-  describe('getQueryParams', function () {
-    it('should get query param from object', async function () {
+  describe('getQueryParams', () => {
+    it('should get query param from object', async () => {
       const query = {
         _id: '123',
         subscriberId: '333',
@@ -291,7 +292,7 @@ describe('shared cache', function () {
       expect(res).toEqual(':limit=10:seen=true');
     });
 
-    it('should filter credentials from query param from object', async function () {
+    it('should filter credentials from query param from object', async () => {
       const query = {
         _id: '123',
         subscriberId: '333',
@@ -307,7 +308,7 @@ describe('shared cache', function () {
       expect(res).toContain('seen');
     });
 
-    it('should exclude undefined params from query object', async function () {
+    it('should exclude undefined params from query object', async () => {
       const query = {
         _id: '123',
         subscriberId: '333',
@@ -323,7 +324,7 @@ describe('shared cache', function () {
       expect(res).not.toContain('seen');
     });
 
-    it('should stringify nested object in query object', async function () {
+    it('should stringify nested object in query object', async () => {
       const query = {
         _id: '123',
         subscriberId: '333',
@@ -336,7 +337,7 @@ describe('shared cache', function () {
       expect(res).toEqual(':limit=10:options={"limit":10,"filter":true}');
     });
 
-    it('should return {key=value} format separated with delimiter :', async function () {
+    it('should return {key=value} format separated with delimiter :', async () => {
       const query = {
         _id: '123',
         subscriberId: '333',
@@ -349,7 +350,7 @@ describe('shared cache', function () {
       expect(res).toContain(':options={"limit":10,"filter":true}');
     });
 
-    it('should return key with find prefix', async function () {
+    it('should return key with find prefix', async () => {
       const query = {
         _id: '123',
         subscriberId: '333',
@@ -360,7 +361,7 @@ describe('shared cache', function () {
       expect(res).toEqual(':limit=10');
     });
 
-    it('should return key with findOne prefix', async function () {
+    it('should return key with findOne prefix', async () => {
       const query = {
         _id: '123',
         subscriberId: '333',
@@ -374,7 +375,7 @@ describe('shared cache', function () {
       expect(findByIdRes).toEqual(':limit=10');
     });
 
-    it('should return key without method name prefix', async function () {
+    it('should return key without method name prefix', async () => {
       const query = {
         _id: '123',
         subscriberId: '333',
@@ -389,8 +390,8 @@ describe('shared cache', function () {
     });
   });
 
-  describe('getCredentialsKeys', function () {
-    it('should return credentials with and without underline', async function () {
+  describe('getCredentialsKeys', () => {
+    it('should return credentials with and without underline', async () => {
       const credentials = getCredentialsKeys();
       let tmp: string;
 
@@ -420,8 +421,8 @@ describe('shared cache', function () {
     });
   });
 
-  describe('buildCachedQuery', function () {
-    it('should return query object from object list', async function () {
+  describe('buildCachedQuery', () => {
+    it('should return query object from object list', async () => {
       const queryArgs = [
         {
           query: {
@@ -452,7 +453,7 @@ describe('shared cache', function () {
       expect(credentials.options.filter).toEqual(true);
     });
 
-    it('should return query object from string list', async function () {
+    it('should return query object from string list', async () => {
       const queryArgs = ['123', '456'];
 
       const credentials = buildCachedQuery(queryArgs) as Record<string, string>;
@@ -462,8 +463,8 @@ describe('shared cache', function () {
     });
   });
 
-  describe('getInvalidateQuery', function () {
-    it('should create object after create method with its response (createResponse)', async function () {
+  describe('getInvalidateQuery', () => {
+    it('should create object after create method with its response (createResponse)', async () => {
       const createResponse = {
         _id: 'createResponse_123',
         subscriberId: 'createResponse_333',
@@ -476,17 +477,13 @@ describe('shared cache', function () {
         { limit: '10', filter: true },
       ];
 
-      const credentials = getInvalidateQuery(
-        'Create',
-        createResponse,
-        queryArgs,
-      );
+      const credentials = getInvalidateQuery('Create', createResponse, queryArgs);
 
       expect(credentials._id).toEqual('createResponse_123');
       expect(credentials.subscriberId).toEqual('createResponse_333');
     });
 
-    it('should create object after update method with args object (queryArgs) first element', async function () {
+    it('should create object after update method with args object (queryArgs) first element', async () => {
       const createResponse = {
         _id: '123',
         subscriberId: '333',
@@ -502,19 +499,15 @@ describe('shared cache', function () {
         { options: { limit: '10', filter: true } },
       ];
 
-      const credentials = getInvalidateQuery(
-        'update',
-        createResponse,
-        queryArgs,
-      );
+      const credentials = getInvalidateQuery('update', createResponse, queryArgs);
 
       expect(credentials._id).toEqual('queryArgs_123');
       expect(credentials.subscriberId).toEqual('queryArgs_333');
     });
   });
 
-  describe('buildQueryKeyPart', function () {
-    it('should build query key part for cached interceptor', async function () {
+  describe('buildQueryKeyPart', () => {
+    it('should build query key part for cached interceptor', async () => {
       const query = {
         _id: '123',
         subscriberId: '333',
@@ -522,16 +515,12 @@ describe('shared cache', function () {
         limit: 10,
         seen: true,
       };
-      const res = buildQueryKeyPart(
-        CacheKeyPrefixEnum.MESSAGE_COUNT,
-        CacheInterceptorTypeEnum.CACHED,
-        query,
-      );
+      const res = buildQueryKeyPart(CacheKeyPrefixEnum.MESSAGE_COUNT, CacheInterceptorTypeEnum.CACHED, query);
 
       expect(res).toEqual(':limit=10:seen=true');
     });
 
-    it('should build query key part for invalidate interceptor', async function () {
+    it('should build query key part for invalidate interceptor', async () => {
       const query = {
         _id: '123',
         subscriberId: '333',
@@ -539,11 +528,7 @@ describe('shared cache', function () {
         limit: 10,
         seen: true,
       };
-      const res = buildQueryKeyPart(
-        CacheKeyPrefixEnum.MESSAGE_COUNT,
-        CacheInterceptorTypeEnum.INVALIDATE,
-        query,
-      );
+      const res = buildQueryKeyPart(CacheKeyPrefixEnum.MESSAGE_COUNT, CacheInterceptorTypeEnum.INVALIDATE, query);
 
       expect(res).toEqual('*');
     });

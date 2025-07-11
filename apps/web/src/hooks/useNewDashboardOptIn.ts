@@ -1,9 +1,8 @@
-import { useCallback } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { NewDashboardOptInStatusEnum } from '@novu/shared';
-
-import { NEW_DASHBOARD_URL } from '../config';
+import { useCallback } from 'react';
 import { useSegment } from '../components/providers/SegmentProvider';
+import { NEW_DASHBOARD_URL } from '../config';
 
 export function useNewDashboardOptIn() {
   const { user, isLoaded } = useUser();

@@ -1,19 +1,19 @@
-import axios from 'axios';
-import { expect } from 'chai';
 import {
-  MessageRepository,
-  NotificationTemplateEntity,
-  SubscriberEntity,
+  JobEntity,
   JobRepository,
   JobStatusEnum,
-  JobEntity,
+  MessageRepository,
+  type NotificationTemplateEntity,
+  type SubscriberEntity,
 } from '@novu/dal';
-import { StepTypeEnum, DigestTypeEnum, DigestUnitEnum, IDigestRegularMetadata } from '@novu/shared';
-import { UserSession, SubscribersService } from '@novu/testing';
+import { DigestTypeEnum, DigestUnitEnum, IDigestRegularMetadata, StepTypeEnum } from '@novu/shared';
+import { SubscribersService, UserSession } from '@novu/testing';
+import axios from 'axios';
+import { expect } from 'chai';
 
 const axiosInstance = axios.create();
 
-describe('Trigger event - Scheduled Digest Mode - /v1/events/trigger (POST) #novu-v2', function () {
+describe('Trigger event - Scheduled Digest Mode - /v1/events/trigger (POST) #novu-v2', () => {
   let session: UserSession;
   let template: NotificationTemplateEntity;
   let subscriber: SubscriberEntity;

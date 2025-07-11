@@ -1,5 +1,5 @@
+import type { IEmailBlock } from '@novu/shared';
 import { useEffect, useState } from 'react';
-import { IEmailBlock } from '@novu/shared';
 import { useGetLocalesFromContent } from '../../../api/hooks';
 import { useGetDefaultLocale } from '../../../ee/translations/hooks';
 

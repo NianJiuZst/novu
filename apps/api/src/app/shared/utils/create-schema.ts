@@ -1,5 +1,5 @@
 import { JsonSchemaFormatEnum, JsonSchemaTypeEnum } from '@novu/dal';
-import { JSONSchemaDto } from '../dtos/json-schema.dto';
+import type { JSONSchemaDto } from '../dtos/json-schema.dto';
 
 function determineSchemaType(value: unknown): JSONSchemaDto {
   if (value === null) {

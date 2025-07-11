@@ -1,5 +1,5 @@
+import type { TriggerOverrides, TriggerRecipientSubscriber, TriggerTenantContext } from '@novu/shared';
 import { IsDefined, IsObject, IsOptional, IsString } from 'class-validator';
-import { TriggerOverrides, TriggerRecipientSubscriber, TriggerTenantContext } from '@novu/shared';
 
 import { EnvironmentWithUserCommand } from '../../../shared/commands/project.command';
 

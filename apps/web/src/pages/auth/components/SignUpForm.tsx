@@ -1,22 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
 import { Center } from '@mantine/core';
-import { passwordConstraints, UTM_CAMPAIGN_QUERY_PARAM } from '@novu/shared';
+import { Button, Checkbox, colors, Input, PasswordInput, Text } from '@novu/design-system';
 import type { IResponseError } from '@novu/shared';
-import { PasswordInput, Button, colors, Input, Text, Checkbox } from '@novu/design-system';
-
-import { useAuth } from '../../../hooks/useAuth';
+import { passwordConstraints, UTM_CAMPAIGN_QUERY_PARAM } from '@novu/shared';
+import { useMutation } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link, useLocation } from 'react-router-dom';
 import { api } from '../../../api/api.client';
-import { useRedirectURL } from '../../../hooks';
-import { useAcceptInvite } from './useAcceptInvite';
-import { PasswordRequirementPopover } from './PasswordRequirementPopover';
-import { ROUTES } from '../../../constants/routes';
-import { OAuth } from './OAuth';
 import { useSegment } from '../../../components/providers/SegmentProvider';
+import { ROUTES } from '../../../constants/routes';
+import { useRedirectURL } from '../../../hooks';
+import { useAuth } from '../../../hooks/useAuth';
 import { useStudioState } from '../../../studio/hooks';
 import { navigateToWorkflows } from '../../../utils';
+import { OAuth } from './OAuth';
+import { PasswordRequirementPopover } from './PasswordRequirementPopover';
+import { useAcceptInvite } from './useAcceptInvite';
 
 type SignUpFormProps = {
   invitationToken?: string;

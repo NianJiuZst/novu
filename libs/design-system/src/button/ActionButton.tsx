@@ -1,9 +1,8 @@
-import React, { MouseEventHandler, FunctionComponent, ReactNode } from 'react';
-import { ActionIcon, Center, Sx } from '@mantine/core';
-
-import { Tooltip, ITooltipProps } from '../tooltip/Tooltip';
-import { Text } from '../typography/text/Text';
+import { ActionIcon, Center, type Sx } from '@mantine/core';
+import React, { type FunctionComponent, type MouseEventHandler, type ReactNode } from 'react';
 import { colors } from '../config';
+import { type ITooltipProps, Tooltip } from '../tooltip/Tooltip';
+import { Text } from '../typography/text/Text';
 
 export const ActionButton = React.forwardRef<
   HTMLButtonElement,

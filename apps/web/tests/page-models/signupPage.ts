@@ -1,7 +1,7 @@
-import { UserEntity } from '@novu/dal';
-import { Page, selectors } from '@playwright/test';
 import { faker } from '@faker-js/faker';
+import type { UserEntity } from '@novu/dal';
 import { JobTitleEnum, jobTitleToLabelMapper } from '@novu/shared';
+import { type Page, selectors } from '@playwright/test';
 
 export interface SignUpTestData extends Partial<UserEntity> {
   fullName?: string;

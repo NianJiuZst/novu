@@ -1,9 +1,9 @@
 import { Skeleton } from '@mantine/core';
-import { Title, type WithLoadingSkeleton, type LocalizedMessage } from '@novu/novui';
+import { type LocalizedMessage, Title, type WithLoadingSkeleton } from '@novu/novui';
 import { css, cx } from '@novu/novui/css';
 import { hstack } from '@novu/novui/patterns';
 import { token } from '@novu/novui/tokens';
-import { FC, MouseEventHandler } from 'react';
+import type { FC, MouseEventHandler } from 'react';
 import { truncatedFlexTextCss } from '../../../utils/shared.styles';
 
 interface IStepNodeProps {

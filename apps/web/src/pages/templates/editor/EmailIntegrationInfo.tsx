@@ -1,5 +1,5 @@
 import { ChannelTypeEnum } from '@novu/shared';
-import { useIntegrationLimit, useAuth } from '../../../hooks';
+import { useAuth, useIntegrationLimit } from '../../../hooks';
 
 export const EmailIntegrationInfo = ({
   integration,

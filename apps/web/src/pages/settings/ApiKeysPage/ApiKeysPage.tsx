@@ -1,9 +1,15 @@
-import { IconOutlineVisibility, IconOutlineVisibilityOff, IconRefresh, IconSize, Input } from '@novu/design-system';
+import {
+  IconOutlineVisibility,
+  IconOutlineVisibilityOff,
+  IconRefresh,
+  type IconSize,
+  Input,
+} from '@novu/design-system';
 import { Flex } from '@novu/novui/jsx';
-import { IconButton, ClipboardIconButton } from '../../../components';
+import { ClipboardIconButton, IconButton } from '../../../components';
+import { useEnvironment } from '../../../hooks/useEnvironment';
 import { SettingsPageContainer } from '../SettingsPageContainer';
 import { ConfirmRegenerationModal } from '../tabs/components/ConfirmRegenerationModal';
-import { useEnvironment } from '../../../hooks/useEnvironment';
 import { useApiKeysPage } from './useApiKeysPage';
 
 const INPUT_ICON_SIZE: IconSize = '16';

@@ -1,10 +1,10 @@
-import { useMutation, UseMutationOptions } from '@tanstack/react-query';
-import {
+import type {
   IBlueprint,
   ICreateNotificationTemplateDto,
   INotificationTemplate,
   INotificationTemplateStep,
 } from '@novu/shared';
+import { type UseMutationOptions, useMutation } from '@tanstack/react-query';
 
 import { createTemplate } from '../../notification-templates';
 

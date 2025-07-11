@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { ISubscriberPreferenceResponse, ShortIsPrefixEnum } from '@novu/shared';
+import { type ISubscriberPreferenceResponse, ShortIsPrefixEnum } from '@novu/shared';
 import { plainToInstance } from 'class-transformer';
-import { GetSubscriberPreferencesCommand } from './get-subscriber-preferences.command';
 import { buildSlug } from '../../../shared/helpers/build-slug';
 import {
-  GetSubscriberGlobalPreference,
+  type GetSubscriberGlobalPreference,
   GetSubscriberGlobalPreferenceCommand,
 } from '../../../subscribers/usecases/get-subscriber-global-preference';
 import {
-  GetSubscriberPreference,
+  type GetSubscriberPreference,
   GetSubscriberPreferenceCommand,
 } from '../../../subscribers/usecases/get-subscriber-preference';
-import { SubscriberGlobalPreferenceDto } from '../../dtos/subscriber-global-preference.dto';
 import { GetSubscriberPreferencesDto } from '../../dtos/get-subscriber-preferences.dto';
-import { SubscriberWorkflowPreferenceDto } from '../../dtos/subscriber-workflow-preference.dto';
+import type { SubscriberGlobalPreferenceDto } from '../../dtos/subscriber-global-preference.dto';
+import type { SubscriberWorkflowPreferenceDto } from '../../dtos/subscriber-workflow-preference.dto';
+import type { GetSubscriberPreferencesCommand } from './get-subscriber-preferences.command';
 
 @Injectable()
 export class GetSubscriberPreferences {

@@ -1,5 +1,5 @@
-import { getInputProps, WidgetProps } from '@rjsf/utils';
-import { TextInputType, Textarea } from '../../components';
+import { getInputProps, type WidgetProps } from '@rjsf/utils';
+import { Textarea, type TextInputType } from '../../components';
 
 /**
  * @deprecated

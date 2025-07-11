@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { schemaOptions } from '../schema-default.options';
-import { LocalizationDBModel } from './localization.entity';
+import { type LocalizationDBModel, TranslationStatusEnum } from './localization.entity';
 
 const localizationSchema = new Schema<LocalizationDBModel>(
   {
@@ -26,6 +26,17 @@ const localizationSchema = new Schema<LocalizationDBModel>(
       type: Schema.Types.ObjectId,
       ref: 'Organization',
       required: true,
+    },
+    // Translation status tracking fields
+    status: {
+      type: Schema.Types.String,
+      enum: Object.values(TranslationStatusEnum),
+      default: TranslationStatusEnum.UP_TO_DATE,
+      required: true,
+    },
+    missingKeys: {
+      type: [Schema.Types.String],
+      default: [],
     },
   },
   schemaOptions

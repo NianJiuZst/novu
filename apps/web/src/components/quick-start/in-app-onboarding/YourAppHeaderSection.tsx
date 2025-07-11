@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { createStyles, Popover } from '@mantine/core';
-import { colors, shadows, Bell, User } from '@novu/design-system';
+import { Bell, colors, shadows, User } from '@novu/design-system';
 import { SandboxNotificationCenter } from './SandboxNotificationCenter';
 
 const useStyles = createStyles((theme) => ({

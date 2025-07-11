@@ -2,14 +2,14 @@ import styled from '@emotion/styled';
 import { ActionIcon, useMantineTheme } from '@mantine/core';
 import {
   colors,
+  Edit,
+  type IExtendedColumn,
+  PlusButton,
+  Table,
   Text,
   Tooltip,
-  PlusButton,
-  withCellLoading,
-  Edit,
   Trash,
-  IExtendedColumn,
-  Table,
+  withCellLoading,
 } from '@novu/design-system';
 import type { ILayoutEntity } from '@novu/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -17,15 +17,14 @@ import { format } from 'date-fns';
 import { useCallback, useState } from 'react';
 import { deleteLayoutById } from '../../api/layouts';
 import { QueryKeys } from '../../api/query.keys';
+import { useSegment } from '../../components/providers/SegmentProvider';
 import { When } from '../../components/utils/When';
-
 import { useAuth, useEnvironment, useLayouts } from '../../hooks';
 import { errorMessage, successMessage } from '../../utils/notifications';
-import { useSegment } from '../../components/providers/SegmentProvider';
 import { DeleteConfirmModal } from '../templates/components/DeleteConfirmModal';
 import { LayoutEditor } from './LayoutEditor';
 
-const enum ActivePageEnum {
+enum ActivePageEnum {
   LAYOUTS_LIST = 'layouts_list',
   EDIT_LAYOUT = 'edit_layout',
   CREATE_LAYOUT = 'create_layout',

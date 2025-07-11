@@ -1,5 +1,5 @@
-import { SubscriberEntity, UserEntity, MemberEntity } from '@novu/dal';
-import { AuthProviderEnum, AuthenticateContext, ISubscriberJwt, UserSessionData } from '@novu/shared';
+import type { MemberEntity, SubscriberEntity, UserEntity } from '@novu/dal';
+import type { AuthenticateContext, AuthProviderEnum, ISubscriberJwt, UserSessionData } from '@novu/shared';
 
 export interface IAuthService {
   authenticate(

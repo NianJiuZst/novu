@@ -1,13 +1,12 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { JobTopicNameEnum } from '@novu/shared';
-
-import { QueueBaseService } from './queue-base.service';
-import { BullMqService } from '../bull-mq';
-import { WorkflowInMemoryProviderService } from '../in-memory-provider';
-import {
+import type {
   IProcessSubscriberBulkJobDto,
   IProcessSubscriberJobDto,
 } from '../../dtos/process-subscriber-job.dto';
+import { BullMqService } from '../bull-mq';
+import { WorkflowInMemoryProviderService } from '../in-memory-provider';
+import { QueueBaseService } from './queue-base.service';
 
 @Injectable()
 export class SubscriberProcessQueueService extends QueueBaseService {

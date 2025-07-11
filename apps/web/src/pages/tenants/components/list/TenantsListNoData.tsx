@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 
 import { Buildings, colors } from '@novu/design-system';
-import { useEnvironment } from '../../../../hooks';
 import { When } from '../../../../components/utils/When';
+import { useEnvironment } from '../../../../hooks';
 
 const NoDataHolder = styled.div`
   display: flex;

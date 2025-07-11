@@ -1,17 +1,16 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Center, LoadingOverlay } from '@mantine/core';
+import { Button, colors, PageMeta, Text } from '@novu/design-system';
+import type { IGetInviteResponseDto } from '@novu/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { Center, LoadingOverlay } from '@mantine/core';
-import { IGetInviteResponseDto } from '@novu/shared';
-
-import { colors, Text, Button, PageMeta } from '@novu/design-system';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getInviteTokenData } from '../../api/invitation';
 import AuthLayout from '../../components/layout/components/AuthLayout';
-import { SignUpForm } from './components/SignUpForm';
-import { useAuth } from '../../hooks/useAuth';
 import { ROUTES } from '../../constants/routes';
-import { useAcceptInvite } from './components/useAcceptInvite';
+import { useAuth } from '../../hooks/useAuth';
 import { LoginForm } from './components/LoginForm';
+import { SignUpForm } from './components/SignUpForm';
+import { useAcceptInvite } from './components/useAcceptInvite';
 
 export default function InvitationPage() {
   const queryClient = useQueryClient();

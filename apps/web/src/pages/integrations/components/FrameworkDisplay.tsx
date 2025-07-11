@@ -1,7 +1,7 @@
-import { Text, UnstyledButton, Group, useMantineTheme } from '@mantine/core';
+import { Group, Text, UnstyledButton, useMantineTheme } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
+import { AngularGradient, CodeGradient, Copy, JsGradient, ReactGradient, VueGradient } from '@novu/design-system';
 import { colors } from '@novu/notification-center';
-import { AngularGradient, Copy, ReactGradient, VueGradient, JsGradient, CodeGradient } from '@novu/design-system';
 import { UTM_CAMPAIGN_QUERY_PARAM } from '@novu/shared';
 
 import { useEnvironment } from '../../../hooks';

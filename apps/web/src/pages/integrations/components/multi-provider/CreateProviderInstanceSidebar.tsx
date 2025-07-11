@@ -1,36 +1,35 @@
-import { Group, Radio, Text, Input, useMantineTheme } from '@mantine/core';
-import { useEffect, useMemo } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Controller, useForm } from 'react-hook-form';
 import styled from '@emotion/styled';
+import { Group, Input, Radio, Text, useMantineTheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { ChannelTypeEnum, NOVU_PROVIDERS, providers } from '@novu/shared';
-import type { IResponseError, ICreateIntegrationBodyDto } from '@novu/shared';
 import {
   ActionButton,
+  ArrowLeft,
   Button,
+  Condition,
+  ConditionPlus,
   colors,
+  inputStyles,
   NameInput,
   Sidebar,
-  ConditionPlus,
-  ArrowLeft,
-  Condition,
-  inputStyles,
 } from '@novu/design-system';
-
-import { useEnvironment } from '../../../../hooks';
-import { useSegment } from '../../../../components/providers/SegmentProvider';
+import type { ICreateIntegrationBodyDto, IResponseError } from '@novu/shared';
+import { ChannelTypeEnum, NOVU_PROVIDERS, providers } from '@novu/shared';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useMemo } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { createIntegration } from '../../../../api/integration';
-import { defaultIntegrationConditionsProps, IntegrationsStoreModalAnalytics } from '../../constants';
-import { errorMessage, successMessage } from '../../../../utils/notifications';
 import { QueryKeys } from '../../../../api/query.keys';
-import { ProviderImage } from './SelectProviderSidebar';
+import { Conditions, type IConditions } from '../../../../components/conditions';
+import { useSegment } from '../../../../components/providers/SegmentProvider';
+import { When } from '../../../../components/utils/When';
+import { useEnvironment } from '../../../../hooks';
 import { CHANNEL_TYPE_TO_STRING } from '../../../../utils/channels';
+import { errorMessage, successMessage } from '../../../../utils/notifications';
+import { defaultIntegrationConditionsProps, IntegrationsStoreModalAnalytics } from '../../constants';
 import type { IntegrationEntity } from '../../types';
 import { useProviders } from '../../useProviders';
-import { When } from '../../../../components/utils/When';
-import { Conditions, IConditions } from '../../../../components/conditions';
 import { ConditionIconButton } from '../ConditionIconButton';
+import { ProviderImage } from './SelectProviderSidebar';
 
 interface ICreateProviderInstanceForm {
   name: string;

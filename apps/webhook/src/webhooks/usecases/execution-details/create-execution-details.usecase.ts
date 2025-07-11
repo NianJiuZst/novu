@@ -1,11 +1,10 @@
 import { Injectable, Logger, Module } from '@nestjs/common';
-import { ExecutionDetailsEntity, ExecutionDetailsRepository, MessageEntity } from '@novu/dal';
+import type { ExecutionDetailsEntity, ExecutionDetailsRepository, MessageEntity } from '@novu/dal';
 import { ChannelTypeEnum, ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum } from '@novu/shared';
 
 import { EmailEventStatusEnum, SmsEventStatusEnum } from '@novu/stateless';
-import { CreateExecutionDetailsCommand, WebhookCommand } from './create-execution-details.command';
-
-import { IWebhookResult } from '../../dtos/webhooks-response.dto';
+import type { IWebhookResult } from '../../dtos/webhooks-response.dto';
+import type { CreateExecutionDetailsCommand, WebhookCommand } from './create-execution-details.command';
 
 const LOG_CONTEXT = 'CreateExecutionDetails';
 

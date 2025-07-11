@@ -1,17 +1,17 @@
-import { createContext, useCallback, useEffect } from 'react';
-import { IOrganizationEntity, IUserEntity } from '@novu/shared';
+import type { IOrganizationEntity, IUserEntity } from '@novu/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { HttpStatusCode } from 'axios';
+import { createContext, useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../constants/routes';
-import { useSegment } from './SegmentProvider';
-import { clearEnvironmentId } from './EnvironmentProvider';
-import { getUser } from '../../api/user';
 import { switchOrganization as apiSwitchOrganization, getOrganization } from '../../api/organization';
-import { DEFAULT_AUTH_CONTEXT_VALUE } from './constants';
-import { type AuthContextValue } from './AuthProvider';
+import { getUser } from '../../api/user';
+import { ROUTES } from '../../constants/routes';
 import { useRouteScopes } from '../../hooks/useRouteScopes';
 import { inIframe } from '../../utils/iframe';
+import type { AuthContextValue } from './AuthProvider';
+import { DEFAULT_AUTH_CONTEXT_VALUE } from './constants';
+import { clearEnvironmentId } from './EnvironmentProvider';
+import { useSegment } from './SegmentProvider';
 
 export const LOCAL_STORAGE_AUTH_TOKEN_KEY = 'nv_auth_token';
 
@@ -145,8 +145,11 @@ export const CommunityAuthProvider = ({ children }: { children: React.ReactNode 
       redirectURL,
       origin,
       anonymousId,
-    }: { redirectURL?: string; origin?: string; anonymousId?: string | null } = {}) =>
-      redirectTo({ url: ROUTES.AUTH_SIGNUP, redirectURL, origin, anonymousId }),
+    }: {
+      redirectURL?: string;
+      origin?: string;
+      anonymousId?: string | null;
+    } = {}) => redirectTo({ url: ROUTES.AUTH_SIGNUP, redirectURL, origin, anonymousId }),
     [redirectTo]
   );
 

@@ -1,17 +1,15 @@
 import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { encryptApiKey } from '@novu/application-generic';
+import type { EnvironmentEntity, EnvironmentRepository, NotificationGroupRepository } from '@novu/dal';
+import { EnvironmentEnum, PROTECTED_ENVIRONMENTS } from '@novu/shared';
 import { createHash } from 'crypto';
 import { nanoid } from 'nanoid';
-
-import { encryptApiKey } from '@novu/application-generic';
-import { EnvironmentEntity, EnvironmentRepository, NotificationGroupRepository } from '@novu/dal';
-
-import { EnvironmentEnum, PROTECTED_ENVIRONMENTS } from '@novu/shared';
 import { CreateNovuIntegrationsCommand } from '../../../integrations/usecases/create-novu-integrations/create-novu-integrations.command';
-import { CreateNovuIntegrations } from '../../../integrations/usecases/create-novu-integrations/create-novu-integrations.usecase';
-import { CreateDefaultLayout, CreateDefaultLayoutCommand } from '../../../layouts-v1/usecases';
-import { GenerateUniqueApiKey } from '../generate-unique-api-key/generate-unique-api-key.usecase';
-import { CreateEnvironmentCommand } from './create-environment.command';
+import type { CreateNovuIntegrations } from '../../../integrations/usecases/create-novu-integrations/create-novu-integrations.usecase';
+import { type CreateDefaultLayout, CreateDefaultLayoutCommand } from '../../../layouts-v1/usecases';
 import { EnvironmentResponseDto } from '../../dtos/environment-response.dto';
+import type { GenerateUniqueApiKey } from '../generate-unique-api-key/generate-unique-api-key.usecase';
+import type { CreateEnvironmentCommand } from './create-environment.command';
 
 @Injectable()
 export class CreateEnvironment {

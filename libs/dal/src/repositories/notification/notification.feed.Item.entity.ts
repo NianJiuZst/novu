@@ -1,9 +1,9 @@
-import { StepTypeEnum } from '@novu/shared';
-import { ExecutionDetailsEntity } from '../execution-details';
-import { JobEntity } from '../job';
-import { NotificationTemplateEntity } from '../notification-template';
-import { SubscriberEntity } from '../subscriber';
-import { NotificationEntity } from './notification.entity';
+import type { StepTypeEnum } from '@novu/shared';
+import type { ExecutionDetailsEntity } from '../execution-details';
+import type { JobEntity } from '../job';
+import type { NotificationTemplateEntity } from '../notification-template';
+import type { SubscriberEntity } from '../subscriber';
+import type { NotificationEntity } from './notification.entity';
 
 export type NotificationFeedItemEntity = Omit<NotificationEntity, 'template'> & {
   template?: TemplateFeedItem;

@@ -1,13 +1,12 @@
+import { createStyles, Button as MantineButton, TextInput as MantineInput, Popover } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
+import { colors, shadows, TextAlignment, Wifi } from '@novu/design-system';
+import { TextAlignEnum } from '@novu/shared';
 import { useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { showNotification } from '@mantine/notifications';
-import { TextInput as MantineInput, Popover, Button as MantineButton, createStyles } from '@mantine/core';
-import { TextAlignEnum } from '@novu/shared';
-
-import { colors, shadows, TextAlignment, Wifi } from '@novu/design-system';
 import { useEnvironment } from '../../../../hooks';
-import type { IForm } from '../formTypes';
 import { useStepFormPath } from '../../hooks/useStepFormPath';
+import type { IForm } from '../formTypes';
 
 const usePopoverStyles = createStyles((theme) => ({
   dropdown: {

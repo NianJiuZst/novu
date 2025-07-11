@@ -1,6 +1,6 @@
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { BasePage } from './basePage';
-import { EditorState } from './editorState';
+import type { EditorState } from './editorState';
 
 export abstract class WorkflowBaseSidePanelPage extends BasePage {
   protected constructor(page: Page) {

@@ -1,7 +1,7 @@
-import { FC } from 'react';
 import { css } from '@novu/novui/css';
 import { styled } from '@novu/novui/jsx';
 import { title } from '@novu/novui/recipes';
+import type { FC } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { InputPlain } from '../components';
 import { SettingsPageContainer } from '../SettingsPageContainer';

@@ -3,27 +3,23 @@
  */
 
 import {
-  InvalidateQueryFilters,
-  QueryClient,
-  QueryFunctionContext,
-  QueryKey,
+  type InvalidateQueryFilters,
+  type QueryClient,
+  type QueryFunctionContext,
+  type QueryKey,
+  type UseQueryResult,
+  type UseSuspenseQueryResult,
   useQuery,
-  UseQueryResult,
   useSuspenseQuery,
-  UseSuspenseQueryResult,
-} from "@tanstack/react-query";
-import { NovuCore } from "../core.js";
-import { layoutsRetrieve } from "../funcs/layoutsRetrieve.js";
-import { combineSignals } from "../lib/primitives.js";
-import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
-import { unwrapAsync } from "../types/fp.js";
-import { useNovuContext } from "./_context.js";
-import {
-  QueryHookOptions,
-  SuspenseQueryHookOptions,
-  TupleToPrefixes,
-} from "./_types.js";
+} from '@tanstack/react-query';
+import type { NovuCore } from '../core.js';
+import { layoutsRetrieve } from '../funcs/layoutsRetrieve.js';
+import { combineSignals } from '../lib/primitives.js';
+import type { RequestOptions } from '../lib/sdks.js';
+import type * as operations from '../models/operations/index.js';
+import { unwrapAsync } from '../types/fp.js';
+import { useNovuContext } from './_context.js';
+import type { QueryHookOptions, SuspenseQueryHookOptions, TupleToPrefixes } from './_types.js';
 
 export type LayoutsRetrieveQueryData = operations.LayoutsControllerGetResponse;
 
@@ -36,16 +32,11 @@ export type LayoutsRetrieveQueryData = operations.LayoutsControllerGetResponse;
 export function useLayoutsRetrieve(
   layoutId: string,
   idempotencyKey?: string | undefined,
-  options?: QueryHookOptions<LayoutsRetrieveQueryData>,
+  options?: QueryHookOptions<LayoutsRetrieveQueryData>
 ): UseQueryResult<LayoutsRetrieveQueryData, Error> {
   const client = useNovuContext();
   return useQuery({
-    ...buildLayoutsRetrieveQuery(
-      client,
-      layoutId,
-      idempotencyKey,
-      options,
-    ),
+    ...buildLayoutsRetrieveQuery(client, layoutId, idempotencyKey, options),
     ...options,
   });
 }
@@ -59,16 +50,11 @@ export function useLayoutsRetrieve(
 export function useLayoutsRetrieveSuspense(
   layoutId: string,
   idempotencyKey?: string | undefined,
-  options?: SuspenseQueryHookOptions<LayoutsRetrieveQueryData>,
+  options?: SuspenseQueryHookOptions<LayoutsRetrieveQueryData>
 ): UseSuspenseQueryResult<LayoutsRetrieveQueryData, Error> {
   const client = useNovuContext();
   return useSuspenseQuery({
-    ...buildLayoutsRetrieveQuery(
-      client,
-      layoutId,
-      idempotencyKey,
-      options,
-    ),
+    ...buildLayoutsRetrieveQuery(client, layoutId, idempotencyKey, options),
     ...options,
   });
 }
@@ -77,24 +63,17 @@ export function prefetchLayoutsRetrieve(
   queryClient: QueryClient,
   client$: NovuCore,
   layoutId: string,
-  idempotencyKey?: string | undefined,
+  idempotencyKey?: string | undefined
 ): Promise<void> {
   return queryClient.prefetchQuery({
-    ...buildLayoutsRetrieveQuery(
-      client$,
-      layoutId,
-      idempotencyKey,
-    ),
+    ...buildLayoutsRetrieveQuery(client$, layoutId, idempotencyKey),
   });
 }
 
 export function setLayoutsRetrieveData(
   client: QueryClient,
-  queryKeyBase: [
-    layoutId: string,
-    parameters: { idempotencyKey?: string | undefined },
-  ],
-  data: LayoutsRetrieveQueryData,
+  queryKeyBase: [layoutId: string, parameters: { idempotencyKey?: string | undefined }],
+  data: LayoutsRetrieveQueryData
 ): LayoutsRetrieveQueryData | undefined {
   const key = queryKeyLayoutsRetrieve(...queryKeyBase);
 
@@ -103,24 +82,22 @@ export function setLayoutsRetrieveData(
 
 export function invalidateLayoutsRetrieve(
   client: QueryClient,
-  queryKeyBase: TupleToPrefixes<
-    [layoutId: string, parameters: { idempotencyKey?: string | undefined }]
-  >,
-  filters?: Omit<InvalidateQueryFilters, "queryKey" | "predicate" | "exact">,
+  queryKeyBase: TupleToPrefixes<[layoutId: string, parameters: { idempotencyKey?: string | undefined }]>,
+  filters?: Omit<InvalidateQueryFilters, 'queryKey' | 'predicate' | 'exact'>
 ): Promise<void> {
   return client.invalidateQueries({
     ...filters,
-    queryKey: ["@novu/api", "Layouts", "retrieve", ...queryKeyBase],
+    queryKey: ['@novu/api', 'Layouts', 'retrieve', ...queryKeyBase],
   });
 }
 
 export function invalidateAllLayoutsRetrieve(
   client: QueryClient,
-  filters?: Omit<InvalidateQueryFilters, "queryKey" | "predicate" | "exact">,
+  filters?: Omit<InvalidateQueryFilters, 'queryKey' | 'predicate' | 'exact'>
 ): Promise<void> {
   return client.invalidateQueries({
     ...filters,
-    queryKey: ["@novu/api", "Layouts", "retrieve"],
+    queryKey: ['@novu/api', 'Layouts', 'retrieve'],
   });
 }
 
@@ -128,35 +105,28 @@ export function buildLayoutsRetrieveQuery(
   client$: NovuCore,
   layoutId: string,
   idempotencyKey?: string | undefined,
-  options?: RequestOptions,
+  options?: RequestOptions
 ): {
   queryKey: QueryKey;
   queryFn: (context: QueryFunctionContext) => Promise<LayoutsRetrieveQueryData>;
 } {
   return {
     queryKey: queryKeyLayoutsRetrieve(layoutId, { idempotencyKey }),
-    queryFn: async function layoutsRetrieveQueryFn(
-      ctx,
-    ): Promise<LayoutsRetrieveQueryData> {
+    queryFn: async function layoutsRetrieveQueryFn(ctx): Promise<LayoutsRetrieveQueryData> {
       const sig = combineSignals(ctx.signal, options?.fetchOptions?.signal);
       const mergedOptions = {
         ...options,
         fetchOptions: { ...options?.fetchOptions, signal: sig },
       };
 
-      return unwrapAsync(layoutsRetrieve(
-        client$,
-        layoutId,
-        idempotencyKey,
-        mergedOptions,
-      ));
+      return unwrapAsync(layoutsRetrieve(client$, layoutId, idempotencyKey, mergedOptions));
     },
   };
 }
 
 export function queryKeyLayoutsRetrieve(
   layoutId: string,
-  parameters: { idempotencyKey?: string | undefined },
+  parameters: { idempotencyKey?: string | undefined }
 ): QueryKey {
-  return ["@novu/api", "Layouts", "retrieve", layoutId, parameters];
+  return ['@novu/api', 'Layouts', 'retrieve', layoutId, parameters];
 }

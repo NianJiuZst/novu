@@ -1,4 +1,4 @@
-import { expect, Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 export const navigateToGetStarted = async (page: Page, card = 'channel-card-email') => {
   await page.goto('/get-started');

@@ -1,8 +1,8 @@
-import React, { ReactNode, useState } from 'react';
+import { Group, Popover, Transition } from '@mantine/core';
+import React, { type ReactNode, useState } from 'react';
 import { NavLink as ReactNavLink } from 'react-router-dom';
-import { Group, Transition, Popover } from '@mantine/core';
-import useStyles from './NavMenu.styles';
 import usePopoverStyles from './NavLinkPopover.styles';
+import useStyles from './NavMenu.styles';
 
 interface INavMenuProps {
   menuItems: IMenuItem[];

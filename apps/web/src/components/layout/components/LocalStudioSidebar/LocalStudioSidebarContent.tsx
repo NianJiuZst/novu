@@ -1,19 +1,19 @@
+import { Skeleton } from '@mantine/core';
+import type { DiscoverWorkflowOutput } from '@novu/framework/internal';
+import type { WithLoadingSkeleton } from '@novu/novui';
+import { css, cx } from '@novu/novui/css';
 import { IconAdd } from '@novu/novui/icons';
 import { Flex, Stack } from '@novu/novui/jsx';
-import { Skeleton } from '@mantine/core';
-import { FC } from 'react';
 import { token } from '@novu/novui/tokens';
-import { css, cx } from '@novu/novui/css';
-import { WithLoadingSkeleton } from '@novu/novui';
-import type { DiscoverWorkflowOutput } from '@novu/framework/internal';
+import type { FC } from 'react';
+import { useStudioState } from '../../../../studio/StudioStateProvider';
+import { PATHS } from '../../../docs/docs.const';
+import { useDocsModal } from '../../../docs/useDocsModal';
 import { NavMenu } from '../../../nav/NavMenu';
+import { NavMenuButtonInner, rawButtonBaseStyles } from '../../../nav/NavMenuButton/NavMenuButton.shared';
 import { NavMenuSection } from '../../../nav/NavMenuSection';
 import { LocalStudioSidebarOrganizationDisplay } from './LocalStudioSidebarOrganizationDisplay';
 import { LocalStudioSidebarToggleButton } from './LocalStudioSidebarToggleButton';
-import { useStudioState } from '../../../../studio/StudioStateProvider';
-import { NavMenuButtonInner, rawButtonBaseStyles } from '../../../nav/NavMenuButton/NavMenuButton.shared';
-import { useDocsModal } from '../../../docs/useDocsModal';
-import { PATHS } from '../../../docs/docs.const';
 
 type LocalStudioSidebarContentProps = {
   workflows: DiscoverWorkflowOutput[];

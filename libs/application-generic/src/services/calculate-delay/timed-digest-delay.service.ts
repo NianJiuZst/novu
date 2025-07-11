@@ -1,21 +1,15 @@
 // cSpell:ignore RRULE, BYSETPOS, BYMONTHDAY, bysetpos, byweekday, bymonthday, byhour, byminute, bysecond, dtstart
-import {
-  differenceInMilliseconds,
-  addMinutes,
-  addHours,
-  addDays,
-  addWeeks,
-  addMonths,
-} from 'date-fns';
-import { RRule, Frequency, Weekday } from 'rrule';
+
 import {
   DaysEnum,
   DigestUnitEnum,
-  ITimedConfig,
+  type ITimedConfig,
   MonthlyTypeEnum,
   OrdinalEnum,
   OrdinalValueEnum,
 } from '@novu/shared';
+import { addDays, addHours, addMinutes, addMonths, addWeeks, differenceInMilliseconds } from 'date-fns';
+import { Frequency, RRule, type Weekday } from 'rrule';
 
 const UNIT_TO_RRULE_FREQUENCY = {
   [DigestUnitEnum.MINUTES]: Frequency.MINUTELY,
@@ -79,20 +73,11 @@ export class TimedDigestDelayService {
     dateStart = new Date(),
     unit = DigestUnitEnum.MINUTES,
     amount,
-    timeConfig: {
-      atTime,
-      weekDays,
-      monthDays,
-      monthlyType = MonthlyTypeEnum.EACH,
-      ordinal,
-      ordinalValue,
-    } = {},
+    timeConfig: { atTime, weekDays, monthDays, monthlyType = MonthlyTypeEnum.EACH, ordinal, ordinalValue } = {},
   }: ICalculateArgs): number {
-    const [hours, minutes, seconds] = atTime
-      ? atTime.split(':').map((part) => parseInt(part, 10))
-      : [];
+    const [hours, minutes, seconds] = atTime ? atTime.split(':').map((part) => parseInt(part, 10)) : [];
 
-    const { bysetpos, byweekday, bymonthday } = this.calculateByFields({
+    const { bysetpos, byweekday, bymonthday } = TimedDigestDelayService.calculateByFields({
       weekDays,
       monthDays,
       monthlyType,
@@ -102,7 +87,7 @@ export class TimedDigestDelayService {
 
     const rule = new RRule({
       dtstart: dateStart,
-      until: this.getUntilDate(dateStart, unit, amount),
+      until: TimedDigestDelayService.getUntilDate(dateStart, unit, amount),
       freq: UNIT_TO_RRULE_FREQUENCY[unit],
       interval: amount,
       bysetpos,
@@ -122,13 +107,7 @@ export class TimedDigestDelayService {
     return differenceInMilliseconds(next, new Date());
   }
 
-  private static calculateByFields({
-    weekDays,
-    monthDays,
-    monthlyType,
-    ordinal,
-    ordinalValue,
-  }: ITimedConfig) {
+  private static calculateByFields({ weekDays, monthDays, monthlyType, ordinal, ordinalValue }: ITimedConfig) {
     let byweekday: Weekday[] | undefined;
     let bymonthday: number | number[] | undefined;
 
@@ -164,11 +143,7 @@ export class TimedDigestDelayService {
     }
   }
 
-  private static getUntilDate(
-    dateStart: Date,
-    unit: DigestUnitEnum,
-    amount: number,
-  ): Date {
+  private static getUntilDate(dateStart: Date, unit: DigestUnitEnum, amount: number): Date {
     switch (unit) {
       case DigestUnitEnum.MINUTES:
         return addMinutes(dateStart, amount);

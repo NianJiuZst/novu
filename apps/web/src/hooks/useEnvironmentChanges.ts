@@ -1,9 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-
-import { useEnvironment } from './useEnvironment';
-
 import { getPromotedChanges, getUnpromotedChanges } from '../api/changes';
 import { QueryKeys } from '../api/query.keys';
+import { useEnvironment } from './useEnvironment';
 
 export function usePromotedChanges(page = 0, limit = 10) {
   const { environment } = useEnvironment();

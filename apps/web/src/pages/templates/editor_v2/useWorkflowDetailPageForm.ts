@@ -1,11 +1,11 @@
-import { INotificationTemplate } from '@novu/shared';
-import { useFormContext, SubmitHandler, useWatch } from 'react-hook-form';
+import type { INotificationTemplate } from '@novu/shared';
 import { captureException } from '@sentry/react';
+import { type SubmitHandler, useFormContext, useWatch } from 'react-hook-form';
 import { useUpdateTemplate } from '../../../api/hooks';
-import { useUpdateWorkflowPreferences } from '../../../hooks/workflowPreferences/useUpdateWorkflowPreferences';
-import { WorkflowDetailFormContext } from '../../../studio/components/workflows/preferences/WorkflowDetailFormContextProvider';
-import { errorMessage, successMessage } from '../../../utils/notifications';
 import { useEffectOnce } from '../../../hooks';
+import { useUpdateWorkflowPreferences } from '../../../hooks/workflowPreferences/useUpdateWorkflowPreferences';
+import type { WorkflowDetailFormContext } from '../../../studio/components/workflows/preferences/WorkflowDetailFormContextProvider';
+import { errorMessage, successMessage } from '../../../utils/notifications';
 
 type UseWorkflowDetailPageFormProps = {
   templateId: string;

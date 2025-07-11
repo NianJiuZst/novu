@@ -1,5 +1,5 @@
 import { useInterval } from '@mantine/hooks';
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const DEFAULT_MINIMUM_TIME_SECONDS = 0;
 

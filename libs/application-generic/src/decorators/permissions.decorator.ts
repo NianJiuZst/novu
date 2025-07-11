@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { PermissionsEnum } from '@novu/shared';
+import type { PermissionsEnum } from '@novu/shared';
 
 export const PERMISSIONS_KEY = 'permissions';
 export const RequirePermissions = (...permissions: PermissionsEnum[]) => {

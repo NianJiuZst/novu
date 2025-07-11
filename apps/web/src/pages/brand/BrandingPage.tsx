@@ -1,19 +1,19 @@
 import { Button, LoadingOverlay } from '@novu/design-system';
-import { useForm } from 'react-hook-form';
 import { css } from '@novu/novui/css';
 import { Stack } from '@novu/novui/jsx';
 import { useEffect } from 'react';
-import { useUpdateOrganizationBranding, useFetchOrganization } from '../../api/hooks';
+import { useForm } from 'react-hook-form';
+import { useFetchOrganization, useUpdateOrganizationBranding } from '../../api/hooks';
 import { useAuth } from '../../hooks/useAuth';
 import { successMessage } from '../../utils/notifications';
 import { SettingsPageContainer } from '../settings/SettingsPageContainer';
+import { BrandInputs } from './BrandInputs';
 import {
   DEFAULT_BRANDING_COLOR,
   DEFAULT_FONT_COLOR,
   DEFAULT_FONT_FAMILY,
-  IBrandFormValues,
+  type IBrandFormValues,
 } from './BrandingPage.const';
-import { BrandInputs } from './BrandInputs';
 import { InAppInputs } from './InAppInputs';
 
 export function BrandingPage() {

@@ -1,10 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  CustomDataType,
-  INotificationTrigger,
-  INotificationTriggerVariable,
-  ITemplateConfiguration,
-  ITriggerReservedVariable,
+  type CustomDataType,
+  type INotificationTrigger,
+  type INotificationTriggerVariable,
+  type ITemplateConfiguration,
+  type ITriggerReservedVariable,
   TemplateVariableTypeEnum,
   TriggerContextTypeEnum,
   TriggerTypeEnum,

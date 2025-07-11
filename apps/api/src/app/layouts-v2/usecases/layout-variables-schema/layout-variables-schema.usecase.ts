@@ -3,11 +3,11 @@ import { InstrumentUsecase } from '@novu/application-generic';
 import { JsonSchemaTypeEnum } from '@novu/dal';
 import { LAYOUT_CONTENT_VARIABLE } from '@novu/shared';
 
-import { JSONSchemaDto } from '../../../shared/dtos/json-schema.dto';
-import { buildSubscriberSchema } from '../../../shared/utils/create-schema';
-import { LayoutVariablesSchemaCommand } from './layout-variables-schema.command';
+import type { JSONSchemaDto } from '../../../shared/dtos/json-schema.dto';
 import { CreateVariablesObjectCommand } from '../../../shared/usecases/create-variables-object/create-variables-object.command';
-import { CreateVariablesObject } from '../../../shared/usecases/create-variables-object/create-variables-object.usecase';
+import type { CreateVariablesObject } from '../../../shared/usecases/create-variables-object/create-variables-object.usecase';
+import { buildSubscriberSchema } from '../../../shared/utils/create-schema';
+import type { LayoutVariablesSchemaCommand } from './layout-variables-schema.command';
 
 @Injectable()
 export class LayoutVariablesSchemaUseCase {

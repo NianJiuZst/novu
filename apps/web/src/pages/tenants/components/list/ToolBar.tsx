@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
-import React from 'react';
-
 import { Button, Text } from '@novu/design-system';
+import type React from 'react';
 
 const Holder = styled.div`
   display: flex;

@@ -1,12 +1,10 @@
 import { Injectable, NotFoundException, Scope } from '@nestjs/common';
-
-import { EnvironmentEntity, EnvironmentRepository } from '@novu/dal';
-import { decryptApiKey, PinoLogger } from '@novu/application-generic';
-import { ShortIsPrefixEnum, EnvironmentEnum } from '@novu/shared';
-
-import { GetMyEnvironmentsCommand } from './get-my-environments.command';
-import { EnvironmentResponseDto } from '../../dtos/environment-response.dto';
+import { decryptApiKey, type PinoLogger } from '@novu/application-generic';
+import type { EnvironmentEntity, EnvironmentRepository } from '@novu/dal';
+import { EnvironmentEnum, ShortIsPrefixEnum } from '@novu/shared';
 import { buildSlug } from '../../../shared/helpers/build-slug';
+import type { EnvironmentResponseDto } from '../../dtos/environment-response.dto';
+import type { GetMyEnvironmentsCommand } from './get-my-environments.command';
 
 @Injectable({
   scope: Scope.REQUEST,

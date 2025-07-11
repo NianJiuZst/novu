@@ -1,5 +1,5 @@
-import { MutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { IResponseError } from '@novu/shared';
+import { type MutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { deleteIntegration } from '../integration';
 import { QueryKeys } from '../query.keys';

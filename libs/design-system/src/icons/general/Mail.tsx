@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 /* eslint-disable */
 export function Mail(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (

@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 export function Somaliland(props: React.SVGProps<SVGSVGElement>) {
   return (

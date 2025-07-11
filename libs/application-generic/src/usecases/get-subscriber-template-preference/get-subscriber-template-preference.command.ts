@@ -1,7 +1,6 @@
-import { NotificationTemplateEntity, SubscriberEntity } from '@novu/dal';
+import type { NotificationTemplateEntity, SubscriberEntity } from '@novu/dal';
+import type { ITenantDefine } from '@novu/shared';
 import { IsBoolean, IsDefined, IsNotEmpty, IsOptional } from 'class-validator';
-
-import { ITenantDefine } from '@novu/shared';
 import { EnvironmentWithSubscriber } from '../../commands';
 
 export class GetSubscriberTemplatePreferenceCommand extends EnvironmentWithSubscriber {

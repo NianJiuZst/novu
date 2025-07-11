@@ -1,4 +1,4 @@
-import { expect, Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { ConditionsPage } from '../page-models/conditionsPage';
 
 export async function logout(page: Page, settings = {}) {

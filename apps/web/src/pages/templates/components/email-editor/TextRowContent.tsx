@@ -1,15 +1,14 @@
 import styled from '@emotion/styled';
+import { getHotkeyHandler } from '@mantine/hooks';
+import { colors } from '@novu/design-system';
+import { TextAlignEnum } from '@novu/shared';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { getHotkeyHandler } from '@mantine/hooks';
-import { TextAlignEnum } from '@novu/shared';
-import { colors } from '@novu/design-system';
-
+import { useWorkflowVariables } from '../../../../api/hooks';
 import { useEnvironment } from '../../../../hooks';
 import { useStepFormPath } from '../../hooks/useStepFormPath';
 import type { IForm } from '../formTypes';
 import { AutoSuggestionsDropdown } from './AutoSuggestionsDropdown';
-import { useWorkflowVariables } from '../../../../api/hooks';
 
 export function TextRowContent({ blockIndex }: { blockIndex: number }) {
   const methods = useFormContext<IForm>();

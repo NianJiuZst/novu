@@ -1,11 +1,11 @@
 import { Grid, useMantineTheme } from '@mantine/core';
-import { Controller, useFormContext } from 'react-hook-form';
 import { colors, Input, Select, Tooltip } from '@novu/design-system';
 import { useEffect } from 'react';
-import { useLayouts } from '../../../../hooks';
-import { useStepFormPath } from '../../hooks/useStepFormPath';
-import { useStepFormErrors } from '../../hooks/useStepFormErrors';
+import { Controller, useFormContext } from 'react-hook-form';
 import { When } from '../../../../components/utils/When';
+import { useLayouts } from '../../../../hooks';
+import { useStepFormErrors } from '../../hooks/useStepFormErrors';
+import { useStepFormPath } from '../../hooks/useStepFormPath';
 
 export const EmailInboxContent = ({
   integration,

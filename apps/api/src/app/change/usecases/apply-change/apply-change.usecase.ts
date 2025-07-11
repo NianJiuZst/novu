@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { ChangeEntity, ChangeRepository } from '@novu/dal';
+import type { ChangeEntity, ChangeRepository } from '@novu/dal';
 
-import { PromoteChangeToEnvironmentCommand, PromoteChangeToEnvironment } from '../promote-change-to-environment';
-import { ApplyChangeCommand } from './apply-change.command';
+import { type PromoteChangeToEnvironment, PromoteChangeToEnvironmentCommand } from '../promote-change-to-environment';
+import type { ApplyChangeCommand } from './apply-change.command';
 
 @Injectable()
 export class ApplyChange {

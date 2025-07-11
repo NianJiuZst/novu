@@ -1,4 +1,4 @@
-import { UserEntity, UserRepository } from '@novu/dal';
+import type { UserEntity, UserRepository } from '@novu/dal';
 
 import { getEERepository } from './ee.repository.factory';
 

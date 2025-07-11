@@ -1,14 +1,13 @@
 import { Grid } from '@mantine/core';
+import { Input, inputStyles, SegmentedControl } from '@novu/design-system';
 import { DelayTypeEnum } from '@novu/shared';
 import { Controller, useFormContext } from 'react-hook-form';
-
-import { Input, SegmentedControl, inputStyles } from '@novu/design-system';
-import { useEnvironment } from '../../../hooks';
 import { When } from '../../../components/utils/When';
+import { useEnvironment } from '../../../hooks';
+import { useStepFormPath } from '../hooks/useStepFormPath';
 import { IntervalRadios } from './IntervalRadios';
 import { LabelWithTooltip } from './LabelWithTooltip';
 import { StepSettings } from './SideBar/StepSettings';
-import { useStepFormPath } from '../hooks/useStepFormPath';
 
 export const DelayMetadata = () => {
   const { readonly } = useEnvironment();

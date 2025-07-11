@@ -1,8 +1,8 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ApiAuthSchemeEnum, ISubscriberJwt, MemberRoleEnum } from '@novu/shared';
-import { AuthService } from '../auth.service';
+import { PassportStrategy } from '@nestjs/passport';
+import { ApiAuthSchemeEnum, type ISubscriberJwt, MemberRoleEnum } from '@novu/shared';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import type { AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtSubscriberStrategy extends PassportStrategy(Strategy, 'subscriberJwt') {

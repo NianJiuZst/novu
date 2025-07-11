@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth, useEnvironment } from '../hooks';
-import { ROUTES } from '../constants/routes';
-import { assertProtocol } from '../utils/url';
-import { encodeBase64 } from './utils/base64';
-import { StudioState } from './types';
-import { novuOnboardedCookie } from '../utils/cookies';
 import { LocalStudioPageLayout } from '../components/layout/components/LocalStudioPageLayout';
 import { getToken } from '../components/providers/AuthProvider';
+import { ROUTES } from '../constants/routes';
+import { useAuth, useEnvironment } from '../hooks';
+import { novuOnboardedCookie } from '../utils/cookies';
+import { assertProtocol } from '../utils/url';
+import type { StudioState } from './types';
+import { encodeBase64 } from './utils/base64';
 
 function buildBridgeURL(origin: string | null, tunnelPath: string) {
   if (!origin) {

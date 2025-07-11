@@ -1,12 +1,11 @@
 import { Group, useMantineColorScheme } from '@mantine/core';
-import { ChannelTypeEnum, providers, StepTypeEnum } from '@novu/shared';
-
-import { StepNameInput } from './StepNameInput';
-import { stepIcon, stepNames } from '../constants';
-import { useGetPrimaryIntegration, useHasActiveIntegrations } from '../../../hooks';
+import { type ChannelTypeEnum, providers, type StepTypeEnum } from '@novu/shared';
 import { CONTEXT_PATH } from '../../../config';
-import { DisplayPrimaryProviderIcon } from '../workflow/DisplayPrimaryProviderIcon';
+import { useGetPrimaryIntegration, useHasActiveIntegrations } from '../../../hooks';
+import { stepIcon, stepNames } from '../constants';
 import { useStepFormPath } from '../hooks/useStepFormPath';
+import { DisplayPrimaryProviderIcon } from '../workflow/DisplayPrimaryProviderIcon';
+import { StepNameInput } from './StepNameInput';
 import { StepNameLabel } from './StepNameLabel';
 
 export const StepName = ({ channel }: { channel: StepTypeEnum | ChannelTypeEnum }) => {

@@ -1,7 +1,7 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext } from "react";
 
 type PreviewTriggerContextType = {
-  triggerPreview: () => void;
+	triggerPreview: () => void;
 };
 
 const PreviewTriggerContext = createContext<PreviewTriggerContextType | null>(null);
@@ -9,12 +9,12 @@ const PreviewTriggerContext = createContext<PreviewTriggerContextType | null>(nu
 export const PreviewTriggerProvider = PreviewTriggerContext.Provider;
 
 export const usePreviewTrigger = () => {
-  const context = useContext(PreviewTriggerContext);
+	const context = useContext(PreviewTriggerContext);
 
-  if (!context) {
-    // Return a no-op function if context is not available
-    return { triggerPreview: () => {} };
-  }
+	if (!context) {
+		// Return a no-op function if context is not available
+		return { triggerPreview: () => {} };
+	}
 
-  return context;
+	return context;
 };

@@ -1,17 +1,17 @@
 /* eslint-disable global-require */
 import {
-  DynamicModule,
+  type DynamicModule,
+  type ForwardReference,
   forwardRef,
-  ForwardReference,
-  MiddlewareConsumer,
+  type MiddlewareConsumer,
   Module,
-  NestModule,
-  Type,
+  type NestModule,
+  type Type,
 } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
 import { SharedModule } from '../shared/shared.module';
 import { ChangesController } from './changes.controller';
 import { USE_CASES } from './usecases';
-import { AuthModule } from '../auth/auth.module';
 import { PromoteNotificationTemplateChange } from './usecases/promote-notification-template-change/promote-notification-template-change.usecase';
 
 const enterpriseImports = (): Array<Type | DynamicModule | Promise<DynamicModule> | ForwardReference> => {

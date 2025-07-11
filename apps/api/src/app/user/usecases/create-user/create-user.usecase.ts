@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { UserEntity, UserRepository } from '@novu/dal';
-import { CreateUserCommand } from './create-user.command';
+import { UserEntity, type UserRepository } from '@novu/dal';
+import type { CreateUserCommand } from './create-user.command';
 
 @Injectable()
 export class CreateUser {

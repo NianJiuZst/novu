@@ -1,27 +1,27 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import {
-  AnalyticsService,
-  CreateNotificationJobs,
+  type AnalyticsService,
+  type CreateNotificationJobs,
   CreateNotificationJobsCommand,
   CreateOrUpdateSubscriberCommand,
-  CreateOrUpdateSubscriberUseCase,
+  type CreateOrUpdateSubscriberUseCase,
   Instrument,
   InstrumentUsecase,
-  PinoLogger,
+  type PinoLogger,
 } from '@novu/application-generic';
-import { IntegrationRepository, NotificationTemplateEntity, NotificationTemplateRepository } from '@novu/dal';
+import type { IntegrationRepository, NotificationTemplateEntity, NotificationTemplateRepository } from '@novu/dal';
 import {
   buildWorkflowPreferences,
   ChannelTypeEnum,
   InAppProviderIdEnum,
-  ISubscribersDefine,
-  ProvidersIdEnum,
-  STEP_TYPE_TO_CHANNEL_TYPE,
+  type ISubscribersDefine,
+  type ProvidersIdEnum,
   ResourceTypeEnum,
+  STEP_TYPE_TO_CHANNEL_TYPE,
 } from '@novu/shared';
-import { StoreSubscriberJobs, StoreSubscriberJobsCommand } from '../store-subscriber-jobs';
-import { SubscriberJobBoundCommand } from './subscriber-job-bound.command';
+import { type StoreSubscriberJobs, StoreSubscriberJobsCommand } from '../store-subscriber-jobs';
+import type { SubscriberJobBoundCommand } from './subscriber-job-bound.command';
 
 const LOG_CONTEXT = 'SubscriberJobBoundUseCase';
 

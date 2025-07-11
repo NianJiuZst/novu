@@ -1,12 +1,12 @@
 import { DirectionEnum } from '@novu/shared';
-import { FilterQuery } from 'mongoose';
+import type { FilterQuery } from 'mongoose';
 
 import type { EnforceEnvOrOrgIds } from '../../types/enforce';
-import { SortOrder } from '../../types/sort-order';
+import type { SortOrder } from '../../types/sort-order';
 import { BaseRepository } from '../base-repository';
-import { TopicDBModel, TopicEntity } from './topic.entity';
+import { type TopicDBModel, TopicEntity } from './topic.entity';
 import { Topic } from './topic.schema';
-import { EnvironmentId, ExternalSubscriberId, OrganizationId, TopicId, TopicKey, TopicName } from './types';
+import type { EnvironmentId, ExternalSubscriberId, OrganizationId, TopicId, TopicKey, TopicName } from './types';
 
 const TOPIC_SUBSCRIBERS_COLLECTION = 'topicsubscribers';
 

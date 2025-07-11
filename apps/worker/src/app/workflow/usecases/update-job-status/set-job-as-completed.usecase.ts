@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { JobStatusEnum } from '@novu/dal';
 
-import { SetJobAsCommand } from './set-job-as.command';
+import type { SetJobAsCommand } from './set-job-as.command';
 import { UpdateJobStatusCommand } from './update-job-status.command';
-import { UpdateJobStatus } from './update-job-status.usecase';
+import type { UpdateJobStatus } from './update-job-status.usecase';
 
 @Injectable()
 export class SetJobAsCompleted {

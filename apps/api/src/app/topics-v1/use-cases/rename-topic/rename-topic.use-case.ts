@@ -1,11 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { TopicEntity, TopicRepository } from '@novu/dal';
-
-import { RenameTopicCommand } from './rename-topic.command';
-
-import { TopicDto } from '../../dtos/topic.dto';
-import { ExternalSubscriberId } from '../../types';
-import { GetTopicUseCase } from '../get-topic';
+import type { TopicEntity, TopicRepository } from '@novu/dal';
+import type { TopicDto } from '../../dtos/topic.dto';
+import type { ExternalSubscriberId } from '../../types';
+import type { GetTopicUseCase } from '../get-topic';
+import type { RenameTopicCommand } from './rename-topic.command';
 
 @Injectable()
 export class RenameTopicUseCase {

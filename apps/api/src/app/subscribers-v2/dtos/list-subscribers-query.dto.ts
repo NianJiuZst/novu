@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
-import { SubscriberResponseDto } from '../../subscribers/dtos';
+import type { SubscriberResponseDto } from '../../subscribers/dtos';
 import { CursorPaginationQueryDto } from './cursor-pagination-query.dto';
 
 export class ListSubscribersQueryDto extends CursorPaginationQueryDto<SubscriberResponseDto, 'updatedAt' | '_id'> {

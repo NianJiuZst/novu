@@ -1,7 +1,7 @@
-import { Navigate, useLocation } from 'react-router-dom';
 import { type PropsWithChildren, useLayoutEffect } from 'react';
-import { useAuth, useEnvironment, useMonitoring, useRouteScopes } from './hooks';
+import { Navigate, useLocation } from 'react-router-dom';
 import { ROUTES } from './constants/routes';
+import { useAuth, useEnvironment, useMonitoring, useRouteScopes } from './hooks';
 
 export function ApplicationReadyGuard({ children }: PropsWithChildren) {
   useMonitoring();

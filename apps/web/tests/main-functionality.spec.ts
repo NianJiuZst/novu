@@ -1,16 +1,17 @@
 /* eslint-disable max-len */
-import { expect } from '@playwright/test';
+
 import os from 'node:os';
-import { test } from './utils/baseTest';
+import { expect } from '@playwright/test';
 import { ChangesPage } from './page-models/changesPage';
 import { NodeEmailEditorPageModal } from './page-models/nodeEmailEditorPageModal';
 import { NodeInAppEditingModalPageModel } from './page-models/nodeInAppEditingModalPageModel';
 import { SidebarPage } from './page-models/sidebarPage';
 import { WorkflowEditorPage } from './page-models/workflowEditorPage';
 import { WorkflowsPage } from './page-models/workflowsPage';
+import { test } from './utils/baseTest';
 import { initializeSession, waitForNetworkIdle } from './utils/browser';
 import { ChannelType } from './utils/ChannelType';
-import { SessionData } from './utils/plugins';
+import type { SessionData } from './utils/plugins';
 
 const isMac = os.platform() === 'darwin';
 const modifier = isMac ? 'Meta' : 'Control';

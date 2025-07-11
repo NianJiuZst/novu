@@ -1,6 +1,6 @@
-import { IsObject, IsOptional, ValidateNested } from 'class-validator';
+import type { StepCreateAndUpdateKeys } from '@novu/shared';
 import { Type } from 'class-transformer';
-import { StepCreateAndUpdateKeys } from '@novu/shared';
+import { IsObject, IsOptional, ValidateNested } from 'class-validator';
 import { ContentIssue } from './content.issue';
 import { StepIssue } from './step.issue';
 

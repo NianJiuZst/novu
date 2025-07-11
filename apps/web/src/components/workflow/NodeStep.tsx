@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import React from 'react';
 import { colors, shadows, Text } from '@novu/design-system';
+import type React from 'react';
 
 type NodeStepProps = {
   className?: string;

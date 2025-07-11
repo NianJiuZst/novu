@@ -1,5 +1,5 @@
-import { ChannelTypeEnum } from '@novu/shared';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import type { ChannelTypeEnum } from '@novu/shared';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { ROUTES } from '../../../constants/routes';
 import type { IIntegratedProvider } from '../types';

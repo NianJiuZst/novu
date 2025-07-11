@@ -1,8 +1,8 @@
-import React, { ChangeEventHandler } from 'react';
-import { StoryFn, Meta } from '@storybook/react';
 import { useArgs } from '@storybook/client-api';
+import type { Meta, StoryFn } from '@storybook/react';
+import React, { type ChangeEventHandler } from 'react';
 
-import { SearchInput, ISearchInputProps } from './SearchInput';
+import { type ISearchInputProps, SearchInput } from './SearchInput';
 
 export default {
   title: 'Components/SearchInput',

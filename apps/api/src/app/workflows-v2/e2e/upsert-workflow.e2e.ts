@@ -1,18 +1,18 @@
-import { expect } from 'chai';
-import { UserSession } from '@novu/testing';
+import type { Novu } from '@novu/api';
 import {
-  CreateLayoutDto,
-  CreateWorkflowDto,
-  EmailStepResponseDto,
-  JSONSchemaDto,
+  type CreateLayoutDto,
+  type CreateWorkflowDto,
+  type EmailStepResponseDto,
+  type JSONSchemaDto,
   LayoutCreationSourceEnum,
-  LayoutResponseDto,
+  type LayoutResponseDto,
   StepTypeEnum,
-  UpdateWorkflowDto,
+  type UpdateWorkflowDto,
   WorkflowCreationSourceEnum,
-  WorkflowResponseDto,
+  type WorkflowResponseDto,
 } from '@novu/api/models/components';
-import { Novu } from '@novu/api';
+import { UserSession } from '@novu/testing';
+import { expect } from 'chai';
 import { initNovuClassSdkInternalAuth } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
 interface ITestStepConfig {
@@ -20,7 +20,7 @@ interface ITestStepConfig {
   controlValues: Record<string, string>;
 }
 
-describe('Upsert Workflow #novu-v2', function () {
+describe('Upsert Workflow #novu-v2', () => {
   let session: UserSession;
   let novuClient: Novu;
 

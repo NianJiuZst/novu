@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 import { usePreviewEmail } from '../../../api/hooks';
-import { IForm } from '../components/formTypes';
+import { parsePayload } from '../../../utils';
+import type { IForm } from '../components/formTypes';
 import { useStepFormCombinedErrors } from './useStepFormCombinedErrors';
 import { useStepFormPath } from './useStepFormPath';
-import { parsePayload } from '../../../utils';
 
 export const usePreviewEmailTemplate = ({ locale, payload }: { locale?: string; payload: string }) => {
   const { watch } = useFormContext<IForm>();

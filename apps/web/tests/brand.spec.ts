@@ -1,5 +1,5 @@
-import { test } from './utils/baseTest';
 import { BrandPage } from './page-models/brandPage';
+import { test } from './utils/baseTest';
 import { assertPageShowsMessage, initializeSession } from './utils/browser';
 
 let session;

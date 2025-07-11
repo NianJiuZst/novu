@@ -1,7 +1,7 @@
-import { colors, shadows, Button } from '@novu/design-system';
 import { Group, Modal, Title, useMantineTheme } from '@mantine/core';
-import { VariableManager } from './VariableManager';
+import { Button, colors, shadows } from '@novu/design-system';
 import { useStepFormPath } from '../hooks/useStepFormPath';
+import { VariableManager } from './VariableManager';
 
 export const EditVariablesModal = ({
   open,

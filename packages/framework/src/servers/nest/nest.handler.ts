@@ -1,8 +1,8 @@
-import { type VercelRequest, type VercelResponse } from '@vercel/node';
 import { Injectable } from '@nestjs/common';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { Request, Response } from 'express';
 
-import { type INovuRequestHandlerOptions } from '../../handler';
+import type { INovuRequestHandlerOptions } from '../../handler';
 import type { Either } from '../../types';
 
 @Injectable()

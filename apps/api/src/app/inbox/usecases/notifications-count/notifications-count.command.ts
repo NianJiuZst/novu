@@ -1,6 +1,6 @@
 import { IsArray, IsBoolean, IsDefined, IsOptional, IsString } from 'class-validator';
 import { EnvironmentWithSubscriber } from '../../../shared/commands/project.command';
-import { NotificationFilter } from '../../utils/types';
+import type { NotificationFilter } from '../../utils/types';
 
 class NotificationsFilter implements NotificationFilter {
   @IsOptional()

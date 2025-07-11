@@ -1,17 +1,16 @@
-import { useMemo } from 'react';
-import cloneDeep from 'lodash.clonedeep';
 import {
   ChannelTypeEnum,
-  IConfigCredentials,
-  IProviderConfig,
+  type IConfigCredentials,
+  type IProviderConfig,
   NOVU_SMS_EMAIL_PROVIDERS,
-  providers,
   PushProviderIdEnum,
+  providers,
 } from '@novu/shared';
-
+import cloneDeep from 'lodash.clonedeep';
+import { useMemo } from 'react';
+import { IS_SELF_HOSTED } from '../../config';
 import { useIntegrations } from '../../hooks';
 import type { IIntegratedProvider, IntegrationEntity } from './types';
-import { IS_SELF_HOSTED } from '../../config';
 
 /*
  * temporary patch before migration script

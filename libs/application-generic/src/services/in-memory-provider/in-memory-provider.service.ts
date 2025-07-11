@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { setTimeout } from 'timers/promises';
 
-import { getClientAndConfig, getClientAndConfigForCluster, InMemoryProviderConfig } from './providers';
-import {
+import { getClientAndConfig, getClientAndConfigForCluster, type InMemoryProviderConfig } from './providers';
+import type {
   Cluster,
   ClusterOptions,
   InMemoryProviderClient,

@@ -1,17 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import {
-  AnalyticsService,
+  type AnalyticsService,
   GetLayoutCommand as GetLayoutCommandV1,
-  GetLayoutUseCase as GetLayoutUseCaseV1,
+  type GetLayoutUseCase as GetLayoutUseCaseV1,
 } from '@novu/application-generic';
-import { ControlValuesRepository } from '@novu/dal';
+import type { ControlValuesRepository } from '@novu/dal';
 import { ControlValuesLevelEnum, ResourceOriginEnum, ResourceTypeEnum } from '@novu/shared';
-
-import { GetLayoutCommand } from './get-layout.command';
-import { LayoutResponseDto } from '../../dtos';
-import { mapToResponseDto } from '../mapper';
-import { LayoutVariablesSchemaUseCase } from '../layout-variables-schema';
+import type { LayoutResponseDto } from '../../dtos';
+import type { LayoutVariablesSchemaUseCase } from '../layout-variables-schema';
 import { LayoutVariablesSchemaCommand } from '../layout-variables-schema/layout-variables-schema.command';
+import { mapToResponseDto } from '../mapper';
+import type { GetLayoutCommand } from './get-layout.command';
 
 @Injectable()
 export class GetLayoutUseCase {

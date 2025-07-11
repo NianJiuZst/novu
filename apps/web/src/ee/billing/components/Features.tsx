@@ -1,8 +1,8 @@
-import { css } from '@novu/novui/css';
-import { Text } from '@novu/novui';
 import styled from '@emotion/styled';
-import { ApiServiceLevelEnum } from '@novu/shared';
+import { Text } from '@novu/novui';
+import { css } from '@novu/novui/css';
 import { IconCheck as _IconCheck } from '@novu/novui/icons';
+import { ApiServiceLevelEnum } from '@novu/shared';
 
 const TitleCell = styled.div`
   display: flex;

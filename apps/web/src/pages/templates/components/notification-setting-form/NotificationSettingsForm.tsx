@@ -1,10 +1,9 @@
 import { ActionIcon, Grid, Stack } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
+import { Check, Copy, Input, Select, Switch, Tooltip, When } from '@novu/design-system';
+import type { INotificationTrigger, IResponseError } from '@novu/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Controller, useFormContext } from 'react-hook-form';
-import type { IResponseError, INotificationTrigger } from '@novu/shared';
-
-import { Input, Select, Switch, Tooltip, Check, Copy, When } from '@novu/design-system';
 import { useParams } from 'react-router-dom';
 import { api } from '../../../../api/api.client';
 import { useEnvironment, useNotificationGroup } from '../../../../hooks';

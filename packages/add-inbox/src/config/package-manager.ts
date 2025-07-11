@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 import prompts from 'prompts';
-import { PACKAGE_MANAGERS, PackageManagerType } from '../constants';
+import { PACKAGE_MANAGERS, type PackageManagerType } from '../constants';
 import fileUtils from '../utils/file';
 import logger from '../utils/logger';
 

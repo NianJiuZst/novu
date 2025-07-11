@@ -1,6 +1,6 @@
 import { Skeleton } from '@mantine/core';
 import { Mail } from '@novu/design-system';
-import { Title, Text } from '@novu/novui';
+import { Text, Title } from '@novu/novui';
 import { css } from '@novu/novui/css';
 import { HStack, VStack } from '@novu/novui/jsx';
 import { useEffect, useMemo } from 'react';
@@ -8,11 +8,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ExecutionDetailsAccordion } from '../../components/execution-detail/ExecutionDetailsAccordion';
 import { When } from '../../components/utils/When';
 import { ROUTES } from '../../constants/routes';
+import { useNotifications, useTelemetry } from '../../hooks/useNovuAPI';
+import { setNovuOnboardingStepCookie } from '../../utils';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { Wrapper } from './components/Wrapper';
-import { setNovuOnboardingStepCookie } from '../../utils';
-import { useNotifications, useTelemetry } from '../../hooks/useNovuAPI';
 
 const ONBOARDING_COOKIE_EXPIRY_DAYS = 10 * 365;
 

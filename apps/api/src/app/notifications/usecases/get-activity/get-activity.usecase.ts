@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { NotificationRepository } from '@novu/dal';
-import { AnalyticsService } from '@novu/application-generic';
+import type { AnalyticsService } from '@novu/application-generic';
+import type { NotificationRepository } from '@novu/dal';
 
-import { ActivityNotificationResponseDto } from '../../dtos/activities-response.dto';
-import { GetActivityCommand } from './get-activity.command';
+import type { ActivityNotificationResponseDto } from '../../dtos/activities-response.dto';
 import { mapFeedItemToDto } from '../get-activity-feed/map-feed-item-to.dto';
+import type { GetActivityCommand } from './get-activity.command';
 
 @Injectable()
 export class GetActivity {

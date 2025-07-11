@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { SubscriberRepository, TopicSubscribersRepository, PreferencesRepository } from '@novu/dal';
 import {
-  buildSubscriberKey,
   buildFeedKey,
   buildMessageCountKey,
-  InvalidateCacheService,
+  buildSubscriberKey,
+  type InvalidateCacheService,
 } from '@novu/application-generic';
+import type { PreferencesRepository, SubscriberRepository, TopicSubscribersRepository } from '@novu/dal';
 
-import { RemoveSubscriberCommand } from './remove-subscriber.command';
+import type { RemoveSubscriberCommand } from './remove-subscriber.command';
 
 @Injectable()
 export class RemoveSubscriber {

@@ -1,6 +1,6 @@
-import Redis, { Cluster, ClusterNode, ClusterOptions, NodeRole } from 'ioredis';
-import { ConnectionOptions } from 'tls';
 import { Logger } from '@nestjs/common';
+import Redis, { Cluster, type ClusterNode, ClusterOptions, NodeRole } from 'ioredis';
+import type { ConnectionOptions } from 'tls';
 
 import { convertStringValues } from './variable-mappers';
 

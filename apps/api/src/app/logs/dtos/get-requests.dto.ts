@@ -1,5 +1,5 @@
-import { IsNumber, IsOptional, IsString, Matches, MaxLength, Min, Max, IsArray } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
+import { IsArray, IsNumber, IsOptional, IsString, Matches, Max, MaxLength, Min } from 'class-validator';
 
 // Custom transformer to convert statusCode to array of numbers
 const StatusCodeTransformer = Transform(({ value }) => {

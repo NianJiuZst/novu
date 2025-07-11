@@ -1,3 +1,3 @@
-import { IWorkflowOverrideRequestDto } from './workflow-override.dto';
+import type { IWorkflowOverrideRequestDto } from './workflow-override.dto';
 
 export type IUpdateWorkflowOverrideRequestDto = IWorkflowOverrideRequestDto;

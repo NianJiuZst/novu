@@ -1,10 +1,9 @@
 import { Text } from '@mantine/core';
 import { colors } from '@novu/design-system';
-
-import { TriggerSnippetTabs } from './TriggerSnippetTabs';
+import { When } from '../../../components/utils/When';
 import { useTemplateEditorForm } from './TemplateEditorFormProvider';
 import { TriggerSegmentControl } from './TriggerSegmentControl';
-import { When } from '../../../components/utils/When';
+import { TriggerSnippetTabs } from './TriggerSnippetTabs';
 import { WorkflowSidebar } from './WorkflowSidebar';
 
 export function SnippetPage() {

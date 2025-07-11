@@ -1,16 +1,16 @@
-import { text } from '@novu/novui/recipes';
-import { HStack, styled, VStack } from '@novu/novui/jsx';
 import { Tooltip } from '@novu/design-system';
-import { IconOutlineMenuBook } from '@novu/novui/icons';
-import { useLocation } from 'react-router-dom';
-import { css } from '@novu/novui/css';
 import { Button } from '@novu/novui';
-import { When } from '../../../components/utils/When';
+import { css } from '@novu/novui/css';
+import { IconOutlineMenuBook } from '@novu/novui/icons';
+import { HStack, styled, VStack } from '@novu/novui/jsx';
+import { text } from '@novu/novui/recipes';
+import { useLocation } from 'react-router-dom';
 import { DocsButton } from '../../../components/docs/DocsButton';
-import { useTelemetry } from '../../../hooks/useNovuAPI';
 import { PATHS } from '../../../components/docs/docs.const';
-import { DocsPaths, useDocsPath } from '../../../components/docs/useDocsPath';
+import { type DocsPaths, useDocsPath } from '../../../components/docs/useDocsPath';
+import { When } from '../../../components/utils/When';
 import { ROUTES } from '../../../constants/routes';
+import { useTelemetry } from '../../../hooks/useNovuAPI';
 
 const Text = styled('a', text);
 

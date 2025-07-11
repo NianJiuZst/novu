@@ -1,19 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-
-import { MessageEntity, MessageRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
-import { MessagesStatusEnum } from '@novu/shared';
 import {
-  AnalyticsService,
+  type AnalyticsService,
   buildFeedKey,
   buildMessageCountKey,
   buildSubscriberKey,
   CachedResponse,
-  InvalidateCacheService,
-  WebSocketsQueueService,
+  type InvalidateCacheService,
+  type WebSocketsQueueService,
 } from '@novu/application-generic';
-import { MarkMessageAsByMarkCommand } from './mark-message-as-by-mark.command';
+import type { MessageEntity, MessageRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
+import type { MessagesStatusEnum } from '@novu/shared';
 import { mapMarkMessageToWebSocketEvent } from '../../../shared/helpers';
 import { MessageResponseDto } from '../../dtos/message-response.dto';
+import type { MarkMessageAsByMarkCommand } from './mark-message-as-by-mark.command';
 
 @Injectable()
 export class MarkMessageAsByMark {

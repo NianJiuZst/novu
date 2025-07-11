@@ -1,22 +1,22 @@
-import { createEffect, createMemo, createSignal, For, JSX, Show } from 'solid-js';
+import { createEffect, createMemo, createSignal, For, type JSX, Show } from 'solid-js';
 
 import type { Notification } from '../../../notifications';
 import { ActionTypeEnum } from '../../../types';
 import { useInboxContext, useLocalization } from '../../context';
 import { cn, formatSnoozedUntil, formatToRelativeTime, useStyle } from '../../helpers';
 import { Clock as DefaultClock } from '../../icons/Clock';
-import {
-  type BodyRenderer,
-  type NotificationActionClickHandler,
-  type NotificationClickHandler,
-  type SubjectRenderer,
+import type {
+  BodyRenderer,
+  NotificationActionClickHandler,
+  NotificationClickHandler,
+  SubjectRenderer,
 } from '../../types';
-import Markdown from '../elements/Markdown';
 import { ExternalElementRenderer } from '../ExternalElementRenderer';
+import Markdown from '../elements/Markdown';
 import { Button } from '../primitives';
 import { Badge } from '../primitives/Badge';
-import { renderNotificationActions } from './NotificationActions';
 import { IconRendererWrapper } from '../shared/IconRendererWrapper';
+import { renderNotificationActions } from './NotificationActions';
 
 type DefaultNotificationProps = {
   notification: Notification;

@@ -1,12 +1,12 @@
 import { Loader, Timeline as MantineTimeline } from '@mantine/core';
-import { useEffect, useState } from 'react';
-import { IconCheck } from '@novu/novui/icons';
-import { Text } from '@novu/novui';
-import { css } from '@novu/novui/css';
 import { useColorScheme } from '@novu/design-system';
 import type { HealthCheck } from '@novu/framework/internal';
-import { CodeSnippet } from './CodeSnippet';
+import { Text } from '@novu/novui';
+import { css } from '@novu/novui/css';
+import { IconCheck } from '@novu/novui/icons';
+import { useEffect, useState } from 'react';
 import { useStudioState } from '../../../studio/StudioStateProvider';
+import { CodeSnippet } from './CodeSnippet';
 import { timelineRecipe } from './SetupTimeline.recipe';
 
 const Icon = () => (

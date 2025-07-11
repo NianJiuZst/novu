@@ -1,18 +1,18 @@
-import { plainToInstance } from 'class-transformer';
-import { validateSync, ValidationError } from 'class-validator';
 import { BadRequestException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
+import { type ValidationError, validateSync } from 'class-validator';
 
 export abstract class BaseCommand {
   static create<T extends BaseCommand>(this: new (...args: unknown[]) => T, data: T): T {
-    const convertedObject = plainToInstance<T, unknown>(this, {
+    const convertedObject = plainToInstance<T, unknown>(BaseCommand, {
       ...data,
     });
 
     const errors = validateSync(convertedObject);
     const flattenedErrors = flattenErrors(errors);
     if (Object.keys(flattenedErrors).length > 0) {
-      throw new CommandValidationException(this.name, flattenedErrors);
+      throw new CommandValidationException(BaseCommand.name, flattenedErrors);
     }
 
     return convertedObject;

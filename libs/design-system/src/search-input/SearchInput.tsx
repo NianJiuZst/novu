@@ -1,9 +1,8 @@
-import { forwardRef } from 'react';
-import { Input, InputProps } from '@mantine/core';
 import styled from '@emotion/styled';
-
-import { IconClose, IconSearch } from '../iconsV2';
+import { Input, type InputProps } from '@mantine/core';
+import { forwardRef } from 'react';
 import { colors } from '../config';
+import { IconClose, IconSearch } from '../iconsV2';
 
 export interface ISearchInputProps {
   placeholder?: string;

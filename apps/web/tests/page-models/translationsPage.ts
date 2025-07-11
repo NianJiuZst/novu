@@ -1,5 +1,5 @@
-import { expect, Page } from '@playwright/test';
 import { faker } from '@faker-js/faker';
+import { expect, type Page } from '@playwright/test';
 import { setFileForFilePicker } from '../utils/commands';
 
 export class TranslationsPage {

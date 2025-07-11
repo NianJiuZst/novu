@@ -1,8 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ILayoutEntity, IResponseError } from '@novu/shared';
-
-import { QueryKeys } from '../api/query.keys';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createLayout, getLayoutById, updateLayoutById } from '../api/layouts';
+import { QueryKeys } from '../api/query.keys';
 
 export function useLayoutsEditor(id: string) {
   const queryClient = useQueryClient();

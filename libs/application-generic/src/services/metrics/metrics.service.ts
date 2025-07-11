@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { IMetricsService } from './metrics.interface';
+import type { IMetricsService } from './metrics.interface';
 
 const nr = require('newrelic');
 

@@ -1,4 +1,5 @@
-import {
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import type {
   ActiveJobsMetricQueueService,
   ActiveJobsMetricWorkerService,
   MetricsService,
@@ -6,7 +7,6 @@ import {
   WorkerOptions,
 } from '@novu/application-generic';
 import { CronExpressionEnum } from '@novu/shared';
-import { Inject, Injectable, Logger } from '@nestjs/common';
 
 const nr = require('newrelic');
 

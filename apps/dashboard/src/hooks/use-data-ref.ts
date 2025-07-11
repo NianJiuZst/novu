@@ -1,8 +1,8 @@
-import { useRef } from 'react';
+import { useRef } from "react";
 
 export const useDataRef = <T>(data: T) => {
-  const ref = useRef<T>(data);
-  ref.current = data;
+	const ref = useRef<T>(data);
+	ref.current = data;
 
-  return ref;
+	return ref;
 };

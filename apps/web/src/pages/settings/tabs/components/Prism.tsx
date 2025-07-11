@@ -1,6 +1,6 @@
-import { colors } from '@novu/design-system';
-import { Prism as MantinePrism } from '@mantine/prism';
 import { useClipboard } from '@mantine/hooks';
+import { Prism as MantinePrism } from '@mantine/prism';
+import { colors } from '@novu/design-system';
 
 export function Prism({ code }: { code: string }) {
   return (

@@ -1,5 +1,5 @@
-import { Text } from '@novu/novui';
 import { Progress } from '@mantine/core';
+import { Text } from '@novu/novui';
 import { css } from '@novu/novui/css';
 import { IconError, IconWarning } from '@novu/novui/icons';
 import { ApiServiceLevelEnum } from '@novu/shared';

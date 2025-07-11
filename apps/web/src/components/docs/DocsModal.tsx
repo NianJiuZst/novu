@@ -1,14 +1,14 @@
 import { Modal } from '@novu/design-system';
-import { useEffect, useState } from 'react';
-import { css } from '@novu/novui/css';
-import { Flex } from '@novu/novui/jsx';
-import { IconOpenInNew, IconClose } from '@novu/novui/icons';
 import { IconButton } from '@novu/novui';
+import { css } from '@novu/novui/css';
+import { IconClose, IconOpenInNew } from '@novu/novui/icons';
+import { Flex } from '@novu/novui/jsx';
+import { useEffect, useState } from 'react';
+import { useTelemetry } from '../../hooks/useNovuAPI';
 import { Docs } from './Docs';
 import { DOCS_URL } from './docs.const';
-import { Voting, VotingWidget } from './VotingWidget';
 import { useLoadDocs } from './useLoadDocs';
-import { useTelemetry } from '../../hooks/useNovuAPI';
+import { type Voting, VotingWidget } from './VotingWidget';
 
 export const DocsModal = ({ open, toggle, path }) => {
   const [voted, setVoted] = useState<Voting | undefined>(undefined);

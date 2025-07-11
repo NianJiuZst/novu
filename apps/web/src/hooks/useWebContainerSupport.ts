@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { isChrome, isEdge, browserName } from 'react-device-detect';
+import { browserName, isChrome, isEdge } from 'react-device-detect';
 
 export const useWebContainerSupported = () => {
   return useMemo(() => {

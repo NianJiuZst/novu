@@ -1,4 +1,4 @@
-import * as VisuallyHiddenAll from '@radix-ui/react-visually-hidden';
+import * as VisuallyHiddenAll from "@radix-ui/react-visually-hidden";
 
 const VisuallyHidden = VisuallyHiddenAll.Root;
 

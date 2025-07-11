@@ -10,7 +10,7 @@ import {
 } from './constants';
 import {
   BridgeError,
-  FrameworkError,
+  type FrameworkError,
   InvalidActionError,
   isFrameworkError,
   MethodNotAllowedError,
@@ -20,9 +20,9 @@ import {
   SignatureNotFoundError,
   SigningKeyNotFoundError,
 } from './errors';
-import type { Awaitable, EventTriggerParams, Workflow } from './types';
-import { initApiClient, createHmacSubtle } from './utils';
 import { isPlatformError } from './errors/guard.errors';
+import type { Awaitable, EventTriggerParams, Workflow } from './types';
+import { createHmacSubtle, initApiClient } from './utils';
 
 export type ServeHandlerOptions = {
   client?: Client;

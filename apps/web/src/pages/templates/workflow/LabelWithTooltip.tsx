@@ -1,5 +1,5 @@
 import { Group, Stack, useMantineTheme } from '@mantine/core';
-import { colors, Tooltip, InfoCircle } from '@novu/design-system';
+import { colors, InfoCircle, Tooltip } from '@novu/design-system';
 
 export const LabelWithTooltip = ({ label, tooltip }) => {
   const theme = useMantineTheme();

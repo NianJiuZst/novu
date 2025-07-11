@@ -1,15 +1,15 @@
-import { IsDefined, IsEnum, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
+import type { DiscoverWorkflowOutput } from '@novu/framework/internal';
 
 import {
   AddressingTypeEnum,
-  StatelessControls,
-  TriggerOverrides,
-  TriggerRecipientsPayload,
-  TriggerRecipientSubscriber,
+  type StatelessControls,
+  type TriggerOverrides,
+  type TriggerRecipientSubscriber,
+  type TriggerRecipientsPayload,
   TriggerRequestCategoryEnum,
-  TriggerTenantContext,
+  type TriggerTenantContext,
 } from '@novu/shared';
-import { DiscoverWorkflowOutput } from '@novu/framework/internal';
+import { IsDefined, IsEnum, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
 
 import { EnvironmentWithUserCommand } from '../../commands';
 

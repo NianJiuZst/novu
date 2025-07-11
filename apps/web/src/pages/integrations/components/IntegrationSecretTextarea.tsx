@@ -1,7 +1,7 @@
 import { Grid, UnstyledButton } from '@mantine/core';
-import { IConfigCredentials } from '@novu/shared';
+import { IconOutlineVisibility, IconOutlineVisibilityOff, Textarea } from '@novu/design-system';
+import type { IConfigCredentials } from '@novu/shared';
 import { useState } from 'react';
-import { Textarea, IconOutlineVisibility, IconOutlineVisibilityOff } from '@novu/design-system';
 import { When } from '../../../components/utils/When';
 
 export const IntegrationSecretTextarea = ({

@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
+import { Injectable, Logger, type OnApplicationBootstrap, type OnApplicationShutdown } from '@nestjs/common';
 import {
   CronExpressionEnum,
   JobCronNameEnum,
@@ -6,8 +6,14 @@ import {
   TimezoneEnum,
 } from '@novu/shared';
 import { captureException } from '@sentry/node';
-import { MetricsService } from '../metrics';
-import { CronJobData, CronJobProcessor, CronMetrics, CronMetricsEventEnum, CronOptions } from './cron.types';
+import type { MetricsService } from '../metrics';
+import {
+  type CronJobData,
+  type CronJobProcessor,
+  type CronMetrics,
+  CronMetricsEventEnum,
+  type CronOptions,
+} from './cron.types';
 
 const nr = require('newrelic');
 

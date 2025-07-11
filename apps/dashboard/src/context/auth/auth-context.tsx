@@ -1,5 +1,5 @@
-import React from 'react';
-import type { AuthContextValue } from './types';
+import React from "react";
+import type { AuthContextValue } from "./types";
 
 export const AuthContext = React.createContext<AuthContextValue>({} as AuthContextValue);
-AuthContext.displayName = 'AuthContext';
+AuthContext.displayName = "AuthContext";

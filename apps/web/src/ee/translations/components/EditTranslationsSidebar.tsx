@@ -6,8 +6,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Outlet } from 'react-router-dom';
 import { useEnvironment } from '../../../hooks';
-import { useFetchLocales, useFetchTranslationGroup, useUploadTranslations, useGetDefaultLocale } from '../hooks';
 import { useEditTranslationFileContext } from '../context/useEditTranslationFileContext';
+import { useFetchLocales, useFetchTranslationGroup, useGetDefaultLocale, useUploadTranslations } from '../hooks';
 import {
   ArrowForward,
   TranslationFileIcon,

@@ -1,16 +1,16 @@
-import { useCallback } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import type { ICreateNotificationTemplateDto, INotificationTemplate, IResponseError } from '@novu/shared';
 import { StepTypeEnum, WorkflowCreationSourceEnum } from '@novu/shared';
-import type { IResponseError, ICreateNotificationTemplateDto, INotificationTemplate } from '@novu/shared';
+import { useMutation } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { v4 as uuid4 } from 'uuid';
-import { createTemplate } from '../../notification-templates';
-import { parseUrl } from '../../../utils/routeUtils';
 import { ROUTES } from '../../../constants/routes';
-import { errorMessage } from '../../../utils/notifications';
-import { useNotificationGroup, useTemplates } from '../../../hooks';
 import { FIRST_100_WORKFLOWS } from '../../../constants/workflowConstants';
+import { useNotificationGroup, useTemplates } from '../../../hooks';
+import { errorMessage } from '../../../utils/notifications';
+import { parseUrl } from '../../../utils/routeUtils';
+import { createTemplate } from '../../notification-templates';
 
 export const useCreateDigestDemoWorkflow = () => {
   const navigate = useNavigate();

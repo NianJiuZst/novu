@@ -2,17 +2,17 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   BullMqService,
   getWorkflowWorkerOptions,
-  IWorkflowDataDto,
+  type IWorkflowDataDto,
   PinoLogger,
-  storage,
   Store,
-  TriggerEvent,
-  WorkerOptions,
-  WorkerProcessor,
-  WorkflowInMemoryProviderService,
+  storage,
+  type TriggerEvent,
+  type WorkerOptions,
+  type WorkerProcessor,
+  type WorkflowInMemoryProviderService,
   WorkflowWorkerService,
 } from '@novu/application-generic';
-import { CommunityOrganizationRepository } from '@novu/dal';
+import type { CommunityOrganizationRepository } from '@novu/dal';
 import { ObservabilityBackgroundTransactionEnum } from '@novu/shared';
 
 const nr = require('newrelic');

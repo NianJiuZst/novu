@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ChangeRepository } from '@novu/dal';
-import { CountChangesCommand } from './count-changes.command';
+import type { ChangeRepository } from '@novu/dal';
+import type { CountChangesCommand } from './count-changes.command';
 
 @Injectable()
 export class CountChanges {

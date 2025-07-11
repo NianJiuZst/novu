@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import type { RequestLog, RequestLogRepository, Where } from '@novu/application-generic';
 import { subHours } from 'date-fns';
-import { RequestLog, RequestLogRepository, Where } from '@novu/application-generic';
-import { GetRequestsCommand } from './get-requests.command';
-import { GetRequestsResponseDto, RequestLogResponseDto } from '../../dtos/get-requests.response.dto';
+import type { GetRequestsResponseDto, RequestLogResponseDto } from '../../dtos/get-requests.response.dto';
+import type { GetRequestsCommand } from './get-requests.command';
 
 @Injectable()
 export class GetRequests {

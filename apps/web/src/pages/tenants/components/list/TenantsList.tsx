@@ -1,13 +1,12 @@
-import { useState } from 'react';
 import { Container } from '@mantine/core';
-import { Row } from 'react-table';
-import { ITenantEntity } from '@novu/shared';
-
 import { Table, When } from '@novu/design-system';
-import { columns } from './columns';
+import type { ITenantEntity } from '@novu/shared';
+import { useState } from 'react';
+import type { Row } from 'react-table';
 import { useTenants } from '../../../../hooks/useTenants';
-import { Toolbar } from './ToolBar';
+import { columns } from './columns';
 import { TenantsListNoData } from './TenantsListNoData';
+import { Toolbar } from './ToolBar';
 
 export const TenantsList = ({
   onAddTenantClick,

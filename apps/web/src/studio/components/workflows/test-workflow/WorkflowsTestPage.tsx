@@ -1,24 +1,24 @@
 import { Loader } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { showNotification } from '@mantine/notifications';
 import { css } from '@novu/novui/css';
 import { IconOutlineCable, IconPlayArrow } from '@novu/novui/icons';
 import { Center } from '@novu/novui/jsx';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { showNotification } from '@mantine/notifications';
-import { useWorkflow, useWorkflowTrigger } from '../../../hooks/useBridgeAPI';
-import { When } from '../../../../components/utils/When';
-import { ExecutionDetailsModalWrapper } from '../../../../pages/templates/components/ExecutionDetailsModalWrapper';
-import { WorkflowsPageTemplate, WorkflowsPanelLayout } from '../layout/index';
-import { ToSubscriber, WorkflowTestControlsPanel } from './WorkflowTestControlsPanel';
-import { WorkflowTestTriggerPanel } from './WorkflowTestTriggerPanel';
 import { useTemplateFetcher } from '../../../../api/hooks/index';
-import { useSegment } from '../../../../components/providers/SegmentProvider';
-import { useStudioState } from '../../../StudioStateProvider';
 import { testTrigger } from '../../../../api/notification-templates';
-import { OutlineButton } from '../../OutlineButton';
+import { useSegment } from '../../../../components/providers/SegmentProvider';
+import { When } from '../../../../components/utils/When';
 import { useTelemetry } from '../../../../hooks/useNovuAPI';
+import { ExecutionDetailsModalWrapper } from '../../../../pages/templates/components/ExecutionDetailsModalWrapper';
+import { useWorkflow, useWorkflowTrigger } from '../../../hooks/useBridgeAPI';
+import { useStudioState } from '../../../StudioStateProvider';
+import { OutlineButton } from '../../OutlineButton';
+import { WorkflowsPageTemplate, WorkflowsPanelLayout } from '../layout/index';
+import { type ToSubscriber, WorkflowTestControlsPanel } from './WorkflowTestControlsPanel';
+import { WorkflowTestTriggerPanel } from './WorkflowTestTriggerPanel';
 
 export const WorkflowsTestPage = () => {
   const track = useTelemetry();

@@ -3,56 +3,44 @@
  */
 
 import {
-  InvalidateQueryFilters,
-  QueryClient,
-  QueryFunctionContext,
-  QueryKey,
+  type InvalidateQueryFilters,
+  type QueryClient,
+  type QueryFunctionContext,
+  type QueryKey,
+  type UseQueryResult,
+  type UseSuspenseQueryResult,
   useQuery,
-  UseQueryResult,
   useSuspenseQuery,
-  UseSuspenseQueryResult,
-} from "@tanstack/react-query";
-import { NovuCore } from "../core.js";
-import { retrieve } from "../funcs/retrieve.js";
-import { combineSignals } from "../lib/primitives.js";
-import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
-import { unwrapAsync } from "../types/fp.js";
-import { useNovuContext } from "./_context.js";
-import {
-  QueryHookOptions,
-  SuspenseQueryHookOptions,
-  TupleToPrefixes,
-} from "./_types.js";
+} from '@tanstack/react-query';
+import type { NovuCore } from '../core.js';
+import { retrieve } from '../funcs/retrieve.js';
+import { combineSignals } from '../lib/primitives.js';
+import type { RequestOptions } from '../lib/sdks.js';
+import type * as operations from '../models/operations/index.js';
+import { unwrapAsync } from '../types/fp.js';
+import { useNovuContext } from './_context.js';
+import type { QueryHookOptions, SuspenseQueryHookOptions, TupleToPrefixes } from './_types.js';
 
 export type RetrieveQueryData = operations.LogsControllerGetLogsResponseBody;
 
 export function useRetrieve(
   request: operations.LogsControllerGetLogsRequest,
-  options?: QueryHookOptions<RetrieveQueryData>,
+  options?: QueryHookOptions<RetrieveQueryData>
 ): UseQueryResult<RetrieveQueryData, Error> {
   const client = useNovuContext();
   return useQuery({
-    ...buildRetrieveQuery(
-      client,
-      request,
-      options,
-    ),
+    ...buildRetrieveQuery(client, request, options),
     ...options,
   });
 }
 
 export function useRetrieveSuspense(
   request: operations.LogsControllerGetLogsRequest,
-  options?: SuspenseQueryHookOptions<RetrieveQueryData>,
+  options?: SuspenseQueryHookOptions<RetrieveQueryData>
 ): UseSuspenseQueryResult<RetrieveQueryData, Error> {
   const client = useNovuContext();
   return useSuspenseQuery({
-    ...buildRetrieveQuery(
-      client,
-      request,
-      options,
-    ),
+    ...buildRetrieveQuery(client, request, options),
     ...options,
   });
 }
@@ -60,13 +48,10 @@ export function useRetrieveSuspense(
 export function prefetchRetrieve(
   queryClient: QueryClient,
   client$: NovuCore,
-  request: operations.LogsControllerGetLogsRequest,
+  request: operations.LogsControllerGetLogsRequest
 ): Promise<void> {
   return queryClient.prefetchQuery({
-    ...buildRetrieveQuery(
-      client$,
-      request,
-    ),
+    ...buildRetrieveQuery(client$, request),
   });
 }
 
@@ -83,7 +68,7 @@ export function setRetrieveData(
       idempotencyKey?: string | undefined;
     },
   ],
-  data: RetrieveQueryData,
+  data: RetrieveQueryData
 ): RetrieveQueryData | undefined {
   const key = queryKeyRetrieve(...queryKeyBase);
 
@@ -93,38 +78,40 @@ export function setRetrieveData(
 export function invalidateRetrieve(
   client: QueryClient,
   queryKeyBase: TupleToPrefixes<
-    [parameters: {
-      page?: number | undefined;
-      limit?: number | undefined;
-      statusCodes?: Array<number> | undefined;
-      url?: string | undefined;
-      transactionId?: string | undefined;
-      created?: number | undefined;
-      idempotencyKey?: string | undefined;
-    }]
+    [
+      parameters: {
+        page?: number | undefined;
+        limit?: number | undefined;
+        statusCodes?: Array<number> | undefined;
+        url?: string | undefined;
+        transactionId?: string | undefined;
+        created?: number | undefined;
+        idempotencyKey?: string | undefined;
+      },
+    ]
   >,
-  filters?: Omit<InvalidateQueryFilters, "queryKey" | "predicate" | "exact">,
+  filters?: Omit<InvalidateQueryFilters, 'queryKey' | 'predicate' | 'exact'>
 ): Promise<void> {
   return client.invalidateQueries({
     ...filters,
-    queryKey: ["@novu/api", "retrieve", ...queryKeyBase],
+    queryKey: ['@novu/api', 'retrieve', ...queryKeyBase],
   });
 }
 
 export function invalidateAllRetrieve(
   client: QueryClient,
-  filters?: Omit<InvalidateQueryFilters, "queryKey" | "predicate" | "exact">,
+  filters?: Omit<InvalidateQueryFilters, 'queryKey' | 'predicate' | 'exact'>
 ): Promise<void> {
   return client.invalidateQueries({
     ...filters,
-    queryKey: ["@novu/api", "retrieve"],
+    queryKey: ['@novu/api', 'retrieve'],
   });
 }
 
 export function buildRetrieveQuery(
   client$: NovuCore,
   request: operations.LogsControllerGetLogsRequest,
-  options?: RequestOptions,
+  options?: RequestOptions
 ): {
   queryKey: QueryKey;
   queryFn: (context: QueryFunctionContext) => Promise<RetrieveQueryData>;
@@ -146,25 +133,19 @@ export function buildRetrieveQuery(
         fetchOptions: { ...options?.fetchOptions, signal: sig },
       };
 
-      return unwrapAsync(retrieve(
-        client$,
-        request,
-        mergedOptions,
-      ));
+      return unwrapAsync(retrieve(client$, request, mergedOptions));
     },
   };
 }
 
-export function queryKeyRetrieve(
-  parameters: {
-    page?: number | undefined;
-    limit?: number | undefined;
-    statusCodes?: Array<number> | undefined;
-    url?: string | undefined;
-    transactionId?: string | undefined;
-    created?: number | undefined;
-    idempotencyKey?: string | undefined;
-  },
-): QueryKey {
-  return ["@novu/api", "retrieve", parameters];
+export function queryKeyRetrieve(parameters: {
+  page?: number | undefined;
+  limit?: number | undefined;
+  statusCodes?: Array<number> | undefined;
+  url?: string | undefined;
+  transactionId?: string | undefined;
+  created?: number | undefined;
+  idempotencyKey?: string | undefined;
+}): QueryKey {
+  return ['@novu/api', 'retrieve', parameters];
 }

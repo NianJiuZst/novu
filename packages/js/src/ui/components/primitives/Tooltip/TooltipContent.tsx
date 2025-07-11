@@ -1,11 +1,11 @@
-import { JSX, onCleanup, onMount, Show, splitProps } from 'solid-js';
+import { type JSX, onCleanup, onMount, Show, splitProps } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { useAppearance, useFocusManager } from '../../../context';
 import { useStyle } from '../../../helpers';
 import type { AppearanceKey } from '../../../types';
 import { Root } from '../../elements';
-import { useTooltip } from './TooltipRoot';
 import { Motion } from '../Motion';
+import { useTooltip } from './TooltipRoot';
 
 export const tooltipContentVariants = () =>
   'nt-bg-foreground nt-p-2 nt-shadow-tooltip nt-rounded-lg nt-text-background nt-text-xs';

@@ -1,6 +1,6 @@
 import { Card } from '@mantine/core';
+import { Button, IconButton, Text, Title } from '@novu/novui';
 import { css } from '@novu/novui/css';
-import { Text, Title, Button, IconButton } from '@novu/novui';
 import { IconOutlineClose } from '@novu/novui/icons';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { useEffect } from 'react';

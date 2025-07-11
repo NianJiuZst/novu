@@ -1,16 +1,15 @@
-import React, { ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
 import {
-  INotificationTemplateStep,
-  IUpdateNotificationTemplateDto,
+  type IDigestRegularMetadata,
+  type INotificationTemplateStep,
+  type IUpdateNotificationTemplateDto,
   StepTypeEnum,
-  IDigestRegularMetadata,
 } from '@novu/shared';
-
-import { testTrigger } from '../../../api/notification-templates';
-import { useAuth } from '../../../hooks/useAuth';
-import { useDebounce } from '../../../hooks';
+import { useMutation } from '@tanstack/react-query';
+import React, { type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTemplateFetcher, useUpdateTemplate } from '../../../api/hooks';
+import { testTrigger } from '../../../api/notification-templates';
+import { useDebounce } from '../../../hooks';
+import { useAuth } from '../../../hooks/useAuth';
 
 interface IDigestDemoFlowProviderState {
   isRunningDigest: boolean;

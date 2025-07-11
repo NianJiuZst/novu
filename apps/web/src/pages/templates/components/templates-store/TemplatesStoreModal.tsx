@@ -1,19 +1,29 @@
+import { faFile } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionIcon, Modal, useMantineTheme } from '@mantine/core';
+import { Button, Close, colors, shadows } from '@novu/design-system';
+import { type INotificationTemplateStep, WorkflowCreationSourceEnum } from '@novu/shared';
 import { useState } from 'react';
 import { ReactFlowProvider } from 'react-flow-renderer';
-import { ActionIcon, Modal, useMantineTheme } from '@mantine/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useNavigate } from 'react-router-dom';
-import { Button, colors, shadows, Close } from '@novu/design-system';
-import { faFile } from '@fortawesome/free-regular-svg-icons';
-
-import { INotificationTemplateStep, WorkflowCreationSourceEnum } from '@novu/shared';
-
+import { type IBlueprintsGrouped, useCreateTemplateFromBlueprint } from '../../../../api/hooks';
+import type { IBlueprintTemplate } from '../../../../api/types';
+import { useSegment } from '../../../../components/providers/SegmentProvider';
+import { FlowEditor } from '../../../../components/workflow';
+import { ROUTES } from '../../../../constants/routes';
+import { errorMessage } from '../../../../utils/notifications';
+import { parseUrl } from '../../../../utils/routeUtils';
+import { TemplateAnalyticsEnum } from '../../constants';
+import { FrameworkProjectModalItem } from '../FrameworkProjectWaitList';
+import { ChannelNode } from './ChannelNode';
+import { TriggerNode } from './TriggerNode';
 import {
   CanvasHolder,
   GroupName,
   MadeByNovuStyled,
   ModalBodyHolder,
   NovuButtonHolder,
+  TemplateDescription,
   TemplateDetails,
   TemplateHeader,
   TemplateItem,
@@ -21,20 +31,8 @@ import {
   TemplatesDetailsHolder,
   TemplatesGroup,
   TemplatesSidebarHolder,
-  TemplateDescription,
   useStyles,
 } from './templateStoreStyles';
-import { IBlueprintsGrouped, useCreateTemplateFromBlueprint } from '../../../../api/hooks';
-import { TriggerNode } from './TriggerNode';
-import { ChannelNode } from './ChannelNode';
-import { FlowEditor } from '../../../../components/workflow';
-import { errorMessage } from '../../../../utils/notifications';
-import { parseUrl } from '../../../../utils/routeUtils';
-import { ROUTES } from '../../../../constants/routes';
-import { useSegment } from '../../../../components/providers/SegmentProvider';
-import { IBlueprintTemplate } from '../../../../api/types';
-import { TemplateAnalyticsEnum } from '../../constants';
-import { FrameworkProjectModalItem } from '../FrameworkProjectWaitList';
 
 const nodeTypes = {
   triggerNode: TriggerNode,

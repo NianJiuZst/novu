@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
 import { useColorScheme as useMantineColorScheme } from '@mantine/hooks';
-import { useLocalThemePreference, ColorSchemePreferenceEnum } from '../hooks/useLocalThemePreference';
-import { ColorScheme } from './ColorScheme';
-import { mapThemeStatusToColorScheme } from './mapThemeStatusToColorScheme';
+import { useCallback, useEffect, useState } from 'react';
+import { ColorSchemePreferenceEnum, useLocalThemePreference } from '../hooks/useLocalThemePreference';
+import type { ColorScheme } from './ColorScheme';
 import { getColorSchemeHtmlElement } from './getColorSchemeHtmlElement';
+import { mapThemeStatusToColorScheme } from './mapThemeStatusToColorScheme';
 
 /**
  * Handle behavior for changing ColorSchemes or ThemeStatuses.

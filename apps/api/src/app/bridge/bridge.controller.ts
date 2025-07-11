@@ -13,37 +13,34 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-
+import { ApiExcludeController } from '@nestjs/swagger';
+import {
+  type AnalyticsService,
+  ExternalApiAccessible,
+  RequirePermissions,
+  SkipPermissionsCheck,
+  UserSession,
+} from '@novu/application-generic';
+import type { ControlValuesRepository, EnvironmentRepository, NotificationTemplateRepository } from '@novu/dal';
 import { HttpHeaderKeysEnum } from '@novu/framework/internal';
 import {
   ControlValuesLevelEnum,
-  UserSessionData,
+  PermissionsEnum,
   ResourceOriginEnum,
   ResourceTypeEnum,
-  PermissionsEnum,
+  type UserSessionData,
 } from '@novu/shared';
-import {
-  AnalyticsService,
-  ExternalApiAccessible,
-  UserSession,
-  RequirePermissions,
-  SkipPermissionsCheck,
-} from '@novu/application-generic';
-import { ControlValuesRepository, EnvironmentRepository, NotificationTemplateRepository } from '@novu/dal';
-
-import { ApiExcludeController } from '@nestjs/swagger';
-
-import { StoreControlValuesCommand, StoreControlValuesUseCase } from './usecases/store-control-values';
-import { PreviewStep, PreviewStepCommand } from './usecases/preview-step';
-import { SyncCommand } from './usecases/sync';
-import { Sync } from './usecases/sync/sync.usecase';
-import { ValidateBridgeUrlRequestDto } from './dtos/validate-bridge-url-request.dto';
-import { ValidateBridgeUrlResponseDto } from './dtos/validate-bridge-url-response.dto';
-import { GetBridgeStatus } from './usecases/get-bridge-status/get-bridge-status.usecase';
-import { GetBridgeStatusCommand } from './usecases/get-bridge-status/get-bridge-status.command';
-import { CreateBridgeRequestDto } from './dtos/create-bridge-request.dto';
-import { CreateBridgeResponseDto } from './dtos/create-bridge-response.dto';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
+import type { CreateBridgeRequestDto } from './dtos/create-bridge-request.dto';
+import type { CreateBridgeResponseDto } from './dtos/create-bridge-response.dto';
+import type { ValidateBridgeUrlRequestDto } from './dtos/validate-bridge-url-request.dto';
+import type { ValidateBridgeUrlResponseDto } from './dtos/validate-bridge-url-response.dto';
+import { GetBridgeStatusCommand } from './usecases/get-bridge-status/get-bridge-status.command';
+import type { GetBridgeStatus } from './usecases/get-bridge-status/get-bridge-status.usecase';
+import { type PreviewStep, PreviewStepCommand } from './usecases/preview-step';
+import { StoreControlValuesCommand, type StoreControlValuesUseCase } from './usecases/store-control-values';
+import { SyncCommand } from './usecases/sync';
+import type { Sync } from './usecases/sync/sync.usecase';
 
 @Controller('/bridge')
 @UseInterceptors(ClassSerializerInterceptor)

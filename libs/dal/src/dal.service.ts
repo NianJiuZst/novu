@@ -1,6 +1,6 @@
-import mongoose, { Connection, ConnectOptions } from 'mongoose';
 import { Logger } from '@nestjs/common';
-import { AuthMechanism } from './types';
+import mongoose, { type Connection, type ConnectOptions } from 'mongoose';
+import type { AuthMechanism } from './types';
 
 const MONGODB_CONTEXT = '[@novu/dal]';
 

@@ -1,10 +1,10 @@
+import { parse } from '@handlebars/parser';
+import { getTemplateVariables } from '@novu/shared';
+import isEqual from 'lodash.isequal';
 import { useLayoutEffect, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import { parse } from '@handlebars/parser';
-import isEqual from 'lodash.isequal';
-import { getTemplateVariables } from '@novu/shared';
 
-import { IForm, ITemplates } from '../pages/templates/components/formTypes';
+import type { IForm, ITemplates } from '../pages/templates/components/formTypes';
 import { useStepFormPath } from '../pages/templates/hooks/useStepFormPath';
 import { useStepIndex } from '../pages/templates/hooks/useStepIndex';
 

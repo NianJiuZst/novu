@@ -1,13 +1,13 @@
 import { Loader } from '@mantine/core';
+import { Text, Title } from '@novu/novui';
 import { css } from '@novu/novui/css';
 import { Flex, Grid, VStack } from '@novu/novui/jsx';
 import { token } from '@novu/novui/tokens';
-import { PropsWithChildren, ReactNode } from 'react';
-import { Title, Text } from '@novu/novui';
-import { DocsQueryResults } from './useLoadDocs';
+import type { PropsWithChildren, ReactNode } from 'react';
 import { useFrameworkTerminalScript } from '../../hooks/useFrameworkTerminalScript';
 import { When } from '../utils/When';
 import { Mdx } from './Mdx';
+import type { DocsQueryResults } from './useLoadDocs';
 
 export const DOCS_WRAPPER_ELEMENT_ID = 'embedded-docs';
 

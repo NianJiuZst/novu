@@ -1,40 +1,37 @@
-import { Test } from '@nestjs/testing';
-import { expect } from 'chai';
-import { formatISO } from 'date-fns';
-import { v4 as uuid } from 'uuid';
 import { faker } from '@faker-js/faker';
-import { setTimeout } from 'timers/promises';
-
+import { Test } from '@nestjs/testing';
+import { StandardQueueService, WorkflowInMemoryProviderService } from '@novu/application-generic';
 import {
   CommunityOrganizationRepository,
-  EnvironmentEntity,
-  JobEntity,
+  type EnvironmentEntity,
+  type JobEntity,
   JobRepository,
   JobStatusEnum,
-  MessageTemplateEntity,
+  type MessageTemplateEntity,
   NotificationRepository,
-  NotificationTemplateEntity,
+  type NotificationTemplateEntity,
   NotificationTemplateRepository,
-  OrganizationEntity,
-  SubscriberEntity,
-  UserEntity,
+  type OrganizationEntity,
+  type SubscriberEntity,
+  type UserEntity,
 } from '@novu/dal';
 import { StepTypeEnum } from '@novu/shared';
 import {
   EnvironmentService,
+  JobsService,
   NotificationTemplateService,
   OrganizationService,
   SubscribersService,
   UserService,
-  JobsService,
 } from '@novu/testing';
-import { StandardQueueService, WorkflowInMemoryProviderService } from '@novu/application-generic';
-
-import { StandardWorker } from './standard.worker';
-
-import { WorkflowModule } from '../workflow.module';
-import { HandleLastFailedJob, RunJob, SetJobAsFailed, WebhookFilterBackoffStrategy } from '../usecases';
+import { expect } from 'chai';
+import { formatISO } from 'date-fns';
+import { setTimeout } from 'timers/promises';
+import { v4 as uuid } from 'uuid';
 import { SharedModule } from '../../shared/shared.module';
+import { HandleLastFailedJob, RunJob, SetJobAsFailed, WebhookFilterBackoffStrategy } from '../usecases';
+import { WorkflowModule } from '../workflow.module';
+import { StandardWorker } from './standard.worker';
 
 let standardQueueService: StandardQueueService;
 let standardWorker: StandardWorker;

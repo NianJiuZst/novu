@@ -4,9 +4,9 @@ import {
   ChannelCTATypeEnum,
   ChannelTypeEnum,
   EmailBlockTypeEnum,
-  IMessage,
-  IMessageAction,
-  IMessageCTA,
+  type IMessage,
+  type IMessageAction,
+  type IMessageCTA,
   MessageActionStatusEnum,
   TextAlignEnum,
 } from '@novu/shared';

@@ -1,7 +1,7 @@
 import type { IResponseError } from '@novu/shared';
-import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
+import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { errorMessage } from '../../utils/notifications';
-import { updateBrandingSettings, UpdateOrgBrandingPayloadType } from '../organization';
+import { type UpdateOrgBrandingPayloadType, updateBrandingSettings } from '../organization';
 
 type PayloadType = UpdateOrgBrandingPayloadType;
 type ResultType = UpdateOrgBrandingPayloadType;

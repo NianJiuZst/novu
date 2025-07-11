@@ -1,20 +1,19 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { addBreadcrumb } from '@sentry/node';
-import { IntegrationEntity, OrganizationRepository } from '@novu/dal';
-import { ChannelTypeEnum, EmailProviderIdEnum, IEmailOptions, ResourceOriginEnum } from '@novu/shared';
-
 import {
-  AnalyticsService,
-  CompileEmailTemplate,
+  type AnalyticsService,
+  type CompileEmailTemplate,
   CompileEmailTemplateCommand,
-  GetNovuProviderCredentials,
+  type GetNovuProviderCredentials,
   InstrumentUsecase,
   MailFactory,
-  SelectIntegration,
+  type SelectIntegration,
   SelectIntegrationCommand,
 } from '@novu/application-generic';
-import { SendTestEmailCommand } from './send-test-email.command';
-import { PreviewStep, PreviewStepCommand } from '../../../bridge/usecases/preview-step';
+import type { IntegrationEntity, OrganizationRepository } from '@novu/dal';
+import { ChannelTypeEnum, EmailProviderIdEnum, type IEmailOptions, ResourceOriginEnum } from '@novu/shared';
+import { addBreadcrumb } from '@sentry/node';
+import { type PreviewStep, PreviewStepCommand } from '../../../bridge/usecases/preview-step';
+import type { SendTestEmailCommand } from './send-test-email.command';
 
 @Injectable()
 export class SendTestEmail {

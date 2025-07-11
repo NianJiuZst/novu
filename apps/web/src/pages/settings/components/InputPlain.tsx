@@ -1,7 +1,6 @@
-import React from 'react';
-import { Input, IInputProps } from '@novu/design-system';
-
+import { type IInputProps, Input } from '@novu/design-system';
 import { css, cx } from '@novu/novui/css';
+import React from 'react';
 
 const inputPlainStyles = css({
   marginBottom: '200',

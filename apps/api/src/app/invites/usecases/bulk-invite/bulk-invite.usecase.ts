@@ -1,10 +1,10 @@
-import { captureException } from '@sentry/node';
 import { Injectable, Scope } from '@nestjs/common';
+import type { PinoLogger } from '@novu/application-generic';
 import { MemberRoleEnum } from '@novu/shared';
-import { PinoLogger } from '@novu/application-generic';
+import { captureException } from '@sentry/node';
 import { InviteMemberCommand } from '../invite-member/invite-member.command';
-import { InviteMember } from '../invite-member/invite-member.usecase';
-import { BulkInviteCommand } from './bulk-invite.command';
+import type { InviteMember } from '../invite-member/invite-member.usecase';
+import type { BulkInviteCommand } from './bulk-invite.command';
 
 interface IBulkInviteResponse {
   success: boolean;

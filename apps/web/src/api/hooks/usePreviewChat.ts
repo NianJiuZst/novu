@@ -1,7 +1,7 @@
-import { useMutation, UseMutationOptions } from '@tanstack/react-query';
-import { useCallback } from 'react';
 import { errorMessage } from '@novu/design-system';
 import type { IResponseError } from '@novu/shared';
+import { type UseMutationOptions, useMutation } from '@tanstack/react-query';
+import { useCallback } from 'react';
 
 import { previewChat } from '../content-templates';
 

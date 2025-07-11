@@ -1,11 +1,10 @@
-import { createContext, useCallback, useEffect, useMemo } from 'react';
+import { useAuth, useOrganization, useUser } from '@clerk/clerk-react';
+import type { OrganizationResource, UserResource } from '@clerk/types';
 import type { IOrganizationEntity, IUserEntity } from '@novu/shared';
-import { useAuth, useUser, useOrganization } from '@clerk/clerk-react';
-import { OrganizationResource, UserResource } from '@clerk/types';
-
-import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { type AuthContextValue } from '../../../components/providers/AuthProvider';
+import { createContext, useCallback, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import type { AuthContextValue } from '../../../components/providers/AuthProvider';
 import { DEFAULT_AUTH_CONTEXT_VALUE } from '../../../components/providers/constants';
 import { useSegment } from '../../../components/providers/SegmentProvider';
 import { ROUTES } from '../../../constants/routes';

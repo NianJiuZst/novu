@@ -1,11 +1,11 @@
-import {
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import type {
   EnvironmentId,
   IPreferenceChannels,
   IWorkflowOverride,
   OrganizationId,
   WorkflowOverrideId,
 } from '@novu/shared';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { SubscriberPreferenceChannels } from '../../shared/dtos/preference-channels';
 
 export class OverrideResponseDto implements IWorkflowOverride {

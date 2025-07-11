@@ -1,2 +1,2 @@
-export * from './PageTemplate';
 export * from './PageContainer';
+export * from './PageTemplate';

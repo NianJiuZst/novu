@@ -1,6 +1,6 @@
-import React from 'react';
-import { colors, Text } from '@novu/design-system';
 import { Group, useMantineTheme } from '@mantine/core';
+import { colors, Text } from '@novu/design-system';
+import React from 'react';
 
 export const ContactSalesButton = ({ onContactSales, label }: { onContactSales: () => void; label?: string }) => {
   const { colorScheme } = useMantineTheme();

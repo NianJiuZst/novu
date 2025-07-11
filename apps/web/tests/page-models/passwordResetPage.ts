@@ -1,4 +1,4 @@
-import { Page, selectors } from '@playwright/test';
+import { type Page, selectors } from '@playwright/test';
 
 export class PasswordResetPage {
   constructor(private page: Page) {

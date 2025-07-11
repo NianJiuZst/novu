@@ -1,6 +1,11 @@
-import { createClient, ClickHouseClient, ClickHouseClientConfigOptions, PingResult } from '@clickhouse/client';
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
-import { PinoLogger } from 'nestjs-pino';
+import {
+  type ClickHouseClient,
+  type ClickHouseClientConfigOptions,
+  createClient,
+  type PingResult,
+} from '@clickhouse/client';
+import { Injectable, type OnModuleDestroy } from '@nestjs/common';
+import type { PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class ClickHouseService implements OnModuleDestroy {

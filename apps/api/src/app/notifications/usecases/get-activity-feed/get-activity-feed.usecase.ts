@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Instrument } from '@novu/application-generic';
-import {
+import type {
   CommunityOrganizationRepository,
   NotificationFeedItemEntity,
   NotificationRepository,
@@ -8,8 +8,8 @@ import {
   SubscriberRepository,
 } from '@novu/dal';
 import { ApiServiceLevelEnum, FeatureNameEnum, getFeatureForTierAsNumber } from '@novu/shared';
-import { ActivitiesResponseDto, ActivityNotificationResponseDto } from '../../dtos/activities-response.dto';
-import { GetActivityFeedCommand } from './get-activity-feed.command';
+import type { ActivitiesResponseDto, ActivityNotificationResponseDto } from '../../dtos/activities-response.dto';
+import type { GetActivityFeedCommand } from './get-activity-feed.command';
 import { mapFeedItemToDto } from './map-feed-item-to.dto';
 
 @Injectable()

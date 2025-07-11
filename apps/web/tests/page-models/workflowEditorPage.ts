@@ -1,18 +1,18 @@
-import { Locator, Page, expect } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { dragAndDrop } from '../utils/browser';
-import { WorkflowBaseSidePanelPage, WorkflowSettingsSidePanel } from './workflowSettingsSidePanel';
 import { ChannelType } from '../utils/ChannelType';
-import { NodeInAppEditingModalPageModel } from './nodeInAppEditingModalPageModel';
-import { CodeSnippetSidePanelPageModel } from './codeSnippetSidePanelPageModel';
-import { NodeEmailEditorPageModal } from './nodeEmailEditorPageModal';
-import { NodeSmsEditingModalPageModel } from './nodeSmsEditingModalPageModel';
-import { WorkflowTriggerSidebar } from './workflowTriggerSidebar';
-import { NodeDigestEditorPageModal } from './nodeDigestEditorPageModal';
-import { NodeChatEditingModalPageModel } from './nodeChatEditingModalPageModel';
-import { NodePushEditorPageModal } from './nodePushEditorPageModal';
-import { NodeDelayEditorPageModal } from './nodeDelayEditorPageModal';
-import { ConditionsPage } from './conditionsPage';
 import { addConditions } from '../utils/commands';
+import { CodeSnippetSidePanelPageModel } from './codeSnippetSidePanelPageModel';
+import { ConditionsPage } from './conditionsPage';
+import { NodeChatEditingModalPageModel } from './nodeChatEditingModalPageModel';
+import { NodeDelayEditorPageModal } from './nodeDelayEditorPageModal';
+import { NodeDigestEditorPageModal } from './nodeDigestEditorPageModal';
+import { NodeEmailEditorPageModal } from './nodeEmailEditorPageModal';
+import { NodeInAppEditingModalPageModel } from './nodeInAppEditingModalPageModel';
+import { NodePushEditorPageModal } from './nodePushEditorPageModal';
+import { NodeSmsEditingModalPageModel } from './nodeSmsEditingModalPageModel';
+import { WorkflowBaseSidePanelPage, WorkflowSettingsSidePanel } from './workflowSettingsSidePanel';
+import { WorkflowTriggerSidebar } from './workflowTriggerSidebar';
 
 export class WorkflowEditorPage {
   async getFirstSmsNodeEditor() {

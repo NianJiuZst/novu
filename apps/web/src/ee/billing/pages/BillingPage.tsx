@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
+import { useSegment } from '../../../components/providers/SegmentProvider';
 import { Plan } from '../components/Plan';
 import { SubscriptionProvider } from '../components/SubscriptionProvider';
-import { useSegment } from '../../../components/providers/SegmentProvider';
 
 export const BillingPage = () => {
   const segment = useSegment();

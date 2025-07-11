@@ -6,7 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import postcss from 'postcss';
 import loadPostcssConfig from 'postcss-load-config';
-import { defineConfig, Options } from 'tsup';
+import { defineConfig, type Options } from 'tsup';
 import { name, version } from './package.json';
 
 const processCSS = async (css: string, filePath: string) => {
@@ -27,7 +27,7 @@ const buildCSS = async () => {
 const isProd = process.env.NODE_ENV === 'production';
 const isPreview = process.env.IS_PREVIEW === 'true';
 
-let previewLastCommitHash: string | undefined = undefined; // Default value
+let previewLastCommitHash: string | undefined; // Default value
 if (isPreview) {
   try {
     previewLastCommitHash = execSync('git rev-parse HEAD').toString().trim();

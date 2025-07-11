@@ -1,3 +1,4 @@
+import { useToggle } from '@mantine/hooks';
 import {
   // cspell:disable-next-line
   IconAutorenew,
@@ -14,27 +15,26 @@ import {
   IconWebhook,
 } from '@novu/novui/icons';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
-import { useToggle } from '@mantine/hooks';
-import { ChangesCountBadge } from '../layout/components/ChangesCountBadge';
-import { ROUTES } from '../../constants/routes';
-import { useEnvironment } from '../../hooks/useEnvironment';
+import { IS_EE_AUTH_ENABLED, IS_SELF_HOSTED } from '../../config/index';
 import { BaseEnvironmentEnum } from '../../constants/BaseEnvironmentEnum';
+import { ROUTES } from '../../constants/routes';
+import { OrganizationSwitcher } from '../../ee/clerk';
+import { useEnvironment } from '../../hooks/useEnvironment';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { OpenLocalStudioModal } from '../../studio/components/OpenLocalStudioModal';
+import { OutlineButton } from '../../studio/components/OutlineButton';
+import { useNavigateToLocalStudio } from '../../studio/hooks/useNavigateToLocalStudio';
+import { parseUrl } from '../../utils/routeUtils';
+import { ChangesCountBadge } from '../layout/components/ChangesCountBadge';
+import { FreeTrialSidebarWidget } from '../layout/components/FreeTrialSidebarWidget';
+import { SidebarFooter } from '../layout/components/LocalStudioSidebar/SidebarFooter';
+import { NewDashboardOptInWidget } from '../layout/components/v2/NewDashboardOptInWidget';
+import { When } from '../utils/When';
 import { EnvironmentSelect } from './EnvironmentSelect';
 import { NavMenu } from './NavMenu';
 import { NavMenuLinkButton } from './NavMenuButton/NavMenuLinkButton';
 import { NavMenuSection } from './NavMenuSection';
 import { OrganizationSelect } from './OrganizationSelect/OrganizationSelect';
-import { FreeTrialSidebarWidget } from '../layout/components/FreeTrialSidebarWidget';
-import { parseUrl } from '../../utils/routeUtils';
-import { OrganizationSwitcher } from '../../ee/clerk';
-import { IS_SELF_HOSTED, IS_EE_AUTH_ENABLED } from '../../config/index';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { When } from '../utils/When';
-import { SidebarFooter } from '../layout/components/LocalStudioSidebar/SidebarFooter';
-import { useNavigateToLocalStudio } from '../../studio/hooks/useNavigateToLocalStudio';
-import { OpenLocalStudioModal } from '../../studio/components/OpenLocalStudioModal';
-import { OutlineButton } from '../../studio/components/OutlineButton';
-import { NewDashboardOptInWidget } from '../layout/components/v2/NewDashboardOptInWidget';
 
 const getEnvPageRoute = (route: ROUTES, env: BaseEnvironmentEnum) => parseUrl(route, { env });
 

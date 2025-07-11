@@ -1,13 +1,13 @@
-import { Novu } from '@novu/api';
-import { TopicResponseDto } from '@novu/api/models/components';
-import { SubscriberEntity, SubscriberRepository, TopicSubscribersRepository } from '@novu/dal';
-import { ExternalSubscriberId, TopicKey, TopicName } from '@novu/shared';
+import type { Novu } from '@novu/api';
+import type { TopicResponseDto } from '@novu/api/models/components';
+import { type SubscriberEntity, SubscriberRepository, TopicSubscribersRepository } from '@novu/dal';
+import type { ExternalSubscriberId, TopicKey, TopicName } from '@novu/shared';
 import { SubscribersService, UserSession } from '@novu/testing';
 import { expect } from 'chai';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
 const subscriberId = '123';
-describe('Delete Subscriber - /subscribers/:subscriberId (DELETE) #novu-v2', function () {
+describe('Delete Subscriber - /subscribers/:subscriberId (DELETE) #novu-v2', () => {
   let session: UserSession;
   let subscriberService: SubscribersService;
   const subscriberRepository = new SubscriberRepository();
@@ -20,7 +20,7 @@ describe('Delete Subscriber - /subscribers/:subscriberId (DELETE) #novu-v2', fun
     novuClient = initNovuClassSdk(session);
   });
 
-  it('should delete an existing subscriber', async function () {
+  it('should delete an existing subscriber', async () => {
     await novuClient.subscribers.create({
       subscriberId,
       firstName: 'John',

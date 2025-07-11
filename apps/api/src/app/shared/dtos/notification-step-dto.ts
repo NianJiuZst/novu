@@ -4,21 +4,20 @@ import {
   DelayTypeEnum,
   DigestTypeEnum,
   DigestUnitEnum,
-  IDelayRegularMetadata,
-  IDelayScheduledMetadata,
-  IDigestBaseMetadata,
-  IDigestRegularMetadata,
-  IDigestTimedMetadata,
-  ITimedConfig,
-  IWorkflowStepMetadata,
+  type IDelayRegularMetadata,
+  type IDelayScheduledMetadata,
+  type IDigestBaseMetadata,
+  type IDigestRegularMetadata,
+  type IDigestTimedMetadata,
+  type ITimedConfig,
+  type IWorkflowStepMetadata,
   MonthlyTypeEnum,
   OrdinalEnum,
   OrdinalValueEnum,
-  StepVariantDto,
+  type StepVariantDto,
 } from '@novu/shared';
-import { IsBoolean, IsString, ValidateNested } from 'class-validator';
-
 import { Type } from 'class-transformer';
+import { IsBoolean, IsString, ValidateNested } from 'class-validator';
 import { MessageTemplate } from './message-template';
 import { StepFilterDto } from './step-filter-dto';
 

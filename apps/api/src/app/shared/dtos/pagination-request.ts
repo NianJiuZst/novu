@@ -1,9 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import type { IPaginationParams } from '@novu/shared';
 import { Type } from 'class-transformer';
 import { IsInt, Max, Min } from 'class-validator';
-import { IPaginationParams } from '@novu/shared';
 
-import { Constructor } from '../types';
+import type { Constructor } from '../types';
 
 export function PaginationRequestDto(defaultLimit = 10, maxLimit = 100): Constructor<IPaginationParams> {
   class PaginationRequest {

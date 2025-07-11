@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { useMantineColorScheme } from '@mantine/core';
-import { colors, Text, Discord } from '@novu/design-system';
+import { colors, Discord, Text } from '@novu/design-system';
 import { useIntercom } from 'react-use-intercom';
 
 import { useSegment } from '../../../../../components/providers/SegmentProvider';

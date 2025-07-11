@@ -1,3 +1,3 @@
-export * from './iphone';
 export * from './android';
 export * from './InAppHeaderIcons';
+export * from './iphone';

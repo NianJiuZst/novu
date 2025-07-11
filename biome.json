@@ -1,0 +1,238 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.1.1/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": [
+      "**",
+      "!node_modules/**",
+      "!dist/**",
+      "!build/**",
+      "!.github/**",
+      "!coverage/**",
+      "!.nx/**",
+      "!.git/**",
+      "!*.log",
+      "!pnpm-lock.yaml",
+      "!swagger-spec.json",
+      "!**/*.d.ts",
+      "!**/*.generated.ts"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noSvgWithoutTitle": "off",
+        "useButtonType": "off",
+        "noStaticElementInteractions": "warn",
+        "useKeyWithClickEvents": "warn",
+        "useSemanticElements": "warn",
+        "noLabelWithoutControl": "warn",
+        "useAriaPropsSupportedByRole": "warn",
+        "useFocusableInteractive": "warn",
+        "useAriaPropsForRole": "warn"
+      },
+      "complexity": {
+        "noForEach": "warn"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "noImplicitAnyLet": "warn",
+        "noRedeclare": "warn",
+        "noAssignInExpressions": "warn",
+        "noExplicitAny": "warn"
+      },
+      "style": {
+        "noCommonJs": "warn",
+        "noNamespace": "warn",
+        "useConst": "error",
+        "useArrayLiterals": "error",
+        "useAsConstAssertion": "error"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "es5"
+    }
+  },
+  "json": {
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 2
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["apps/dashboard/**/*.{ts,tsx}"],
+      "formatter": {
+        "indentStyle": "tab"
+      },
+      "javascript": {
+        "formatter": {
+          "quoteStyle": "double"
+        }
+      },
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noUselessTypeConstraint": "error"
+          },
+          "correctness": {
+            "noUnusedVariables": "warn",
+            "useExhaustiveDependencies": "warn",
+            "useHookAtTopLevel": "error"
+          },
+          "style": {
+            "useComponentExportOnlyModules": "warn",
+            "useNamingConvention": {
+              "level": "error",
+              "options": {
+                "strictCase": false,
+                "requireAscii": false,
+                "conventions": [
+                  {
+                    "selector": { "kind": "enumMember" },
+                    "formats": ["CONSTANT_CASE"]
+                  },
+                  {
+                    "selector": { "kind": "typeParameter" },
+                    "formats": ["PascalCase"]
+                  },
+                  {
+                    "selector": { "kind": "class" },
+                    "formats": ["PascalCase"]
+                  },
+                  {
+                    "selector": { "kind": "interface" },
+                    "formats": ["PascalCase"]
+                  },
+                  { "match": ".*" }
+                ]
+              }
+            }
+          },
+          "suspicious": {
+            "noEmptyBlockStatements": "off",
+            "noExtraNonNullAssertion": "error",
+            "noMisleadingInstantiator": "error",
+            "noUnsafeDeclarationMerging": "error",
+            "useNamespaceKeyword": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/api/**/*.{ts,js}"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noUselessTypeConstraint": "error"
+          },
+          "correctness": {
+            "noUnusedVariables": "warn"
+          },
+          "style": {
+            "useNamingConvention": {
+              "level": "error",
+              "options": {
+                "strictCase": false,
+                "requireAscii": false,
+                "conventions": [
+                  {
+                    "selector": { "kind": "enumMember" },
+                    "formats": ["CONSTANT_CASE"]
+                  },
+                  {
+                    "selector": { "kind": "typeParameter" },
+                    "formats": ["PascalCase"]
+                  },
+                  {
+                    "selector": { "kind": "class" },
+                    "formats": ["PascalCase"]
+                  },
+                  {
+                    "selector": { "kind": "interface" },
+                    "formats": ["PascalCase"]
+                  },
+                  { "match": ".*" }
+                ]
+              }
+            }
+          },
+          "suspicious": {
+            "noEmptyBlockStatements": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.test.{ts,tsx,js}", "**/*.spec.{ts,tsx,js}", "**/*.e2e.{ts,js}"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off",
+            "noImplicitAnyLet": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["libs/**/*.{ts,js}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": {
+              "level": "error",
+              "options": {
+                "strictCase": false,
+                "requireAscii": false,
+                "conventions": [
+                  {
+                    "selector": { "kind": "enumMember" },
+                    "formats": ["CONSTANT_CASE"]
+                  },
+                  {
+                    "selector": { "kind": "typeParameter" },
+                    "formats": ["PascalCase"]
+                  },
+                  {
+                    "selector": { "kind": "class" },
+                    "formats": ["PascalCase"]
+                  },
+                  {
+                    "selector": { "kind": "interface" },
+                    "formats": ["PascalCase"]
+                  },
+                  { "match": ".*" }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
+}

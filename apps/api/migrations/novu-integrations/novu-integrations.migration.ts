@@ -1,13 +1,13 @@
 import '../../src/config';
+import { NestFactory } from '@nestjs/core';
 import {
-  OrganizationRepository,
+  ChannelTypeEnum,
+  type EnvironmentEntity,
   EnvironmentRepository,
   IntegrationRepository,
-  ChannelTypeEnum,
-  EnvironmentEntity,
+  OrganizationRepository,
 } from '@novu/dal';
 import { EmailProviderIdEnum, SmsProviderIdEnum, slugify } from '@novu/shared';
-import { NestFactory } from '@nestjs/core';
 import shortid from 'shortid';
 import { AppModule } from '../../src/app.module';
 

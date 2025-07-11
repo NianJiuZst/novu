@@ -1,12 +1,12 @@
-import { expect } from 'chai';
-import { UserSession } from '@novu/testing';
-import { Novu } from '@novu/api';
-import { LayoutsControllerCreateResponse } from '@novu/api/models/operations';
+import type { Novu } from '@novu/api';
+import type { LayoutsControllerCreateResponse } from '@novu/api/models/operations';
 import { layoutControlSchema, layoutUiSchema } from '@novu/application-generic';
 import { LayoutRepository } from '@novu/dal';
+import { UserSession } from '@novu/testing';
+import { expect } from 'chai';
 
 import { initNovuClassSdkInternalAuth } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
-import { CreateLayoutDto, UpdateLayoutDto } from '../dtos';
+import type { CreateLayoutDto, UpdateLayoutDto } from '../dtos';
 import { LayoutCreationSourceEnum } from '../types';
 
 describe('Upsert Layout #novu-v2', () => {

@@ -1,11 +1,11 @@
+import { errorMessage, When } from '@novu/design-system';
 import { Button } from '@novu/novui';
 import { css } from '@novu/novui/css';
 import { ApiServiceLevelEnum } from '@novu/shared';
 import { useMutation } from '@tanstack/react-query';
-import { errorMessage, When } from '@novu/design-system';
 import { api } from '../../../api';
-import { useSubscriptionContext } from './SubscriptionProvider';
 import { useSegment } from '../../../components/providers/SegmentProvider';
+import { useSubscriptionContext } from './SubscriptionProvider';
 
 const checkoutUrl = '/v1/billing/checkout-session';
 const billingPortalUrl = '/v1/billing/portal';

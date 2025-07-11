@@ -1,24 +1,23 @@
+import styled from '@emotion/styled';
 import { JsonInput } from '@mantine/core';
+import { Button, colors, inputStyles } from '@novu/design-system';
+import { useMutation } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import styled from '@emotion/styled';
-import { Button, colors, inputStyles } from '@novu/design-system';
-
-import { useMutation } from '@tanstack/react-query';
+import { api } from '../../../../api';
 import { useActiveIntegrations, useProcessVariables } from '../../../../hooks';
+import { useEnvironment } from '../../../../hooks/useEnvironment';
+import { ControlVariablesForm } from '../../../../pages/templates/components/ControlVariablesForm';
 import type { IForm } from '../../../../pages/templates/components/formTypes';
+import { useTemplateEditorForm } from '../../../../pages/templates/components/TemplateEditorFormProvider';
+import { usePreviewEmailTemplate } from '../../../../pages/templates/hooks/usePreviewEmailTemplate';
 import { useStepFormErrors } from '../../../../pages/templates/hooks/useStepFormErrors';
 import { useStepFormPath } from '../../../../pages/templates/hooks/useStepFormPath';
+import { useTemplateLocales } from '../../../../pages/templates/hooks/useTemplateLocales';
 import { When } from '../../../utils/When';
+import { ErrorPrettyRender } from '../ErrorPrettyRender';
 import { PreviewMobile } from './PreviewMobile';
 import { PreviewWeb } from './PreviewWeb';
-import { api } from '../../../../api';
-import { useTemplateLocales } from '../../../../pages/templates/hooks/useTemplateLocales';
-import { usePreviewEmailTemplate } from '../../../../pages/templates/hooks/usePreviewEmailTemplate';
-import { useEnvironment } from '../../../../hooks/useEnvironment';
-import { useTemplateEditorForm } from '../../../../pages/templates/components/TemplateEditorFormProvider';
-import { ControlVariablesForm } from '../../../../pages/templates/components/ControlVariablesForm';
-import { ErrorPrettyRender } from '../ErrorPrettyRender';
 
 const PreviewContainer = styled.div`
   display: flex;

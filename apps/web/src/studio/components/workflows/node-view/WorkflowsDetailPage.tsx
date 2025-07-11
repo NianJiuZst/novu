@@ -14,10 +14,10 @@ import { OutlineButton } from '../../OutlineButton';
 import { WorkflowsPageTemplate } from '../layout/WorkflowsPageTemplate';
 import { StudioWorkflowSettingsSidePanel } from '../preferences/StudioWorkflowSettingsSidePanel';
 import { WorkflowDetailFormContextProvider } from '../preferences/WorkflowDetailFormContextProvider';
+import { WorkflowNotFound } from '../WorkflowNotFound';
 import { WorkflowBackgroundWrapper } from './WorkflowBackgroundWrapper';
 import { WorkflowFloatingMenu } from './WorkflowFloatingMenu';
 import { WorkflowNodes } from './WorkflowNodes';
-import { WorkflowNotFound } from '../WorkflowNotFound';
 
 const BaseWorkflowsDetailPage = () => {
   const { currentWorkflowId, goToStep, goToTest } = useStudioWorkflowsNavigation();

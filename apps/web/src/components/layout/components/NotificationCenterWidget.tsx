@@ -1,19 +1,19 @@
 import { useMantineColorScheme } from '@mantine/core';
 import { NovuProvider, PopoverNotificationCenter, useUpdateAction } from '@novu/notification-center';
 import {
-  ButtonTypeEnum,
-  IMessage,
+  type ButtonTypeEnum,
+  type IMessage,
   INVITE_TEAM_MEMBER_NUDGE_PAYLOAD_KEY,
-  IUserEntity,
+  type IUserEntity,
   MessageActionStatusEnum,
 } from '@novu/shared';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../hooks/useAuth';
 import { API_ROOT, APP_ID, IS_EU_ENV, WS_URL } from '../../../config';
-import { useEnvironment } from '../../../hooks';
-import { NotificationCenterBell } from './NotificationCenterBell';
 import { ROUTES } from '../../../constants/routes';
+import { useEnvironment } from '../../../hooks';
+import { useAuth } from '../../../hooks/useAuth';
 import { useSegment } from '../../providers/SegmentProvider';
+import { NotificationCenterBell } from './NotificationCenterBell';
 
 const BACKEND_URL = IS_EU_ENV ? 'https://api.novu.co' : API_ROOT;
 const SOCKET_URL = IS_EU_ENV ? 'https://ws.novu.co' : WS_URL;

@@ -1,11 +1,10 @@
 import { Group, Radio, SimpleGrid, Text } from '@mantine/core';
-import { Controller, useFormContext } from 'react-hook-form';
-import { DigestUnitEnum, OrdinalEnum, OrdinalValueEnum, MonthlyTypeEnum, DigestTypeEnum } from '@novu/shared';
-
 import { colors, Select, When } from '@novu/design-system';
-import { DaySelect } from './DaySelect';
+import { DigestTypeEnum, DigestUnitEnum, MonthlyTypeEnum, OrdinalEnum, OrdinalValueEnum } from '@novu/shared';
+import { Controller, useFormContext } from 'react-hook-form';
 import { useEnvironment } from '../../../../hooks';
 import { useStepFormPath } from '../../hooks/useStepFormPath';
+import { DaySelect } from './DaySelect';
 
 export const ScheduleMonthlyFields = () => {
   const { readonly } = useEnvironment();

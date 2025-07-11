@@ -1,5 +1,5 @@
 import { EnvironmentWithUserObjectCommand } from '@novu/application-generic';
-import { GeneratePreviewRequestDto } from '../../dtos';
+import type { GeneratePreviewRequestDto } from '../../dtos';
 
 export class PreviewCommand extends EnvironmentWithUserObjectCommand {
   workflowIdOrInternalId: string;

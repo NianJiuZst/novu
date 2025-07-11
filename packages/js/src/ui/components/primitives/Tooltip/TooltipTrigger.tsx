@@ -1,4 +1,4 @@
-import { createMemo, JSX, splitProps } from 'solid-js';
+import { createMemo, type JSX, splitProps } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import { useStyle } from '../../../helpers';
 import { mergeRefs } from '../../../helpers/mergeRefs';

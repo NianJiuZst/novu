@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { NotificationGroupRepository, DalException } from '@novu/dal';
-import { DeleteNotificationGroupCommand } from './delete-notification-group.command';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { DalException, type NotificationGroupRepository } from '@novu/dal';
+import type { DeleteNotificationGroupCommand } from './delete-notification-group.command';
 
 @Injectable()
 export class DeleteNotificationGroup {

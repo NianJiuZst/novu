@@ -1,13 +1,12 @@
 import { Container, Group } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { IMemberEntity, MemberRoleEnum } from '@novu/shared';
-import { useQuery } from '@tanstack/react-query';
-
 import { errorMessage, successMessage, Title, UserAccess } from '@novu/design-system';
-import { IS_SELF_HOSTED } from '../../../config';
+import type { IMemberEntity, MemberRoleEnum } from '@novu/shared';
+import { useQuery } from '@tanstack/react-query';
 import { changeMemberRole, getOrganizationMembers, removeMember, resendInviteMember } from '../../../api/organization';
-import { useAuth } from '../../../hooks/useAuth';
 import { ProductLead } from '../../../components/utils/ProductLead';
+import { IS_SELF_HOSTED } from '../../../config';
+import { useAuth } from '../../../hooks/useAuth';
 import { MembersTable } from '../components/MembersTable';
 import { CopyInviteLink } from './CopyInviteLink';
 import { MemberInviteForm } from './MemberInviteForm';

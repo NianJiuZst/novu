@@ -1,18 +1,16 @@
 import { Injectable } from '@nestjs/common';
-
-import { NotificationTemplateEntity } from '@novu/dal';
-import { buildWorkflowPreferencesFromPreferenceChannels, DEFAULT_WORKFLOW_PREFERENCES } from '@novu/shared';
 import {
   GetPreferences,
   GetPreferencesCommand,
+  GetWorkflowByIdsCommand,
+  type GetWorkflowByIdsUseCase,
   Instrument,
   InstrumentUsecase,
-  GetWorkflowByIdsUseCase,
-  GetWorkflowByIdsCommand,
 } from '@novu/application-generic';
-
-import { GetWorkflowWithPreferencesCommand } from './get-workflow-with-preferences.command';
-import { WorkflowWithPreferencesResponseDto } from '../../dtos/get-workflow-with-preferences.dto';
+import type { NotificationTemplateEntity } from '@novu/dal';
+import { buildWorkflowPreferencesFromPreferenceChannels, DEFAULT_WORKFLOW_PREFERENCES } from '@novu/shared';
+import type { WorkflowWithPreferencesResponseDto } from '../../dtos/get-workflow-with-preferences.dto';
+import type { GetWorkflowWithPreferencesCommand } from './get-workflow-with-preferences.command';
 
 @Injectable()
 export class GetWorkflowWithPreferencesUseCase {

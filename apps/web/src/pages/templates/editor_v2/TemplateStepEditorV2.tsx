@@ -1,15 +1,15 @@
+import { errorMessage, IconPlayArrow, successMessage } from '@novu/design-system';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { errorMessage, IconPlayArrow, successMessage } from '@novu/design-system';
-import { useTemplateController } from '../components/useTemplateController';
-import { parseUrl } from '../../../utils/routeUtils';
 import { api } from '../../../api/api.client';
+import { WorkflowsStepEditor } from '../../../components/workflow_v2/StepEditorComponent';
 import { ROUTES } from '../../../constants/routes';
 import { useControlsHandler } from '../../../hooks/workflow/useControlsHandler';
-import { WorkflowsStepEditor } from '../../../components/workflow_v2/StepEditorComponent';
-import { StepIcon, WorkflowsPageTemplate } from '../../../studio/components/workflows/layout/WorkflowsPageTemplate';
 import { OutlineButton } from '../../../studio/components/OutlineButton';
+import { StepIcon, WorkflowsPageTemplate } from '../../../studio/components/workflows/layout/WorkflowsPageTemplate';
+import { parseUrl } from '../../../utils/routeUtils';
+import { useTemplateController } from '../components/useTemplateController';
 
 export const WorkflowsStepEditorPageV2 = () => {
   const navigate = useNavigate();

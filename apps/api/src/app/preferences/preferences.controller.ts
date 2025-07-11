@@ -8,19 +8,19 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
+import { ApiExcludeController } from '@nestjs/swagger';
 import {
   DeletePreferencesCommand,
-  DeletePreferencesUseCase,
-  GetPreferences,
+  type DeletePreferencesUseCase,
+  type GetPreferences,
   GetPreferencesCommand,
-  UpsertPreferences,
+  type UpsertPreferences,
   UpsertUserWorkflowPreferencesCommand,
   UserSession,
 } from '@novu/application-generic';
-import { PreferencesTypeEnum, UserSessionData } from '@novu/shared';
-import { ApiExcludeController } from '@nestjs/swagger';
+import { PreferencesTypeEnum, type UserSessionData } from '@novu/shared';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
-import { UpsertPreferencesDto } from './dtos/upsert-preferences.dto';
+import type { UpsertPreferencesDto } from './dtos/upsert-preferences.dto';
 
 /**
  * @deprecated - set workflow preferences using the `/workflows` endpoint instead

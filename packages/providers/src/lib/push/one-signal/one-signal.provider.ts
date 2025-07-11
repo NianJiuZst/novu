@@ -1,9 +1,14 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-
-import { ChannelTypeEnum, ISendMessageSuccessResponse, IPushOptions, IPushProvider } from '@novu/stateless';
 import { PushProviderIdEnum } from '@novu/shared';
+
+import {
+  ChannelTypeEnum,
+  type IPushOptions,
+  type IPushProvider,
+  type ISendMessageSuccessResponse,
+} from '@novu/stateless';
+import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export class OneSignalPushProvider extends BaseProvider implements IPushProvider {
   id = PushProviderIdEnum.OneSignal;

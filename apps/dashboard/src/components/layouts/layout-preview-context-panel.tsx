@@ -1,85 +1,85 @@
-import { useCallback, useEffect } from 'react';
-import type { ISubscriberResponseDto, SubscriberDto } from '@novu/shared';
+import type { ISubscriberResponseDto, SubscriberDto } from "@novu/shared";
+import { useCallback, useEffect } from "react";
 
-import { Accordion } from '@/components/primitives/accordion';
-import { PreviewSubscriberSection } from '../preview-subscriber-section';
-import { usePreviewContext } from '@/hooks/use-preview-context';
-import { clearSubscriberData, loadSubscriberData, saveSubscriberData } from './utils/layout-preview-context-storage';
-import { useLayoutEditor } from './layout-editor-provider';
-import { useEnvironment } from '@/context/environment/hooks';
-import { createSubscriberData } from '../workflow-editor/steps/utils/preview-context.utils';
+import { Accordion } from "@/components/primitives/accordion";
+import { useEnvironment } from "@/context/environment/hooks";
+import { usePreviewContext } from "@/hooks/use-preview-context";
+import { PreviewSubscriberSection } from "../preview-subscriber-section";
+import { createSubscriberData } from "../workflow-editor/steps/utils/preview-context.utils";
+import { useLayoutEditor } from "./layout-editor-provider";
+import { clearSubscriberData, loadSubscriberData, saveSubscriberData } from "./utils/layout-preview-context-storage";
 
 type ParsedData = { subscriber: Partial<SubscriberDto> };
 
 function parseJsonValue(value: string): ParsedData {
-  try {
-    const parsed = JSON.parse(value || '{}');
-    return {
-      subscriber: parsed.subscriber || {},
-    };
-  } catch {
-    return {
-      subscriber: {},
-    };
-  }
+	try {
+		const parsed = JSON.parse(value || "{}");
+		return {
+			subscriber: parsed.subscriber || {},
+		};
+	} catch {
+		return {
+			subscriber: {},
+		};
+	}
 }
 
 export const LayoutPreviewContextPanel = () => {
-  const { layout, previewContextValue, setPreviewContextValue } = useLayoutEditor();
-  const { currentEnvironment } = useEnvironment();
+	const { layout, previewContextValue, setPreviewContextValue } = useLayoutEditor();
+	const { currentEnvironment } = useEnvironment();
 
-  const { accordionValue, setAccordionValue, errors, localParsedData, updateJsonSection } = usePreviewContext({
-    value: previewContextValue,
-    onChange: setPreviewContextValue,
-    defaultAccordionValue: ['subscriber'],
-    defaultErrors: {
-      subscriber: null,
-    },
-    parseJsonValue,
-    onDataPersist: (data: ParsedData) => {
-      if (data.subscriber !== undefined) {
-        saveSubscriberData(layout?._id || '', currentEnvironment?._id || '', data.subscriber);
-      }
-    },
-  });
+	const { accordionValue, setAccordionValue, errors, localParsedData, updateJsonSection } = usePreviewContext({
+		value: previewContextValue,
+		onChange: setPreviewContextValue,
+		defaultAccordionValue: ["subscriber"],
+		defaultErrors: {
+			subscriber: null,
+		},
+		parseJsonValue,
+		onDataPersist: (data: ParsedData) => {
+			if (data.subscriber !== undefined) {
+				saveSubscriberData(layout?._id || "", currentEnvironment?._id || "", data.subscriber);
+			}
+		},
+	});
 
-  useEffect(() => {
-    if (!layout?._id || !currentEnvironment?._id) {
-      return;
-    }
+	useEffect(() => {
+		if (!layout?._id || !currentEnvironment?._id) {
+			return;
+		}
 
-    const subscriberData = loadSubscriberData(layout?._id, currentEnvironment?._id);
+		const subscriberData = loadSubscriberData(layout?._id, currentEnvironment?._id);
 
-    if (subscriberData) {
-      updateJsonSection('subscriber', subscriberData);
-    }
-  }, [layout?._id, currentEnvironment?._id, updateJsonSection]);
+		if (subscriberData) {
+			updateJsonSection("subscriber", subscriberData);
+		}
+	}, [layout?._id, currentEnvironment?._id, updateJsonSection]);
 
-  const handleSubscriberSelection = useCallback(
-    (subscriber: ISubscriberResponseDto) => {
-      const subscriberData = createSubscriberData(subscriber);
-      updateJsonSection('subscriber', subscriberData);
-    },
-    [updateJsonSection]
-  );
+	const handleSubscriberSelection = useCallback(
+		(subscriber: ISubscriberResponseDto) => {
+			const subscriberData = createSubscriberData(subscriber);
+			updateJsonSection("subscriber", subscriberData);
+		},
+		[updateJsonSection]
+	);
 
-  const handleClearPersistedSubscriber = () => {
-    clearSubscriberData(layout?._id || '', currentEnvironment?._id || '');
+	const handleClearPersistedSubscriber = () => {
+		clearSubscriberData(layout?._id || "", currentEnvironment?._id || "");
 
-    updateJsonSection('subscriber', {});
-  };
+		updateJsonSection("subscriber", {});
+	};
 
-  const canClearPersisted = !!(layout?._id && currentEnvironment?._id);
+	const canClearPersisted = !!(layout?._id && currentEnvironment?._id);
 
-  return (
-    <Accordion type="multiple" value={accordionValue} onValueChange={setAccordionValue}>
-      <PreviewSubscriberSection
-        error={errors.subscriber}
-        subscriber={localParsedData.subscriber}
-        onUpdate={updateJsonSection}
-        onSubscriberSelect={handleSubscriberSelection}
-        onClearPersisted={canClearPersisted ? handleClearPersistedSubscriber : undefined}
-      />
-    </Accordion>
-  );
+	return (
+		<Accordion type="multiple" value={accordionValue} onValueChange={setAccordionValue}>
+			<PreviewSubscriberSection
+				error={errors.subscriber}
+				subscriber={localParsedData.subscriber}
+				onUpdate={updateJsonSection}
+				onSubscriberSelect={handleSubscriberSelection}
+				onClearPersisted={canClearPersisted ? handleClearPersistedSubscriber : undefined}
+			/>
+		</Accordion>
+	);
 };

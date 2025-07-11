@@ -1,4 +1,22 @@
 import {
+  type ContentIssue,
+  EnvironmentWithUserCommand,
+  type IStepControl,
+  type JSONSchema,
+  type NotificationStep,
+  PreferencesRequired,
+} from '@novu/application-generic';
+import type { RuntimeIssue } from '@novu/dal';
+import {
+  type CustomDataType,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_NAME_LENGTH,
+  MAX_TAG_LENGTH,
+  ResourceTypeEnum,
+  WorkflowStatusEnum,
+} from '@novu/shared';
+import { Type } from 'class-transformer';
+import {
   ArrayUnique,
   IsArray,
   IsBoolean,
@@ -12,26 +30,6 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
-
-import {
-  CustomDataType,
-  WorkflowStatusEnum,
-  ResourceTypeEnum,
-  MAX_DESCRIPTION_LENGTH,
-  MAX_NAME_LENGTH,
-  MAX_TAG_LENGTH,
-} from '@novu/shared';
-
-import { Type } from 'class-transformer';
-import { RuntimeIssue } from '@novu/dal';
-import {
-  EnvironmentWithUserCommand,
-  PreferencesRequired,
-  ContentIssue,
-  IStepControl,
-  JSONSchema,
-  NotificationStep,
-} from '@novu/application-generic';
 
 export class UpdateWorkflowCommand extends EnvironmentWithUserCommand {
   @IsDefined()

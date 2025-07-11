@@ -1,4 +1,4 @@
-import { NodeProps, Handle, Position, getOutgoers, useReactFlow } from 'react-flow-renderer';
+import { getOutgoers, Handle, type NodeProps, Position, useReactFlow } from 'react-flow-renderer';
 
 import { NodeStep } from '../../../../components/workflow';
 

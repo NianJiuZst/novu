@@ -1,10 +1,9 @@
-import { Injectable, ConflictException } from '@nestjs/common';
-import { AnalyticsService } from '@novu/application-generic';
-import { LayoutRepository, ControlValuesRepository } from '@novu/dal';
+import { ConflictException, Injectable } from '@nestjs/common';
+import type { AnalyticsService } from '@novu/application-generic';
+import type { ControlValuesRepository, LayoutRepository } from '@novu/dal';
 import { ControlValuesLevelEnum } from '@novu/shared';
-
-import { DeleteLayoutCommand } from './delete-layout.command';
-import { GetLayoutCommand, GetLayoutUseCase } from '../get-layout';
+import { GetLayoutCommand, type GetLayoutUseCase } from '../get-layout';
+import type { DeleteLayoutCommand } from './delete-layout.command';
 
 @Injectable()
 export class DeleteLayoutUseCase {

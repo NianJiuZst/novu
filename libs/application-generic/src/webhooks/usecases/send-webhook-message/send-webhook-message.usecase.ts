@@ -1,11 +1,11 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { PinoLogger } from 'nestjs-pino';
-import { EnvironmentRepository } from '@novu/dal';
+import type { EnvironmentRepository } from '@novu/dal';
+import type { PinoLogger } from 'nestjs-pino';
 import { shortId } from '../../../utils/generate-id';
-import { SendWebhookMessageCommand } from './send-webhook-message.command';
-import { WrapperDto } from '../../dtos/webhook-payload.dto';
-import { SvixClient } from '../../services';
+import type { WrapperDto } from '../../dtos/webhook-payload.dto';
+import type { SvixClient } from '../../services';
 import { generateWebhookAppId } from '../../utils/app-id';
+import type { SendWebhookMessageCommand } from './send-webhook-message.command';
 
 @Injectable()
 export class SendWebhookMessage {

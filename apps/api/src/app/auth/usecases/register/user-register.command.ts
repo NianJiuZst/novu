@@ -1,7 +1,7 @@
-import { IsBoolean, IsDefined, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
-
-import { JobTitleEnum, ProductUseCases, SignUpOriginEnum } from '@novu/shared';
 import { BaseCommand } from '@novu/application-generic';
+
+import { JobTitleEnum, type ProductUseCases, SignUpOriginEnum } from '@novu/shared';
+import { IsBoolean, IsDefined, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class UserRegisterCommand extends BaseCommand {
   @IsDefined()

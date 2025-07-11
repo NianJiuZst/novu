@@ -1,5 +1,5 @@
-import React from 'react';
 import { Badge } from '@mantine/core';
+import type React from 'react';
 import { colors } from '../config';
 
 /**

@@ -1,9 +1,9 @@
 import { expect } from '@playwright/test';
-import { test } from './utils/baseTest';
 import { ActivitiesPage, FILTER_TERM } from './page-models/activitiesPage';
+import { test } from './utils/baseTest';
 
 import { initializeSession } from './utils/browser';
-import { createNotifications, SessionData } from './utils/plugins';
+import { createNotifications, type SessionData } from './utils/plugins';
 
 let session: SessionData;
 

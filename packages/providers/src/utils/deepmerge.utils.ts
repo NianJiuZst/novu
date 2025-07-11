@@ -32,9 +32,9 @@ function defaultArrayMerge(
   source: Record<string, unknown>[],
   options: IOptions
 ): Record<string, unknown>[] {
-  return target.concat(source).map(function (element) {
-    return cloneUnlessOtherwiseSpecified(element, options) as Record<string, unknown>;
-  });
+  return target
+    .concat(source)
+    .map((element) => cloneUnlessOtherwiseSpecified(element, options) as Record<string, unknown>);
 }
 
 function getMergeFunction(key: string, options: IOptions) {
@@ -63,7 +63,7 @@ function propertyIsUnsafe(target: Record<string, unknown>, key: string) {
   return (
     propertyIsOnObject(target, key) && // Properties are safe to merge if they don't exist in the target yet,
     !(
-      Object.hasOwnProperty.call(target, key) && // unsafe if they exist up the prototype chain,
+      Object.hasOwn(target, key) && // unsafe if they exist up the prototype chain,
       Object.propertyIsEnumerable.call(target, key)
     )
   ); // and also unsafe if they're nonenumerable.
@@ -80,7 +80,7 @@ function mergeObject(
       destination[key] = cloneUnlessOtherwiseSpecified(target[key] as Record<string, unknown>, options);
     });
   }
-  getKeys(source).forEach(function (key: string) {
+  getKeys(source).forEach((key: string) => {
     if (propertyIsUnsafe(target, key as string)) {
       return;
     }
@@ -190,7 +190,5 @@ export function deepMerge<T extends Record<string, unknown>>(array: T[], options
     throw new Error('first argument should be an array');
   }
 
-  return array.reduce(function (prev, next) {
-    return deepMergeObjects(prev, next, options);
-  }, {} as T);
+  return array.reduce((prev, next) => deepMergeObjects(prev, next, options), {} as T);
 }

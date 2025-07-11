@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { OrganizationRepository, UserRepository } from '@novu/dal';
-import { differenceInDays } from 'date-fns';
+import type { OrganizationRepository, UserRepository } from '@novu/dal';
 import { uiComponent } from '@team-plain/typescript-sdk';
-import { PlainCardsCommand } from './plain-cards.command';
+import { differenceInDays } from 'date-fns';
+import type { PlainCardsCommand } from './plain-cards.command';
 
 @Injectable()
 export class PlainCardsUsecase {

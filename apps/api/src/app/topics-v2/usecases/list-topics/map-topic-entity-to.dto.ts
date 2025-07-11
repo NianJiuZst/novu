@@ -1,6 +1,6 @@
-import { SubscriberEntity, TopicEntity, TopicSubscribersEntity } from '@novu/dal';
-import { TopicResponseDto } from '../../dtos/topic-response.dto';
-import { TopicSubscriptionResponseDto } from '../../dtos/topic-subscription-response.dto';
+import type { SubscriberEntity, TopicEntity, TopicSubscribersEntity } from '@novu/dal';
+import type { TopicResponseDto } from '../../dtos/topic-response.dto';
+import type { TopicSubscriptionResponseDto } from '../../dtos/topic-subscription-response.dto';
 
 export function mapTopicEntityToDto(topicEntity: TopicEntity): TopicResponseDto {
   return {

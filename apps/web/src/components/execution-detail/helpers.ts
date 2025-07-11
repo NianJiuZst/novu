@@ -1,11 +1,11 @@
-import { ExecutionDetailsStatusEnum, StepTypeEnum } from '@novu/shared';
-import { MantineTheme } from '@mantine/core';
+import type { MantineTheme } from '@mantine/core';
 import {
-  colors,
   Chat,
   Check,
   CheckCircle,
   Clicked,
+  CurlyBrackets,
+  colors,
   Digest,
   ErrorIcon,
   InApp,
@@ -18,8 +18,8 @@ import {
   Sms,
   Timer,
   WarningIcon,
-  CurlyBrackets,
 } from '@novu/design-system';
+import { ExecutionDetailsStatusEnum, StepTypeEnum } from '@novu/shared';
 
 export const getColorByStatus = (theme: MantineTheme, status: ExecutionDetailsStatusEnum): string => {
   if (status === ExecutionDetailsStatusEnum.FAILED) {

@@ -1,92 +1,92 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { LocalizationResourceEnum } from '@/types/translations';
-import { useEnvironment } from '@/context/environment/hooks';
-import { useFetchOrganizationSettings } from '@/hooks/use-fetch-organization-settings';
-import { getTranslation } from '@/api/translations';
-import { QueryKeys } from '@/utils/query-keys';
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { getTranslation } from "@/api/translations";
+import { useEnvironment } from "@/context/environment/hooks";
+import { useFetchOrganizationSettings } from "@/hooks/use-fetch-organization-settings";
+import { LocalizationResourceEnum } from "@/types/translations";
+import { QueryKeys } from "@/utils/query-keys";
 
 type FetchTranslationKeysParams = {
-  workflowId: string;
-  enabled?: boolean;
+	workflowId: string;
+	enabled?: boolean;
 };
 
 export const useFetchTranslationKeys = ({ workflowId, enabled = true }: FetchTranslationKeysParams) => {
-  const { currentEnvironment } = useEnvironment();
-  const { data: organizationSettings, isLoading: isOrgSettingsLoading } = useFetchOrganizationSettings();
+	const { currentEnvironment } = useEnvironment();
+	const { data: organizationSettings, isLoading: isOrgSettingsLoading } = useFetchOrganizationSettings();
 
-  const defaultLocale = organizationSettings?.data?.defaultLocale;
+	const defaultLocale = organizationSettings?.data?.defaultLocale;
 
-  const {
-    data: translationData,
-    isLoading: isTranslationDataLoading,
-    error,
-  } = useQuery({
-    queryKey: [QueryKeys.fetchTranslationKeys, workflowId, defaultLocale, currentEnvironment?._id],
-    queryFn: async () => {
-      if (!currentEnvironment || !defaultLocale) {
-        throw new Error('Environment and default locale are required');
-      }
+	const {
+		data: translationData,
+		isLoading: isTranslationDataLoading,
+		error,
+	} = useQuery({
+		queryKey: [QueryKeys.fetchTranslationKeys, workflowId, defaultLocale, currentEnvironment?._id],
+		queryFn: async () => {
+			if (!currentEnvironment || !defaultLocale) {
+				throw new Error("Environment and default locale are required");
+			}
 
-      try {
-        return await getTranslation({
-          environment: currentEnvironment,
-          resourceId: workflowId,
-          resourceType: LocalizationResourceEnum.WORKFLOW,
-          locale: defaultLocale,
-        });
-      } catch (error) {
-        // If translation doesn't exist, return null instead of throwing
-        // This allows the component to work even without translations
-        console.debug('No translation found for workflow:', workflowId, 'locale:', defaultLocale);
+			try {
+				return await getTranslation({
+					environment: currentEnvironment,
+					resourceId: workflowId,
+					resourceType: LocalizationResourceEnum.WORKFLOW,
+					locale: defaultLocale,
+				});
+			} catch (error) {
+				// If translation doesn't exist, return null instead of throwing
+				// This allows the component to work even without translations
+				console.debug("No translation found for workflow:", workflowId, "locale:", defaultLocale);
 
-        return null;
-      }
-    },
-    enabled: !!currentEnvironment && !!defaultLocale && !!workflowId && enabled,
-    retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+				return null;
+			}
+		},
+		enabled: !!currentEnvironment && !!defaultLocale && !!workflowId && enabled,
+		retry: false,
+		staleTime: 5 * 60 * 1000, // 5 minutes
+	});
 
-  const translationKeys = useMemo(() => {
-    if (!translationData?.content) {
-      return [];
-    }
+	const translationKeys = useMemo(() => {
+		if (!translationData?.content) {
+			return [];
+		}
 
-    // Extract all keys from the translation content (nested keys supported)
-    const extractKeys = (obj: Record<string, unknown>, prefix = ''): string[] => {
-      const keys: string[] = [];
+		// Extract all keys from the translation content (nested keys supported)
+		const extractKeys = (obj: Record<string, unknown>, prefix = ""): string[] => {
+			const keys: string[] = [];
 
-      for (const [key, value] of Object.entries(obj)) {
-        const fullKey = prefix ? `${prefix}.${key}` : key;
+			for (const [key, value] of Object.entries(obj)) {
+				const fullKey = prefix ? `${prefix}.${key}` : key;
 
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          // Recursively extract nested keys
-          keys.push(...extractKeys(value as Record<string, unknown>, fullKey));
-        } else {
-          // This is a leaf node, add the key
-          keys.push(fullKey);
-        }
-      }
+				if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+					// Recursively extract nested keys
+					keys.push(...extractKeys(value as Record<string, unknown>, fullKey));
+				} else {
+					// This is a leaf node, add the key
+					keys.push(fullKey);
+				}
+			}
 
-      return keys;
-    };
+			return keys;
+		};
 
-    const keys = extractKeys(translationData.content);
+		const keys = extractKeys(translationData.content);
 
-    // Return in the format expected by the suggestion system
-    return keys.map((key) => ({ name: key }));
-  }, [translationData?.content]);
+		// Return in the format expected by the suggestion system
+		return keys.map((key) => ({ name: key }));
+	}, [translationData?.content]);
 
-  // Overall loading state - we're loading if either org settings or translation data is loading
-  const isLoading = isOrgSettingsLoading || isTranslationDataLoading;
+	// Overall loading state - we're loading if either org settings or translation data is loading
+	const isLoading = isOrgSettingsLoading || isTranslationDataLoading;
 
-  return {
-    translationKeys,
-    isLoading,
-    error,
-    defaultLocale,
-    hasTranslations: translationKeys.length > 0,
-    translationData,
-  };
+	return {
+		translationKeys,
+		isLoading,
+		error,
+		defaultLocale,
+		hasTranslations: translationKeys.length > 0,
+		translationData,
+	};
 };

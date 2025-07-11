@@ -1,12 +1,12 @@
 import { Switch } from '@mantine/core';
+import { IconInfoOutline, Tooltip, When } from '@novu/design-system';
 import { Table, Text } from '@novu/novui';
 import { css } from '@novu/novui/css';
 import { HStack, VStack } from '@novu/novui/jsx';
 import { ColorToken } from '@novu/novui/tokens';
-import { ChannelTypeEnum, WorkflowPreferences } from '@novu/shared';
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { IconInfoOutline, Tooltip, When } from '@novu/design-system';
-import { PreferenceChannelName, SubscriptionPreferenceRow } from './types';
+import type { ChannelTypeEnum, WorkflowPreferences } from '@novu/shared';
+import { type FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { PreferenceChannelName, SubscriptionPreferenceRow } from './types';
 import { CHANNEL_LABELS_LOOKUP, CHANNEL_SETTINGS_LOGO_LOOKUP } from './WorkflowSubscriptionPreferences.const';
 import { tableClassName } from './WorkflowSubscriptionPreferences.styles';
 

@@ -1,4 +1,4 @@
-import { ChatProviderIdEnum, ISubscriberChannel, PushProviderIdEnum } from '../../types';
+import type { ChatProviderIdEnum, ISubscriberChannel, PushProviderIdEnum } from '../../types';
 
 interface IChannelCredentials {
   webhookUrl?: string;

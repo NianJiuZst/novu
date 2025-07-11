@@ -1,13 +1,12 @@
+import { STEP_TYPE_TO_CHANNEL_TYPE, type StepTypeEnum } from '@novu/shared';
 import { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { StepTypeEnum, STEP_TYPE_TO_CHANNEL_TYPE } from '@novu/shared';
-
-import { getStepErrors, getVariantErrors } from '../shared/errors';
-import { NODE_ERROR_TYPES } from '../workflow/workflow/node-types/utils';
-import { IForm } from './formTypes';
 import { useGetPrimaryIntegration, useHasActiveIntegrations } from '../../../hooks';
 import { useStepIndex } from '../hooks/useStepIndex';
+import { getStepErrors, getVariantErrors } from '../shared/errors';
+import { NODE_ERROR_TYPES } from '../workflow/workflow/node-types/utils';
+import type { IForm } from './formTypes';
 
 export enum ItemTypeEnum {
   ROOT = 'root',

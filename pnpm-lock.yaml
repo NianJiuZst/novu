@@ -42,6 +42,9 @@ importers:
       '@auto-it/released':
         specifier: ^10.36.5
         version: 10.44.0(@swc/core@1.3.107(@swc/helpers@0.5.15))(@types/node@18.16.9)(encoding@0.1.13)(typescript@5.6.2)
+      '@biomejs/biome':
+        specifier: ^2.1.1
+        version: 2.1.1
       '@cspell/eslint-plugin':
         specifier: ^6.14.3
         version: 6.31.1(encoding@0.1.13)

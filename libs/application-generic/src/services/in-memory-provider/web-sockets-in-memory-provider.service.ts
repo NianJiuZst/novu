@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { InMemoryProviderService } from './in-memory-provider.service';
-import { InMemoryProviderEnum, InMemoryProviderClient, ScanStream } from './types';
+import { type InMemoryProviderClient, InMemoryProviderEnum, type ScanStream } from './types';
 import { isClusterModeEnabled } from './utils';
 
 const LOG_CONTEXT = 'WebSocketsInMemoryProviderService';

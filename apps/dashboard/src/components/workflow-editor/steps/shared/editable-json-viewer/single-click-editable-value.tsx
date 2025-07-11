@@ -1,27 +1,27 @@
-import type { SingleClickEditableValueProps } from './types';
-import { VALUE_TYPE_COLORS } from './constants';
+import { VALUE_TYPE_COLORS } from "./constants";
+import type { SingleClickEditableValueProps } from "./types";
 
 export function SingleClickEditableValue({ value, setIsEditing, customNodeProps }: SingleClickEditableValueProps) {
-  const { type } = customNodeProps || {};
+	const { type } = customNodeProps || {};
 
-  const handleClick = () => {
-    setIsEditing?.(true);
-  };
+	const handleClick = () => {
+		setIsEditing?.(true);
+	};
 
-  const displayValue = type === 'string' ? `"${value}"` : String(value);
-  const color = VALUE_TYPE_COLORS[type as keyof typeof VALUE_TYPE_COLORS] || VALUE_TYPE_COLORS.default;
+	const displayValue = type === "string" ? `"${value}"` : String(value);
+	const color = VALUE_TYPE_COLORS[type as keyof typeof VALUE_TYPE_COLORS] || VALUE_TYPE_COLORS.default;
 
-  return (
-    <span
-      onClick={handleClick}
-      style={{
-        cursor: 'pointer',
-        color,
-        fontWeight: type === 'boolean' ? '600' : 'normal',
-      }}
-      title="Click to edit"
-    >
-      {displayValue}
-    </span>
-  );
+	return (
+		<span
+			onClick={handleClick}
+			style={{
+				cursor: "pointer",
+				color,
+				fontWeight: type === "boolean" ? "600" : "normal",
+			}}
+			title="Click to edit"
+		>
+			{displayValue}
+		</span>
+	);
 }

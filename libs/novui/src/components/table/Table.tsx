@@ -1,15 +1,16 @@
 import { Table as ExternalTable } from '@mantine/core';
 import {
-  CellContext,
+  createColumnHelper as _createColumnHelper,
+  type CellContext,
+  type ColumnDefTemplate,
   flexRender,
   getCoreRowModel,
-  Row,
+  type Row,
   useReactTable,
-  createColumnHelper as _createColumnHelper,
-  ColumnDefTemplate,
 } from '@tanstack/react-table';
-import React, { useMemo } from 'react';
-import { CoreProps } from '../../types';
+import type React from 'react';
+import { useMemo } from 'react';
+import type { CoreProps } from '../../types';
 
 import classes from './Table.styles';
 

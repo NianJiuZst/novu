@@ -1,7 +1,7 @@
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
-import { StoryFn, Meta } from '@storybook/react';
-import { Input } from './Input';
 import { Copy } from '../icons';
+import { Input } from './Input';
 
 export default {
   title: 'Inputs/Input',

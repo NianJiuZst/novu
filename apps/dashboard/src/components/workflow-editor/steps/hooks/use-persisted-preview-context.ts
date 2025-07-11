@@ -1,121 +1,121 @@
-import { useCallback, useEffect, useRef } from 'react';
-import type { ParsedData, PayloadData, PreviewSubscriberData } from '../types/preview-context.types';
+import { useCallback, useEffect, useRef } from "react";
+import type { ParsedData, PayloadData, PreviewSubscriberData } from "../types/preview-context.types";
 import {
-  savePreviewContextData,
-  loadPreviewContextData,
-  mergePreviewContextData,
-  clearPreviewContextData,
-  cleanupExpiredPreviewData,
-  savePayloadData,
-  loadPayloadData,
-  clearPayloadData,
-  saveSubscriberData,
-  loadSubscriberData,
-  clearSubscriberData,
-} from '../utils/preview-context-storage.utils';
+	cleanupExpiredPreviewData,
+	clearPayloadData,
+	clearPreviewContextData,
+	clearSubscriberData,
+	loadPayloadData,
+	loadPreviewContextData,
+	loadSubscriberData,
+	mergePreviewContextData,
+	savePayloadData,
+	savePreviewContextData,
+	saveSubscriberData,
+} from "../utils/preview-context-storage.utils";
 
 type UsePersistedPreviewContextProps = {
-  workflowId: string;
-  stepId: string;
-  environmentId: string;
-  ttlDays?: number;
+	workflowId: string;
+	stepId: string;
+	environmentId: string;
+	ttlDays?: number;
 };
 
 export function usePersistedPreviewContext({ workflowId, stepId, environmentId }: UsePersistedPreviewContextProps) {
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+	const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-  useEffect(() => {
-    cleanupExpiredPreviewData();
-  }, []);
+	useEffect(() => {
+		cleanupExpiredPreviewData();
+	}, []);
 
-  const loadPersistedData = (): ParsedData | null => {
-    if (!workflowId || !stepId || !environmentId) return null;
+	const loadPersistedData = (): ParsedData | null => {
+		if (!workflowId || !stepId || !environmentId) return null;
 
-    return loadPreviewContextData(workflowId, stepId, environmentId);
-  };
+		return loadPreviewContextData(workflowId, stepId, environmentId);
+	};
 
-  const savePersistedData = useCallback(
-    (data: ParsedData) => {
-      if (!workflowId || !stepId || !environmentId) return;
+	const savePersistedData = useCallback(
+		(data: ParsedData) => {
+			if (!workflowId || !stepId || !environmentId) return;
 
-      // Clear existing timeout
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
+			// Clear existing timeout
+			if (saveTimeoutRef.current) {
+				clearTimeout(saveTimeoutRef.current);
+			}
 
-      // Debounce save operation
-      saveTimeoutRef.current = setTimeout(() => {
-        savePreviewContextData(workflowId, stepId, environmentId, data);
-      }, 500);
-    },
-    [workflowId, stepId, environmentId]
-  );
+			// Debounce save operation
+			saveTimeoutRef.current = setTimeout(() => {
+				savePreviewContextData(workflowId, stepId, environmentId, data);
+			}, 500);
+		},
+		[workflowId, stepId, environmentId]
+	);
 
-  const clearPersistedData = () => {
-    if (!workflowId || !stepId || !environmentId) return;
+	const clearPersistedData = () => {
+		if (!workflowId || !stepId || !environmentId) return;
 
-    clearPreviewContextData(workflowId, stepId, environmentId);
-  };
+		clearPreviewContextData(workflowId, stepId, environmentId);
+	};
 
-  const loadPersistedPayload = (): PayloadData | null => {
-    if (!workflowId || !environmentId) return null;
+	const loadPersistedPayload = (): PayloadData | null => {
+		if (!workflowId || !environmentId) return null;
 
-    return loadPayloadData(workflowId, environmentId);
-  };
+		return loadPayloadData(workflowId, environmentId);
+	};
 
-  const savePersistedPayload = (payload: PayloadData) => {
-    if (!workflowId || !environmentId) return;
+	const savePersistedPayload = (payload: PayloadData) => {
+		if (!workflowId || !environmentId) return;
 
-    savePayloadData(workflowId, environmentId, payload);
-  };
+		savePayloadData(workflowId, environmentId, payload);
+	};
 
-  const clearPersistedPayload = () => {
-    if (!workflowId || !environmentId) return;
+	const clearPersistedPayload = () => {
+		if (!workflowId || !environmentId) return;
 
-    clearPayloadData(workflowId, environmentId);
-  };
+		clearPayloadData(workflowId, environmentId);
+	};
 
-  const loadPersistedSubscriber = (): PreviewSubscriberData | null => {
-    if (!workflowId || !environmentId) return null;
+	const loadPersistedSubscriber = (): PreviewSubscriberData | null => {
+		if (!workflowId || !environmentId) return null;
 
-    return loadSubscriberData(workflowId, environmentId);
-  };
+		return loadSubscriberData(workflowId, environmentId);
+	};
 
-  const savePersistedSubscriber = (subscriber: PreviewSubscriberData) => {
-    if (!workflowId || !environmentId) return;
+	const savePersistedSubscriber = (subscriber: PreviewSubscriberData) => {
+		if (!workflowId || !environmentId) return;
 
-    saveSubscriberData(workflowId, environmentId, subscriber);
-  };
+		saveSubscriberData(workflowId, environmentId, subscriber);
+	};
 
-  const clearPersistedSubscriber = () => {
-    if (!workflowId || !environmentId) return;
+	const clearPersistedSubscriber = () => {
+		if (!workflowId || !environmentId) return;
 
-    clearSubscriberData(workflowId, environmentId);
-  };
+		clearSubscriberData(workflowId, environmentId);
+	};
 
-  const mergeWithDefaults = (persistedData: ParsedData, serverDefaults: ParsedData): ParsedData => {
-    return mergePreviewContextData(persistedData, serverDefaults);
-  };
+	const mergeWithDefaults = (persistedData: ParsedData, serverDefaults: ParsedData): ParsedData => {
+		return mergePreviewContextData(persistedData, serverDefaults);
+	};
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, []);
+	// Cleanup timeout on unmount
+	useEffect(() => {
+		return () => {
+			if (saveTimeoutRef.current) {
+				clearTimeout(saveTimeoutRef.current);
+			}
+		};
+	}, []);
 
-  return {
-    loadPersistedData,
-    savePersistedData,
-    clearPersistedData,
-    loadPersistedPayload,
-    savePersistedPayload,
-    clearPersistedPayload,
-    loadPersistedSubscriber,
-    savePersistedSubscriber,
-    clearPersistedSubscriber,
-    mergeWithDefaults,
-  };
+	return {
+		loadPersistedData,
+		savePersistedData,
+		clearPersistedData,
+		loadPersistedPayload,
+		savePersistedPayload,
+		clearPersistedPayload,
+		loadPersistedSubscriber,
+		savePersistedSubscriber,
+		clearPersistedSubscriber,
+		mergeWithDefaults,
+	};
 }

@@ -1,17 +1,15 @@
-import { Logger } from '@nestjs/common';
-import { differenceInMilliseconds } from 'date-fns';
+import { BadRequestException, Logger } from '@nestjs/common';
 import {
-  DigestUnitEnum,
   DelayTypeEnum,
-  IDigestRegularMetadata,
-  IDigestTimedMetadata,
-  IWorkflowStepMetadata,
   DigestTypeEnum,
-  IDelayScheduledMetadata,
-  IDelayRegularMetadata,
+  DigestUnitEnum,
+  type IDelayRegularMetadata,
+  type IDelayScheduledMetadata,
+  type IDigestRegularMetadata,
+  type IDigestTimedMetadata,
+  type IWorkflowStepMetadata,
 } from '@novu/shared';
-
-import { BadRequestException } from '@nestjs/common';
+import { differenceInMilliseconds } from 'date-fns';
 import { isRegularDigest } from '../../utils/digest';
 import { TimedDigestDelayService } from './timed-digest-delay.service';
 

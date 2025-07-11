@@ -1,5 +1,5 @@
+import type { IUserEntity } from '@novu/shared';
 import { AnalyticsBrowser } from '@segment/analytics-next';
-import { IUserEntity } from '@novu/shared';
 import * as mixpanel from 'mixpanel-browser';
 import { api } from '../api';
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 /* eslint-disable max-len */
 export function ActiveLabel(props: React.ComponentPropsWithoutRef<'svg'>) {

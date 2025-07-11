@@ -1,5 +1,4 @@
-import { IsDefined, IsOptional } from 'class-validator';
-import {
+import type {
   CodeResult,
   DiscoverOutput,
   Event,
@@ -9,7 +8,8 @@ import {
   HttpQueryKeysEnum,
   PostActionEnum,
 } from '@novu/framework/internal';
-import { ResourceOriginEnum } from '@novu/shared';
+import type { ResourceOriginEnum } from '@novu/shared';
+import { IsDefined, IsOptional } from 'class-validator';
 import { EnvironmentLevelCommand } from '../../commands';
 
 export type BridgeError = {

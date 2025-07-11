@@ -1,6 +1,6 @@
-import { RequestEvent } from '@sveltejs/kit';
+import type { RequestEvent } from '@sveltejs/kit';
 import { NovuRequestHandler, type ServeHandlerOptions } from '../handler';
-import { type SupportedFrameworkName } from '../types';
+import type { SupportedFrameworkName } from '../types';
 import { getResponse } from '../utils';
 
 /*

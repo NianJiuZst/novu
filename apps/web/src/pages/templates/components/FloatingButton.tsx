@@ -1,6 +1,6 @@
-import { MouseEventHandler } from 'react';
 import styled from '@emotion/styled';
-import { colors, shadows, ChevronPlainDown } from '@novu/design-system';
+import { ChevronPlainDown, colors, shadows } from '@novu/design-system';
+import type { MouseEventHandler } from 'react';
 
 const FloatingButtonHolder = styled.button`
   display: flex;

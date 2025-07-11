@@ -1,10 +1,9 @@
+import type { ILayoutEntity } from '@novu/shared';
 import { useQuery } from '@tanstack/react-query';
-import { ILayoutEntity } from '@novu/shared';
-
-import { useEnvironment } from './useEnvironment';
+import { getLayoutsList } from '../api/layouts';
 
 import { QueryKeys } from '../api/query.keys';
-import { getLayoutsList } from '../api/layouts';
+import { useEnvironment } from './useEnvironment';
 
 export function useLayouts(page = 0, pageSize = 10) {
   const { environment } = useEnvironment();

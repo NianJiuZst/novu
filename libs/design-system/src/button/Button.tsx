@@ -1,5 +1,6 @@
-import React, { forwardRef, MouseEventHandler } from 'react';
-import { Button as MantineButton, ButtonProps, Sx } from '@mantine/core';
+import { type ButtonProps, Button as MantineButton, type Sx } from '@mantine/core';
+import type React from 'react';
+import { forwardRef, type MouseEventHandler } from 'react';
 
 import useStyles from './Button.styles';
 

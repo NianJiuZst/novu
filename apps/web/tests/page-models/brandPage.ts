@@ -1,4 +1,4 @@
-import { expect, Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import path from 'path';
 import { setFileForFilePicker } from '../utils/commands';
 import { SidebarPage } from './sidebarPage';

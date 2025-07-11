@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { areNovuEmailCredentialsSet, FeatureFlagsService } from '@novu/application-generic';
-import { EnvironmentEntity, IntegrationRepository, OrganizationEntity, UserEntity } from '@novu/dal';
+import { areNovuEmailCredentialsSet, type FeatureFlagsService } from '@novu/application-generic';
+import type { EnvironmentEntity, IntegrationRepository, OrganizationEntity, UserEntity } from '@novu/dal';
 
 import {
   ChannelTypeEnum,
@@ -10,10 +10,10 @@ import {
   InAppProviderIdEnum,
 } from '@novu/shared';
 import { CreateIntegrationCommand } from '../create-integration/create-integration.command';
-import { CreateIntegration } from '../create-integration/create-integration.usecase';
+import type { CreateIntegration } from '../create-integration/create-integration.usecase';
 import { SetIntegrationAsPrimaryCommand } from '../set-integration-as-primary/set-integration-as-primary.command';
-import { SetIntegrationAsPrimary } from '../set-integration-as-primary/set-integration-as-primary.usecase';
-import { CreateNovuIntegrationsCommand } from './create-novu-integrations.command';
+import type { SetIntegrationAsPrimary } from '../set-integration-as-primary/set-integration-as-primary.usecase';
+import type { CreateNovuIntegrationsCommand } from './create-novu-integrations.command';
 
 @Injectable()
 export class CreateNovuIntegrations {

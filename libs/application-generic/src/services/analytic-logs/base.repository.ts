@@ -1,7 +1,7 @@
-import { PinoLogger } from 'nestjs-pino';
-import { ClickhouseSchema, InferClickhouseSchemaType } from 'clickhouse-schema';
-import { ClickHouseService } from './clickhouse.service';
+import type { ClickhouseSchema, InferClickhouseSchemaType } from 'clickhouse-schema';
+import type { PinoLogger } from 'nestjs-pino';
 import { generateObjectId } from '../../utils/generate-id';
+import type { ClickHouseService } from './clickhouse.service';
 
 // Define operators as const assertion to maintain literal types
 const CLICKHOUSE_OPERATORS = [

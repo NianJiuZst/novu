@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DirectionEnum } from '@novu/shared';
-import { ClassConstructor, plainToInstance } from 'class-transformer';
+import { type ClassConstructor, plainToInstance } from 'class-transformer';
 import {
-  ClientSession,
-  FilterQuery,
-  Model,
-  ProjectionType,
-  QueryOptions,
-  QueryWithHelpers,
-  SortOrder,
+  type ClientSession,
+  type FilterQuery,
+  type Model,
+  type ProjectionType,
+  type QueryOptions,
+  type QueryWithHelpers,
+  type SortOrder,
   Types,
-  UpdateQuery,
+  type UpdateQuery,
 } from 'mongoose';
 import { DalException } from '../shared';
 

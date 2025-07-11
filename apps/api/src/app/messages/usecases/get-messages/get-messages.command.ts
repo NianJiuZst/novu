@@ -1,4 +1,4 @@
-import { ChannelTypeEnum } from '@novu/shared';
+import type { ChannelTypeEnum } from '@novu/shared';
 import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 import { EnvironmentCommand } from '../../../shared/commands/project.command';
 

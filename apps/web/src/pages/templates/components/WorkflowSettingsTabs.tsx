@@ -1,7 +1,7 @@
 import { Tabs } from '@mantine/core';
+import { useTabsStyles } from '@novu/design-system';
 import { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useTabsStyles } from '@novu/design-system';
 import { useBasePath } from '../hooks/useBasePath';
 
 export const WorkflowSettingsTabs = () => {

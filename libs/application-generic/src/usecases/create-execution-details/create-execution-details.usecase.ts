@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { ExecutionDetailsRepository, ExecutionDetailsEntity } from '@novu/dal';
-
-import { CreateExecutionDetailsResponseDto, mapExecutionDetailsCommandToEntity } from './dtos/execution-details.dto';
-import { CreateExecutionDetailsCommand } from './create-execution-details.command';
+import type { ExecutionDetailsEntity, ExecutionDetailsRepository } from '@novu/dal';
+import type { CreateExecutionDetailsCommand } from './create-execution-details.command';
+import {
+  type CreateExecutionDetailsResponseDto,
+  mapExecutionDetailsCommandToEntity,
+} from './dtos/execution-details.dto';
 
 @Injectable()
 export class CreateExecutionDetails {

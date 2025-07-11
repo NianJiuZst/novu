@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { colors, Text, ReactLogo, AngularLogo, JavaScriptLogo, VueLogo, IframeLogo } from '@novu/design-system';
+import { AngularLogo, colors, IframeLogo, JavaScriptLogo, ReactLogo, Text, VueLogo } from '@novu/design-system';
 import { UTM_CAMPAIGN_QUERY_PARAM } from '@novu/shared';
 
 import { FrameworkEnum } from '../../quick-start/consts';

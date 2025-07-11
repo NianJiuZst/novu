@@ -1,12 +1,11 @@
 import { Grid } from '@mantine/core';
 import { Title } from '@novu/design-system';
 import { ChannelTypeEnum, EmailProviderIdEnum, SmsProviderIdEnum } from '@novu/shared';
-import { ProviderCard } from './ProviderCard';
-
-import type { IIntegratedProvider } from '../types';
-import { NovuIntegrationCard } from './NovuIntegrationCard';
 import { When } from '../../../components/utils/When';
 import { CONTEXT_PATH, IS_SELF_HOSTED } from '../../../config';
+import type { IIntegratedProvider } from '../types';
+import { NovuIntegrationCard } from './NovuIntegrationCard';
+import { ProviderCard } from './ProviderCard';
 
 export function ChannelGroup({
   title,

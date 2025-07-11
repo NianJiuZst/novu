@@ -1,5 +1,5 @@
-import { ApiServiceLevelEnum, GetSubscriptionDto } from '@novu/shared';
-import { Page } from '@playwright/test';
+import { ApiServiceLevelEnum, type GetSubscriptionDto } from '@novu/shared';
+import type { Page } from '@playwright/test';
 import { addDays, endOfDay, startOfDay, subDays } from 'date-fns';
 
 const SUBSCRIPTION_ROUTE = '**/v1/billing/subscription';

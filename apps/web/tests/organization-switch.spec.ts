@@ -1,8 +1,8 @@
 import { expect } from '@playwright/test';
+import { SidebarPage } from './page-models/sidebarPage';
 import { test } from './utils/baseTest';
 import { initializeSession } from './utils/browser';
-import { SidebarPage } from './page-models/sidebarPage';
-import { addOrganization, SessionData } from './utils/plugins';
+import { addOrganization, type SessionData } from './utils/plugins';
 
 let session: SessionData;
 test.beforeEach(async ({ page }) => {

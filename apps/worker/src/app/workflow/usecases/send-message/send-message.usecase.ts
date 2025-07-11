@@ -1,57 +1,55 @@
 import { Injectable } from '@nestjs/common';
-
 import {
-  DigestTypeEnum,
-  ExecutionDetailsSourceEnum,
-  ExecutionDetailsStatusEnum,
-  IDigestRegularMetadata,
-  IPreferenceChannels,
-  PreferencesTypeEnum,
-  StepTypeEnum,
-  ResourceTypeEnum,
-} from '@novu/shared';
-import {
-  AnalyticsService,
+  type AnalyticsService,
   buildSubscriberKey,
   CachedResponse,
   ConditionsFilter,
   ConditionsFilterCommand,
-  CreateExecutionDetails,
+  type CreateExecutionDetails,
   CreateExecutionDetailsCommand,
   DetailEnum,
   GetPreferences,
-  GetSubscriberTemplatePreference,
+  type GetSubscriberTemplatePreference,
   GetSubscriberTemplatePreferenceCommand,
-  IConditionsFilterResponse,
-  IFilterVariables,
+  type IConditionsFilterResponse,
+  type IFilterVariables,
   Instrument,
   InstrumentUsecase,
-  NormalizeVariables,
+  type NormalizeVariables,
   NormalizeVariablesCommand,
   PlatformException,
 } from '@novu/application-generic';
 import {
-  JobEntity,
-  JobRepository,
+  type JobEntity,
+  type JobRepository,
   JobStatusEnum,
-  NotificationTemplateRepository,
-  SubscriberRepository,
-  TenantEntity,
-  TenantRepository,
+  type NotificationTemplateRepository,
+  type SubscriberRepository,
+  type TenantEntity,
+  type TenantRepository,
 } from '@novu/dal';
-import { ExecuteOutput } from '@novu/framework/internal';
-
+import type { ExecuteOutput } from '@novu/framework/internal';
+import {
+  DigestTypeEnum,
+  ExecutionDetailsSourceEnum,
+  ExecutionDetailsStatusEnum,
+  type IDigestRegularMetadata,
+  type IPreferenceChannels,
+  PreferencesTypeEnum,
+  ResourceTypeEnum,
+  StepTypeEnum,
+} from '@novu/shared';
+import type { ExecuteBridgeJob } from '../execute-bridge-job';
+import type { Digest } from './digest';
+import type { ExecuteStepCustom } from './execute-step-custom.usecase';
 import { SendMessageCommand } from './send-message.command';
-import { SendMessageDelay } from './send-message-delay.usecase';
-import { SendMessageEmail } from './send-message-email.usecase';
-import { SendMessageSms } from './send-message-sms.usecase';
-import { SendMessageInApp } from './send-message-in-app.usecase';
-import { SendMessageChat } from './send-message-chat.usecase';
-import { SendMessagePush } from './send-message-push.usecase';
-import { Digest } from './digest';
-import { ExecuteStepCustom } from './execute-step-custom.usecase';
-import { ExecuteBridgeJob } from '../execute-bridge-job';
-import { SendMessageResult } from './send-message-type.usecase';
+import type { SendMessageChat } from './send-message-chat.usecase';
+import type { SendMessageDelay } from './send-message-delay.usecase';
+import type { SendMessageEmail } from './send-message-email.usecase';
+import type { SendMessageInApp } from './send-message-in-app.usecase';
+import type { SendMessagePush } from './send-message-push.usecase';
+import type { SendMessageSms } from './send-message-sms.usecase';
+import type { SendMessageResult } from './send-message-type.usecase';
 
 @Injectable()
 export class SendMessage {

@@ -1,8 +1,7 @@
 import styled from '@emotion/styled';
 import { createStyles, Group, useMantineColorScheme } from '@mantine/core';
-import { ChannelTypeEnum, IConfigCredentials } from '@novu/shared';
-
 import { colors, shadows, Text, Tooltip } from '@novu/design-system';
+import { ChannelTypeEnum, type IConfigCredentials } from '@novu/shared';
 import { useIntegrationLimit } from '../../../hooks';
 import type { IIntegratedProvider } from '../types';
 import { CardStatusBar } from './CardStatusBar';

@@ -1,8 +1,8 @@
-import { DelayTypeEnum, StepTypeEnum } from '@novu/shared';
 import { BadRequestException } from '@nestjs/common';
-import { VerifyPayloadService, InstrumentUsecase } from '@novu/application-generic';
+import { InstrumentUsecase, VerifyPayloadService } from '@novu/application-generic';
+import { DelayTypeEnum, StepTypeEnum } from '@novu/shared';
 
-import { VerifyPayloadCommand } from './verify-payload.command';
+import type { VerifyPayloadCommand } from './verify-payload.command';
 
 const ISO_DATE_REGEX = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 

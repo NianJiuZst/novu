@@ -1,22 +1,21 @@
-import { MouseEventHandler } from 'react';
 import styled from '@emotion/styled';
-import { Group, Container } from '@mantine/core';
+import { Container, Group } from '@mantine/core';
 import {
   ActionButton,
-  Dropdown,
-  IDropdownProps,
-  ConditionPlus,
   Condition,
+  ConditionPlus,
   DotsHorizontal,
+  Dropdown,
+  type IDropdownProps,
   NoConditions,
   PencilOutlined,
   Trash,
   VariantPlus,
 } from '@novu/design-system';
-import { DELAYED_STEPS, StepTypeEnum } from '@novu/shared';
-
-import { NodeType } from './WorkflowNode';
+import { DELAYED_STEPS, type StepTypeEnum } from '@novu/shared';
+import type { MouseEventHandler } from 'react';
 import { When } from '../../../../../components/utils/When';
+import type { NodeType } from './WorkflowNode';
 
 const ButtonsContainer = styled(Container)`
   padding: 0;

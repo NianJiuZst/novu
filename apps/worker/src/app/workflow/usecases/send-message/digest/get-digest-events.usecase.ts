@@ -1,18 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { JobRepository, JobEntity } from '@novu/dal';
+import {
+  type CreateExecutionDetails,
+  CreateExecutionDetailsCommand,
+  DetailEnum,
+  getNestedValue,
+  Instrument,
+} from '@novu/application-generic';
+import type { JobEntity, JobRepository } from '@novu/dal';
 import {
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
-  IDigestBaseMetadata,
+  type IDigestBaseMetadata,
   StepTypeEnum,
 } from '@novu/shared';
-import {
-  DetailEnum,
-  Instrument,
-  getNestedValue,
-  CreateExecutionDetails,
-  CreateExecutionDetailsCommand,
-} from '@novu/application-generic';
 
 import { PlatformException } from '../../../../shared/utils';
 

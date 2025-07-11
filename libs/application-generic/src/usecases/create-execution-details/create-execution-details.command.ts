@@ -1,7 +1,7 @@
+import { type ExecutionDetailsEntity, ExecutionDetailsRepository, type JobEntity } from '@novu/dal';
+import type { ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum, StepTypeEnum } from '@novu/shared';
+import type { EmailEventStatusEnum, SmsEventStatusEnum } from '@novu/stateless';
 import { IsDate, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { ExecutionDetailsEntity, ExecutionDetailsRepository, JobEntity } from '@novu/dal';
-import { ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum, StepTypeEnum } from '@novu/shared';
-import { EmailEventStatusEnum, SmsEventStatusEnum } from '@novu/stateless';
 import { EnvironmentWithSubscriber } from '../../commands';
 
 export class CreateExecutionDetailsCommand extends EnvironmentWithSubscriber {

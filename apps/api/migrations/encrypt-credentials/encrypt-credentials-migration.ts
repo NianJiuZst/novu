@@ -1,7 +1,7 @@
-import { IntegrationEntity, IntegrationRepository } from '@novu/dal';
-import { ICredentialsDto, secureCredentials } from '@novu/shared';
-import { encryptSecret, PinoLogger } from '@novu/application-generic';
 import { NestFactory } from '@nestjs/core';
+import { encryptSecret, PinoLogger } from '@novu/application-generic';
+import { type IntegrationEntity, IntegrationRepository } from '@novu/dal';
+import { type ICredentialsDto, secureCredentials } from '@novu/shared';
 import { AppModule } from '../../src/app.module';
 
 export async function encryptOldCredentialsMigration() {

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getResponse, getBridgeUrl } from './env.utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getBridgeUrl, getResponse } from './env.utils';
 
 describe('env.utils', () => {
   describe('getResponse', () => {

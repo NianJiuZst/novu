@@ -1,10 +1,9 @@
 import styled from '@emotion/styled';
 import { Group, Skeleton, Stack, useMantineColorScheme } from '@mantine/core';
 import { colors, Text } from '@novu/design-system';
-
-import { NovuGreyIcon, PreviewEditOverlay } from '../common';
-import { When } from '../../../utils/When';
 import { useHover } from '../../../../hooks';
+import { When } from '../../../utils/When';
+import { NovuGreyIcon, PreviewEditOverlay } from '../common';
 
 export function ChatContent({ isLoading, content, errorMsg, showOverlay = true }) {
   const { isHovered, onMouseEnter, onMouseLeave } = useHover();

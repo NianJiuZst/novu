@@ -1,8 +1,7 @@
 import styled from '@emotion/styled';
-
-import { Button, IButtonProps } from './Button';
-import { Text } from '../typography/text/Text';
 import { PlusFilled } from '../icons';
+import { Text } from '../typography/text/Text';
+import { Button, type IButtonProps } from './Button';
 
 interface PlusButtonProps extends IButtonProps {
   isGradient?: boolean;

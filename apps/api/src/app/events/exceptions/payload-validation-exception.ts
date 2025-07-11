@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { ErrorObject } from 'ajv';
+import type { ErrorObject } from 'ajv';
 
 export interface IPayloadValidationError {
   field: string;

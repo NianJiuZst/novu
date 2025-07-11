@@ -1,5 +1,5 @@
-import { defineConfig } from '@pandacss/dev';
 import { GLOBAL_CSS, novuPandaPreset } from '@novu/novui';
+import { defineConfig } from '@pandacss/dev';
 
 const STYLED_SYSTEM_PATH_BASE = './node_modules/@novu/novui/';
 

@@ -1,5 +1,5 @@
 import { CursorBasedPaginatedCommand } from '@novu/application-generic';
-import { TopicEntity } from '@novu/dal';
+import type { TopicEntity } from '@novu/dal';
 import { IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class ListTopicsCommand extends CursorBasedPaginatedCommand<TopicEntity, 'createdAt' | 'updatedAt' | '_id'> {

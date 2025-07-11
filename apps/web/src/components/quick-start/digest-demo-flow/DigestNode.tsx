@@ -1,14 +1,14 @@
-import { Handle, Position } from 'react-flow-renderer';
-import { createStyles, NumberInput, Loader } from '@mantine/core';
 import styled from '@emotion/styled';
-
-import { CountdownTimer, DigestAction, colors } from '@novu/design-system';
-import { useEffect, useState } from 'react';
+import { createStyles, Loader, NumberInput } from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
-import { NodeStepWithPopover } from './NodeStepWithPopover';
+
+import { CountdownTimer, colors, DigestAction } from '@novu/design-system';
+import { useEffect, useState } from 'react';
+import { Handle, Position } from 'react-flow-renderer';
+import { useDataRef } from '../../../hooks';
 import { useDigestDemoFlowContext } from './DigestDemoFlowProvider';
 import { Indicator } from './Indicator';
-import { useDataRef } from '../../../hooks';
+import { NodeStepWithPopover } from './NodeStepWithPopover';
 
 const LoaderStyled = styled(Loader)`
   position: absolute;

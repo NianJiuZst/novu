@@ -1,4 +1,4 @@
-import { type OffsetOptions, type Placement } from '@floating-ui/dom';
+import type { OffsetOptions, Placement } from '@floating-ui/dom';
 import { createMemo, createSignal, Match, Show, Switch } from 'solid-js';
 import { useInboxContext } from '../context';
 import { cn, useStyle } from '../helpers';

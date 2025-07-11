@@ -1,16 +1,14 @@
-import { join } from 'path';
 import { Module } from '@nestjs/common';
-import { SentryModule } from '@sentry/nestjs/setup';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { createNestLoggingModuleOptions, LoggerModule, TracingModule } from '@novu/application-generic';
-
+import { SentryModule } from '@sentry/nestjs/setup';
+import { join } from 'path';
+import packageJson from '../package.json';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { SharedModule } from './shared/shared.module';
 import { HealthModule } from './health/health.module';
+import { SharedModule } from './shared/shared.module';
 import { SocketModule } from './socket/socket.module';
-
-import packageJson from '../package.json';
 
 const modules = [
   SharedModule,

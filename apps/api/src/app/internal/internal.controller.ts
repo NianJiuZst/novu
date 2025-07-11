@@ -1,14 +1,14 @@
-import { Body, Controller, Post, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
-import { ApiExcludeController } from '@nestjs/swagger';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { SubscriberEntity } from '@novu/dal';
-import {
+import { ApiExcludeController } from '@nestjs/swagger';
+import type { SubscriberEntity } from '@novu/dal';
+import { SubscriberSession } from '../shared/framework/user.decorator';
+import type {
   UpdateSubscriberOnlineStateRequestDto,
   UpdateSubscriberOnlineStateResponseDto,
 } from './dtos/subscriber-online-state.dto';
-import { UpdateSubscriberOnlineState } from './usecases/update-subscriber-online-state/update-subscriber-online-state.usecase';
 import { UpdateSubscriberOnlineStateCommand } from './usecases/update-subscriber-online-state/update-subscriber-online-state.command';
-import { SubscriberSession } from '../shared/framework/user.decorator';
+import type { UpdateSubscriberOnlineState } from './usecases/update-subscriber-online-state/update-subscriber-online-state.usecase';
 
 @Controller('/internal')
 @ApiExcludeController()

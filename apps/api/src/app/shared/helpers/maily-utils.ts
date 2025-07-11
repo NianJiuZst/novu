@@ -1,4 +1,4 @@
-import { JSONContent as MailyJSONContent } from '@maily-to/render';
+import type { JSONContent as MailyJSONContent } from '@maily-to/render';
 import { TRANSLATION_KEY_SINGLE_REGEX } from '@novu/shared';
 
 import { MAILY_FIRST_CITIZEN_VARIABLE_KEY, MailyAttrsEnum, MailyContentTypeEnum } from './maily.types';

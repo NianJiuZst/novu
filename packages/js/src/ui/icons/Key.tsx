@@ -1,4 +1,4 @@
-import { JSX } from 'solid-js';
+import type { JSX } from 'solid-js';
 
 /* eslint-disable max-len */
 export function Key(props?: JSX.HTMLAttributes<SVGSVGElement>) {

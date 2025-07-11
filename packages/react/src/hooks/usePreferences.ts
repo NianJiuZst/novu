@@ -1,4 +1,4 @@
-import { NovuError, Preference } from '@novu/js';
+import type { NovuError, Preference } from '@novu/js';
 import { useEffect, useState } from 'react';
 import { useNovu } from './NovuProvider';
 

@@ -1,9 +1,8 @@
+import styled from '@emotion/styled';
 import { ActionIcon, Group, Title, useMantineTheme } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
-import { CSSProperties, ReactNode, useEffect } from 'react';
-import styled from '@emotion/styled';
-
-import { Button, colors, Text, Calendar, Close } from '@novu/design-system';
+import { Button, Calendar, Close, colors, Text } from '@novu/design-system';
+import { type CSSProperties, type ReactNode, useEffect } from 'react';
 import { IS_SELF_HOSTED } from '../../config';
 import { useAuth } from '../../hooks/useAuth';
 import { useSegment } from '../providers/SegmentProvider';

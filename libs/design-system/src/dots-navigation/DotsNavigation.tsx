@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import React from 'react';
+import type React from 'react';
 import { colors } from '../config';
 
 const DotsNavigationHolder = styled.ul`

@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React from 'react';
+import type React from 'react';
 
 export function Workflow(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (

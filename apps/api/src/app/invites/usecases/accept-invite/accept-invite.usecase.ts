@@ -1,12 +1,11 @@
-import { Injectable, NotFoundException, Scope, BadRequestException } from '@nestjs/common';
-
-import { MemberEntity, MemberRepository, OrganizationRepository, UserEntity, UserRepository } from '@novu/dal';
-import { MemberStatusEnum } from '@novu/shared';
+import { BadRequestException, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { Novu } from '@novu/api';
-import { PinoLogger } from '@novu/application-generic';
-import { AuthService } from '../../../auth/services/auth.service';
-import { AcceptInviteCommand } from './accept-invite.command';
+import type { PinoLogger } from '@novu/application-generic';
+import type { MemberEntity, MemberRepository, OrganizationRepository, UserEntity, UserRepository } from '@novu/dal';
+import { MemberStatusEnum } from '@novu/shared';
+import type { AuthService } from '../../../auth/services/auth.service';
 import { capitalize } from '../../../shared/services/helper/helper.service';
+import type { AcceptInviteCommand } from './accept-invite.command';
 
 @Injectable({
   scope: Scope.REQUEST,

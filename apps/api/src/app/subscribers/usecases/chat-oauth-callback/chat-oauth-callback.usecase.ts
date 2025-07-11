@@ -1,26 +1,25 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import axios from 'axios';
-
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  CreateOrUpdateSubscriberUseCase,
   CreateOrUpdateSubscriberCommand,
+  type CreateOrUpdateSubscriberUseCase,
   decryptCredentials,
-  IChannelCredentialsCommand,
+  type IChannelCredentialsCommand,
   OAuthHandlerEnum,
-  UpdateSubscriberChannel,
+  type UpdateSubscriberChannel,
   UpdateSubscriberChannelCommand,
 } from '@novu/application-generic';
-import { ICredentialsDto } from '@novu/shared';
 import {
   ChannelTypeEnum,
-  EnvironmentEntity,
-  EnvironmentRepository,
-  IntegrationEntity,
-  IntegrationRepository,
+  type EnvironmentEntity,
+  type EnvironmentRepository,
+  type IntegrationEntity,
+  type IntegrationRepository,
 } from '@novu/dal';
-import { ChatOauthCallbackCommand } from './chat-oauth-callback.command';
+import type { ICredentialsDto } from '@novu/shared';
+import axios from 'axios';
 import { validateEncryption } from '../chat-oauth/chat-oauth.usecase';
-import { ChatOauthCallbackResult, ResponseTypeEnum } from './chat-oauth-callback.result';
+import type { ChatOauthCallbackCommand } from './chat-oauth-callback.command';
+import { type ChatOauthCallbackResult, ResponseTypeEnum } from './chat-oauth-callback.result';
 
 @Injectable()
 export class ChatOauthCallback {

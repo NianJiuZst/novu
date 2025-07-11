@@ -1,4 +1,4 @@
-import { Subscriber } from '../types';
+import type { Subscriber } from '../types';
 
 export type KeylessInitializeSessionArgs = {} & { [K in string]?: never }; // empty object,disallows all unknown keys
 

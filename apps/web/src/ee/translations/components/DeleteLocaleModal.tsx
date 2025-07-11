@@ -1,10 +1,10 @@
 import { Group } from '@mantine/core';
+import { Button, colors, Modal, Text } from '@novu/design-system';
 import { useFormContext } from 'react-hook-form';
-import { Modal, Text, colors, Button } from '@novu/design-system';
 import { useFetchLocales } from '../hooks/useFetchLocales';
-import { FlagIcon } from './shared';
-import { Warning } from '../icons';
 import { useGetDefaultLocale } from '../hooks/useGetDefaultLocale';
+import { Warning } from '../icons';
+import { FlagIcon } from './shared';
 
 export const DeleteLocaleModal = ({
   localeToDelete,

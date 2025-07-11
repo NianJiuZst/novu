@@ -1,7 +1,6 @@
 import { Group } from '@mantine/core';
-import { Control, useController } from 'react-hook-form';
-
-import { Text, Switch } from '@novu/design-system';
+import { Switch, Text } from '@novu/design-system';
+import { type Control, useController } from 'react-hook-form';
 import type { IForm } from '../formTypes';
 
 export function EnableAvatarSwitch({

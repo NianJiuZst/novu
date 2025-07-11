@@ -3,8 +3,8 @@ import { FileButton, Group, Indicator, Skeleton, Stack, useMantineColorScheme } 
 import {
   ActionButton,
   colors,
-  IExtendedCellProps,
-  IExtendedColumn,
+  type IExtendedCellProps,
+  type IExtendedColumn,
   PencilOutlined,
   Text,
   Tooltip,
@@ -16,14 +16,13 @@ import {
 import { format } from 'date-fns';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FlagMap } from '../icons/flags';
-
 import { useEnvironment } from '../../../hooks';
-import { ITranslation, useFetchLocales } from '../hooks';
 import { useEditTranslationFileContext } from '../context/useEditTranslationFileContext';
-import { ReuploadIcon, Star, Warning } from '../icons';
-import { DeleteTranslationModal } from './TranslationGroup/DeleteTranslationModal';
+import { type ITranslation, useFetchLocales } from '../hooks';
 import { useGetDefaultLocale } from '../hooks/useGetDefaultLocale';
+import { ReuploadIcon, Star, Warning } from '../icons';
+import { FlagMap } from '../icons/flags';
+import { DeleteTranslationModal } from './TranslationGroup/DeleteTranslationModal';
 
 const LanguageCell = ({ row: { original }, isLoading }: IExtendedCellProps<ITranslation>) => {
   const { getLocale } = useFetchLocales();

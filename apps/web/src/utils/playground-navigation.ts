@@ -1,5 +1,5 @@
-import { ROUTES } from '../constants/routes';
 import { CONTEXT_PATH } from '../config';
+import { ROUTES } from '../constants/routes';
 
 const basePath = CONTEXT_PATH.slice(0, -1);
 

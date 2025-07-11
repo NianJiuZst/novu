@@ -1,5 +1,5 @@
-import { expect, test, vi } from 'vitest';
 import axios from 'axios';
+import { expect, test, vi } from 'vitest';
 import { MattermostProvider } from './mattermost.provider';
 
 test('should trigger mattermost library correctly, default channel', async () => {

@@ -1,6 +1,6 @@
 import { PageMeta } from '@novu/design-system';
-import { SignUpForm } from './components/SignUpForm';
 import AuthLayout from '../../components/layout/components/AuthLayout';
+import { SignUpForm } from './components/SignUpForm';
 
 const title = 'Sign up';
 

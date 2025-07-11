@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ChannelTypeEnum } from '@novu/shared';
-import { CheckIntegrationEMail } from './check-integration-email.usecase';
-import { CheckIntegrationCommand } from './check-integration.command';
+import type { CheckIntegrationCommand } from './check-integration.command';
+import type { CheckIntegrationEMail } from './check-integration-email.usecase';
 
 @Injectable()
 export class CheckIntegration {

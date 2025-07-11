@@ -1,12 +1,11 @@
-import { PinoLogger } from '@novu/application-generic';
-import { AdditionalOperation, RulesLogic } from 'json-logic-js';
-
+import type { PinoLogger } from '@novu/application-generic';
+import type { AdditionalOperation, RulesLogic } from 'json-logic-js';
+import type { JSONSchemaDto } from '../../shared/dtos/json-schema.dto';
+import { isStringifiedMailyJSONContent, wrapMailyInLiquid } from '../../shared/helpers/maily-utils';
 import { extractFieldsFromRules, isValidRule } from '../../shared/services/query-parser/query-parser.service';
-import { JSONSchemaDto } from '../../shared/dtos/json-schema.dto';
 import { extractLiquidTemplateVariables } from './template-parser/liquid-parser';
 import { extractLiquidTemplateVariables as newExtractLiquidTemplateVariables } from './template-parser/new-liquid-parser';
 import type { VariableDetails } from './template-parser/types';
-import { isStringifiedMailyJSONContent, wrapMailyInLiquid } from '../../shared/helpers/maily-utils';
 
 export function buildVariables({
   useNewLiquidParser,

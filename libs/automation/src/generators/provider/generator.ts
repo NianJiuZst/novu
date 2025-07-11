@@ -1,8 +1,8 @@
-import { addProjectConfiguration, formatFiles, generateFiles, Tree } from '@nx/devkit';
 import fs from 'node:fs';
 import path from 'node:path';
+import { addProjectConfiguration, formatFiles, generateFiles, type Tree } from '@nx/devkit';
 // eslint-disable-next-line import/extensions
-import { IProviderGeneratorSchema } from './schema';
+import type { IProviderGeneratorSchema } from './schema';
 
 const PROVIDERS_BASE_FOLDER = path.join('..', '..', 'packages', 'providers', 'src', 'lib');
 

@@ -1,39 +1,36 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { addBreadcrumb } from '@sentry/node';
-import { ModuleRef } from '@nestjs/core';
-import { merge } from 'lodash';
-
-import { MessageRepository, SubscriberRepository, MessageEntity, IntegrationEntity, JobEntity } from '@novu/dal';
+import type { ModuleRef } from '@nestjs/core';
+import {
+  type CompileTemplate,
+  CompileTemplateCommand,
+  type CreateExecutionDetails,
+  CreateExecutionDetailsCommand,
+  DetailEnum,
+  type GetNovuProviderCredentials,
+  InstrumentUsecase,
+  type IPushHandler,
+  PushFactory,
+  type SelectIntegration,
+  type SelectVariant,
+} from '@novu/application-generic';
+import type { IntegrationEntity, JobEntity, MessageEntity, MessageRepository, SubscriberRepository } from '@novu/dal';
+import type { PushOutput } from '@novu/framework/internal';
 import {
   ChannelTypeEnum,
-  PushProviderIdEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
-  IChannelSettings,
-  ProvidersIdEnum,
-  TriggerOverrides,
+  type IChannelSettings,
+  type ProvidersIdEnum,
+  PushProviderIdEnum,
+  type TriggerOverrides,
 } from '@novu/shared';
-import {
-  InstrumentUsecase,
-  DetailEnum,
-  SelectIntegration,
-  CompileTemplate,
-  CompileTemplateCommand,
-  IPushHandler,
-  PushFactory,
-  GetNovuProviderCredentials,
-  SelectVariant,
-  CreateExecutionDetails,
-  CreateExecutionDetailsCommand,
-} from '@novu/application-generic';
-import { IPushOptions } from '@novu/stateless';
-import { PushOutput } from '@novu/framework/internal';
-
-import { SendMessageCommand } from './send-message.command';
-import { SendMessageBase } from './send-message.base';
-
+import type { IPushOptions } from '@novu/stateless';
+import { addBreadcrumb } from '@sentry/node';
+import { merge } from 'lodash';
 import { PlatformException } from '../../../shared/utils';
-import { SendMessageResult } from './send-message-type.usecase';
+import { SendMessageBase } from './send-message.base';
+import type { SendMessageCommand } from './send-message.command';
+import type { SendMessageResult } from './send-message-type.usecase';
 
 const LOG_CONTEXT = 'SendMessagePush';
 

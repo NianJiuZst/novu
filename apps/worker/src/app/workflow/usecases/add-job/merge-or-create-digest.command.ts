@@ -1,7 +1,7 @@
-import { IsDefined, IsOptional } from 'class-validator';
-
-import { JobEntity } from '@novu/dal';
 import { BaseCommand } from '@novu/application-generic';
+
+import type { JobEntity } from '@novu/dal';
+import { IsDefined, IsOptional } from 'class-validator';
 
 export class MergeOrCreateDigestCommand extends BaseCommand {
   @IsDefined()

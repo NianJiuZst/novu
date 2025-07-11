@@ -1,4 +1,4 @@
-import { ChannelPreference, Preference, PreferenceLevel, Workflow } from '../types';
+import { type ChannelPreference, type Preference, type PreferenceLevel, Workflow } from '../types';
 
 export type FetchPreferencesArgs = {
   level?: PreferenceLevel;

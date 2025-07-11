@@ -1,7 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { addBreadcrumb } from '@sentry/node';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
-import {
+import type {
   EnvironmentRepository,
   JobEntity,
   JobRepository,
@@ -11,21 +10,21 @@ import {
 } from '@novu/dal';
 import {
   AddressingTypeEnum,
-  ISubscribersDefine,
-  ITenantDefine,
-  TriggerRecipientSubscriber,
-  TriggerTenantContext,
+  type ISubscribersDefine,
+  type ITenantDefine,
+  type TriggerRecipientSubscriber,
+  type TriggerTenantContext,
 } from '@novu/shared';
+import { addBreadcrumb } from '@sentry/node';
 import { Instrument, InstrumentUsecase } from '../../instrumentation';
-import { PinoLogger } from '../../logging';
-import { AnalyticsService } from '../../services/analytics.service';
-import { BadRequestException } from '@nestjs/common';
-import { ProcessTenant, ProcessTenantCommand } from '../process-tenant';
+import type { PinoLogger } from '../../logging';
+import type { AnalyticsService } from '../../services/analytics.service';
+import { CreateOrUpdateSubscriberCommand, type CreateOrUpdateSubscriberUseCase } from '../create-or-update-subscriber';
+import { type ProcessTenant, ProcessTenantCommand } from '../process-tenant';
 import { TriggerBroadcastCommand } from '../trigger-broadcast/trigger-broadcast.command';
-import { TriggerBroadcast } from '../trigger-broadcast/trigger-broadcast.usecase';
-import { TriggerMulticast, TriggerMulticastCommand } from '../trigger-multicast';
-import { TriggerEventCommand } from './trigger-event.command';
-import { CreateOrUpdateSubscriberCommand, CreateOrUpdateSubscriberUseCase } from '../create-or-update-subscriber';
+import type { TriggerBroadcast } from '../trigger-broadcast/trigger-broadcast.usecase';
+import { type TriggerMulticast, TriggerMulticastCommand } from '../trigger-multicast';
+import type { TriggerEventCommand } from './trigger-event.command';
 
 const LOG_CONTEXT = 'TriggerEventUseCase';
 

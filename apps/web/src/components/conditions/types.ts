@@ -1,5 +1,5 @@
-import { Control } from 'react-hook-form';
-import { BuilderFieldType, BuilderGroupValues, FilterParts, FilterPartTypeEnum } from '@novu/shared';
+import type { BuilderFieldType, BuilderGroupValues, FilterParts, FilterPartTypeEnum } from '@novu/shared';
+import type { Control } from 'react-hook-form';
 
 export interface IConditions {
   isNegated?: boolean;

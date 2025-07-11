@@ -4,8 +4,8 @@ import {
   AnalyticsService,
   CacheInMemoryProviderService,
   CacheService,
-  FeatureFlagsService,
   ClickHouseService,
+  FeatureFlagsService,
 } from '../services';
 
 export const featureFlagsService = {

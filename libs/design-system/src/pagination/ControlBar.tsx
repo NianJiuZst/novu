@@ -1,13 +1,13 @@
 import styled from '@emotion/styled';
-import { Box, BoxProps, useMantineTheme } from '@mantine/core';
-import { forwardRef, PropsWithChildren, useContext, useEffect, useState } from 'react';
+import { Box, type BoxProps, useMantineTheme } from '@mantine/core';
+import { forwardRef, type PropsWithChildren, useContext, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from '../icons';
+import { clamp } from '../utils';
 import { ControlButton } from './ControlButton';
+import { IconControlButton } from './IconControlButton';
 import { DEFAULT_ELLIPSIS_NODE, DEFAULT_SIBLING_COUNT, MAX_SIBLING_COUNT, MIN_SIBLING_COUNT } from './Pagination.const';
 import { PaginationContext } from './PaginationContext';
-import { getPaginationSymbols, PaginationSymbol } from './util';
-import { clamp } from '../utils';
-import { IconControlButton } from './IconControlButton';
+import { getPaginationSymbols, type PaginationSymbol } from './util';
 
 const Group = styled(Box)<BoxProps & React.RefAttributes<HTMLDivElement>>(
   ({ theme }) => `

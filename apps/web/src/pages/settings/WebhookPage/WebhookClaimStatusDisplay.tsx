@@ -5,14 +5,14 @@ import {
   IconRefresh,
   When,
 } from '@novu/design-system';
-import { FC } from 'react';
 import { cva } from '@novu/novui/css';
 import { HStack } from '@novu/novui/jsx';
-import { SystemStyleObject } from '@novu/novui/types';
+import type { SystemStyleObject } from '@novu/novui/types';
+import type { FC } from 'react';
 import { IconButton } from '../../../components';
-import { LocalizedMessage } from '../../../types/LocalizedMessage';
+import type { LocalizedMessage } from '../../../types/LocalizedMessage';
 import { Text } from './WebhookPage.shared';
-import { type WebhookClaimStatus } from './WebhookPage.types';
+import type { WebhookClaimStatus } from './WebhookPage.types';
 
 const WEBHOOK_STATUS_LABEL_LOOKUP: Record<WebhookClaimStatus, LocalizedMessage> = {
   unclaimed: 'Not claimed',

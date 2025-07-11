@@ -1,37 +1,41 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { addBreadcrumb } from '@sentry/node';
-import { ModuleRef } from '@nestjs/core';
-
-import { MessageRepository, NotificationStepEntity, SubscriberRepository, MessageEntity } from '@novu/dal';
+import type { ModuleRef } from '@nestjs/core';
 import {
+  buildFeedKey,
+  buildMessageCountKey,
+  type CompileInAppTemplate,
+  CompileInAppTemplateCommand,
+  type CreateExecutionDetails,
+  CreateExecutionDetailsCommand,
+  DetailEnum,
+  type GetNovuProviderCredentials,
+  InstrumentUsecase,
+  type InvalidateCacheService,
+  type SelectIntegration,
+  type SelectVariant,
+  type WebSocketsQueueService,
+} from '@novu/application-generic';
+
+import {
+  type MessageEntity,
+  type MessageRepository,
+  NotificationStepEntity,
+  type SubscriberRepository,
+} from '@novu/dal';
+import type { InAppOutput } from '@novu/framework/internal';
+import {
+  ActorTypeEnum,
   ChannelTypeEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
-  ActorTypeEnum,
-  WebSocketEventEnum,
   inAppMessageFromBridgeOutputs,
+  WebSocketEventEnum,
 } from '@novu/shared';
-import {
-  InstrumentUsecase,
-  InvalidateCacheService,
-  DetailEnum,
-  SelectIntegration,
-  buildFeedKey,
-  buildMessageCountKey,
-  GetNovuProviderCredentials,
-  SelectVariant,
-  CompileInAppTemplate,
-  CompileInAppTemplateCommand,
-  WebSocketsQueueService,
-  CreateExecutionDetails,
-  CreateExecutionDetailsCommand,
-} from '@novu/application-generic';
-import { InAppOutput } from '@novu/framework/internal';
-
-import { SendMessageCommand } from './send-message.command';
-import { SendMessageBase } from './send-message.base';
+import { addBreadcrumb } from '@sentry/node';
 import { PlatformException } from '../../../shared/utils';
-import { SendMessageResult } from './send-message-type.usecase';
+import { SendMessageBase } from './send-message.base';
+import type { SendMessageCommand } from './send-message.command';
+import type { SendMessageResult } from './send-message-type.usecase';
 
 @Injectable()
 export class SendMessageInApp extends SendMessageBase {

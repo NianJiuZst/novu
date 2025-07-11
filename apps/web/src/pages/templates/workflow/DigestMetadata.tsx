@@ -1,19 +1,18 @@
-import { Accordion, Group, useMantineColorScheme } from '@mantine/core';
-import { Controller, useFormContext } from 'react-hook-form';
 import styled from '@emotion/styled';
+import { Accordion, Group, useMantineColorScheme } from '@mantine/core';
+import { Bell, colors, Digest, Input, Select, Timer, Tooltip } from '@novu/design-system';
 import { DigestTypeEnum } from '@novu/shared';
-
-import { colors, Input, Select, Tooltip, Bell, Digest, Timer } from '@novu/design-system';
+import { Controller, useFormContext } from 'react-hook-form';
 import { When } from '../../../components/utils/When';
+import { useEnvironment } from '../../../hooks';
+import { useTemplateEditorForm } from '../components/TemplateEditorFormProvider';
+import { useStepFormPath } from '../hooks/useStepFormPath';
+import { RegularInfo } from './digest/icons/RegularInfo';
 import { TypeSegmented } from './digest/TypeSegment';
 import { WillBeSentHeader } from './digest/WillBeSentHeader';
-import { RegularInfo } from './digest/icons/RegularInfo';
-import { TimedDigestMetadata } from './TimedDigestMetadata';
 import { RegularDigestMetadata } from './RegularDigestMetadata';
 import { StepSettings } from './SideBar/StepSettings';
-import { useEnvironment } from '../../../hooks';
-import { useStepFormPath } from '../hooks/useStepFormPath';
-import { useTemplateEditorForm } from '../components/TemplateEditorFormProvider';
+import { TimedDigestMetadata } from './TimedDigestMetadata';
 
 const GroupStyled = styled(Group)`
   gap: 18px;

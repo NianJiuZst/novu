@@ -1,4 +1,4 @@
-import { type LocalizedString } from '@novu/novui';
+import type { LocalizedString } from '@novu/novui';
 import { Helmet } from 'react-helmet-async';
 
 export interface IPageMetaProps {

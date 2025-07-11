@@ -1,5 +1,5 @@
-import { ExternalSubscriberId } from '@novu/shared';
 import { ApiProperty } from '@nestjs/swagger';
+import type { ExternalSubscriberId } from '@novu/shared';
 
 export class FailedAssignmentsDto {
   @ApiProperty({

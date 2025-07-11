@@ -1,19 +1,18 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useMantineTheme, Group, Container, Card } from '@mantine/core';
+import { Card, Container, Group, useMantineTheme } from '@mantine/core';
 import { Dropzone } from '@mantine/dropzone';
-import { useFormContext, useFieldArray } from 'react-hook-form';
-import { EmailBlockTypeEnum, IEmailBlock, FeatureFlagsKeysEnum } from '@novu/shared';
-
-import { Upload, colors, Text } from '@novu/design-system';
-import { ContentRow } from './ContentRow';
-import { ControlBar } from './ControlBar';
-import { ButtonRowContent } from './ButtonRowContent';
-import { TextRowContent } from './TextRowContent';
-import type { IForm, IFormStep, ITemplates } from '../formTypes';
-import { useStepFormPath } from '../../hooks/useStepFormPath';
+import { colors, Text, Upload } from '@novu/design-system';
+import { EmailBlockTypeEnum, FeatureFlagsKeysEnum, type IEmailBlock } from '@novu/shared';
+import { useState } from 'react';
+import { useFieldArray, useFormContext } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../../constants/routes';
 import { useFeatureFlag } from '../../../../hooks/useFeatureFlag';
+import { useStepFormPath } from '../../hooks/useStepFormPath';
+import type { IForm, IFormStep, ITemplates } from '../formTypes';
+import { ButtonRowContent } from './ButtonRowContent';
+import { ContentRow } from './ContentRow';
+import { ControlBar } from './ControlBar';
+import { TextRowContent } from './TextRowContent';
 
 interface IStepEntityExtended extends IFormStep {
   template: ITemplates & {

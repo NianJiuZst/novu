@@ -1,9 +1,8 @@
-import { Tooltip, Dropdown, CardTile } from '@novu/design-system';
 import { Badge } from '@mantine/core';
-
-import { TemplateItem } from './templates-store/templateStoreStyles';
+import { CardTile, Dropdown, Tooltip } from '@novu/design-system';
 import { useSegment } from '../../../components/providers/SegmentProvider';
 import { useAuth } from '../../../hooks/useAuth';
+import { TemplateItem } from './templates-store/templateStoreStyles';
 
 const SEGMENT_EVENT = 'Button Clicked - [Bridge promotion]';
 const segmentEventAction = {

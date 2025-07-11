@@ -1,12 +1,11 @@
-import capitalize from 'lodash.capitalize';
-import { format } from 'date-fns';
 import { useMantineColorScheme } from '@mantine/core';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChangeEntityTypeEnum } from '@novu/shared';
-import { useEffect } from 'react';
 import { showNotification } from '@mantine/notifications';
-
-import { IExtendedColumn, Table, Button, colors, Text, withCellLoading } from '@novu/design-system';
+import { Button, colors, type IExtendedColumn, Table, Text, withCellLoading } from '@novu/design-system';
+import { ChangeEntityTypeEnum } from '@novu/shared';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import capitalize from 'lodash.capitalize';
+import { useEffect } from 'react';
 import { promoteChange } from '../../../api/changes';
 import { QueryKeys } from '../../../api/query.keys';
 

@@ -1,23 +1,22 @@
 import { Container } from '@mantine/core';
-import { Outlet } from 'react-router-dom';
+import { type IExtendedColumn, Table, Text, withCellLoading } from '@novu/design-system';
+import type { ChannelTypeEnum } from '@novu/shared';
 import { useMemo } from 'react';
-import { Row } from 'react-table';
-import { ChannelTypeEnum } from '@novu/shared';
-
-import { Table, Text, withCellLoading, IExtendedColumn } from '@novu/design-system';
+import { Outlet } from 'react-router-dom';
+import type { Row } from 'react-table';
 import PageContainer from '../../components/layout/components/PageContainer';
 import PageHeader from '../../components/layout/components/PageHeader';
+import { When } from '../../components/utils/When';
 import { useEnvironment, useIntegrations } from '../../hooks';
-import { IntegrationsListToolbar } from './components/IntegrationsListToolbar';
-import { IntegrationNameCell } from './components/IntegrationNameCell';
-import type { ITableIntegration } from './types';
+import { ConditionCell } from './components/ConditionCell';
 import { IntegrationChannelCell } from './components/IntegrationChannelCell';
 import { IntegrationEnvironmentCell } from './components/IntegrationEnvironmentCell';
+import { IntegrationNameCell } from './components/IntegrationNameCell';
 import { IntegrationStatusCell } from './components/IntegrationStatusCell';
-import { When } from '../../components/utils/When';
 import { IntegrationsListNoData } from './components/IntegrationsListNoData';
+import { IntegrationsListToolbar } from './components/IntegrationsListToolbar';
+import type { ITableIntegration } from './types';
 import { mapToTableIntegration } from './utils';
-import { ConditionCell } from './components/ConditionCell';
 
 const columns: IExtendedColumn<ITableIntegration>[] = [
   {

@@ -1,6 +1,6 @@
 import { Injectable, Scope } from '@nestjs/common';
-import { OrganizationRepository } from '@novu/dal';
-import { GetOrganizationsCommand } from './get-organizations.command';
+import type { OrganizationRepository } from '@novu/dal';
+import type { GetOrganizationsCommand } from './get-organizations.command';
 
 @Injectable({
   scope: Scope.REQUEST,

@@ -1,8 +1,8 @@
-import { Inject, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { MessageEntity, MessageRepository, MessageTemplateEntity, SubscriberRepository } from '@novu/dal';
-import { AnalyticsService } from '@novu/application-generic';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import type { AnalyticsService } from '@novu/application-generic';
+import type { MessageEntity, MessageRepository, MessageTemplateEntity, SubscriberRepository } from '@novu/dal';
 
-import { UpdateMessageActionsCommand } from './update-message-actions.command';
+import type { UpdateMessageActionsCommand } from './update-message-actions.command';
 
 @Injectable()
 export class UpdateMessageActions {

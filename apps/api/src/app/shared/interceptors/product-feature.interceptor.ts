@@ -1,20 +1,20 @@
 import {
-  CallHandler,
-  ExecutionContext,
+  type CallHandler,
+  type ExecutionContext,
   HttpException,
   Injectable,
-  NestInterceptor,
+  type NestInterceptor,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { OrganizationRepository } from '@novu/dal';
+import type { Reflector } from '@nestjs/core';
+import type { OrganizationRepository } from '@novu/dal';
 import {
-  ApiServiceLevelEnum,
+  type ApiServiceLevelEnum,
+  type ProductFeatureKeyEnum,
   productFeatureEnabledForServiceLevel,
-  ProductFeatureKeyEnum,
-  UserSessionData,
+  type UserSessionData,
 } from '@novu/shared';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { ProductFeature } from '../decorators/product-feature.decorator';
 
 @Injectable()

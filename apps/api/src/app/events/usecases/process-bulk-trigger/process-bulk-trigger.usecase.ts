@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { AddressingTypeEnum, TriggerEventStatusEnum, TriggerRequestCategoryEnum } from '@novu/shared';
-
-import { ProcessBulkTriggerCommand } from './process-bulk-trigger.command';
-
-import { TriggerEventResponseDto } from '../../dtos';
-import { ParseEventRequest } from '../parse-event-request/parse-event-request.usecase';
+import type { TriggerEventResponseDto } from '../../dtos';
 import { ParseEventRequestMulticastCommand } from '../parse-event-request/parse-event-request.command';
+import type { ParseEventRequest } from '../parse-event-request/parse-event-request.usecase';
+import type { ProcessBulkTriggerCommand } from './process-bulk-trigger.command';
 
 @Injectable()
 export class ProcessBulkTrigger {

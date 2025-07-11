@@ -1,5 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import { ListNotificationsResponse, Notification, NovuError, isSameFilter, NotificationFilter } from '@novu/js';
+import {
+  isSameFilter,
+  type ListNotificationsResponse,
+  type Notification,
+  type NotificationFilter,
+  type NovuError,
+} from '@novu/js';
+import { useEffect, useRef, useState } from 'react';
 import { useNovu } from './NovuProvider';
 
 export type UseNotificationsProps = {

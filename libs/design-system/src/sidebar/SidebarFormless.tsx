@@ -1,8 +1,8 @@
 import { cx } from '@emotion/css';
 import { Drawer, Loader, Stack } from '@mantine/core';
-import { useKeyDown } from '../hooks/useKeyDown';
 import { ActionButton } from '../button/ActionButton';
 import { colors } from '../config';
+import { useKeyDown } from '../hooks/useKeyDown';
 import { ArrowLeft } from '../icons';
 import { When } from '../when';
 import { Close } from './Close';
@@ -14,7 +14,7 @@ import {
   sidebarDrawerContentClassName,
   useDrawerStyles,
 } from './Sidebar.styles';
-import { ISidebarBaseProps } from './Sidebar.types';
+import type { ISidebarBaseProps } from './Sidebar.types';
 
 /**
  * A Sidebar component without the form element that wraps content.

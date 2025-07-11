@@ -1,8 +1,8 @@
 import '../../../src/config';
 import { NestFactory } from '@nestjs/core';
 import { SubscriberRepository } from '@novu/dal';
+import type { IChannelSettings, ISubscriber } from '@novu/shared';
 import { AppModule } from '../../../src/app.module';
-import { IChannelSettings, ISubscriber } from '@novu/shared';
 
 export async function removeDuplicatedSubscribers() {
   // eslint-disable-next-line no-console

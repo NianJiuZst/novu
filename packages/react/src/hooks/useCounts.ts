@@ -1,7 +1,7 @@
+import { areTagsEqual, type Notification, type NotificationFilter, type NovuError } from '@novu/js';
 import { useEffect, useState } from 'react';
-import { Notification, NotificationFilter, NovuError, areTagsEqual } from '@novu/js';
-import { useNovu } from './NovuProvider';
 import { useWebSocketEvent } from './internal/useWebsocketEvent';
+import { useNovu } from './NovuProvider';
 
 type Count = {
   count: number;

@@ -1,8 +1,7 @@
-import { FC } from 'react';
-
-import { CoreProps } from '@novu/novui';
-import { Grid, GridItem } from '@novu/novui/jsx';
+import type { CoreProps } from '@novu/novui';
 import { css, cx } from '@novu/novui/css';
+import { Grid, GridItem } from '@novu/novui/jsx';
+import type { FC } from 'react';
 
 /** Panel layout that accepts exactly two children */
 export interface IWorkflowsPanelLayoutProps extends CoreProps {

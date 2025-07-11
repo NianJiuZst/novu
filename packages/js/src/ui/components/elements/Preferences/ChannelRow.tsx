@@ -1,5 +1,5 @@
-import { JSX } from 'solid-js';
-import { ChannelPreference, ChannelType } from '../../../../types';
+import type { JSX } from 'solid-js';
+import { type ChannelPreference, ChannelType } from '../../../../types';
 import { useStyle } from '../../../helpers';
 import {
   Chat as DefaultChat,
@@ -8,8 +8,8 @@ import {
   Push as DefaultPush,
   Sms as DefaultSms,
 } from '../../../icons';
-import { AppearanceKey, IconKey } from '../../../types';
-import { Switch, SwitchState } from '../../primitives/Switch';
+import type { AppearanceKey, IconKey } from '../../../types';
+import { Switch, type SwitchState } from '../../primitives/Switch';
 import { IconRendererWrapper } from '../../shared/IconRendererWrapper';
 
 type ChannelRowProps = {

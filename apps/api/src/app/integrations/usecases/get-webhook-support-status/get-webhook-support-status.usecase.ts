@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException, Scope, BadRequestException } from '@nestjs/common';
-import { IntegrationEntity, IntegrationQuery, IntegrationRepository } from '@novu/dal';
-import { IEmailProvider, ISmsProvider } from '@novu/stateless';
-import { IMailHandler, ISmsHandler, MailFactory, SmsFactory } from '@novu/application-generic';
+import { BadRequestException, Injectable, NotFoundException, Scope } from '@nestjs/common';
+import { type IMailHandler, type ISmsHandler, MailFactory, SmsFactory } from '@novu/application-generic';
+import type { IntegrationEntity, IntegrationQuery, IntegrationRepository } from '@novu/dal';
 import { ChannelTypeEnum, providers } from '@novu/shared';
+import type { IEmailProvider, ISmsProvider } from '@novu/stateless';
 
-import { GetWebhookSupportStatusCommand } from './get-webhook-support-status.command';
+import type { GetWebhookSupportStatusCommand } from './get-webhook-support-status.command';
 
 @Injectable({ scope: Scope.REQUEST })
 export class GetWebhookSupportStatus {

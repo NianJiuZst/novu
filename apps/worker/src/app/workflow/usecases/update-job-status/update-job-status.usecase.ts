@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { JobRepository } from '@novu/dal';
 import { InstrumentUsecase } from '@novu/application-generic';
+import type { JobRepository } from '@novu/dal';
 
-import { UpdateJobStatusCommand } from './update-job-status.command';
+import type { UpdateJobStatusCommand } from './update-job-status.command';
 
 @Injectable()
 export class UpdateJobStatus {

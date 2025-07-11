@@ -1,23 +1,22 @@
-import React, { useEffect, useState } from 'react';
-
-import { useLocation, useParams } from 'react-router-dom';
-
-import { Popover } from '@novu/design-system';
 import styled from '@emotion/styled';
+import { Popover } from '@novu/design-system';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
+import { ROUTES } from '../../../constants/routes';
+import { OnBoardingAnalyticsEnum } from '../../../pages/quick-start/consts';
+import { parseUrl } from '../../../utils/routeUtils';
+import { useSegment } from '../../providers/SegmentProvider';
+import { NodeStep } from '../../workflow';
 import {
-  guidePreview,
-  guidePlayground,
   GuideTitleEnum,
-  IBeat,
+  guidePlayground,
+  guidePreview,
   HINT_MIDDLE_OPACITY,
   HINT_VISIBLE_OPACITY,
+  type IBeat,
 } from './consts';
-import { ROUTES } from '../../../constants/routes';
-import { parseUrl } from '../../../utils/routeUtils';
-import { OnBoardingAnalyticsEnum } from '../../../pages/quick-start/consts';
-import { useSegment } from '../../providers/SegmentProvider';
 import { useDigestDemoFlowContext } from './DigestDemoFlowProvider';
-import { NodeStep } from '../../workflow';
 
 const getOpacity = (id: string, hoveredHintId?: string, sequence?: { opacity: number }): number => {
   if (hoveredHintId) {

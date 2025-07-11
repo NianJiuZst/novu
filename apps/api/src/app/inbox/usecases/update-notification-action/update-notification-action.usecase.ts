@@ -1,12 +1,12 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { AnalyticsService, buildFeedKey, InvalidateCacheService } from '@novu/application-generic';
-import { MessageEntity, MessageRepository } from '@novu/dal';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { type AnalyticsService, buildFeedKey, type InvalidateCacheService } from '@novu/application-generic';
+import type { MessageEntity, MessageRepository } from '@novu/dal';
 import { ButtonTypeEnum } from '@novu/shared';
 
-import { GetSubscriber } from '../../../subscribers/usecases/get-subscriber';
+import type { GetSubscriber } from '../../../subscribers/usecases/get-subscriber';
 import { AnalyticsEventsEnum } from '../../utils';
 import { mapToDto } from '../../utils/notification-mapper';
-import { InboxNotification } from '../../utils/types';
+import type { InboxNotification } from '../../utils/types';
 import type { UpdateNotificationActionCommand } from './update-notification-action.command';
 
 @Injectable()

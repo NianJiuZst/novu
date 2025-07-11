@@ -1,15 +1,15 @@
 import { useClipboard } from '@mantine/hooks';
-import { successMessage, errorMessage } from '@novu/design-system';
-import { IResponseError, checkIsResponseError } from '@novu/shared';
+import { errorMessage, successMessage } from '@novu/design-system';
+import { checkIsResponseError, type IResponseError } from '@novu/shared';
 import { useMutation } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { MAIL_SERVER_DOMAIN } from '../../../config';
-import { useEnvironment, useEffectOnce } from '../../../hooks';
 import { updateDnsSettings } from '../../../api';
 import { validateMxRecord } from '../../../api/inbound-parse';
+import { MAIL_SERVER_DOMAIN } from '../../../config';
+import { useEffectOnce, useEnvironment } from '../../../hooks';
 import { getWebhookClaimStatusFromEnvironment } from './getWebhookClaimStatusFromEnvironment';
-import { WebhookClaimStatus } from './WebhookPage.types';
+import type { WebhookClaimStatus } from './WebhookPage.types';
 
 export const useWebhookPage = () => {
   const mailServerDomain = `10 ${MAIL_SERVER_DOMAIN}`;

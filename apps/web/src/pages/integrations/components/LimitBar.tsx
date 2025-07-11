@@ -1,8 +1,8 @@
 import styled from '@emotion/styled/macro';
 import { Stack, useMantineColorScheme } from '@mantine/core';
+import { colors, Text } from '@novu/design-system';
 import { ChannelTypeEnum } from '@novu/shared';
 import { Link } from 'react-router-dom';
-import { colors, Text } from '@novu/design-system';
 import { When } from '../../../components/utils/When';
 
 const WARNING_LIMIT = {

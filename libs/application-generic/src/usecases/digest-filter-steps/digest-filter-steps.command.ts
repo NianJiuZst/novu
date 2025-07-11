@@ -1,12 +1,6 @@
-import {
-  IsBoolean,
-  IsDefined,
-  IsMongoId,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { NotificationStepEntity } from '@novu/dal';
-import { DigestTypeEnum } from '@novu/shared';
+import type { NotificationStepEntity } from '@novu/dal';
+import type { DigestTypeEnum } from '@novu/shared';
+import { IsBoolean, IsDefined, IsMongoId, IsOptional, IsString } from 'class-validator';
 
 import { EnvironmentWithUserCommand } from '../../commands/project.command';
 

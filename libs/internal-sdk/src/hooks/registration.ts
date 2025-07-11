@@ -1,5 +1,5 @@
-import { Hooks } from "./types.js";
-import {NovuCustomHook} from "./novu-custom-hook.js";
+import { NovuCustomHook } from './novu-custom-hook.js';
+import type { Hooks } from './types.js';
 
 /*
  * This file is only ever generated once on the first generation and then is free to be modified.
@@ -8,7 +8,7 @@ import {NovuCustomHook} from "./novu-custom-hook.js";
  */
 
 export function initHooks(hooks: Hooks) {
-    hooks.registerAfterSuccessHook(new NovuCustomHook())
-    hooks.registerBeforeRequestHook(new NovuCustomHook())
-    hooks.registerBeforeCreateRequestHook(new NovuCustomHook())
+  hooks.registerAfterSuccessHook(new NovuCustomHook());
+  hooks.registerBeforeRequestHook(new NovuCustomHook());
+  hooks.registerBeforeCreateRequestHook(new NovuCustomHook());
 }

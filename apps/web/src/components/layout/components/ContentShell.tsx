@@ -1,5 +1,5 @@
-import { styled } from '@novu/novui/jsx';
 import { cva } from '@novu/novui/css';
+import { styled } from '@novu/novui/jsx';
 
 export const ContentShell = styled(
   'div',

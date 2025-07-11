@@ -1,6 +1,6 @@
-import { ISubscriber } from '@novu/shared';
-import { IsOptional, IsString } from 'class-validator';
 import { CursorBasedPaginatedCommand } from '@novu/application-generic';
+import type { ISubscriber } from '@novu/shared';
+import { IsOptional, IsString } from 'class-validator';
 
 export class ListSubscribersCommand extends CursorBasedPaginatedCommand<ISubscriber, 'updatedAt' | '_id'> {
   @IsString()

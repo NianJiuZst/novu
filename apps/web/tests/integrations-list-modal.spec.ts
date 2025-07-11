@@ -21,7 +21,7 @@ import {
   interceptIntegrationsRequest,
   navigateToGetStarted,
 } from './utils/integrations';
-import { deleteProvider, SessionData } from './utils/plugins';
+import { deleteProvider, type SessionData } from './utils/plugins';
 
 let session: SessionData;
 test.beforeEach(async ({ page }) => {

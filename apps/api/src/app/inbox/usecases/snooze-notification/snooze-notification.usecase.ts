@@ -1,19 +1,19 @@
-import { Injectable, NotFoundException, InternalServerErrorException, HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import {
-  AnalyticsService,
-  CreateExecutionDetails,
+  type AnalyticsService,
+  type CreateExecutionDetails,
   CreateExecutionDetailsCommand,
   DetailEnum,
-  StandardQueueService,
-  PinoLogger,
+  type PinoLogger,
+  type StandardQueueService,
 } from '@novu/application-generic';
 import {
-  JobEntity,
+  type CommunityOrganizationRepository,
+  type JobEntity,
   JobRepository,
-  MessageRepository,
-  MessageEntity,
-  OrganizationEntity,
-  CommunityOrganizationRepository,
+  type MessageEntity,
+  type MessageRepository,
+  type OrganizationEntity,
 } from '@novu/dal';
 import {
   ApiServiceLevelEnum,
@@ -25,11 +25,11 @@ import {
   JobStatusEnum,
 } from '@novu/shared';
 import { v4 as uuidv4 } from 'uuid';
-import { SnoozeNotificationCommand } from './snooze-notification.command';
-import { MarkNotificationAs } from '../mark-notification-as/mark-notification-as.usecase';
-import { MarkNotificationAsCommand } from '../mark-notification-as/mark-notification-as.command';
-import { InboxNotification } from '../../utils/types';
 import { AnalyticsEventsEnum } from '../../utils';
+import type { InboxNotification } from '../../utils/types';
+import { MarkNotificationAsCommand } from '../mark-notification-as/mark-notification-as.command';
+import type { MarkNotificationAs } from '../mark-notification-as/mark-notification-as.usecase';
+import type { SnoozeNotificationCommand } from './snooze-notification.command';
 
 @Injectable()
 export class SnoozeNotification {

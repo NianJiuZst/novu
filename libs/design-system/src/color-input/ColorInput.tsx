@@ -1,7 +1,7 @@
+import { type ColorInputProps, ColorInput as MantineColorInput } from '@mantine/core';
 import React from 'react';
-import { ColorInput as MantineColorInput, ColorInputProps } from '@mantine/core';
 import { inputStyles } from '../config/inputs.styles';
-import { SpacingProps } from '../shared/spacing.props';
+import type { SpacingProps } from '../shared/spacing.props';
 
 const defaultSwatchColors: string[] = [
   '#f47373',

@@ -1,7 +1,7 @@
-import { Group, createStyles } from '@mantine/core';
+import { createStyles, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
-import { Text, CurlyBrackets, ActionButton, Popover } from '@novu/design-system';
+import { ActionButton, CurlyBrackets, Popover, Text } from '@novu/design-system';
 
 import { useStepFormPath } from '../hooks/useStepFormPath';
 import { VariablesManagement } from './email-editor/variables-management/VariablesManagement';

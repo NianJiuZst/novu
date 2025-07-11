@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { MessageTemplateEntity, MessageTemplateRepository } from '@novu/dal';
+import type { MessageTemplateEntity, MessageTemplateRepository } from '@novu/dal';
 
-import { FindMessageTemplatesByLayoutCommand } from './find-message-templates-by-layout.command';
+import type { FindMessageTemplatesByLayoutCommand } from './find-message-templates-by-layout.command';
 
 const DEFAULT_PAGE_SIZE = 100;
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 /* eslint-disable */
 export function ErrorIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (

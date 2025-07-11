@@ -1,5 +1,5 @@
-import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
-import type { IResponseError, INotificationTemplate, IUpdateNotificationTemplateDto } from '@novu/shared';
+import type { INotificationTemplate, IResponseError, IUpdateNotificationTemplateDto } from '@novu/shared';
+import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { updateTemplate } from '../../notification-templates';
 import { QueryKeys } from '../../query.keys';

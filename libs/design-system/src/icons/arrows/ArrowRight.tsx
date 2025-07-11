@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 /* eslint-disable max-len */
 export const ArrowRight = (props: React.ComponentPropsWithoutRef<'svg'>) => {

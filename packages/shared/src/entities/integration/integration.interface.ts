@@ -1,5 +1,5 @@
-import { ChannelTypeEnum, OrganizationId, EnvironmentId, IPreviousStepFilterPart } from '../../types';
-import { ICredentials } from './credential.interface';
+import type { ChannelTypeEnum, EnvironmentId, IPreviousStepFilterPart, OrganizationId } from '../../types';
+import type { ICredentials } from './credential.interface';
 
 export interface IIntegration {
   _id: string;

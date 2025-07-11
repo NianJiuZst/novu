@@ -1,12 +1,12 @@
 import { Center, Loader, useMantineTheme } from '@mantine/core';
 import { colors, errorMessage, successMessage } from '@novu/design-system';
 import { useEffect, useState } from 'react';
-import { PlanSwitcher } from './PlanSwitcher';
-import { useSubscriptionContext } from './SubscriptionProvider';
 import { ActivePlanBanner } from './ActivePlanBanner';
-import { PlansRow } from './PlansRow';
-import { HighlightsRow } from './HighlightsRow';
 import { Features } from './Features';
+import { HighlightsRow } from './HighlightsRow';
+import { PlanSwitcher } from './PlanSwitcher';
+import { PlansRow } from './PlansRow';
+import { useSubscriptionContext } from './SubscriptionProvider';
 
 export const Plan = () => {
   const theme = useMantineTheme();

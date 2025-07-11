@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { HandlebarHelpers } from '@novu/shared';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 import { getWorkflowVariables } from '../../notification-templates';
 
@@ -25,32 +25,28 @@ export const useWorkflowVariables = () => {
   });
 
   const allVariables: IVariable[] = useMemo(() => {
-    const systemVars = Object.keys(variables)
-      .map((key) => {
-        const subVariables = variables[key];
+    const systemVars = Object.keys(variables).flatMap((key) => {
+      const subVariables = variables[key];
 
-        return Object.keys(subVariables)
-          .map((name) => {
-            const type = subVariables[name];
-            if (typeof type === 'object') {
-              return Object.keys(type).map((subName) => {
-                return {
-                  label: `${key === 'translations' ? 'i18n ' : ''}${name}.${subName}`,
-                  detail: type[subName],
-                  insertText: getTextToInsert(`${name}.${subName}`, key),
-                };
-              });
-            }
-
+      return Object.keys(subVariables).flatMap((name) => {
+        const type = subVariables[name];
+        if (typeof type === 'object') {
+          return Object.keys(type).map((subName) => {
             return {
-              label: `${key === 'translations' ? 'i18n ' : ''}${name}`,
-              detail: type,
-              insertText: getTextToInsert(name, key),
+              label: `${key === 'translations' ? 'i18n ' : ''}${name}.${subName}`,
+              detail: type[subName],
+              insertText: getTextToInsert(`${name}.${subName}`, key),
             };
-          })
-          .flat();
-      })
-      .flat();
+          });
+        }
+
+        return {
+          label: `${key === 'translations' ? 'i18n ' : ''}${name}`,
+          detail: type,
+          insertText: getTextToInsert(name, key),
+        };
+      });
+    });
 
     return [
       ...Object.keys(HandlebarHelpers).map((name) => ({

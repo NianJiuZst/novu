@@ -1,10 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
 import { ChannelTypeEnum } from '@novu/shared';
-
-import { getWebhookSupportStatus } from '../integration';
+import { useQuery } from '@tanstack/react-query';
 import { IS_SELF_HOSTED, WEBHOOK_URL } from '../../config';
 import { useEnvironment } from '../../hooks';
 import { useAuth } from '../../hooks/useAuth';
+import { getWebhookSupportStatus } from '../integration';
 
 export const useWebhookSupportStatus = ({
   hasCredentials,

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { OrganizationRepository } from '@novu/dal';
-import { RenameOrganizationCommand } from './rename-organization-command';
+import type { OrganizationRepository } from '@novu/dal';
+import type { RenameOrganizationCommand } from './rename-organization-command';
 
 @Injectable()
 export class RenameOrganization {

@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
-  AnalyticsService,
+  type AnalyticsService,
+  GetLayoutCommand,
+  type GetLayoutUseCase,
   InstrumentUsecase,
   UpsertControlValuesCommand,
-  UpsertControlValuesUseCase,
-  GetLayoutCommand,
-  GetLayoutUseCase,
+  type UpsertControlValuesUseCase,
 } from '@novu/application-generic';
-import { ControlValuesRepository, LayoutRepository } from '@novu/dal';
+import type { ControlValuesRepository, LayoutRepository } from '@novu/dal';
 import {
   ControlValuesLevelEnum,
   LAYOUT_CONTENT_VARIABLE,
@@ -15,20 +15,19 @@ import {
   ResourceTypeEnum,
   slugify,
 } from '@novu/shared';
-
-import { LayoutResponseDto } from '../../dtos';
-import { UpsertLayoutCommand } from './upsert-layout.command';
-import { hasMailyVariable, isStringifiedMailyJSONContent } from '../../../shared/helpers/maily-utils';
+import type { LayoutDto } from '../../../layouts-v1/dtos';
 import {
   CreateLayoutCommand,
-  CreateLayoutUseCase,
+  type CreateLayoutUseCase,
   UpdateLayoutCommand,
-  UpdateLayoutUseCase,
+  type UpdateLayoutUseCase,
 } from '../../../layouts-v1/usecases';
-import { mapToResponseDto } from '../mapper';
-import { LayoutVariablesSchemaUseCase } from '../layout-variables-schema';
+import { hasMailyVariable, isStringifiedMailyJSONContent } from '../../../shared/helpers/maily-utils';
+import type { LayoutResponseDto } from '../../dtos';
+import type { LayoutVariablesSchemaUseCase } from '../layout-variables-schema';
 import { LayoutVariablesSchemaCommand } from '../layout-variables-schema/layout-variables-schema.command';
-import { LayoutDto } from '../../../layouts-v1/dtos';
+import { mapToResponseDto } from '../mapper';
+import type { UpsertLayoutCommand } from './upsert-layout.command';
 
 @Injectable()
 export class UpsertLayoutUseCase {

@@ -1,17 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
 import styled from '@emotion/styled';
-import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip } from 'chart.js';
-import { Bar, getElementAtEvent } from 'react-chartjs-2';
-import { useEffect, useState, useRef, useMemo } from 'react';
 import { useMantineTheme } from '@mantine/core';
-import cloneDeep from 'lodash.clonedeep';
+import { useQuery } from '@tanstack/react-query';
+import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip } from 'chart.js';
 import { differenceInDays, format, isSameDay, subDays } from 'date-fns';
-
-import { MessageContainer } from './MessageContainer';
-import { ActivityGraphGlobalStyles } from './ActivityGraphGlobalStyles';
+import cloneDeep from 'lodash.clonedeep';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Bar, getElementAtEvent } from 'react-chartjs-2';
 import { getActivityGraphStats } from '../../../api/activity';
-import { IActivityGraphStats } from '../interfaces';
-import { getOptions, getChartData } from '../services';
+import type { IActivityGraphStats } from '../interfaces';
+import { getChartData, getOptions } from '../services';
+import { ActivityGraphGlobalStyles } from './ActivityGraphGlobalStyles';
+import { MessageContainer } from './MessageContainer';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 

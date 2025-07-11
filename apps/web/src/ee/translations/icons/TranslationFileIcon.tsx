@@ -1,5 +1,5 @@
-import React from 'react';
 import { useMantineColorScheme } from '@mantine/core';
+import React from 'react';
 
 export const TranslationFileIcon = (props) => {
   const { colorScheme } = useMantineColorScheme();

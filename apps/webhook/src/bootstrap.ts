@@ -1,5 +1,5 @@
 import './instrument';
-import { INestApplication } from '@nestjs/common';
+import type { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { getErrorInterceptor, Logger } from '@novu/application-generic';
 

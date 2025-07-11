@@ -1,15 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Select, successMessage, Tooltip, When } from '@novu/design-system';
+import { css } from '@novu/novui/css';
+import type { IOrganizationEntity, IResponseError } from '@novu/shared';
 import { useMutation } from '@tanstack/react-query';
 import capitalize from 'lodash.capitalize';
-import type { IResponseError, IOrganizationEntity } from '@novu/shared';
-import { Select, Tooltip, When, successMessage } from '@novu/design-system';
-import { css } from '@novu/novui/css';
-import { COMPANY_LOGO_PATH } from '../../../constants/assets';
-import { arrowStyles, navSelectStyles, tooltipStyles } from '../NavSelect.styles';
-import { useAuth } from '../../providers/AuthProvider';
+import { useEffect, useMemo, useState } from 'react';
 import { addOrganization } from '../../../api/organization';
-import { useSpotlightContext } from '../../providers/SpotlightProvider';
+import { COMPANY_LOGO_PATH } from '../../../constants/assets';
 import { useOrganizations } from '../../../hooks/useOrganizations';
+import { useAuth } from '../../providers/AuthProvider';
+import { useSpotlightContext } from '../../providers/SpotlightProvider';
+import { arrowStyles, navSelectStyles, tooltipStyles } from '../NavSelect.styles';
 
 export function OrganizationSelect() {
   const [canShowTooltip, setCanShowTooltip] = useState<boolean>(false);

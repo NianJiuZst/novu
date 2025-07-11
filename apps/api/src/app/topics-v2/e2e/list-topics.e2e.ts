@@ -1,6 +1,6 @@
-import { Novu } from '@novu/api';
-import { SubscriberEntity } from '@novu/dal';
-import { ExternalSubscriberId, TopicKey } from '@novu/shared';
+import type { Novu } from '@novu/api';
+import type { SubscriberEntity } from '@novu/dal';
+import type { ExternalSubscriberId, TopicKey } from '@novu/shared';
 import { SubscribersService, UserSession } from '@novu/testing';
 import { expect } from 'chai';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';

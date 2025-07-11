@@ -1,30 +1,36 @@
-import { useForm, Controller, useFieldArray } from 'react-hook-form';
-import { ActionIcon, Center, Grid, Group, Modal, Title, useMantineTheme } from '@mantine/core';
-import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
 import { parse } from '@handlebars/parser';
+import { ActionIcon, Center, Grid, Group, Modal, Title, useMantineTheme } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import { getTemplateVariables, ITemplateVariable, isReservedVariableName, LayoutId, slugify } from '@novu/shared';
 import {
   ArrowLeft,
-  Check,
-  Copy,
   Button,
+  Check,
   Checkbox,
+  Copy,
   colors,
   Input,
-  Text,
   LoadingOverlay,
   shadows,
+  Text,
   Tooltip,
 } from '@novu/design-system';
+import {
+  getTemplateVariables,
+  type ITemplateVariable,
+  isReservedVariableName,
+  type LayoutId,
+  slugify,
+} from '@novu/shared';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { QueryKeys } from '../../api/query.keys';
 import { useEnvironment, useLayoutsEditor, usePrompt } from '../../hooks';
 import { errorMessage, successMessage } from '../../utils/notifications';
-import { QueryKeys } from '../../api/query.keys';
+import { CustomCodeEditor } from '../templates/components/CustomCodeEditor';
 import { VariablesManagement } from '../templates/components/email-editor/variables-management/VariablesManagement';
 import { UnsavedChangesModal } from '../templates/components/UnsavedChangesModal';
 import { VariableManager } from '../templates/components/VariableManager';
-import { CustomCodeEditor } from '../templates/components/CustomCodeEditor';
 
 interface ILayoutForm {
   content: string;

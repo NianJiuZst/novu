@@ -1,13 +1,12 @@
 import { Drawer, Loader, Stack } from '@mantine/core';
-import { useKeyDown } from '../hooks/useKeyDown';
-
 import { ActionButton } from '../button/ActionButton';
 import { colors } from '../config';
+import { useKeyDown } from '../hooks/useKeyDown';
 import { ArrowLeft } from '../icons';
 import { When } from '../when';
 import { Close } from './Close';
-import { BodyHolder, FooterHolder, HeaderHolder, Form, useDrawerStyles } from './Sidebar.styles';
-import { ISidebarBaseProps } from './Sidebar.types';
+import { BodyHolder, FooterHolder, Form, HeaderHolder, useDrawerStyles } from './Sidebar.styles';
+import type { ISidebarBaseProps } from './Sidebar.types';
 
 export interface ISidebarProps extends ISidebarBaseProps {
   onSubmit?: React.FormEventHandler<HTMLFormElement>;

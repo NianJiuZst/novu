@@ -1,4 +1,4 @@
-import { InboxService } from './api';
+import type { InboxService } from './api';
 import { BaseModule } from './base-module';
 import { NovuEventEmitter } from './event-emitter';
 

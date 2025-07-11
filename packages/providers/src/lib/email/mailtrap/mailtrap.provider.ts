@@ -1,15 +1,15 @@
 import { EmailProviderIdEnum } from '@novu/shared';
 import {
   ChannelTypeEnum,
-  ISendMessageSuccessResponse,
-  IEmailOptions,
-  IEmailProvider,
-  ICheckIntegrationResponse,
   CheckIntegrationResponseEnum,
+  type ICheckIntegrationResponse,
+  type IEmailOptions,
+  type IEmailProvider,
+  type ISendMessageSuccessResponse,
 } from '@novu/stateless';
-import { MailtrapClient, Address, Mail, Attachment } from 'mailtrap';
+import { type Address, Attachment, type Mail, MailtrapClient } from 'mailtrap';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export class MailtrapEmailProvider extends BaseProvider implements IEmailProvider {
   id = EmailProviderIdEnum.Mailtrap;

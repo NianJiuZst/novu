@@ -1,9 +1,7 @@
+import type { ISubscriber } from '@novu/shared';
 import { useQuery } from '@tanstack/react-query';
-import { ISubscriber } from '@novu/shared';
-
-import { useEnvironment } from './useEnvironment';
-
 import { getSubscribersList } from '../api/subscribers';
+import { useEnvironment } from './useEnvironment';
 
 export function useSubscribers(page = 0, limit = 10) {
   const { environment } = useEnvironment();

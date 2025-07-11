@@ -1,4 +1,4 @@
-import { JSONSchema } from './json-schema';
+import type { JSONSchema } from './json-schema';
 
 export interface IStepControl {
   schema: JSONSchema;

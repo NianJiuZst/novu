@@ -1,12 +1,12 @@
 import { SignedIn, SignedOut } from '@clerk/clerk-react';
 import { Navigate, Route } from 'react-router-dom';
+import { PrivatePageLayout } from '../../components/layout/components/PrivatePageLayout';
 import { PublicPageLayout } from '../../components/layout/components/PublicPageLayout';
 import { ROUTES } from '../../constants/routes';
-import OrganizationListPage from './pages/OrganizationListPage';
 import ManageAccountPage from './pages/ManageAccountPage';
+import OrganizationListPage from './pages/OrganizationListPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
-import { PrivatePageLayout } from '../../components/layout/components/PrivatePageLayout';
 
 const EnterprisePublicAuthLayout = () => {
   return (

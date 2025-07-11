@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { EnvironmentRepository, MemberRepository, UserRepository } from '@novu/dal';
-import { AuthService } from '../../services/auth.service';
-import { SwitchEnvironmentCommand } from './switch-environment.command';
+import type { EnvironmentRepository, MemberRepository, UserRepository } from '@novu/dal';
+import type { AuthService } from '../../services/auth.service';
+import type { SwitchEnvironmentCommand } from './switch-environment.command';
 
 @Injectable()
 export class SwitchEnvironment {

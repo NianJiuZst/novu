@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { TenantRepository } from '@novu/dal';
-import { GetTenantCommand } from './get-tenant.command';
+import type { TenantRepository } from '@novu/dal';
+import type { GetTenantCommand } from './get-tenant.command';
 
 @Injectable()
 export class GetTenant {
@@ -14,7 +14,7 @@ export class GetTenant {
 
     if (!tenant) {
       throw new NotFoundException(
-        `Tenant with identifier: ${command.identifier} does not exist under environment ${command.environmentId}`,
+        `Tenant with identifier: ${command.identifier} does not exist under environment ${command.environmentId}`
       );
     }
 

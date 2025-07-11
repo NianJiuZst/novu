@@ -1,11 +1,10 @@
-import { LayoutRepository } from '@novu/dal';
 import { Injectable } from '@nestjs/common';
-import { GetNovuLayout } from '@novu/application-generic';
-
-import { CreateDefaultLayoutCommand } from './create-default-layout.command';
-import { SetDefaultLayoutUseCase } from '../set-default-layout';
-import { LayoutDto } from '../../dtos';
-import { CreateLayoutCommand, CreateLayoutUseCase } from '../create-layout';
+import type { GetNovuLayout } from '@novu/application-generic';
+import type { LayoutRepository } from '@novu/dal';
+import type { LayoutDto } from '../../dtos';
+import { CreateLayoutCommand, type CreateLayoutUseCase } from '../create-layout';
+import type { SetDefaultLayoutUseCase } from '../set-default-layout';
+import type { CreateDefaultLayoutCommand } from './create-default-layout.command';
 
 @Injectable()
 export class CreateDefaultLayout {

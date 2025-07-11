@@ -1,2 +1,2 @@
-export * from './ChatPreview';
 export { ChatBasePreview } from './ChatBasePreview';
+export * from './ChatPreview';

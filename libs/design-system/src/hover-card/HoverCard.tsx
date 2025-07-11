@@ -1,4 +1,4 @@
-import { HoverCard as MantineHoverCard, HoverCardProps } from '@mantine/core';
+import { type HoverCardProps, HoverCard as MantineHoverCard } from '@mantine/core';
 
 /**
  * HoverCard component

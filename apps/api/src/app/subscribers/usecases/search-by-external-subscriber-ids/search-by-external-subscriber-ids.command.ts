@@ -1,4 +1,4 @@
-import { ExternalSubscriberId } from '@novu/shared';
+import type { ExternalSubscriberId } from '@novu/shared';
 import { IsArray, IsDefined } from 'class-validator';
 
 import { EnvironmentCommand } from '../../../shared/commands/project.command';

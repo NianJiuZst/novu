@@ -1,8 +1,7 @@
-import { IEnvironment, providers } from '@novu/shared';
-
-import type { IntegrationEntity, ITableIntegration } from './types';
+import { type IEnvironment, providers } from '@novu/shared';
 import { CONTEXT_PATH } from '../../config';
 import { CHANNEL_TYPE_TO_STRING } from '../../utils/channels';
+import type { IntegrationEntity, ITableIntegration } from './types';
 
 export const mapToTableIntegration = (
   integration: IntegrationEntity,

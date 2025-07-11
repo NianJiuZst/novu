@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { IPaginationProps, PageContainer, Pagination, colors, ITableProps } from '@novu/design-system';
-import { ComponentProps, PropsWithChildren } from 'react';
+import { colors, type IPaginationProps, type ITableProps, PageContainer, Pagination } from '@novu/design-system';
+import type { ComponentProps, PropsWithChildren } from 'react';
 import PageHeader from './PageHeader';
 
 // values directly from designs -- see comment below about why they're necessary
@@ -23,9 +23,9 @@ const StickyFooter = styled.footer`
   border-width: ${FOOTER_FADE_OVERLAY_HEIGHT_PX}px 0 0 0;
   border-style: solid;
   border-image: ${({ theme }) =>
-      theme.colorScheme === 'dark'
-        ? `linear-gradient(0deg, ${colors.B15}FF 0%, ${colors.B15}00 100%)`
-        : `linear-gradient(0deg, ${colors.white}FF 0%, ${colors.white}00 100%)`}
+    theme.colorScheme === 'dark'
+      ? `linear-gradient(0deg, ${colors.B15}FF 0%, ${colors.B15}00 100%)`
+      : `linear-gradient(0deg, ${colors.white}FF 0%, ${colors.white}00 100%)`}
     100% 0 0 0;
 
   /* TODO: use theme values */

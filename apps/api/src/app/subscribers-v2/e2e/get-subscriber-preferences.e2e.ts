@@ -1,9 +1,9 @@
+import type { Novu } from '@novu/api';
+import type { SubscriberResponseDto } from '@novu/api/models/components';
+import type { NotificationTemplateEntity } from '@novu/dal';
+import { UserSession } from '@novu/testing';
 import { expect } from 'chai';
 import { randomBytes } from 'crypto';
-import { UserSession } from '@novu/testing';
-import { NotificationTemplateEntity } from '@novu/dal';
-import { SubscriberResponseDto } from '@novu/api/models/components';
-import { Novu } from '@novu/api';
 import { expectSdkExceptionGeneric, initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
 let session: UserSession;

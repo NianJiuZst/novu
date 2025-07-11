@@ -1,5 +1,5 @@
-import { IsDefined, IsEmail, IsOptional, MinLength, Matches, MaxLength, IsString, IsEnum } from 'class-validator';
-import { JobTitleEnum, passwordConstraints, ProductUseCases, SignUpOriginEnum } from '@novu/shared';
+import { JobTitleEnum, type ProductUseCases, passwordConstraints, SignUpOriginEnum } from '@novu/shared';
+import { IsDefined, IsEmail, IsEnum, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class UserRegistrationBodyDto {
   @IsDefined()

@@ -1,18 +1,17 @@
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Group } from '@mantine/core';
 import styled from '@emotion/styled';
-import { useFormContext } from 'react-hook-form';
-
+import { Group } from '@mantine/core';
 import { Button, colors, Trash } from '@novu/design-system';
-import { NotificationSettingsForm } from './notification-setting-form/NotificationSettingsForm';
-import { DeleteConfirmModal } from './DeleteConfirmModal';
-import { useEnvironment } from '../../../hooks';
-import { useTemplateEditorForm } from './TemplateEditorFormProvider';
+import { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { useNavigate, useParams } from 'react-router-dom';
 import { deleteTemplateById } from '../../../api/notification-templates';
 import { ROUTES } from '../../../constants/routes';
+import { useEnvironment } from '../../../hooks';
+import { DeleteConfirmModal } from './DeleteConfirmModal';
+import type { IForm } from './formTypes';
+import { NotificationSettingsForm } from './notification-setting-form/NotificationSettingsForm';
+import { useTemplateEditorForm } from './TemplateEditorFormProvider';
 import { WorkflowSettingsTabs } from './WorkflowSettingsTabs';
-import { IForm } from './formTypes';
 import { WorkflowSidebar } from './WorkflowSidebar';
 
 export const TemplateSettings = () => {

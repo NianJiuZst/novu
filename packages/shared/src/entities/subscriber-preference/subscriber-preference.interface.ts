@@ -1,5 +1,5 @@
-import { ChannelTypeEnum, PreferenceOverrideSourceEnum, PreferencesTypeEnum } from '../../types';
-import { INotificationTrigger } from '../notification-trigger';
+import { type ChannelTypeEnum, PreferenceOverrideSourceEnum, type PreferencesTypeEnum } from '../../types';
+import type { INotificationTrigger } from '../notification-trigger';
 
 export interface IPreferenceChannels {
   email?: boolean;

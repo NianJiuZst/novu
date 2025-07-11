@@ -1,7 +1,7 @@
-import { Accessor, ComponentProps, createSignal, Setter } from 'solid-js';
-import { MountableElement, render } from 'solid-js/web';
+import { type Accessor, type ComponentProps, createSignal, type Setter } from 'solid-js';
+import { type MountableElement, render } from 'solid-js/web';
 import type { NovuOptions } from '../types';
-import { NovuComponent, NovuComponentName, novuComponents, Renderer } from './components/Renderer';
+import { type NovuComponent, type NovuComponentName, type novuComponents, Renderer } from './components/Renderer';
 import { generateRandomString } from './helpers';
 import type {
   Appearance,
@@ -17,7 +17,7 @@ import type {
 export type NovuUIOptions = NovuProviderProps;
 export type BaseNovuUIOptions = BaseNovuProviderProps;
 export class NovuUI {
-  #dispose: { (): void } | null = null;
+  #dispose: (() => void) | null = null;
   #container: Accessor<Node | null | undefined>;
   #setContainer: Setter<Node | null | undefined>;
   #rootElement: HTMLElement;

@@ -1,9 +1,9 @@
+import { ApiServiceLevelEnum, type GetSubscriptionDto } from '@novu/shared';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
 import { differenceInDays, isSameDay } from 'date-fns';
-import { ApiServiceLevelEnum, GetSubscriptionDto } from '@novu/shared';
-import { useAuth } from '../../../hooks/useAuth';
+import { useMemo } from 'react';
 import { api } from '../../../api';
+import { useAuth } from '../../../hooks/useAuth';
 
 const today = new Date();
 

@@ -1,11 +1,11 @@
 import {
-  Accessor,
+  type Accessor,
   createContext,
   createEffect,
   createSignal,
-  JSX,
-  ParentProps,
-  Setter,
+  type JSX,
+  type ParentProps,
+  type Setter,
   splitProps,
   useContext,
 } from 'solid-js';

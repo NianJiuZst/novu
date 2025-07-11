@@ -1,5 +1,5 @@
-import { IsDefined, MinLength, Matches, MaxLength, IsUUID, IsEmail } from 'class-validator';
 import { passwordConstraints } from '@novu/shared';
+import { IsDefined, IsEmail, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class PasswordResetBodyDto {
   @IsDefined()

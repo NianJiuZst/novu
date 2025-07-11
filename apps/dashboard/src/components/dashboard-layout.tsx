@@ -1,26 +1,26 @@
-import type { ReactNode } from 'react';
-import { SideNavigation } from '@/components/side-navigation/side-navigation';
-import { HeaderNavigation } from '@/components/header-navigation/header-navigation';
+import type { ReactNode } from "react";
+import { HeaderNavigation } from "@/components/header-navigation/header-navigation";
+import { SideNavigation } from "@/components/side-navigation/side-navigation";
 
 export const DashboardLayout = ({
-  children,
-  headerStartItems,
-  showSideNavigation = true,
-  showBridgeUrl = true,
+	children,
+	headerStartItems,
+	showSideNavigation = true,
+	showBridgeUrl = true,
 }: {
-  children: ReactNode;
-  headerStartItems?: ReactNode;
-  showSideNavigation?: boolean;
-  showBridgeUrl?: boolean;
+	children: ReactNode;
+	headerStartItems?: ReactNode;
+	showSideNavigation?: boolean;
+	showBridgeUrl?: boolean;
 }) => {
-  return (
-    <div className="relative flex h-full w-full">
-      {showSideNavigation && <SideNavigation />}
-      <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-        <HeaderNavigation startItems={headerStartItems} hideBridgeUrl={!showBridgeUrl} />
+	return (
+		<div className="relative flex h-full w-full">
+			{showSideNavigation && <SideNavigation />}
+			<div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+				<HeaderNavigation startItems={headerStartItems} hideBridgeUrl={!showBridgeUrl} />
 
-        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">{children}</div>
-      </div>
-    </div>
-  );
+				<div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">{children}</div>
+			</div>
+		</div>
+	);
 };

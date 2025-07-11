@@ -1,27 +1,27 @@
-import React, { useEffect, useMemo } from 'react';
-import { Skeleton, TableProps, Table as MantineTable, Pagination, Button } from '@mantine/core';
 import styled from '@emotion/styled';
+import { Button, Table as MantineTable, Pagination, Skeleton, type TableProps } from '@mantine/core';
+import type React from 'react';
+import { useEffect, useMemo } from 'react';
 import {
-  useTable,
-  Column,
+  type CellProps,
+  type Column,
+  type IdType,
+  type Row,
+  type TableInstance,
+  type UsePaginationInstanceProps,
+  type UsePaginationState,
+  type UseRowSelectInstanceProps,
+  type UseRowSelectState,
   usePagination,
-  TableInstance,
-  UsePaginationInstanceProps,
-  UsePaginationState,
-  Row,
-  CellProps,
-  IdType,
   useRowSelect,
-  UseRowSelectInstanceProps,
-  UseRowSelectState,
+  useTable,
 } from 'react-table';
-import { useDataRef } from '../hooks/useDataRef';
-
-import useStyles from './Table.styles';
 import { colors } from '../config';
-import { DefaultCell } from './DefaultCell';
+import { useDataRef } from '../hooks/useDataRef';
 import { ChevronLeft, ChevronRight } from '../icons';
 import { Radio } from '../radio/Radio';
+import { DefaultCell } from './DefaultCell';
+import useStyles from './Table.styles';
 
 const NoDataPlaceholder = styled.div`
   padding: 0 30px;

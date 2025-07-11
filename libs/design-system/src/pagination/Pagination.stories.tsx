@@ -1,7 +1,7 @@
-import React from 'react';
-import { StoryFn, Meta } from '@storybook/react';
 import { useArgs } from '@storybook/client-api';
-import { Pagination, IPaginationProps } from './Pagination';
+import type { Meta, StoryFn } from '@storybook/react';
+import React from 'react';
+import { type IPaginationProps, Pagination } from './Pagination';
 
 export default {
   title: 'Components/Pagination',

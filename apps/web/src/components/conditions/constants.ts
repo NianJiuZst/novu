@@ -1,4 +1,4 @@
-import { FieldLogicalOperatorEnum, PreviousStepTypeEnum, TimeOperatorEnum, FieldOperatorEnum } from '@novu/shared';
+import { FieldLogicalOperatorEnum, FieldOperatorEnum, PreviousStepTypeEnum, TimeOperatorEnum } from '@novu/shared';
 
 export const DefaultTimeOperatorData = [
   { value: TimeOperatorEnum.MINUTES, label: 'Minutes' },

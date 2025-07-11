@@ -1,16 +1,15 @@
-import { PropsWithChildren, useMemo } from 'react';
 import styled from '@emotion/styled/macro';
-import { Title, Text, Grid, Stack, useMantineColorScheme, TextProps } from '@mantine/core';
-import { useMutation } from '@tanstack/react-query';
-import { Controller, useForm } from 'react-hook-form';
-import type { IResponseError, ICredentialsDto } from '@novu/shared';
+import { Grid, Stack, Text, type TextProps, Title, useMantineColorScheme } from '@mantine/core';
+import { Button, CircleArrowRight, colors, Switch } from '@novu/design-system';
+import type { ICredentialsDto, IResponseError } from '@novu/shared';
 import { UTM_CAMPAIGN_QUERY_PARAM } from '@novu/shared';
-import { Switch, Button, colors, CircleArrowRight } from '@novu/design-system';
-
-import { IIntegratedProvider } from '../types';
+import { useMutation } from '@tanstack/react-query';
+import { type PropsWithChildren, useMemo } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { updateIntegration } from '../../../api/integration';
 import { When } from '../../../components/utils/When';
 import { errorMessage, successMessage } from '../../../utils/notifications';
+import type { IIntegratedProvider } from '../types';
 
 export const NovuInAppForm = ({
   provider,

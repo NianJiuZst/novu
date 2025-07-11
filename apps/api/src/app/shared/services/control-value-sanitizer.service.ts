@@ -1,24 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import _ from 'lodash';
-import get from 'lodash/get';
-import Ajv, { ErrorObject } from 'ajv';
-import addFormats from 'ajv-formats';
-import { ResourceOriginEnum } from '@novu/shared';
 import {
   dashboardSanitizeControlValues,
   layoutControlSchema,
-  PinoLogger,
-  SanitizationType,
+  type PinoLogger,
+  type SanitizationType,
 } from '@novu/application-generic';
 import { actionStepSchemas, channelStepSchemas } from '@novu/framework/internal';
-import { JSONSchemaDto } from '../dtos/json-schema.dto';
+import { ResourceOriginEnum } from '@novu/shared';
+import Ajv, { type ErrorObject } from 'ajv';
+import addFormats from 'ajv-formats';
+import _ from 'lodash';
+import get from 'lodash/get';
+import { previewControlValueDefault } from '../../workflows-v2/usecases/preview/preview.constants';
+import type {
+  ControlValueProcessingResult,
+  PreviewTemplateData,
+} from '../../workflows-v2/usecases/preview/preview.types';
+import { replaceAll } from '../../workflows-v2/usecases/preview/utils/variable-helpers';
+import { buildVariables } from '../../workflows-v2/util/build-variables';
 import { buildLiquidParser } from '../../workflows-v2/util/template-parser/liquid-engine';
 import type { Variable } from '../../workflows-v2/util/template-parser/types';
-import { buildVariables } from '../../workflows-v2/util/build-variables';
-import { isStringifiedMailyJSONContent, isObjectMailyJSONContent, replaceMailyVariables } from '../helpers/maily-utils';
-import { previewControlValueDefault } from '../../workflows-v2/usecases/preview/preview.constants';
-import { replaceAll } from '../../workflows-v2/usecases/preview/utils/variable-helpers';
-import { PreviewTemplateData, ControlValueProcessingResult } from '../../workflows-v2/usecases/preview/preview.types';
+import type { JSONSchemaDto } from '../dtos/json-schema.dto';
+import { isObjectMailyJSONContent, isStringifiedMailyJSONContent, replaceMailyVariables } from '../helpers/maily-utils';
 
 @Injectable()
 export class ControlValueSanitizerService {

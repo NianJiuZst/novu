@@ -1,15 +1,21 @@
-import { ArgumentsHost, ExceptionFilter, HttpException, HttpStatus, PayloadTooLargeException } from '@nestjs/common';
-import { Response } from 'express';
-import { CommandValidationException, PinoLogger, RequestLogRepository } from '@novu/application-generic';
 import { randomUUID } from 'node:crypto';
-import { captureException } from '@sentry/node';
-import { ZodError } from 'zod';
+import {
+  type ArgumentsHost,
+  type ExceptionFilter,
+  HttpException,
+  HttpStatus,
+  PayloadTooLargeException,
+} from '@nestjs/common';
 import { InternalServerErrorException } from '@nestjs/common/exceptions/internal-server-error.exception';
-import { UserSessionData } from '@novu/shared';
-import { HttpArgumentsHost } from '@nestjs/common/interfaces';
-import { ErrorDto, ValidationErrorDto } from './error-dto';
-import { retryWithBackoff } from './utils/payload-sanitizer';
+import type { HttpArgumentsHost } from '@nestjs/common/interfaces';
+import { CommandValidationException, type PinoLogger, type RequestLogRepository } from '@novu/application-generic';
+import type { UserSessionData } from '@novu/shared';
+import { captureException } from '@sentry/node';
+import type { Response } from 'express';
+import { ZodError } from 'zod';
 import { buildLog } from './app/shared/utils/mappers';
+import type { ErrorDto, ValidationErrorDto } from './error-dto';
+import { retryWithBackoff } from './utils/payload-sanitizer';
 
 export const ERROR_MSG_500 = `Internal server error, contact support and provide them with the errorId`;
 

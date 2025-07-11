@@ -1,18 +1,18 @@
-import { ErrorBoundary } from '@sentry/react';
-import { Outlet, useLocation } from 'react-router-dom';
+import type { WithLoadingSkeleton } from '@novu/novui';
 import { css } from '@novu/novui/css';
-import { WithLoadingSkeleton } from '@novu/novui';
 import { Box } from '@novu/novui/jsx';
+import { ErrorBoundary } from '@sentry/react';
 import { useEffect } from 'react';
-import { LocalStudioHeader } from './LocalStudioHeader/LocalStudioHeader';
-import { LocalStudioSidebar } from './LocalStudioSidebar';
+import { Outlet, useLocation } from 'react-router-dom';
+import { useTelemetry } from '../../../hooks/useNovuAPI';
+import { WorkflowsDetailPage } from '../../../studio/components/workflows/index';
+import { useStudioState } from '../../../studio/hooks';
 import { isStudioOnboardingRoute } from '../../../studio/utils/routing';
+import { useSegment } from '../../providers/SegmentProvider';
 import { AppShell } from './AppShell';
 import { ContentShell } from './ContentShell';
-import { WorkflowsDetailPage } from '../../../studio/components/workflows/index';
-import { useTelemetry } from '../../../hooks/useNovuAPI';
-import { useStudioState } from '../../../studio/hooks';
-import { useSegment } from '../../providers/SegmentProvider';
+import { LocalStudioHeader } from './LocalStudioHeader/LocalStudioHeader';
+import { LocalStudioSidebar } from './LocalStudioSidebar';
 
 export const LocalStudioPageLayout: WithLoadingSkeleton = () => {
   const { pathname } = useLocation();

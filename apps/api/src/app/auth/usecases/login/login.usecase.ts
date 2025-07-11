@@ -1,11 +1,11 @@
-import bcrypt from 'bcrypt';
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import { differenceInMinutes, parseISO } from 'date-fns';
-import { UserRepository, UserEntity, OrganizationRepository } from '@novu/dal';
-import { AnalyticsService, createHash } from '@novu/application-generic';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { type AnalyticsService, createHash } from '@novu/application-generic';
+import type { OrganizationRepository, UserEntity, UserRepository } from '@novu/dal';
 import { normalizeEmail } from '@novu/shared';
-import { AuthService } from '../../services/auth.service';
-import { LoginCommand } from './login.command';
+import bcrypt from 'bcrypt';
+import { differenceInMinutes, parseISO } from 'date-fns';
+import type { AuthService } from '../../services/auth.service';
+import type { LoginCommand } from './login.command';
 
 @Injectable()
 export class Login {

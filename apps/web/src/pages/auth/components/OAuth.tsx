@@ -1,9 +1,9 @@
-import { Divider, Button as MantineButton } from '@mantine/core';
 import styled from '@emotion/styled';
+import { Divider, Button as MantineButton } from '@mantine/core';
 
 import { colors, GitHub, Text } from '@novu/design-system';
 
-import { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
 import { When } from '../../../components/utils/When';
 import { IS_SELF_HOSTED } from '../../../config';
 import { buildGithubLink } from './gitHubUtils';

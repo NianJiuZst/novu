@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import type { INotificationTemplate, IResponseError } from '@novu/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { IResponseError, INotificationTemplate } from '@novu/shared';
+import { useEffect, useState } from 'react';
 
 import { updateTemplateStatus } from '../../../api/notification-templates';
 import { QueryKeys } from '../../../api/query.keys';

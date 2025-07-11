@@ -1,10 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { LayoutEntity, LayoutRepository } from '@novu/dal';
-
-import { FindDeletedLayoutCommand } from './find-deleted-layout.command';
-
-import { LayoutDto } from '../../dtos';
-import { IEmailBlock, ITemplateVariable } from '../../types';
+import type { LayoutEntity, LayoutRepository } from '@novu/dal';
+import type { LayoutDto } from '../../dtos';
+import type { IEmailBlock, ITemplateVariable } from '../../types';
+import type { FindDeletedLayoutCommand } from './find-deleted-layout.command';
 
 @Injectable()
 export class FindDeletedLayoutUseCase {

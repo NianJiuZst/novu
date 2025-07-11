@@ -1,18 +1,17 @@
-import { NotFoundError } from 'rxjs';
 import { Injectable, Logger } from '@nestjs/common';
-
-import { JobRepository } from '@novu/dal';
-import { ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum } from '@novu/shared';
 import {
-  DetailEnum,
-  CreateExecutionDetails,
+  type CreateExecutionDetails,
   CreateExecutionDetailsCommand,
+  DetailEnum,
   InstrumentUsecase,
 } from '@novu/application-generic';
 
-import { HandleLastFailedJobCommand } from './handle-last-failed-job.command';
-import { QueueNextJob, QueueNextJobCommand } from '../queue-next-job';
+import type { JobRepository } from '@novu/dal';
+import { ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum } from '@novu/shared';
+import { NotFoundError } from 'rxjs';
 import { PlatformException, shouldHaltOnStepFailure } from '../../../shared/utils';
+import { type QueueNextJob, QueueNextJobCommand } from '../queue-next-job';
+import type { HandleLastFailedJobCommand } from './handle-last-failed-job.command';
 
 const LOG_CONTEXT = 'HandleLastFailedJob';
 

@@ -1,7 +1,7 @@
 import { ApiExtraModels, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 import { IsOptional, ValidateNested } from 'class-validator';
-import { StepContentIssueDto } from './step-content-issue.dto';
 import { StepIntegrationIssue } from './integration-issue.dto';
+import { StepContentIssueDto } from './step-content-issue.dto';
 
 @ApiExtraModels(StepContentIssueDto, StepIntegrationIssue)
 export class StepIssuesDto {

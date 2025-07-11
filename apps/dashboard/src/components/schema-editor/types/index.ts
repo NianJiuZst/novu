@@ -1,1 +1,1 @@
-export * from './schema-form.types';
+export * from "./schema-form.types";

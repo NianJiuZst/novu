@@ -1,30 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import {
+import type {
+  EnvironmentEntity,
   NotificationTemplateEntity,
+  OrganizationEntity,
   SubscriberEntity,
   TopicEntity,
-  EnvironmentEntity,
-  OrganizationEntity,
   UserEntity,
 } from '@novu/dal';
 import {
-  ISubscribersDefine,
-  ITenantDefine,
-  SubscriberSourceEnum,
-  TriggerOverrides,
-  TriggerRequestCategoryEnum,
-  StatelessControls,
-  ResourceEnum,
   FeatureFlagsKeysEnum,
+  type ISubscribersDefine,
+  type ITenantDefine,
+  ResourceEnum,
+  type StatelessControls,
+  type SubscriberSourceEnum,
+  type TriggerOverrides,
+  type TriggerRequestCategoryEnum,
 } from '@novu/shared';
 import _ from 'lodash';
 
-import { IProcessSubscriberBulkJobDto } from '../../dtos';
-import { SubscriberProcessQueueService } from '../../services/queues/subscriber-process-queue.service';
+import type { IProcessSubscriberBulkJobDto } from '../../dtos';
+import type { PinoLogger } from '../../logging';
+import type { CacheService, FeatureFlagsService } from '../../services';
 import { buildUsageKey } from '../../services/cache/key-builders';
-import { CacheService, FeatureFlagsService } from '../../services';
+import type { SubscriberProcessQueueService } from '../../services/queues/subscriber-process-queue.service';
 import { mapSubscribersToJobs } from '../../utils';
-import { PinoLogger } from '../../logging';
 
 export type BaseTriggerCommand = {
   environmentId: string;

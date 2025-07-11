@@ -1,17 +1,17 @@
 import { EmailProviderIdEnum } from '@novu/shared';
 import {
   ChannelTypeEnum,
-  IEmailOptions,
-  IEmailProvider,
-  ISendMessageSuccessResponse,
-  ICheckIntegrationResponse,
   CheckIntegrationResponseEnum,
-  IEmailEventBody,
   EmailEventStatusEnum,
+  type ICheckIntegrationResponse,
+  type IEmailEventBody,
+  type IEmailOptions,
+  type IEmailProvider,
+  type ISendMessageSuccessResponse,
 } from '@novu/stateless';
-import { Errors, ServerClient, Message, Models } from 'postmark';
+import { Errors, type Message, Models, ServerClient } from 'postmark';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export class PostmarkEmailProvider extends BaseProvider implements IEmailProvider {
   id = EmailProviderIdEnum.Postmark;

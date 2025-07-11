@@ -1,17 +1,17 @@
-import { expect } from 'chai';
-import { Novu } from '@novu/api';
-import { UserSession } from '@novu/testing';
-import { randomBytes } from 'crypto';
+import type { Novu } from '@novu/api';
 import {
+  type MessageEntity,
   MessageRepository,
-  SubscriberRepository,
-  TopicSubscribersRepository,
-  TopicRepository,
   PreferencesRepository,
-  MessageEntity,
   SubscriberEntity,
+  SubscriberRepository,
+  TopicRepository,
+  TopicSubscribersRepository,
 } from '@novu/dal';
 import { ChannelTypeEnum } from '@novu/shared';
+import { UserSession } from '@novu/testing';
+import { expect } from 'chai';
+import { randomBytes } from 'crypto';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
 describe('Delete Subscriber - /subscribers/:subscriberId (DELETE) #novu-v2', () => {

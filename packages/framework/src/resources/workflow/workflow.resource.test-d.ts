@@ -1,6 +1,6 @@
 import { describe, expectTypeOf } from 'vitest';
+import type { Subscriber } from '../../types';
 import { workflow } from '.';
-import { Subscriber } from '../../types';
 
 describe('workflow function types', () => {
   describe('event types', () => {

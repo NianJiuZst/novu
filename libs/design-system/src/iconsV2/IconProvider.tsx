@@ -1,7 +1,7 @@
-import { PropsWithChildren } from 'react';
-import { IconContext } from 'react-icons';
 import { css } from '@emotion/react';
 import { useMantineTheme } from '@mantine/core';
+import type { PropsWithChildren } from 'react';
+import { IconContext } from 'react-icons';
 import { DEFAULT_ICON_SIZE } from './Icon.const';
 
 const iconClassName = css`

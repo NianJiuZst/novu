@@ -1,4 +1,4 @@
-import { EnvironmentId, ExternalSubscriberId, OrganizationId, SubscriberId, TopicId, TopicKey } from '../../types';
+import type { EnvironmentId, ExternalSubscriberId, OrganizationId, SubscriberId, TopicId, TopicKey } from '../../types';
 
 export interface ITopicSubscriber {
   _organizationId: OrganizationId;

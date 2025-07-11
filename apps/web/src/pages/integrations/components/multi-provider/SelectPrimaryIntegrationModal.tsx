@@ -1,12 +1,9 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Modal, useMantineTheme } from '@mantine/core';
 import styled from '@emotion/styled';
-import type { Row } from 'react-table';
-import { ChannelTypeEnum } from '@novu/shared';
+import { Modal, useMantineTheme } from '@mantine/core';
 import {
   Button,
   colors,
-  IExtendedColumn,
+  type IExtendedColumn,
   Popover,
   shadows,
   Table,
@@ -14,16 +11,19 @@ import {
   Title,
   withCellLoading,
 } from '@novu/design-system';
-import { IntegrationChannel } from '../IntegrationChannel';
-import { IntegrationEnvironmentPill } from '../IntegrationEnvironmentPill';
-import { CHANNEL_TYPE_TO_STRING } from '../../../../utils/channels';
-import { useEnvironment, useIntegrations } from '../../../../hooks';
-import { IntegrationEntity, ITableIntegration } from '../../types';
-import { mapToTableIntegration } from '../../utils';
-import { IntegrationStatusCell } from '../IntegrationStatusCell';
-import { IntegrationNameCell } from '../IntegrationNameCell';
+import { ChannelTypeEnum } from '@novu/shared';
+import { useCallback, useMemo, useState } from 'react';
+import type { Row } from 'react-table';
 import { useMakePrimaryIntegration } from '../../../../api/hooks/useMakePrimaryIntegration';
 import { When } from '../../../../components/utils/When';
+import { useEnvironment, useIntegrations } from '../../../../hooks';
+import { CHANNEL_TYPE_TO_STRING } from '../../../../utils/channels';
+import type { IntegrationEntity, ITableIntegration } from '../../types';
+import { mapToTableIntegration } from '../../utils';
+import { IntegrationChannel } from '../IntegrationChannel';
+import { IntegrationEnvironmentPill } from '../IntegrationEnvironmentPill';
+import { IntegrationNameCell } from '../IntegrationNameCell';
+import { IntegrationStatusCell } from '../IntegrationStatusCell';
 
 const ModalBodyHolder = styled.div`
   display: flex;

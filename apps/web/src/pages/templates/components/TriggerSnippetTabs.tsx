@@ -1,12 +1,10 @@
 import { Prism } from '@mantine/prism';
-import { useMemo } from 'react';
-import set from 'lodash.set';
-import get from 'lodash.get';
-
-import { INotificationTrigger, INotificationTriggerVariable, TemplateVariableTypeEnum } from '@novu/shared';
-
 import { colors, Tabs } from '@novu/design-system';
-import { CodeSnippetProps, createCurlSnippet, createNodeSnippet } from '../../../utils/codeSnippets';
+import { type INotificationTrigger, type INotificationTriggerVariable, TemplateVariableTypeEnum } from '@novu/shared';
+import get from 'lodash.get';
+import set from 'lodash.set';
+import { useMemo } from 'react';
+import { type CodeSnippetProps, createCurlSnippet, createNodeSnippet } from '../../../utils/codeSnippets';
 
 const NODE_JS = 'Node.js';
 const CURL = 'Curl';

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InstrumentUsecase } from '@novu/application-generic';
-import { TopicRepository } from '@novu/dal';
+import type { TopicRepository } from '@novu/dal';
 import { DirectionEnum } from '../../../shared/dtos/base-responses';
-import { ListTopicsResponseDto } from '../../dtos/list-topics-response.dto';
-import { ListTopicsCommand } from './list-topics.command';
+import type { ListTopicsResponseDto } from '../../dtos/list-topics-response.dto';
+import type { ListTopicsCommand } from './list-topics.command';
 import { mapTopicEntityToDto } from './map-topic-entity-to.dto';
 
 @Injectable()

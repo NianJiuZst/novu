@@ -1,6 +1,6 @@
-import { UserSessionData } from '@novu/shared';
+import type { RequestLog } from '@novu/application-generic';
+import type { UserSessionData } from '@novu/shared';
 import { getClientIp } from 'request-ip';
-import { RequestLog } from '@novu/application-generic';
 import { sanitizePayload } from '../../../utils/payload-sanitizer';
 import { generateTransactionId } from '../helpers';
 

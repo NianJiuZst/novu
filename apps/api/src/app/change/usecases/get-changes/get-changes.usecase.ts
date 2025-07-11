@@ -1,19 +1,19 @@
 /* eslint-disable global-require */
-import { Injectable, BadRequestException } from '@nestjs/common';
-import {
+import { BadRequestException, Injectable } from '@nestjs/common';
+import type { ModuleRef } from '@nestjs/core';
+import type { PinoLogger } from '@novu/application-generic';
+import type {
   ChangeEntity,
   ChangeRepository,
+  FeedRepository,
+  LayoutRepository,
   MessageTemplateRepository,
   NotificationGroupRepository,
   NotificationTemplateRepository,
-  FeedRepository,
-  LayoutRepository,
 } from '@novu/dal';
 import { ChangeEntityTypeEnum } from '@novu/shared';
-import { ModuleRef } from '@nestjs/core';
-import { PinoLogger } from '@novu/application-generic';
-import { ChangesResponseDto } from '../../dtos/change-response.dto';
-import { GetChangesCommand } from './get-changes.command';
+import type { ChangesResponseDto } from '../../dtos/change-response.dto';
+import type { GetChangesCommand } from './get-changes.command';
 
 interface IViewEntity {
   templateName: string;

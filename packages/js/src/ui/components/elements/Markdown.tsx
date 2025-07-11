@@ -1,7 +1,7 @@
-import { createMemo, For, JSX, splitProps } from 'solid-js';
+import { createMemo, For, type JSX, splitProps } from 'solid-js';
 import { cn, useStyle } from '../../helpers';
 import { parseMarkdownIntoTokens } from '../../internal';
-import { AppearanceKey } from '../../types';
+import type { AppearanceKey } from '../../types';
 
 const Bold = (props: { children?: JSX.Element; appearanceKey?: AppearanceKey }) => {
   const style = useStyle();

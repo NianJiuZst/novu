@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { SubscriberEntity, SubscriberRepository, TenantEntity, TenantRepository } from '@novu/dal';
-import { FilterPartTypeEnum, IMessageFilter } from '@novu/shared';
-import { IFilterVariables } from '../../utils';
+import type { SubscriberEntity, SubscriberRepository, TenantEntity, TenantRepository } from '@novu/dal';
+import { FilterPartTypeEnum, type IMessageFilter } from '@novu/shared';
 import { buildSubscriberKey, CachedResponse } from '../../services';
-import { ConditionsFilterCommand } from '../conditions-filter';
+import type { IFilterVariables } from '../../utils';
+import type { ConditionsFilterCommand } from '../conditions-filter';
 
 /**
  * This service class is responsible for normalizing the variables used within the message filtering process.

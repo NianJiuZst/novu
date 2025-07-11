@@ -1,16 +1,16 @@
-import { createMemo, createSignal, Index, JSXElement, Show } from 'solid-js';
-import { JSX } from 'solid-js/jsx-runtime';
+import { createMemo, createSignal, Index, type JSXElement, Show } from 'solid-js';
+import type { JSX } from 'solid-js/jsx-runtime';
 
 import { RouteFill } from 'src/ui/icons/RouteFill';
-import { ChannelPreference, ChannelType, Preference } from '../../../../types';
-import { StringLocalizationKey, useLocalization } from '../../../context';
+import type { ChannelPreference, ChannelType, Preference } from '../../../../types';
+import { type StringLocalizationKey, useLocalization } from '../../../context';
 import { cn, useStyle } from '../../../helpers';
 import { Cogs, ArrowDropDown as DefaultArrowDropDown } from '../../../icons';
-import { AppearanceKey, IconKey, IconOverrides } from '../../../types';
+import { type AppearanceKey, type IconKey, IconOverrides } from '../../../types';
 import { Collapsible } from '../../primitives/Collapsible';
-import { ChannelRow, getLabel } from './ChannelRow';
-import { SwitchState } from '../../primitives/Switch';
+import type { SwitchState } from '../../primitives/Switch';
 import { IconRendererWrapper } from '../../shared/IconRendererWrapper';
+import { ChannelRow, getLabel } from './ChannelRow';
 
 type IconComponentType = (props?: JSX.HTMLAttributes<SVGSVGElement>) => JSXElement;
 

@@ -1,9 +1,9 @@
-import { Component, createEffect, createMemo, createSignal, onCleanup, Show } from 'solid-js';
+import { type Component, createEffect, createMemo, createSignal, onCleanup, Show } from 'solid-js';
 import { useLocalization } from '../../context/LocalizationContext';
 import { useStyle } from '../../helpers';
 import { Button } from '../primitives/Button';
 import { DatePicker, DatePickerCalendar, DatePickerHeader } from '../primitives/DatePicker';
-import { TimePicker, TimeValue } from '../primitives/TimePicker';
+import { TimePicker, type TimeValue } from '../primitives/TimePicker';
 import { Tooltip } from '../primitives/Tooltip';
 
 const fiveMinutesFromNow = () => {

@@ -1,12 +1,11 @@
-import { useState } from 'react';
-import { format } from 'date-fns';
-import { Code, Button } from '@mantine/core';
+import { Button, Code } from '@mantine/core';
+import { HoverCard, type IExtendedColumn, Table, ViewportWide, withCellLoading } from '@novu/design-system';
 import type { ISubscriber } from '@novu/shared';
-
-import { Table, withCellLoading, IExtendedColumn, ViewportWide, HoverCard } from '@novu/design-system';
-import { useSubscribers } from '../../hooks';
-import PageHeader from '../../components/layout/components/PageHeader';
+import { format } from 'date-fns';
+import { useState } from 'react';
 import PageContainer from '../../components/layout/components/PageContainer';
+import PageHeader from '../../components/layout/components/PageHeader';
+import { useSubscribers } from '../../hooks';
 
 const columns: IExtendedColumn<ISubscriber>[] = [
   {

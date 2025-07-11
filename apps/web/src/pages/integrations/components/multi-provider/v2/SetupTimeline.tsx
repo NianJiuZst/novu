@@ -1,14 +1,14 @@
 import styled from '@emotion/styled';
 import { Stack, Timeline, useMantineColorScheme } from '@mantine/core';
-import { useQuery } from '@tanstack/react-query';
 import { colors, shadows, Text } from '@novu/design-system';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
+import { useQuery } from '@tanstack/react-query';
 import { getApiKeys } from '../../../../../api/environment';
+import { useInAppActivated } from '../../../../../api/hooks';
+import { QueryKeys } from '../../../../../api/query.keys';
 import { When } from '../../../../../components/utils/When';
 import { API_ROOT, ENV, IS_SELF_HOSTED, WS_URL } from '../../../../../config';
 import { useEnvironment, useFeatureFlag } from '../../../../../hooks';
-import { PrismOnCopy } from '../../../../settings/tabs/components/Prism';
-import { SetupStatus } from './SetupStatus';
 import {
   API_KEY,
   APPLICATION_IDENTIFIER,
@@ -17,8 +17,8 @@ import {
   frameworkInstructions,
   frameworkInstructionsV2,
 } from '../../../../quick-start/consts';
-import { QueryKeys } from '../../../../../api/query.keys';
-import { useInAppActivated } from '../../../../../api/hooks';
+import { PrismOnCopy } from '../../../../settings/tabs/components/Prism';
+import { SetupStatus } from './SetupStatus';
 
 export const SetupTimeline = ({
   framework,

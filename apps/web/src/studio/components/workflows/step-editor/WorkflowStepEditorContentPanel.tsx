@@ -1,10 +1,4 @@
-import { FC, useMemo } from 'react';
 import { Prism } from '@mantine/prism';
-import { Tabs } from '@novu/novui';
-import { IconOutlineCode, IconVisibility } from '@novu/novui/icons';
-import { VStack } from '@novu/novui/jsx';
-import { inAppMessageFromBridgeOutputs, StepTypeEnum } from '@novu/shared';
-import { css } from '@novu/novui/css';
 import type {
   ChatOutput,
   EmailOutput,
@@ -13,16 +7,22 @@ import type {
   PushOutput,
   SmsOutput,
 } from '@novu/framework/internal';
-import { PreviewWeb } from '../../../../components/workflow/preview/email/PreviewWeb';
-import { useActiveIntegrations } from '../../../../hooks';
+import { Tabs } from '@novu/novui';
+import { css } from '@novu/novui/css';
+import { IconOutlineCode, IconVisibility } from '@novu/novui/icons';
+import { VStack } from '@novu/novui/jsx';
+import { inAppMessageFromBridgeOutputs, StepTypeEnum } from '@novu/shared';
+import { type FC, useMemo } from 'react';
 import {
   ChatBasePreview,
-  PushBasePreview,
   InAppBasePreview,
+  PushBasePreview,
   SmsBasePreview,
 } from '../../../../components/workflow/preview';
 import { MobileSimulator } from '../../../../components/workflow/preview/common';
 import { ErrorPrettyRender } from '../../../../components/workflow/preview/ErrorPrettyRender';
+import { PreviewWeb } from '../../../../components/workflow/preview/email/PreviewWeb';
+import { useActiveIntegrations } from '../../../../hooks';
 
 interface IWorkflowStepEditorContentPanelProps {
   preview: ExecuteOutput;

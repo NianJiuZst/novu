@@ -1,8 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import type { IPaginationWithQueryParams } from '@novu/shared';
 import { IsOptional, IsString } from 'class-validator';
-import { IPaginationWithQueryParams } from '@novu/shared';
 
-import { Constructor } from '../types';
+import type { Constructor } from '../types';
 import { PaginationRequestDto } from './pagination-request';
 
 export function PaginationWithFiltersRequestDto({

@@ -1,10 +1,10 @@
 import { Novu } from '@novu/api';
 import { NovuCore } from '@novu/api/core';
-import { SDKOptions } from '@novu/api/lib/config';
-import { HTTPClient, HTTPClientOptions } from '@novu/api/lib/http';
-import { ErrorDto, SDKValidationError, ValidationErrorDto } from '@novu/api/models/errors';
+import type { SDKOptions } from '@novu/api/lib/config';
+import { HTTPClient, type HTTPClientOptions } from '@novu/api/lib/http';
+import { type ErrorDto, SDKValidationError, type ValidationErrorDto } from '@novu/api/models/errors';
 import { HttpRequestHeaderKeysEnum } from '@novu/application-generic';
-import { UserSession } from '@novu/testing';
+import type { UserSession } from '@novu/testing';
 import { expect } from 'chai';
 
 export function initNovuClassSdk(session: UserSession, shouldRetry: boolean = false): Novu {

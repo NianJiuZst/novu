@@ -1,9 +1,9 @@
-import { LocalizedMessage, Text } from '@novu/novui';
-import { Flex, Stack } from '@novu/novui/jsx';
-import { FC } from 'react';
-import { css } from '@novu/novui/css';
-import { Popover, useColorScheme } from '@novu/design-system';
 import { useDisclosure } from '@mantine/hooks';
+import { Popover, useColorScheme } from '@novu/design-system';
+import { type LocalizedMessage, Text } from '@novu/novui';
+import { css } from '@novu/novui/css';
+import { Flex, Stack } from '@novu/novui/jsx';
+import type { FC } from 'react';
 
 type LocalStudioSidebarOrganizationDisplayProps = {
   title: LocalizedMessage;

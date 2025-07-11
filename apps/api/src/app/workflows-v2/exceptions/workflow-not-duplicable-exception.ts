@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { WorkflowResponseDto } from '@novu/shared';
+import type { WorkflowResponseDto } from '@novu/shared';
 import { DUPLICABLE_WORKFLOW_ORIGINS } from '../usecases';
 
 export class WorkflowNotDuplicableException extends BadRequestException {

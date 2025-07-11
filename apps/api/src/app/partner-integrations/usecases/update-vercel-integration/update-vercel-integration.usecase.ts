@@ -1,17 +1,16 @@
-import { HttpService } from '@nestjs/axios';
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { lastValueFrom } from 'rxjs';
-import {
+import type { HttpService } from '@nestjs/axios';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { type AnalyticsService, decryptApiKey, type PinoLogger } from '@novu/application-generic';
+import type {
   CommunityUserRepository,
   EnvironmentEntity,
   EnvironmentRepository,
   MemberRepository,
   OrganizationRepository,
 } from '@novu/dal';
-import { AnalyticsService, decryptApiKey, PinoLogger } from '@novu/application-generic';
-
-import { UpdateVercelIntegrationCommand } from './update-vercel-integration.command';
-import { Sync } from '../../../bridge/usecases/sync';
+import { lastValueFrom } from 'rxjs';
+import type { Sync } from '../../../bridge/usecases/sync';
+import type { UpdateVercelIntegrationCommand } from './update-vercel-integration.command';
 
 interface ISetEnvironment {
   name: string;

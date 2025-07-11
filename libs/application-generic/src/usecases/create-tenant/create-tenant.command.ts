@@ -1,4 +1,4 @@
-import { CustomDataType } from '@novu/shared';
+import type { CustomDataType } from '@novu/shared';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { EnvironmentWithUserCommand } from '../../commands';
 

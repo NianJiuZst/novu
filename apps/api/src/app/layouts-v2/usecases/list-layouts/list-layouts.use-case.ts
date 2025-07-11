@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { LayoutEntity, LayoutRepository } from '@novu/dal';
 import { InstrumentUsecase } from '@novu/application-generic';
-
-import { ListLayoutsCommand } from './list-layouts.command';
-import { ListLayoutResponseDto, LayoutResponseDto } from '../../dtos';
+import type { LayoutEntity, LayoutRepository } from '@novu/dal';
+import type { LayoutDto } from '../../../layouts-v1/dtos/layout.dto';
+import type { LayoutResponseDto, ListLayoutResponseDto } from '../../dtos';
 import { mapToResponseDto } from '../mapper';
-import { LayoutDto } from '../../../layouts-v1/dtos/layout.dto';
+import type { ListLayoutsCommand } from './list-layouts.command';
 
 @Injectable()
 export class ListLayoutsUseCase {

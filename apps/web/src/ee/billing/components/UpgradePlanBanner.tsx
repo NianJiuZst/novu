@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Stack, useMantineTheme } from '@mantine/core';
 import { Button, colors, Text, When } from '@novu/design-system';
 import { ApiServiceLevelEnum } from '@novu/shared';
+import type React from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../hooks/useSubscription';
-import { ContactSalesModal } from './ContactSalesModal';
 import { ContactSalesButton } from './ContactSalesButton';
+import { ContactSalesModal } from './ContactSalesModal';
 
 export function UpgradePlanBanner({ FeatureActivatedBanner }: { FeatureActivatedBanner: React.FC<any> }) {
   const { colorScheme } = useMantineTheme();

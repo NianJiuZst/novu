@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { IS_SELF_HOSTED } from '../../../config/index';
+import { ControlVariablesForm as Component } from '../../../ee/editor/index';
 import { useStepFormPath } from '../hooks/useStepFormPath';
 import { useTemplateEditorForm } from './TemplateEditorFormProvider';
-import { ControlVariablesForm as Component } from '../../../ee/editor/index';
 
 export const ControlVariablesForm = ({ onChange }: { onChange?: (data: any) => void }) => {
   const stepFormPath = useStepFormPath();

@@ -1,10 +1,10 @@
 import { ClassSerializerInterceptor, Controller, Get, Query, UseInterceptors } from '@nestjs/common';
 import { ExternalApiAccessible, UserSession } from '@novu/application-generic';
-import { GetRequests } from './usecases/get-requests/get-requests.usecase';
-import { GetRequestsCommand } from './usecases/get-requests/get-requests.command';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
-import { GetRequestsDto } from './dtos/get-requests.dto';
-import { GetRequestsResponseDto } from './dtos/get-requests.response.dto';
+import type { GetRequestsDto } from './dtos/get-requests.dto';
+import type { GetRequestsResponseDto } from './dtos/get-requests.response.dto';
+import { GetRequestsCommand } from './usecases/get-requests/get-requests.command';
+import type { GetRequests } from './usecases/get-requests/get-requests.usecase';
 
 @Controller('/logs')
 @UseInterceptors(ClassSerializerInterceptor)

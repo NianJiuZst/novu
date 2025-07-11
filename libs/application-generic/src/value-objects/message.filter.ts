@@ -1,5 +1,5 @@
+import type { BuilderFieldType, BuilderGroupValues, FilterParts } from '@novu/shared';
 import { IsArray, IsString } from 'class-validator';
-import { BuilderFieldType, BuilderGroupValues, FilterParts } from '@novu/shared';
 
 export class MessageFilter {
   isNegated?: boolean;

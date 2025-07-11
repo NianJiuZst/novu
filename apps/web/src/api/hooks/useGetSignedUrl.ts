@@ -1,7 +1,7 @@
-import { useMutation, UseMutationOptions } from '@tanstack/react-query';
-import { IResponseError } from '@novu/shared';
+import type { IResponseError } from '@novu/shared';
+import { type UseMutationOptions, useMutation } from '@tanstack/react-query';
 
-import { getSignedUrl, IGetSignedUrlParams, ISignedUrlResponse } from '../storage';
+import { getSignedUrl, type IGetSignedUrlParams, type ISignedUrlResponse } from '../storage';
 
 export const useGetSignedUrl = (
   options: UseMutationOptions<ISignedUrlResponse, IResponseError, IGetSignedUrlParams> = {}

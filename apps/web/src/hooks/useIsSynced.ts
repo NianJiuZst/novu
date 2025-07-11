@@ -1,5 +1,5 @@
+import type { INotificationTemplate } from '@novu/shared';
 import { useMemo } from 'react';
-import { INotificationTemplate } from '@novu/shared';
 
 import { useDiscover } from '../studio/hooks';
 import { createHash } from '../utils/create-hash';

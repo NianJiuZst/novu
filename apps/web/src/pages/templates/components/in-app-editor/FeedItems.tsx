@@ -1,18 +1,17 @@
-import { useState } from 'react';
-import { Popover, useMantineTheme, Grid, ColorScheme, createStyles } from '@mantine/core';
-import { useClipboard } from '@mantine/hooks';
 import styled from '@emotion/styled';
+import { type ColorScheme, createStyles, Grid, Popover, useMantineTheme } from '@mantine/core';
+import { useClipboard } from '@mantine/hooks';
+import { showNotification } from '@mantine/notifications';
+import { Button, Copy, colors, shadows, Text, Tooltip, Trash } from '@novu/design-system';
+import type { IFeedEntity, IResponseError } from '@novu/shared';
 import { captureException } from '@sentry/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { showNotification } from '@mantine/notifications';
+import { useState } from 'react';
 import type { UseFormSetValue } from 'react-hook-form';
-import type { IResponseError, IFeedEntity } from '@novu/shared';
-
-import { colors, shadows, Text, Tooltip, Button, Copy, Trash } from '@novu/design-system';
-import { FeedChip } from './FeedChip';
 import { deleteFeed, getFeeds } from '../../../../api/feeds';
 import { QueryKeys } from '../../../../api/query.keys';
 import type { IForm } from '../formTypes';
+import { FeedChip } from './FeedChip';
 
 interface IFeedItemPopoverProps {
   showFeed: boolean;

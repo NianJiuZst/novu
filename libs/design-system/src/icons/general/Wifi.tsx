@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 export function Wifi(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (

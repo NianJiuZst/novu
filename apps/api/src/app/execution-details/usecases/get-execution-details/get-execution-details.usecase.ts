@@ -1,7 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ExecutionDetailsEntity, ExecutionDetailsRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
 import { buildSubscriberKey, CachedResponse } from '@novu/application-generic';
-import { GetExecutionDetailsCommand } from './get-execution-details.command';
+import type {
+  ExecutionDetailsEntity,
+  ExecutionDetailsRepository,
+  SubscriberEntity,
+  SubscriberRepository,
+} from '@novu/dal';
+import type { GetExecutionDetailsCommand } from './get-execution-details.command';
 
 @Injectable()
 export class GetExecutionDetails {

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ICreateTenantDto, CustomDataType } from '@novu/shared';
+import type { CustomDataType, ICreateTenantDto } from '@novu/shared';
 
 export class CreateTenantRequestDto implements ICreateTenantDto {
   @ApiProperty()

@@ -1,4 +1,4 @@
-import { Ref } from 'solid-js';
+import type { Ref } from 'solid-js';
 
 function chain<Args extends [] | any[]>(callbacks: {
   [Symbol.iterator](): IterableIterator<((...args: Args) => any) | undefined>;

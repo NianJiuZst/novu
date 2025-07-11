@@ -1,16 +1,16 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  AnalyticsService,
-  InvalidateCacheService,
-  WebSocketsQueueService,
+  type AnalyticsService,
   buildFeedKey,
   buildMessageCountKey,
+  type InvalidateCacheService,
+  type WebSocketsQueueService,
 } from '@novu/application-generic';
-import { DalException, MessageRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
+import { DalException, type MessageRepository, type SubscriberEntity, type SubscriberRepository } from '@novu/dal';
 import { WebSocketEventEnum } from '@novu/shared';
 
 import { MarkEnum } from '../mark-message-as/mark-message-as.command';
-import { RemoveMessageCommand } from './remove-message.command';
+import type { RemoveMessageCommand } from './remove-message.command';
 
 @Injectable()
 export class RemoveMessage {

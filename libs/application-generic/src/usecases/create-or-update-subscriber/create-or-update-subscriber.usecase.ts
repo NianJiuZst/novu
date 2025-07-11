@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { SubscriberEntity, SubscriberRepository } from '@novu/dal';
-import { AnalyticsService, buildSubscriberKey, InvalidateCacheService } from '../../services';
-import { UpdateSubscriber, UpdateSubscriberCommand } from '../update-subscriber';
-import { OAuthHandlerEnum, UpdateSubscriberChannel, UpdateSubscriberChannelCommand } from '../subscribers';
+import type { SubscriberEntity, SubscriberRepository } from '@novu/dal';
 import { RetryOnError } from '../../decorators/retry-on-error-decorator';
-import { CreateOrUpdateSubscriberCommand } from './create-or-update-subscriber.command';
+import { type AnalyticsService, buildSubscriberKey, type InvalidateCacheService } from '../../services';
+import { OAuthHandlerEnum, type UpdateSubscriberChannel, UpdateSubscriberChannelCommand } from '../subscribers';
+import { type UpdateSubscriber, UpdateSubscriberCommand } from '../update-subscriber';
+import type { CreateOrUpdateSubscriberCommand } from './create-or-update-subscriber.command';
 
 @Injectable()
 export class CreateOrUpdateSubscriberUseCase {

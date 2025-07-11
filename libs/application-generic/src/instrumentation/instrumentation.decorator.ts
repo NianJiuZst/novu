@@ -23,10 +23,7 @@ export const InstrumentUsecase = ({
     buildTransactionIdSuffix,
   });
 
-export const Instrument = ({
-  transactionName = '',
-  buildTransactionIdSuffix,
-}: InstrumentationOptions = {}): any =>
+export const Instrument = ({ transactionName = '', buildTransactionIdSuffix }: InstrumentationOptions = {}): any =>
   instrumentationWrapper({
     transactionName,
     instrumentationType: 'Function',
@@ -59,11 +56,7 @@ function instrumentationWrapper({
       if (!isAsync) {
         // eslint-disable-next-line no-param-reassign
         descriptor.value = function instrumentedMethod(...args: unknown[]) {
-          const transactionIdentifier = buildTransactionId(
-            transactionIdentifierBase,
-            buildTransactionIdSuffix,
-            args,
-          );
+          const transactionIdentifier = buildTransactionId(transactionIdentifierBase, buildTransactionIdSuffix, args);
 
           return nr.startSegment(transactionIdentifier, true, () => {
             return method.apply(this, args);
@@ -71,14 +64,8 @@ function instrumentationWrapper({
         };
       } else {
         // eslint-disable-next-line no-param-reassign
-        descriptor.value = async function instrumentedAsyncMethod(
-          ...args: unknown[]
-        ) {
-          const transactionIdentifier = buildTransactionId(
-            transactionIdentifierBase,
-            buildTransactionIdSuffix,
-            args,
-          );
+        descriptor.value = async function instrumentedAsyncMethod(...args: unknown[]) {
+          const transactionIdentifier = buildTransactionId(transactionIdentifierBase, buildTransactionIdSuffix, args);
 
           return nr.startSegment(transactionIdentifier, true, async () => {
             return await method.apply(this, args);
@@ -96,7 +83,7 @@ function instrumentationWrapper({
 const buildTransactionId = (
   transactionIdentifierBase: string,
   buildSuffix: InstrumentationOptions['buildTransactionIdSuffix'],
-  args: unknown[],
+  args: unknown[]
 ): string => {
   const suffix = buildSuffix ? `:${buildSuffix(...args)}` : '';
 

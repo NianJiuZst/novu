@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 import { CursorPaginationQueryDto } from './cursor-pagination-query.dto';
-import { TopicResponseDto } from './topic-response.dto';
+import type { TopicResponseDto } from './topic-response.dto';
 
 export class ListTopicsQueryDto extends CursorPaginationQueryDto<TopicResponseDto, 'createdAt' | 'updatedAt' | '_id'> {
   @ApiProperty({

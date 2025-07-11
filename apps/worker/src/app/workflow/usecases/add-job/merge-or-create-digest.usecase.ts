@@ -1,15 +1,4 @@
-import { forwardRef, Inject, Injectable, BadRequestException } from '@nestjs/common';
-import { IDelayOrDigestJobResult, JobEntity, JobRepository, NotificationRepository } from '@novu/dal';
-import {
-  DigestCreationResultEnum,
-  DigestTypeEnum,
-  ExecutionDetailsSourceEnum,
-  ExecutionDetailsStatusEnum,
-  IDigestBaseMetadata,
-  IDigestRegularMetadata,
-  IDigestTimedMetadata,
-  JobStatusEnum,
-} from '@novu/shared';
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   CreateExecutionDetails,
   CreateExecutionDetailsCommand,
@@ -18,8 +7,19 @@ import {
   InstrumentUsecase,
   RetryOnError,
 } from '@novu/application-generic';
+import type { IDelayOrDigestJobResult, JobEntity, JobRepository, NotificationRepository } from '@novu/dal';
+import {
+  DigestCreationResultEnum,
+  DigestTypeEnum,
+  ExecutionDetailsSourceEnum,
+  ExecutionDetailsStatusEnum,
+  type IDigestBaseMetadata,
+  type IDigestRegularMetadata,
+  type IDigestTimedMetadata,
+  JobStatusEnum,
+} from '@novu/shared';
 import { isBefore } from 'date-fns';
-import { MergeOrCreateDigestCommand } from './merge-or-create-digest.command';
+import type { MergeOrCreateDigestCommand } from './merge-or-create-digest.command';
 
 type MergeOrCreateDigestResultType = DigestCreationResultEnum;
 

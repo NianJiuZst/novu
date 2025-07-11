@@ -1,19 +1,19 @@
+import type { HealthCheck } from '@novu/framework/internal';
+import { Text, Title } from '@novu/novui';
 import { css } from '@novu/novui/css';
-import { useEffect } from 'react';
-import { Title, Text } from '@novu/novui';
 import { VStack } from '@novu/novui/jsx';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HealthCheck } from '@novu/framework/internal';
+import { ROUTES } from '../../constants/routes';
+import { useTelemetry } from '../../hooks/useNovuAPI';
+import { useHealthCheck } from '../../studio/hooks/useBridgeAPI';
+import { useStudioState } from '../../studio/StudioStateProvider';
+import { setNovuOnboardingStepCookie } from '../../utils';
+import { capitalizeFirstLetter } from '../../utils/string';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { SetupTimeline } from './components/SetupTimeline';
 import { Wrapper } from './components/Wrapper';
-import { ROUTES } from '../../constants/routes';
-import { useHealthCheck } from '../../studio/hooks/useBridgeAPI';
-import { useStudioState } from '../../studio/StudioStateProvider';
-import { capitalizeFirstLetter } from '../../utils/string';
-import { setNovuOnboardingStepCookie } from '../../utils';
-import { useTelemetry } from '../../hooks/useNovuAPI';
 
 const ONBOARDING_COOKIE_EXPIRY_DAYS = 10 * 365;
 

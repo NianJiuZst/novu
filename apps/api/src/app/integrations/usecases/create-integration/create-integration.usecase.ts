@@ -1,27 +1,26 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
-import shortid from 'shortid';
-import { DalException, IntegrationEntity, IntegrationQuery, IntegrationRepository } from '@novu/dal';
+import {
+  type AnalyticsService,
+  areNovuEmailCredentialsSet,
+  areNovuSmsCredentialsSet,
+  buildIntegrationKey,
+  encryptCredentials,
+  type InvalidateCacheService,
+} from '@novu/application-generic';
+import { DalException, type IntegrationEntity, type IntegrationQuery, type IntegrationRepository } from '@novu/dal';
 import {
   CHANNELS_WITH_PRIMARY,
   ChannelTypeEnum,
   EmailProviderIdEnum,
   InAppProviderIdEnum,
   providers,
-  slugify,
   SmsProviderIdEnum,
+  slugify,
 } from '@novu/shared';
-import {
-  AnalyticsService,
-  areNovuEmailCredentialsSet,
-  areNovuSmsCredentialsSet,
-  buildIntegrationKey,
-  encryptCredentials,
-  InvalidateCacheService,
-} from '@novu/application-generic';
-
-import { CreateIntegrationCommand } from './create-integration.command';
+import shortid from 'shortid';
 import { CheckIntegrationCommand } from '../check-integration/check-integration.command';
-import { CheckIntegration } from '../check-integration/check-integration.usecase';
+import type { CheckIntegration } from '../check-integration/check-integration.usecase';
+import type { CreateIntegrationCommand } from './create-integration.command';
 
 @Injectable()
 export class CreateIntegration {

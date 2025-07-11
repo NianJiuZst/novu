@@ -1,4 +1,4 @@
-import {
+import type {
   EnvironmentId,
   IActor,
   IMessageCTA,
@@ -8,9 +8,8 @@ import {
   UiSchemaGroupEnum,
   UiSchemaProperty,
 } from '@novu/shared';
-
-import { IEmailBlock, ITemplateVariable } from './types';
 import type { ChangePropsValueType } from '../../types';
+import type { IEmailBlock, ITemplateVariable } from './types';
 
 export class MessageTemplateEntity {
   _id?: string;

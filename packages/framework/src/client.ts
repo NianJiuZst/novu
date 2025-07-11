@@ -1,4 +1,4 @@
-import { Liquid } from 'liquidjs';
+import type { Liquid } from 'liquidjs';
 
 import { PostActionEnum } from './constants';
 import {
@@ -17,6 +17,8 @@ import {
   StepNotFoundError,
   WorkflowNotFoundError,
 } from './errors';
+import { mockSchema } from './jsonSchemaFaker';
+import { prettyPrintDiscovery } from './resources/workflow/pretty-print-discovery';
 import type {
   ActionStep,
   ClientOptions,
@@ -35,14 +37,11 @@ import type {
   ValidationError,
   Workflow,
 } from './types';
-import { WithPassthrough } from './types/provider.types';
+import type { WithPassthrough } from './types/provider.types';
 import { EMOJI, log, resolveApiUrl, resolveSecretKey, sanitizeHtmlInObject } from './utils';
-import { validateData } from './validators';
-
-import { mockSchema } from './jsonSchemaFaker';
-import { prettyPrintDiscovery } from './resources/workflow/pretty-print-discovery';
-import { deepMerge } from './utils/object.utils';
 import { createLiquidEngine } from './utils/liquid.utils';
+import { deepMerge } from './utils/object.utils';
+import { validateData } from './validators';
 
 function isRuntimeInDevelopment() {
   return ['development', undefined].includes(process.env.NODE_ENV);

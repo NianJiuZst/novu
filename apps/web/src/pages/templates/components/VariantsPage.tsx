@@ -1,12 +1,11 @@
-import { useNavigate, useParams } from 'react-router-dom';
 import styled from '@emotion/styled';
-import { StepTypeEnum, DELAYED_STEPS } from '@novu/shared';
-
-import { useTemplateEditorForm } from './TemplateEditorFormProvider';
-import { VariantsListSidebar } from './VariantsListSidebar';
+import { DELAYED_STEPS, type StepTypeEnum } from '@novu/shared';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useBasePath } from '../hooks/useBasePath';
-import { VariantsList } from './VariantsList';
+import { useTemplateEditorForm } from './TemplateEditorFormProvider';
 import { VariantPreview } from './VariantPreview';
+import { VariantsList } from './VariantsList';
+import { VariantsListSidebar } from './VariantsListSidebar';
 
 const VariantsPageContainer = styled.div`
   display: grid;

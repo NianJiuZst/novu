@@ -6,16 +6,16 @@ import {
   IconRoomPreferences,
   IconWorkspacePremium,
 } from '@novu/design-system';
-import { useNavigate } from 'react-router-dom';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
-import { useAuth } from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
+import { useAuth } from '../../hooks/useAuth';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { FreeTrialSidebarWidget } from '../layout/components/FreeTrialSidebarWidget';
+import { When } from '../utils/When';
 import { NavMenu } from './NavMenu';
 import { NavMenuLinkButton } from './NavMenuButton/NavMenuLinkButton';
 import { NavMenuSection } from './NavMenuSection';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { When } from '../utils/When';
 
 const getScopedTitle = (label: string, scope?: string) => `${label} ${scope ? `(${scope})` : ''}`;
 

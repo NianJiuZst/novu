@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateChange, CreateChangeCommand } from '@novu/application-generic';
-import { NotificationGroupRepository, NotificationGroupEntity } from '@novu/dal';
+import { type CreateChange, CreateChangeCommand } from '@novu/application-generic';
+import { type NotificationGroupEntity, NotificationGroupRepository } from '@novu/dal';
 import { ChangeEntityTypeEnum } from '@novu/shared';
 
-import { CreateNotificationGroupCommand } from './create-notification-group.command';
+import type { CreateNotificationGroupCommand } from './create-notification-group.command';
 
 @Injectable()
 export class CreateNotificationGroup {

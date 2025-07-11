@@ -1,6 +1,6 @@
-import { MouseEventHandler, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { PencilOutlined } from '@novu/design-system';
+import { type MouseEventHandler, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import {
   BubbleText,

@@ -1,5 +1,5 @@
-import { Group } from '@mantine/core';
 import styled from '@emotion/styled';
+import { Group } from '@mantine/core';
 
 import { Container } from '@novu/design-system';
 import { GotAQuestionButton } from '../utils/GotAQuestionButton';

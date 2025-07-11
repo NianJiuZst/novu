@@ -1,4 +1,23 @@
 import {
+  ContentIssue,
+  EnvironmentWithUserCommand,
+  type JSONSchema,
+  type NotificationStep,
+  PreferencesRequired,
+} from '@novu/application-generic';
+import type { RuntimeIssue } from '@novu/dal';
+import {
+  type CustomDataType,
+  type INotificationGroup,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_NAME_LENGTH,
+  MAX_TAG_LENGTH,
+  ResourceOriginEnum,
+  ResourceTypeEnum,
+  WorkflowStatusEnum,
+} from '@novu/shared';
+import { Type } from 'class-transformer';
+import {
   ArrayUnique,
   IsArray,
   IsBoolean,
@@ -12,27 +31,6 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
-
-import {
-  CustomDataType,
-  INotificationGroup,
-  ResourceOriginEnum,
-  WorkflowStatusEnum,
-  ResourceTypeEnum,
-  MAX_DESCRIPTION_LENGTH,
-  MAX_NAME_LENGTH,
-  MAX_TAG_LENGTH,
-} from '@novu/shared';
-
-import { Type } from 'class-transformer';
-import { RuntimeIssue } from '@novu/dal';
-import {
-  EnvironmentWithUserCommand,
-  ContentIssue,
-  JSONSchema,
-  NotificationStep,
-  PreferencesRequired,
-} from '@novu/application-generic';
 
 export class CreateWorkflowCommand extends EnvironmentWithUserCommand {
   @IsDefined()

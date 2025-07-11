@@ -1,22 +1,22 @@
 import type {
-  CountArgs,
-  ListNotificationsArgs,
-  Notification,
-  ListNotificationsResponse,
-  CountResponse,
-  ReadArgs,
   ArchivedArgs,
   CompleteArgs,
+  CountArgs,
+  CountResponse,
+  ListNotificationsArgs,
+  ListNotificationsResponse,
+  Notification,
+  ReadArgs,
   RevertArgs,
+  SnoozeArgs,
   UnarchivedArgs,
   UnreadArgs,
-  SnoozeArgs,
   UnsnoozeArgs,
 } from '../notifications';
-import { Preference } from '../preferences/preference';
-import { ListPreferencesArgs, UpdatePreferenceArgs } from '../preferences/types';
+import type { Preference } from '../preferences/preference';
+import type { ListPreferencesArgs, UpdatePreferenceArgs } from '../preferences/types';
 import type { InitializeSessionArgs } from '../session';
-import { Session, WebSocketEvent } from '../types';
+import type { Session, WebSocketEvent } from '../types';
 
 type NovuPendingEvent<A, D = undefined> = {
   args: A;

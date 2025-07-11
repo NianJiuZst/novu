@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { WorkflowResponse } from './workflow-response.dto';
+import type { WorkflowResponse } from './workflow-response.dto';
 
 /**
  * @deprecated use dto's in /workflows directory

@@ -1,27 +1,26 @@
 import { WebSocket } from 'partysocket';
-import { InboxService } from '../api';
+import type { InboxService } from '../api';
 import { BaseModule } from '../base-module';
-import type { BaseSocketInterface } from './base-socket';
-
-import {
+import type {
   NotificationReceivedEvent,
-  NotificationUnseenEvent,
   NotificationUnreadEvent,
+  NotificationUnseenEvent,
   NovuEventEmitter,
   SocketEventNames,
 } from '../event-emitter';
 import { Notification } from '../notifications';
 import {
   ActionTypeEnum,
+  type InboxNotification,
   NotificationActionStatus,
-  InboxNotification,
-  Session,
-  Subscriber,
-  TODO,
+  type Result,
+  type Session,
+  type Subscriber,
+  type TODO,
   WebSocketEvent,
-  Result,
 } from '../types';
 import { NovuError } from '../utils/errors';
+import type { BaseSocketInterface } from './base-socket';
 
 export const PRODUCTION_SOCKET_URL = 'wss://socket.novu.co';
 const NOTIFICATION_RECEIVED: NotificationReceivedEvent = 'notifications.notification_received';

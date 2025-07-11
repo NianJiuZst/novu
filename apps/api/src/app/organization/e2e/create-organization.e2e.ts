@@ -1,23 +1,22 @@
-import { expect } from 'chai';
-
 import {
-  IntegrationRepository,
-  EnvironmentRepository,
+  CommunityMemberRepository,
   CommunityOrganizationRepository,
   CommunityUserRepository,
-  CommunityMemberRepository,
+  EnvironmentRepository,
+  IntegrationRepository,
 } from '@novu/dal';
-import { UserSession } from '@novu/testing';
 import {
   ApiServiceLevelEnum,
   ChannelTypeEnum,
   EmailProviderIdEnum,
-  ICreateOrganizationDto,
+  type ICreateOrganizationDto,
   InAppProviderIdEnum,
   JobTitleEnum,
   MemberRoleEnum,
   SmsProviderIdEnum,
 } from '@novu/shared';
+import { UserSession } from '@novu/testing';
+import { expect } from 'chai';
 
 describe('Create Organization - /organizations (POST) #novu-v0-os', async () => {
   let session: UserSession;

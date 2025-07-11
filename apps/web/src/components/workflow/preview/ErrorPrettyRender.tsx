@@ -1,9 +1,9 @@
 import { useDisclosure } from '@mantine/hooks';
-import { css } from '@novu/novui/css';
 import { Text } from '@novu/novui';
-import { hstack } from '@novu/novui/patterns';
-import { Center, Stack } from '@novu/novui/jsx';
+import { css } from '@novu/novui/css';
 import { IconErrorOutline, IconExpandLess, IconExpandMore } from '@novu/novui/icons';
+import { Center, Stack } from '@novu/novui/jsx';
+import { hstack } from '@novu/novui/patterns';
 
 export function ErrorPrettyRender({ error: unparsedError }) {
   const [isExpanded, { toggle }] = useDisclosure();

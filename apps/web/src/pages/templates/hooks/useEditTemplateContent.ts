@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useTimeout } from '@mantine/hooks';
+import { useState } from 'react';
 
 export function useEditTemplateContent() {
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);

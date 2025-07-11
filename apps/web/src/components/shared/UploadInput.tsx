@@ -1,8 +1,7 @@
-import React, { useImperativeHandle } from 'react';
 import { IconOutlineFileUpload, Text } from '@novu/design-system';
-
 import { cx } from '@novu/novui/css';
-import { ProfileImageProps } from './ProfileImage';
+import React, { useImperativeHandle } from 'react';
+import type { ProfileImageProps } from './ProfileImage';
 import { imageUploadStyles } from './ProfileImage.styles';
 
 export const UploadInput = React.forwardRef<HTMLInputElement, Omit<ProfileImageProps, 'value'>>(

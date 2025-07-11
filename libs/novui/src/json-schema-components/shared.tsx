@@ -1,10 +1,10 @@
-import { FC, MouseEventHandler } from 'react';
-import { token } from '../../styled-system/tokens';
+import type { FC, MouseEventHandler } from 'react';
+import { cva, cx } from '../../styled-system/css';
 import { hstack } from '../../styled-system/patterns';
+import { token } from '../../styled-system/tokens';
 import { Title } from '../components';
 import { IconExpandLess, IconExpandMore } from '../icons';
-import { CoreProps, CorePropsWithChildren } from '../types';
-import { cva, cx } from '../../styled-system/css';
+import type { CoreProps, CorePropsWithChildren } from '../types';
 
 export const FormGroupTitle: FC<CorePropsWithChildren> = ({ children, ...titleProps }) => {
   return (

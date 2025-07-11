@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
-import { HealthCheck, HealthCheckResult, HealthCheckService } from '@nestjs/terminus';
-import { DalServiceHealthIndicator } from '@novu/application-generic';
+import { HealthCheck, type HealthCheckResult, type HealthCheckService } from '@nestjs/terminus';
+import type { DalServiceHealthIndicator } from '@novu/application-generic';
 
 import { version } from '../../package.json';
 

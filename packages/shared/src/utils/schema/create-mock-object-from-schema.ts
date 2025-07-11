@@ -1,4 +1,4 @@
-import { JSONSchemaDto } from '../../dto';
+import type { JSONSchemaDto } from '../../dto';
 
 /**
  * Generates a payload based solely on the schema.

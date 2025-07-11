@@ -1,5 +1,5 @@
-import React from 'react';
 import { useMantineColorScheme } from '@mantine/core';
+import React from 'react';
 
 export const TranslationVariablesIcon = () => {
   const { colorScheme } = useMantineColorScheme();

@@ -1,15 +1,14 @@
-import { memo, useEffect, useState } from 'react';
-import { Handle, Position, getOutgoers, useReactFlow, useNodes } from 'react-flow-renderer';
 import { FilterPartTypeEnum } from '@novu/shared';
-
-import { useParams } from 'react-router-dom';
+import { memo, useEffect, useState } from 'react';
+import { getOutgoers, Handle, Position, useNodes, useReactFlow } from 'react-flow-renderer';
 import { useFormContext } from 'react-hook-form';
-import { WorkflowNode } from './WorkflowNode';
-import { INode } from '../../../../../components/workflow/types';
-import { useStepSubtitle } from '../../../hooks/useStepSubtitle';
+import { useParams } from 'react-router-dom';
 import { Conditions } from '../../../../../components/conditions';
+import type { INode } from '../../../../../components/workflow/types';
+import type { IForm } from '../../../components/formTypes';
 import { useFilterPartsList } from '../../../hooks/useFilterPartsList';
-import { IForm } from '../../../components/formTypes';
+import { useStepSubtitle } from '../../../hooks/useStepSubtitle';
+import { WorkflowNode } from './WorkflowNode';
 
 export default memo((node: INode) => {
   const { data, id, dragging } = node;

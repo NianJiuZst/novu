@@ -1,21 +1,21 @@
-import Handlebars from 'handlebars';
+import { BadRequestException } from '@nestjs/common';
 import {
   DelayTypeEnum,
-  FilterParts,
+  type FilterParts,
   FilterPartTypeEnum,
   getTemplateVariables,
-  IFieldFilterPart,
-  IMustacheVariable,
-  ITriggerReservedVariable,
+  type IFieldFilterPart,
+  type IMustacheVariable,
+  type ITriggerReservedVariable,
   ReservedVariablesMap,
   StepTypeEnum,
   TemplateSystemVariables,
   TemplateVariableTypeEnum,
-  TriggerContextTypeEnum,
+  type TriggerContextTypeEnum,
   TriggerReservedVariables,
 } from '@novu/shared';
-import { BadRequestException } from '@nestjs/common';
-import { NotificationStep } from '../value-objects';
+import Handlebars from 'handlebars';
+import type { NotificationStep } from '../value-objects';
 
 export class ContentService {
   replaceVariables(content: string, variables: { [key: string]: string }) {
@@ -23,7 +23,7 @@ export class ContentService {
     let modifiedContent = content;
 
     for (const key in variables) {
-      if (!variables.hasOwnProperty(key)) continue;
+      if (!Object.hasOwn(variables, key)) continue;
       modifiedContent = modifiedContent.replace(new RegExp(`{{${this.escapeForRegExp(key)}}}`, 'g'), variables[key]);
     }
 
@@ -203,7 +203,7 @@ export class ContentService {
   ): { [key: string]: any } {
     const newMessageVariables: { [key: string]: any } = { ...messageVariables };
 
-    Object.keys(subscriberPayload).forEach(function (key) {
+    Object.keys(subscriberPayload).forEach((key) => {
       const newKey = subscriberString === '' ? key : `${subscriberString}.${key}`;
       newMessageVariables[newKey] = subscriberPayload[key];
     });

@@ -1,7 +1,6 @@
-import { MemberRoleEnum } from '@novu/shared';
 import styled from '@emotion/styled';
-
 import { Dropdown, Tag } from '@novu/design-system';
+import { MemberRoleEnum } from '@novu/shared';
 
 export function MemberRole({ member, onChangeMemberRole, isEnableMemberActions, allowChangeRole = false }) {
   const TagElement = () => {

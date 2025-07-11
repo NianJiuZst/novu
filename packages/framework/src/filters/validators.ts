@@ -1,5 +1,5 @@
 import { toSentenceArgsValidator } from './to-sentence';
-import { LiquidFilterIssue } from './types';
+import type { LiquidFilterIssue } from './types';
 
 type FilterValidators = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

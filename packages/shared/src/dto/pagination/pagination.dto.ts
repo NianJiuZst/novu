@@ -1,4 +1,4 @@
-import { DirectionEnum } from '../../types';
+import type { DirectionEnum } from '../../types';
 
 export class CursorPaginationDto<T, K extends keyof T> {
   limit?: number;

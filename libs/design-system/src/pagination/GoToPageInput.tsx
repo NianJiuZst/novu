@@ -1,18 +1,18 @@
+import styled from '@emotion/styled';
+import { Input, NumberInput, type NumberInputProps, useMantineTheme } from '@mantine/core';
 import {
-  FocusEventHandler,
+  type FocusEventHandler,
   forwardRef,
-  KeyboardEventHandler,
+  type KeyboardEventHandler,
   useContext,
   useImperativeHandle,
   useRef,
   useState,
 } from 'react';
-import styled from '@emotion/styled';
-import { Input, NumberInput, NumberInputProps, useMantineTheme } from '@mantine/core';
-import { PaginationContext } from './PaginationContext';
+import { colors } from '../config';
 import { Tooltip } from '../tooltip/Tooltip';
 import { FIRST_PAGE_NUMBER } from './Pagination.const';
-import { colors } from '../config';
+import { PaginationContext } from './PaginationContext';
 
 export interface IGoToPageInputProps extends NumberInputProps {
   firstPageNumber?: number;

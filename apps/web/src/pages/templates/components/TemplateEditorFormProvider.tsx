@@ -1,34 +1,34 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { FieldErrors, FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useParams } from 'react-router-dom';
-import cloneDeep from 'lodash.clonedeep';
 import {
   ActorTypeEnum,
   DelayTypeEnum,
   DigestTypeEnum,
   DigestUnitEnum,
   EmailBlockTypeEnum,
-  IEmailBlock,
-  INotificationTemplate,
-  INotificationTrigger,
+  type IEmailBlock,
+  type INotificationTemplate,
+  type INotificationTrigger,
   isBridgeWorkflow,
   StepTypeEnum,
-  TextAlignEnum,
   slugify,
+  TextAlignEnum,
 } from '@novu/shared';
 import { captureException } from '@sentry/react';
+import cloneDeep from 'lodash.clonedeep';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { type FieldErrors, FormProvider, useFieldArray, useForm } from 'react-hook-form';
+import { useParams } from 'react-router-dom';
 
 import { v4 as uuid4 } from 'uuid';
-import type { IForm, IFormStep, ITemplates } from './formTypes';
-import { useTemplateController } from './useTemplateController';
-import { mapFormToCreateNotificationTemplate, mapNotificationTemplateToForm } from './templateToFormMappers';
-import { errorMessage, successMessage } from '../../../utils/notifications';
-import { schema } from './notificationTemplateSchema';
 import { useEffectOnce, useNotificationGroup } from '../../../hooks';
-import { useCreate } from '../hooks/useCreate';
+import { errorMessage, successMessage } from '../../../utils/notifications';
 import { stepNames } from '../constants';
+import { useCreate } from '../hooks/useCreate';
 import { getExplicitErrors } from '../shared/errors';
+import type { IForm, IFormStep, ITemplates } from './formTypes';
+import { schema } from './notificationTemplateSchema';
+import { mapFormToCreateNotificationTemplate, mapNotificationTemplateToForm } from './templateToFormMappers';
+import { useTemplateController } from './useTemplateController';
 
 const defaultEmailBlocks: IEmailBlock[] = [
   {

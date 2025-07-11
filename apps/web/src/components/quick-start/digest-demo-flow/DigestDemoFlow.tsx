@@ -1,14 +1,13 @@
-import { useEffect } from 'react';
 import { Skeleton } from '@mantine/core';
 import { useResizeObserver } from '@mantine/hooks';
-import ReactFlow, { Edge, Node, useReactFlow } from 'react-flow-renderer';
-
-import { TriggerNode } from './TriggerNode';
+import { useEffect } from 'react';
+import ReactFlow, { type Edge, type Node, useReactFlow } from 'react-flow-renderer';
+import { useTemplateFetcher } from '../../../api/hooks';
+import { WorkflowWrapper } from '../common';
+import { DigestDemoFlowProvider } from './DigestDemoFlowProvider';
 import { DigestNode } from './DigestNode';
 import { EmailNode } from './EmailNode';
-import { useTemplateFetcher } from '../../../api/hooks';
-import { DigestDemoFlowProvider } from './DigestDemoFlowProvider';
-import { WorkflowWrapper } from '../common';
+import { TriggerNode } from './TriggerNode';
 
 export function DigestDemoFlow({
   isReadOnly = true,

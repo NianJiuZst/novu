@@ -1,18 +1,17 @@
 import { Stack } from '@mantine/core';
+import { Input } from '@novu/design-system';
+import { ChannelTypeEnum } from '@novu/shared';
 import { useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-
-import { ChannelTypeEnum } from '@novu/shared';
-import { Input } from '@novu/design-system';
-import { useEnvironment, useHasActiveIntegrations, useVariablesManager } from '../../../../hooks';
-import { StepSettings } from '../../workflow/SideBar/StepSettings';
-import { LackIntegrationAlert } from '../LackIntegrationAlert';
-import { EditVariablesModal } from '../EditVariablesModal';
-import { InAppContentCard } from './InAppContentCard';
-import { useStepFormPath } from '../../hooks/useStepFormPath';
-import type { IForm, ITemplates } from '../formTypes';
 import { When } from '../../../../components/utils/When';
+import { useEnvironment, useHasActiveIntegrations, useVariablesManager } from '../../../../hooks';
+import { useStepFormPath } from '../../hooks/useStepFormPath';
+import { StepSettings } from '../../workflow/SideBar/StepSettings';
+import { EditVariablesModal } from '../EditVariablesModal';
+import type { IForm, ITemplates } from '../formTypes';
+import { LackIntegrationAlert } from '../LackIntegrationAlert';
 import { useTemplateEditorForm } from '../TemplateEditorFormProvider';
+import { InAppContentCard } from './InAppContentCard';
 
 const getVariableContents = (template: ITemplates) => {
   const baseContent = ['content'];

@@ -1,5 +1,5 @@
-import { UserSession } from '@novu/testing';
-import { IUpdateNotificationTemplateDto } from '@novu/shared';
+import type { IUpdateNotificationTemplateDto } from '@novu/shared';
+import type { UserSession } from '@novu/testing';
 import axios from 'axios';
 
 const axiosInstance = axios.create();

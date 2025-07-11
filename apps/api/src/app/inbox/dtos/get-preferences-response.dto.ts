@@ -1,4 +1,4 @@
-import { IPreferenceChannels, PreferenceLevelEnum } from '@novu/shared';
+import { type IPreferenceChannels, PreferenceLevelEnum } from '@novu/shared';
 import { IsDefined, IsEnum, IsOptional } from 'class-validator';
 import type { Workflow } from '../utils/types';
 

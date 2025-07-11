@@ -1,15 +1,15 @@
 import { EmailProviderIdEnum } from '@novu/shared';
 import {
   ChannelTypeEnum,
-  ISendMessageSuccessResponse,
-  ICheckIntegrationResponse,
   CheckIntegrationResponseEnum,
-  IEmailOptions,
-  IEmailProvider,
+  type ICheckIntegrationResponse,
+  type IEmailOptions,
+  type IEmailProvider,
+  type ISendMessageSuccessResponse,
 } from '@novu/stateless';
 import { Resend } from 'resend';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export class ResendEmailProvider extends BaseProvider implements IEmailProvider {
   protected casing: CasingEnum = CasingEnum.SNAKE_CASE;

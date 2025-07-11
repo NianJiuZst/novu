@@ -1,13 +1,13 @@
-import { ChannelStepEnum } from '../../constants';
+import type { ChannelStepEnum } from '../../constants';
 import { emptySchema } from '../../schemas';
 import type {
   Awaitable,
+  ChannelStep,
   DiscoverStepOutput,
   DiscoverWorkflowOutput,
-  Schema,
-  ChannelStep,
-  StepOptions,
   FromSchema,
+  Schema,
+  StepOptions,
 } from '../../types';
 import { transformSchema } from '../../validators';
 import { discoverProviders } from './discover-providers';

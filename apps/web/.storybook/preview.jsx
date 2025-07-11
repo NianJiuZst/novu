@@ -1,6 +1,6 @@
+import { ThemeProvider } from '@novu/design-system';
 import React from 'react';
 import { useDarkMode } from 'storybook-dark-mode';
-import { ThemeProvider } from '@novu/design-system';
 import { DocsContainer } from './Doc.container';
 
 export const parameters = {

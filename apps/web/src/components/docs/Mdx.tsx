@@ -1,17 +1,17 @@
 import { Accordion, Alert, Code, Paper } from '@mantine/core';
 import { Tabs, Tooltip } from '@novu/design-system';
-import { IconInfoOutline, IconOutlineWarning } from '@novu/novui/icons';
+import { Text, Title } from '@novu/novui';
 import { css } from '@novu/novui/css';
+import { IconInfoOutline, IconOutlineWarning } from '@novu/novui/icons';
 import { Flex, Grid, GridItem, styled } from '@novu/novui/jsx';
-import * as mdxBundler from 'mdx-bundler/client';
-import { useMemo, ReactNode, PropsWithChildren, useEffect } from 'react';
-import { Title, Text } from '@novu/novui';
 import { text } from '@novu/novui/recipes';
-import { DOCS_URL, MINTLIFY_IMAGE_URL } from './docs.const';
-import { Highlight } from './Highlight';
-import { DocsQueryResults } from './useLoadDocs';
+import * as mdxBundler from 'mdx-bundler/client';
+import { type PropsWithChildren, type ReactNode, useEffect, useMemo } from 'react';
 import { DOCS_WRAPPER_ELEMENT_ID } from './Docs';
+import { DOCS_URL, MINTLIFY_IMAGE_URL } from './docs.const';
 import { createGlobals } from './globals';
+import { Highlight } from './Highlight';
+import type { DocsQueryResults } from './useLoadDocs';
 
 const LiText = styled('span', text);
 

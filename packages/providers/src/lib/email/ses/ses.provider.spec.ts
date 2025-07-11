@@ -1,6 +1,6 @@
-import { expect, test, vi, describe } from 'vitest';
-import { EmailEventStatusEnum } from '@novu/stateless';
 import { SESClient } from '@aws-sdk/client-ses';
+import { EmailEventStatusEnum } from '@novu/stateless';
+import { describe, expect, test, vi } from 'vitest';
 import { SESEmailProvider } from './ses.provider';
 
 const mockConfig = {

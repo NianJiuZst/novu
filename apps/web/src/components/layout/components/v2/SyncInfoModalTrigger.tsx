@@ -1,15 +1,13 @@
-import React, { useState } from 'react';
-import CryptoJS from 'crypto-js';
-
 import { colors, Tooltip, useColorScheme } from '@novu/design-system';
 import { Button, Text } from '@novu/novui';
 import { css } from '@novu/novui/css';
 import { IconOutlineCloudUpload } from '@novu/novui/icons';
-
-import { useTelemetry } from '../../../../hooks/useNovuAPI';
-import { SyncInfoModal } from './SyncInfoModal';
-import { When } from '../../../utils/When';
+import CryptoJS from 'crypto-js';
+import React, { useState } from 'react';
 import { useIsSynced } from '../../../../hooks';
+import { useTelemetry } from '../../../../hooks/useNovuAPI';
+import { When } from '../../../utils/When';
+import { SyncInfoModal } from './SyncInfoModal';
 
 export function SyncInfoModalTrigger() {
   const [showSyncInfoModal, setShowSyncInfoModal] = useState(false);

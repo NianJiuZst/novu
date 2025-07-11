@@ -1,14 +1,14 @@
 import styled from '@emotion/styled';
 import { Box, Center, Group } from '@mantine/core';
 import { useClipboard, useDisclosure } from '@mantine/hooks';
-import { Button, Check, colors, Copy, Input, Sidebar, Text } from '@novu/design-system';
+import { Button, Check, Copy, colors, Input, Sidebar, Text } from '@novu/design-system';
 import {
   CHANNELS_WITH_PRIMARY,
   CredentialsKeyEnum,
   EmailProviderIdEnum,
-  IConfigCredentials,
-  IConstructIntegrationDto,
-  ICredentialsDto,
+  type IConfigCredentials,
+  type IConstructIntegrationDto,
+  type ICredentialsDto,
   InAppProviderIdEnum,
   SmsProviderIdEnum,
   slugify,
@@ -17,13 +17,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
 import { useWebhookSupportStatus } from '../../../../../api/hooks';
 import { useUpdateIntegration } from '../../../../../api/hooks/useUpdateIntegration';
-import { Conditions, IConditions } from '../../../../../components/conditions';
+import { Conditions, type IConditions } from '../../../../../components/conditions';
 import { When } from '../../../../../components/utils/When';
 import { useEnvironment } from '../../../../../hooks';
 import { successMessage } from '../../../../../utils/notifications';
-import { Faq } from './Faq';
-import { SetupTimeline } from './SetupTimeline';
-import { FrameworkEnum } from '../../../../quick-start/consts';
+import type { FrameworkEnum } from '../../../../quick-start/consts';
 import { defaultIntegrationConditionsProps } from '../../../constants';
 import type { IIntegratedProvider } from '../../../types';
 import { useProviders } from '../../../useProviders';
@@ -36,6 +34,8 @@ import { UpdateIntegrationSidebarHeader } from '../../UpdateIntegrationSidebarHe
 import { NovuInAppFrameworks } from '../../v2';
 import { NovuProviderSidebarContent } from '../NovuProviderSidebarContent';
 import { useSelectPrimaryIntegrationModal } from '../useSelectPrimaryIntegrationModal';
+import { Faq } from './Faq';
+import { SetupTimeline } from './SetupTimeline';
 
 interface IProviderForm {
   name: string;

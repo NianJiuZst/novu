@@ -6,7 +6,7 @@ export function flattenJson(obj?: Object, parentKey = '', result = {}) {
   }
 
   for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.hasOwn(obj, key)) {
       const newKey = parentKey ? `${parentKey}.${key}` : key;
 
       if (typeof obj[key] === 'object' && obj[key] !== null && !_.isArray(obj[key])) {

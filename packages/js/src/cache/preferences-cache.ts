@@ -1,9 +1,9 @@
+import type { NovuEventEmitter, PreferenceEvents } from '../event-emitter';
+import type { Preference } from '../preferences/preference';
+import type { ListPreferencesArgs } from '../preferences/types';
+import { PreferenceLevel } from '../types';
 import { InMemoryCache } from './in-memory-cache';
 import type { Cache } from './types';
-import { NovuEventEmitter, PreferenceEvents } from '../event-emitter';
-import { PreferenceLevel } from '../types';
-import { Preference } from '../preferences/preference';
-import { ListPreferencesArgs } from '../preferences/types';
 
 // these events should update the preferences in the cache
 const updateEvents: PreferenceEvents[] = [

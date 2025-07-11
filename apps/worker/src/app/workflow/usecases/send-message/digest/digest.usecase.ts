@@ -1,36 +1,33 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  MessageRepository,
-  JobRepository,
+  type CreateExecutionDetails,
+  CreateExecutionDetailsCommand,
+  DetailEnum,
+  type FeatureFlagsService,
+} from '@novu/application-generic';
+import {
+  type EnvironmentEntity,
+  type JobEntity,
+  type JobRepository,
   JobStatusEnum,
-  JobEntity,
-  EnvironmentEntity,
-  OrganizationEntity,
-  UserEntity,
+  type MessageRepository,
+  type OrganizationEntity,
+  type UserEntity,
 } from '@novu/dal';
 import {
-  StepTypeEnum,
+  DigestTypeEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
-  DigestTypeEnum,
-  IDigestRegularMetadata,
   FeatureFlagsKeysEnum,
+  type IDigestRegularMetadata,
+  StepTypeEnum,
 } from '@novu/shared';
-import {
-  DetailEnum,
-  CreateExecutionDetails,
-  CreateExecutionDetailsCommand,
-  FeatureFlagsService,
-} from '@novu/application-generic';
-
-import { GetDigestEventsRegular } from './get-digest-events-regular.usecase';
-import { GetDigestEventsBackoff } from './get-digest-events-backoff.usecase';
-
 import { PlatformException } from '../../../../shared/utils';
-
-import { SendMessageCommand } from '../send-message.command';
-import { SendMessageResult, SendMessageType } from '../send-message-type.usecase';
+import type { SendMessageCommand } from '../send-message.command';
+import { type SendMessageResult, SendMessageType } from '../send-message-type.usecase';
 import { DigestEventsCommand } from './digest-events.command';
+import type { GetDigestEventsBackoff } from './get-digest-events-backoff.usecase';
+import type { GetDigestEventsRegular } from './get-digest-events-regular.usecase';
 
 const LOG_CONTEXT = 'Digest';
 

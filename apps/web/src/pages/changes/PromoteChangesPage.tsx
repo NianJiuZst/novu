@@ -1,17 +1,16 @@
+import styled from '@emotion/styled';
+import { Button, Tabs } from '@novu/design-system';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import styled from '@emotion/styled';
-
-import { Button, Tabs } from '@novu/design-system';
-import PageHeader from '../../components/layout/components/PageHeader';
-import PageContainer from '../../components/layout/components/PageContainer';
-import { useEnvironment, usePromotedChanges, useUnPromotedChanges } from '../../hooks';
-import { ChangesTable } from './components/ChangesTableLayout';
 import { bulkPromoteChanges } from '../../api/changes';
 import { QueryKeys } from '../../api/query.keys';
-import { errorMessage, successMessage } from '../../utils/notifications';
+import PageContainer from '../../components/layout/components/PageContainer';
+import PageHeader from '../../components/layout/components/PageHeader';
 import { ROUTES } from '../../constants/routes';
+import { useEnvironment, usePromotedChanges, useUnPromotedChanges } from '../../hooks';
+import { errorMessage, successMessage } from '../../utils/notifications';
+import { ChangesTable } from './components/ChangesTableLayout';
 
 const PENDING = 'Pending';
 const HISTORY = 'History';

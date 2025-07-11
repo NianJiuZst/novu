@@ -1,15 +1,15 @@
-import { Inject, BadRequestException, Injectable } from '@nestjs/common';
-import { AnalyticsService } from '@novu/application-generic';
-import { OrganizationEntity, OrganizationRepository, UserRepository } from '@novu/dal';
-import { ApiServiceLevelEnum, EnvironmentEnum, JobTitleEnum, MemberRoleEnum } from '@novu/shared';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import type { AnalyticsService } from '@novu/application-generic';
+import type { OrganizationEntity, OrganizationRepository, UserRepository } from '@novu/dal';
+import { ApiServiceLevelEnum, EnvironmentEnum, type JobTitleEnum, MemberRoleEnum } from '@novu/shared';
 
 import { CreateEnvironmentCommand } from '../../../environments-v1/usecases/create-environment/create-environment.command';
-import { CreateEnvironment } from '../../../environments-v1/usecases/create-environment/create-environment.usecase';
+import type { CreateEnvironment } from '../../../environments-v1/usecases/create-environment/create-environment.usecase';
 import { GetOrganizationCommand } from '../get-organization/get-organization.command';
-import { GetOrganization } from '../get-organization/get-organization.usecase';
+import type { GetOrganization } from '../get-organization/get-organization.usecase';
 import { AddMemberCommand } from '../membership/add-member/add-member.command';
-import { AddMember } from '../membership/add-member/add-member.usecase';
-import { CreateOrganizationCommand } from './create-organization.command';
+import type { AddMember } from '../membership/add-member/add-member.usecase';
+import type { CreateOrganizationCommand } from './create-organization.command';
 
 @Injectable()
 export class CreateOrganization {

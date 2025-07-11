@@ -1,34 +1,34 @@
-import { patchSubscriber } from '@/api/subscribers';
-import { useEnvironment } from '@/context/environment/hooks';
-import { QueryKeys } from '@/utils/query-keys';
-import type { OmitEnvironmentFromParameters } from '@/utils/types';
-import type { SubscriberResponseDto } from '@novu/api/models/components';
-import { useMutation, type UseMutationOptions, useQueryClient } from '@tanstack/react-query';
+import type { SubscriberResponseDto } from "@novu/api/models/components";
+import { type UseMutationOptions, useMutation, useQueryClient } from "@tanstack/react-query";
+import { patchSubscriber } from "@/api/subscribers";
+import { useEnvironment } from "@/context/environment/hooks";
+import { QueryKeys } from "@/utils/query-keys";
+import type { OmitEnvironmentFromParameters } from "@/utils/types";
 
 type PatchSubscriberParameters = OmitEnvironmentFromParameters<typeof patchSubscriber>;
 
 export const usePatchSubscriber = (
-  options?: UseMutationOptions<SubscriberResponseDto, unknown, PatchSubscriberParameters>
+	options?: UseMutationOptions<SubscriberResponseDto, unknown, PatchSubscriberParameters>
 ) => {
-  const queryClient = useQueryClient();
-  const { currentEnvironment } = useEnvironment();
+	const queryClient = useQueryClient();
+	const { currentEnvironment } = useEnvironment();
 
-  const { mutateAsync, ...rest } = useMutation({
-    mutationFn: (args: PatchSubscriberParameters) => patchSubscriber({ environment: currentEnvironment!, ...args }),
-    ...options,
-    onSuccess: async (data, variables, ctx) => {
-      await queryClient.setQueryData([QueryKeys.fetchSubscriber, variables.subscriberId], data);
+	const { mutateAsync, ...rest } = useMutation({
+		mutationFn: (args: PatchSubscriberParameters) => patchSubscriber({ environment: currentEnvironment!, ...args }),
+		...options,
+		onSuccess: async (data, variables, ctx) => {
+			await queryClient.setQueryData([QueryKeys.fetchSubscriber, variables.subscriberId], data);
 
-      await queryClient.invalidateQueries({
-        queryKey: [QueryKeys.fetchSubscribers],
-      });
+			await queryClient.invalidateQueries({
+				queryKey: [QueryKeys.fetchSubscribers],
+			});
 
-      options?.onSuccess?.(data, variables, ctx);
-    },
-  });
+			options?.onSuccess?.(data, variables, ctx);
+		},
+	});
 
-  return {
-    ...rest,
-    patchSubscriber: mutateAsync,
-  };
+	return {
+		...rest,
+		patchSubscriber: mutateAsync,
+	};
 };

@@ -1,19 +1,18 @@
-import { useRef, useState } from 'react';
-import { useFormContext, Controller } from 'react-hook-form';
-import { ActionIcon, useMantineTheme } from '@mantine/core';
 import styled from '@emotion/styled';
-import { TextAlignEnum } from '@novu/shared';
-
+import { ActionIcon, useMantineTheme } from '@mantine/core';
 import {
-  DotsHorizontalOutlined,
-  Trash,
   Button,
   colors,
+  DotsHorizontalOutlined,
   Dropdown,
-  IconOutlineAlignHorizontalLeft,
   IconOutlineAlignHorizontalCenter,
+  IconOutlineAlignHorizontalLeft,
   IconOutlineAlignHorizontalRight,
+  Trash,
 } from '@novu/design-system';
+import { TextAlignEnum } from '@novu/shared';
+import { useRef, useState } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import { useEnvironment } from '../../../../hooks';
 import { useStepFormPath } from '../../hooks/useStepFormPath';
 

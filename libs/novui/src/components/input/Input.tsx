@@ -1,12 +1,12 @@
 import { TextInput as ExternalTextInput, type InputProps as ExternalTextInputProps } from '@mantine/core';
-import { ChangeEventHandler, forwardRef } from 'react';
-import { CoreProps, LocalizedMessage, LocalizedString } from '../../types';
+import { type ChangeEventHandler, forwardRef } from 'react';
 import { css, cx } from '../../../styled-system/css';
 import { splitCssProps } from '../../../styled-system/jsx';
-import { input, InputVariant } from '../../../styled-system/recipes';
-import { JsxStyleProps } from '../../../styled-system/types';
-import { PolymorphicRef } from '../../types/props-helpers';
+import { type InputVariant, input } from '../../../styled-system/recipes';
+import type { JsxStyleProps } from '../../../styled-system/types';
 import { IconErrorOutline } from '../../icons';
+import type { CoreProps, LocalizedMessage, LocalizedString } from '../../types';
+import type { PolymorphicRef } from '../../types/props-helpers';
 
 export type TextInputType = 'text' | 'password' | 'email' | 'search' | 'tel';
 export const DEFAULT_TEXT_INPUT_TYPE: TextInputType = 'text';

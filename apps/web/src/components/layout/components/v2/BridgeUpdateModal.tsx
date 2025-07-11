@@ -1,19 +1,19 @@
 import { Modal, successMessage } from '@novu/design-system';
-import { css } from '@novu/novui/css';
-import { text } from '@novu/novui/recipes';
 import { Button, Input, Title } from '@novu/novui';
+import { css } from '@novu/novui/css';
 import { IconOutlineMenuBook } from '@novu/novui/icons';
-import { HStack, Box, styled } from '@novu/novui/jsx';
-import { FC, useEffect, useState } from 'react';
-import { validateBridgeUrl } from '../../../../api/bridge';
+import { Box, HStack, styled } from '@novu/novui/jsx';
+import { text } from '@novu/novui/recipes';
+import { type FC, useEffect, useState } from 'react';
 import { updateBridgeUrl } from '../../../../api';
-import { useEnvironment } from '../../../../hooks';
-import { validateURL } from '../../../../utils';
-import { useStudioState } from '../../../../studio/StudioStateProvider';
+import { validateBridgeUrl } from '../../../../api/bridge';
 import { buildBridgeHTTPClient } from '../../../../bridgeApi/bridgeApi.client';
+import { useEnvironment } from '../../../../hooks';
 import { useTelemetry } from '../../../../hooks/useNovuAPI';
-import { useDocsModal } from '../../../docs/useDocsModal';
+import { useStudioState } from '../../../../studio/StudioStateProvider';
+import { validateURL } from '../../../../utils';
 import { PATHS } from '../../../docs/docs.const';
+import { useDocsModal } from '../../../docs/useDocsModal';
 
 export type BridgeUpdateModalProps = {
   isOpen: boolean;

@@ -3,30 +3,25 @@
  */
 
 import {
-  InvalidateQueryFilters,
-  QueryClient,
-  QueryFunctionContext,
-  QueryKey,
+  type InvalidateQueryFilters,
+  type QueryClient,
+  type QueryFunctionContext,
+  type QueryKey,
+  type UseQueryResult,
+  type UseSuspenseQueryResult,
   useQuery,
-  UseQueryResult,
   useSuspenseQuery,
-  UseSuspenseQueryResult,
-} from "@tanstack/react-query";
-import { NovuCore } from "../core.js";
-import { integrationsListActive } from "../funcs/integrationsListActive.js";
-import { combineSignals } from "../lib/primitives.js";
-import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
-import { unwrapAsync } from "../types/fp.js";
-import { useNovuContext } from "./_context.js";
-import {
-  QueryHookOptions,
-  SuspenseQueryHookOptions,
-  TupleToPrefixes,
-} from "./_types.js";
+} from '@tanstack/react-query';
+import type { NovuCore } from '../core.js';
+import { integrationsListActive } from '../funcs/integrationsListActive.js';
+import { combineSignals } from '../lib/primitives.js';
+import type { RequestOptions } from '../lib/sdks.js';
+import type * as operations from '../models/operations/index.js';
+import { unwrapAsync } from '../types/fp.js';
+import { useNovuContext } from './_context.js';
+import type { QueryHookOptions, SuspenseQueryHookOptions, TupleToPrefixes } from './_types.js';
 
-export type IntegrationsListActiveQueryData =
-  operations.IntegrationsControllerGetActiveIntegrationsResponse;
+export type IntegrationsListActiveQueryData = operations.IntegrationsControllerGetActiveIntegrationsResponse;
 
 /**
  * List active integrations
@@ -36,15 +31,11 @@ export type IntegrationsListActiveQueryData =
  */
 export function useIntegrationsListActive(
   idempotencyKey?: string | undefined,
-  options?: QueryHookOptions<IntegrationsListActiveQueryData>,
+  options?: QueryHookOptions<IntegrationsListActiveQueryData>
 ): UseQueryResult<IntegrationsListActiveQueryData, Error> {
   const client = useNovuContext();
   return useQuery({
-    ...buildIntegrationsListActiveQuery(
-      client,
-      idempotencyKey,
-      options,
-    ),
+    ...buildIntegrationsListActiveQuery(client, idempotencyKey, options),
     ...options,
   });
 }
@@ -57,15 +48,11 @@ export function useIntegrationsListActive(
  */
 export function useIntegrationsListActiveSuspense(
   idempotencyKey?: string | undefined,
-  options?: SuspenseQueryHookOptions<IntegrationsListActiveQueryData>,
+  options?: SuspenseQueryHookOptions<IntegrationsListActiveQueryData>
 ): UseSuspenseQueryResult<IntegrationsListActiveQueryData, Error> {
   const client = useNovuContext();
   return useSuspenseQuery({
-    ...buildIntegrationsListActiveQuery(
-      client,
-      idempotencyKey,
-      options,
-    ),
+    ...buildIntegrationsListActiveQuery(client, idempotencyKey, options),
     ...options,
   });
 }
@@ -73,20 +60,17 @@ export function useIntegrationsListActiveSuspense(
 export function prefetchIntegrationsListActive(
   queryClient: QueryClient,
   client$: NovuCore,
-  idempotencyKey?: string | undefined,
+  idempotencyKey?: string | undefined
 ): Promise<void> {
   return queryClient.prefetchQuery({
-    ...buildIntegrationsListActiveQuery(
-      client$,
-      idempotencyKey,
-    ),
+    ...buildIntegrationsListActiveQuery(client$, idempotencyKey),
   });
 }
 
 export function setIntegrationsListActiveData(
   client: QueryClient,
   queryKeyBase: [parameters: { idempotencyKey?: string | undefined }],
-  data: IntegrationsListActiveQueryData,
+  data: IntegrationsListActiveQueryData
 ): IntegrationsListActiveQueryData | undefined {
   const key = queryKeyIntegrationsListActive(...queryKeyBase);
 
@@ -95,59 +79,47 @@ export function setIntegrationsListActiveData(
 
 export function invalidateIntegrationsListActive(
   client: QueryClient,
-  queryKeyBase: TupleToPrefixes<
-    [parameters: { idempotencyKey?: string | undefined }]
-  >,
-  filters?: Omit<InvalidateQueryFilters, "queryKey" | "predicate" | "exact">,
+  queryKeyBase: TupleToPrefixes<[parameters: { idempotencyKey?: string | undefined }]>,
+  filters?: Omit<InvalidateQueryFilters, 'queryKey' | 'predicate' | 'exact'>
 ): Promise<void> {
   return client.invalidateQueries({
     ...filters,
-    queryKey: ["@novu/api", "Integrations", "listActive", ...queryKeyBase],
+    queryKey: ['@novu/api', 'Integrations', 'listActive', ...queryKeyBase],
   });
 }
 
 export function invalidateAllIntegrationsListActive(
   client: QueryClient,
-  filters?: Omit<InvalidateQueryFilters, "queryKey" | "predicate" | "exact">,
+  filters?: Omit<InvalidateQueryFilters, 'queryKey' | 'predicate' | 'exact'>
 ): Promise<void> {
   return client.invalidateQueries({
     ...filters,
-    queryKey: ["@novu/api", "Integrations", "listActive"],
+    queryKey: ['@novu/api', 'Integrations', 'listActive'],
   });
 }
 
 export function buildIntegrationsListActiveQuery(
   client$: NovuCore,
   idempotencyKey?: string | undefined,
-  options?: RequestOptions,
+  options?: RequestOptions
 ): {
   queryKey: QueryKey;
-  queryFn: (
-    context: QueryFunctionContext,
-  ) => Promise<IntegrationsListActiveQueryData>;
+  queryFn: (context: QueryFunctionContext) => Promise<IntegrationsListActiveQueryData>;
 } {
   return {
     queryKey: queryKeyIntegrationsListActive({ idempotencyKey }),
-    queryFn: async function integrationsListActiveQueryFn(
-      ctx,
-    ): Promise<IntegrationsListActiveQueryData> {
+    queryFn: async function integrationsListActiveQueryFn(ctx): Promise<IntegrationsListActiveQueryData> {
       const sig = combineSignals(ctx.signal, options?.fetchOptions?.signal);
       const mergedOptions = {
         ...options,
         fetchOptions: { ...options?.fetchOptions, signal: sig },
       };
 
-      return unwrapAsync(integrationsListActive(
-        client$,
-        idempotencyKey,
-        mergedOptions,
-      ));
+      return unwrapAsync(integrationsListActive(client$, idempotencyKey, mergedOptions));
     },
   };
 }
 
-export function queryKeyIntegrationsListActive(
-  parameters: { idempotencyKey?: string | undefined },
-): QueryKey {
-  return ["@novu/api", "Integrations", "listActive", parameters];
+export function queryKeyIntegrationsListActive(parameters: { idempotencyKey?: string | undefined }): QueryKey {
+  return ['@novu/api', 'Integrations', 'listActive', parameters];
 }

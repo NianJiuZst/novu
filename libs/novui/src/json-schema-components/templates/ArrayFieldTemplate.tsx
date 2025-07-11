@@ -1,7 +1,7 @@
 import {
-  ArrayFieldTemplateItemType,
-  ArrayFieldTemplateProps,
-  ArrayFieldTitleProps,
+  type ArrayFieldTemplateItemType,
+  type ArrayFieldTemplateProps,
+  type ArrayFieldTitleProps,
   getTemplate,
   getUiOptions,
 } from '@rjsf/utils';
@@ -9,8 +9,8 @@ import { css } from '../../../styled-system/css';
 import { Box } from '../../../styled-system/jsx';
 import { jsonSchemaFormArrayToolbar, jsonSchemaFormSection } from '../../../styled-system/recipes';
 import { FormGroupTitle, SectionTitleToggle } from '../shared';
-import { calculateSectionDepth, getVariantFromDepth } from '../utils';
 import { useExpandToggle } from '../useExpandToggle';
+import { calculateSectionDepth, getVariantFromDepth } from '../utils';
 
 export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
   const [isExpanded, toggleExpanded] = useExpandToggle();

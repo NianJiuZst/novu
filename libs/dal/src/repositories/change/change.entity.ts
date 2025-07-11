@@ -1,8 +1,8 @@
-import { Types } from 'mongoose';
-import { ChangeEntityTypeEnum } from '@novu/shared';
+import type { ChangeEntityTypeEnum } from '@novu/shared';
+import type { Types } from 'mongoose';
+import type { ChangePropsValueType } from '../../types/helpers';
 import type { EnvironmentId } from '../environment';
 import type { OrganizationId } from '../organization';
-import type { ChangePropsValueType } from '../../types/helpers';
 import { UserEntity } from '../user';
 
 export class ChangeEntity {

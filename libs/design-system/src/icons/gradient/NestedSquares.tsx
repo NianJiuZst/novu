@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 export function NestedSquares(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (

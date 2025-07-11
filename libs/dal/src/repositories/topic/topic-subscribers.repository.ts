@@ -1,16 +1,16 @@
-import { DirectionEnum, ExternalSubscriberId } from '@novu/shared';
+import { DirectionEnum, type ExternalSubscriberId } from '@novu/shared';
 
-import { FilterQuery } from 'mongoose';
-import { TopicEntity } from '../..';
+import type { FilterQuery } from 'mongoose';
+import type { TopicEntity } from '../..';
 import type { EnforceEnvOrOrgIds } from '../../types/enforce';
 import { BaseRepository } from '../base-repository';
 import {
-  CreateTopicSubscribersEntity,
-  TopicSubscribersDBModel,
+  type CreateTopicSubscribersEntity,
+  type TopicSubscribersDBModel,
   TopicSubscribersEntity,
 } from './topic-subscribers.entity';
 import { TopicSubscribers } from './topic-subscribers.schema';
-import { EnvironmentId, OrganizationId, TopicId, TopicKey } from './types';
+import type { EnvironmentId, OrganizationId, TopicId, TopicKey } from './types';
 
 export class TopicSubscribersRepository extends BaseRepository<
   TopicSubscribersDBModel,

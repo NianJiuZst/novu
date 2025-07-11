@@ -1,7 +1,7 @@
-import { expect, Locator, Page, selectors } from '@playwright/test';
 import os from 'node:os';
-import { FeatureFlagsKeysEnum } from '@novu/shared';
-import { getSession, ISessionOptions } from './plugins';
+import type { FeatureFlagsKeysEnum } from '@novu/shared';
+import { expect, type Locator, type Page, selectors } from '@playwright/test';
+import { getSession, type ISessionOptions } from './plugins';
 
 const isMac = os.platform() === 'darwin';
 const modifier = isMac ? 'Meta' : 'Control';

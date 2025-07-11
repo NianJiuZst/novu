@@ -1,5 +1,5 @@
-import { LiquidError, RenderError, Template } from 'liquidjs';
-import { JSONSchemaDto } from '../../../shared/dtos/json-schema.dto';
+import { LiquidError, type RenderError, type Template } from 'liquidjs';
+import type { JSONSchemaDto } from '../../../shared/dtos/json-schema.dto';
 
 export type Variable = {
   /**

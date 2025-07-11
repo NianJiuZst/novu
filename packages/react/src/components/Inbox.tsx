@@ -1,10 +1,10 @@
+import type { StandardNovuOptions, Subscriber } from '@novu/js';
 import React, { useMemo } from 'react';
-import { Subscriber, StandardNovuOptions } from '@novu/js';
-import { DefaultProps, DefaultInboxProps, WithChildrenProps } from '../utils/types';
-import { Mounter } from './Mounter';
 import { useNovuUI } from '../context/NovuUIContext';
 import { useRenderer } from '../context/RendererContext';
 import { InternalNovuProvider, useNovu, useUnsafeNovu } from '../hooks/NovuProvider';
+import type { DefaultInboxProps, DefaultProps, WithChildrenProps } from '../utils/types';
+import { Mounter } from './Mounter';
 import { NovuUI } from './NovuUI';
 import { withRenderer } from './Renderer';
 

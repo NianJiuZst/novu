@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { ApiRateLimitCategoryEnum, ExternalSubscriberId, TopicKey, UserSessionData } from '@novu/shared';
-
+import { ApiRateLimitCategoryEnum, type ExternalSubscriberId, type TopicKey, type UserSessionData } from '@novu/shared';
+import { RequireAuthentication } from '../auth/framework/auth.decorator';
 import { ExternalApiAccessible } from '../auth/framework/external-api.decorator';
 import { ThrottlerCategory } from '../rate-limiting/guards';
 import {
@@ -10,39 +10,38 @@ import {
   ApiOkResponse,
   ApiResponse,
 } from '../shared/framework/response.decorator';
-import { RequireAuthentication } from '../auth/framework/auth.decorator';
 import { SdkGroupName, SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 import { UserSession } from '../shared/framework/user.decorator';
 import {
-  AddSubscribersRequestDto,
-  CreateTopicRequestDto,
+  type AddSubscribersRequestDto,
+  type CreateTopicRequestDto,
   CreateTopicResponseDto,
-  FilterTopicsRequestDto,
+  type FilterTopicsRequestDto,
   FilterTopicsResponseDto,
   GetTopicResponseDto,
-  RemoveSubscribersRequestDto,
-  RenameTopicRequestDto,
+  type RemoveSubscribersRequestDto,
+  type RenameTopicRequestDto,
   RenameTopicResponseDto,
   TopicSubscriberDto,
 } from './dtos';
 import { AssignSubscriberToTopicDto } from './dtos/assignSubscriberToTopicDto';
 import {
   AddSubscribersCommand,
-  AddSubscribersUseCase,
+  type AddSubscribersUseCase,
   CreateTopicCommand,
-  CreateTopicUseCase,
+  type CreateTopicUseCase,
   DeleteTopicCommand,
-  DeleteTopicUseCase,
+  type DeleteTopicUseCase,
   FilterTopicsCommand,
-  FilterTopicsUseCase,
+  type FilterTopicsUseCase,
   GetTopicCommand,
   GetTopicSubscriberCommand,
-  GetTopicSubscriberUseCase,
-  GetTopicUseCase,
+  type GetTopicSubscriberUseCase,
+  type GetTopicUseCase,
   RemoveSubscribersCommand,
-  RemoveSubscribersUseCase,
+  type RemoveSubscribersUseCase,
   RenameTopicCommand,
-  RenameTopicUseCase,
+  type RenameTopicUseCase,
 } from './use-cases';
 
 @ThrottlerCategory(ApiRateLimitCategoryEnum.CONFIGURATION)

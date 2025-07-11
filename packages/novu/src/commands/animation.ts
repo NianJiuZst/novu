@@ -18,7 +18,7 @@ const consoleFunctions = {
 
 // eslint-disable-next-line guard-for-in
 for (const func in consoleFunctions) {
-  console[func] = function () {
+  console[func] = () => {
     stopLastAnimation();
     // eslint-disable-next-line prefer-rest-params
     consoleFunctions[func].apply(console, arguments);
@@ -151,15 +151,14 @@ function animateString(str, effect, delay, speed) {
     init: false,
     f: 0,
     render() {
-      const self = this;
       if (!this.init) {
         log('\n'.repeat(this.lines - 1));
         this.init = true;
       }
       log(this.frame());
       setTimeout(() => {
-        if (!self.stopped) {
-          self.render();
+        if (!this.stopped) {
+          this.render();
         }
       }, delay / speed);
     },

@@ -1,7 +1,6 @@
-import { Popover, createStyles } from '@mantine/core';
-import { IMessageButton, MessageActionStatusEnum } from '@novu/shared';
-
+import { createStyles, Popover } from '@mantine/core';
 import { colors } from '@novu/design-system';
+import { type IMessageButton, MessageActionStatusEnum } from '@novu/shared';
 import { ButtonsTemplates } from './ButtonsTemplates';
 
 const usePopoverStyles = createStyles(({ colorScheme }) => ({

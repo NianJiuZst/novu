@@ -1,6 +1,6 @@
-import { createSignal, JSX } from 'solid-js';
-import { Tooltip } from './Tooltip';
+import { createSignal, type JSX } from 'solid-js';
 import { useStyle } from '../../helpers';
+import { Tooltip } from './Tooltip';
 
 type CopyToClipboardProps = {
   textToCopy: string;

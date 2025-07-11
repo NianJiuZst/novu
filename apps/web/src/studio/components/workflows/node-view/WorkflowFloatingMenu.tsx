@@ -1,20 +1,20 @@
 import { Tooltip } from '@novu/design-system';
-import { IconButton, LocalizedMessage, Text, type CoreProps, type IconButtonProps } from '@novu/novui';
+import { type CoreProps, IconButton, type IconButtonProps, type LocalizedMessage, Text } from '@novu/novui';
 import { css, cx } from '@novu/novui/css';
 import {
   IconOutlineAutoAwesomeMotion,
   IconOutlineAvTimer,
+  IconOutlineBolt,
   IconOutlineEmail,
   IconOutlineForum,
   IconOutlineMobileFriendly,
   IconOutlineNotifications,
   IconOutlineSms,
-  IconOutlineBolt,
-  IconType,
+  type IconType,
 } from '@novu/novui/icons';
 import { VStack } from '@novu/novui/jsx';
 import { vstack } from '@novu/novui/patterns';
-import { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 type IWorkflowFloatingMenuProps = CoreProps;
 

@@ -1,13 +1,13 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  BuilderFieldOperator,
-  BuilderFieldType,
+  type BuilderFieldOperator,
+  type BuilderFieldType,
   BuilderFieldTypeEnum,
-  BuilderGroupValues,
+  type BuilderGroupValues,
   FilterPartTypeEnum,
   PreviousStepTypeEnum,
   TimeOperatorEnum,
 } from '@novu/shared';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class BaseFilterPart {
   on: FilterPartTypeEnum;

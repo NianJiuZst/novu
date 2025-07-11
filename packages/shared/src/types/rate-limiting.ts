@@ -1,4 +1,4 @@
-import { ApiServiceLevelEnum } from './organization';
+import type { ApiServiceLevelEnum } from './organization';
 
 export enum ApiRateLimitAlgorithmEnum {
   BURST_ALLOWANCE = 'burst_allowance',

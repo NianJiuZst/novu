@@ -1,18 +1,18 @@
-import { useState } from 'react';
 import styled from '@emotion/styled';
 import { Group } from '@mantine/core';
 import {
-  colors,
-  When,
-  Text,
-  Modal,
-  Button,
-  Title,
   ActionButton,
+  Button,
   Condition,
   ConditionPlus,
+  colors,
+  Modal,
+  Text,
+  Title,
   Warning,
+  When,
 } from '@novu/design-system';
+import { useState } from 'react';
 
 const RemovesPrimary = () => {
   return (

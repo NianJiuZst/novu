@@ -1,29 +1,29 @@
-import { useState } from 'react';
 import { Grid, SegmentedControl, useMantineTheme } from '@mantine/core';
-import { colors } from '@novu/design-system';
 import { useHotkeys } from '@mantine/hooks';
+import { colors } from '@novu/design-system';
 import { ChannelTypeEnum } from '@novu/shared';
-import { EmailContentCard } from './EmailContentCard';
-import { useAuth } from '../../../../hooks/useAuth';
+import { useState } from 'react';
 import { When } from '../../../../components/utils/When';
 import { EmailPreview } from '../../../../components/workflow/preview';
-import { EditorPreviewSwitch } from '../EditorPreviewSwitch';
-import { TestSendEmail } from './TestSendEmail';
 import { MobileIcon } from '../../../../components/workflow/preview/email/PreviewSegment/MobileIcon';
 import { WebIcon } from '../../../../components/workflow/preview/email/PreviewSegment/WebIcon';
-import { VariablesManagement } from './variables-management/VariablesManagement';
 import {
-  useHasActiveIntegrations,
+  useEnvironment,
   useGetPrimaryIntegration,
+  useHasActiveIntegrations,
   useIntegrationLimit,
   useVariablesManager,
-  useEnvironment,
 } from '../../../../hooks';
-import { EditVariablesModal } from '../EditVariablesModal';
-import { StepSettings } from '../../workflow/SideBar/StepSettings';
-import { LackIntegrationAlert } from '../LackIntegrationAlert';
+import { useAuth } from '../../../../hooks/useAuth';
 import { useStepFormPath } from '../../hooks/useStepFormPath';
+import { StepSettings } from '../../workflow/SideBar/StepSettings';
+import { EditorPreviewSwitch } from '../EditorPreviewSwitch';
+import { EditVariablesModal } from '../EditVariablesModal';
+import { LackIntegrationAlert } from '../LackIntegrationAlert';
 import { useTemplateEditorForm } from '../TemplateEditorFormProvider';
+import { EmailContentCard } from './EmailContentCard';
+import { TestSendEmail } from './TestSendEmail';
+import { VariablesManagement } from './variables-management/VariablesManagement';
 
 export enum ViewEnum {
   EDIT = 'Edit',

@@ -1,17 +1,17 @@
 import {
-  SetMetadata,
   applyDecorators,
-  ExecutionContext,
+  type CallHandler,
+  type ExecutionContext,
   Injectable,
-  CallHandler,
-  NestInterceptor,
+  type NestInterceptor,
+  SetMetadata,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import type { PinoLogger, RequestLog, RequestLogRepository } from '@novu/application-generic';
+import type { UserSessionData } from '@novu/shared';
+import type { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { PinoLogger, RequestLog, RequestLogRepository } from '@novu/application-generic';
-import { UserSessionData } from '@novu/shared';
 import { retryWithBackoff } from '../../../utils/payload-sanitizer';
-import { TriggerEventResponseDto } from '../../events/dtos/trigger-event-response.dto';
+import type { TriggerEventResponseDto } from '../../events/dtos/trigger-event-response.dto';
 import { buildLog } from '../utils/mappers';
 
 const LOG_ANALYTICS_KEY = 'logAnalytics';

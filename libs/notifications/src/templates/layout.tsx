@@ -1,5 +1,5 @@
 import { Body, Container, Head, Html, Img, Preview, Tailwind } from '@react-email/components';
-import React from 'react';
+import type React from 'react';
 
 interface IBaseEmailLayoutProps {
   previewText: string;

@@ -1,4 +1,4 @@
-import { AdditionalOperation, RulesLogic } from 'json-logic-js';
+import type { AdditionalOperation, RulesLogic } from 'json-logic-js';
 
 import { COMPARISON_OPERATORS, JsonComparisonOperatorEnum, JsonLogicOperatorEnum } from './types';
 
@@ -155,8 +155,6 @@ export class QueryValidatorService {
             type: QueryIssueTypeEnum.MISSING_VALUE,
           });
         }
-
-        continue;
       }
     }
   }

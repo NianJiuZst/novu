@@ -1,6 +1,5 @@
-import axios from 'axios';
-
 import type { DiscoverWorkflowOutput, Event, ExecuteOutput, HealthCheck } from '@novu/framework/internal';
+import axios from 'axios';
 
 export type TriggerParams = {
   workflowId: string;

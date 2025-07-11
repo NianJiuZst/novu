@@ -1,11 +1,11 @@
-import { css } from '@novu/novui/css';
-import { Title, Text } from '@novu/novui';
 import styled from '@emotion/styled';
-import { MantineTheme } from '@mantine/core';
+import type { MantineTheme } from '@mantine/core';
+import { Text, Title } from '@novu/novui';
+import { css } from '@novu/novui/css';
 import { ApiServiceLevelEnum, FeatureFlagsKeysEnum } from '@novu/shared';
 import { Badge } from './Badge';
-import { PlanActionButton } from './PlanActionButton';
 import { ContactUsButton } from './ContactUsButton';
+import { PlanActionButton } from './PlanActionButton';
 
 const Cell = styled.div`
   display: flex;

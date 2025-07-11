@@ -1,12 +1,12 @@
 import {
-  ClickhouseSchema,
-  InferClickhouseSchemaType,
-  CHUInt16,
-  CHString,
   CHDateTime64,
   CHLowCardinality,
   CHNullable,
+  CHString,
+  CHUInt16,
   CHUInt32,
+  ClickhouseSchema,
+  type InferClickhouseSchemaType,
 } from 'clickhouse-schema';
 import { TABLE_NAME } from './request-log.repository';
 

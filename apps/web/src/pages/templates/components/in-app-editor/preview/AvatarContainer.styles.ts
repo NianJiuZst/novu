@@ -1,5 +1,5 @@
-import { createStyles } from '@mantine/core';
 import styled from '@emotion/styled';
+import { createStyles } from '@mantine/core';
 import { colors } from '@novu/design-system';
 
 export const useStyles = createStyles((theme) => {

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
-import { FeatureFlagsService, PinoLogger } from '@novu/application-generic';
+import type { ModuleRef } from '@nestjs/core';
+import type { FeatureFlagsService, PinoLogger } from '@novu/application-generic';
 import { createLiquidEngine } from '@novu/framework/internal';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
-import { FullPayloadForRender } from './render-command';
+import type { FullPayloadForRender } from './render-command';
 
 @Injectable()
 export abstract class BaseTranslationRendererUsecase {

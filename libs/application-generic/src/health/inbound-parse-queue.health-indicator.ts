@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { InboundParseQueueService } from '../services/queues';
+import type { InboundParseQueueService } from '../services/queues';
 import { QueueHealthIndicator } from './queue-health-indicator.service';
 
 const LOG_CONTEXT = 'InboundParseQueueServiceHealthIndicator';

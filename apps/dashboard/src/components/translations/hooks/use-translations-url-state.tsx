@@ -1,101 +1,101 @@
-import { useCallback, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { DEFAULT_TRANSLATIONS_LIMIT, DEFAULT_TRANSLATIONS_OFFSET } from '../constants';
+import { useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
+import { DEFAULT_TRANSLATIONS_LIMIT, DEFAULT_TRANSLATIONS_OFFSET } from "../constants";
 
 export type TranslationsFilter = {
-  query: string;
-  limit?: number;
-  offset?: number;
+	query: string;
+	limit?: number;
+	offset?: number;
 };
 
 export const defaultTranslationsFilter: TranslationsFilter = {
-  query: '',
-  limit: DEFAULT_TRANSLATIONS_LIMIT,
-  offset: DEFAULT_TRANSLATIONS_OFFSET,
+	query: "",
+	limit: DEFAULT_TRANSLATIONS_LIMIT,
+	offset: DEFAULT_TRANSLATIONS_OFFSET,
 };
 
 export type TranslationsUrlState = {
-  filterValues: TranslationsFilter;
-  handleFiltersChange: (newFilters: Partial<TranslationsFilter>) => void;
-  resetFilters: () => void;
-  handleNext: () => void;
-  handlePrevious: () => void;
-  handleFirst: () => void;
+	filterValues: TranslationsFilter;
+	handleFiltersChange: (newFilters: Partial<TranslationsFilter>) => void;
+	resetFilters: () => void;
+	handleNext: () => void;
+	handlePrevious: () => void;
+	handleFirst: () => void;
 };
 
 type UseTranslationsUrlStateProps = {
-  total?: number;
-  limit?: number;
+	total?: number;
+	limit?: number;
 };
 
 export function useTranslationsUrlState({
-  total = 0,
-  limit = DEFAULT_TRANSLATIONS_LIMIT,
+	total = 0,
+	limit = DEFAULT_TRANSLATIONS_LIMIT,
 }: UseTranslationsUrlStateProps): TranslationsUrlState {
-  const [searchParams, setSearchParams] = useSearchParams();
+	const [searchParams, setSearchParams] = useSearchParams();
 
-  const filterValues = useMemo(() => {
-    const query = searchParams.get('query') || '';
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
+	const filterValues = useMemo(() => {
+		const query = searchParams.get("query") || "";
+		const offset = parseInt(searchParams.get("offset") || "0", 10);
 
-    return {
-      query,
-      limit,
-      offset,
-    };
-  }, [searchParams, limit]);
+		return {
+			query,
+			limit,
+			offset,
+		};
+	}, [searchParams, limit]);
 
-  const handleFiltersChange = useCallback(
-    (newFilters: Partial<TranslationsFilter>) => {
-      setSearchParams((prev) => {
-        const newParams = new URLSearchParams(prev);
+	const handleFiltersChange = useCallback(
+		(newFilters: Partial<TranslationsFilter>) => {
+			setSearchParams((prev) => {
+				const newParams = new URLSearchParams(prev);
 
-        Object.entries(newFilters).forEach(([key, value]) => {
-          if (value === '' || value === undefined) {
-            newParams.delete(key);
-          } else {
-            newParams.set(key, String(value));
-          }
-        });
+				Object.entries(newFilters).forEach(([key, value]) => {
+					if (value === "" || value === undefined) {
+						newParams.delete(key);
+					} else {
+						newParams.set(key, String(value));
+					}
+				});
 
-        // Reset offset when filters change (except when offset is being set)
-        if (!('offset' in newFilters)) {
-          newParams.delete('offset');
-        }
+				// Reset offset when filters change (except when offset is being set)
+				if (!("offset" in newFilters)) {
+					newParams.delete("offset");
+				}
 
-        return newParams;
-      });
-    },
-    [setSearchParams]
-  );
+				return newParams;
+			});
+		},
+		[setSearchParams]
+	);
 
-  const resetFilters = useCallback(() => {
-    setSearchParams({});
-  }, [setSearchParams]);
+	const resetFilters = useCallback(() => {
+		setSearchParams({});
+	}, [setSearchParams]);
 
-  const handleNext = useCallback(() => {
-    const nextOffset = filterValues.offset + limit;
+	const handleNext = useCallback(() => {
+		const nextOffset = filterValues.offset + limit;
 
-    if (nextOffset < total) {
-      handleFiltersChange({ offset: nextOffset });
-    }
-  }, [filterValues.offset, limit, total, handleFiltersChange]);
+		if (nextOffset < total) {
+			handleFiltersChange({ offset: nextOffset });
+		}
+	}, [filterValues.offset, limit, total, handleFiltersChange]);
 
-  const handlePrevious = useCallback(() => {
-    const prevOffset = Math.max(0, filterValues.offset - limit);
-    handleFiltersChange({ offset: prevOffset });
-  }, [filterValues.offset, limit, handleFiltersChange]);
+	const handlePrevious = useCallback(() => {
+		const prevOffset = Math.max(0, filterValues.offset - limit);
+		handleFiltersChange({ offset: prevOffset });
+	}, [filterValues.offset, limit, handleFiltersChange]);
 
-  const handleFirst = useCallback(() => {
-    handleFiltersChange({ offset: 0 });
-  }, [handleFiltersChange]);
+	const handleFirst = useCallback(() => {
+		handleFiltersChange({ offset: 0 });
+	}, [handleFiltersChange]);
 
-  return {
-    filterValues,
-    handleFiltersChange,
-    resetFilters,
-    handleNext,
-    handlePrevious,
-    handleFirst,
-  };
+	return {
+		filterValues,
+		handleFiltersChange,
+		resetFilters,
+		handleNext,
+		handlePrevious,
+		handleFirst,
+	};
 }

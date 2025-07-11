@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { MessageRepository } from '@novu/dal';
-import { ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum } from '@novu/shared';
 import {
-  InstrumentUsecase,
-  DetailEnum,
-  CreateExecutionDetails,
+  type CreateExecutionDetails,
   CreateExecutionDetailsCommand,
+  DetailEnum,
+  InstrumentUsecase,
 } from '@novu/application-generic';
-
-import { SendMessageResult, SendMessageType } from './send-message-type.usecase';
-import { SendMessageCommand } from './send-message.command';
+import type { MessageRepository } from '@novu/dal';
+import { ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum } from '@novu/shared';
+import type { SendMessageCommand } from './send-message.command';
+import { type SendMessageResult, SendMessageType } from './send-message-type.usecase';
 
 @Injectable()
 export class SendMessageDelay extends SendMessageType {

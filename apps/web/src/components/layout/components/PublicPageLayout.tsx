@@ -1,4 +1,4 @@
-import { createStyles, Box } from '@mantine/core';
+import { Box, createStyles } from '@mantine/core';
 import { Outlet } from 'react-router-dom';
 import { CONTEXT_PATH } from '../../../config/index';
 

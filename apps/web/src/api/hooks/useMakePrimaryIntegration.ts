@@ -1,10 +1,9 @@
-import { useMutation, useQueryClient, UseMutationOptions } from '@tanstack/react-query';
 import type { IResponseError } from '@novu/shared';
-
-import { errorMessage, successMessage } from '../../utils/notifications';
+import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { IntegrationEntity } from '../../pages/integrations/types';
-import { QueryKeys } from '../query.keys';
+import { errorMessage, successMessage } from '../../utils/notifications';
 import { setIntegrationAsPrimary } from '../integration';
+import { QueryKeys } from '../query.keys';
 
 export const useMakePrimaryIntegration = (
   options: UseMutationOptions<IntegrationEntity, IResponseError, { id: string }> = {}

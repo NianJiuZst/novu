@@ -1,8 +1,8 @@
-import { IsDefined, IsOptional, IsString } from 'class-validator';
-import { NotificationStepEntity, JobEntity } from '@novu/dal';
 import { EnvironmentWithUserCommand } from '@novu/application-generic';
-import { ExecuteOutput } from '@novu/framework/internal';
-import { WorkflowPreferences, TriggerOverrides } from '@novu/shared';
+import type { JobEntity, NotificationStepEntity } from '@novu/dal';
+import type { ExecuteOutput } from '@novu/framework/internal';
+import type { TriggerOverrides, WorkflowPreferences } from '@novu/shared';
+import { IsDefined, IsOptional, IsString } from 'class-validator';
 
 export class SendMessageCommand extends EnvironmentWithUserCommand {
   @IsDefined()

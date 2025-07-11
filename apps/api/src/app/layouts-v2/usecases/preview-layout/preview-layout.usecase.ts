@@ -1,20 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { EmailControlType, InstrumentUsecase, LayoutControlType } from '@novu/application-generic';
+import { type EmailControlType, InstrumentUsecase, type LayoutControlType } from '@novu/application-generic';
 import {
   ChannelTypeEnum,
   LAYOUT_PREVIEW_EMAIL_STEP,
   LAYOUT_PREVIEW_WORKFLOW_ID,
   ResourceOriginEnum,
 } from '@novu/shared';
-
-import { GenerateLayoutPreviewResponseDto } from '../../dtos/generate-layout-preview-response.dto';
-import { PreviewLayoutCommand } from './preview-layout.command';
-import { GetLayoutCommand, GetLayoutUseCase } from '../get-layout';
-import { CreateVariablesObject, CreateVariablesObjectCommand } from '../../../shared/usecases/create-variables-object';
-import { ControlValueSanitizerService } from '../../../shared/services/control-value-sanitizer.service';
-import { PreviewStep, PreviewStepCommand } from '../../../bridge/usecases/preview-step';
-import { PreviewPayloadProcessorService } from '../../../workflows-v2/usecases/preview/services/preview-payload-processor.service';
-import { PayloadMergerService } from '../../../workflows-v2/usecases/preview/services/payload-merger.service';
+import { type PreviewStep, PreviewStepCommand } from '../../../bridge/usecases/preview-step';
+import type { ControlValueSanitizerService } from '../../../shared/services/control-value-sanitizer.service';
+import {
+  type CreateVariablesObject,
+  CreateVariablesObjectCommand,
+} from '../../../shared/usecases/create-variables-object';
+import type { PayloadMergerService } from '../../../workflows-v2/usecases/preview/services/payload-merger.service';
+import type { PreviewPayloadProcessorService } from '../../../workflows-v2/usecases/preview/services/preview-payload-processor.service';
+import type { GenerateLayoutPreviewResponseDto } from '../../dtos/generate-layout-preview-response.dto';
+import { GetLayoutCommand, type GetLayoutUseCase } from '../get-layout';
+import type { PreviewLayoutCommand } from './preview-layout.command';
 
 @Injectable()
 export class PreviewLayoutUsecase {

@@ -1,5 +1,5 @@
-import { IResponseError, WorkflowPreferences } from '@novu/shared';
-import { useMutation, UseMutationOptions } from '@tanstack/react-query';
+import type { IResponseError, WorkflowPreferences } from '@novu/shared';
+import { type UseMutationOptions, useMutation } from '@tanstack/react-query';
 import { useNovuAPI } from '../useNovuAPI';
 
 export const useUpdateWorkflowPreferences = (

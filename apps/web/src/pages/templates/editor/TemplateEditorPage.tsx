@@ -1,22 +1,21 @@
+import { isBridgeWorkflow, type ResourceTypeEnum } from '@novu/shared';
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { ReactFlowProvider } from 'react-flow-renderer';
 import { useFormContext } from 'react-hook-form';
-
-import { isBridgeWorkflow, ResourceTypeEnum } from '@novu/shared';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import PageContainer from '../../../components/layout/components/PageContainer';
-import type { IForm } from '../components/formTypes';
-import WorkflowEditor from '../workflow/WorkflowEditor';
-import { useEnvironment, usePrompt } from '../../../hooks';
-import { BlueprintModal } from '../components/BlueprintModal';
-import { TemplateEditorFormProvider, useTemplateEditorForm } from '../components/TemplateEditorFormProvider';
 import { ROUTES } from '../../../constants/routes';
-import { TourProvider } from './TourProvider';
-import { NavigateValidatorModal } from '../components/NavigateValidatorModal';
-import { useTourStorage } from '../hooks/useTourStorage';
-import { useBasePath } from '../hooks/useBasePath';
-import { TemplateDetailsPageV2 } from '../editor_v2/TemplateDetailsPageV2';
+import { useEnvironment, usePrompt } from '../../../hooks';
 import { WorkflowDetailFormContextProvider } from '../../../studio/components/workflows/preferences/WorkflowDetailFormContextProvider';
+import { BlueprintModal } from '../components/BlueprintModal';
+import type { IForm } from '../components/formTypes';
+import { NavigateValidatorModal } from '../components/NavigateValidatorModal';
+import { TemplateEditorFormProvider, useTemplateEditorForm } from '../components/TemplateEditorFormProvider';
+import { TemplateDetailsPageV2 } from '../editor_v2/TemplateDetailsPageV2';
+import { useBasePath } from '../hooks/useBasePath';
+import { useTourStorage } from '../hooks/useTourStorage';
+import WorkflowEditor from '../workflow/WorkflowEditor';
+import { TourProvider } from './TourProvider';
 
 function BaseTemplateEditorPage() {
   const navigate = useNavigate();

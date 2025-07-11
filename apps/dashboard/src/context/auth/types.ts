@@ -1,23 +1,23 @@
-import type { IOrganizationEntity, IUserEntity } from '@novu/shared';
+import type { IOrganizationEntity, IUserEntity } from "@novu/shared";
 
 type UserState =
-  | {
-      isUserLoaded: true;
-      currentUser: IUserEntity;
-    }
-  | {
-      isUserLoaded: false;
-      currentUser: undefined;
-    };
+	| {
+			isUserLoaded: true;
+			currentUser: IUserEntity;
+	  }
+	| {
+			isUserLoaded: false;
+			currentUser: undefined;
+	  };
 
 type OrganizationState =
-  | {
-      isOrganizationLoaded: true;
-      currentOrganization: IOrganizationEntity;
-    }
-  | {
-      isOrganizationLoaded: false;
-      currentOrganization: undefined;
-    };
+	| {
+			isOrganizationLoaded: true;
+			currentOrganization: IOrganizationEntity;
+	  }
+	| {
+			isOrganizationLoaded: false;
+			currentOrganization: undefined;
+	  };
 
 export type AuthContextValue = UserState & OrganizationState;

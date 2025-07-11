@@ -1,17 +1,16 @@
+import { ActionIcon, createStyles, Group, type MantineTheme, Modal } from '@mantine/core';
+import { Close, colors } from '@novu/design-system';
+import type { ChannelTypeEnum } from '@novu/shared';
 import { useCallback, useEffect, useReducer } from 'react';
-import { Group, Modal, ActionIcon, createStyles, MantineTheme } from '@mantine/core';
-import { Row } from 'react-table';
-import { ChannelTypeEnum } from '@novu/shared';
-import { colors, Close } from '@novu/design-system';
-
-import { useKeyDown } from '../../hooks';
+import type { Row } from 'react-table';
 import { useSegment } from '../../components/providers/SegmentProvider';
-import { IntegrationsStoreModalAnalytics } from './constants';
-import type { IIntegratedProvider, ITableIntegration } from './types';
-import { IntegrationsList } from './IntegrationsList';
-import { SelectProviderSidebar } from './components/multi-provider/SelectProviderSidebar';
+import { useKeyDown } from '../../hooks';
 import { CreateProviderInstanceSidebar } from './components/multi-provider/CreateProviderInstanceSidebar';
+import { SelectProviderSidebar } from './components/multi-provider/SelectProviderSidebar';
 import { UpdateProviderSidebar } from './components/multi-provider/v2';
+import { IntegrationsStoreModalAnalytics } from './constants';
+import { IntegrationsList } from './IntegrationsList';
+import type { IIntegratedProvider, ITableIntegration } from './types';
 
 enum SidebarType {
   SELECT = 'select',

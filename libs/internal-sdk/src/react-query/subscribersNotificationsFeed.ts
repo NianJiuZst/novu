@@ -3,30 +3,25 @@
  */
 
 import {
-  InvalidateQueryFilters,
-  QueryClient,
-  QueryFunctionContext,
-  QueryKey,
+  type InvalidateQueryFilters,
+  type QueryClient,
+  type QueryFunctionContext,
+  type QueryKey,
+  type UseQueryResult,
+  type UseSuspenseQueryResult,
   useQuery,
-  UseQueryResult,
   useSuspenseQuery,
-  UseSuspenseQueryResult,
-} from "@tanstack/react-query";
-import { NovuCore } from "../core.js";
-import { subscribersNotificationsFeed } from "../funcs/subscribersNotificationsFeed.js";
-import { combineSignals } from "../lib/primitives.js";
-import { RequestOptions } from "../lib/sdks.js";
-import * as operations from "../models/operations/index.js";
-import { unwrapAsync } from "../types/fp.js";
-import { useNovuContext } from "./_context.js";
-import {
-  QueryHookOptions,
-  SuspenseQueryHookOptions,
-  TupleToPrefixes,
-} from "./_types.js";
+} from '@tanstack/react-query';
+import type { NovuCore } from '../core.js';
+import { subscribersNotificationsFeed } from '../funcs/subscribersNotificationsFeed.js';
+import { combineSignals } from '../lib/primitives.js';
+import type { RequestOptions } from '../lib/sdks.js';
+import type * as operations from '../models/operations/index.js';
+import { unwrapAsync } from '../types/fp.js';
+import { useNovuContext } from './_context.js';
+import type { QueryHookOptions, SuspenseQueryHookOptions, TupleToPrefixes } from './_types.js';
 
-export type SubscribersNotificationsFeedQueryData =
-  operations.SubscribersV1ControllerGetNotificationsFeedResponse;
+export type SubscribersNotificationsFeedQueryData = operations.SubscribersV1ControllerGetNotificationsFeedResponse;
 
 /**
  * Retrieve subscriber notifications
@@ -36,15 +31,11 @@ export type SubscribersNotificationsFeedQueryData =
  */
 export function useSubscribersNotificationsFeed(
   request: operations.SubscribersV1ControllerGetNotificationsFeedRequest,
-  options?: QueryHookOptions<SubscribersNotificationsFeedQueryData>,
+  options?: QueryHookOptions<SubscribersNotificationsFeedQueryData>
 ): UseQueryResult<SubscribersNotificationsFeedQueryData, Error> {
   const client = useNovuContext();
   return useQuery({
-    ...buildSubscribersNotificationsFeedQuery(
-      client,
-      request,
-      options,
-    ),
+    ...buildSubscribersNotificationsFeedQuery(client, request, options),
     ...options,
   });
 }
@@ -57,15 +48,11 @@ export function useSubscribersNotificationsFeed(
  */
 export function useSubscribersNotificationsFeedSuspense(
   request: operations.SubscribersV1ControllerGetNotificationsFeedRequest,
-  options?: SuspenseQueryHookOptions<SubscribersNotificationsFeedQueryData>,
+  options?: SuspenseQueryHookOptions<SubscribersNotificationsFeedQueryData>
 ): UseSuspenseQueryResult<SubscribersNotificationsFeedQueryData, Error> {
   const client = useNovuContext();
   return useSuspenseQuery({
-    ...buildSubscribersNotificationsFeedQuery(
-      client,
-      request,
-      options,
-    ),
+    ...buildSubscribersNotificationsFeedQuery(client, request, options),
     ...options,
   });
 }
@@ -73,13 +60,10 @@ export function useSubscribersNotificationsFeedSuspense(
 export function prefetchSubscribersNotificationsFeed(
   queryClient: QueryClient,
   client$: NovuCore,
-  request: operations.SubscribersV1ControllerGetNotificationsFeedRequest,
+  request: operations.SubscribersV1ControllerGetNotificationsFeedRequest
 ): Promise<void> {
   return queryClient.prefetchQuery({
-    ...buildSubscribersNotificationsFeedQuery(
-      client$,
-      request,
-    ),
+    ...buildSubscribersNotificationsFeedQuery(client$, request),
   });
 }
 
@@ -96,7 +80,7 @@ export function setSubscribersNotificationsFeedData(
       idempotencyKey?: string | undefined;
     },
   ],
-  data: SubscribersNotificationsFeedQueryData,
+  data: SubscribersNotificationsFeedQueryData
 ): SubscribersNotificationsFeedQueryData | undefined {
   const key = queryKeySubscribersNotificationsFeed(...queryKeyBase);
 
@@ -118,33 +102,31 @@ export function invalidateSubscribersNotificationsFeed(
       },
     ]
   >,
-  filters?: Omit<InvalidateQueryFilters, "queryKey" | "predicate" | "exact">,
+  filters?: Omit<InvalidateQueryFilters, 'queryKey' | 'predicate' | 'exact'>
 ): Promise<void> {
   return client.invalidateQueries({
     ...filters,
-    queryKey: ["@novu/api", "Notifications", "feed", ...queryKeyBase],
+    queryKey: ['@novu/api', 'Notifications', 'feed', ...queryKeyBase],
   });
 }
 
 export function invalidateAllSubscribersNotificationsFeed(
   client: QueryClient,
-  filters?: Omit<InvalidateQueryFilters, "queryKey" | "predicate" | "exact">,
+  filters?: Omit<InvalidateQueryFilters, 'queryKey' | 'predicate' | 'exact'>
 ): Promise<void> {
   return client.invalidateQueries({
     ...filters,
-    queryKey: ["@novu/api", "Notifications", "feed"],
+    queryKey: ['@novu/api', 'Notifications', 'feed'],
   });
 }
 
 export function buildSubscribersNotificationsFeedQuery(
   client$: NovuCore,
   request: operations.SubscribersV1ControllerGetNotificationsFeedRequest,
-  options?: RequestOptions,
+  options?: RequestOptions
 ): {
   queryKey: QueryKey;
-  queryFn: (
-    context: QueryFunctionContext,
-  ) => Promise<SubscribersNotificationsFeedQueryData>;
+  queryFn: (context: QueryFunctionContext) => Promise<SubscribersNotificationsFeedQueryData>;
 } {
   return {
     queryKey: queryKeySubscribersNotificationsFeed(request.subscriberId, {
@@ -155,20 +137,14 @@ export function buildSubscribersNotificationsFeedQuery(
       payload: request.payload,
       idempotencyKey: request.idempotencyKey,
     }),
-    queryFn: async function subscribersNotificationsFeedQueryFn(
-      ctx,
-    ): Promise<SubscribersNotificationsFeedQueryData> {
+    queryFn: async function subscribersNotificationsFeedQueryFn(ctx): Promise<SubscribersNotificationsFeedQueryData> {
       const sig = combineSignals(ctx.signal, options?.fetchOptions?.signal);
       const mergedOptions = {
         ...options,
         fetchOptions: { ...options?.fetchOptions, signal: sig },
       };
 
-      return unwrapAsync(subscribersNotificationsFeed(
-        client$,
-        request,
-        mergedOptions,
-      ));
+      return unwrapAsync(subscribersNotificationsFeed(client$, request, mergedOptions));
     },
   };
 }
@@ -182,7 +158,7 @@ export function queryKeySubscribersNotificationsFeed(
     seen?: boolean | undefined;
     payload?: string | undefined;
     idempotencyKey?: string | undefined;
-  },
+  }
 ): QueryKey {
-  return ["@novu/api", "Notifications", "feed", subscriberId, parameters];
+  return ['@novu/api', 'Notifications', 'feed', subscriberId, parameters];
 }

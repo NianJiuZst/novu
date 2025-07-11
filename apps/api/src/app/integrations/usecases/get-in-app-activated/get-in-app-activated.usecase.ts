@@ -1,6 +1,6 @@
-import { SubscriberRepository } from '@novu/dal';
 import { Injectable } from '@nestjs/common';
-import { GetInAppActivatedCommand } from './get-in-app-activated.command';
+import type { SubscriberRepository } from '@novu/dal';
+import type { GetInAppActivatedCommand } from './get-in-app-activated.command';
 
 @Injectable()
 export class GetInAppActivated {

@@ -1,8 +1,8 @@
+import type { CustomDataType, IPaginationWithQueryParams, WorkflowPreferences } from '@novu/shared';
 import axios from 'axios';
-import { CustomDataType, IPaginationWithQueryParams, WorkflowPreferences } from '@novu/shared';
-import { API_ROOT } from '../config';
 import { getToken } from '../components/providers/AuthProvider';
-import { getEnvironmentId, clearEnvironmentId } from '../components/providers/EnvironmentProvider';
+import { clearEnvironmentId, getEnvironmentId } from '../components/providers/EnvironmentProvider';
+import { API_ROOT } from '../config';
 
 interface IOptions {
   absoluteUrl: boolean;

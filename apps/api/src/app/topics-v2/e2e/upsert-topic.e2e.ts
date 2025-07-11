@@ -1,4 +1,4 @@
-import { Novu } from '@novu/api';
+import type { Novu } from '@novu/api';
 import { UserSession } from '@novu/testing';
 import { expect } from 'chai';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';

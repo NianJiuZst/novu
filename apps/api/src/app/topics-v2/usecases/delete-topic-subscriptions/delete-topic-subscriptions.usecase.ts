@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InstrumentUsecase } from '@novu/application-generic';
-import { SubscriberRepository, TopicRepository, TopicSubscribersRepository } from '@novu/dal';
-import {
+import type { SubscriberRepository, TopicRepository, TopicSubscribersRepository } from '@novu/dal';
+import type {
   DeleteTopicSubscriptionsResponseDto,
   SubscriptionDto,
   SubscriptionsDeleteErrorDto,
 } from '../../dtos/delete-topic-subscriptions-response.dto';
-import { DeleteTopicSubscriptionsCommand } from './delete-topic-subscriptions.command';
+import type { DeleteTopicSubscriptionsCommand } from './delete-topic-subscriptions.command';
 
 @Injectable()
 export class DeleteTopicSubscriptionsUsecase {

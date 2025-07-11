@@ -1,9 +1,9 @@
-import { HealthCheckError, HealthIndicator, HealthIndicatorResult } from '@nestjs/terminus';
 import { Injectable } from '@nestjs/common';
+import { HealthCheckError, HealthIndicator, type HealthIndicatorResult } from '@nestjs/terminus';
 
-import { IHealthIndicator } from '@novu/application-generic';
+import type { IHealthIndicator } from '@novu/application-generic';
 
-import { WSGateway } from '../ws.gateway';
+import type { WSGateway } from '../ws.gateway';
 
 @Injectable()
 export class WSServerHealthIndicator extends HealthIndicator implements IHealthIndicator {

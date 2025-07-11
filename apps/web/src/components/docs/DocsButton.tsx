@@ -1,11 +1,11 @@
 import { Popover } from '@mantine/core';
 import { ActionButton, Button, IconOutlineMenuBook, QuickGuide, Tooltip } from '@novu/design-system';
-import { ComponentProps, useEffect, useMemo, useState } from 'react';
 import { css } from '@novu/novui/css';
 import { Flex, styled } from '@novu/novui/jsx';
 import { text, title } from '@novu/novui/recipes';
-import { DocsModal } from './DocsModal';
+import { type ComponentProps, useEffect, useMemo, useState } from 'react';
 import { useTelemetry } from '../../hooks/useNovuAPI';
+import { DocsModal } from './DocsModal';
 
 const Title = styled('h3', title);
 const Text = styled('p', text);

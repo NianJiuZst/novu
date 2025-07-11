@@ -1,208 +1,208 @@
-import { delV2, getV2, postV2 } from './api.client';
-import type { IEnvironment } from '@novu/shared';
-import type { LocalizationResourceEnum } from '@/types/translations';
+import type { IEnvironment } from "@novu/shared";
+import type { LocalizationResourceEnum } from "@/types/translations";
+import { delV2, getV2, postV2 } from "./api.client";
 
 export type TranslationsFilter = {
-  query?: string;
-  limit?: number;
-  offset?: number;
+	query?: string;
+	limit?: number;
+	offset?: number;
 };
 
 export type TranslationGroup = {
-  resourceId: string;
-  resourceName: string;
-  resourceType: LocalizationResourceEnum;
-  locales: string[];
-  createdAt: string;
-  updatedAt: string;
+	resourceId: string;
+	resourceName: string;
+	resourceType: LocalizationResourceEnum;
+	locales: string[];
+	createdAt: string;
+	updatedAt: string;
 };
 
 export type Translation = {
-  resourceId: string;
-  resourceType: LocalizationResourceEnum;
-  locale: string;
-  content: Record<string, unknown>;
-  createdAt: string;
-  updatedAt: string;
+	resourceId: string;
+	resourceType: LocalizationResourceEnum;
+	locale: string;
+	content: Record<string, unknown>;
+	createdAt: string;
+	updatedAt: string;
 };
 
 export type GetTranslationsListResponse = {
-  data: TranslationGroup[];
-  total: number;
-  limit: number;
-  offset: number;
+	data: TranslationGroup[];
+	total: number;
+	limit: number;
+	offset: number;
 };
 
 export type GetTranslationsResponse = {
-  data: Translation[];
-  total: number;
+	data: Translation[];
+	total: number;
 };
 
 export type UploadTranslationsRequest = {
-  resourceId: string;
-  resourceType: LocalizationResourceEnum;
-  files: File[];
+	resourceId: string;
+	resourceType: LocalizationResourceEnum;
+	files: File[];
 };
 
 export type UploadTranslationsResponse = {
-  data: {
-    totalFiles: number;
-    successfulUploads: number;
-    failedUploads: number;
-    errors: string[];
-  };
+	data: {
+		totalFiles: number;
+		successfulUploads: number;
+		failedUploads: number;
+		errors: string[];
+	};
 };
 
 export const getTranslationsList = async ({
-  environment,
-  query,
-  limit = 50,
-  offset = 0,
+	environment,
+	query,
+	limit = 50,
+	offset = 0,
 }: TranslationsFilter & { environment: IEnvironment }): Promise<GetTranslationsListResponse> => {
-  const searchParams = new URLSearchParams();
+	const searchParams = new URLSearchParams();
 
-  if (query) {
-    searchParams.append('query', query);
-  }
+	if (query) {
+		searchParams.append("query", query);
+	}
 
-  searchParams.append('limit', limit.toString());
-  searchParams.append('offset', offset.toString());
+	searchParams.append("limit", limit.toString());
+	searchParams.append("offset", offset.toString());
 
-  const queryString = searchParams.toString();
-  const endpoint = `/translations/list${queryString ? `?${queryString}` : ''}`;
+	const queryString = searchParams.toString();
+	const endpoint = `/translations/list${queryString ? `?${queryString}` : ""}`;
 
-  return getV2<GetTranslationsListResponse>(endpoint, { environment });
+	return getV2<GetTranslationsListResponse>(endpoint, { environment });
 };
 
 export const getTranslations = async ({
-  environment,
-  resourceId,
-  resourceType,
-  locale,
+	environment,
+	resourceId,
+	resourceType,
+	locale,
 }: {
-  environment: IEnvironment;
-  resourceId: string;
-  resourceType: LocalizationResourceEnum;
-  locale?: string;
+	environment: IEnvironment;
+	resourceId: string;
+	resourceType: LocalizationResourceEnum;
+	locale?: string;
 }): Promise<GetTranslationsResponse> => {
-  const searchParams = new URLSearchParams();
+	const searchParams = new URLSearchParams();
 
-  searchParams.append('resourceId', resourceId);
-  searchParams.append('resourceType', resourceType);
+	searchParams.append("resourceId", resourceId);
+	searchParams.append("resourceType", resourceType);
 
-  if (locale) {
-    searchParams.append('locale', locale);
-  }
+	if (locale) {
+		searchParams.append("locale", locale);
+	}
 
-  const queryString = searchParams.toString();
-  const endpoint = `/translations?${queryString}`;
+	const queryString = searchParams.toString();
+	const endpoint = `/translations?${queryString}`;
 
-  return getV2<GetTranslationsResponse>(endpoint, { environment });
+	return getV2<GetTranslationsResponse>(endpoint, { environment });
 };
 
 export type GetTranslationResponse = {
-  data: Translation;
+	data: Translation;
 };
 
 export const getTranslation = async ({
-  environment,
-  resourceId,
-  resourceType,
-  locale,
+	environment,
+	resourceId,
+	resourceType,
+	locale,
 }: {
-  environment: IEnvironment;
-  resourceId: string;
-  resourceType: LocalizationResourceEnum;
-  locale: string;
+	environment: IEnvironment;
+	resourceId: string;
+	resourceType: LocalizationResourceEnum;
+	locale: string;
 }): Promise<Translation> => {
-  const endpoint = `/translations/${resourceType}/${resourceId}/${locale}`;
-  const response = await getV2<GetTranslationResponse>(endpoint, { environment });
-  return response.data;
+	const endpoint = `/translations/${resourceType}/${resourceId}/${locale}`;
+	const response = await getV2<GetTranslationResponse>(endpoint, { environment });
+	return response.data;
 };
 
 export type SaveTranslationRequest = {
-  resourceId: string;
-  resourceType: LocalizationResourceEnum;
-  locale: string;
-  content: Record<string, unknown>;
+	resourceId: string;
+	resourceType: LocalizationResourceEnum;
+	locale: string;
+	content: Record<string, unknown>;
 };
 
 export type SaveTranslationResponse = {
-  data: Translation;
+	data: Translation;
 };
 
 export const saveTranslation = async ({
-  environment,
-  resourceId,
-  resourceType,
-  locale,
-  content,
+	environment,
+	resourceId,
+	resourceType,
+	locale,
+	content,
 }: SaveTranslationRequest & { environment: IEnvironment }): Promise<Translation> => {
-  const endpoint = '/translations';
-  const response = await postV2<SaveTranslationResponse>(endpoint, {
-    body: {
-      resourceId,
-      resourceType,
-      locale,
-      content,
-    },
-    environment,
-  });
-  return response.data;
+	const endpoint = "/translations";
+	const response = await postV2<SaveTranslationResponse>(endpoint, {
+		body: {
+			resourceId,
+			resourceType,
+			locale,
+			content,
+		},
+		environment,
+	});
+	return response.data;
 };
 
 export type DeleteTranslationRequest = {
-  resourceId: string;
-  resourceType: LocalizationResourceEnum;
-  locale: string;
+	resourceId: string;
+	resourceType: LocalizationResourceEnum;
+	locale: string;
 };
 
 export const deleteTranslation = async ({
-  environment,
-  resourceId,
-  resourceType,
-  locale,
+	environment,
+	resourceId,
+	resourceType,
+	locale,
 }: DeleteTranslationRequest & { environment: IEnvironment }): Promise<void> => {
-  const endpoint = `/translations/${resourceType}/${resourceId}/${locale}`;
+	const endpoint = `/translations/${resourceType}/${resourceId}/${locale}`;
 
-  await delV2(endpoint, { environment });
+	await delV2(endpoint, { environment });
 };
 
 export type DeleteTranslationGroupRequest = {
-  resourceId: string;
-  resourceType: LocalizationResourceEnum;
+	resourceId: string;
+	resourceType: LocalizationResourceEnum;
 };
 
 export const deleteTranslationGroup = async ({
-  environment,
-  resourceId,
-  resourceType,
+	environment,
+	resourceId,
+	resourceType,
 }: DeleteTranslationGroupRequest & { environment: IEnvironment }): Promise<void> => {
-  const endpoint = `/translations/${resourceType}/${resourceId}`;
+	const endpoint = `/translations/${resourceType}/${resourceId}`;
 
-  await delV2(endpoint, { environment });
+	await delV2(endpoint, { environment });
 };
 
 export const uploadTranslations = async ({
-  environment,
-  resourceId,
-  resourceType,
-  files,
-}: UploadTranslationsRequest & { environment: IEnvironment }): Promise<UploadTranslationsResponse['data']> => {
-  const formData = new FormData();
+	environment,
+	resourceId,
+	resourceType,
+	files,
+}: UploadTranslationsRequest & { environment: IEnvironment }): Promise<UploadTranslationsResponse["data"]> => {
+	const formData = new FormData();
 
-  formData.append('resourceId', resourceId);
-  formData.append('resourceType', resourceType);
+	formData.append("resourceId", resourceId);
+	formData.append("resourceType", resourceType);
 
-  files.forEach((file) => {
-    formData.append('files', file);
-  });
+	files.forEach((file) => {
+		formData.append("files", file);
+	});
 
-  const endpoint = '/translations/upload';
-  const response = await postV2<UploadTranslationsResponse>(endpoint, {
-    body: formData,
-    environment,
-  });
+	const endpoint = "/translations/upload";
+	const response = await postV2<UploadTranslationsResponse>(endpoint, {
+		body: formData,
+		environment,
+	});
 
-  return response.data;
+	return response.data;
 };

@@ -1,12 +1,12 @@
 import { expect } from '@playwright/test';
-import { test } from './utils/baseTest';
-import { initializeSession } from './utils/browser';
-import { WorkflowEditorPage } from './page-models/workflowEditorPage';
-import { ChannelType } from './utils/ChannelType';
-import { NodeInAppEditingModalPageModel } from './page-models/nodeInAppEditingModalPageModel';
 import { NodeDigestEditorPageModal } from './page-models/nodeDigestEditorPageModal';
 import { NodeEmailEditorPageModal } from './page-models/nodeEmailEditorPageModal';
-import { SessionData } from './utils/plugins';
+import { NodeInAppEditingModalPageModel } from './page-models/nodeInAppEditingModalPageModel';
+import { WorkflowEditorPage } from './page-models/workflowEditorPage';
+import { test } from './utils/baseTest';
+import { initializeSession } from './utils/browser';
+import { ChannelType } from './utils/ChannelType';
+import type { SessionData } from './utils/plugins';
 
 let session: SessionData;
 test.beforeEach(async ({ page }) => {

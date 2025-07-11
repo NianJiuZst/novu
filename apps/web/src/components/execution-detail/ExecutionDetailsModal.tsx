@@ -1,12 +1,11 @@
-import { useEffect, useState } from 'react';
 import { Center, LoadingOverlay, Modal, UnstyledButton, useMantineTheme } from '@mantine/core';
-import { JobStatusEnum } from '@novu/shared';
-
 import { colors, shadows, Text, Title } from '@novu/design-system';
-import { ExecutionDetailsAccordion } from './ExecutionDetailsAccordion';
+import { JobStatusEnum } from '@novu/shared';
+import { useEffect, useState } from 'react';
 import { useNotification } from '../../hooks/useNovuAPI';
-import { When } from '../utils/When';
 import { useNotificationStatus } from '../../pages/activities/hooks/useNotificationStatus';
+import { When } from '../utils/When';
+import { ExecutionDetailsAccordion } from './ExecutionDetailsAccordion';
 
 export function ExecutionDetailsModal({
   notificationId,

@@ -1,5 +1,5 @@
-import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
 import type { IResponseError, IUpdateUserProfile, IUserEntity } from '@novu/shared';
+import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { updateUserProfile } from '../user';
 

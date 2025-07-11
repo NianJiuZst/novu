@@ -1,5 +1,5 @@
 import { LiquidError } from 'liquidjs';
-import { LiquidErrors } from './types';
+import type { LiquidErrors } from './types';
 
 /**
  * Validates if the provided template is a non-empty string

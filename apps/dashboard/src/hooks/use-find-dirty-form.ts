@@ -1,39 +1,39 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 
 export function useFindDirtyForm() {
-  const [isDirty, setIsDirty] = useState(false);
-  const [element, setElement] = useState<HTMLElement | null>(null);
+	const [isDirty, setIsDirty] = useState(false);
+	const [element, setElement] = useState<HTMLElement | null>(null);
 
-  useEffect(() => {
-    if (!element) return;
+	useEffect(() => {
+		if (!element) return;
 
-    const checkDirty = () => {
-      const dirtyFound = element.querySelector('[data-dirty="true"]') !== null;
-      setIsDirty(dirtyFound);
-    };
+		const checkDirty = () => {
+			const dirtyFound = element.querySelector('[data-dirty="true"]') !== null;
+			setIsDirty(dirtyFound);
+		};
 
-    checkDirty();
+		checkDirty();
 
-    const observer = new MutationObserver((mutations) => {
-      const shouldCheck = mutations.some((mutation) => mutation.type === 'attributes' || mutation.type === 'childList');
+		const observer = new MutationObserver((mutations) => {
+			const shouldCheck = mutations.some((mutation) => mutation.type === "attributes" || mutation.type === "childList");
 
-      if (shouldCheck) {
-        checkDirty();
-      }
-    });
+			if (shouldCheck) {
+				checkDirty();
+			}
+		});
 
-    observer.observe(element, {
-      attributes: true,
-      childList: true,
-      subtree: true,
-    });
+		observer.observe(element, {
+			attributes: true,
+			childList: true,
+			subtree: true,
+		});
 
-    return () => observer.disconnect();
-  }, [element]);
+		return () => observer.disconnect();
+	}, [element]);
 
-  const ref = useCallback((node: HTMLElement | null) => {
-    setElement(node);
-  }, []);
+	const ref = useCallback((node: HTMLElement | null) => {
+		setElement(node);
+	}, []);
 
-  return { isDirty, ref };
+	return { isDirty, ref };
 }

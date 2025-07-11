@@ -1,13 +1,12 @@
-import { useState } from 'react';
 import { Center, Loader, ScrollArea } from '@mantine/core';
-import { ChannelTypeEnum } from '@novu/shared';
-
 import { colors } from '@novu/design-system';
+import { ChannelTypeEnum } from '@novu/shared';
+import { useState } from 'react';
+import { IntegrationsListModal } from '../../integrations/IntegrationsListModal';
 import type { IIntegratedProvider } from '../../integrations/types';
 import { useProviders } from '../../integrations/useProviders';
 import { ListProviders } from './ListProviders';
 import { WorkflowSettingsTabs } from './WorkflowSettingsTabs';
-import { IntegrationsListModal } from '../../integrations/IntegrationsListModal';
 import { WorkflowSidebar } from './WorkflowSidebar';
 
 export function ProvidersPage() {

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IUserEntity, JobTitleEnum } from '@novu/shared';
+import { type IUserEntity, JobTitleEnum } from '@novu/shared';
 
 export class ServicesHashesDto {
   @ApiProperty()

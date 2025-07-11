@@ -1,4 +1,4 @@
-import { CustomDataType } from './utils';
+import type { CustomDataType } from './utils';
 
 export type TenantIdentifier = string;
 export type TenantId = string;

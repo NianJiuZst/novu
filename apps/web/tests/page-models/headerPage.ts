@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { waitForNetworkIdle } from '../utils/browser';
 
 export class HeaderPage {

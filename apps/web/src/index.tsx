@@ -1,10 +1,10 @@
+import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk';
 import App from './App';
+import { LAUNCH_DARKLY_CLIENT_SIDE_ID } from './config';
 import { initializeApp } from './initializeApp';
 import reportWebVitals from './reportWebVitals';
-import { LAUNCH_DARKLY_CLIENT_SIDE_ID } from './config';
 
 import './index.css';
 import '@novu/novui/styles.css';

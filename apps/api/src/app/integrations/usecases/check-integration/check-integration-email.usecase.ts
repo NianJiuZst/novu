@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MailFactory } from '@novu/application-generic';
 
-import { CheckIntegrationCommand } from './check-integration.command';
+import type { CheckIntegrationCommand } from './check-integration.command';
 
 @Injectable()
 export class CheckIntegrationEMail {

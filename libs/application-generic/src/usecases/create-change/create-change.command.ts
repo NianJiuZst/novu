@@ -1,6 +1,6 @@
-import { ChangeEntityTypeEnum } from '@novu/shared';
+import type { ChangeEntityTypeEnum } from '@novu/shared';
 import { IsDefined, IsMongoId, IsOptional, IsString } from 'class-validator';
-import { Document } from 'mongoose';
+import type { Document } from 'mongoose';
 import { EnvironmentWithUserCommand } from '../../commands';
 
 export interface IItem extends Pick<Document, '_id'> {

@@ -1,4 +1,4 @@
-import { ChannelTypeEnum, JobTitleEnum, OrganizationTypeEnum } from '../../types';
+import type { ChannelTypeEnum, JobTitleEnum, OrganizationTypeEnum } from '../../types';
 
 export type UpdateExternalOrganizationDto = {
   jobTitle?: JobTitleEnum;

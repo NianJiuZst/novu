@@ -1,30 +1,36 @@
-import { ComponentType, MouseEvent, MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef } from 'react';
+import styled from '@emotion/styled';
+import { useMantineColorScheme } from '@mantine/core';
+import { colors } from '@novu/design-system';
+import type { StepTypeEnum } from '@novu/shared';
+import cloneDeep from 'lodash.clonedeep';
+import {
+  type ComponentType,
+  type MouseEvent,
+  type MouseEvent as ReactMouseEvent,
+  useCallback,
+  useEffect,
+  useRef,
+} from 'react';
 import ReactFlow, {
   addEdge,
   Background,
   BackgroundVariant,
   Controls,
-  Edge,
-  EdgeProps,
+  type Edge,
+  type EdgeProps,
   getOutgoers,
-  Node,
-  NodeProps,
-  ReactFlowProps,
+  type Node,
+  type NodeProps,
+  type ReactFlowProps,
   useEdgesState,
   useNodesState,
   useReactFlow,
 } from 'react-flow-renderer';
-import { useMantineColorScheme } from '@mantine/core';
-import styled from '@emotion/styled';
 import { v4 as uuid4 } from 'uuid';
-import cloneDeep from 'lodash.clonedeep';
-import { StepTypeEnum } from '@novu/shared';
-
-import { colors } from '@novu/design-system';
-import { getChannel } from '../../utils/channels';
 import { useEnvironment } from '../../hooks';
-import type { IEdge, IFlowStep, INode } from './types';
 import { useTemplateEditorForm } from '../../pages/templates/components/TemplateEditorFormProvider';
+import { getChannel } from '../../utils/channels';
+import type { IEdge, IFlowStep, INode } from './types';
 
 const triggerNode: Node = {
   id: '1',

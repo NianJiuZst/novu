@@ -1,17 +1,16 @@
-import ws from 'ws';
-import ora from 'ora';
-import open from 'open';
-import chalk from 'chalk';
 import { NtfrTunnel } from '@novu/ntfr-client';
-
-import { DevServer } from '../../dev-server';
-import { showWelcomeScreen } from '../shared';
-import { config } from '../../index';
-import { DevCommandOptions, LocalTunnelResponse } from './types';
-import { parseOptions, wait } from './utils';
+import chalk from 'chalk';
+import open from 'open';
+import ora from 'ora';
+import ws from 'ws';
 import packageJson from '../../../package.json';
+import { DevServer } from '../../dev-server';
+import { config } from '../../index';
+import { showWelcomeScreen } from '../shared';
+import type { DevCommandOptions, LocalTunnelResponse } from './types';
+import { parseOptions, wait } from './utils';
 
-process.on('SIGINT', function () {
+process.on('SIGINT', () => {
   // TODO: Close the NTFR Tunnel
   process.exit();
 });

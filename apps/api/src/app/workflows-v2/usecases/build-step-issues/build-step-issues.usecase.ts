@@ -1,42 +1,41 @@
-import merge from 'lodash/merge';
-import capitalize from 'lodash/capitalize';
-import isEmpty from 'lodash/isEmpty';
-import Ajv, { ErrorObject } from 'ajv';
-import addFormats from 'ajv-formats';
-import { AdditionalOperation, RulesLogic } from 'json-logic-js';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { ControlValuesRepository, IntegrationRepository } from '@novu/dal';
-import {
-  ControlValuesLevelEnum,
-  FeatureFlagsKeysEnum,
-  StepContentIssue,
-  StepContentIssueEnum,
-  StepIntegrationIssueEnum,
-  StepIssuesDto,
-  StepTypeEnum,
-  UserSessionData,
-  ResourceOriginEnum,
-} from '@novu/shared';
 import {
   dashboardSanitizeControlValues,
-  FeatureFlagsService,
+  type FeatureFlagsService,
   Instrument,
   InstrumentUsecase,
-  PinoLogger,
+  type PinoLogger,
   TierRestrictionsValidateCommand,
   TierRestrictionsValidateUsecase,
 } from '@novu/application-generic';
-
-import { buildVariables } from '../../util/build-variables';
-import { BuildVariableSchemaCommand, BuildVariableSchemaUsecase } from '../build-variable-schema';
-import { BuildStepIssuesCommand } from './build-step-issues.command';
+import type { ControlValuesRepository, IntegrationRepository } from '@novu/dal';
+import {
+  ControlValuesLevelEnum,
+  FeatureFlagsKeysEnum,
+  ResourceOriginEnum,
+  type StepContentIssue,
+  StepContentIssueEnum,
+  StepIntegrationIssueEnum,
+  type StepIssuesDto,
+  StepTypeEnum,
+  type UserSessionData,
+} from '@novu/shared';
+import Ajv, { type ErrorObject } from 'ajv';
+import addFormats from 'ajv-formats';
+import type { AdditionalOperation, RulesLogic } from 'json-logic-js';
+import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
+import merge from 'lodash/merge';
+import type { JSONSchemaDto } from '../../../shared/dtos/json-schema.dto';
 import {
   QueryIssueTypeEnum,
   QueryValidatorService,
 } from '../../../shared/services/query-parser/query-validator.service';
+import { buildVariables } from '../../util/build-variables';
 import { parseStepVariables } from '../../util/parse-step-variables';
-import { JSONSchemaDto } from '../../../shared/dtos/json-schema.dto';
 import { buildLiquidParser } from '../../util/template-parser/liquid-engine';
+import { BuildVariableSchemaCommand, type BuildVariableSchemaUsecase } from '../build-variable-schema';
+import type { BuildStepIssuesCommand } from './build-step-issues.command';
 
 const PAYLOAD_FIELD_PREFIX = 'payload.';
 const SUBSCRIBER_DATA_FIELD_PREFIX = 'subscriber.data.';

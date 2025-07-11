@@ -1,5 +1,5 @@
 import { BaseCommand } from '../../commands';
-import { PreferenceSet } from '../get-preferences/get-preferences.usecase';
+import type { PreferenceSet } from '../get-preferences/get-preferences.usecase';
 
 export class MergePreferencesCommand extends BaseCommand {
   workflowResourcePreference?: PreferenceSet['workflowResourcePreference'];

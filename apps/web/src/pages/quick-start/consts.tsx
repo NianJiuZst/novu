@@ -1,7 +1,8 @@
-import React, { Dispatch } from 'react';
 import { Stack } from '@mantine/core';
-import { NavigateFunction } from 'react-router-dom';
-import { ChannelTypeEnum, UTM_CAMPAIGN_QUERY_PARAM } from '@novu/shared';
+import { type ChannelTypeEnum, UTM_CAMPAIGN_QUERY_PARAM } from '@novu/shared';
+import type React from 'react';
+import type { Dispatch } from 'react';
+import type { NavigateFunction } from 'react-router-dom';
 
 import { WIDGET_EMBED_PATH } from '../../config';
 

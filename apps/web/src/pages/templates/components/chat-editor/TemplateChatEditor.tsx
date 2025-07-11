@@ -1,22 +1,21 @@
-import { ChannelTypeEnum } from '@novu/shared';
-import { Controller, useFormContext } from 'react-hook-form';
 import { Grid, SegmentedControl, Stack, useMantineTheme } from '@mantine/core';
-import { useState } from 'react';
-
 import { When } from '@novu/design-system';
+import { ChannelTypeEnum } from '@novu/shared';
+import { useState } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
+import { ChatPreview } from '../../../../components/workflow/preview';
 import { useEnvironment, useHasActiveIntegrations, useVariablesManager } from '../../../../hooks';
+import { useEditTemplateContent } from '../../hooks/useEditTemplateContent';
 import { useStepFormPath } from '../../hooks/useStepFormPath';
 import { StepSettings } from '../../workflow/SideBar/StepSettings';
-import type { IForm } from '../formTypes';
-import { LackIntegrationAlert } from '../LackIntegrationAlert';
+import { ControlVariablesForm } from '../ControlVariablesForm';
 import { CustomCodeEditor } from '../CustomCodeEditor';
-import { ChatPreview } from '../../../../components/workflow/preview';
 
 import { EditVariablesModal } from '../EditVariablesModal';
-import { VariableManagementButton } from '../VariableManagementButton';
-import { useEditTemplateContent } from '../../hooks/useEditTemplateContent';
+import type { IForm } from '../formTypes';
+import { LackIntegrationAlert } from '../LackIntegrationAlert';
 import { useTemplateEditorForm } from '../TemplateEditorFormProvider';
-import { ControlVariablesForm } from '../ControlVariablesForm';
+import { VariableManagementButton } from '../VariableManagementButton';
 
 const templateFields = ['content'];
 

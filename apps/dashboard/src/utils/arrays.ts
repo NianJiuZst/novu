@@ -1,27 +1,27 @@
 export const sort = (array: number[]) => {
-  array.sort((a, b) => a - b);
+	array.sort((a, b) => a - b);
 
-  return array;
+	return array;
 };
 
 export const range = (start: number, end: number) => {
-  const array: number[] = [];
+	const array: number[] = [];
 
-  for (let i = start; i <= end; i++) {
-    array.push(i);
-  }
+	for (let i = start; i <= end; i++) {
+		array.push(i);
+	}
 
-  return array;
+	return array;
 };
 
 export const dedup = (array: number[]) => {
-  const result: number[] = [];
+	const result: number[] = [];
 
-  array.forEach((i) => {
-    if (result.indexOf(i) < 0) {
-      result.push(i);
-    }
-  });
+	array.forEach((i) => {
+		if (result.indexOf(i) < 0) {
+			result.push(i);
+		}
+	});
 
-  return result;
+	return result;
 };

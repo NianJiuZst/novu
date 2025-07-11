@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { colors } from '../../config';
 
 export function TerminalGradient(props: React.ComponentPropsWithoutRef<'svg'> & { disabled?: boolean }) {

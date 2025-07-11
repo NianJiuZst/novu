@@ -1,5 +1,6 @@
 import { OrganizationProfile, UserProfile } from '@clerk/clerk-react';
 import { Modal, Tabs } from '@mantine/core';
+import { Title } from '@novu/novui';
 import {
   IconAdminPanelSettings,
   IconCreditCard,
@@ -10,12 +11,11 @@ import {
 } from '@novu/novui/icons';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { useNavigate, useParams } from 'react-router-dom';
+import { OrganizationSettings } from '../../../components/settings/OrganizationSettings';
 import { MANAGE_ACCOUNT_ROUTE_SEGMENTS, ROUTES } from '../../../constants/routes';
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { BrandingPage } from '../../../pages/brand/BrandingPage';
 import { BillingPage } from '../../billing/pages/BillingPage';
-import { Title } from '@novu/novui';
-import { OrganizationSettings } from '../../../components/settings/OrganizationSettings';
 import {
   billingTitle,
   clerkComponentAppearance,

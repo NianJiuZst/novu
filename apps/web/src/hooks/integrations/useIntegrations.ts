@@ -1,8 +1,8 @@
-import { UseQueryOptions, useQuery } from '@tanstack/react-query';
+import { type UseQueryOptions, useQuery } from '@tanstack/react-query';
 
 import { getIntegrations } from '../../api/integration';
-import type { IntegrationEntity } from '../../pages/integrations/types';
 import { QueryKeys } from '../../api/query.keys';
+import type { IntegrationEntity } from '../../pages/integrations/types';
 
 export function useIntegrations(options: UseQueryOptions<IntegrationEntity[], any, IntegrationEntity[]> = {}) {
   const { data, isLoading, ...rest } = useQuery<IntegrationEntity[], any, IntegrationEntity[]>(

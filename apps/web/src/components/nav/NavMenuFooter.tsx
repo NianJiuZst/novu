@@ -1,5 +1,5 @@
-import { PropsWithChildren } from 'react';
 import { css, cx } from '@novu/novui/css';
+import type { PropsWithChildren } from 'react';
 
 export interface INavMenuFooterProps {
   className?: string;

@@ -1,11 +1,11 @@
-import { expect } from 'chai';
-import { UserSession } from '@novu/testing';
-import { Novu } from '@novu/api';
-import { ChannelTypeEnum } from '@novu/shared';
+import type { Novu } from '@novu/api';
 import { EnvironmentRepository, LayoutRepository } from '@novu/dal';
+import { ChannelTypeEnum } from '@novu/shared';
+import { UserSession } from '@novu/testing';
+import { expect } from 'chai';
 
 import { initNovuClassSdkInternalAuth } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
-import { CreateLayoutDto } from '../dtos';
+import type { CreateLayoutDto } from '../dtos';
 import { LayoutCreationSourceEnum } from '../types';
 
 describe('Preview Layout #novu-v2', () => {

@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { useClipboard } from '@mantine/hooks';
-import { useEnvironment, useApiKeys } from '../../../hooks';
+import { useState } from 'react';
+import { useApiKeys, useEnvironment } from '../../../hooks';
 import { useRegenerateSecretKeyModal } from './useRegenerateApiKeyModal';
 
 const CLIPBOARD_TIMEOUT_MS = 2000;

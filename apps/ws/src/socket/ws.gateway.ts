@@ -1,13 +1,17 @@
-import { Server, Socket } from 'socket.io';
-import { JwtService } from '@nestjs/jwt';
-import { OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
+import type { JwtService } from '@nestjs/jwt';
+import {
+  type OnGatewayConnection,
+  type OnGatewayDisconnect,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
+import type { IDestroy } from '@novu/application-generic';
+import { type ISubscriberJwt, ObservabilityBackgroundTransactionEnum } from '@novu/shared';
 import { instrument } from '@socket.io/admin-ui';
+import type { Server, Socket } from 'socket.io';
 
-import { ISubscriberJwt, ObservabilityBackgroundTransactionEnum } from '@novu/shared';
-import { IDestroy } from '@novu/application-generic';
-
-import { SubscriberOnlineService } from '../shared/subscriber-online';
+import type { SubscriberOnlineService } from '../shared/subscriber-online';
 
 const nr = require('newrelic');
 

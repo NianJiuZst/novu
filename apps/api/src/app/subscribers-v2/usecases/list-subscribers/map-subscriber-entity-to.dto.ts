@@ -1,5 +1,5 @@
-import { SubscriberEntity } from '@novu/dal';
-import { SubscriberResponseDto } from '../../../subscribers/dtos';
+import type { SubscriberEntity } from '@novu/dal';
+import type { SubscriberResponseDto } from '../../../subscribers/dtos';
 
 export function mapSubscriberEntityToDto(subscriber: SubscriberEntity): SubscriberResponseDto {
   return {

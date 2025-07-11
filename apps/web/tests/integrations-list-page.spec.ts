@@ -6,7 +6,7 @@ import {
   emailProviders,
   InAppProviderIdEnum,
   inAppProviders,
-  ProvidersIdEnum,
+  type ProvidersIdEnum,
   PushProviderIdEnum,
   pushProviders,
   SmsProviderIdEnum,
@@ -17,7 +17,7 @@ import { test } from './utils/baseTest';
 
 import { initializeSession, isDarkTheme } from './utils/browser';
 import { checkTableLoading, checkTableRow, clickOnListRow, interceptIntegrationsRequest } from './utils/integrations';
-import { deleteProvider, SessionData } from './utils/plugins';
+import { deleteProvider, type SessionData } from './utils/plugins';
 
 let session: SessionData;
 test.beforeEach(async ({ page }) => {

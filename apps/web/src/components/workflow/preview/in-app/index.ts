@@ -1,2 +1,2 @@
-export * from './InAppPreview';
 export { InAppBasePreview } from './InAppBasePreview';
+export * from './InAppPreview';

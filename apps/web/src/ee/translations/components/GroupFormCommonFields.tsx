@@ -1,11 +1,10 @@
+import { Box, CloseButton, Group, type MultiSelectValueProps, Stack, useMantineTheme } from '@mantine/core';
+import { colors, Input, Select, Text, When } from '@novu/design-system';
 import { useState } from 'react';
-import { Text, colors, Input, Select, When } from '@novu/design-system';
-import { Group, CloseButton, Box, MultiSelectValueProps, useMantineTheme, Stack } from '@mantine/core';
-import { Control, Controller } from 'react-hook-form';
-
-import { FlagIcon, ICreateGroup, SelectItem } from './shared';
+import { type Control, Controller } from 'react-hook-form';
 import { useFetchLocales, useGetDefaultLocale } from '../hooks';
 import { DeleteLocaleModal } from './DeleteLocaleModal';
+import { FlagIcon, type ICreateGroup, SelectItem } from './shared';
 
 export const GroupFormCommonFields = ({
   control,

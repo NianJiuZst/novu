@@ -1,14 +1,13 @@
-import { FC, useEffect, useMemo } from 'react';
-
 import { Sidebar } from '@novu/design-system';
 import { Title } from '@novu/novui';
 import { css } from '@novu/novui/css';
+import { buildWorkflowPreferences } from '@novu/shared';
+import { type FC, useEffect, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { buildWorkflowPreferences } from '@novu/shared';
 import { useStudioWorkflowPreferences } from '../../../../hooks/workflowPreferences/useStudioWorkflowPreferences';
 import { useDiscover } from '../../../hooks/useBridgeAPI';
-import { WorkflowDetailFormContext } from './WorkflowDetailFormContextProvider';
+import type { WorkflowDetailFormContext } from './WorkflowDetailFormContextProvider';
 import { WorkflowSettingsSidePanelContent } from './WorkflowSettingsSidePanelContent';
 
 type StudioWorkflowSettingsSidePanelProps = { onClose: () => void };

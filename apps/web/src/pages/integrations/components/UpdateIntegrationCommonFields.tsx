@@ -1,8 +1,7 @@
-import { Controller, useFormContext } from 'react-hook-form';
 import styled from '@emotion/styled';
 import { useClipboard } from '@mantine/hooks';
-
-import { Input, Switch, Check, Copy } from '@novu/design-system';
+import { Check, Copy, Input, Switch } from '@novu/design-system';
+import { Controller, useFormContext } from 'react-hook-form';
 import type { IIntegratedProvider } from '../types';
 
 const CopyWrapper = styled.div`

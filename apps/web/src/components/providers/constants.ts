@@ -1,4 +1,4 @@
-import { type AuthContextValue } from './AuthProvider';
+import type { AuthContextValue } from './AuthProvider';
 
 const noop = () => {};
 const asyncNoop = async () => {};

@@ -1,5 +1,5 @@
-import { test } from './utils/baseTest';
 import { TenantsPage } from './page-models/tenantsPage';
+import { test } from './utils/baseTest';
 import { assertPageShowsMessage, initializeSession } from './utils/browser';
 
 test.beforeEach(async ({ page }) => {

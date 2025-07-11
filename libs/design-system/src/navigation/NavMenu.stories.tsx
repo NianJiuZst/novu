@@ -1,8 +1,8 @@
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
-import { StoryFn, Meta } from '@storybook/react';
 import { MemoryRouter } from 'react-router-dom';
-import { NavMenu } from './NavMenu';
 import { Activity, Bolt, Settings, Team } from '../icons';
+import { NavMenu } from './NavMenu';
 
 export default {
   title: 'Menus/NavigationMenu',

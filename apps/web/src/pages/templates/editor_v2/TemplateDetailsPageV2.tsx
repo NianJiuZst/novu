@@ -11,11 +11,11 @@ import { WorkflowsPageTemplate } from '../../../studio/components/workflows/layo
 import { WorkflowBackgroundWrapper } from '../../../studio/components/workflows/node-view/WorkflowBackgroundWrapper';
 import { WorkflowFloatingMenu } from '../../../studio/components/workflows/node-view/WorkflowFloatingMenu';
 import { WorkflowNodes } from '../../../studio/components/workflows/node-view/WorkflowNodes';
+import { WorkflowSettingsPanelTab } from '../../../studio/components/workflows/preferences';
 import { parseUrl } from '../../../utils/routeUtils';
 import { useTemplateController } from '../components/useTemplateController';
 import { CloudWorkflowSettingsSidePanel } from './CloudWorkflowSettingsSidePanel';
 import { useWorkflowDetailPageForm } from './useWorkflowDetailPageForm';
-import { WorkflowSettingsPanelTab } from '../../../studio/components/workflows/preferences';
 
 export const TemplateDetailsPageV2 = () => {
   const { templateId = '' } = useParams<{ templateId: string }>();

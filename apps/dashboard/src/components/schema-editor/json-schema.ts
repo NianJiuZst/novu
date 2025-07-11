@@ -1,1 +1,1 @@
-export type { JSONSchema7, JSONSchema7TypeName } from 'json-schema';
+export type { JSONSchema7, JSONSchema7TypeName } from "json-schema";

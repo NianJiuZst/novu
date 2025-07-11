@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NovuEventEmitter } from '../event-emitter';
-import { ListNotificationsArgs, ListNotificationsResponse, Notification } from '../notifications';
-import { NotificationsCache } from './notifications-cache';
+
+import type { InboxService } from '../api';
+import type { NovuEventEmitter } from '../event-emitter';
+import { type ListNotificationsArgs, type ListNotificationsResponse, Notification } from '../notifications';
 import { ChannelType } from '../types';
-import { InboxService } from '../api';
+import { NotificationsCache } from './notifications-cache';
 
 describe('NotificationsCache', () => {
   let notificationsCache: NotificationsCache;

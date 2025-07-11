@@ -1,22 +1,22 @@
-import React, { useMemo } from 'react';
+import styled from '@emotion/styled';
 import {
   Box,
-  Select as MantineSelect,
-  MultiSelect as MantineMultiSelect,
   CloseButton,
-  InputBaseProps,
-  MultiSelectValueProps,
-  useMantineTheme,
-  SelectItem,
+  type InputBaseProps,
   Loader,
+  MultiSelect as MantineMultiSelect,
+  Select as MantineSelect,
+  type MultiSelectValueProps,
+  type SelectItem,
+  useMantineTheme,
 } from '@mantine/core';
-import styled from '@emotion/styled';
-import { useSelectStyles } from './Select.styles';
+import React, { useMemo } from 'react';
+import { colors } from '../config';
 import { inputStyles } from '../config/inputs.styles';
 import { ArrowDown } from '../icons';
-import { colors } from '../config';
 import { Text } from '../index';
-import { ISelectProps } from './Select.types';
+import { useSelectStyles } from './Select.styles';
+import type { ISelectProps } from './Select.types';
 
 /**
  * Select component

@@ -1,18 +1,17 @@
+import { isBridgeWorkflow, ResourceTypeEnum, StepTypeEnum } from '@novu/shared';
 import { useParams } from 'react-router-dom';
-import { StepTypeEnum, ResourceTypeEnum, isBridgeWorkflow } from '@novu/shared';
-
+import { useNavigateFromEditor } from '../hooks/useNavigateFromEditor';
+import { useStepIndex } from '../hooks/useStepIndex';
+import { DelayMetadata } from '../workflow/DelayMetadata';
+import { DigestMetadata } from '../workflow/DigestMetadata';
+import { TemplateChatEditor } from './chat-editor/TemplateChatEditor';
+import { TemplateCustomEditor } from './custom-editor/TemplateCustomEditor';
 import { EmailMessagesCards } from './email-editor/EmailMessagesCards';
 import { TemplateInAppEditor } from './in-app-editor/TemplateInAppEditor';
-import { TemplateSMSEditor } from './sms-editor/TemplateSMSEditor';
-import { TemplatePushEditor } from './TemplatePushEditor';
-import { TemplateChatEditor } from './chat-editor/TemplateChatEditor';
 import { StepEditorSidebar } from './StepEditorSidebar';
-import { DigestMetadata } from '../workflow/DigestMetadata';
-import { DelayMetadata } from '../workflow/DelayMetadata';
-import { useStepIndex } from '../hooks/useStepIndex';
-import { useNavigateFromEditor } from '../hooks/useNavigateFromEditor';
-import { TemplateCustomEditor } from './custom-editor/TemplateCustomEditor';
+import { TemplateSMSEditor } from './sms-editor/TemplateSMSEditor';
 import { useTemplateEditorForm } from './TemplateEditorFormProvider';
+import { TemplatePushEditor } from './TemplatePushEditor';
 
 export const ChannelStepEditor = () => {
   const { channel } = useParams<{

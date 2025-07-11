@@ -1,27 +1,27 @@
 import { faker } from '@faker-js/faker';
 import {
+  FeedRepository,
+  LayoutRepository,
+  MessageTemplateRepository,
+  NotificationGroupRepository,
+  type NotificationStepEntity,
+  type NotificationTemplateEntity,
+  NotificationTemplateRepository,
+  PreferencesRepository,
+} from '@novu/dal';
+import {
   buildWorkflowPreferencesFromPreferenceChannels,
   ChannelCTATypeEnum,
   DEFAULT_WORKFLOW_PREFERENCES,
   EmailBlockTypeEnum,
+  type IWorkflowStepMetadata,
   PreferencesTypeEnum,
   StepTypeEnum,
   TemplateVariableTypeEnum,
-  IWorkflowStepMetadata,
 } from '@novu/shared';
-import {
-  MessageTemplateRepository,
-  NotificationGroupRepository,
-  NotificationStepEntity,
-  NotificationTemplateEntity,
-  NotificationTemplateRepository,
-  FeedRepository,
-  LayoutRepository,
-  PreferencesRepository,
-} from '@novu/dal';
 import { v4 as uuid } from 'uuid';
 
-import { CreateTemplatePayload } from './create-notification-template.interface';
+import type { CreateTemplatePayload } from './create-notification-template.interface';
 
 export class NotificationTemplateService {
   constructor(

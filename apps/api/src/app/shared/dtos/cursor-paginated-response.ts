@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptions } from '@nestjs/swagger';
 import { mixin } from '@nestjs/common';
+import { ApiProperty, type ApiPropertyOptions } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 

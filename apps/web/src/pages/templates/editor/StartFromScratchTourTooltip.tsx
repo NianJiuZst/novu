@@ -1,23 +1,23 @@
 import { Group, Stack, UnstyledButton, useMantineColorScheme } from '@mantine/core';
-import { useMutation } from '@tanstack/react-query';
-import { TooltipRenderProps } from 'react-joyride';
-import { useNavigate, useParams } from 'react-router-dom';
-import type { IResponseError, IUserEntity } from '@novu/shared';
 import {
+  BuildWorkflow,
   Button,
   colors,
-  Text,
-  BuildWorkflow,
   Pencil,
   QuickGuide,
   RightArrow,
   RunTestBell,
+  Text,
   WorkflowSettings,
 } from '@novu/design-system';
-import { useAuth } from '../../../hooks';
+import type { IResponseError, IUserEntity } from '@novu/shared';
+import { useMutation } from '@tanstack/react-query';
+import type { TooltipRenderProps } from 'react-joyride';
+import { useNavigate, useParams } from 'react-router-dom';
 import { updateUserOnBoardingTour } from '../../../api/user';
 import { useSegment } from '../../../components/providers/SegmentProvider';
 import { When } from '../../../components/utils/When';
+import { useAuth } from '../../../hooks';
 import { errorMessage } from '../../../utils/notifications';
 import { ordinalNumbers, SCRATCH_HINT_INDEX_TO_CLICK_ANALYTICS, StartFromScratchTourAnalyticsEnum } from '../constants';
 import { useBasePath } from '../hooks/useBasePath';

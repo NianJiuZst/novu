@@ -1,10 +1,9 @@
 import { errorMessage } from '@novu/design-system';
-import { IResponseError, PasswordResetFlowEnum } from '@novu/shared';
+import { type IResponseError, PasswordResetFlowEnum } from '@novu/shared';
 import { useMutation } from '@tanstack/react-query';
 import { api } from '../../../api';
-import { useAuth } from '../../../hooks/useAuth';
-
 import { useCountdownTimer } from '../../../hooks';
+import { useAuth } from '../../../hooks/useAuth';
 
 const COUNTDOWN_TIMER_START_SECONDS = 60;
 

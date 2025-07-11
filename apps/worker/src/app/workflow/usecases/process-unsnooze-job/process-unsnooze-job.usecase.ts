@@ -1,22 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { JobRepository, MessageRepository } from '@novu/dal';
+import {
+  buildFeedKey,
+  buildMessageCountKey,
+  type CreateExecutionDetails,
+  CreateExecutionDetailsCommand,
+  DetailEnum,
+  type InvalidateCacheService,
+  PlatformException,
+  type WebSocketsQueueService,
+} from '@novu/application-generic';
+import type { JobRepository, MessageRepository } from '@novu/dal';
 import {
   ChannelTypeEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
   WebSocketEventEnum,
 } from '@novu/shared';
-import {
-  CreateExecutionDetailsCommand,
-  CreateExecutionDetails,
-  DetailEnum,
-  WebSocketsQueueService,
-  PlatformException,
-  buildFeedKey,
-  buildMessageCountKey,
-  InvalidateCacheService,
-} from '@novu/application-generic';
-import { ProcessUnsnoozeJobCommand } from './process-unsnooze-job.command';
+import type { ProcessUnsnoozeJobCommand } from './process-unsnooze-job.command';
 
 @Injectable()
 export class ProcessUnsnoozeJob {

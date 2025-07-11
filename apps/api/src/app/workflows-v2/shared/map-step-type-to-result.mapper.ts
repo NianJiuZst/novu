@@ -1,7 +1,7 @@
-import { JSONSchema } from '@novu/application-generic';
+import type { JSONSchema } from '@novu/application-generic';
 import { JsonSchemaTypeEnum } from '@novu/dal';
 import { ActionStepEnum, actionStepSchemas, ChannelStepEnum, channelStepSchemas } from '@novu/framework/internal';
-import { StepTypeEnum } from '@novu/shared';
+import type { StepTypeEnum } from '@novu/shared';
 
 export function computeResultSchema({
   stepType,

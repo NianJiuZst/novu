@@ -1,4 +1,4 @@
-import { expect, Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 export enum FILTER_TERM {
   EMAIL = 'Email',
@@ -11,7 +11,7 @@ export class ActivitiesPage {
   constructor(private page: Page) {}
 
   public static async goTo(page: Page) {
-    const pageDataLoadedPromise = this.getPageDataLoadedPromise(page);
+    const pageDataLoadedPromise = ActivitiesPage.getPageDataLoadedPromise(page);
     await page.goto('/activities');
     await pageDataLoadedPromise;
 

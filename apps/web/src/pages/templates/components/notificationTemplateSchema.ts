@@ -1,15 +1,15 @@
-import { z } from 'zod';
 import {
   ChannelTypeEnum,
-  StepTypeEnum,
+  DaysEnum,
   DelayTypeEnum,
   DigestTypeEnum,
   DigestUnitEnum,
-  DaysEnum,
   MonthlyTypeEnum,
   OrdinalEnum,
   OrdinalValueEnum,
+  StepTypeEnum,
 } from '@novu/shared';
+import { z } from 'zod';
 
 import { getChannel } from '../../../utils/channels';
 

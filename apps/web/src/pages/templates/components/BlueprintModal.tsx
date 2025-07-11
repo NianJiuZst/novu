@@ -1,18 +1,16 @@
-import { Modal, useMantineTheme, Center, Loader } from '@mantine/core';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { Center, Loader, Modal, useMantineTheme } from '@mantine/core';
+import { Button, colors, shadows, Text, Title } from '@novu/design-system';
+import { type IResponseError, type IUserEntity, WorkflowCreationSourceEnum } from '@novu/shared';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-
-import { IResponseError, IUserEntity, WorkflowCreationSourceEnum } from '@novu/shared';
-import { colors, shadows, Title, Text, Button } from '@novu/design-system';
-
-import { updateUserOnBoarding } from '../../../api/user';
-import { getBlueprintTemplateById } from '../../../api/notification-templates';
-import { errorMessage } from '../../../utils/notifications';
-import { When } from '../../../components/utils/When';
-import { useSegment } from '../../../components/providers/SegmentProvider';
+import { useNavigate } from 'react-router-dom';
 import { useCreateTemplateFromBlueprint } from '../../../api/hooks';
+import { getBlueprintTemplateById } from '../../../api/notification-templates';
+import { updateUserOnBoarding } from '../../../api/user';
+import { useSegment } from '../../../components/providers/SegmentProvider';
+import { When } from '../../../components/utils/When';
 import { ROUTES } from '../../../constants/routes';
+import { errorMessage } from '../../../utils/notifications';
 
 export function BlueprintModal() {
   const theme = useMantineTheme();

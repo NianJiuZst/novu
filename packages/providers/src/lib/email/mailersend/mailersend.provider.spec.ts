@@ -1,6 +1,6 @@
-import { expect, test, vi } from 'vitest';
-import MailerSend, { Attachment, Recipient } from 'mailersend';
 import { CheckIntegrationResponseEnum } from '@novu/stateless';
+import MailerSend, { Attachment, Recipient } from 'mailersend';
+import { expect, test, vi } from 'vitest';
 import { MailersendEmailProvider } from './mailersend.provider';
 
 const mockConfig = {

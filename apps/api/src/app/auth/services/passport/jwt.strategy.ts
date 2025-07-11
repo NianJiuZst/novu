@@ -1,11 +1,11 @@
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { HttpRequestHeaderKeysEnum, Instrument } from '@novu/application-generic';
+import type { EnvironmentRepository } from '@novu/dal';
+import { ApiAuthSchemeEnum, type UserSessionData } from '@novu/shared';
 import type http from 'http';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { Instrument, HttpRequestHeaderKeysEnum } from '@novu/application-generic';
-import { ApiAuthSchemeEnum, UserSessionData } from '@novu/shared';
-import { EnvironmentRepository } from '@novu/dal';
-import { AuthService } from '../auth.service';
+import type { AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {

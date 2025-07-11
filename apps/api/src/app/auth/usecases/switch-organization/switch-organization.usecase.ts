@@ -1,7 +1,7 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import { MemberRepository, UserRepository } from '@novu/dal';
-import { AuthService } from '../../services/auth.service';
-import { SwitchOrganizationCommand } from './switch-organization.command';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import type { MemberRepository, UserRepository } from '@novu/dal';
+import type { AuthService } from '../../services/auth.service';
+import type { SwitchOrganizationCommand } from './switch-organization.command';
 
 @Injectable()
 export class SwitchOrganization {

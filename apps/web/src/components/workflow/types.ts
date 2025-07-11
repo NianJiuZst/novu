@@ -1,6 +1,6 @@
+import type { ChannelTypeEnum, IEmailBlock, StepTypeEnum } from '@novu/shared';
 import type { MouseEvent } from 'react';
-import { EdgeProps, NodeProps } from 'react-flow-renderer';
-import { ChannelTypeEnum, IEmailBlock, StepTypeEnum } from '@novu/shared';
+import type { EdgeProps, NodeProps } from 'react-flow-renderer';
 
 import type { IFormStep } from '../../pages/templates/components/formTypes';
 

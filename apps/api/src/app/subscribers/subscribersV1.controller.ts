@@ -17,29 +17,30 @@ import {
 import { ApiExcludeEndpoint, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   CreateOrUpdateSubscriberCommand,
-  CreateOrUpdateSubscriberUseCase,
+  type CreateOrUpdateSubscriberUseCase,
   OAuthHandlerEnum,
-  UpdateSubscriber,
-  UpdateSubscriberChannel,
+  type UpdateSubscriber,
+  type UpdateSubscriberChannel,
   UpdateSubscriberChannelCommand,
   UpdateSubscriberCommand,
 } from '@novu/application-generic';
-import { MessageEntity } from '@novu/dal';
+import type { MessageEntity } from '@novu/dal';
 import {
   ApiRateLimitCategoryEnum,
   ApiRateLimitCostEnum,
-  ButtonTypeEnum,
-  ChatProviderIdEnum,
-  IPreferenceChannels,
+  type ButtonTypeEnum,
+  type ChatProviderIdEnum,
+  type IPreferenceChannels,
   PreferenceLevelEnum,
   TriggerTypeEnum,
-  UserSessionData,
+  type UserSessionData,
 } from '@novu/shared';
+import { RequireAuthentication } from '../auth/framework/auth.decorator';
 import { ExternalApiAccessible } from '../auth/framework/external-api.decorator';
 import { UpdatePreferencesCommand } from '../inbox/usecases/update-preferences/update-preferences.command';
-import { UpdatePreferences } from '../inbox/usecases/update-preferences/update-preferences.usecase';
+import type { UpdatePreferences } from '../inbox/usecases/update-preferences/update-preferences.usecase';
 import { ThrottlerCategory, ThrottlerCost } from '../rate-limiting/guards';
-import { PaginatedResponseDto } from '../shared/dtos/pagination-response';
+import type { PaginatedResponseDto } from '../shared/dtos/pagination-response';
 import { ApiOkPaginatedResponse } from '../shared/framework/paginated-ok-response.decorator';
 import {
   ApiCommonResponses,
@@ -48,68 +49,67 @@ import {
   ApiNoContentResponse,
   ApiResponse,
 } from '../shared/framework/response.decorator';
-import { RequireAuthentication } from '../auth/framework/auth.decorator';
 import { SdkGroupName, SdkMethodName, SdkUsePagination } from '../shared/framework/swagger/sdk.decorators';
 import { UserSession } from '../shared/framework/user.decorator';
 import { FeedResponseDto } from '../widgets/dtos/feeds-response.dto';
-import { MessageMarkAsRequestDto } from '../widgets/dtos/mark-as-request.dto';
-import { MarkMessageActionAsSeenDto } from '../widgets/dtos/mark-message-action-as-seen.dto';
-import { MarkMessageAsRequestDto } from '../widgets/dtos/mark-message-as-request.dto';
+import type { MessageMarkAsRequestDto } from '../widgets/dtos/mark-as-request.dto';
+import type { MarkMessageActionAsSeenDto } from '../widgets/dtos/mark-message-action-as-seen.dto';
+import type { MarkMessageAsRequestDto } from '../widgets/dtos/mark-message-as-request.dto';
 import { MessageResponseDto } from '../widgets/dtos/message-response.dto';
 import { UnseenCountResponse } from '../widgets/dtos/unseen-count-response.dto';
-import { UpdateSubscriberPreferenceRequestDto } from '../widgets/dtos/update-subscriber-preference-request.dto';
+import type { UpdateSubscriberPreferenceRequestDto } from '../widgets/dtos/update-subscriber-preference-request.dto';
 import {
-  UpdateSubscriberPreferenceGlobalResponseDto,
+  type UpdateSubscriberPreferenceGlobalResponseDto,
   UpdateSubscriberPreferenceResponseDto,
 } from '../widgets/dtos/update-subscriber-preference-response.dto';
 import { GetFeedCountCommand } from '../widgets/usecases/get-feed-count/get-feed-count.command';
-import { GetFeedCount } from '../widgets/usecases/get-feed-count/get-feed-count.usecase';
+import type { GetFeedCount } from '../widgets/usecases/get-feed-count/get-feed-count.usecase';
 import { GetNotificationsFeedCommand } from '../widgets/usecases/get-notifications-feed/get-notifications-feed.command';
-import { GetNotificationsFeed } from '../widgets/usecases/get-notifications-feed/get-notifications-feed.usecase';
+import type { GetNotificationsFeed } from '../widgets/usecases/get-notifications-feed/get-notifications-feed.usecase';
 import { UpdateMessageActionsCommand } from '../widgets/usecases/mark-action-as-done/update-message-actions.command';
-import { UpdateMessageActions } from '../widgets/usecases/mark-action-as-done/update-message-actions.usecase';
+import type { UpdateMessageActions } from '../widgets/usecases/mark-action-as-done/update-message-actions.usecase';
 import { MarkAllMessagesAsCommand } from '../widgets/usecases/mark-all-messages-as/mark-all-messages-as.command';
-import { MarkAllMessagesAs } from '../widgets/usecases/mark-all-messages-as/mark-all-messages-as.usecase';
-import { MarkMessageAsByMarkCommand } from '../widgets/usecases/mark-message-as-by-mark/mark-message-as-by-mark.command';
-import { MarkMessageAsByMark } from '../widgets/usecases/mark-message-as-by-mark/mark-message-as-by-mark.usecase';
+import type { MarkAllMessagesAs } from '../widgets/usecases/mark-all-messages-as/mark-all-messages-as.usecase';
 import { MarkMessageAsCommand } from '../widgets/usecases/mark-message-as/mark-message-as.command';
-import { MarkMessageAs } from '../widgets/usecases/mark-message-as/mark-message-as.usecase';
+import type { MarkMessageAs } from '../widgets/usecases/mark-message-as/mark-message-as.usecase';
+import { MarkMessageAsByMarkCommand } from '../widgets/usecases/mark-message-as-by-mark/mark-message-as-by-mark.command';
+import type { MarkMessageAsByMark } from '../widgets/usecases/mark-message-as-by-mark/mark-message-as-by-mark.usecase';
 import {
-  BulkSubscriberCreateDto,
-  CreateSubscriberRequestDto,
+  type BulkSubscriberCreateDto,
+  type CreateSubscriberRequestDto,
   DeleteSubscriberResponseDto,
-  GetSubscriberPreferencesResponseDto,
+  type GetSubscriberPreferencesResponseDto,
   SubscriberResponseDto,
-  UpdateSubscriberChannelRequestDto,
-  UpdateSubscriberGlobalPreferencesRequestDto,
-  UpdateSubscriberRequestDto,
+  type UpdateSubscriberChannelRequestDto,
+  type UpdateSubscriberGlobalPreferencesRequestDto,
+  type UpdateSubscriberRequestDto,
 } from './dtos';
 import { BulkCreateSubscriberResponseDto } from './dtos/bulk-create-subscriber-response.dto';
-import { ChatOauthCallbackRequestDto, ChatOauthRequestDto } from './dtos/chat-oauth-request.dto';
-import { GetInAppNotificationsFeedForSubscriberDto } from './dtos/get-in-app-notification-feed-for-subscriber.dto';
-import { GetSubscribersDto } from './dtos/get-subscribers.dto';
-import { MarkAllMessageAsRequestDto } from './dtos/mark-all-messages-as-request.dto';
-import { UpdateSubscriberOnlineFlagRequestDto } from './dtos/update-subscriber-online-flag-request.dto';
-import { GetSubscriberPreferencesByLevelParams } from './params';
-import { UnseenCountQueryDto } from './query-objects/unseen-count.query';
+import type { ChatOauthCallbackRequestDto, ChatOauthRequestDto } from './dtos/chat-oauth-request.dto';
+import type { GetInAppNotificationsFeedForSubscriberDto } from './dtos/get-in-app-notification-feed-for-subscriber.dto';
+import type { GetSubscribersDto } from './dtos/get-subscribers.dto';
+import type { MarkAllMessageAsRequestDto } from './dtos/mark-all-messages-as-request.dto';
+import type { UpdateSubscriberOnlineFlagRequestDto } from './dtos/update-subscriber-online-flag-request.dto';
+import type { GetSubscriberPreferencesByLevelParams } from './params';
+import type { UnseenCountQueryDto } from './query-objects/unseen-count.query';
 import { BulkCreateSubscribersCommand } from './usecases/bulk-create-subscribers';
-import { BulkCreateSubscribers } from './usecases/bulk-create-subscribers/bulk-create-subscribers.usecase';
+import type { BulkCreateSubscribers } from './usecases/bulk-create-subscribers/bulk-create-subscribers.usecase';
+import { ChatOauthCommand } from './usecases/chat-oauth/chat-oauth.command';
+import type { ChatOauth } from './usecases/chat-oauth/chat-oauth.usecase';
 import { ChatOauthCallbackCommand } from './usecases/chat-oauth-callback/chat-oauth-callback.command';
 import { ResponseTypeEnum } from './usecases/chat-oauth-callback/chat-oauth-callback.result';
-import { ChatOauthCallback } from './usecases/chat-oauth-callback/chat-oauth-callback.usecase';
-import { ChatOauthCommand } from './usecases/chat-oauth/chat-oauth.command';
-import { ChatOauth } from './usecases/chat-oauth/chat-oauth.usecase';
+import type { ChatOauthCallback } from './usecases/chat-oauth-callback/chat-oauth-callback.usecase';
 import {
-  DeleteSubscriberCredentials,
+  type DeleteSubscriberCredentials,
   DeleteSubscriberCredentialsCommand,
 } from './usecases/delete-subscriber-credentials';
 import { GetPreferencesByLevelCommand } from './usecases/get-preferences-by-level/get-preferences-by-level.command';
-import { GetPreferencesByLevel } from './usecases/get-preferences-by-level/get-preferences-by-level.usecase';
-import { GetSubscriber, GetSubscriberCommand } from './usecases/get-subscriber';
-import { GetSubscribers, GetSubscribersCommand } from './usecases/get-subscribers';
-import { RemoveSubscriber, RemoveSubscriberCommand } from './usecases/remove-subscriber';
+import type { GetPreferencesByLevel } from './usecases/get-preferences-by-level/get-preferences-by-level.usecase';
+import { type GetSubscriber, GetSubscriberCommand } from './usecases/get-subscriber';
+import { type GetSubscribers, GetSubscribersCommand } from './usecases/get-subscribers';
+import { type RemoveSubscriber, RemoveSubscriberCommand } from './usecases/remove-subscriber';
 import {
-  UpdateSubscriberOnlineFlag,
+  type UpdateSubscriberOnlineFlag,
   UpdateSubscriberOnlineFlagCommand,
 } from './usecases/update-subscriber-online-flag';
 

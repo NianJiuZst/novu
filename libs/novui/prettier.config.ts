@@ -1,5 +1,5 @@
+import type { Config } from 'prettier';
 import rootConfig from '../../prettier.config.js';
-import { Config } from 'prettier';
 
 const config: Config = {
   ...rootConfig,

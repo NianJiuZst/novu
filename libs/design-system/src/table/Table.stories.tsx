@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { StoryFn, Meta } from '@storybook/react';
 import { Badge } from '@mantine/core';
+import type { Meta, StoryFn } from '@storybook/react';
+import { useState } from 'react';
 
 import { Switch } from '../switch/Switch';
-import { IExtendedColumn, Table } from './Table';
+import { type IExtendedColumn, Table } from './Table';
 
 export default {
   title: 'Components/Table',

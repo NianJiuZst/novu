@@ -1,15 +1,15 @@
-import React from 'react';
+import styled from '@emotion/styled';
+import { type ColorScheme, TextInput, useMantineColorScheme, useMantineTheme } from '@mantine/core';
+import { Button, colors, RemoveCircle } from '@novu/design-system';
 import {
-  darkButtonStyle,
-  IMessageButton,
-  lightButtonStyle,
   ButtonTypeEnum,
-  IMessageAction,
+  darkButtonStyle,
+  type IMessageAction,
+  type IMessageButton,
+  lightButtonStyle,
   MessageActionStatusEnum,
 } from '@novu/shared';
-import { ColorScheme, TextInput, useMantineColorScheme, useMantineTheme } from '@mantine/core';
-import { RemoveCircle, Button, colors } from '@novu/design-system';
-import styled from '@emotion/styled';
+import React from 'react';
 import { When } from '../../../../../components/utils/When';
 
 export function ActionBlockContainer({

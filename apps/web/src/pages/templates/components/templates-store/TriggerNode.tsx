@@ -1,6 +1,5 @@
-import { Handle, NodeProps, Position } from 'react-flow-renderer';
-
 import { BoltOutlinedGradient } from '@novu/design-system';
+import { Handle, type NodeProps, Position } from 'react-flow-renderer';
 import { NodeStep } from '../../../../components/workflow';
 
 export const TriggerNode = ({ data }: NodeProps) => {

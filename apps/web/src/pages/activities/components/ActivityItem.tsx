@@ -1,17 +1,23 @@
-import { useEffect, useState } from 'react';
-import { createStyles, CSSObject, Grid, MantineTheme, Text, UnstyledButton, useMantineTheme } from '@mantine/core';
+import styled from '@emotion/styled';
+import {
+  type CSSObject,
+  createStyles,
+  Grid,
+  type MantineTheme,
+  Text,
+  UnstyledButton,
+  useMantineTheme,
+} from '@mantine/core';
+import { useClipboard } from '@mantine/hooks';
+import { CheckCircle, colors, ErrorIcon, Timer } from '@novu/design-system';
 import { JobStatusEnum } from '@novu/shared';
 import { format } from 'date-fns';
-import styled from '@emotion/styled';
-import { useClipboard } from '@mantine/hooks';
-
-import { CheckCircle, colors, ErrorIcon, Timer } from '@novu/design-system';
-import { ActivityStep } from './ActivityStep';
-import { DigestedStep } from './DigestedStep';
-
+import { useEffect, useState } from 'react';
 import { When } from '../../../components/utils/When';
 import { useNotificationStatus } from '../hooks/useNotificationStatus';
+import { ActivityStep } from './ActivityStep';
 import { CopyButton } from './CopyButton';
+import { DigestedStep } from './DigestedStep';
 
 const JOB_LENGTH_UPPER_THRESHOLD = 3;
 

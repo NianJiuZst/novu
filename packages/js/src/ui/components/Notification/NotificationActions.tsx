@@ -1,17 +1,17 @@
-import { createMemo, createSignal, For, JSX } from 'solid-js';
+import { createMemo, createSignal, For, type JSX } from 'solid-js';
 import type { Notification } from '../../../notifications';
 import { useInboxContext, useLocalization } from '../../context';
 import { useStyle } from '../../helpers';
+import { MarkAsUnarchived as DefaultMarkAsUnarchived } from '../../icons';
 import { Clock, Clock as DefaultClock } from '../../icons/Clock';
 import { MarkAsArchived as DefaultMarkAsArchived } from '../../icons/MarkAsArchived';
 import { MarkAsRead as DefaultMarkAsRead } from '../../icons/MarkAsRead';
-import { MarkAsUnarchived as DefaultMarkAsUnarchived } from '../../icons';
 import { MarkAsUnread as DefaultMarkAsUnread } from '../../icons/MarkAsUnread';
 import { Unsnooze as DefaultUnsnooze } from '../../icons/Unsnooze';
-import { LocalizationKey, NotificationStatus } from '../../types';
+import { type LocalizationKey, NotificationStatus } from '../../types';
 import { Button, Dropdown, dropdownItemVariants, Popover } from '../primitives';
-import { IconRendererWrapper } from '../shared/IconRendererWrapper';
 import { Tooltip } from '../primitives/Tooltip';
+import { IconRendererWrapper } from '../shared/IconRendererWrapper';
 import { SnoozeDateTimePicker } from './SnoozeDateTimePicker';
 
 export const SNOOZE_PRESETS = [

@@ -1,12 +1,12 @@
-import { useNavigate, useParams } from 'react-router-dom';
-import { Step } from 'react-joyride';
-import { useFormContext } from 'react-hook-form';
 import { StepTypeEnum } from '@novu/shared';
+import { useFormContext } from 'react-hook-form';
+import type { Step } from 'react-joyride';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useEffectOnce } from '../../../hooks';
-import { IForm } from '../components/formTypes';
-import { DigestWorkflowTourTooltip } from './DigestWorkflowTourTooltip';
+import type { IForm } from '../components/formTypes';
 import { useBasePath } from '../hooks/useBasePath';
 import { useTourStorage } from '../hooks/useTourStorage';
+import { DigestWorkflowTourTooltip } from './DigestWorkflowTourTooltip';
 
 const digestTourSteps: Step[] = [
   {

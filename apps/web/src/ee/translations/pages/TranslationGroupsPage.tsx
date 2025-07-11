@@ -1,17 +1,16 @@
 import { Container, Group, UnstyledButton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { colors, PageContainer, Text, Title, When, IRow } from '@novu/design-system';
+import { colors, type IRow, PageContainer, Text, Title, When } from '@novu/design-system';
+import { Flex } from '@novu/novui/jsx';
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { Flex } from '@novu/novui/jsx';
 import { useEnvironment } from '../../../hooks';
-import { useGetDefaultLocale, ITranslationGroup, useFetchLocales, useFetchTranslationGroups } from '../hooks';
-import { FlagIcon } from '../components/shared';
-
 import { DefaultLocaleModal } from '../components/DefaultLocaleModal';
+import { FlagIcon } from '../components/shared';
 import { TranslationGroupEmptyList } from '../components/TranslationGroup/TranslationGroupEmptyList';
 import { TranslationGroupListToolbar } from '../components/TranslationGroup/TranslationGroupListToolbar';
 import { TranslationGroupsList } from '../components/TranslationGroup/TranslationGroupsList';
+import { type ITranslationGroup, useFetchLocales, useFetchTranslationGroups, useGetDefaultLocale } from '../hooks';
 import { ROUTES } from '../routes';
 
 export const TranslationGroupsPage = () => {

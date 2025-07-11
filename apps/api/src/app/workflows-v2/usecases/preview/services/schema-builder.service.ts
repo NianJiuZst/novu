@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import _ from 'lodash';
-import { NotificationTemplateEntity, JsonSchemaTypeEnum, JsonSchemaFormatEnum } from '@novu/dal';
+import type { FeatureFlagsService } from '@novu/application-generic';
+import { JsonSchemaFormatEnum, JsonSchemaTypeEnum, type NotificationTemplateEntity } from '@novu/dal';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
-import { FeatureFlagsService } from '@novu/application-generic';
-import { PreviewPayloadDto } from '../../../dtos';
-import { JSONSchemaDto } from '../../../../shared/dtos/json-schema.dto';
+import _ from 'lodash';
+import type { JSONSchemaDto } from '../../../../shared/dtos/json-schema.dto';
 import { buildVariablesSchema } from '../../../../shared/utils/create-schema';
+import type { PreviewPayloadDto } from '../../../dtos';
 
 @Injectable()
 export class SchemaBuilderService {

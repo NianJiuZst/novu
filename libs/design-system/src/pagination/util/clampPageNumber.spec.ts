@@ -1,4 +1,4 @@
-import { expect, describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { clampPageNumber } from './clampPageNumber';
 
 const FIRST_PAGE_NUMBER = 1;

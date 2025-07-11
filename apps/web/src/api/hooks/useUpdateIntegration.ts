@@ -1,9 +1,8 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { IResponseError, IUpdateIntegrationBodyDto } from '@novu/shared';
-
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { IntegrationEntity } from '../../pages/integrations/types';
 import { errorMessage, successMessage } from '../../utils/notifications';
 import { updateIntegration } from '../integration';
-import type { IntegrationEntity } from '../../pages/integrations/types';
 import { QueryKeys } from '../query.keys';
 
 export const useUpdateIntegration = (integrationId: string) => {

@@ -1,8 +1,13 @@
-import { SmsProviderIdEnum } from '@novu/shared';
-import { ChannelTypeEnum, ISendMessageSuccessResponse, ISmsOptions, ISmsProvider } from '@novu/stateless';
+import type { SmsProviderIdEnum } from '@novu/shared';
+import {
+  ChannelTypeEnum,
+  type ISendMessageSuccessResponse,
+  type ISmsOptions,
+  type ISmsProvider,
+} from '@novu/stateless';
 import AfricasTalking from 'africastalking';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export class AfricasTalkingSmsProvider extends BaseProvider implements ISmsProvider {
   protected casing = CasingEnum.CAMEL_CASE;

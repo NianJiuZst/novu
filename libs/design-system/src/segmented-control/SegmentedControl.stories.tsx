@@ -1,4 +1,4 @@
-import { StoryFn, Meta } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { SegmentedControl } from './SegmentedControl';
 
 export default {

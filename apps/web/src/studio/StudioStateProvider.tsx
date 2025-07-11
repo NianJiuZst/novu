@@ -1,6 +1,6 @@
+import type { IUserEntity } from '@novu/shared';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { IUserEntity } from '@novu/shared';
 import { useAuth } from '../hooks/useAuth';
 import { useEnvironment } from '../hooks/useEnvironment';
 import type { StudioState } from './types';

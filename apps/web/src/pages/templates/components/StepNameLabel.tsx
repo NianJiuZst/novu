@@ -1,8 +1,7 @@
 import { Center } from '@mantine/core';
-import { Text, colors, Variant, VariantsFile } from '@novu/design-system';
-
-import { useStepInfoPath } from '../hooks/useStepInfoPath';
+import { colors, Text, Variant, VariantsFile } from '@novu/design-system';
 import { useStepIndex } from '../hooks/useStepIndex';
+import { useStepInfoPath } from '../hooks/useStepInfoPath';
 import { useStepVariantsCount } from '../hooks/useStepVariantsCount';
 
 export const StepNameLabel = () => {

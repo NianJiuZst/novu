@@ -1,10 +1,15 @@
-import { InAppRenderOutput } from '@novu/shared';
 import { Injectable } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
-import { InstrumentUsecase, sanitizeHtmlInObject, FeatureFlagsService, PinoLogger } from '@novu/application-generic';
-import { NotificationTemplateEntity } from '@novu/dal';
-import { RenderCommand } from './render-command';
+import type { ModuleRef } from '@nestjs/core';
+import {
+  type FeatureFlagsService,
+  InstrumentUsecase,
+  type PinoLogger,
+  sanitizeHtmlInObject,
+} from '@novu/application-generic';
+import type { NotificationTemplateEntity } from '@novu/dal';
+import type { InAppRenderOutput } from '@novu/shared';
 import { BaseTranslationRendererUsecase } from './base-translation-renderer.usecase';
+import { RenderCommand } from './render-command';
 
 export class InAppOutputRendererCommand extends RenderCommand {
   dbWorkflow: NotificationTemplateEntity;

@@ -1,15 +1,14 @@
-import { Controller, useFormContext } from 'react-hook-form';
 import { Group } from '@mantine/core';
-import { format } from 'date-fns';
+import { colors, Input, inputStyles, SegmentedControl } from '@novu/design-system';
 import { DigestTypeEnum, DigestUnitEnum } from '@novu/shared';
-
-import { colors, Input, SegmentedControl, inputStyles } from '@novu/design-system';
-import { WeekDaySelect } from './digest/WeekDaySelect';
-import { ScheduleMonthlyFields } from './digest/ScheduleMonthlyFields';
+import { format } from 'date-fns';
+import { Controller, useFormContext } from 'react-hook-form';
 import { When } from '../../../components/utils/When';
-import { useStepFormPath } from '../hooks/useStepFormPath';
 import { useEnvironment } from '../../../hooks';
 import { useTemplateEditorForm } from '../components/TemplateEditorFormProvider';
+import { useStepFormPath } from '../hooks/useStepFormPath';
+import { ScheduleMonthlyFields } from './digest/ScheduleMonthlyFields';
+import { WeekDaySelect } from './digest/WeekDaySelect';
 
 const convertUnitToLabel = (unit: DigestUnitEnum) => {
   switch (unit) {

@@ -1,17 +1,17 @@
+import type { Novu } from '@novu/api';
 import {
-  CreateWorkflowDto,
+  type CreateWorkflowDto,
   DirectionEnum,
   WorkflowCreationSourceEnum,
-  WorkflowResponseDto,
+  type WorkflowResponseDto,
   WorkflowResponseDtoSortField,
   WorkflowStatusEnum,
 } from '@novu/api/models/components';
 import { UserSession } from '@novu/testing';
 import { expect } from 'chai';
-import { Novu } from '@novu/api';
 import { initNovuClassSdkInternalAuth } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
-describe('List Workflows - /workflows (GET) #novu-v2', function () {
+describe('List Workflows - /workflows (GET) #novu-v2', () => {
   let session: UserSession;
   let novuClient: Novu;
 

@@ -1,20 +1,18 @@
+import { Timeline as MantineTimeline } from '@mantine/core';
 import { Button, Input, inputStyles } from '@novu/design-system';
-import { FC } from 'react';
-import { Controller } from 'react-hook-form';
-
 import { css, cx } from '@novu/novui/css';
 import { HStack, Stack } from '@novu/novui/jsx';
 import { text } from '@novu/novui/recipes';
-import { Timeline as MantineTimeline } from '@mantine/core';
+import type { FC } from 'react';
+import { Controller } from 'react-hook-form';
 import { ClipboardIconButton } from '../../../components';
 import { Timeline } from '../../../components/Timeline';
 import { SettingsPageContainer } from '../SettingsPageContainer';
-import { Text } from './WebhookPage.shared';
-
 // Unfortunately, a wrapper around TimelineItem prevented any styles from applying, so have to use direct import for now
 import { useWebhookPage } from './useWebhookPage';
-import { WebhookClaimStatusDisplay } from './WebhookClaimStatusDisplay';
 import { WebhookAdditionalInformationLink } from './WebhookAdditionalInformationLink';
+import { WebhookClaimStatusDisplay } from './WebhookClaimStatusDisplay';
+import { Text } from './WebhookPage.shared';
 
 const codeValueInputClassName = css({
   '& input': {

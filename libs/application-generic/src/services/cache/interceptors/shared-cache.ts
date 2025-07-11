@@ -120,7 +120,7 @@ export function getQueryParams(keysConfig: Record<string, unknown>): string {
 }
 
 export function getCredentialsKeys() {
-  return ['id', 'subscriberId', 'environmentId', 'organizationId'].map((cred) => [cred, `_${cred}`]).flat();
+  return ['id', 'subscriberId', 'environmentId', 'organizationId'].flatMap((cred) => [cred, `_${cred}`]);
 }
 
 /**

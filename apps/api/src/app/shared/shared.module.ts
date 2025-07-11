@@ -1,5 +1,24 @@
 /* eslint-disable global-require */
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import {
+  analyticsService,
+  CacheServiceHealthIndicator,
+  ComputeJobWaitDurationService,
+  CreateExecutionDetails,
+  cacheService,
+  clickHouseService,
+  createNestLoggingModuleOptions,
+  DalServiceHealthIndicator,
+  ExecuteBridgeRequest,
+  featureFlagsService,
+  GetDecryptedSecretKey,
+  InvalidateCacheService,
+  LoggerModule,
+  QueuesModule,
+  RequestLogRepository,
+  storageService,
+} from '@novu/application-generic';
 import {
   ChangeRepository,
   CommunityMemberRepository,
@@ -28,27 +47,7 @@ import {
   UserRepository,
   WorkflowOverrideRepository,
 } from '@novu/dal';
-import {
-  analyticsService,
-  cacheService,
-  CacheServiceHealthIndicator,
-  clickHouseService,
-  ComputeJobWaitDurationService,
-  CreateExecutionDetails,
-  createNestLoggingModuleOptions,
-  DalServiceHealthIndicator,
-  ExecuteBridgeRequest,
-  featureFlagsService,
-  GetDecryptedSecretKey,
-  InvalidateCacheService,
-  LoggerModule,
-  QueuesModule,
-  RequestLogRepository,
-  storageService,
-} from '@novu/application-generic';
-
 import { isClerkEnabled, JobTopicNameEnum } from '@novu/shared';
-import { JwtModule } from '@nestjs/jwt';
 import packageJson from '../../../package.json';
 
 function getDynamicAuthProviders() {

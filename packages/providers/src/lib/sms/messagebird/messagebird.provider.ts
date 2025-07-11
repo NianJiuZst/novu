@@ -1,10 +1,14 @@
-import { ChannelTypeEnum, ISendMessageSuccessResponse, ISmsOptions, ISmsProvider } from '@novu/stateless';
-
-import { Message, MessageParameters } from 'messagebird/types/messages';
-import { initClient } from 'messagebird';
 import { SmsProviderIdEnum } from '@novu/shared';
+import {
+  ChannelTypeEnum,
+  type ISendMessageSuccessResponse,
+  type ISmsOptions,
+  type ISmsProvider,
+} from '@novu/stateless';
+import { initClient } from 'messagebird';
+import type { Message, MessageParameters } from 'messagebird/types/messages';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export class MessageBirdSmsProvider extends BaseProvider implements ISmsProvider {
   id = SmsProviderIdEnum.MessageBird;

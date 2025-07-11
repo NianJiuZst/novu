@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { EditTranslationFileProvider } from '../context/useEditTranslationFileContext';
 import { EditTranslationsSidebar } from '../components/EditTranslationsSidebar';
+import { EditTranslationFileProvider } from '../context/useEditTranslationFileContext';
 import { ROUTES } from '../routes';
 
 export function EditGroupTranslationsPage() {

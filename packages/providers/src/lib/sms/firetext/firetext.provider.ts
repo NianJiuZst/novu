@@ -1,7 +1,12 @@
 import { SmsProviderIdEnum } from '@novu/shared';
-import { ChannelTypeEnum, ISendMessageSuccessResponse, ISmsOptions, ISmsProvider } from '@novu/stateless';
+import {
+  ChannelTypeEnum,
+  type ISendMessageSuccessResponse,
+  type ISmsOptions,
+  type ISmsProvider,
+} from '@novu/stateless';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export class FiretextSmsProvider extends BaseProvider implements ISmsProvider {
   id = SmsProviderIdEnum.Firetext;

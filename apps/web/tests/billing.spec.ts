@@ -1,9 +1,9 @@
-import { expect, Page } from '@playwright/test';
-import { test } from './utils/baseTest';
-import { initializeSession } from './utils/browser';
+import { ApiServiceLevelEnum } from '@novu/shared';
+import { expect, type Page } from '@playwright/test';
 import { BillingPage } from './page-models/billingPage';
 import { BillingRouteMocks } from './rest-mocks/BillingRouteMocks';
-import { ApiServiceLevelEnum } from '@novu/shared';
+import { test } from './utils/baseTest';
+import { initializeSession } from './utils/browser';
 
 const GREEN = 'rgb(77, 153, 128)';
 const YELLOW = 'rgb(253, 224, 68)';

@@ -1,27 +1,26 @@
-import { useEffect, useState } from 'react';
-import { JsonInput, MultiSelect, ActionIcon } from '@mantine/core';
-import { useClipboard } from '@mantine/hooks';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useFormContext, useWatch } from 'react-hook-form';
 import styled from '@emotion/styled';
-import { ChannelTypeEnum, MemberStatusEnum } from '@novu/shared';
-
+import { ActionIcon, JsonInput, MultiSelect } from '@mantine/core';
+import { useClipboard } from '@mantine/hooks';
 import {
-  Button,
-  Text,
-  colors,
-  Tooltip,
   ArrowDown,
+  Button,
   Check,
   Copy,
+  colors,
   Invite,
   inputStyles,
+  Text,
+  Tooltip,
   useSelectStyles,
 } from '@novu/design-system';
-import { errorMessage, successMessage } from '../../../../utils/notifications';
-import { useAuth, useProcessVariables, useIntegrationLimit } from '../../../../hooks';
-import { getOrganizationMembers } from '../../../../api/organization';
+import { ChannelTypeEnum, MemberStatusEnum } from '@novu/shared';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { testSendEmailMessage } from '../../../../api/notification-templates';
+import { getOrganizationMembers } from '../../../../api/organization';
+import { useAuth, useIntegrationLimit, useProcessVariables } from '../../../../hooks';
+import { errorMessage, successMessage } from '../../../../utils/notifications';
 import { useStepFormPath } from '../../hooks/useStepFormPath';
 import type { IForm } from '../formTypes';
 import { useTemplateEditorForm } from '../TemplateEditorFormProvider';

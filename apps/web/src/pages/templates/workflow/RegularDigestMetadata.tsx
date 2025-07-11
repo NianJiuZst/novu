@@ -1,13 +1,12 @@
-import { Controller, useFormContext } from 'react-hook-form';
 import { Group } from '@mantine/core';
-import { DigestTypeEnum } from '@novu/shared';
-
 import { colors, Input, inputStyles } from '@novu/design-system';
-import { IntervalSelect } from './digest/IntervalSelect';
-import { BackOffFields } from './digest/BackOffFields';
-import { useStepFormPath } from '../hooks/useStepFormPath';
+import { DigestTypeEnum } from '@novu/shared';
+import { Controller, useFormContext } from 'react-hook-form';
 import { useEnvironment } from '../../../hooks';
 import { useTemplateEditorForm } from '../components/TemplateEditorFormProvider';
+import { useStepFormPath } from '../hooks/useStepFormPath';
+import { BackOffFields } from './digest/BackOffFields';
+import { IntervalSelect } from './digest/IntervalSelect';
 
 const amountDefaultValue = '30';
 

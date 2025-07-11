@@ -1,15 +1,14 @@
+import { createStyles, Stack, useMantineColorScheme } from '@mantine/core';
+import { useDidUpdate } from '@mantine/hooks';
+import { BoltOutlinedGradient, Check, colors, Tooltip } from '@novu/design-system';
 import { StepTypeEnum } from '@novu/shared';
 import { memo, useState } from 'react';
 import { Handle, Position, useReactFlow } from 'react-flow-renderer';
-
-import { createStyles, Stack, useMantineColorScheme } from '@mantine/core';
-import { useDidUpdate } from '@mantine/hooks';
 import { useFormContext } from 'react-hook-form';
-import { colors, Tooltip, BoltOutlinedGradient, Check } from '@novu/design-system';
 import { When } from '../../../../../components/utils/When';
-import { IForm } from '../../../components/formTypes';
+import type { INode } from '../../../../../components/workflow/types';
+import type { IForm } from '../../../components/formTypes';
 import { WorkflowNode } from './WorkflowNode';
-import { INode } from '../../../../../components/workflow/types';
 
 const useStyles = createStyles(
   (

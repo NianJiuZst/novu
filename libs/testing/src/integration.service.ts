@@ -1,15 +1,15 @@
-import shortid from 'shortid';
 import { EnvironmentRepository, IntegrationRepository } from '@novu/dal';
 import {
   ChannelTypeEnum,
   ChatProviderIdEnum,
   EmailProviderIdEnum,
   InAppProviderIdEnum,
-  ProvidersIdEnum,
+  type ProvidersIdEnum,
   PushProviderIdEnum,
   SmsProviderIdEnum,
   slugify,
 } from '@novu/shared';
+import shortid from 'shortid';
 
 export class IntegrationService {
   private integrationRepository = new IntegrationRepository();

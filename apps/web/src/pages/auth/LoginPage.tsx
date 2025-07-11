@@ -1,6 +1,6 @@
-import { colors, Text, PageMeta } from '@novu/design-system';
-import { LoginForm } from './components/LoginForm';
+import { colors, PageMeta, Text } from '@novu/design-system';
 import AuthLayout from '../../components/layout/components/AuthLayout';
+import { LoginForm } from './components/LoginForm';
 
 const title = 'Sign In';
 

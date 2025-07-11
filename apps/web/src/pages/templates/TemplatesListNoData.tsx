@@ -1,14 +1,13 @@
 import styled from '@emotion/styled';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDiagramNext } from '@fortawesome/free-solid-svg-icons';
 import { faFile } from '@fortawesome/free-regular-svg-icons';
+import { faDiagramNext } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Skeleton } from '@mantine/core';
 
 import { CardTile, colors, Popover } from '@novu/design-system';
 import { WorkflowCreationSourceEnum } from '@novu/shared';
-
+import type { IBlueprintTemplate } from '../../api/types';
 import { useSegment } from '../../components/providers/SegmentProvider';
-import { IBlueprintTemplate } from '../../api/types';
 import { useHoverOverItem } from '../../hooks';
 import { FrameworkProjectCardTile } from './components/FrameworkProjectWaitList';
 

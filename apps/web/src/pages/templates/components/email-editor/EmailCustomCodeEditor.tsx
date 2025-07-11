@@ -1,10 +1,10 @@
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-handlebars';
 import 'ace-builds/src-noconflict/theme-monokai';
-import { addCompleter } from 'ace-builds/src-noconflict/ext-language_tools';
 import { Card } from '@mantine/core';
-import { SystemVariablesWithTypes, HandlebarHelpers } from '@novu/shared';
 import { colors } from '@novu/design-system';
+import { HandlebarHelpers, SystemVariablesWithTypes } from '@novu/shared';
+import { addCompleter } from 'ace-builds/src-noconflict/ext-language_tools';
 import { useEnvironment } from '../../../../hooks';
 
 export function EmailCustomCodeEditor({
@@ -19,18 +19,16 @@ export function EmailCustomCodeEditor({
   const { readonly } = useEnvironment();
   addCompleter({
     getCompletions(editor, session, pos, prefix, callback) {
-      const systemVars = Object.keys(SystemVariablesWithTypes)
-        .map((name) => {
-          const type = SystemVariablesWithTypes[name];
-          if (typeof type === 'object') {
-            return Object.keys(type).map((subName) => {
-              return { name: `${name}.${subName}`, type: type[subName] };
-            });
-          }
+      const systemVars = Object.keys(SystemVariablesWithTypes).flatMap((name) => {
+        const type = SystemVariablesWithTypes[name];
+        if (typeof type === 'object') {
+          return Object.keys(type).map((subName) => {
+            return { name: `${name}.${subName}`, type: type[subName] };
+          });
+        }
 
-          return { name, type };
-        })
-        .flat();
+        return { name, type };
+      });
 
       callback(null, [
         ...Object.keys(HandlebarHelpers).map((name) => {

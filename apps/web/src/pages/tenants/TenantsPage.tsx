@@ -1,13 +1,13 @@
+import type { ITenantEntity } from '@novu/shared';
 import React, { useCallback, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { Row } from 'react-table';
-import { ITenantEntity } from '@novu/shared';
+import type { Row } from 'react-table';
 
 import PageContainer from '../../components/layout/components/PageContainer';
 import PageHeader from '../../components/layout/components/PageHeader';
-import { TenantsList } from './components/list/TenantsList';
-import { ROUTES } from '../../constants/routes';
 import { useSegment } from '../../components/providers/SegmentProvider';
+import { ROUTES } from '../../constants/routes';
+import { TenantsList } from './components/list/TenantsList';
 
 export function TenantsPage() {
   const segment = useSegment();

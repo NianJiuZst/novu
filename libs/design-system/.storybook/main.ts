@@ -1,5 +1,5 @@
+import type { StorybookConfig } from '@storybook/react-webpack5';
 import { dirname, join } from 'path';
-import { StorybookConfig } from '@storybook/react-webpack5';
 
 export default {
   stories: ['../src/**/*.stories.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],

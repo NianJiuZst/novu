@@ -1,6 +1,7 @@
 import { errorMessage } from '@novu/design-system';
 import { MIME_TYPE_TO_FILE_EXTENSION } from '@novu/shared';
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ProfileImage } from '../../../components/shared';
 

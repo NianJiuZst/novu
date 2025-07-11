@@ -1,30 +1,30 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  AnalyticsService,
-  GetSubscriberTemplatePreference,
+  type AnalyticsService,
+  type GetSubscriberTemplatePreference,
   GetSubscriberTemplatePreferenceCommand,
-  UpsertPreferences,
-  UpsertSubscriberWorkflowPreferencesCommand,
-  UpsertSubscriberGlobalPreferencesCommand,
-  InstrumentUsecase,
-  Instrument,
-  GetWorkflowByIdsUseCase,
   GetWorkflowByIdsCommand,
+  type GetWorkflowByIdsUseCase,
+  Instrument,
+  InstrumentUsecase,
+  type UpsertPreferences,
+  UpsertSubscriberGlobalPreferencesCommand,
+  UpsertSubscriberWorkflowPreferencesCommand,
 } from '@novu/application-generic';
-import { SubscriberEntity, SubscriberRepository } from '@novu/dal';
+import type { SubscriberEntity, SubscriberRepository } from '@novu/dal';
 import {
-  IPreferenceChannels,
+  type IPreferenceChannels,
   PreferenceLevelEnum,
-  WorkflowPreferences,
-  WorkflowPreferencesPartial,
+  type WorkflowPreferences,
+  type WorkflowPreferencesPartial,
 } from '@novu/shared';
-import { AnalyticsEventsEnum } from '../../utils';
-import { InboxPreference } from '../../utils/types';
-import { UpdatePreferencesCommand } from './update-preferences.command';
 import {
-  GetSubscriberGlobalPreference,
+  type GetSubscriberGlobalPreference,
   GetSubscriberGlobalPreferenceCommand,
 } from '../../../subscribers/usecases/get-subscriber-global-preference';
+import { AnalyticsEventsEnum } from '../../utils';
+import type { InboxPreference } from '../../utils/types';
+import type { UpdatePreferencesCommand } from './update-preferences.command';
 
 @Injectable()
 export class UpdatePreferences {

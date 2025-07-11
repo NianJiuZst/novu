@@ -1,7 +1,6 @@
-import React from 'react';
 import { Button, LoadingOverlay, Pagination, useMantineColorScheme } from '@mantine/core';
-
-import { colors, ChevronLeft, ChevronRight } from '@novu/design-system';
+import { ChevronLeft, ChevronRight, colors } from '@novu/design-system';
+import React from 'react';
 import { ActivityItem } from './ActivityItem';
 
 export type Data = Record<string, any>;

@@ -1,15 +1,14 @@
+import { useMutation } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useLocation } from 'react-router-dom';
-
-import { useEffect, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { IForm } from '../../../../pages/templates/components/formTypes';
-import { useStepFormPath } from '../../../../pages/templates/hooks/useStepFormPath';
-import { useTemplateLocales } from '../../../../pages/templates/hooks/useTemplateLocales';
-import { usePreviewChatTemplate } from '../../../../pages/templates/hooks/usePreviewChatTemplate';
 import { api } from '../../../../api';
 import { useEnvironment } from '../../../../hooks/useEnvironment';
+import type { IForm } from '../../../../pages/templates/components/formTypes';
 import { useTemplateEditorForm } from '../../../../pages/templates/components/TemplateEditorFormProvider';
+import { usePreviewChatTemplate } from '../../../../pages/templates/hooks/usePreviewChatTemplate';
+import { useStepFormPath } from '../../../../pages/templates/hooks/useStepFormPath';
+import { useTemplateLocales } from '../../../../pages/templates/hooks/useTemplateLocales';
 import { ChatBasePreview } from './ChatBasePreview';
 
 export function ChatPreview({

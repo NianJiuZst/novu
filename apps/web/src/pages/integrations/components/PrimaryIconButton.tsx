@@ -1,17 +1,17 @@
 import styled from '@emotion/styled';
 import { Group, Text } from '@mantine/core';
-import { useState } from 'react';
 import {
-  When,
+  ActionButton,
   Button,
   colors,
   Modal,
-  Title,
-  ActionButton,
   RemoveCondition,
   StarEmpty,
+  Title,
   Warning,
+  When,
 } from '@novu/design-system';
+import { useState } from 'react';
 
 const IconButton = styled(Group)`
   text-align: center;

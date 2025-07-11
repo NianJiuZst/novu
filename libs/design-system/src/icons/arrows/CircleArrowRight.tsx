@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 /* eslint-disable */
 export function CircleArrowRight(props: React.ComponentPropsWithoutRef<'svg'>) {

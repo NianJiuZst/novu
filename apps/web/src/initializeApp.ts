@@ -1,7 +1,7 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import { fas } from '@fortawesome/free-solid-svg-icons';
-import { init, Replay, type Event } from '@sentry/react';
+import { type Event, init, Replay } from '@sentry/react';
 import { Integrations } from '@sentry/tracing';
 import { ENV, SENTRY_DSN } from './config';
 

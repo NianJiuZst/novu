@@ -1,15 +1,11 @@
-import { Form } from 'antd';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import styled from '@emotion/styled';
-import { showNotification } from '@mantine/notifications';
 import { Container, Group } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import { MemberRoleEnum } from '@novu/shared';
-import type { IResponseError } from '@novu/shared';
-
+import { showNotification } from '@mantine/notifications';
 import { Button, Input, Invite, UserAccess } from '@novu/design-system';
-import PageHeader from '../../components/layout/components/PageHeader';
-import PageContainer from '../../components/layout/components/PageContainer';
+import type { IResponseError, MemberRoleEnum } from '@novu/shared';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Form } from 'antd';
 import {
   changeMemberRole,
   getOrganizationMembers,
@@ -17,12 +13,14 @@ import {
   removeMember,
   resendInviteMember,
 } from '../../api/organization';
-import { MembersTable } from './components/MembersTable';
+import PageContainer from '../../components/layout/components/PageContainer';
+import PageHeader from '../../components/layout/components/PageHeader';
+import { useSegment } from '../../components/providers/SegmentProvider';
+import { ProductLead } from '../../components/utils/ProductLead';
+import { ROUTES } from '../../constants/routes';
 import { useAuth } from '../../hooks/useAuth';
 import { parseUrl } from '../../utils/routeUtils';
-import { ROUTES } from '../../constants/routes';
-import { ProductLead } from '../../components/utils/ProductLead';
-import { useSegment } from '../../components/providers/SegmentProvider';
+import { MembersTable } from './components/MembersTable';
 
 export function MembersInvitePage() {
   const [form] = Form.useForm();

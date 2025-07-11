@@ -1,30 +1,29 @@
-import { Grid, Group, ActionIcon, Center, useMantineTheme } from '@mantine/core';
 import styled from '@emotion/styled';
-import { Control, Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
-import { FilterPartTypeEnum, IFieldFilterPart, FieldLogicalOperatorEnum, FieldOperatorEnum } from '@novu/shared';
+import { ActionIcon, Center, Grid, Group, useMantineTheme } from '@mantine/core';
 import {
   Button,
+  Condition,
+  ConditionPlus,
   colors,
+  DotsHorizontal,
   Dropdown,
+  Duplicate,
+  ErrorIcon,
   Input,
   Select,
   Sidebar,
   Text,
   Title,
   Tooltip,
-  ConditionPlus,
-  DotsHorizontal,
-  Duplicate,
   Trash,
-  Condition,
-  ErrorIcon,
   When,
 } from '@novu/design-system';
-
-import { DataSelect, IConditions, IConditionsForm, IConditionsProps, IFilterTypeList } from './types';
-import { OnlineConditionRow } from './OnlineConditionRow';
+import { FieldLogicalOperatorEnum, FieldOperatorEnum, FilterPartTypeEnum, type IFieldFilterPart } from '@novu/shared';
+import { type Control, Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { DefaultGroupOperatorData, DefaultOperatorData } from './constants';
+import { OnlineConditionRow } from './OnlineConditionRow';
 import { PreviousStepsConditionRow } from './PreviousStepsConditionRow';
+import type { DataSelect, IConditions, IConditionsForm, IConditionsProps, IFilterTypeList } from './types';
 
 export interface IConditionsComponentProps {
   isOpened: boolean;

@@ -1,7 +1,7 @@
-import { ModalProps, Modal as MantineModal } from '@mantine/core';
-import React, { ReactNode } from 'react';
-import useStyles from './Modal.styles';
+import { Modal as MantineModal, type ModalProps } from '@mantine/core';
+import React, { type ReactNode } from 'react';
 import { colors, shadows } from '../config';
+import useStyles from './Modal.styles';
 
 interface IModalProps extends ModalProps {
   opened: boolean;

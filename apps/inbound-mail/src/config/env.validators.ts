@@ -1,5 +1,5 @@
-import { CleanedEnv, cleanEnv, json, num, port, str, ValidatorSpec } from 'envalid';
-import { StringifyEnv } from '@novu/shared';
+import type { StringifyEnv } from '@novu/shared';
+import { type CleanedEnv, cleanEnv, json, num, port, str, type ValidatorSpec } from 'envalid';
 
 export function validateEnv() {
   return cleanEnv(process.env, envValidators);

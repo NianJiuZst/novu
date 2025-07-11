@@ -1,50 +1,49 @@
-import { ChangeEventHandler, useMemo, useState } from 'react';
-import { ActionIcon, useMantineTheme, Group } from '@mantine/core';
-import { createSearchParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
-import { format } from 'date-fns';
+import { ActionIcon, Group, useMantineTheme } from '@mantine/core';
 import {
-  Tag,
-  Table,
-  colors,
-  Text,
-  IExtendedColumn,
-  withCellLoading,
-  Container,
   Bolt,
   BoltFilled,
   BoltOffFilled,
+  Container,
+  colors,
   Edit,
+  type IExtendedColumn,
   ProviderMissing,
-  Tooltip,
   SearchInput,
+  Table,
+  Tag,
+  Text,
+  Tooltip,
+  withCellLoading,
 } from '@novu/design-system';
-import { FeatureFlagsKeysEnum, WorkflowCreationSourceEnum } from '@novu/shared';
-
-import { css } from '@novu/novui/css';
 import { Button } from '@novu/novui';
-import {
-  useTemplates,
-  useEnvironment,
-  useNotificationGroup,
-  INotificationTemplateExtended,
-  useDebouncedSearch,
-  useFeatureFlag,
-} from '../../hooks';
-import { ROUTES } from '../../constants/routes';
-import { parseUrl } from '../../utils/routeUtils';
-import { TemplatesListNoData } from './TemplatesListNoData';
+import { css } from '@novu/novui/css';
+import { FeatureFlagsKeysEnum, WorkflowCreationSourceEnum } from '@novu/shared';
+import { format } from 'date-fns';
+import { type ChangeEventHandler, useMemo, useState } from 'react';
+import { createSearchParams, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useCreateTemplateFromBlueprint, useFetchBlueprints } from '../../api/hooks';
+import type { IBlueprintTemplate } from '../../api/types';
+import { ListPage } from '../../components/layout/components/ListPage';
 import { useSegment } from '../../components/providers/SegmentProvider';
+import { When } from '../../components/utils/When';
+import { ROUTES } from '../../constants/routes';
+import {
+  type INotificationTemplateExtended,
+  useDebouncedSearch,
+  useEnvironment,
+  useFeatureFlag,
+  useNotificationGroup,
+  useTemplates,
+} from '../../hooks';
+import { GetStartedPageV2 } from '../../studio/components/GetStartedPageV2/index';
+import { errorMessage } from '../../utils/notifications';
+import { parseUrl } from '../../utils/routeUtils';
+import { CreateWorkflowDropdown } from './components/CreateWorkflowDropdown';
 import { TemplateAnalyticsEnum } from './constants';
 import { useTemplatesStoreModal } from './hooks/useTemplatesStoreModal';
-import { useFetchBlueprints, useCreateTemplateFromBlueprint } from '../../api/hooks';
-import { CreateWorkflowDropdown } from './components/CreateWorkflowDropdown';
-import { IBlueprintTemplate } from '../../api/types';
-import { errorMessage } from '../../utils/notifications';
-import { When } from '../../components/utils/When';
-import { ListPage } from '../../components/layout/components/ListPage';
+import { TemplatesListNoData } from './TemplatesListNoData';
 import { WorkflowListNoMatches } from './WorkflowListNoMatches';
-import { GetStartedPageV2 } from '../../studio/components/GetStartedPageV2/index';
 
 const columns: IExtendedColumn<INotificationTemplateExtended>[] = [
   {

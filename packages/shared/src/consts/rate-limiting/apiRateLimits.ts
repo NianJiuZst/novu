@@ -2,8 +2,8 @@ import {
   ApiRateLimitAlgorithmEnum,
   ApiRateLimitCategoryEnum,
   ApiRateLimitCostEnum,
-  IApiRateLimitAlgorithm,
-  IApiRateLimitCost,
+  type IApiRateLimitAlgorithm,
+  type IApiRateLimitCost,
 } from '../../types';
 import { FeatureNameEnum } from '../feature-tiers-constants';
 

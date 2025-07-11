@@ -1,11 +1,11 @@
 import { errorMessage, successMessage } from '@novu/design-system';
-import { useMutation } from '@tanstack/react-query';
+import { Button } from '@novu/novui';
 import { IconPlayArrow } from '@novu/novui/icons';
 import { ChannelTypeEnum } from '@novu/shared';
-import { Button } from '@novu/novui';
+import { useMutation } from '@tanstack/react-query';
 import { testSendEmailMessage } from '../../../../api/notification-templates';
-import { useStudioState } from '../../../StudioStateProvider';
 import { useTelemetry } from '../../../../hooks/useNovuAPI';
+import { useStudioState } from '../../../StudioStateProvider';
 
 export const WorkflowTestStepButton = ({
   stepId,

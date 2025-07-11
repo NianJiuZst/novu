@@ -1,12 +1,12 @@
-import { ChannelTypeEnum, StepTypeEnum } from '@novu/shared';
+import { type ChannelTypeEnum, StepTypeEnum } from '@novu/shared';
 import { subMonths, subWeeks } from 'date-fns';
-import { FilterQuery, QueryWithHelpers, Types } from 'mongoose';
+import { type FilterQuery, type QueryWithHelpers, Types } from 'mongoose';
 
 import type { EnforceEnvOrOrgIds } from '../../types';
 import { BaseRepository } from '../base-repository';
-import { EnvironmentId } from '../environment';
-import { NotificationDBModel, NotificationEntity } from './notification.entity';
-import { NotificationFeedItemEntity } from './notification.feed.Item.entity';
+import type { EnvironmentId } from '../environment';
+import { type NotificationDBModel, NotificationEntity } from './notification.entity';
+import type { NotificationFeedItemEntity } from './notification.feed.Item.entity';
 import { Notification } from './notification.schema';
 
 export class NotificationRepository extends BaseRepository<

@@ -1,17 +1,17 @@
 import {
-  INotificationTemplate,
-  ICreateNotificationTemplateDto,
-  DigestTypeEnum,
-  INotificationTemplateStep,
-  DelayTypeEnum,
-  DigestUnitEnum,
-  IWorkflowStepMetadata,
-  MonthlyTypeEnum,
-  IStepVariant,
-  NotificationStepDto,
-  StepTypeEnum,
   ActorTypeEnum,
   ChannelCTATypeEnum,
+  DelayTypeEnum,
+  DigestTypeEnum,
+  DigestUnitEnum,
+  type ICreateNotificationTemplateDto,
+  type INotificationTemplate,
+  type INotificationTemplateStep,
+  type IStepVariant,
+  type IWorkflowStepMetadata,
+  MonthlyTypeEnum,
+  type NotificationStepDto,
+  StepTypeEnum,
 } from '@novu/shared';
 import { v4 as uuid4 } from 'uuid';
 

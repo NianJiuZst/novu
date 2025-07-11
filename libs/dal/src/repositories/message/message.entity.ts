@@ -1,12 +1,11 @@
+import type { ChannelTypeEnum, IActor, IMessageCTA } from '@novu/shared';
 import { Exclude } from 'class-transformer';
-import { ChannelTypeEnum, IActor, IMessageCTA } from '@novu/shared';
-
-import { IEmailBlock } from '../message-template';
-import { SubscriberEntity } from '../subscriber';
-import { NotificationTemplateEntity } from '../notification-template';
-import type { OrganizationId } from '../organization';
-import type { EnvironmentId } from '../environment';
 import type { ChangePropsValueType } from '../../types/helpers';
+import type { EnvironmentId } from '../environment';
+import type { IEmailBlock } from '../message-template';
+import type { NotificationTemplateEntity } from '../notification-template';
+import type { OrganizationId } from '../organization';
+import type { SubscriberEntity } from '../subscriber';
 
 export class MessageEntity {
   _id: string;

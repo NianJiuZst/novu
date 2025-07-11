@@ -1,4 +1,4 @@
-import { ComponentProps } from 'solid-js';
+import type { ComponentProps } from 'solid-js';
 import { Portal as PortalPrimitive } from 'solid-js/web';
 import { useAppearance } from '../../context/AppearanceContext';
 

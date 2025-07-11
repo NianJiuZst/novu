@@ -1,10 +1,15 @@
-import { ChannelTypeEnum, ISendMessageSuccessResponse, IPushOptions, IPushProvider } from '@novu/stateless';
-import { initializeApp, cert, deleteApp, getApp } from 'firebase-admin/app';
-import { getMessaging, Messaging, MulticastMessage, TopicMessage } from 'firebase-admin/messaging';
-import crypto from 'crypto';
 import { PushProviderIdEnum } from '@novu/shared';
+import {
+  ChannelTypeEnum,
+  type IPushOptions,
+  type IPushProvider,
+  type ISendMessageSuccessResponse,
+} from '@novu/stateless';
+import crypto from 'crypto';
+import { cert, deleteApp, getApp, initializeApp } from 'firebase-admin/app';
+import { getMessaging, type Messaging, type MulticastMessage, type TopicMessage } from 'firebase-admin/messaging';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export class FcmPushProvider extends BaseProvider implements IPushProvider {
   id = PushProviderIdEnum.FCM;

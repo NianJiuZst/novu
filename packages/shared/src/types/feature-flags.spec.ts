@@ -1,5 +1,5 @@
-import { expect, describe, it } from 'vitest';
-import { FlagKey, testFlagEnumValidity } from './feature-flags';
+import { describe, expect, it } from 'vitest';
+import { type FlagKey, testFlagEnumValidity } from './feature-flags';
 
 describe('Flags', () => {
   /**

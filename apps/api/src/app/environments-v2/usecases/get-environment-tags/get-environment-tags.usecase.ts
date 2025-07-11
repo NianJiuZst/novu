@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { EnvironmentEntity, EnvironmentRepository, NotificationTemplateRepository } from '@novu/dal';
-import { GetEnvironmentTagsCommand } from './get-environment-tags.command';
-import { GetEnvironmentTagsDto } from '../../dtos/get-environment-tags.dto';
+import type { EnvironmentEntity, EnvironmentRepository, NotificationTemplateRepository } from '@novu/dal';
+import type { GetEnvironmentTagsDto } from '../../dtos/get-environment-tags.dto';
+import type { GetEnvironmentTagsCommand } from './get-environment-tags.command';
 
 @Injectable()
 export class GetEnvironmentTags {

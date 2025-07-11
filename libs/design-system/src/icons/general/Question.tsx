@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React from 'react';
+import type React from 'react';
 
 export function Question(props: React.ComponentPropsWithoutRef<'svg'> & { isGradient?: boolean }) {
   const { isGradient = false, ...rest } = props;

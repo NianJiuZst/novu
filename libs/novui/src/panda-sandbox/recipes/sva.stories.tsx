@@ -1,6 +1,6 @@
-import { Meta, StoryFn } from '@storybook/react/*';
-import React, { FC } from 'react';
-import { RecipeVariant, sva } from '../../../styled-system/css';
+import type { Meta, StoryFn } from '@storybook/react/*';
+import React, { type FC } from 'react';
+import { type RecipeVariant, sva } from '../../../styled-system/css';
 import { Stack } from '../../../styled-system/jsx';
 
 export default {

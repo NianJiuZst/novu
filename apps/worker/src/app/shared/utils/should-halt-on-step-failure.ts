@@ -1,5 +1,5 @@
 import { isActionStepType } from '@novu/application-generic';
-import { JobEntity } from '@novu/dal';
+import type { JobEntity } from '@novu/dal';
 
 export const shouldHaltOnStepFailure = (job: JobEntity): boolean => {
   if (!job.type) {

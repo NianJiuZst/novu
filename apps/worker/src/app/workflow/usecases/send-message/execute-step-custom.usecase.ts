@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { type CreateExecutionDetails, InstrumentUsecase } from '@novu/application-generic';
+import type { JobRepository, MessageRepository } from '@novu/dal';
 
-import { JobRepository, MessageRepository } from '@novu/dal';
-import { CreateExecutionDetails, InstrumentUsecase } from '@novu/application-generic';
-
-import { SendMessageCommand } from './send-message.command';
-import { SendMessageResult, SendMessageType } from './send-message-type.usecase';
+import type { SendMessageCommand } from './send-message.command';
+import { type SendMessageResult, SendMessageType } from './send-message-type.usecase';
 
 @Injectable()
 export class ExecuteStepCustom extends SendMessageType {

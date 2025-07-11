@@ -1,110 +1,110 @@
-import { createContext, useContext, type ReactNode, useMemo, useState, useEffect, useRef } from 'react';
-import { useFormContext } from 'react-hook-form';
 import {
-  type WorkflowResponseDto,
-  type StepResponseDto,
-  ResourceOriginEnum,
-  type GeneratePreviewResponseDto,
-  DEFAULT_LOCALE,
-} from '@novu/shared';
-import { useEditorPreview } from '@/components/workflow-editor/steps/use-editor-preview';
-import { useFetchOrganizationSettings } from '@/hooks/use-fetch-organization-settings';
+	DEFAULT_LOCALE,
+	type GeneratePreviewResponseDto,
+	ResourceOriginEnum,
+	type StepResponseDto,
+	type WorkflowResponseDto,
+} from "@novu/shared";
+import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useFormContext } from "react-hook-form";
+import { useEditorPreview } from "@/components/workflow-editor/steps/use-editor-preview";
+import { useFetchOrganizationSettings } from "@/hooks/use-fetch-organization-settings";
 
 type StepEditorContextType = {
-  workflow: WorkflowResponseDto;
-  step: StepResponseDto;
-  controlValues: Record<string, unknown>;
-  editorValue: string;
-  setEditorValue: (value: string) => Error | null;
-  previewData: GeneratePreviewResponseDto | null;
-  isPreviewPending: boolean;
-  isInitialLoad: boolean;
-  isSubsequentLoad: boolean;
-  isNovuCloud: boolean;
-  isStepEditable: boolean;
-  selectedLocale: string;
-  setSelectedLocale: (locale: string) => void;
+	workflow: WorkflowResponseDto;
+	step: StepResponseDto;
+	controlValues: Record<string, unknown>;
+	editorValue: string;
+	setEditorValue: (value: string) => Error | null;
+	previewData: GeneratePreviewResponseDto | null;
+	isPreviewPending: boolean;
+	isInitialLoad: boolean;
+	isSubsequentLoad: boolean;
+	isNovuCloud: boolean;
+	isStepEditable: boolean;
+	selectedLocale: string;
+	setSelectedLocale: (locale: string) => void;
 };
 
 const StepEditorContext = createContext<StepEditorContextType | null>(null);
 
 type StepEditorProviderProps = {
-  children: ReactNode;
-  workflow: WorkflowResponseDto;
-  step: StepResponseDto;
+	children: ReactNode;
+	workflow: WorkflowResponseDto;
+	step: StepResponseDto;
 };
 
 export function StepEditorProvider({ children, workflow, step }: StepEditorProviderProps) {
-  const form = useFormContext();
-  const controlValues = form.watch();
-  const { data: organizationSettings } = useFetchOrganizationSettings();
-  const [selectedLocale, setSelectedLocale] = useState<string>(DEFAULT_LOCALE);
-  const hasInitialized = useRef(false);
+	const form = useFormContext();
+	const controlValues = form.watch();
+	const { data: organizationSettings } = useFetchOrganizationSettings();
+	const [selectedLocale, setSelectedLocale] = useState<string>(DEFAULT_LOCALE);
+	const hasInitialized = useRef(false);
 
-  // Set to organization default when settings load (only once)
-  useEffect(() => {
-    if (organizationSettings?.data?.defaultLocale && !hasInitialized.current) {
-      setSelectedLocale(organizationSettings.data.defaultLocale);
-      hasInitialized.current = true;
-    }
-  }, [organizationSettings?.data?.defaultLocale]);
+	// Set to organization default when settings load (only once)
+	useEffect(() => {
+		if (organizationSettings?.data?.defaultLocale && !hasInitialized.current) {
+			setSelectedLocale(organizationSettings.data.defaultLocale);
+			hasInitialized.current = true;
+		}
+	}, [organizationSettings?.data?.defaultLocale]);
 
-  const { editorValue, setEditorValue, previewData, isPreviewPending, isFetching } = useEditorPreview({
-    workflowSlug: workflow.workflowId,
-    stepSlug: step.stepId,
-    controlValues,
-    payloadSchema: workflow.payloadSchema,
-  });
-  const { uiSchema } = step.controls;
-  const isNovuCloud = workflow.origin === ResourceOriginEnum.NOVU_CLOUD && Boolean(uiSchema);
-  const isExternal = workflow.origin === ResourceOriginEnum.EXTERNAL;
-  const isStepEditable = isExternal || (isNovuCloud && Boolean(uiSchema));
+	const { editorValue, setEditorValue, previewData, isPreviewPending, isFetching } = useEditorPreview({
+		workflowSlug: workflow.workflowId,
+		stepSlug: step.stepId,
+		controlValues,
+		payloadSchema: workflow.payloadSchema,
+	});
+	const { uiSchema } = step.controls;
+	const isNovuCloud = workflow.origin === ResourceOriginEnum.NOVU_CLOUD && Boolean(uiSchema);
+	const isExternal = workflow.origin === ResourceOriginEnum.EXTERNAL;
+	const isStepEditable = isExternal || (isNovuCloud && Boolean(uiSchema));
 
-  const isInitialLoad = isPreviewPending;
-  const isSubsequentLoad = isFetching && !isPreviewPending;
+	const isInitialLoad = isPreviewPending;
+	const isSubsequentLoad = isFetching && !isPreviewPending;
 
-  const contextValue = useMemo(
-    () => ({
-      workflow,
-      step,
-      controlValues,
-      editorValue,
-      setEditorValue,
-      previewData: previewData || null,
-      isPreviewPending,
-      isInitialLoad,
-      isSubsequentLoad,
-      isNovuCloud,
-      isStepEditable,
-      selectedLocale,
-      setSelectedLocale,
-    }),
-    [
-      workflow,
-      step,
-      controlValues,
-      editorValue,
-      setEditorValue,
-      previewData,
-      isPreviewPending,
-      isInitialLoad,
-      isSubsequentLoad,
-      isNovuCloud,
-      isStepEditable,
-      selectedLocale,
-      setSelectedLocale,
-    ]
-  );
+	const contextValue = useMemo(
+		() => ({
+			workflow,
+			step,
+			controlValues,
+			editorValue,
+			setEditorValue,
+			previewData: previewData || null,
+			isPreviewPending,
+			isInitialLoad,
+			isSubsequentLoad,
+			isNovuCloud,
+			isStepEditable,
+			selectedLocale,
+			setSelectedLocale,
+		}),
+		[
+			workflow,
+			step,
+			controlValues,
+			editorValue,
+			setEditorValue,
+			previewData,
+			isPreviewPending,
+			isInitialLoad,
+			isSubsequentLoad,
+			isNovuCloud,
+			isStepEditable,
+			selectedLocale,
+			setSelectedLocale,
+		]
+	);
 
-  return <StepEditorContext.Provider value={contextValue}>{children}</StepEditorContext.Provider>;
+	return <StepEditorContext.Provider value={contextValue}>{children}</StepEditorContext.Provider>;
 }
 
 export function useStepEditor(): StepEditorContextType {
-  const context = useContext(StepEditorContext);
+	const context = useContext(StepEditorContext);
 
-  if (!context) {
-    throw new Error('useStepEditor must be used within a StepEditorProvider');
-  }
+	if (!context) {
+		throw new Error("useStepEditor must be used within a StepEditorProvider");
+	}
 
-  return context;
+	return context;
 }

@@ -1,6 +1,6 @@
 import { createMemo, Index, Show } from 'solid-js';
 
-import { ChannelPreference, Preference } from '../../../../types';
+import type { ChannelPreference, Preference } from '../../../../types';
 import { PreferencesListSkeleton } from './PreferencesListSkeleton';
 import { PreferencesRow } from './PreferencesRow';
 

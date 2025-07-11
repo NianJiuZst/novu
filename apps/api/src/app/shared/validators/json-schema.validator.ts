@@ -1,9 +1,9 @@
-import { registerDecorator, ValidationOptions, ValidationArguments } from 'class-validator';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
+import { registerDecorator, type ValidationArguments, type ValidationOptions } from 'class-validator';
 
 export function IsValidJsonSchema(validationOptions?: ValidationOptions) {
-  return function (object: object, propertyName: string) {
+  return (object: object, propertyName: string) => {
     registerDecorator({
       name: 'isValidJsonSchema',
       target: object.constructor,

@@ -1,8 +1,8 @@
 import { useLocation } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
+import { Aside } from './Aside';
 import { RootNavMenu } from './RootNavMenu';
 import { SettingsNavMenu } from './SettingsNavMenu';
-import { Aside } from './Aside';
 
 export const Sidebar = () => {
   const { pathname } = useLocation();

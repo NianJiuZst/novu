@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { css } from '@novu/novui/css';
 import { IconPerson } from '@novu/novui/icons';
+import { useState } from 'react';
 import { INBOX_TOKENS } from './InboxPreviewContent';
 
 export const InboxAvatar = (props: { src?: string }) => {

@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { MessageRepository } from '@novu/dal';
-import { buildFeedKey, buildMessageCountKey, InvalidateCacheService } from '@novu/application-generic';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { buildFeedKey, buildMessageCountKey, type InvalidateCacheService } from '@novu/application-generic';
+import type { MessageRepository } from '@novu/dal';
 
-import { RemoveMessageCommand } from './remove-message.command';
+import type { RemoveMessageCommand } from './remove-message.command';
 
 @Injectable()
 export class RemoveMessage {

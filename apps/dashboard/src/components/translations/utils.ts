@@ -1,4 +1,4 @@
-import { locales } from '@/utils/locales';
+import { locales } from "@/utils/locales";
 
 /**
  * Get a human-readable display name for a locale code
@@ -6,20 +6,20 @@ import { locales } from '@/utils/locales';
  * @returns A formatted display name (e.g., 'English, United States')
  */
 export function getLocaleDisplayName(localeCode: string): string {
-  const locale = locales.find((l) => l.langIso === localeCode);
+	const locale = locales.find((l) => l.langIso === localeCode);
 
-  if (locale?.langName) {
-    // Extract language and country from langName like "Spanish (Spain)" -> "Spanish, Spain"
-    const match = locale.langName.match(/^(.+?)\s*\((.+?)\)$/);
+	if (locale?.langName) {
+		// Extract language and country from langName like "Spanish (Spain)" -> "Spanish, Spain"
+		const match = locale.langName.match(/^(.+?)\s*\((.+?)\)$/);
 
-    if (match) {
-      return `${match[1]}, ${match[2]}`;
-    }
+		if (match) {
+			return `${match[1]}, ${match[2]}`;
+		}
 
-    return locale.langName;
-  }
+		return locale.langName;
+	}
 
-  return localeCode;
+	return localeCode;
 }
 
 /**
@@ -29,8 +29,8 @@ export function getLocaleDisplayName(localeCode: string): string {
  * @returns Formatted date string
  */
 export function formatTranslationDate(date: Date | string, options: Intl.DateTimeFormatOptions): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return dateObj.toLocaleDateString('en-US', options);
+	const dateObj = typeof date === "string" ? new Date(date) : date;
+	return dateObj.toLocaleDateString("en-US", options);
 }
 
 /**
@@ -40,6 +40,6 @@ export function formatTranslationDate(date: Date | string, options: Intl.DateTim
  * @returns Formatted time string
  */
 export function formatTranslationTime(date: Date | string, options: Intl.DateTimeFormatOptions): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return dateObj.toLocaleTimeString('en-US', options);
+	const dateObj = typeof date === "string" ? new Date(date) : date;
+	return dateObj.toLocaleTimeString("en-US", options);
 }

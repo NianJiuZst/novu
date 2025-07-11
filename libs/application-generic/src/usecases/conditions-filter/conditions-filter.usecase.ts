@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import axios from 'axios';
-import {
+import type {
   EnvironmentRepository,
   ExecutionDetailsRepository,
   JobEntity,
@@ -14,27 +13,28 @@ import {
   ChannelTypeEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
+  FILTER_TO_LABEL,
   FieldLogicalOperatorEnum,
   FieldOperatorEnum,
-  FILTER_TO_LABEL,
-  FilterParts,
+  type FilterParts,
   FilterPartTypeEnum,
-  ICondition,
-  IOnlineInLastFilterPart,
-  IPreviousStepFilterPart,
-  IRealtimeOnlineFilterPart,
-  IWebhookFilterPart,
+  type ICondition,
+  type IOnlineInLastFilterPart,
+  type IPreviousStepFilterPart,
+  type IRealtimeOnlineFilterPart,
+  type IWebhookFilterPart,
   PreviousStepTypeEnum,
   TimeOperatorEnum,
 } from '@novu/shared';
-import { differenceInDays, differenceInHours, differenceInMinutes, parseISO } from 'date-fns';
 import { EmailEventStatusEnum } from '@novu/stateless';
-import { createHash, Filter, FilterProcessingDetails, IFilterVariables, PlatformException } from '../../utils';
-import { ConditionsFilterCommand } from './conditions-filter.command';
-import { buildSubscriberKey, CachedResponse } from '../../services';
-import { CompileTemplate } from '../compile-template';
-import { CreateExecutionDetails, CreateExecutionDetailsCommand, DetailEnum } from '../create-execution-details';
+import axios from 'axios';
+import { differenceInDays, differenceInHours, differenceInMinutes, parseISO } from 'date-fns';
 import { decryptApiKey } from '../../encryption';
+import { buildSubscriberKey, CachedResponse } from '../../services';
+import { createHash, Filter, FilterProcessingDetails, type IFilterVariables, PlatformException } from '../../utils';
+import type { CompileTemplate } from '../compile-template';
+import { CreateExecutionDetails, CreateExecutionDetailsCommand, DetailEnum } from '../create-execution-details';
+import type { ConditionsFilterCommand } from './conditions-filter.command';
 
 export interface IConditionsFilterResponse {
   passed: boolean;

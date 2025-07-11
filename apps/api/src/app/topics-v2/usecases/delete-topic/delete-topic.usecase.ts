@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InstrumentUsecase } from '@novu/application-generic';
-import { TopicRepository, TopicSubscribersRepository } from '@novu/dal';
-import { DeleteTopicCommand } from './delete-topic.command';
+import type { TopicRepository, TopicSubscribersRepository } from '@novu/dal';
+import type { DeleteTopicCommand } from './delete-topic.command';
 
 @Injectable()
 export class DeleteTopicUseCase {

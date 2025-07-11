@@ -1,5 +1,5 @@
 export enum EscapeKeyManagerPriority {
-  NONE = 0,
-  SHEET = 100,
-  POPOVER = 200,
+	NONE = 0,
+	SHEET = 100,
+	POPOVER = 200,
 }

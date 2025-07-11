@@ -1,5 +1,5 @@
 import { errorMessage } from '@novu/design-system';
-import type { IResponseError, IEmailBlock } from '@novu/shared';
+import type { IEmailBlock, IResponseError } from '@novu/shared';
 import { useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { IS_SELF_HOSTED } from '../../config';

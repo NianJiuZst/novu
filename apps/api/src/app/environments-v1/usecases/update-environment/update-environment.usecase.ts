@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
-import { EnvironmentEntity, EnvironmentRepository } from '@novu/dal';
+import type { EnvironmentEntity, EnvironmentRepository } from '@novu/dal';
 import { PROTECTED_ENVIRONMENTS } from '@novu/shared';
-import { UpdateEnvironmentCommand } from './update-environment.command';
+import type { UpdateEnvironmentCommand } from './update-environment.command';
 
 @Injectable()
 export class UpdateEnvironment {

@@ -1,18 +1,18 @@
-import { useEffect } from 'react';
-import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
-import { captureException } from '@sentry/react';
 import { Center } from '@mantine/core';
-import { PasswordInput, Button, colors, Input, Text } from '@novu/design-system';
+import { Button, colors, Input, PasswordInput, Text } from '@novu/design-system';
 import type { IResponseError } from '@novu/shared';
-import { useAuth, useRedirectURL } from '../../../hooks';
-import { useSegment } from '../../../components/providers/SegmentProvider';
+import { captureException } from '@sentry/react';
+import { useMutation } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../../api/api.client';
-import { useAcceptInvite } from './useAcceptInvite';
+import { useSegment } from '../../../components/providers/SegmentProvider';
 import { ROUTES } from '../../../constants/routes';
-import { OAuth } from './OAuth';
+import { useAuth, useRedirectURL } from '../../../hooks';
 import { parseServerErrorMessage } from '../../../utils/errors';
+import { OAuth } from './OAuth';
+import { useAcceptInvite } from './useAcceptInvite';
 
 type LoginFormProps = {
   invitationToken?: string;

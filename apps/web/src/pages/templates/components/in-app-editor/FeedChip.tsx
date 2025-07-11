@@ -1,9 +1,8 @@
 import styled from '@emotion/styled';
-import { ColorScheme, useMantineTheme } from '@mantine/core';
-import { IFeedEntity } from '@novu/shared';
+import { type ColorScheme, useMantineTheme } from '@mantine/core';
+import { colors, DotsHorizontal, shadows } from '@novu/design-system';
+import type { IFeedEntity } from '@novu/shared';
 import type { UseFormSetValue } from 'react-hook-form';
-
-import { colors, shadows, DotsHorizontal } from '@novu/design-system';
 import { useEnvironment } from '../../../../hooks';
 import { useStepFormPath } from '../../hooks/useStepFormPath';
 import type { IForm } from '../formTypes';

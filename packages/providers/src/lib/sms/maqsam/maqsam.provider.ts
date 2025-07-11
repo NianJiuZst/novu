@@ -1,10 +1,15 @@
 import { SmsProviderIdEnum } from '@novu/shared';
-import { ChannelTypeEnum, ISendMessageSuccessResponse, ISmsOptions, ISmsProvider } from '@novu/stateless';
+import {
+  ChannelTypeEnum,
+  type ISendMessageSuccessResponse,
+  type ISmsOptions,
+  type ISmsProvider,
+} from '@novu/stateless';
 
-import axios, { AxiosInstance } from 'axios';
+import axios, { type AxiosInstance } from 'axios';
 import { fromUnixTime } from 'date-fns';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export class MaqsamSmsProvider extends BaseProvider implements ISmsProvider {
   id = SmsProviderIdEnum.Maqsam;

@@ -1,34 +1,34 @@
 import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  ChangeRepository,
-  EnvironmentRepository,
-  MessageTemplateRepository,
-  NotificationGroupRepository,
-  NotificationStepData,
-  NotificationStepEntity,
-  NotificationTemplateEntity,
+  buildGroupedBlueprintsKey,
+  DeletePreferencesCommand,
+  type DeletePreferencesUseCase,
+  type InvalidateCacheService,
+  type PinoLogger,
+  type UpsertPreferences,
+  UpsertUserWorkflowPreferencesCommand,
+  UpsertWorkflowPreferencesCommand,
+} from '@novu/application-generic';
+import {
+  type ChangeRepository,
+  type EnvironmentRepository,
+  type MessageTemplateRepository,
+  type NotificationGroupRepository,
+  type NotificationStepData,
+  type NotificationStepEntity,
+  type NotificationTemplateEntity,
   NotificationTemplateRepository,
 } from '@novu/dal';
 import {
   buildWorkflowPreferencesFromPreferenceChannels,
   ChangeEntityTypeEnum,
   DEFAULT_WORKFLOW_PREFERENCES,
-  IPreferenceChannels,
+  type IPreferenceChannels,
   PreferencesTypeEnum,
 } from '@novu/shared';
-import {
-  buildGroupedBlueprintsKey,
-  DeletePreferencesCommand,
-  DeletePreferencesUseCase,
-  InvalidateCacheService,
-  PinoLogger,
-  UpsertPreferences,
-  UpsertUserWorkflowPreferencesCommand,
-  UpsertWorkflowPreferencesCommand,
-} from '@novu/application-generic';
 import { ApplyChange, ApplyChangeCommand } from '../apply-change';
-import { PromoteTypeChangeCommand } from '../promote-type-change.command';
-import { INotificationTemplateChangeService } from '../shared';
+import type { PromoteTypeChangeCommand } from '../promote-type-change.command';
+import type { INotificationTemplateChangeService } from '../shared';
 
 /**
  * Promote a notification template change to a workflow

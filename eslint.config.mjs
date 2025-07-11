@@ -1,14 +1,4 @@
 // Eslint v9.0 and above plugins
-import tsEslint from 'typescript-eslint';
-import jsEslint from '@eslint/js';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import pluginCypress from 'eslint-plugin-cypress/flat';
-import localRules from 'eslint-plugin-local-rules';
-
-// Eslint v8.0 and below plugins
-import reactHooks from 'eslint-plugin-react-hooks';
-import promise from 'eslint-plugin-promise';
-import unusedImports from 'eslint-plugin-unused-imports';
 
 /**
  * Eslint v8 compatibility packages
@@ -24,6 +14,15 @@ import unusedImports from 'eslint-plugin-unused-imports';
  */
 import { fixupConfigRules, fixupPluginRules } from '@eslint/compat';
 import { FlatCompat } from '@eslint/eslintrc';
+import jsEslint from '@eslint/js';
+import pluginCypress from 'eslint-plugin-cypress/flat';
+import localRules from 'eslint-plugin-local-rules';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import promise from 'eslint-plugin-promise';
+// Eslint v8.0 and below plugins
+import reactHooks from 'eslint-plugin-react-hooks';
+import unusedImports from 'eslint-plugin-unused-imports';
+import tsEslint from 'typescript-eslint';
 
 const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
 

@@ -1,20 +1,20 @@
-import { Grid, Text, useMantineTheme } from '@mantine/core';
-import { JobStatusEnum, StepTypeEnum } from '@novu/shared';
-import capitalize from 'lodash.capitalize';
 import styled from '@emotion/styled';
+import { Grid, Text, useMantineTheme } from '@mantine/core';
 import {
-  colors,
-  shadows,
+  Chat,
   CheckCircle,
-  ErrorIcon,
+  colors,
   Digest,
+  ErrorIcon,
+  InApp,
   Mail,
   Mobile,
-  Chat,
   Sms,
-  InApp,
+  shadows,
   Timer,
 } from '@novu/design-system';
+import { JobStatusEnum, StepTypeEnum } from '@novu/shared';
+import capitalize from 'lodash.capitalize';
 import { When } from '../../../components/utils/When';
 
 const TypeIcon = ({ type }: { type: StepTypeEnum }) => {

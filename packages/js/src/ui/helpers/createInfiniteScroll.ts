@@ -1,4 +1,13 @@
-import { Accessor, batch, createEffect, createResource, createSignal, onCleanup, onMount, Setter } from 'solid-js';
+import {
+  type Accessor,
+  batch,
+  createEffect,
+  createResource,
+  createSignal,
+  onCleanup,
+  onMount,
+  type Setter,
+} from 'solid-js';
 
 export function createInfiniteScroll<T>(
   fetcher: (after: string | undefined) => Promise<{ data: T[]; hasMore: boolean }>,

@@ -1,8 +1,8 @@
 import { expect } from '@playwright/test';
+import { ApiKeysPage } from './page-models/apiKeysPage';
 import { test } from './utils/baseTest';
 import { initializeSession } from './utils/browser';
-import { ApiKeysPage } from './page-models/apiKeysPage';
-import { SessionData } from './utils/plugins';
+import type { SessionData } from './utils/plugins';
 
 let session: SessionData;
 

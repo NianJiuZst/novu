@@ -1,8 +1,12 @@
-import { INotificationTemplate, isBridgeWorkflow, WorkflowIntegrationStatus, ResourceTypeEnum } from '@novu/shared';
-import { IUsePaginationQueryParamsStateOptions } from '@novu/design-system';
-
-import { useEnvironment } from './useEnvironment';
+import type { IUsePaginationQueryParamsStateOptions } from '@novu/design-system';
+import {
+  type INotificationTemplate,
+  isBridgeWorkflow,
+  ResourceTypeEnum,
+  type WorkflowIntegrationStatus,
+} from '@novu/shared';
 import { getNotificationsList } from '../api/notification-templates';
+import { useEnvironment } from './useEnvironment';
 import { usePaginatedQuery } from './usePaginatedQuery';
 
 export type INotificationTemplateExtended = INotificationTemplate & {

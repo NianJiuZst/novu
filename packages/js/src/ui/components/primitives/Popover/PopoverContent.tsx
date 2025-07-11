@@ -1,4 +1,4 @@
-import { JSX, onCleanup, onMount, Show, splitProps } from 'solid-js';
+import { type JSX, onCleanup, onMount, Show, splitProps } from 'solid-js';
 import { useAppearance, useFocusManager } from '../../../context';
 import { cn, useStyle } from '../../../helpers';
 import type { AppearanceKey } from '../../../types';

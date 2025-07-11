@@ -1,16 +1,16 @@
 import { EmailProviderIdEnum } from '@novu/shared';
 import {
   ChannelTypeEnum,
-  ISendMessageSuccessResponse,
-  IEmailOptions,
-  IEmailProvider,
-  ICheckIntegrationResponse,
   CheckIntegrationResponseEnum,
+  type ICheckIntegrationResponse,
+  type IEmailOptions,
+  type IEmailProvider,
+  type ISendMessageSuccessResponse,
 } from '@novu/stateless';
 
-import MailerSend, { EmailParams, Recipient, Attachment } from 'mailersend';
+import MailerSend, { Attachment, EmailParams, Recipient } from 'mailersend';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export class MailersendEmailProvider extends BaseProvider implements IEmailProvider {
   readonly id = EmailProviderIdEnum.MailerSend;

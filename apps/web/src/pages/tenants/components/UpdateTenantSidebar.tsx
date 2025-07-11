@@ -1,14 +1,13 @@
-import { useEffect } from 'react';
 import { Group, Stack } from '@mantine/core';
-import { Controller, useForm } from 'react-hook-form';
+import { Button, colors, NameInput, Sidebar, Text } from '@novu/design-system';
+import type { IResponseError, ITenantEntity, IUpdateTenantDto } from '@novu/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import type { IResponseError, ITenantEntity, IUpdateTenantDto } from '@novu/shared';
-import { Button, colors, NameInput, Sidebar, Text } from '@novu/design-system';
-
+import { useEffect } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { QueryKeys } from '../../../api/query.keys';
 import { getTenantByIdentifier, updateTenant } from '../../../api/tenants';
 import { errorMessage, successMessage } from '../../../utils/notifications';
-import { QueryKeys } from '../../../api/query.keys';
 import { TenantFormCommonFields } from './TenantFormCommonFields';
 
 export interface ITenantForm {

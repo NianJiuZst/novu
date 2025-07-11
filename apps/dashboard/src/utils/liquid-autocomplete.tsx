@@ -1,32 +1,32 @@
-import { getFilters } from '@/components/variable/constants';
-import { NewVariablePreview } from '@/components/variable/components/new-variable-preview';
-import type { LiquidVariable } from '@/utils/parseStepVariables';
-import type { Completion, CompletionContext, CompletionResult, CompletionSource } from '@codemirror/autocomplete';
-import type { EditorView } from '@uiw/react-codemirror';
-import { createRoot } from 'react-dom/client';
-import type React from 'react';
-import { getVariablesAtPositionWithLoopProperties } from './liquid-scope-analyzer';
+import type { Completion, CompletionContext, CompletionResult, CompletionSource } from "@codemirror/autocomplete";
+import type { EditorView } from "@uiw/react-codemirror";
+import type React from "react";
+import { createRoot } from "react-dom/client";
+import { NewVariablePreview } from "@/components/variable/components/new-variable-preview";
+import { getFilters } from "@/components/variable/constants";
+import type { LiquidVariable } from "@/utils/parseStepVariables";
+import { getVariablesAtPositionWithLoopProperties } from "./liquid-scope-analyzer";
 
 export interface CompletionOption {
-  label: string;
-  type: string;
-  boost?: number;
-  isNewVariable?: boolean;
-  displayLabel?: string;
+	label: string;
+	type: string;
+	boost?: number;
+	isNewVariable?: boolean;
+	displayLabel?: string;
 }
 
 // Novu JIT namespaces
-const PAYLOAD_NAMESPACE = 'payload';
-const SUBSCRIBER_DATA_NAMESPACE = 'subscriber.data';
+const PAYLOAD_NAMESPACE = "payload";
+const SUBSCRIBER_DATA_NAMESPACE = "subscriber.data";
 const STEP_PAYLOAD_REGEX = /^steps\.[a-zA-Z0-9_-]+\.events/;
 
 /**
  * Create a DOM element to render the info panel in Codemirror.
  */
 const createInfoPanel = ({ component }: { component: React.ReactNode }) => {
-  const dom = document.createElement('div');
-  createRoot(dom).render(component);
-  return dom;
+	const dom = document.createElement("div");
+	createRoot(dom).render(component);
+	return dom;
 };
 
 /**
@@ -85,297 +85,297 @@ const createInfoPanel = ({ component }: { component: React.ReactNode }) => {
  *    - steps.{valid-step}.events[n].payload.* (any new field)
  */
 export const completions =
-  (
-    scopedVariables: LiquidVariable[],
-    variables: LiquidVariable[],
-    onCreateNewVariable?: (variableName: string) => Promise<void>,
-    isPayloadSchemaEnabled?: boolean
-  ) =>
-  (context: CompletionContext): CompletionResult | null => {
-    const { state, pos } = context;
-    const beforeCursor = state.sliceDoc(0, pos);
+	(
+		scopedVariables: LiquidVariable[],
+		variables: LiquidVariable[],
+		onCreateNewVariable?: (variableName: string) => Promise<void>,
+		isPayloadSchemaEnabled?: boolean
+	) =>
+	(context: CompletionContext): CompletionResult | null => {
+		const { state, pos } = context;
+		const beforeCursor = state.sliceDoc(0, pos);
 
-    // Only proceed if we're inside or just after {{
-    const lastOpenBrace = beforeCursor.lastIndexOf('{{');
-    if (lastOpenBrace === -1) return null;
+		// Only proceed if we're inside or just after {{
+		const lastOpenBrace = beforeCursor.lastIndexOf("{{");
+		if (lastOpenBrace === -1) return null;
 
-    // Get the content between {{ and cursor
-    const insideBraces = state.sliceDoc(lastOpenBrace + 2, pos);
+		// Get the content between {{ and cursor
+		const insideBraces = state.sliceDoc(lastOpenBrace + 2, pos);
 
-    // Get clean search text without braces and trim
-    const searchText = insideBraces.replace(/}+$/, '').trim();
+		// Get clean search text without braces and trim
+		const searchText = insideBraces.replace(/}+$/, "").trim();
 
-    // Handle pipe filters
-    const afterPipe = getContentAfterPipe(searchText);
+		// Handle pipe filters
+		const afterPipe = getContentAfterPipe(searchText);
 
-    if (afterPipe !== null) {
-      return {
-        from: pos - afterPipe.length,
-        to: pos,
-        options: getFilterCompletions(afterPipe),
-      };
-    }
+		if (afterPipe !== null) {
+			return {
+				from: pos - afterPipe.length,
+				to: pos,
+				options: getFilterCompletions(afterPipe),
+			};
+		}
 
-    const allVariables = [...scopedVariables, ...variables];
-    const matchingVariables = getMatchingVariables(
-      searchText,
-      scopedVariables,
-      variables,
-      onCreateNewVariable,
-      isPayloadSchemaEnabled
-    );
+		const allVariables = [...scopedVariables, ...variables];
+		const matchingVariables = getMatchingVariables(
+			searchText,
+			scopedVariables,
+			variables,
+			onCreateNewVariable,
+			isPayloadSchemaEnabled
+		);
 
-    // If we have matches or we're in a valid context, show them
-    if (matchingVariables.length > 0 || isInsideLiquidBlock(beforeCursor)) {
-      return {
-        from: lastOpenBrace + 2,
-        to: pos,
-        options:
-          matchingVariables.length > 0
-            ? matchingVariables.map((v) =>
-                createCompletionOption(
-                  v.name,
-                  v.isNewSuggestion && isPayloadSchemaEnabled ? 'new-variable' : (v.type ?? 'variable'),
-                  v.boost,
-                  v.info,
-                  v.displayLabel
-                )
-              )
-            : allVariables.map((v) =>
-                createCompletionOption(v.name, v.type ?? 'variable', v.boost, v.info, v.displayLabel)
-              ),
-      };
-    }
+		// If we have matches or we're in a valid context, show them
+		if (matchingVariables.length > 0 || isInsideLiquidBlock(beforeCursor)) {
+			return {
+				from: lastOpenBrace + 2,
+				to: pos,
+				options:
+					matchingVariables.length > 0
+						? matchingVariables.map((v) =>
+								createCompletionOption(
+									v.name,
+									v.isNewSuggestion && isPayloadSchemaEnabled ? "new-variable" : (v.type ?? "variable"),
+									v.boost,
+									v.info,
+									v.displayLabel
+								)
+							)
+						: allVariables.map((v) =>
+								createCompletionOption(v.name, v.type ?? "variable", v.boost, v.info, v.displayLabel)
+							),
+			};
+		}
 
-    return null;
-  };
+		return null;
+	};
 
 function isInsideLiquidBlock(beforeCursor: string): boolean {
-  const lastOpenBrace = beforeCursor.lastIndexOf('{{');
+	const lastOpenBrace = beforeCursor.lastIndexOf("{{");
 
-  return lastOpenBrace !== -1;
+	return lastOpenBrace !== -1;
 }
 
 function getContentAfterPipe(content: string): string | null {
-  const pipeIndex = content.lastIndexOf('|');
-  if (pipeIndex === -1) return null;
+	const pipeIndex = content.lastIndexOf("|");
+	if (pipeIndex === -1) return null;
 
-  return content.slice(pipeIndex + 1).trimStart();
+	return content.slice(pipeIndex + 1).trimStart();
 }
 
 function createCompletionOption(
-  label: string,
-  type: string,
-  boost?: number,
-  info?: Completion['info'],
-  displayLabel?: Completion['displayLabel']
+	label: string,
+	type: string,
+	boost?: number,
+	info?: Completion["info"],
+	displayLabel?: Completion["displayLabel"]
 ): CompletionOption {
-  return {
-    label,
-    type,
-    isNewVariable: type === 'new-variable',
-    ...(boost && { boost }),
-    ...(info && { info }),
-    ...(displayLabel && { displayLabel }),
-  };
+	return {
+		label,
+		type,
+		isNewVariable: type === "new-variable",
+		...(boost && { boost }),
+		...(info && { info }),
+		...(displayLabel && { displayLabel }),
+	};
 }
 
 function getFilterCompletions(afterPipe: string): CompletionOption[] {
-  return getFilters()
-    .filter((f) => f.label.toLowerCase().startsWith(afterPipe.toLowerCase()))
-    .map((f) => createCompletionOption(f.value, 'function'));
+	return getFilters()
+		.filter((f) => f.label.toLowerCase().startsWith(afterPipe.toLowerCase()))
+		.map((f) => createCompletionOption(f.value, "function"));
 }
 
 function getMatchingVariables(
-  searchText: string,
-  scopedVariables: LiquidVariable[],
-  variables: LiquidVariable[],
-  onCreateNewVariable?: (variableName: string) => Promise<void>,
-  isPayloadSchemaEnabled?: boolean
+	searchText: string,
+	scopedVariables: LiquidVariable[],
+	variables: LiquidVariable[],
+	onCreateNewVariable?: (variableName: string) => Promise<void>,
+	isPayloadSchemaEnabled?: boolean
 ): LiquidVariable[] {
-  const allVariables = [...scopedVariables, ...variables];
-  if (!searchText) return allVariables;
+	const allVariables = [...scopedVariables, ...variables];
+	if (!searchText) return allVariables;
 
-  const searchTextTrimmed = searchText.trim();
+	const searchTextTrimmed = searchText.trim();
 
-  // Handle dot endings
-  if (searchText.endsWith('.')) {
-    const prefix = searchText.slice(0, -1);
-    return allVariables.filter((v) => v.name.startsWith(prefix));
-  }
+	// Handle dot endings
+	if (searchText.endsWith(".")) {
+		const prefix = searchText.slice(0, -1);
+		return allVariables.filter((v) => v.name.startsWith(prefix));
+	}
 
-  // Filter jit step namespaces out of the returned variables from the server
-  const stepPayloadNamespaces = variables.reduce<string[]>((acc, variableItem) => {
-    const match = variableItem.name.match(STEP_PAYLOAD_REGEX);
+	// Filter jit step namespaces out of the returned variables from the server
+	const stepPayloadNamespaces = variables.reduce<string[]>((acc, variableItem) => {
+		const match = variableItem.name.match(STEP_PAYLOAD_REGEX);
 
-    const withPayload = match ? `${match[0]}.payload` : null;
+		const withPayload = match ? `${match[0]}.payload` : null;
 
-    if (withPayload && !acc.includes(withPayload)) {
-      acc.push(withPayload);
-    }
+		if (withPayload && !acc.includes(withPayload)) {
+			acc.push(withPayload);
+		}
 
-    return acc;
-  }, []);
+		return acc;
+	}, []);
 
-  // Create JIT variables based on the search text e.g. payload.foo, subscriber.data.foo, steps.digest-step.events[0].payload.foo
-  const jitVariables = [PAYLOAD_NAMESPACE, SUBSCRIBER_DATA_NAMESPACE, ...stepPayloadNamespaces].reduce<
-    LiquidVariable[]
-  >((acc, namespace) => {
-    // If the user is typing steps.*, don't suggest any variables like payload.steps.digest-step.events
-    if (searchText.startsWith('steps.')) {
-      return acc;
-    }
+	// Create JIT variables based on the search text e.g. payload.foo, subscriber.data.foo, steps.digest-step.events[0].payload.foo
+	const jitVariables = [PAYLOAD_NAMESPACE, SUBSCRIBER_DATA_NAMESPACE, ...stepPayloadNamespaces].reduce<
+		LiquidVariable[]
+	>((acc, namespace) => {
+		// If the user is typing steps.*, don't suggest any variables like payload.steps.digest-step.events
+		if (searchText.startsWith("steps.")) {
+			return acc;
+		}
 
-    if (searchText.startsWith(namespace + '.') && searchText !== namespace) {
-      // Ensure that if the user types payload.foo the first suggestion is payload.foo
-      acc.push({
-        name: searchText,
-        type: 'variable',
-        isNewSuggestion: true,
-        info: () => {
-          if (!isPayloadSchemaEnabled) {
-            return null;
-          }
+		if (searchText.startsWith(namespace + ".") && searchText !== namespace) {
+			// Ensure that if the user types payload.foo the first suggestion is payload.foo
+			acc.push({
+				name: searchText,
+				type: "variable",
+				isNewSuggestion: true,
+				info: () => {
+					if (!isPayloadSchemaEnabled) {
+						return null;
+					}
 
-          const dom = createInfoPanel({
-            component: (
-              <NewVariablePreview
-                onCreateClick={() => {
-                  onCreateNewVariable?.(searchText.replace(namespace + '.', ''));
-                }}
-              />
-            ),
-          });
-          return {
-            dom,
-            destroy: () => {
-              dom.remove();
-            },
-          };
-        },
-      });
-    } else if (!searchText.startsWith(namespace)) {
-      const suggestedVariableName = `${namespace}.${searchText.trim()}`;
-      const isPayloadVariable = namespace === PAYLOAD_NAMESPACE;
+					const dom = createInfoPanel({
+						component: (
+							<NewVariablePreview
+								onCreateClick={() => {
+									onCreateNewVariable?.(searchText.replace(namespace + ".", ""));
+								}}
+							/>
+						),
+					});
+					return {
+						dom,
+						destroy: () => {
+							dom.remove();
+						},
+					};
+				},
+			});
+		} else if (!searchText.startsWith(namespace)) {
+			const suggestedVariableName = `${namespace}.${searchText.trim()}`;
+			const isPayloadVariable = namespace === PAYLOAD_NAMESPACE;
 
-      // For payload variables, treat them as new suggestions with creation capability
-      acc.push({
-        name: suggestedVariableName,
-        type: 'variable',
-        isNewSuggestion: isPayloadVariable,
-        ...(isPayloadVariable && {
-          info: () => {
-            if (!isPayloadSchemaEnabled) {
-              return null;
-            }
+			// For payload variables, treat them as new suggestions with creation capability
+			acc.push({
+				name: suggestedVariableName,
+				type: "variable",
+				isNewSuggestion: isPayloadVariable,
+				...(isPayloadVariable && {
+					info: () => {
+						if (!isPayloadSchemaEnabled) {
+							return null;
+						}
 
-            const dom = createInfoPanel({
-              component: (
-                <NewVariablePreview
-                  onCreateClick={() => {
-                    onCreateNewVariable?.(searchText.trim());
-                  }}
-                />
-              ),
-            });
-            return {
-              dom,
-              destroy: () => {
-                dom.remove();
-              },
-            };
-          },
-        }),
-      });
-    }
+						const dom = createInfoPanel({
+							component: (
+								<NewVariablePreview
+									onCreateClick={() => {
+										onCreateNewVariable?.(searchText.trim());
+									}}
+								/>
+							),
+						});
+						return {
+							dom,
+							destroy: () => {
+								dom.remove();
+							},
+						};
+					},
+				}),
+			});
+		}
 
-    return acc;
-  }, []);
+		return acc;
+	}, []);
 
-  const prefix = searchText.split('.')[0];
-  const localVariable = scopedVariables.find((v) => v.name === prefix);
-  let combinedVariables = [...jitVariables, ...allVariables];
+	const prefix = searchText.split(".")[0];
+	const localVariable = scopedVariables.find((v) => v.name === prefix);
+	let combinedVariables = [...jitVariables, ...allVariables];
 
-  if (localVariable) {
-    combinedVariables = [
-      ...jitVariables,
-      {
-        name: searchText,
-        displayLabel: searchText,
-        type: 'local',
-      },
-      ...allVariables,
-    ];
-  }
+	if (localVariable) {
+		combinedVariables = [
+			...jitVariables,
+			{
+				name: searchText,
+				displayLabel: searchText,
+				type: "local",
+			},
+			...allVariables,
+		];
+	}
 
-  const baseVariables = Array.from(new Map(combinedVariables.map((item) => [item.name, item])).values());
+	const baseVariables = Array.from(new Map(combinedVariables.map((item) => [item.name, item])).values());
 
-  const existingMatchingVariables = baseVariables.filter((v) => {
-    const namePartWithoutFilters = v.name.split('|')[0].trim();
+	const existingMatchingVariables = baseVariables.filter((v) => {
+		const namePartWithoutFilters = v.name.split("|")[0].trim();
 
-    return namePartWithoutFilters.includes(searchTextTrimmed);
-  });
+		return namePartWithoutFilters.includes(searchTextTrimmed);
+	});
 
-  return existingMatchingVariables;
+	return existingMatchingVariables;
 }
 
 export function createAutocompleteSource(
-  variables: LiquidVariable[],
-  onVariableSelect?: (completion: CompletionOption) => void,
-  onCreateNewVariable?: (variableName: string) => Promise<void>,
-  isPayloadSchemaEnabled?: boolean
+	variables: LiquidVariable[],
+	onVariableSelect?: (completion: CompletionOption) => void,
+	onCreateNewVariable?: (variableName: string) => Promise<void>,
+	isPayloadSchemaEnabled?: boolean
 ): CompletionSource {
-  return (context: CompletionContext) => {
-    // Match text that starts with {{ and capture everything after it until the cursor position
-    const word = context.matchBefore(/\{\{([^}]*)/);
-    if (!word) return null;
+	return (context: CompletionContext) => {
+		// Match text that starts with {{ and capture everything after it until the cursor position
+		const word = context.matchBefore(/\{\{([^}]*)/);
+		if (!word) return null;
 
-    const scopedVariables = getVariablesAtPositionWithLoopProperties(context.state.doc.toString(), context.pos);
-    const scopedLiquidVariables = scopedVariables.map<LiquidVariable>((variable) => ({
-      name: variable,
-      displayLabel: variable,
-      type: 'local',
-    }));
-    const options = completions(scopedLiquidVariables, variables, onCreateNewVariable, isPayloadSchemaEnabled)(context);
-    if (!options) return null;
+		const scopedVariables = getVariablesAtPositionWithLoopProperties(context.state.doc.toString(), context.pos);
+		const scopedLiquidVariables = scopedVariables.map<LiquidVariable>((variable) => ({
+			name: variable,
+			displayLabel: variable,
+			type: "local",
+		}));
+		const options = completions(scopedLiquidVariables, variables, onCreateNewVariable, isPayloadSchemaEnabled)(context);
+		if (!options) return null;
 
-    const { from, to } = options;
+		const { from, to } = options;
 
-    return {
-      from,
-      to,
-      options: options.options.map(
-        (option) =>
-          ({
-            ...option,
-            apply: (view: EditorView, completion: CompletionOption, from: number, to: number) => {
-              const selectedValue = completion.label;
+		return {
+			from,
+			to,
+			options: options.options.map(
+				(option) =>
+					({
+						...option,
+						apply: (view: EditorView, completion: CompletionOption, from: number, to: number) => {
+							const selectedValue = completion.label;
 
-              const content = view.state.doc.toString();
-              const beforeCursor = content.slice(0, from);
-              const afterCursor = content.slice(to);
+							const content = view.state.doc.toString();
+							const beforeCursor = content.slice(0, from);
+							const afterCursor = content.slice(to);
 
-              // Ensure proper {{ }} wrapping
-              const needsOpening = !beforeCursor.endsWith('{{');
-              const needsClosing = !afterCursor.startsWith('}}');
+							// Ensure proper {{ }} wrapping
+							const needsOpening = !beforeCursor.endsWith("{{");
+							const needsClosing = !afterCursor.startsWith("}}");
 
-              const wrappedValue = `${needsOpening ? '{{' : ''}${selectedValue}${needsClosing ? '}}' : ''}`;
+							const wrappedValue = `${needsOpening ? "{{" : ""}${selectedValue}${needsClosing ? "}}" : ""}`;
 
-              // Calculate the final cursor position
-              // Add 2 if we need to account for closing brackets
-              const finalCursorPos = from + wrappedValue.length + (needsClosing ? 0 : 2);
+							// Calculate the final cursor position
+							// Add 2 if we need to account for closing brackets
+							const finalCursorPos = from + wrappedValue.length + (needsClosing ? 0 : 2);
 
-              onVariableSelect?.(completion);
+							onVariableSelect?.(completion);
 
-              view.dispatch({
-                changes: { from, to, insert: wrappedValue },
-                selection: { anchor: finalCursorPos },
-              });
+							view.dispatch({
+								changes: { from, to, insert: wrappedValue },
+								selection: { anchor: finalCursorPos },
+							});
 
-              return true;
-            },
-          }) as Completion
-      ),
-    };
-  };
+							return true;
+						},
+					}) as Completion
+			),
+		};
+	};
 }

@@ -1,6 +1,5 @@
-import { TemplateSystemVariables, ITemplateVariable } from '@novu/shared';
-
 import { BadRequestException } from '@nestjs/common';
+import { type ITemplateVariable, TemplateSystemVariables } from '@novu/shared';
 
 export class VerifyPayloadService {
   checkRequired(variables: ITemplateVariable[], payload: Record<string, unknown>): string[] {

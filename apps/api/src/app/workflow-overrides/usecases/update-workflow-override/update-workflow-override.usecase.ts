@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import {
+import type {
   NotificationTemplateEntity,
   NotificationTemplateRepository,
   TenantEntity,
   TenantRepository,
-  WorkflowOverrideRepository,
   WorkflowOverrideEntity,
+  WorkflowOverrideRepository,
 } from '@novu/dal';
-import { UpdateWorkflowOverrideCommand } from './update-workflow-override.command';
-import { UpdateWorkflowOverrideResponseDto } from '../../dtos/update-workflow-override-response.dto';
+import type { UpdateWorkflowOverrideResponseDto } from '../../dtos/update-workflow-override-response.dto';
+import type { UpdateWorkflowOverrideCommand } from './update-workflow-override.command';
 
 @Injectable()
 export class UpdateWorkflowOverride {

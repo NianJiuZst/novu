@@ -1,10 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
-import { CommunityOrganizationRepository } from '@novu/dal';
-
-import { BadRequestException } from '@nestjs/common';
-import { CompileTemplate, CompileTemplateBase } from '../compile-template';
-import { CompileStepTemplateCommand } from './compile-step-template.command';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import type { ModuleRef } from '@nestjs/core';
+import type { CommunityOrganizationRepository } from '@novu/dal';
+import { type CompileTemplate, CompileTemplateBase } from '../compile-template';
+import type { CompileStepTemplateCommand } from './compile-step-template.command';
 
 @Injectable()
 export class CompileStepTemplate extends CompileTemplateBase {

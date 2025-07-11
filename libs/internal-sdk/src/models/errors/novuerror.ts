@@ -21,15 +21,15 @@ export class NovuError extends Error {
       response: Response;
       request: Request;
       body: string;
-    },
+    }
   ) {
     super(message);
     this.statusCode = httpMeta.response.status;
     this.body = httpMeta.body;
     this.headers = httpMeta.response.headers;
-    this.contentType = httpMeta.response.headers.get("content-type") || "";
+    this.contentType = httpMeta.response.headers.get('content-type') || '';
     this.rawResponse = httpMeta.response;
 
-    this.name = "NovuError";
+    this.name = 'NovuError';
   }
 }

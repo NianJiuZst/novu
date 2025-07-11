@@ -1,16 +1,15 @@
 import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
-
-import { JobRepository, JobStatusEnum } from '@novu/dal';
-import { ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum, StepTypeEnum } from '@novu/shared';
 import {
   ComputeJobWaitDurationService,
-  DetailEnum,
   CreateExecutionDetails,
   CreateExecutionDetailsCommand,
+  DetailEnum,
   InstrumentUsecase,
 } from '@novu/application-generic';
+import { type JobRepository, JobStatusEnum } from '@novu/dal';
+import { ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum, StepTypeEnum } from '@novu/shared';
 
-import { AddJobCommand } from './add-job.command';
+import type { AddJobCommand } from './add-job.command';
 
 @Injectable()
 export class AddDelayJob {

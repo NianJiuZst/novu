@@ -1,2 +1,2 @@
-export { OrganizationSettings } from './OrganizationSettings';
 export { NovuBrandingSwitch } from './NovuBrandingSwitch';
+export { OrganizationSettings } from './OrganizationSettings';

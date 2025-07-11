@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { LayoutEntity, LayoutRepository } from '@novu/dal';
-import { ITemplateVariable } from '@novu/shared';
+import { type LayoutEntity, LayoutRepository } from '@novu/dal';
+import type { ITemplateVariable } from '@novu/shared';
 
-import { GetLayoutCommand } from './get-layout.command';
-import { LayoutDto } from './layout.dto';
+import type { GetLayoutCommand } from './get-layout.command';
+import type { LayoutDto } from './layout.dto';
 
 @Injectable()
 export class GetLayoutUseCase {

@@ -3,10 +3,10 @@ import type {
   Awaitable,
   CustomStep,
   DiscoverWorkflowOutput,
-  StepType,
-  StepOutput,
-  StepOptions,
   Schema,
+  StepOptions,
+  StepOutput,
+  StepType,
 } from '../../types';
 import { transformSchema } from '../../validators';
 import { discoverStep } from './discover-step';

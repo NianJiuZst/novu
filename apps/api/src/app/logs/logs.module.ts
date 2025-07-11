@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
+import { SharedModule } from '../shared/shared.module';
 import { LogsController } from './logs.controller';
 import { GetRequests } from './usecases/get-requests/get-requests.usecase';
-import { SharedModule } from '../shared/shared.module';
 
 const USE_CASES = [GetRequests];
 

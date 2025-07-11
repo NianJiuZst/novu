@@ -1,5 +1,5 @@
+import type { Paramtype } from '@nestjs/common/interfaces/features/paramtype.interface';
 import { expect } from 'chai';
-import { Paramtype } from '@nestjs/common/interfaces/features/paramtype.interface';
 import { LimitPipe } from './limit-pipe';
 
 enum MetadataEnum {

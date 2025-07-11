@@ -1,8 +1,8 @@
-import { MouseEventHandler, PropsWithChildren, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { Group, Stack, Text, UnstyledButton, useMantineColorScheme } from '@mantine/core';
-import { ChannelTypeEnum, NOVU_SMS_EMAIL_PROVIDERS } from '@novu/shared';
 import { Button, colors, Tooltip } from '@novu/design-system';
+import { type ChannelTypeEnum, NOVU_SMS_EMAIL_PROVIDERS } from '@novu/shared';
+import { type MouseEventHandler, type PropsWithChildren, useMemo } from 'react';
 
 import { When } from '../../../components/utils/When';
 import { useEnvironment } from '../../../hooks';

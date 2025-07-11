@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
+import { WorkflowEditorPage } from './page-models/workflowEditorPage';
 import { test } from './utils/baseTest';
 import { initializeSession, waitForNetworkIdle } from './utils/browser';
-import { WorkflowEditorPage } from './page-models/workflowEditorPage';
 import { ChannelType } from './utils/ChannelType';
 
 test.beforeEach(async ({ page }) => {

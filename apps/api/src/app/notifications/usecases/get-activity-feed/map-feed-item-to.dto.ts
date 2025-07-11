@@ -1,4 +1,4 @@
-import {
+import type {
   ExecutionDetailFeedItem,
   JobFeedItem,
   NotificationFeedItemEntity,
@@ -9,16 +9,16 @@ import {
 } from '@novu/dal';
 import {
   DigestTypeEnum,
-  FilterParts,
+  type FilterParts,
   FilterPartTypeEnum,
-  IDigestRegularMetadata,
-  IDigestTimedMetadata,
-  IWorkflowStepMetadata,
-  ProvidersIdEnum,
-  StepTypeEnum,
+  type IDigestRegularMetadata,
+  type IDigestTimedMetadata,
+  type IWorkflowStepMetadata,
+  type ProvidersIdEnum,
+  type StepTypeEnum,
 } from '@novu/shared';
 import { MessageTemplateDto } from '../../../shared/dtos/message.template.dto';
-import {
+import type {
   FieldFilterPartDto,
   FilterPartsDto,
   OnlineInLastFilterPartDto,
@@ -29,13 +29,13 @@ import {
   WebhookFilterPartDto,
 } from '../../../shared/dtos/step-filter-dto';
 import {
-  ActivityNotificationExecutionDetailResponseDto,
-  ActivityNotificationJobResponseDto,
-  ActivityNotificationResponseDto,
+  type ActivityNotificationExecutionDetailResponseDto,
+  type ActivityNotificationJobResponseDto,
+  type ActivityNotificationResponseDto,
   ActivityNotificationStepResponseDto,
-  ActivityNotificationSubscriberResponseDto,
-  ActivityNotificationTemplateResponseDto,
-  DigestMetadataDto,
+  type ActivityNotificationSubscriberResponseDto,
+  type ActivityNotificationTemplateResponseDto,
+  type DigestMetadataDto,
 } from '../../dtos/activities-response.dto';
 
 function buildSubscriberDto(subscriber: SubscriberFeedItem): ActivityNotificationSubscriberResponseDto {

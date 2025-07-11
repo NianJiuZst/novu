@@ -12,9 +12,7 @@ export function formatNumber(num: number, digits: number) {
   const item = lookup
     .slice()
     .reverse()
-    .find(function (lookupItem) {
-      return num >= lookupItem.value;
-    });
+    .find((lookupItem) => num >= lookupItem.value);
 
   return item ? (num / item.value).toFixed(digits).replace(rx, '$1') + item.symbol : '0';
 }

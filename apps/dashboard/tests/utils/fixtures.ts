@@ -1,34 +1,34 @@
-import { test as base } from '@playwright/test';
-import type { UserEntity, OrganizationEntity, EnvironmentEntity } from '@novu/dal';
+import type { EnvironmentEntity, OrganizationEntity, UserEntity } from "@novu/dal";
+import { test as base } from "@playwright/test";
 
-import { Session } from './session';
+import { Session } from "./session";
 
 export const test = base.extend<{
-  session: {
-    user: UserEntity;
-    jwt: string;
-    organization: OrganizationEntity;
-    developmentEnvironment: EnvironmentEntity;
-    productionEnvironment: EnvironmentEntity;
-  };
-  apiClient: any;
+	session: {
+		user: UserEntity;
+		jwt: string;
+		organization: OrganizationEntity;
+		developmentEnvironment: EnvironmentEntity;
+		productionEnvironment: EnvironmentEntity;
+	};
+	apiClient: any;
 }>({
-  session: [
-    async ({ page }, use) => {
-      const session = new Session(page);
-      await session.initialize();
-      const jwt = await session.getJwt();
+	session: [
+		async ({ page }, use) => {
+			const session = new Session(page);
+			await session.initialize();
+			const jwt = await session.getJwt();
 
-      await use({
-        user: session.user,
-        jwt,
-        organization: session.organization,
-        developmentEnvironment: session.developmentEnvironment,
-        productionEnvironment: session.productionEnvironment,
-      });
+			await use({
+				user: session.user,
+				jwt,
+				organization: session.organization,
+				developmentEnvironment: session.developmentEnvironment,
+				productionEnvironment: session.productionEnvironment,
+			});
 
-      await session.teardown();
-    },
-    { auto: true },
-  ],
+			await session.teardown();
+		},
+		{ auto: true },
+	],
 });

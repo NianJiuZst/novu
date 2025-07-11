@@ -1,10 +1,10 @@
-import { getIdFromSlug, WORKFLOW_DIVIDER } from '@/utils/id-utils';
-import type { OmitEnvironmentFromParameters } from '@/utils/types';
-import { QueryKeys } from '@/utils/query-keys';
-import { updateWorkflow } from '@/api/workflows';
-import { useEnvironment } from '@/context/environment/hooks';
-import { useMutation, type UseMutationOptions, useQueryClient } from '@tanstack/react-query';
-import type { WorkflowResponseDto } from '@novu/shared';
+import type { WorkflowResponseDto } from "@novu/shared";
+import { type UseMutationOptions, useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateWorkflow } from "@/api/workflows";
+import { useEnvironment } from "@/context/environment/hooks";
+import { getIdFromSlug, WORKFLOW_DIVIDER } from "@/utils/id-utils";
+import { QueryKeys } from "@/utils/query-keys";
+import type { OmitEnvironmentFromParameters } from "@/utils/types";
 
 type UpdateWorkflowParameters = OmitEnvironmentFromParameters<typeof updateWorkflow>;
 
@@ -19,53 +19,53 @@ type UpdateWorkflowParameters = OmitEnvironmentFromParameters<typeof updateWorkf
  * @returns
  */
 function markNewSteps(previousWorkflow: WorkflowResponseDto, currentWorkflow: WorkflowResponseDto) {
-  if (!previousWorkflow || !currentWorkflow) {
-    return currentWorkflow;
-  }
+	if (!previousWorkflow || !currentWorkflow) {
+		return currentWorkflow;
+	}
 
-  const previousStepIds = new Set(previousWorkflow.steps.map((step) => step.stepId));
+	const previousStepIds = new Set(previousWorkflow.steps.map((step) => step.stepId));
 
-  currentWorkflow.steps.forEach((step) => {
-    if (!previousStepIds.has(step.stepId)) {
-      // @ts-expect-error - isNew doesn't exist on StepResponseDto and it's too much work to override the @novu/shared types now
-      step.isNew = true;
-    }
-  });
+	currentWorkflow.steps.forEach((step) => {
+		if (!previousStepIds.has(step.stepId)) {
+			// @ts-expect-error - isNew doesn't exist on StepResponseDto and it's too much work to override the @novu/shared types now
+			step.isNew = true;
+		}
+	});
 
-  return currentWorkflow;
+	return currentWorkflow;
 }
 
 export const useUpdateWorkflow = (
-  options?: UseMutationOptions<WorkflowResponseDto, unknown, UpdateWorkflowParameters>
+	options?: UseMutationOptions<WorkflowResponseDto, unknown, UpdateWorkflowParameters>
 ) => {
-  const { currentEnvironment } = useEnvironment();
-  const queryClient = useQueryClient();
+	const { currentEnvironment } = useEnvironment();
+	const queryClient = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: (args: UpdateWorkflowParameters) => updateWorkflow({ environment: currentEnvironment!, ...args }),
-    ...options,
-    onSuccess: async (data, variables, context) => {
-      const workflowId = getIdFromSlug({ slug: data.slug, divider: WORKFLOW_DIVIDER });
-      const previousData = await queryClient.getQueryData<WorkflowResponseDto>([
-        QueryKeys.fetchWorkflow,
-        currentEnvironment?._id,
-        workflowId,
-      ]);
+	const mutation = useMutation({
+		mutationFn: (args: UpdateWorkflowParameters) => updateWorkflow({ environment: currentEnvironment!, ...args }),
+		...options,
+		onSuccess: async (data, variables, context) => {
+			const workflowId = getIdFromSlug({ slug: data.slug, divider: WORKFLOW_DIVIDER });
+			const previousData = await queryClient.getQueryData<WorkflowResponseDto>([
+				QueryKeys.fetchWorkflow,
+				currentEnvironment?._id,
+				workflowId,
+			]);
 
-      if (previousData) {
-        markNewSteps(previousData, data);
-      }
+			if (previousData) {
+				markNewSteps(previousData, data);
+			}
 
-      await queryClient.setQueryData([QueryKeys.fetchWorkflow, currentEnvironment?._id, workflowId], data);
-      await queryClient.invalidateQueries({
-        queryKey: [QueryKeys.fetchWorkflowTestData, currentEnvironment?._id, workflowId],
-      });
-      options?.onSuccess?.(data, variables, context);
-    },
-  });
+			await queryClient.setQueryData([QueryKeys.fetchWorkflow, currentEnvironment?._id, workflowId], data);
+			await queryClient.invalidateQueries({
+				queryKey: [QueryKeys.fetchWorkflowTestData, currentEnvironment?._id, workflowId],
+			});
+			options?.onSuccess?.(data, variables, context);
+		},
+	});
 
-  return {
-    ...mutation,
-    updateWorkflow: mutation.mutateAsync,
-  };
+	return {
+		...mutation,
+		updateWorkflow: mutation.mutateAsync,
+	};
 };

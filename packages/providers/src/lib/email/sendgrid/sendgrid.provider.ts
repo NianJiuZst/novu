@@ -1,18 +1,17 @@
+import { EmailProviderIdEnum, type IEmailOptions } from '@novu/shared';
 import {
   ChannelTypeEnum,
-  EmailEventStatusEnum,
-  IEmailProvider,
-  ISendMessageSuccessResponse,
-  ICheckIntegrationResponse,
   CheckIntegrationResponseEnum,
-  IEmailEventBody,
-  IAttachmentOptions,
+  EmailEventStatusEnum,
+  type IAttachmentOptions,
+  type ICheckIntegrationResponse,
+  type IEmailEventBody,
+  type IEmailProvider,
+  type ISendMessageSuccessResponse,
 } from '@novu/stateless';
-
-import { MailDataRequired, MailService } from '@sendgrid/mail';
-import { EmailProviderIdEnum, IEmailOptions } from '@novu/shared';
+import { type MailDataRequired, MailService } from '@sendgrid/mail';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 type AttachmentJSON = MailDataRequired['attachments'][0];
 

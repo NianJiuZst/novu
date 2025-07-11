@@ -1,5 +1,5 @@
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
-import { StoryFn, Meta } from '@storybook/react';
 import { Text } from './Text';
 
 export default {

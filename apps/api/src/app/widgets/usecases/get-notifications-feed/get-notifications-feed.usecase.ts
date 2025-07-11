@@ -1,17 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { ActorTypeEnum, ChannelTypeEnum } from '@novu/shared';
 import {
-  AnalyticsService,
+  type AnalyticsService,
   buildFeedKey,
   buildSubscriberKey,
   CachedQuery,
   CachedResponse,
   InstrumentUsecase,
 } from '@novu/application-generic';
-import { MessageRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
-
-import { GetNotificationsFeedCommand } from './get-notifications-feed.command';
-import { FeedResponseDto } from '../../dtos/feeds-response.dto';
+import type { MessageRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
+import { ActorTypeEnum, ChannelTypeEnum } from '@novu/shared';
+import type { FeedResponseDto } from '../../dtos/feeds-response.dto';
+import type { GetNotificationsFeedCommand } from './get-notifications-feed.command';
 
 @Injectable()
 export class GetNotificationsFeed {

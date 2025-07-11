@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { OrganizationRepository } from '@novu/dal';
-import { UpdateBrandingDetailsCommand } from './update-branding-details.command';
+import type { OrganizationRepository } from '@novu/dal';
+import type { UpdateBrandingDetailsCommand } from './update-branding-details.command';
 
 @Injectable()
 export class UpdateBrandingDetails {

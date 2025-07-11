@@ -1,8 +1,8 @@
-import { testServer } from '@novu/testing';
-import sinon from 'sinon';
-import chai from 'chai';
-import { Connection } from 'mongoose';
 import { DalService } from '@novu/dal';
+import { testServer } from '@novu/testing';
+import chai from 'chai';
+import type { Connection } from 'mongoose';
+import sinon from 'sinon';
 import { bootstrap } from '../src/bootstrap';
 
 let connection: Connection;
@@ -44,6 +44,6 @@ after(async () => {
   }
 });
 
-afterEach(async function () {
+afterEach(async () => {
   sinon.restore();
 });

@@ -1,8 +1,13 @@
 import { SmsProviderIdEnum } from '@novu/shared';
-import { ChannelTypeEnum, ISendMessageSuccessResponse, ISmsOptions, ISmsProvider } from '@novu/stateless';
-import axios, { AxiosInstance } from 'axios';
+import {
+  ChannelTypeEnum,
+  type ISendMessageSuccessResponse,
+  type ISmsOptions,
+  type ISmsProvider,
+} from '@novu/stateless';
+import axios, { type AxiosInstance } from 'axios';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export interface ISendSmsData {
   user_id: number;

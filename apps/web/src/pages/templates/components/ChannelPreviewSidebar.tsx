@@ -1,14 +1,13 @@
-import { ReactNode } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { StepTypeEnum } from '@novu/shared';
 import { Sidebar } from '@novu/design-system';
-
-import { useStepIndex } from '../hooks/useStepIndex';
-import { StepName } from './StepName';
+import type { StepTypeEnum } from '@novu/shared';
+import type { ReactNode } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useBasePath } from '../hooks/useBasePath';
-import { EditorSidebarHeaderActions } from './EditorSidebarHeaderActions';
-import { useStepVariantsCount } from '../hooks/useStepVariantsCount';
 import { useNavigateToVariantPreview } from '../hooks/useNavigateToVariantPreview';
+import { useStepIndex } from '../hooks/useStepIndex';
+import { useStepVariantsCount } from '../hooks/useStepVariantsCount';
+import { EditorSidebarHeaderActions } from './EditorSidebarHeaderActions';
+import { StepName } from './StepName';
 
 const StepSidebarHeader = () => {
   const { channel } = useParams<{

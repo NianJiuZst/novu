@@ -1,8 +1,8 @@
-import React from 'react';
 import styled from '@emotion/styled';
 import { Group, Stack } from '@mantine/core';
-import { ICondition } from '@novu/shared';
-import { colors, Text, Tooltip, CheckCircle, ErrorIcon } from '@novu/design-system';
+import { CheckCircle, colors, ErrorIcon, Text, Tooltip } from '@novu/design-system';
+import type { ICondition } from '@novu/shared';
+import type React from 'react';
 
 export function ExecutionDetailsConditionItem({ condition }: { condition: ICondition }) {
   const isPassed = condition.passed;
