@@ -14,9 +14,6 @@
     "source.fixAll.biome": "explicit",
     "source.organizeImports.biome": "explicit"
   },
-  "[markdown]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
   "[typescriptreact]": {
     "editor.defaultFormatter": "biomejs.biome"
   },

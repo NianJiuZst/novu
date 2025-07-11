@@ -2,11 +2,8 @@ import type { Completion, CompletionContext, CompletionSource } from "@codemirro
 import { html, htmlCompletionSource } from "@codemirror/lang-html";
 import { liquid, liquidCompletionSource } from "@codemirror/lang-liquid";
 import { tags as t } from "@lezer/highlight";
-import * as parserLiquid from "@shopify/prettier-plugin-liquid/standalone";
 import type { EditorView, Extension } from "@uiw/react-codemirror";
 import type { JSONSchema7 } from "json-schema";
-import * as parserHtml from "prettier/plugins/html";
-import { format } from "prettier/standalone";
 import { type MutableRefObject, useCallback, useMemo, useRef } from "react";
 import { RiCodeSSlashFill } from "react-icons/ri";
 import { showErrorToast } from "@/components/primitives/sonner-helpers";
@@ -147,6 +144,18 @@ export function HtmlEditor({
 			e.preventDefault();
 
 			try {
+				// Dynamic import to load Prettier only when needed
+				// Use dynamic string construction to avoid TypeScript module resolution at compile time
+				const prettierStandalone = "prettier/standalone";
+				const prettierHtmlPlugin = "prettier/plugins/html";
+				const prettierLiquidPlugin = "@shopify/prettier-plugin-liquid/standalone";
+
+				const [{ format }, parserHtml, parserLiquid] = await Promise.all([
+					import(/* webpackIgnore: true */ prettierStandalone),
+					import(/* webpackIgnore: true */ prettierHtmlPlugin),
+					import(/* webpackIgnore: true */ prettierLiquidPlugin),
+				]);
+
 				const formattedValue = await format(value, {
 					parser: "liquid-html",
 					printWidth: 120,
