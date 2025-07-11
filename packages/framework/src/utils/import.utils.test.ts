@@ -16,7 +16,13 @@ describe('import utils', () => {
       await expect(
         checkDependencies(
           // @ts-expect-error - Cannot find module 'missing-random-dependency' or its corresponding type declarations.
-          [{ name: 'missing-random-dependency', import: import('missing-random-dependency'), exports: [] }],
+          [
+            {
+              name: 'missing-random-dependency',
+              import: import('missing-random-dependency'),
+              exports: [],
+            },
+          ],
           'test schema'
         )
       ).rejects.toThrow(
@@ -29,9 +35,17 @@ describe('import utils', () => {
         checkDependencies(
           [
             // @ts-expect-error - Cannot find module 'missing-random-dependency-1' or its corresponding type declarations.
-            { name: 'missing-random-dependency-1', import: import('missing-random-dependency-1'), exports: [] },
+            {
+              name: 'missing-random-dependency-1',
+              import: import('missing-random-dependency-1'),
+              exports: [],
+            },
             // @ts-expect-error - Cannot find module 'missing-random-dependency-2' or its corresponding type declarations.
-            { name: 'missing-random-dependency-2', import: import('missing-random-dependency-2'), exports: [] },
+            {
+              name: 'missing-random-dependency-2',
+              import: import('missing-random-dependency-2'),
+              exports: [],
+            },
           ],
           'test schema'
         )
@@ -45,9 +59,17 @@ describe('import utils', () => {
         checkDependencies(
           [
             // @ts-expect-error - Cannot find module 'missing-random-dependency' or its corresponding type declarations.
-            { name: 'missing-random-dependency', import: import('missing-random-dependency'), exports: [] },
+            {
+              name: 'missing-random-dependency',
+              import: import('missing-random-dependency'),
+              exports: [],
+            },
             // @ts-expect-error - Cannot find module 'missing-random-dependency/nested' or its corresponding type declarations.
-            { name: 'missing-random-dependency', import: import('missing-random-dependency/nested'), exports: [] },
+            {
+              name: 'missing-random-dependency',
+              import: import('missing-random-dependency/nested'),
+              exports: [],
+            },
           ],
           'test schema'
         )

@@ -43,7 +43,6 @@ export function getIdentifier(
 }
 
 export function getEnvironment(keyConfig: Record<string, unknown>): { key: string; value: string } | undefined {
-  // eslint-disable-next-line no-nested-ternary
   return keyConfig._environmentId
     ? { key: '_environmentId', value: keyConfig._environmentId as string }
     : keyConfig.environmentId

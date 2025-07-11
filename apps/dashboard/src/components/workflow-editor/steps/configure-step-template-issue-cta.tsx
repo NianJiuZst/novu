@@ -55,7 +55,12 @@ export const ConfigureStepTemplateIssueCta = (props: ConfigureStepTemplateIssueC
 				className="flex h-full w-full justify-start gap-3 py-2 text-xs"
 				type="button"
 			>
-				<span className={cn(`h-full min-w-1 rounded-full`, { "bg-destructive": isError, "bg-bg-sub": !isError })} />
+				<span
+					className={cn(`h-full min-w-1 rounded-full`, {
+						"bg-destructive": isError,
+						"bg-bg-sub": !isError,
+					})}
+				/>
 				<div className="flex flex-col items-start gap-0.5 overflow-hidden">
 					<TruncatedText className="w-full font-medium">{truncatedTextContent}</TruncatedText>
 					<p className="text-text-soft text-wrap text-start">{issue.message}</p>

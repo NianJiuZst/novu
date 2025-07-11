@@ -57,8 +57,14 @@ export const envValidators = {
       STRIPE_API_KEY: str({ default: undefined }),
       STRIPE_CONNECT_SECRET: str({ default: undefined }),
       NOVU_INTERNAL_SECRET_KEY: str({ default: '' }),
-      KEYLESS_ORGANIZATION_ID: str({ desc: 'Required organizationId for Keyless authentication', default: undefined }),
-      KEYLESS_USER_EMAIL: str({ desc: 'Required email for Keyless authentication', default: undefined }),
+      KEYLESS_ORGANIZATION_ID: str({
+        desc: 'Required organizationId for Keyless authentication',
+        default: undefined,
+      }),
+      KEYLESS_USER_EMAIL: str({
+        desc: 'Required email for Keyless authentication',
+        default: undefined,
+      }),
 
       CLICK_HOUSE_URL: str({ default: '' }),
       CLICK_HOUSE_DATABASE: str({ default: '' }),
@@ -81,7 +87,9 @@ export const envValidators = {
   ...(processEnv.STORAGE_SERVICE === 'AZURE' && {
     AZURE_ACCOUNT_NAME: str(),
     AZURE_ACCOUNT_KEY: str(),
-    AZURE_HOST_NAME: str({ default: `https://${processEnv.AZURE_ACCOUNT_NAME}.blob.core.windows.net` }),
+    AZURE_HOST_NAME: str({
+      default: `https://${processEnv.AZURE_ACCOUNT_NAME}.blob.core.windows.net`,
+    }),
     AZURE_CONTAINER_NAME: str({ default: 'novu' }),
   }),
 

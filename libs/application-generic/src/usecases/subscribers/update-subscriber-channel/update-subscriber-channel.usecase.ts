@@ -86,9 +86,7 @@ export class UpdateSubscriberChannel {
     command: UpdateSubscriberChannelCommand,
     foundSubscriber
   ) {
-    // eslint-disable-next-line no-param-reassign
     updatePayload._integrationId = foundIntegration._id;
-    // eslint-disable-next-line no-param-reassign
     updatePayload.providerId = command.providerId;
 
     await this.invalidateCache.invalidateByKey({

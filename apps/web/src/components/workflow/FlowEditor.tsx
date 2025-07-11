@@ -113,9 +113,7 @@ export function FlowEditor({
   useEffect(() => {
     setTimeout(() => {
       initializeWorkflowTree();
-    }, 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [steps, dragging, errors, readonly]);
+    }, 0);  }, [steps, dragging, errors, readonly]);
 
   const addNewNode = useCallback(
     (parentNodeId: string, channelType: string, childId?: string) => {
@@ -133,9 +131,7 @@ export function FlowEditor({
   );
 
   const onDragOver = useCallback((event) => {
-    event.preventDefault();
-    // eslint-disable-next-line no-param-reassign
-    event.dataTransfer.dropEffect = 'move';
+    event.preventDefault();    event.dataTransfer.dropEffect = 'move';
   }, []);
 
   const onDrop = useCallback(

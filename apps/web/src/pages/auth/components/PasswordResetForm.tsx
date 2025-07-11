@@ -88,9 +88,7 @@ export function PasswordResetForm({ token }: Props) {
               },
               pattern: {
                 value: passwordConstraints.pattern,
-                message:
-                  // eslint-disable-next-line max-len
-                  'The password must contain minimum 8 and maximum 64 characters, at least one uppercase letter, one lowercase letter, one number and one special character #?!@$%^&*()-',
+                message:                  'The password must contain minimum 8 and maximum 64 characters, at least one uppercase letter, one lowercase letter, one number and one special character #?!@$%^&*()-',
               },
             })}
             required
@@ -111,9 +109,7 @@ export function PasswordResetForm({ token }: Props) {
             },
             pattern: {
               value: passwordConstraints.pattern,
-              message:
-                // eslint-disable-next-line max-len
-                'The password must contain minimum 8 and maximum 64 characters, at least one uppercase letter, one lowercase letter, one number and one special character #?!@$%^&*()-',
+              message:                'The password must contain minimum 8 and maximum 64 characters, at least one uppercase letter, one lowercase letter, one number and one special character #?!@$%^&*()-',
             },
           })}
           required

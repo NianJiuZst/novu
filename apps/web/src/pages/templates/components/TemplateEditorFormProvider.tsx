@@ -204,9 +204,7 @@ const TemplateEditorFormProvider = ({ children }) => {
         ...trigger,
         identifier: newIdentifier,
       });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name]);
+    }  }, [name]);
 
   const { template, isLoading, isCreating, isUpdating, isDeleting, updateNotificationTemplate } =
     useTemplateController(templateId);

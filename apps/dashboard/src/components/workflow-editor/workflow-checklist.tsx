@@ -213,7 +213,9 @@ function useChecklistItems(steps: Step[]) {
 				isCompleted: (steps: Step[]) =>
 					steps.some((step: Step) => step.type !== StepTypeEnum.TRIGGER && isStepContentComplete(step)),
 				onClick: () => {
-					telemetry(TelemetryEvent.WORKFLOW_CHECKLIST_STEP_CLICKED, { stepTitle: "Add notification content" });
+					telemetry(TelemetryEvent.WORKFLOW_CHECKLIST_STEP_CLICKED, {
+						stepTitle: "Add notification content",
+					});
 					const stepToConfig = steps.find((step) => step.type !== StepTypeEnum.TRIGGER);
 
 					if (stepToConfig) {
@@ -248,7 +250,9 @@ function useChecklistItems(steps: Step[]) {
 				description: "Trigger the workflow to test it in production",
 				isCompleted: () => !!workflow?.lastTriggeredAt,
 				onClick: () => {
-					telemetry(TelemetryEvent.WORKFLOW_CHECKLIST_STEP_CLICKED, { stepTitle: "Trigger workflow" });
+					telemetry(TelemetryEvent.WORKFLOW_CHECKLIST_STEP_CLICKED, {
+						stepTitle: "Trigger workflow",
+					});
 					navigate(
 						buildRoute(isV2TemplateEditorEnabled ? ROUTES.TRIGGER_WORKFLOW : ROUTES.TEST_WORKFLOW, {
 							environmentSlug: currentEnvironment?.slug ?? "",

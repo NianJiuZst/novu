@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-
 import styled from '@emotion/styled';
 import { Group } from '@mantine/core';
 import { CircleArrowRight, colors, ErrorIcon, Text, WarningIcon } from '@novu/design-system';

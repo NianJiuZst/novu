@@ -29,7 +29,11 @@ export const SkeletonAvatar = (props: SkeletonAvatarProps) => {
   );
 };
 
-type SkeletonSwitchProps = { appearanceKey: AppearanceKey; thumbAppearanceKey: AppearanceKey; class?: ClassName };
+type SkeletonSwitchProps = {
+  appearanceKey: AppearanceKey;
+  thumbAppearanceKey: AppearanceKey;
+  class?: ClassName;
+};
 
 export const SkeletonSwitch = (props: SkeletonSwitchProps) => {
   const style = useStyle();

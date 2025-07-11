@@ -13,5 +13,5 @@ export class UpdateMessageActionsCommand extends EnvironmentWithSubscriber {
   status: MessageActionStatusEnum;
 
   @IsOptional()
-  payload?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  payload?: any;
 }

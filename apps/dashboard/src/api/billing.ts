@@ -2,6 +2,8 @@ import type { GetSubscriptionDto, IEnvironment } from "@novu/shared";
 import { get } from "./api.client";
 
 export async function getSubscription({ environment }: { environment: IEnvironment }) {
-	const { data } = await get<{ data: GetSubscriptionDto }>("/billing/subscription", { environment });
+	const { data } = await get<{ data: GetSubscriptionDto }>("/billing/subscription", {
+		environment,
+	});
 	return data;
 }

@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-namespace
 import type * as nestSwagger from '@nestjs/swagger';
 import type { ApiHeaderOptions } from '@nestjs/swagger';
 

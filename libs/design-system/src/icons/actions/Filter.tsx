@@ -1,7 +1,5 @@
 import { useMantineTheme } from '@mantine/core';
 import type React from 'react';
-
-/* eslint-disable */
 export function Filter(props: React.ComponentPropsWithoutRef<'svg'>) {
   const theme = useMantineTheme();
 

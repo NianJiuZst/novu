@@ -14,11 +14,7 @@ export async function createInAppIntegration() {
   const app = await NestFactory.create(AppModule, {
     logger: false,
   });
-
-  // eslint-disable-next-line no-console
   console.log('start migration - in app integration');
-
-  // eslint-disable-next-line no-console
   console.log('get organizations and its environments');
 
   const organizations = await organizationRepository.find({});
@@ -57,8 +53,6 @@ export async function createInAppIntegration() {
 
     console.log(`Prococessed organization ${organization._id}`);
   }
-
-  // eslint-disable-next-line no-console
   console.log('end migration');
 }
 

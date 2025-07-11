@@ -289,7 +289,11 @@ notificationTemplateSchema.index({
   name: 1,
 });
 
-notificationTemplateSchema.plugin(mongooseDelete, { deletedAt: true, deletedBy: true, overrideMethods: 'all' });
+notificationTemplateSchema.plugin(mongooseDelete, {
+  deletedAt: true,
+  deletedBy: true,
+  overrideMethods: 'all',
+});
 
 export const NotificationTemplate =
   (mongoose.models.NotificationTemplate as mongoose.Model<NotificationTemplateDBModel>) ||

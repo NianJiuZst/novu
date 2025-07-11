@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-
 'use-client';
 
 import { useState } from 'react';

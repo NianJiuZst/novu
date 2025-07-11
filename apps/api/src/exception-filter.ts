@@ -205,7 +205,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private handleValidationPipeValidation(exception: ValidationPipeError, request: Request) {
     const errorDto = this.buildErrorDto(request, HttpStatus.UNPROCESSABLE_ENTITY, 'Validation Error', {});
 
-    return { ...errorDto, errors: { general: { messages: exception.response.message, value: 'No Value Recorded' } } };
+    return {
+      ...errorDto,
+      errors: { general: { messages: exception.response.message, value: 'No Value Recorded' } },
+    };
   }
 
   private handlerThrottlerException(request: Request) {

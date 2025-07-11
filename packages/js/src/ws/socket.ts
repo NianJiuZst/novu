@@ -160,7 +160,6 @@ export class Socket extends BaseModule implements BaseSocketInterface {
   };
 
   async #initializeSocket(): Promise<void> {
-    // eslint-disable-next-line no-extra-boolean-cast
     if (this.#socketIo) {
       return;
     }

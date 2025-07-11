@@ -24,9 +24,7 @@ export const StudioOnboarding = () => {
   const { data, isLoading } = useHealthCheck();
 
   useEffect(() => {
-    track('Add endpoint step started - [Onboarding - Signup]');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    track('Add endpoint step started - [Onboarding - Signup]');  }, []);
 
   useEffect(() => {
     /**
@@ -35,9 +33,7 @@ export const StudioOnboarding = () => {
     if (data?.discovered?.workflows && data?.discovered?.workflows > 1) {
       setNovuOnboardingStepCookie();
       navigate(ROUTES.STUDIO_FLOWS);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+    }  }, [data]);
 
   const welcomeMessage = `${`Welcome ${capitalizeFirstLetter(testUser?.firstName || '')}`.trim()}. Let's get started!`;
 

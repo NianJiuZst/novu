@@ -56,7 +56,10 @@ describe('Create expireAt - TTL support - with pending jobs', () => {
       _environmentId: session.environment._id,
       _templateId: delayTemplate?._id,
     });
-    const jobs = await jobRepository.find({ _environmentId: session.environment._id, _templateId: delayTemplate?._id });
+    const jobs = await jobRepository.find({
+      _environmentId: session.environment._id,
+      _templateId: delayTemplate?._id,
+    });
     const executionDetails = await executionDetailsRepository.find({
       _environmentId: session.environment._id,
       _notificationTemplateId: delayTemplate?._id,

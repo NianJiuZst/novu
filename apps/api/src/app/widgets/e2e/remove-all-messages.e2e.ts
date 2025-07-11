@@ -80,8 +80,14 @@ describe('Remove all messages - /widgets/messages (DELETE) #novu-v0', () => {
     await novuClient.trigger({ workflowId: template.triggers[0].identifier, to: subscriberId });
     await novuClient.trigger({ workflowId: template.triggers[0].identifier, to: subscriberId });
     await novuClient.trigger({ workflowId: template.triggers[0].identifier, to: subscriberId });
-    await novuClient.trigger({ workflowId: templateWithFeed.triggers[0].identifier, to: subscriberId });
-    await novuClient.trigger({ workflowId: templateWithFeed.triggers[0].identifier, to: subscriberId });
+    await novuClient.trigger({
+      workflowId: templateWithFeed.triggers[0].identifier,
+      to: subscriberId,
+    });
+    await novuClient.trigger({
+      workflowId: templateWithFeed.triggers[0].identifier,
+      to: subscriberId,
+    });
 
     await session.waitForJobCompletion(templateWithFeed._id);
     await session.waitForJobCompletion(template._id);

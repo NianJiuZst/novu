@@ -66,7 +66,10 @@ export class ChangeRepository extends BaseRepository<ChangeDBModel, ChangeEntity
       .limit(limit)
       .populate('user', userSelect);
 
-    return { totalCount: totalItemsCount, data: this.mapEntities(items) as ChangeEntityPopulated[] };
+    return {
+      totalCount: totalItemsCount,
+      data: this.mapEntities(items) as ChangeEntityPopulated[],
+    };
   }
 
   public async getParentId(

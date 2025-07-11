@@ -163,8 +163,6 @@ export class WSGateway implements OnGatewayConnection, OnGatewayDisconnect, IDes
 
     await this.subscriberOnlineService.handleConnection(subscriber);
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async sendMessage(userId: string, event: string, data: any) {
     if (!this.server) {
       Logger.error('No sw server available to send message', LOG_CONTEXT);

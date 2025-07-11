@@ -41,7 +41,11 @@ export const VariableSuggestionList = forwardRef<SuggestionListRef, SuggestionLi
     const customVariableLabel = () => {
       // ensure query has closing characters
       if (!query.endsWith(AUTOCOMPLETE_CLOSE_TAG)) {
-        command({ label: `${AUTOCOMPLETE_OPEN_TAG}${query}`, id: '', error: VariableErrorCode.INVALID_SYNTAX });
+        command({
+          label: `${AUTOCOMPLETE_OPEN_TAG}${query}`,
+          id: '',
+          error: VariableErrorCode.INVALID_SYNTAX,
+        });
 
         return;
       }

@@ -11,7 +11,10 @@ import { InboxFrameworkGuide } from "./inbox-framework-guide";
 export function InboxEmbed(): JSX.Element | null {
 	const [showConfetti, setShowConfetti] = useState(false);
 	const { currentUser } = useAuth();
-	const { integrations } = useFetchIntegrations({ refetchInterval: 1000, refetchOnWindowFocus: true });
+	const { integrations } = useFetchIntegrations({
+		refetchInterval: 1000,
+		refetchOnWindowFocus: true,
+	});
 	const { environments } = useEnvironment();
 	const [searchParams] = useSearchParams();
 	const environmentHint = searchParams.get("environmentId");

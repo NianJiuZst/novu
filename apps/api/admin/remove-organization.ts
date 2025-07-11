@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import '../src/config';
 import {
   type BaseRepository,

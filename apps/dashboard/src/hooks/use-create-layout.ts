@@ -18,7 +18,9 @@ export function useCreateLayout(options?: UseMutationOptions<LayoutResponseDto, 
 	const mutation = useMutation({
 		mutationFn: async (layout: CreateLayoutDto) => createLayout({ environment: currentEnvironment!, layout }),
 		onSuccess: async (data, variables, ctx) => {
-			await queryClient.invalidateQueries({ queryKey: [QueryKeys.fetchLayouts, currentEnvironment?._id] });
+			await queryClient.invalidateQueries({
+				queryKey: [QueryKeys.fetchLayouts, currentEnvironment?._id],
+			});
 
 			showSuccessToast(toastId);
 			navigate(

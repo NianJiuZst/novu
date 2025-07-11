@@ -18,7 +18,9 @@ export const LayoutEmailEditor = (props: EmailEditorProps) => {
 			<div className="px-0 pb-0 pt-0">
 				<div className="border-b border-neutral-200 px-3 py-2">
 					<EmailPreviewHeader minimalHeader>
-						{getLayoutComponentByType({ component: editorType?.component ?? UiComponentEnum.EMAIL_EDITOR_SELECT })}
+						{getLayoutComponentByType({
+							component: editorType?.component ?? UiComponentEnum.EMAIL_EDITOR_SELECT,
+						})}
 					</EmailPreviewHeader>
 				</div>
 			</div>

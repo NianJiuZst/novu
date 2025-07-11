@@ -22,8 +22,6 @@ function createHandlebarsInstance(i18next: any) {
         ...hash,
         returnObjects: false,
       };
-
-      // eslint-disable-next-line no-multi-assign
       const replace = (options.replace = {
         // @ts-ignore
         ...this,
@@ -96,16 +94,13 @@ function createHandlebarsInstance(i18next: any) {
   handlebars.registerHelper(HandlebarHelpersEnum.UNIQUE, (array, property) => {
     if (!Array.isArray(array)) return '';
 
-    return (
-      array
-        // eslint-disable-next-line array-callback-return
-        .map((item) => {
-          if (item[property]) {
-            return item[property];
-          }
-        })
-        .filter((value, index, self) => self.indexOf(value) === index)
-    );
+    return array
+      .map((item) => {
+        if (item[property]) {
+          return item[property];
+        }
+      })
+      .filter((value, index, self) => self.indexOf(value) === index);
   });
 
   handlebars.registerHelper(HandlebarHelpersEnum.SORT_BY, (array, property) => {
@@ -115,8 +110,6 @@ function createHandlebarsInstance(i18next: any) {
     return array.sort((a, b) => {
       const _x = a[property];
       const _y = b[property];
-
-      // eslint-disable-next-line no-nested-ternary
       return _x < _y ? -1 : _x > _y ? 1 : 0;
     });
   });
@@ -134,8 +127,6 @@ function createHandlebarsInstance(i18next: any) {
     const value = parseFloat(number);
 
     const re = `\\d(?=(\\d{3})+${decimalLength > 0 ? '\\D' : '$'})`;
-
-    // eslint-disable-next-line no-bitwise
     const num = value.toFixed(Math.max(0, ~~decimalLength));
 
     return (decimalSep ? num.replace('.', decimalSep) : num).replace(new RegExp(re, 'g'), `$&${thousandsSep}`);

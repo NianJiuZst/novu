@@ -15,12 +15,9 @@ const consoleFunctions = {
   warn: console.warn.bind(console),
   error: console.error.bind(console),
 };
-
-// eslint-disable-next-line guard-for-in
 for (const func in consoleFunctions) {
   console[func] = () => {
     stopLastAnimation();
-    // eslint-disable-next-line prefer-rest-params
     consoleFunctions[func].apply(console, arguments);
   };
 }
@@ -37,7 +34,6 @@ const effects = {
     return gradient(leftColor, rightColor)(str, longHsv);
   },
   pulse(str, frame) {
-    // eslint-disable-next-line no-param-reassign
     frame = (frame % 120) + 1;
     const transition = 20;
     const duration = 15;
@@ -50,11 +46,7 @@ const effects = {
     if (frame >= transition && frame <= transition + duration) {
       return chalk.hex(on)(str); // All red
     }
-
-    // eslint-disable-next-line no-param-reassign
     frame = frame >= transition + duration ? 2 * transition + duration - frame : frame; // Revert animation
-
-    // eslint-disable-next-line id-length
     const g =
       frame <= transition / 2
         ? gradient([
@@ -137,8 +129,6 @@ const effects = {
 
 function animateString(str, effect, delay, speed) {
   stopLastAnimation();
-
-  // eslint-disable-next-line no-param-reassign
   speed = speed === undefined ? 1 : parseFloat(speed);
   if (!speed || speed <= 0) {
     throw new Error('Expected `speed` to be an number greater than 0');
@@ -164,11 +154,8 @@ function animateString(str, effect, delay, speed) {
     },
     frame() {
       this.f += 1;
-
-      // eslint-disable-next-line @typescript-eslint/no-shadow
       return `\u001B[${this.lines}F\u001B[G\u001B[2K${this.text.map((str) => effect(str, this.f)).join('\n')}`;
     },
-    // eslint-disable-next-line @typescript-eslint/no-shadow
     replace(str) {
       this.text = str.split(/\r\n|\r|\n/);
       this.lines = str.split(/\r\n|\r|\n/).length;

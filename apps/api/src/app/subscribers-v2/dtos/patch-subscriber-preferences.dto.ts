@@ -22,7 +22,10 @@ export class PatchPreferenceChannelsDto implements IPreferenceChannels {
 }
 
 export class PatchSubscriberPreferencesDto {
-  @ApiProperty({ description: 'Channel-specific preference settings', type: PatchPreferenceChannelsDto })
+  @ApiProperty({
+    description: 'Channel-specific preference settings',
+    type: PatchPreferenceChannelsDto,
+  })
   @Type(() => PatchPreferenceChannelsDto)
   channels: PatchPreferenceChannelsDto;
 

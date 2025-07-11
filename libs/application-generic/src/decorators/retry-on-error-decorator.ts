@@ -16,8 +16,6 @@ export class RetryOptions {
 export function RetryOnError(errorName: string, options: RetryOptions = {}) {
   return (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value;
-
-    // eslint-disable-next-line no-param-reassign,func-names
     descriptor.value = async function (this: unknown, ...args: unknown[]) {
       const {
         maxRetries = 3,

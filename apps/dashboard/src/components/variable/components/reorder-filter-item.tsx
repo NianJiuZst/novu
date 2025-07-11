@@ -125,7 +125,14 @@ export const ReorderFilterItem = (props: ReorderFilterItemProps) => {
 					</Tooltip>
 				</div>
 				<span
-					className={cn(buttonVariants({ variant: "secondary", mode: "ghost", size: "sm", className: "h-5 p-1" }))}
+					className={cn(
+						buttonVariants({
+							variant: "secondary",
+							mode: "ghost",
+							size: "sm",
+							className: "h-5 p-1",
+						})
+					)}
 					onClick={(e) => {
 						preventClick(e);
 						onRemove(value.value);

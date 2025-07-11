@@ -21,8 +21,6 @@ export const SignUpPage = () => {
 			...utmParams,
 			referrer,
 		});
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

@@ -122,11 +122,17 @@ export class DigestMetadataDto {
   })
   backoffUnit?: DigestUnitEnum;
 
-  @ApiPropertyOptional({ description: 'Regular digest: Indicates if the digest should update', type: Boolean })
+  @ApiPropertyOptional({
+    description: 'Regular digest: Indicates if the digest should update',
+    type: Boolean,
+  })
   updateMode?: boolean;
 
   // Properties for Timed Digest
-  @ApiPropertyOptional({ description: 'Configuration for timed digest', type: () => DigestTimedConfigDto })
+  @ApiPropertyOptional({
+    description: 'Configuration for timed digest',
+    type: () => DigestTimedConfigDto,
+  })
   timed?: DigestTimedConfigDto;
 }
 
@@ -158,10 +164,16 @@ export class ActivityNotificationStepResponseDto {
   @ApiPropertyOptional({ description: 'Optional template for the step', type: MessageTemplateDto })
   template?: MessageTemplateDto;
 
-  @ApiPropertyOptional({ description: 'Variants of the step', type: [ActivityNotificationStepResponseDto] })
+  @ApiPropertyOptional({
+    description: 'Variants of the step',
+    type: [ActivityNotificationStepResponseDto],
+  })
   variants?: ActivityNotificationStepResponseDto[]; // Assuming variants are the same type
 
-  @ApiProperty({ description: 'The identifier for the template associated with this step', type: String })
+  @ApiProperty({
+    description: 'The identifier for the template associated with this step',
+    type: String,
+  })
   _templateId: string;
 
   @ApiPropertyOptional({ description: 'The name of the step', type: String })
@@ -283,7 +295,10 @@ export class ActivityNotificationSubscriberResponseDto {
   @ApiProperty({ description: 'External unique identifier of the subscriber', type: String })
   subscriberId: string;
 
-  @ApiProperty({ description: 'Internal to Novu unique identifier of the subscriber', type: String })
+  @ApiProperty({
+    description: 'Internal to Novu unique identifier of the subscriber',
+    type: String,
+  })
   _id: string;
 
   @ApiPropertyOptional({ description: 'Last name of the subscriber', type: String })
@@ -445,7 +460,10 @@ export class ActivityNotificationResponseDto {
 
 // Activities Response DTO
 export class ActivitiesResponseDto {
-  @ApiProperty({ description: 'Indicates if there are more activities in the result set', type: Boolean })
+  @ApiProperty({
+    description: 'Indicates if there are more activities in the result set',
+    type: Boolean,
+  })
   hasMore: boolean;
 
   @ApiProperty({

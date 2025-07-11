@@ -88,7 +88,9 @@ export class ProcessVercelWebhook {
         throw new BadRequestException('Organization owner not found');
       }
 
-      const internalUser = await this.communityUserRepository.findOne({ externalId: orgOwner?._userId });
+      const internalUser = await this.communityUserRepository.findOne({
+        externalId: orgOwner?._userId,
+      });
 
       if (!internalUser) {
         throw new BadRequestException('User not found');

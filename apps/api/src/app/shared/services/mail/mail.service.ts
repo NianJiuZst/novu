@@ -13,7 +13,7 @@ export interface ISendMail {
   html?: string;
   templateId?: string;
   params?: {
-    [key: string]: string | any[] | any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    [key: string]: string | any[] | any;
   };
 }
 
@@ -27,8 +27,6 @@ export class MailService {
   async sendMail(mail: ISendMail) {
     if (!mail.templateId && !mail.subject) throw new Error('Either templateId or subject must be present');
     if (process.env.NODE_ENV === 'test') return null;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mailObject: any = {
       subject: mail.subject,
       dynamicTemplateData: mail.params,

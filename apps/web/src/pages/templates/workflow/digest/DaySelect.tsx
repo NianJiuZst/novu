@@ -16,9 +16,7 @@ const useStyles = createStyles<string, { active: boolean; disabled: boolean }>((
         padding: '7px 0',
         textAlign: 'center',
         width: '100%',
-        background: active ? colors.B60 : undefined,
-        // eslint-disable-next-line no-nested-ternary
-        color: active ? colors.white : isDark ? colors.B80 : colors.B60,
+        background: active ? colors.B60 : undefined,        color: active ? colors.white : isDark ? colors.B80 : colors.B60,
         opacity: disabled ? 0.4 : 1,
         cursor: disabled ? 'default' : 'pointer',
         borderColor: isDark ? colors.B30 : colors.B60,

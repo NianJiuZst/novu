@@ -78,9 +78,7 @@ export class SendgridEmailProvider extends BaseProvider implements IEmailProvide
      * deleted below values from customData to avoid passing them
      * in customArgs because customArgs has max limit of 10,000 bytes
      */
-    // eslint-disable-next-line no-param-reassign
     delete options.customData?.dynamicTemplateData;
-    // eslint-disable-next-line no-param-reassign
     delete options.customData?.templateId;
 
     const attachments = options.attachments?.map((attachment: IAttachmentOptions) => {
@@ -160,7 +158,6 @@ export class SendgridEmailProvider extends BaseProvider implements IEmailProvide
 
   parseEventBody(body: any | any[], identifier: string): IEmailEventBody | undefined {
     if (Array.isArray(body)) {
-      // eslint-disable-next-line no-param-reassign
       body = body.find((item) => item.id === identifier);
     }
 

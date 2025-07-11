@@ -36,7 +36,9 @@ describe('sync command', () => {
       expect(syncRestCallSpy).toHaveBeenCalledWith(
         expectBackendUrl,
         expect.objectContaining({ bridgeUrl }),
-        expect.objectContaining({ headers: { Authorization: expect.any(String), 'Content-Type': 'application/json' } })
+        expect.objectContaining({
+          headers: { Authorization: expect.any(String), 'Content-Type': 'application/json' },
+        })
       );
       expect(response).toEqual(syncData);
     });

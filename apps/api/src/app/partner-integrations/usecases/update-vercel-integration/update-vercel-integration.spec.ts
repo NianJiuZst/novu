@@ -38,7 +38,11 @@ describe('UpdateVercelIntegration', () => {
                     { id: 'env-1', key: 'NEXT_PUBLIC_NOVU_CLIENT_APP_ID', target: ['production'] },
                     { id: 'env-2', key: 'NOVU_CLIENT_APP_ID', target: ['production'] },
                     { id: 'env-3', key: 'NOVU_SECRET_KEY', target: ['production'] },
-                    { id: 'env-4', key: 'NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER', target: ['production'] },
+                    {
+                      id: 'env-4',
+                      key: 'NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER',
+                      target: ['production'],
+                    },
                   ],
                 },
               ],

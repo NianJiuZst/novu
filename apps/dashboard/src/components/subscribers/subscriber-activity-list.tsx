@@ -115,7 +115,11 @@ export const SubscriberActivityList = ({
 							onActivitySelect(activity._id);
 						}}
 					>
-						<div className={cn("flex max-w-96 items-center gap-2 px-3 py-2", { "opacity-50": !activity.template })}>
+						<div
+							className={cn("flex max-w-96 items-center gap-2 px-3 py-2", {
+								"opacity-50": !activity.template,
+							})}
+						>
 							{activity.template?.origin === ResourceOriginEnum.EXTERNAL ? (
 								<FaCode className="size-3.5 min-w-3.5" />
 							) : (
@@ -130,7 +134,11 @@ export const SubscriberActivityList = ({
 								</TruncatedText>
 							</div>
 						</div>
-						<div className={cn("ml-auto flex items-center px-3 py-2", { "opacity-50": !activity.template })}>
+						<div
+							className={cn("ml-auto flex items-center px-3 py-2", {
+								"opacity-50": !activity.template,
+							})}
+						>
 							<Tooltip>
 								<TooltipTrigger>
 									<StatusBadge variant="light" status={variant}>
@@ -149,7 +157,11 @@ export const SubscriberActivityList = ({
 								</TooltipContent>
 							</Tooltip>
 						</div>
-						<div className={cn("flex w-40 items-center px-3 py-2", { "opacity-50": !activity.template })}>
+						<div
+							className={cn("flex w-40 items-center px-3 py-2", {
+								"opacity-50": !activity.template,
+							})}
+						>
 							<TimeDisplayHoverCard
 								date={new Date(activity.createdAt)}
 								className="text-label-xs text-text-soft flex w-full justify-end"

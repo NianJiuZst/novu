@@ -21,7 +21,6 @@ async function dropDatabase() {
     const conn = await getConnection();
     await conn.db.dropDatabase();
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('Error dropping the database:', error);
   }
 }

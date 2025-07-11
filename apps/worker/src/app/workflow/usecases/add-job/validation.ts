@@ -94,8 +94,6 @@ export const validateDigest = (job: JobEntity): void => {
     }
 
     validateAmountAndUnit(job.digest);
-
-    // eslint-disable-next-line default-case
     switch (job.digest.unit) {
       case DigestUnitEnum.DAYS:
       case DigestUnitEnum.WEEKS:

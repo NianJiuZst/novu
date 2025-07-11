@@ -38,9 +38,7 @@ export default function InvitationPage() {
         await acceptInvite(invitationToken);
         navigate(ROUTES.WORKFLOWS);
       }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [acceptInvite, invitationToken, isLoggedInAsInvitedUser]);
+    })();  }, [acceptInvite, invitationToken, isLoggedInAsInvitedUser]);
 
   useEffect(() => {
     return () => {

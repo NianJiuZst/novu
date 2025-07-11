@@ -154,7 +154,6 @@ export class CommunityAuthService implements IAuthService {
 
       const dbUser = await this.userRepository.findById(user._id);
       if (!dbUser) throw new BadRequestException('User not found');
-      // eslint-disable-next-line no-param-reassign
       user = dbUser;
     }
 

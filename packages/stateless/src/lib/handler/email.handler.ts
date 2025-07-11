@@ -19,8 +19,6 @@ export class EmailHandler {
     const attachments = data.$attachments?.filter((item) =>
       item.channels?.length ? item.channels?.includes(ChannelTypeEnum.EMAIL) : true
     );
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const branding: any = data?.$branding || {};
 
     const templatePayload = {

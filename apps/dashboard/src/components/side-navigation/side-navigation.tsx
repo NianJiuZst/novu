@@ -135,14 +135,20 @@ export const SideNavigation = () => {
 					<div className="flex flex-col gap-4">
 						<NavigationGroup>
 							<Protect permission={PermissionsEnum.WORKFLOW_READ}>
-								<NavigationLink to={buildRoute(ROUTES.WORKFLOWS, { environmentSlug: currentEnvironment?.slug ?? "" })}>
+								<NavigationLink
+									to={buildRoute(ROUTES.WORKFLOWS, {
+										environmentSlug: currentEnvironment?.slug ?? "",
+									})}
+								>
 									<RiRouteFill className="size-4" />
 									<span>Workflows</span>
 								</NavigationLink>
 							</Protect>
 							<Protect permission={PermissionsEnum.SUBSCRIBER_READ}>
 								<NavigationLink
-									to={buildRoute(ROUTES.SUBSCRIBERS, { environmentSlug: currentEnvironment?.slug ?? "" })}
+									to={buildRoute(ROUTES.SUBSCRIBERS, {
+										environmentSlug: currentEnvironment?.slug ?? "",
+									})}
 								>
 									<RiGroup2Line className="size-4" />
 									<span>Subscribers</span>
@@ -150,7 +156,11 @@ export const SideNavigation = () => {
 							</Protect>
 							{isTopicsPageActive && (
 								<Protect permission={PermissionsEnum.TOPIC_READ}>
-									<NavigationLink to={buildRoute(ROUTES.TOPICS, { environmentSlug: currentEnvironment?.slug ?? "" })}>
+									<NavigationLink
+										to={buildRoute(ROUTES.TOPICS, {
+											environmentSlug: currentEnvironment?.slug ?? "",
+										})}
+									>
 										<RiDiscussLine className="size-4" />
 										<span>Topics</span>
 									</NavigationLink>
@@ -162,7 +172,9 @@ export const SideNavigation = () => {
 								{isEmailLayoutsPageActive && (
 									<Protect permission={PermissionsEnum.LAYOUT_READ}>
 										<NavigationLink
-											to={buildRoute(ROUTES.LAYOUTS, { environmentSlug: currentEnvironment?.slug ?? "" })}
+											to={buildRoute(ROUTES.LAYOUTS, {
+												environmentSlug: currentEnvironment?.slug ?? "",
+											})}
 										>
 											<RiLayout5Line className="size-4" />
 											<span>Email Layouts</span>
@@ -171,7 +183,9 @@ export const SideNavigation = () => {
 								)}
 								{isTranslationEnabled && (
 									<NavigationLink
-										to={buildRoute(ROUTES.TRANSLATIONS, { environmentSlug: currentEnvironment?.slug ?? "" })}
+										to={buildRoute(ROUTES.TRANSLATIONS, {
+											environmentSlug: currentEnvironment?.slug ?? "",
+										})}
 									>
 										<RiTranslate2 className="size-4" />
 										<span>Translations</span>
@@ -203,7 +217,11 @@ export const SideNavigation = () => {
 						>
 							<NavigationGroup label="Developer">
 								<Protect permission={PermissionsEnum.API_KEY_READ}>
-									<NavigationLink to={buildRoute(ROUTES.API_KEYS, { environmentSlug: currentEnvironment?.slug ?? "" })}>
+									<NavigationLink
+										to={buildRoute(ROUTES.API_KEYS, {
+											environmentSlug: currentEnvironment?.slug ?? "",
+										})}
+									>
 										<RiKey2Line className="size-4" />
 										<span>API Keys</span>
 									</NavigationLink>
@@ -216,7 +234,9 @@ export const SideNavigation = () => {
 										}
 									>
 										<NavigationLink
-											to={buildRoute(ROUTES.WEBHOOKS, { environmentSlug: currentEnvironment?.slug ?? "" })}
+											to={buildRoute(ROUTES.WEBHOOKS, {
+												environmentSlug: currentEnvironment?.slug ?? "",
+											})}
 										>
 											<RiSignalTowerLine className="size-4" />
 											<span className="flex items-center gap-2">Webhooks</span>
@@ -224,14 +244,18 @@ export const SideNavigation = () => {
 									</Protect>
 								)}
 								<NavigationLink
-									to={buildRoute(ROUTES.ENVIRONMENTS, { environmentSlug: currentEnvironment?.slug ?? "" })}
+									to={buildRoute(ROUTES.ENVIRONMENTS, {
+										environmentSlug: currentEnvironment?.slug ?? "",
+									})}
 								>
 									<RiDatabase2Line className="size-4" />
 									<span>Environments</span>
 								</NavigationLink>
 								<Protect permission={PermissionsEnum.INTEGRATION_READ}>
 									<NavigationLink
-										to={buildRoute(ROUTES.INTEGRATIONS, { environmentSlug: currentEnvironment?.slug ?? "" })}
+										to={buildRoute(ROUTES.INTEGRATIONS, {
+											environmentSlug: currentEnvironment?.slug ?? "",
+										})}
 									>
 										<RiStore3Line className="size-4" />
 										<span>Integration Store</span>

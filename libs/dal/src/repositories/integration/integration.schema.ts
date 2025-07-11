@@ -108,7 +108,11 @@ integrationSchema.index({
   _environmentId: 1,
 });
 
-integrationSchema.plugin(mongooseDelete, { deletedAt: true, deletedBy: true, overrideMethods: 'all' });
+integrationSchema.plugin(mongooseDelete, {
+  deletedAt: true,
+  deletedBy: true,
+  overrideMethods: 'all',
+});
 
 export const Integration =
   (mongoose.models.Integration as mongoose.Model<IntegrationDBModel>) ||

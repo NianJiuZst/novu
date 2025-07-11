@@ -9,15 +9,11 @@ export enum TemplateTypeEnum {
 
 export type TemplateType = `${TemplateTypeEnum}`;
 export type TemplateMode = 'js' | 'ts';
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface GetTemplateFileArgs {
   template: TemplateType;
   mode: TemplateMode;
   file: string;
 }
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface InstallTemplateArgs {
   appName: string;
   root: string;

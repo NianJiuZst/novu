@@ -6,7 +6,6 @@ import type { JobStatusEnum } from './status.enum';
 export interface IJob {
   _id: string;
   identifier: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any;
 
   overrides: Record<string, Record<string, unknown>>;
@@ -23,13 +22,11 @@ export interface IJob {
   delay?: number;
   _parentId?: string;
   status: JobStatusEnum;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error?: any;
   createdAt: string;
   updatedAt: string;
   _templateId: string;
   digest?: IWorkflowStepMetadata & {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     events?: any[];
   };
   type?: StepTypeEnum;

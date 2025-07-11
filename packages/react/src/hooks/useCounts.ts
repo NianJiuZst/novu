@@ -34,7 +34,6 @@ export const useCounts = (props: UseCountsProps): UseCountsResult => {
     const existingCounts = counts ?? filters.map((filter) => ({ count: 0, filter }));
     let countFiltersToFetch: NotificationFilter[] = [];
     if (notification) {
-      // eslint-disable-next-line no-plusplus
       for (let i = 0; i < existingCounts.length; i++) {
         const filter = filters[i];
         if (areTagsEqual(filter.tags, notification.tags)) {
@@ -65,8 +64,6 @@ export const useCounts = (props: UseCountsProps): UseCountsResult => {
     setCounts((oldCounts) => {
       const newCounts: Count[] = [];
       const countsReceived = data.counts;
-
-      // eslint-disable-next-line no-plusplus
       for (let i = 0; i < existingCounts.length; i++) {
         const countReceived = countsReceived.find((c) => areTagsEqual(c.filter.tags, existingCounts[i].filter.tags));
         const count = countReceived || (oldCounts && oldCounts[i]);

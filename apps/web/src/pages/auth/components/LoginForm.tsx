@@ -28,9 +28,7 @@ export interface LocationState {
 export function LoginForm({ email, invitationToken }: LoginFormProps) {
   const segment = useSegment();
 
-  const { setRedirectURL } = useRedirectURL();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => setRedirectURL(), []);
+  const { setRedirectURL } = useRedirectURL();  useEffect(() => setRedirectURL(), []);
 
   const { login, currentUser, currentOrganization } = useAuth();
   const [params] = useSearchParams();
@@ -96,9 +94,7 @@ export function LoginForm({ email, invitationToken }: LoginFormProps) {
   };
 
   useEffect(() => {
-    handleLoginInUseEffect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [login, currentUser]);
+    handleLoginInUseEffect();  }, [login, currentUser]);
 
   const {
     register,

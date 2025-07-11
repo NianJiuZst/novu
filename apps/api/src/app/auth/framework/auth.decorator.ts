@@ -6,7 +6,6 @@ import { CommunityUserAuthGuard } from './community.user.auth.guard';
 
 export function RequireAuthentication() {
   if (isClerkEnabled()) {
-    // eslint-disable-next-line global-require
     const { RequireAuthentication: EERequireAuthentication } = require('@novu/ee-auth');
 
     return EERequireAuthentication();

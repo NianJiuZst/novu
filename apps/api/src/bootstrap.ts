@@ -6,7 +6,6 @@ import {
   BullMqService,
   FeatureFlagsService,
   getErrorInterceptor,
-  // eslint-disable-next-line no-restricted-imports
   Logger,
   PinoLogger,
   RequestLogRepository,
@@ -50,7 +49,6 @@ export async function bootstrap(
   if (process.env.NOVU_ENTERPRISE === 'true' || process.env.CI_EE_TEST === 'true') {
     rawBodyBuffer = (req, res, buffer, encoding): void => {
       if (buffer && buffer.length) {
-        // eslint-disable-next-line no-param-reassign
         req.rawBody = Buffer.from(buffer);
       }
     };

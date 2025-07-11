@@ -136,13 +136,22 @@ export class QueryValidatorService {
       const isBetween =
         key === JsonComparisonOperatorEnum.LESS_THAN_OR_EQUAL && Array.isArray(value) && value.length === 3;
       if (isBetween) {
-        this.validateBetweenOperation({ value: value as [unknown, unknown, unknown], issues, path });
+        this.validateBetweenOperation({
+          value: value as [unknown, unknown, unknown],
+          issues,
+          path,
+        });
         continue;
       }
 
       // handle the rest of the comparison operators
       if (COMPARISON_OPERATORS.includes(key as JsonComparisonOperatorEnum)) {
-        this.validateComparisonOperation({ operator: key as JsonComparisonOperatorEnum, value, issues, path });
+        this.validateComparisonOperation({
+          operator: key as JsonComparisonOperatorEnum,
+          value,
+          issues,
+          path,
+        });
         continue;
       }
 

@@ -94,7 +94,6 @@ export function Plan() {
 				plan: data?.apiServiceLevel,
 			});
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	useEffect(() => {
@@ -103,7 +102,6 @@ export function Plan() {
 			billingInterval: selectedBillingInterval,
 			isTrialActive: data?.trial?.isActive,
 		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const handleBillingIntervalChange = (interval: StripeBillingIntervalEnum) => {
@@ -152,11 +150,16 @@ const buildFeatureArray: (columns: ApiServiceLevelEnum[], featureFlags: FeatureF
 		},
 		{
 			label: "Monthly events",
-			values: buildTableRowRecord({ featureName: FeatureNameEnum.PLATFORM_MONTHLY_EVENTS_INCLUDED, prefix: "Up to " }),
+			values: buildTableRowRecord({
+				featureName: FeatureNameEnum.PLATFORM_MONTHLY_EVENTS_INCLUDED,
+				prefix: "Up to ",
+			}),
 		},
 		{
 			label: "Additional Events",
-			values: buildTableRowRecord({ featureName: FeatureNameEnum.PLATFORM_COST_PER_ADDITIONAL_1K_EVENTS }),
+			values: buildTableRowRecord({
+				featureName: FeatureNameEnum.PLATFORM_COST_PER_ADDITIONAL_1K_EVENTS,
+			}),
 		},
 		{
 			label: "Email, InApp, SMS, Chat, Push Channels",
@@ -171,7 +174,10 @@ const buildFeatureArray: (columns: ApiServiceLevelEnum[], featureFlags: FeatureF
 		},
 		{
 			label: "Custom Environments",
-			values: buildTableRowRecord({ featureName: FeatureNameEnum.CUSTOM_ENVIRONMENTS_BOOLEAN, isBoolean: true }),
+			values: buildTableRowRecord({
+				featureName: FeatureNameEnum.CUSTOM_ENVIRONMENTS_BOOLEAN,
+				isBoolean: true,
+			}),
 		},
 		{
 			label: "Total workflows",
@@ -179,15 +185,21 @@ const buildFeatureArray: (columns: ApiServiceLevelEnum[], featureFlags: FeatureF
 		},
 		{
 			label: "Provider integrations",
-			values: buildTableRowRecord({ featureName: FeatureNameEnum.PLATFORM_PROVIDER_INTEGRATIONS }),
+			values: buildTableRowRecord({
+				featureName: FeatureNameEnum.PLATFORM_PROVIDER_INTEGRATIONS,
+			}),
 		},
 		{
 			label: "Activity Feed retention",
-			values: buildTableRowRecord({ featureName: FeatureNameEnum.PLATFORM_ACTIVITY_FEED_RETENTION }),
+			values: buildTableRowRecord({
+				featureName: FeatureNameEnum.PLATFORM_ACTIVITY_FEED_RETENTION,
+			}),
 		},
 		{
 			label: "Max Digest Window",
-			values: buildTableRowRecord({ featureName: FeatureNameEnum.PLATFORM_MAX_DIGEST_WINDOW_TIME }),
+			values: buildTableRowRecord({
+				featureName: FeatureNameEnum.PLATFORM_MAX_DIGEST_WINDOW_TIME,
+			}),
 		},
 		{
 			label: "Max Delay Duration",
@@ -195,7 +207,10 @@ const buildFeatureArray: (columns: ApiServiceLevelEnum[], featureFlags: FeatureF
 		},
 		{
 			label: "Step controls",
-			values: buildTableRowRecord({ featureName: FeatureNameEnum.PLATFORM_STEP_CONTROLS_BOOLEAN, isBoolean: true }),
+			values: buildTableRowRecord({
+				featureName: FeatureNameEnum.PLATFORM_STEP_CONTROLS_BOOLEAN,
+				isBoolean: true,
+			}),
 		},
 		{
 			label: "Inbox",
@@ -204,7 +219,10 @@ const buildFeatureArray: (columns: ApiServiceLevelEnum[], featureFlags: FeatureF
 		},
 		{
 			label: "Inbox component",
-			values: buildTableRowRecord({ featureName: FeatureNameEnum.INBOX_BELL_COMPONENT_BOOLEAN, isBoolean: true }),
+			values: buildTableRowRecord({
+				featureName: FeatureNameEnum.INBOX_BELL_COMPONENT_BOOLEAN,
+				isBoolean: true,
+			}),
 		},
 		{
 			label: "User preferences component",
@@ -244,7 +262,10 @@ const buildFeatureArray: (columns: ApiServiceLevelEnum[], featureFlags: FeatureF
 		},
 		{
 			label: "GDPR compliance",
-			values: buildTableRowRecord({ featureName: FeatureNameEnum.COMPLIANCE_GDPR_BOOLEAN, isBoolean: true }),
+			values: buildTableRowRecord({
+				featureName: FeatureNameEnum.COMPLIANCE_GDPR_BOOLEAN,
+				isBoolean: true,
+			}),
 		},
 		{
 			label: "SAML SSO and Enterprise SSO providers",
@@ -281,11 +302,15 @@ const buildFeatureArray: (columns: ApiServiceLevelEnum[], featureFlags: FeatureF
 		},
 		{
 			label: "DPA",
-			values: buildTableRowRecord({ featureName: FeatureNameEnum.COMPLIANCE_DATA_PROCESSING_AGREEMENTS }),
+			values: buildTableRowRecord({
+				featureName: FeatureNameEnum.COMPLIANCE_DATA_PROCESSING_AGREEMENTS,
+			}),
 		},
 		{
 			label: "Security review",
-			values: buildTableRowRecord({ featureName: FeatureNameEnum.COMPLIANCE_CUSTOM_SECURITY_REVIEWS }),
+			values: buildTableRowRecord({
+				featureName: FeatureNameEnum.COMPLIANCE_CUSTOM_SECURITY_REVIEWS,
+			}),
 		},
 	];
 

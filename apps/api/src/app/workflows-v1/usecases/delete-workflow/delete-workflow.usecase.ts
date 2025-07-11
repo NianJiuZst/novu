@@ -115,7 +115,6 @@ export class DeleteWorkflowUseCase {
     }
 
     try {
-      // eslint-disable-next-line global-require
       const deleteTranslationGroup = this.moduleRef.get(require('@novu/ee-translation')?.DeleteTranslationGroup, {
         strict: false,
       });

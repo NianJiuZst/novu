@@ -16,7 +16,9 @@ export function useSetPrimaryIntegration() {
 			return setAsPrimaryIntegration(integrationId, currentEnvironment!);
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: [QueryKeys.fetchIntegrations, currentEnvironment?._id] });
+			queryClient.invalidateQueries({
+				queryKey: [QueryKeys.fetchIntegrations, currentEnvironment?._id],
+			});
 		},
 	});
 }

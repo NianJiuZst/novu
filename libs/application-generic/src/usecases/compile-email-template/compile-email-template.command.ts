@@ -12,7 +12,7 @@ export class CompileEmailTemplateCommand extends EnvironmentWithUserCommand {
   contentType: MessageTemplateContentType;
 
   @IsDefined()
-  payload: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  payload: any;
 
   @IsString()
   subject: string;

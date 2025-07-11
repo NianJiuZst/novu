@@ -85,9 +85,7 @@ export const EmailPreview = ({ showVariables = true, view }: { view: string; sho
   useEffect(() => {
     if (bridge && !showVariables) {
       mutateAsync(JSON.parse(processedVariables));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [processedVariables, bridge]);
+    }  }, [processedVariables, bridge]);
 
   useEffect(() => {
     setPayloadValue(processedVariables);

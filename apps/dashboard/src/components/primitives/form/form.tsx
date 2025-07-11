@@ -115,7 +115,10 @@ const FormControl = React.forwardRef<React.ElementRef<typeof Slot>, React.Compon
 );
 FormControl.displayName = "FormControl";
 
-type FormMessagePureProps = React.HTMLAttributes<HTMLParagraphElement> & { hasError?: boolean; icon?: IconType };
+type FormMessagePureProps = React.HTMLAttributes<HTMLParagraphElement> & {
+	hasError?: boolean;
+	icon?: IconType;
+};
 
 const FormMessagePure = React.forwardRef<HTMLParagraphElement, FormMessagePureProps>(
 	({ className, children, hasError = false, icon, ...props }, _ref) => {

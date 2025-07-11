@@ -55,7 +55,11 @@ describe('Get invite object - /invites/:inviteToken (GET) #novu-v0-os', async ()
       const member = members.find((i) => i.memberStatus === MemberStatusEnum.INVITED);
 
       await memberRepository.update(
-        { _organizationId: session.organization._id, _id: member._id, 'invite.token': member.invite.token },
+        {
+          _organizationId: session.organization._id,
+          _id: member._id,
+          'invite.token': member.invite.token,
+        },
         {
           memberStatus: MemberStatusEnum.ACTIVE,
         }

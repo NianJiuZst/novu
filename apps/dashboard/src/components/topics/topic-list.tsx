@@ -26,7 +26,11 @@ type TopicListProps = HTMLAttributes<HTMLDivElement>;
 
 // Wrapper similar to SubscriberListWrapper
 const TopicListWrapper = (
-	props: TopicListFiltersProps & { hasData?: boolean; areFiltersApplied?: boolean; showEmptyState?: boolean }
+	props: TopicListFiltersProps & {
+		hasData?: boolean;
+		areFiltersApplied?: boolean;
+		showEmptyState?: boolean;
+	}
 ) => {
 	const {
 		className,

@@ -67,7 +67,11 @@ workflowOverrideSchema.virtual('tenant', {
   justOne: true,
 });
 
-workflowOverrideSchema.plugin(mongooseDelete, { deletedAt: true, deletedBy: true, overrideMethods: 'all' });
+workflowOverrideSchema.plugin(mongooseDelete, {
+  deletedAt: true,
+  deletedBy: true,
+  overrideMethods: 'all',
+});
 
 workflowOverrideSchema.index(
   {

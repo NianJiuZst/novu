@@ -12,7 +12,10 @@ import { MarkManyNotificationsAs } from '../mark-many-notifications-as/mark-many
 import type { MarkNotificationAsCommand } from './mark-notification-as.command';
 import { MarkNotificationAs } from './mark-notification-as.usecase';
 
-const mockSubscriber: any = { _id: '6447aff5d89122e250412c79', subscriberId: '6447aff5d89122e250412c79' };
+const mockSubscriber: any = {
+  _id: '6447aff5d89122e250412c79',
+  subscriberId: '6447aff5d89122e250412c79',
+};
 const mockMessage: any = {
   _id: '666c0dfa0b55d0f06f4aaa6c',
   content: '',

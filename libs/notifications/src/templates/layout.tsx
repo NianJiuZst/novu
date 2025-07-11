@@ -1,9 +1,10 @@
 import { Body, Container, Head, Html, Img, Preview, Tailwind } from '@react-email/components';
-import type React from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 
 interface IBaseEmailLayoutProps {
   previewText: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function EmailLayout({ previewText, children }: IBaseEmailLayoutProps) {

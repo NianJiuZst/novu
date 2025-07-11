@@ -93,7 +93,11 @@ export class InboundEmailParse {
   }
 
   private async getEntities(transactionId: string, environmentId: string) {
-    const partial: Partial<JobEntity> = { transactionId, _environmentId: environmentId, type: StepTypeEnum.EMAIL };
+    const partial: Partial<JobEntity> = {
+      transactionId,
+      _environmentId: environmentId,
+      type: StepTypeEnum.EMAIL,
+    };
 
     const { template, notification, subscriber, environment, ...job } = await this.jobRepository.findOnePopulate({
       query: partial as JobEntity,

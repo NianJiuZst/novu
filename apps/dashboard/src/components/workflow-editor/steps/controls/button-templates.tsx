@@ -16,7 +16,9 @@ export const AddButton = (props: React.ButtonHTMLAttributes<HTMLButtonElement>) 
 };
 
 export const RemoveButton = (
-	props: React.ButtonHTMLAttributes<HTMLButtonElement> & { registry?: Registry<any, RJSFSchema, any> }
+	props: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+		registry?: Registry<any, RJSFSchema, any>;
+	}
 ) => {
 	return (
 		<CompactButton

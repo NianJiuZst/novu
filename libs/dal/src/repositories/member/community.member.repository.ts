@@ -54,8 +54,6 @@ export class CommunityMemberRepository
       'firstName lastName email _id profilePicture createdAt'
     );
     if (!members) return [];
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const membersEntity: any = this.mapEntities(members);
 
     return [
@@ -96,7 +94,6 @@ export class CommunityMemberRepository
         .map((member) => {
           return {
             ...member,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             _userId: member._userId ? (member._userId as any)._id : null,
             user: member._userId,
           };

@@ -28,7 +28,10 @@ const formSchema = z.object({ bridgeUrl: z.string().url() });
 
 export const EditBridgeUrlButton = () => {
 	const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-	const form = useForm<z.infer<typeof formSchema>>({ mode: "onSubmit", resolver: zodResolver(formSchema) });
+	const form = useForm<z.infer<typeof formSchema>>({
+		mode: "onSubmit",
+		resolver: zodResolver(formSchema),
+	});
 	const {
 		control,
 		handleSubmit,

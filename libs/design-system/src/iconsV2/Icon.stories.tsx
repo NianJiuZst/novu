@@ -3,9 +3,7 @@ import type { Meta, StoryFn } from '@storybook/react';
 import React, { useState } from 'react';
 import { Input } from '../input/Input';
 import { DEFAULT_ICON_SIZE } from './Icon.const';
-import type { IconSize, IIconProps } from './Icon.types';
-// eslint-disable-next-line import/no-namespace
-import * as allIcons from './icon-registry';
+import type { IconSize, IIconProps } from './Icon.types';import * as allIcons from './icon-registry';
 
 export default {
   title: 'Icons/IconsV2',

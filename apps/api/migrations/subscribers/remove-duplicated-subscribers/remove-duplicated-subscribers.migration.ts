@@ -5,7 +5,6 @@ import type { IChannelSettings, ISubscriber } from '@novu/shared';
 import { AppModule } from '../../../src/app.module';
 
 export async function removeDuplicatedSubscribers() {
-  // eslint-disable-next-line no-console
   console.log('start migration - remove duplicated subscribers');
 
   const app = await NestFactory.create(AppModule, {
@@ -50,8 +49,6 @@ export async function removeDuplicatedSubscribers() {
     const sortedSubscribers = subscribers.sort((a, b) => a.updatedAt - b.updatedAt);
     const mergedSubscriber = mergeSubscribers(sortedSubscribers);
     const subscribersToRemove = sortedSubscribers.filter((subscriber) => subscriber._id !== mergedSubscriber._id);
-
-    // eslint-disable-next-line no-console
     console.log(
       'Merged subscriber:',
       mergedSubscriber._id.toString(),
@@ -72,8 +69,6 @@ export async function removeDuplicatedSubscribers() {
           $set: mergedSubscriber,
         }
       );
-
-      // eslint-disable-next-line no-console
       console.log(
         'Remaining subscriber updated with merged data for subscriberId:',
         subscriberId,
@@ -83,7 +78,6 @@ export async function removeDuplicatedSubscribers() {
         environmentId.toString()
       );
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('Error updating remaining subscribers:', err);
     }
 
@@ -94,7 +88,6 @@ export async function removeDuplicatedSubscribers() {
         subscriberId: subscriberId,
         _environmentId: environmentId,
       });
-      // eslint-disable-next-line no-console
       console.log(
         'Duplicates deleted for subscriberId:',
         subscriberId,
@@ -104,12 +97,9 @@ export async function removeDuplicatedSubscribers() {
         subscribersToRemove.map((subscriber) => subscriber._id).join()
       );
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('Error deleting duplicates:', err);
     }
   }
-
-  // eslint-disable-next-line no-console
   console.log('end migration - remove duplicated subscribers');
 
   app.close();

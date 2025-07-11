@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-
 import fs from 'node:fs';
 import { BullMqService } from '@novu/application-generic';
 // biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
@@ -314,7 +312,6 @@ class Mailin extends events.EventEmitter {
          * Use the first detected language.
          * potentialLanguages = [['english', 0.5969], ['hungarian', 0.40563]]
          */
-        // eslint-disable-next-line prefer-destructuring
         language = potentialLanguages[0][0];
       } else {
         logger.info(`${connection.id} Unable to detect language for the current message.`, LOG_CONTEXT);

@@ -64,7 +64,6 @@ export function usePromotionalBanner(props: UsePromotionalBannerProps): UsePromo
 			toast.dismiss(toastId.current);
 			toastId.current = undefined;
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const show = useCallback(() => {
@@ -94,7 +93,6 @@ export function usePromotionalBanner(props: UsePromotionalBannerProps): UsePromo
 		);
 
 		toastId.current = id;
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [props]);
 
 	return { show, hide };

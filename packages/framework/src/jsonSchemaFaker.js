@@ -1076,7 +1076,10 @@ const JSONSchemaFaker = (() => {
     if (path[path.length - 1] !== 'properties') {
       if (option_default('useExamplesValue') && Array.isArray(schema.examples)) {
         const fixedExamples = schema.examples.concat('default' in schema ? [schema.default] : []);
-        return { value: utils_default.typecast(null, schema, () => random_default.pick(fixedExamples)), context };
+        return {
+          value: utils_default.typecast(null, schema, () => random_default.pick(fixedExamples)),
+          context,
+        };
       }
       if (option_default('useExamplesValue') && typeof schema.example !== 'undefined') {
         return { value: utils_default.typecast(null, schema, () => schema.example), context };
@@ -1097,7 +1100,10 @@ const JSONSchemaFaker = (() => {
       schema = utils_default.notValue(schema.not, utils_default.omitProps(schema, ['not']));
       if (schema.type && schema.type === 'object') {
         const { value, context: innerContext } = traverse(schema, path.concat(['not']), resolve2, rootSchema);
-        return { value: utils_default.clean(value, schema, false), context: { ...context, items: innerContext } };
+        return {
+          value: utils_default.clean(value, schema, false),
+          context: { ...context, items: innerContext },
+        };
       }
     }
     if (typeof schema.thunk === 'function') {
@@ -1128,10 +1134,16 @@ const JSONSchemaFaker = (() => {
       }
     }
     if (typeof schema.pattern === 'string') {
-      return { value: utils_default.typecast('string', schema, () => random_default.randexp(schema.pattern)), context };
+      return {
+        value: utils_default.typecast('string', schema, () => random_default.randexp(schema.pattern)),
+        context,
+      };
     }
     if (Array.isArray(schema.enum)) {
-      return { value: utils_default.typecast(null, schema, () => random_default.pick(schema.enum)), context };
+      return {
+        value: utils_default.typecast(null, schema, () => random_default.pick(schema.enum)),
+        context,
+      };
     }
     if (typeof type === 'string') {
       if (!types_default[type]) {

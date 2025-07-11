@@ -139,7 +139,6 @@ export function PayloadSchemaDrawer({
 		if (workflow?.payloadSchema && workflow.payloadSchema !== drawerSchema) {
 			setDrawerSchema(workflow.payloadSchema);
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [workflow?.payloadSchema]);
 
 	// Store original schema when drawer opens
@@ -251,7 +250,9 @@ export function PayloadSchemaDrawer({
 												<Switch
 													checked={payloadSchemaForm.watch("validatePayload")}
 													onCheckedChange={(value) => {
-														payloadSchemaForm.setValue("validatePayload", value, { shouldDirty: true });
+														payloadSchemaForm.setValue("validatePayload", value, {
+															shouldDirty: true,
+														});
 														setValidatePayload(value);
 													}}
 													disabled={isLoadingWorkflow}

@@ -227,9 +227,7 @@ export const HubspotForm = <TProperties extends Record<string, string>>(props: H
       });
     } else {
       createForm();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props]);
+    }  }, [props]);
 
   if (!HUBSPOT_PORTAL_ID) {
     return null;

@@ -107,7 +107,10 @@ export async function ensurePackageJson(packageManager: IPackageManager): Promis
           return false;
         }
         logger.gray(`  $ ${packageManager.name} ${packageManager.init}`);
-        execSync(`${packageManager.name} ${packageManager.init}`, { stdio: 'inherit', timeout: 10000 });
+        execSync(`${packageManager.name} ${packageManager.init}`, {
+          stdio: 'inherit',
+          timeout: 10000,
+        });
         logger.success('  ✓ package.json initialized.');
       } catch (error) {
         logger.error('  ✗ Failed to initialize package.json:');

@@ -153,7 +153,6 @@ export class WidgetsController {
     const feedsQuery = this.toArray(feedId);
 
     if (seen === undefined) {
-      // eslint-disable-next-line no-param-reassign
       seen = false;
     }
 
@@ -180,7 +179,6 @@ export class WidgetsController {
     const feedsQuery = this.toArray(feedId);
 
     if (read === undefined) {
-      // eslint-disable-next-line no-param-reassign
       read = false;
     }
 
@@ -206,7 +204,6 @@ export class WidgetsController {
     const feedsQuery = this.toArray(query.feedIdentifier);
 
     if (query.seen === undefined && query.read === undefined) {
-      // eslint-disable-next-line no-param-reassign
       query.seen = false;
     }
 
@@ -383,7 +380,7 @@ export class WidgetsController {
     @SubscriberSession() subscriberSession: SubscriberEntity,
     @Param('messageId') messageId: string,
     @Param('type') type: ButtonTypeEnum,
-    @Body() body: { payload: any; status: MessageActionStatusEnum } // eslint-disable-line @typescript-eslint/no-explicit-any
+    @Body() body: { payload: any; status: MessageActionStatusEnum }
   ): Promise<MessageEntity> {
     return await this.updateMessageActionsUsecase.execute(
       UpdateMessageActionsCommand.create({

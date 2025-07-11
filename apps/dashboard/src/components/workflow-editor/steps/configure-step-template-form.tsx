@@ -64,7 +64,6 @@ export const ConfigureStepTemplateForm = (props: ConfigureStepTemplateFormProps)
 	const saveFormRef = useDataRef(saveForm);
 	useEffect(() => {
 		return () => {
-			// eslint-disable-next-line react-hooks/exhaustive-deps
 			saveFormRef.current();
 		};
 	}, [saveFormRef]);

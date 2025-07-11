@@ -90,9 +90,7 @@ const ContentRender = ({ payload, readonly }: { payload: string; readonly: boole
       content,
       payload,
       cta,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [compiledContent, payload, cta]);
+    });  }, [compiledContent, payload, cta]);
 
   if (isLoading) {
     return (

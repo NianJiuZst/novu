@@ -127,7 +127,10 @@ export class Digest extends SendMessageType {
   }
 
   private async getCurrentJob(command: SendMessageCommand) {
-    const currentJob = await this.jobRepository.findOne({ _environmentId: command.environmentId, _id: command.jobId });
+    const currentJob = await this.jobRepository.findOne({
+      _environmentId: command.environmentId,
+      _id: command.jobId,
+    });
 
     if (!currentJob) {
       const message = `Digest job ${command.jobId} is not found`;

@@ -23,7 +23,12 @@ export function OverviewItem({
 	value,
 }: OverviewItemProps) {
 	const childrenComponent = children || (
-		<span className={cn("text-foreground-600 text-xs", { "font-mono": isMonospace, "line-through": isDeleted })}>
+		<span
+			className={cn("text-foreground-600 text-xs", {
+				"font-mono": isMonospace,
+				"line-through": isDeleted,
+			})}
+		>
 			{value}
 		</span>
 	);

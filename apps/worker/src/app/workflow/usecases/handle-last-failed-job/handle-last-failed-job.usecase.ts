@@ -33,7 +33,10 @@ export class HandleLastFailedJob {
   public async execute(command: HandleLastFailedJobCommand): Promise<void> {
     const { jobId, error } = command;
 
-    const job = await this.jobRepository.findOne({ _id: jobId, _environmentId: command.environmentId });
+    const job = await this.jobRepository.findOne({
+      _id: jobId,
+      _environmentId: command.environmentId,
+    });
     if (!job) {
       const message = `Job ${jobId} not found when handling the failure of the latest attempt for a backed off job`;
       Logger.error(message, new NotFoundError(message), LOG_CONTEXT);

@@ -13,7 +13,9 @@ enum RedirectTargetEnum {
 }
 
 class RedirectDto {
-  @ApiPropertyOptional({ description: 'URL for redirection. Must be a valid URL or start with / or {{ variable }}.' })
+  @ApiPropertyOptional({
+    description: 'URL for redirection. Must be a valid URL or start with / or {{ variable }}.',
+  })
   /*
    * Note: Cannot directly validate complex regex like schema's with class-validator decorators easily.
    * Basic IsUrl or IsString might be sufficient for DTO, relying on backend Zod validation.
@@ -56,7 +58,10 @@ export class InAppControlDto extends SkipControlDto {
   @IsOptional()
   body?: string;
 
-  @ApiPropertyOptional({ description: 'Subject/title of the in-app message. Required if body is empty.', minLength: 1 })
+  @ApiPropertyOptional({
+    description: 'Subject/title of the in-app message. Required if body is empty.',
+    minLength: 1,
+  })
   @IsString()
   @MinLength(1)
   @ValidateIf((obj) => !obj.body || obj.body.length === 0)

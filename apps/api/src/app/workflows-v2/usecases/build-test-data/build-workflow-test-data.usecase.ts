@@ -66,7 +66,11 @@ export class BuildWorkflowTestDataUseCase {
       }
     );
 
-    const allControlValuesFlat = controls.flatMap((item) => item.controls).flatMap((obj) => Object.values(obj));
+    // biome-ignore lint/complexity/useFlatMap: <explanation>
+    const allControlValuesFlat = controls
+      .map((item) => item.controls)
+      .flat()
+      .flatMap((obj) => Object.values(obj));
 
     const { payload } = await this.createVariablesObject.execute(
       CreateVariablesObjectCommand.create({

@@ -88,7 +88,12 @@ const request = async <T>(
 	}
 };
 
-type RequestOptions = { body?: unknown; environment?: IEnvironment; signal?: AbortSignal; headers?: HeadersInit };
+type RequestOptions = {
+	body?: unknown;
+	environment?: IEnvironment;
+	signal?: AbortSignal;
+	headers?: HeadersInit;
+};
 
 export const get = <T>(endpoint: string, { environment, signal, headers }: RequestOptions = {}) =>
 	request<T>(endpoint, { method: "GET", environment, signal, headers });

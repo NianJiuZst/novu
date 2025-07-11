@@ -9,7 +9,11 @@ enum MetadataEnum {
 
 describe('LimitPipe', () => {
   let pipe: LimitPipe;
-  const metadata = { data: MetadataEnum.DATA, type: MetadataEnum.TYPE as Paramtype, metatype: String };
+  const metadata = {
+    data: MetadataEnum.DATA,
+    type: MetadataEnum.TYPE as Paramtype,
+    metatype: String,
+  };
 
   beforeEach(() => {
     pipe = new LimitPipe(1, 1000);

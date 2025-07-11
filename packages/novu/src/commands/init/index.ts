@@ -59,8 +59,6 @@ export async function init(program: IInitCommandOptions, anonymousId?: string): 
         if (validation.valid) {
           return true;
         }
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return `Invalid project name: ${(validation as any).problems[0]}`;
       },
     });
@@ -87,8 +85,6 @@ export async function init(program: IInitCommandOptions, anonymousId?: string): 
   const validation = validateNpmName(projectName);
   if (!validation.valid) {
     console.error(`Could not create a project called ${red(`"${projectName}"`)} because of npm naming restrictions:`);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (validation as any).problems.forEach((problem: string) => console.error(`    ${red(bold('*'))} ${problem}`));
     process.exit(1);
   }
@@ -97,7 +93,6 @@ export async function init(program: IInitCommandOptions, anonymousId?: string): 
   let userId: string;
   // if no secret key is supplied set to empty string
   if (!program.secretKey) {
-    // eslint-disable-next-line no-param-reassign
     program.secretKey = '';
   } else {
     try {
@@ -130,7 +125,6 @@ export async function init(program: IInitCommandOptions, anonymousId?: string): 
       });
     } catch (error) {
       console.error(
-        // eslint-disable-next-line max-len
         `Failed to verify your secret key against ${program.apiUrl}. For EU instances use --api-url https://eu.api.novu.co or provide the correct secret key`
       );
 

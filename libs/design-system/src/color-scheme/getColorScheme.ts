@@ -22,8 +22,6 @@ export const getCurrentColorScheme = (): ColorScheme => {
   if (!htmlElem?.classList) {
     return getBrowserColorScheme();
   }
-
-  // eslint-disable-next-line no-nested-ternary
   return htmlElem.classList.contains('dark')
     ? 'dark'
     : htmlElem.classList.contains('light')

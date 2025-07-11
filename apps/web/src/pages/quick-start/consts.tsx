@@ -13,9 +13,7 @@ export const cloneDemoRepo = 'git clone https://github.com/novuhq/notification-c
 export const APPLICATION_IDENTIFIER = '<APPLICATION_IDENTIFIER>';
 export const API_KEY = '<API_KEY>';
 export const BACKEND_API_URL = '<BACKEND_API_URL>';
-export const BACKEND_SOCKET_URL = '<BACKEND_SOCKET_URL>';
-// eslint-disable-next-line max-len
-export const setupProject = `cd notification-center-demo && npm run setup:onboarding -- ${APPLICATION_IDENTIFIER} ${API_KEY} ${BACKEND_API_URL} ${BACKEND_SOCKET_URL}`;
+export const BACKEND_SOCKET_URL = '<BACKEND_SOCKET_URL>';export const setupProject = `cd notification-center-demo && npm run setup:onboarding -- ${APPLICATION_IDENTIFIER} ${API_KEY} ${BACKEND_API_URL} ${BACKEND_SOCKET_URL}`;
 export const npmRunCommand = 'npm run dev';
 export const frameworkSetupTitle = 'Choose your go-to framework';
 export const faqUrl = `https://docs.novu.co/notification-center/introduction${UTM_CAMPAIGN_QUERY_PARAM}`;

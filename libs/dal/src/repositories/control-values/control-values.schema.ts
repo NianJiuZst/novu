@@ -38,7 +38,11 @@ const controlValuesSchema = new Schema<ControlValuesModel>(
   schemaOptions
 );
 
-controlValuesSchema.plugin(mongooseDelete, { deletedAt: true, deletedBy: true, overrideMethods: 'all' });
+controlValuesSchema.plugin(mongooseDelete, {
+  deletedAt: true,
+  deletedBy: true,
+  overrideMethods: 'all',
+});
 
 export const ControlValues =
   (mongoose.models.ControlValues as mongoose.Model<ControlValuesModel>) ||

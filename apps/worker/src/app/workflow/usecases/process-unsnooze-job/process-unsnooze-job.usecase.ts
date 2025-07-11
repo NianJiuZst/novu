@@ -29,7 +29,10 @@ export class ProcessUnsnoozeJob {
   ) {}
 
   public async execute(command: ProcessUnsnoozeJobCommand) {
-    const job = await this.jobRepository.findOne({ _id: command.jobId, _environmentId: command.environmentId });
+    const job = await this.jobRepository.findOne({
+      _id: command.jobId,
+      _environmentId: command.environmentId,
+    });
 
     if (!job) {
       throw new NotFoundException(`Could not find a job with id '${command.jobId}'.`);

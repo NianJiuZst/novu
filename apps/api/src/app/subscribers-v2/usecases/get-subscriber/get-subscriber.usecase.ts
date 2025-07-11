@@ -31,6 +31,10 @@ export class GetSubscriber {
     _environmentId: string;
     _organizationId: string;
   }): Promise<SubscriberEntity | null> {
-    return await this.subscriberRepository.findOne({ _environmentId, subscriberId, _organizationId });
+    return await this.subscriberRepository.findOne({
+      _environmentId,
+      subscriberId,
+      _organizationId,
+    });
   }
 }

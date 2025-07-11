@@ -90,7 +90,7 @@ export class MessageEntity {
   errorText: string;
 
   @Exclude()
-  providerResponse: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  providerResponse: any;
 
   payload: Record<string, unknown>;
 

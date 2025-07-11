@@ -42,9 +42,7 @@ export const LocalStudioSidebarOrganizationDisplay: FC<LocalStudioSidebarOrganiz
             <Text variant={'secondary'}>{subtitle}</Text>
           </Stack>
         </Flex>
-      }
-      // eslint-disable-next-line max-len
-      description="A stateless version of the Novu Dashboard. It's connected to your local application and used for development and debugging purposes."
+      }      description="A stateless version of the Novu Dashboard. It's connected to your local application and used for development and debugging purposes."
     />
   );
 };

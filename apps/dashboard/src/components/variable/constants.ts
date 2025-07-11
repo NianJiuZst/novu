@@ -248,7 +248,14 @@ const FILTERS: Filters[] = [
 		hasParam: true,
 		description: "Join array elements with separator.",
 		example: '["🌟","✨","💫"] | join: " " → 🌟 ✨ 💫',
-		params: [{ label: "Separator", placeholder: 'Separator (e.g. ", ")', type: "string", defaultValue: ", " }],
+		params: [
+			{
+				label: "Separator",
+				placeholder: 'Separator (e.g. ", ")',
+				type: "string",
+				defaultValue: ", ",
+			},
+		],
 		sampleValue: '["🌟","✨","💫"]',
 	},
 	{
@@ -257,7 +264,14 @@ const FILTERS: Filters[] = [
 		hasParam: true,
 		description: "Split string into array.",
 		example: '"rock,paper,scissors" | split: "," → ["rock","paper","scissors"]',
-		params: [{ label: "Delimiter", placeholder: 'Delimiter (e.g. ",")', type: "string", defaultValue: "," }],
+		params: [
+			{
+				label: "Delimiter",
+				placeholder: 'Delimiter (e.g. ",")',
+				type: "string",
+				defaultValue: ",",
+			},
+		],
 		sampleValue: "rock,paper,scissors",
 	},
 	{

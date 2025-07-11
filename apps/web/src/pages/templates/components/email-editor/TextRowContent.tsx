@@ -152,9 +152,7 @@ export function TextRowContent({ blockIndex }: { blockIndex: number }) {
   }, [content]);
 
   useEffect(() => {
-    checkPlaceholderVisibility();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content, text]);
+    checkPlaceholderVisibility();  }, [content, text]);
 
   return (
     <div style={{ position: 'relative' }}>

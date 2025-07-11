@@ -5,7 +5,6 @@ import { styled, VStack } from '../../styled-system/jsx';
 import { text } from '../../styled-system/recipes';
 import { DEFAULT_ICON_SIZE } from './Icon.const';
 import type { IconSize, IIconProps } from './Icon.types';
-// eslint-disable-next-line import/no-namespace
 import * as allIcons from './icon-registry';
 
 export default {

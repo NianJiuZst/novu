@@ -34,7 +34,13 @@ export type {
   Tab,
   Variables,
 } from '@novu/js/ui';
-export type { BellProps, InboxContentProps, InboxProps, NotificationProps, NovuProviderProps } from './components';
+export type {
+  BellProps,
+  InboxContentProps,
+  InboxProps,
+  NotificationProps,
+  NovuProviderProps,
+} from './components';
 export { Bell, Inbox, InboxContent, Notifications, NovuProvider, Preferences } from './components';
 export type {
   UseCountsProps,

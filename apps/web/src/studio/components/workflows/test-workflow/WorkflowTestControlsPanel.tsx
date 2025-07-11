@@ -36,9 +36,7 @@ export const WorkflowTestControlsPanel: FC<IWorkflowTestControlsPanelProps> = ({
       onChange(undefined, values as ToSubscriber);
     });
 
-    return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [watch]);
+    return () => unsubscribe();  }, [watch]);
 
   return (
     <Stack gap="margins.layout.page.vertical" className={formContainerClassName}>

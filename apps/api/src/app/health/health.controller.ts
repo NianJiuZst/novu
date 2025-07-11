@@ -1,7 +1,12 @@
 import { Controller, Get, NotFoundException } from '@nestjs/common';
 import { Body, Post } from '@nestjs/common/decorators';
 import { ApiExcludeController } from '@nestjs/swagger';
-import { HealthCheck, type HealthCheckResult, type HealthCheckService, type HealthIndicatorFunction } from '@nestjs/terminus';
+import {
+  HealthCheck,
+  type HealthCheckResult,
+  type HealthCheckService,
+  type HealthIndicatorFunction,
+} from '@nestjs/terminus';
 import {
   type CacheServiceHealthIndicator,
   type DalServiceHealthIndicator,

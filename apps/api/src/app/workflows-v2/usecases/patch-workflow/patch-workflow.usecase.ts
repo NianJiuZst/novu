@@ -1,7 +1,11 @@
 import { Injectable, Optional } from '@nestjs/common';
 import type { ModuleRef } from '@nestjs/core';
 import type { PinoLogger, SendWebhookMessage } from '@novu/application-generic';
-import { LocalizationResourceEnum, type NotificationTemplateEntity, type NotificationTemplateRepository } from '@novu/dal';
+import {
+  LocalizationResourceEnum,
+  type NotificationTemplateEntity,
+  type NotificationTemplateRepository,
+} from '@novu/dal';
 import { type UserSessionData, WebhookEventEnum, WebhookObjectTypeEnum, WorkflowStatusEnum } from '@novu/shared';
 import type { WorkflowWithPreferencesResponseDto } from '../../../workflows-v1/dtos/get-workflow-with-preferences.dto';
 import type { GetWorkflowWithPreferencesUseCase } from '../../../workflows-v1/usecases/get-workflow-with-preferences/get-workflow-with-preferences.usecase';
@@ -160,7 +164,6 @@ export class PatchWorkflowUsecase {
     }
 
     try {
-      // eslint-disable-next-line global-require
       const manageTranslations = this.moduleRef.get(require('@novu/ee-translation')?.ManageTranslations, {
         strict: false,
       });

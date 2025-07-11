@@ -78,12 +78,20 @@ const getRuleSchema = (fields: Array<{ value: string }>): z.ZodType<RuleType | R
 					const values = value?.split(",").filter((val) => val.trim() !== "");
 
 					if (!values || values.length !== 2) {
-						ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Both values are required", path: ["value"] });
+						ctx.addIssue({
+							code: z.ZodIssueCode.custom,
+							message: "Both values are required",
+							path: ["value"],
+						});
 					}
 				} else if (isRelativeDateOperator(operator)) {
 					// Validate relative date values
 					if (!value) {
-						ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Amount and unit are required", path: ["value"] });
+						ctx.addIssue({
+							code: z.ZodIssueCode.custom,
+							message: "Amount and unit are required",
+							path: ["value"],
+						});
 
 						return;
 					}
@@ -113,7 +121,11 @@ const getRuleSchema = (fields: Array<{ value: string }>): z.ZodType<RuleType | R
 					const trimmedValue = value?.trim();
 
 					if (!trimmedValue || trimmedValue.length === 0) {
-						ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Value is required", path: ["value"] });
+						ctx.addIssue({
+							code: z.ZodIssueCode.custom,
+							message: "Value is required",
+							path: ["value"],
+						});
 					}
 				}
 
@@ -122,7 +134,11 @@ const getRuleSchema = (fields: Array<{ value: string }>): z.ZodType<RuleType | R
 					field.startsWith(SUBSCRIBER_DATA_FIELD_PREFIX) && field.length > SUBSCRIBER_DATA_FIELD_PREFIX.length;
 
 				if (!allowedFields.includes(field) && !isPayloadField && !isSubscriberDataField) {
-					ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Value is not valid", path: ["field"] });
+					ctx.addIssue({
+						code: z.ZodIssueCode.custom,
+						message: "Value is not valid",
+						path: ["field"],
+					});
 				}
 			}),
 		z
@@ -218,7 +234,10 @@ export const EditStepConditionsForm = () => {
 		save: (data) => {
 			if (!step || !workflow) return;
 
-			const skip = formatQuery(data.query, { format: "jsonlogic", ruleProcessor: customRuleProcessor });
+			const skip = formatQuery(data.query, {
+				format: "jsonlogic",
+				ruleProcessor: customRuleProcessor,
+			});
 			const updateStepData: Partial<StepUpdateDto> = {
 				controlValues: { ...step.controls.values, skip },
 			};
@@ -259,7 +278,6 @@ export const EditStepConditionsForm = () => {
 	const saveFormRef = useDataRef(saveForm);
 	useEffect(() => {
 		return () => {
-			// eslint-disable-next-line react-hooks/exhaustive-deps
 			saveFormRef.current();
 		};
 	}, [saveFormRef]);

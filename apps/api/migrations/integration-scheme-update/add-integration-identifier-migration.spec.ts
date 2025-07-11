@@ -65,7 +65,9 @@ describe('Add default identifier and name to integration entity', () => {
     } as any);
 
     for (const integration of updatedIntegration) {
-      const { name, identifier } = genIntegrationIdentificationDetails({ providerId: integration.providerId });
+      const { name, identifier } = genIntegrationIdentificationDetails({
+        providerId: integration.providerId,
+      });
 
       expect(integration.name).to.equal(name);
       expect(integration.identifier).to.contain(identifier.split('-')[0]);
@@ -117,7 +119,9 @@ describe('Add default identifier and name to integration entity', () => {
     } as any);
 
     for (const integration of updatedIntegration) {
-      const { name, identifier } = genIntegrationIdentificationDetails({ providerId: integration.providerId });
+      const { name, identifier } = genIntegrationIdentificationDetails({
+        providerId: integration.providerId,
+      });
 
       expect(integration.name).to.equal(name);
       expect(integration.identifier).to.contain(identifier.split('-')[0]);
@@ -129,6 +133,9 @@ async function pruneIntegration(integrationRepository) {
   const old = await integrationRepository.find({});
 
   for (const integration of old) {
-    await integrationRepository.delete({ _id: integration._id, _environmentId: integration._environmentId });
+    await integrationRepository.delete({
+      _id: integration._id,
+      _environmentId: integration._environmentId,
+    });
   }
 }

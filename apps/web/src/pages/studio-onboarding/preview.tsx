@@ -59,9 +59,7 @@ export const StudioOnboardingPreview = () => {
   );
 
   useEffect(() => {
-    track('Create workflow step started - [Onboarding - Signup]');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    track('Create workflow step started - [Onboarding - Signup]');  }, []);
 
   function onControlsChange(type: string, form: any) {
     switch (type) {

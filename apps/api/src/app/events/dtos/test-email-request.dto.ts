@@ -7,7 +7,7 @@ export class TestSendEmailRequestDto {
   contentType: MessageTemplateContentType;
 
   @IsDefined()
-  payload: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  payload: any;
 
   @IsDefined()
   @IsString()

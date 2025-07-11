@@ -11,8 +11,6 @@ export function CachedQuery({ builder }: { builder: (...args) => string }) {
     const originalMethod = descriptor.value;
     const methodName = key;
     injectCache(target, 'cacheService');
-
-    // eslint-disable-next-line no-param-reassign
     descriptor.value = async function (...args: any[]) {
       if (!this.cacheService?.cacheEnabled()) return await originalMethod.apply(this, args);
 

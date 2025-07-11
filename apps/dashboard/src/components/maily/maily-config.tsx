@@ -409,7 +409,10 @@ export const createExtensions = ({
 
 						if (isSrcVariable || isExternalLinkVariable) {
 							const aliasFor = resolveRepeatBlockAlias(isSrcVariable ? (src ?? "") : (externalLink ?? ""), editor);
-							return commands.updateInlineImageAttributes?.({ ...attrs, aliasFor: aliasFor ?? null });
+							return commands.updateInlineImageAttributes?.({
+								...attrs,
+								aliasFor: aliasFor ?? null,
+							});
 						}
 
 						return commands.updateInlineImageAttributes?.(attrs);

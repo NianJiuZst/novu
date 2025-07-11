@@ -103,7 +103,10 @@ describe('extractLiquidTemplateVariables', () => {
 
     it('should extract simple variables', () => {
       const template = '{{payload.phone}} {{test}}';
-      const { validVariables, invalidVariables } = extractLiquidTemplateVariables({ template, variableSchema });
+      const { validVariables, invalidVariables } = extractLiquidTemplateVariables({
+        template,
+        variableSchema,
+      });
 
       expect(validVariables).to.have.lengthOf(1);
       expect(invalidVariables).to.have.lengthOf(1);
@@ -113,7 +116,10 @@ describe('extractLiquidTemplateVariables', () => {
 
     it('should handle nested properties', () => {
       const template = '{{payload.phone}} {{user.profile.address.street}}';
-      const { validVariables, invalidVariables } = extractLiquidTemplateVariables({ template, variableSchema });
+      const { validVariables, invalidVariables } = extractLiquidTemplateVariables({
+        template,
+        variableSchema,
+      });
 
       expect(validVariables).to.have.lengthOf(1);
       expect(invalidVariables).to.have.lengthOf(1);
@@ -123,7 +129,10 @@ describe('extractLiquidTemplateVariables', () => {
 
     it('should handle array notation', () => {
       const template = '{{payload.items[1].email}} {{items[0].name}}';
-      const { validVariables, invalidVariables } = extractLiquidTemplateVariables({ template, variableSchema });
+      const { validVariables, invalidVariables } = extractLiquidTemplateVariables({
+        template,
+        variableSchema,
+      });
 
       expect(validVariables).to.have.lengthOf(1);
       expect(invalidVariables).to.have.lengthOf(1);
@@ -133,7 +142,10 @@ describe('extractLiquidTemplateVariables', () => {
 
     it('should handle invalid payload variables', () => {
       const template = '{{payload.test}} {{items[0].name}}';
-      const { validVariables, invalidVariables } = extractLiquidTemplateVariables({ template, variableSchema });
+      const { validVariables, invalidVariables } = extractLiquidTemplateVariables({
+        template,
+        variableSchema,
+      });
 
       expect(validVariables).to.have.lengthOf(0);
       expect(invalidVariables).to.have.lengthOf(2);

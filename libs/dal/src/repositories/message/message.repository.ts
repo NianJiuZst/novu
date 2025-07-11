@@ -445,7 +445,6 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     environmentId: string,
     id: string,
     status: 'error' | 'sent' | 'warning',
-    // eslint-disable-next-line
     providerPayload: any = {},
     errorId: string,
     errorText: string
@@ -751,7 +750,10 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
   }
 
   async findMessageById(query: { _id: string; _environmentId: string }): Promise<MessageEntity | null> {
-    const res = await this.MongooseModel.findOne({ _id: query._id, _environmentId: query._environmentId })
+    const res = await this.MongooseModel.findOne({
+      _id: query._id,
+      _environmentId: query._environmentId,
+    })
       .populate('subscriber')
       .populate({
         path: 'actorSubscriber',

@@ -42,7 +42,6 @@ const BASE_PROVIDERS: Provider[] = [ReadinessService];
 export class QueuesModule implements OnApplicationShutdown {
   static forRoot(entities: JobTopicNameEnum[] = []): DynamicModule {
     if (!entities.length) {
-      // eslint-disable-next-line no-param-reassign
       entities = Object.values(JobTopicNameEnum);
     }
 

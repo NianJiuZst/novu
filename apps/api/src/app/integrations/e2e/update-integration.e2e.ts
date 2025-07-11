@@ -212,7 +212,10 @@ describe('Update Integration - /integrations/:integrationId (PUT) #novu-v2', () 
       _organizationId: session.organization._id,
       _environmentId: session.environment._id,
     });
-    const prodEnv = await envRepository.findOne({ name: 'Production', _organizationId: session.organization._id });
+    const prodEnv = await envRepository.findOne({
+      name: 'Production',
+      _organizationId: session.organization._id,
+    });
     const payload = {
       _environmentId: prodEnv?._id,
       check: false,

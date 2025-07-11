@@ -78,7 +78,9 @@ export function convertPropertyListToSchema(propertyList?: PropertyListItem[]): 
 
 function processPropertyDefinition(definition: JSONSchema7): JSONSchema7 {
 	const currentDefinition = { ...definition };
-	const definitionAsObjectWithList = currentDefinition as JSONSchema7 & { propertyList?: PropertyListItem[] };
+	const definitionAsObjectWithList = currentDefinition as JSONSchema7 & {
+		propertyList?: PropertyListItem[];
+	};
 
 	// Handle object types with propertyList
 	if (isObjectWithPropertyList(definitionAsObjectWithList)) {

@@ -86,9 +86,7 @@ export const CreateGroupSidebar = ({
       return;
     }
 
-    setValue('identifier', newIdentifier);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name]);
+    setValue('identifier', newIdentifier);  }, [name]);
 
   const onSubmit = async (data: any) => {
     await createTranslationGroup(data);

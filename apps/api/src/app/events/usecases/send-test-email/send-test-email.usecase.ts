@@ -153,7 +153,6 @@ export class SendTestEmail {
 
   private getSystemVariables(variableType: 'subscriber' | 'step' | 'branding', command: SendTestEmailCommand) {
     const variables = {};
-    // eslint-disable-next-line guard-for-in
     for (const variable in command.payload) {
       const [type, names] = variable.includes('.') ? variable.split('.') : variable;
       if (type === variableType) {

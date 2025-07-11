@@ -42,7 +42,6 @@ export function EditStepTemplateV2Page() {
 	const saveFormRef = useDataRef(saveForm);
 	useEffect(() => {
 		return () => {
-			// eslint-disable-next-line react-hooks/exhaustive-deps
 			saveFormRef.current();
 		};
 	}, [saveFormRef]);

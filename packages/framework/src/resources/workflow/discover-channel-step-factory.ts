@@ -18,7 +18,6 @@ export async function discoverChannelStepFactory(
   type: ChannelStepEnum,
   outputSchema: Schema,
   resultSchema: Schema
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<ChannelStep<ChannelStepEnum, any, any>> {
   return async (stepId, resolve, options = {}) => {
     const controlSchema = options?.controlSchema || emptySchema;

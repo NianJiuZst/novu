@@ -95,7 +95,11 @@ messageTemplateSchema.index({
   _parentId: 1,
 });
 
-messageTemplateSchema.plugin(mongooseDelete, { deletedAt: true, deletedBy: true, overrideMethods: 'all' });
+messageTemplateSchema.plugin(mongooseDelete, {
+  deletedAt: true,
+  deletedBy: true,
+  overrideMethods: 'all',
+});
 
 export const MessageTemplate =
   (mongoose.models.MessageTemplate as mongoose.Model<MessageTemplateDBModel>) ||

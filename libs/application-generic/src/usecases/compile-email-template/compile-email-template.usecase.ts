@@ -60,8 +60,6 @@ export class CompileEmailTemplate extends CompileTemplateBase {
     let senderName;
     const { content } = command;
     let { preheader } = command;
-
-    // eslint-disable-next-line no-param-reassign
     command.payload = merge({}, defaultPayload, command.payload);
 
     const payload = {
@@ -145,7 +143,6 @@ export class CompileEmailTemplate extends CompileTemplateBase {
   public static addPreheader(content: string): string {
     // "&nbsp;&zwnj;&nbsp;&zwnj;" is needed to spacing away the rest of the email from the preheader area in email clients
     return content?.replace(
-      // eslint-disable-next-line no-useless-escape
       /<body\b[^<>]*?>/,
       `$&{{#if preheader}}
           <div style="display: none; max-height: 0px; overflow: hidden;">

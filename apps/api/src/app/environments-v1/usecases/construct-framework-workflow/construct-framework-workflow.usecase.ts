@@ -237,7 +237,10 @@ export class ConstructFrameworkWorkflow {
         return step.digest(
           stepId,
           async (controlValues) => {
-            return this.digestOutputRendererUseCase.execute({ controlValues, fullPayloadForRender });
+            return this.digestOutputRendererUseCase.execute({
+              controlValues,
+              fullPayloadForRender,
+            });
           },
           this.constructActionStepOptions(staticStep, fullPayloadForRender)
         );

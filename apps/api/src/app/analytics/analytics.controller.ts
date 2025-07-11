@@ -1,7 +1,12 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
-import { type AnalyticsService, ExternalApiAccessible, SkipPermissionsCheck, UserSession } from '@novu/application-generic';
+import {
+  type AnalyticsService,
+  ExternalApiAccessible,
+  SkipPermissionsCheck,
+  UserSession,
+} from '@novu/application-generic';
 import type { UserSessionData } from '@novu/shared';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
 import { HubspotIdentifyFormCommand } from './usecases/hubspot-identify-form/hubspot-identify-form.command';

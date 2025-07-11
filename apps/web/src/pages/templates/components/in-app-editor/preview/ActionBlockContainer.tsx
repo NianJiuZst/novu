@@ -54,9 +54,7 @@ function SelectedButtonTemplate(props: ISelectedButtonTemplateProps) {
   const dark = useMantineTheme().colorScheme === 'dark';
   const buttonStyle = dark ? darkButtonStyle : lightButtonStyle;
 
-  function handleOnButtonContentChange(data: any, buttonIndex: number) {
-    // eslint-disable-next-line no-unsafe-optional-chaining
-    const currentButtonsValue = props?.value?.buttons ? [...props?.value?.buttons] : [];
+  function handleOnButtonContentChange(data: any, buttonIndex: number) {    const currentButtonsValue = props?.value?.buttons ? [...props?.value?.buttons] : [];
 
     if (currentButtonsValue) {
       if (currentButtonsValue[buttonIndex]) {

@@ -11,7 +11,6 @@ import { BaseProvider, CasingEnum } from '../../../base.provider';
 import type { WithPassthrough } from '../../../utils/types';
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   interface RequestInit {
     agent: ProxyAgent;
   }

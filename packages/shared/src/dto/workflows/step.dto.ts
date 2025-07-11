@@ -31,8 +31,6 @@ export type StepDto = {
   name: string;
   type: StepTypeEnum;
 };
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface Issue<T> {
   issueType: T;
   variableName?: string;
@@ -45,14 +43,8 @@ export class StepIssuesDto {
 }
 
 export type StepCreateAndUpdateKeys = keyof StepCreateDto | keyof StepUpdateDto;
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface StepContentIssue extends Issue<StepContentIssueEnum> {}
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface StepIntegrationIssue extends Issue<StepIntegrationIssueEnum> {}
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface StepIssue extends Issue<StepIssueEnum> {}
 
 export enum UiSchemaGroupEnum {

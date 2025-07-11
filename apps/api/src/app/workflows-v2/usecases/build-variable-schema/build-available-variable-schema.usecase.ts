@@ -42,7 +42,11 @@ export class BuildVariableSchemaUsecase {
         }
       );
 
-      workflowControlValues = controls.flatMap((item) => item.controls).flatMap((obj) => Object.values(obj));
+      // biome-ignore lint/complexity/useFlatMap: <explanation>
+      workflowControlValues = controls
+        .map((item) => item.controls)
+        .flat()
+        .flatMap((obj) => Object.values(obj));
     }
 
     const optimisticControlValues = Object.values(command.optimisticControlValues || {});

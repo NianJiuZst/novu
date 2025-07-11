@@ -26,7 +26,10 @@ describe('FromSchema', () => {
       additionalProperties: false,
     } as const;
 
-    expectTypeOf<FromSchema<typeof testJsonSchema>>().toEqualTypeOf<{ foo: string; bar?: string }>();
+    expectTypeOf<FromSchema<typeof testJsonSchema>>().toEqualTypeOf<{
+      foo: string;
+      bar?: string;
+    }>();
   });
 
   it('should infer a Zod Schema type', () => {
@@ -63,7 +66,10 @@ describe('FromSchemaUnvalidated', () => {
       additionalProperties: false,
     } as const;
 
-    expectTypeOf<FromSchemaUnvalidated<typeof testJsonSchema>>().toEqualTypeOf<{ foo?: string; bar?: string }>();
+    expectTypeOf<FromSchemaUnvalidated<typeof testJsonSchema>>().toEqualTypeOf<{
+      foo?: string;
+      bar?: string;
+    }>();
   });
 
   it('should infer a Zod Schema type', () => {
@@ -72,6 +78,9 @@ describe('FromSchemaUnvalidated', () => {
       bar: z.string().optional(),
     });
 
-    expectTypeOf<FromSchemaUnvalidated<typeof testZodSchema>>().toEqualTypeOf<{ foo?: string; bar?: string }>();
+    expectTypeOf<FromSchemaUnvalidated<typeof testZodSchema>>().toEqualTypeOf<{
+      foo?: string;
+      bar?: string;
+    }>();
   });
 });

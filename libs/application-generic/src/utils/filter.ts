@@ -64,11 +64,8 @@ export abstract class Filter {
     type?: string
   ) {
     if (!type) {
-      // eslint-disable-next-line no-param-reassign
       type = condition.filter;
     }
-
-    // eslint-disable-next-line no-param-reassign
     type = type?.toLowerCase();
 
     if (condition.passed && !summary.passedFilters.includes(type)) {

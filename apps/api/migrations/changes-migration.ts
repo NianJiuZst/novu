@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import '../src/config';
 import { NestFactory } from '@nestjs/core';
 import { CreateChange, CreateChangeCommand } from '@novu/application-generic';

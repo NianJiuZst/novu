@@ -27,9 +27,7 @@ export function FilesDiffSection({
     if (monacoRef.current === null) {
       return;
     }
-    monacoRef.current.editor.setTheme(isDark ? 'novu-dark' : 'novu');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colorScheme]);
+    monacoRef.current.editor.setTheme(isDark ? 'novu-dark' : 'novu');  }, [colorScheme]);
 
   if (!text) return null;
   if (!original) return <FileEditEditor value={text} setIsValidJsonFile={setIsValidJsonFile} readonly={readonly} />;

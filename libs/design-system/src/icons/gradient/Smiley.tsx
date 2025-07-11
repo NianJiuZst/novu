@@ -1,6 +1,4 @@
 import type React from 'react';
-/* eslint-disable */
-
 export function Smiley(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="30" height="31" viewBox="0 0 30 31" fill="none" {...props}>

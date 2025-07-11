@@ -284,7 +284,10 @@ export class NotificationTemplateRepository extends BaseRepository<
   }
 
   async delete(query: NotificationTemplateQuery) {
-    return await this.notificationTemplate.delete({ _id: query._id, _environmentId: query._environmentId });
+    return await this.notificationTemplate.delete({
+      _id: query._id,
+      _environmentId: query._environmentId,
+    });
   }
 
   async findDeleted(query: NotificationTemplateQuery): Promise<NotificationTemplateEntity> {

@@ -22,7 +22,7 @@ export class CreateNotificationJobsCommand extends EnvironmentWithUserCommand {
   overrides: TriggerOverrides;
 
   @IsDefined()
-  payload: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  payload: any;
 
   @IsDefined()
   subscriber: SubscriberEntity;

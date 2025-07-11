@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { useIntercom } from "react-use-intercom";
 import { useAuth } from "@/context/auth/hooks";

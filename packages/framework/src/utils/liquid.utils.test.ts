@@ -232,10 +232,7 @@ describe('createLiquidEngine', () => {
     const engine = createLiquidEngine();
 
     // Using a simplified template without loops
-    /* eslint-disable no-template-curly-in-string */
     const template = 'Items: {{ payload.items | json }}\nTotal: ${{ payload.total }}';
-    /* eslint-enable no-template-curly-in-string */
-
     const data = {
       payload: {
         items: [

@@ -9,9 +9,7 @@ export default function OrganizationListPage() {
   const { setRedirectURL } = useRedirectURL();
 
   useEffect(() => {
-    setRedirectURL();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setRedirectURL();  }, []);
 
   return (
     <AuthLayout>

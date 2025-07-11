@@ -14,8 +14,6 @@ const getCurrentOrganization = withJwtValidation(async () => {
 	const response = await get<{ data: IOrganizationEntity }>("/organizations/me");
 	return response.data;
 });
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function OrganizationContextProvider({ children }: any) {
 	const { data: organization, isLoading } = useQuery({
 		queryKey: [QueryKeys.myOrganization],
@@ -50,6 +48,4 @@ export function OrganizationContextProvider({ children }: any) {
 
 	return <OrganizationContext.Provider value={value}>{children}</OrganizationContext.Provider>;
 }
-
-// eslint-disable-next-line react-refresh/only-export-components
 export const useOrganization = createContextHook(OrganizationContext);

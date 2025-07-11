@@ -35,7 +35,12 @@ describe('Layout creation - /layouts (POST) #novu-v0', async () => {
     const layoutDescription = 'Amazing new layout';
     const content = '<html><body><div>Hello {{organizationName}} {{{body}}}</div></body></html>';
     const variables = [
-      { name: 'organizationName', type: TemplateVariableTypeEnum.STRING, defaultValue: 'Company', required: false },
+      {
+        name: 'organizationName',
+        type: TemplateVariableTypeEnum.STRING,
+        defaultValue: 'Company',
+        required: false,
+      },
     ];
     const isDefault = true;
     const response = await session.testAgent.post(BASE_PATH).send({
@@ -64,7 +69,12 @@ describe('Layout creation - /layouts (POST) #novu-v0', async () => {
     const layoutDescription = 'Amazing new layout';
     const content = '<html><body><div>Hello {{organizationName}} {{{body}}}</div></body></html>';
     const variables = [
-      { name: 'organizationName', type: TemplateVariableTypeEnum.STRING, defaultValue: 'Company', required: false },
+      {
+        name: 'organizationName',
+        type: TemplateVariableTypeEnum.STRING,
+        defaultValue: 'Company',
+        required: false,
+      },
     ];
     const isDefault = false;
 
@@ -96,7 +106,12 @@ describe('Layout creation - /layouts (POST) #novu-v0', async () => {
     const layoutDescription = 'new-default-layout';
     const content = '<html><body><div>Hello {{organizationName}} {{{body}}}</div></body></html>';
     const variables = [
-      { name: 'organizationName', type: TemplateVariableTypeEnum.STRING, defaultValue: 'Company', required: false },
+      {
+        name: 'organizationName',
+        type: TemplateVariableTypeEnum.STRING,
+        defaultValue: 'Company',
+        required: false,
+      },
     ];
     const isDefault = true;
     const response = await session.testAgent.post(BASE_PATH).send({

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { type NestInterceptor, RequestMethod } from '@nestjs/common';
 import { getLoggerToken, Logger, LoggerErrorInterceptor, LoggerModule, type Params, PinoLogger } from 'nestjs-pino';
 import { Store, storage } from 'nestjs-pino/storage';

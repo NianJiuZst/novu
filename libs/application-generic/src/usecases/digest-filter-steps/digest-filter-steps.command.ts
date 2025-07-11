@@ -9,7 +9,7 @@ export class DigestFilterStepsCommand extends EnvironmentWithUserCommand {
   _subscriberId: string;
 
   @IsDefined()
-  payload: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  payload: any;
 
   @IsDefined()
   steps: NotificationStepEntity[];

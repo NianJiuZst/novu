@@ -52,9 +52,7 @@ export const CreateWorkflowDropdown = ({
     if (!isV2Enabled) {
       return;
     }
-    setPath(PATHS.WORKFLOW_INTRODUCTION);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isV2Enabled]);
+    setPath(PATHS.WORKFLOW_INTRODUCTION);  }, [isV2Enabled]);
 
   if (isV2Enabled) {
     return (

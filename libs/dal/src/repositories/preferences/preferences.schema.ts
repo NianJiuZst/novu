@@ -69,7 +69,11 @@ const preferencesSchema = new Schema<PreferencesDBModel>(
   { ...schemaOptions, minimize: false }
 );
 
-preferencesSchema.plugin(mongooseDelete, { deletedAt: true, deletedBy: true, overrideMethods: 'all' });
+preferencesSchema.plugin(mongooseDelete, {
+  deletedAt: true,
+  deletedBy: true,
+  overrideMethods: 'all',
+});
 
 // Subscriber Global Preferences
 preferencesSchema.index({

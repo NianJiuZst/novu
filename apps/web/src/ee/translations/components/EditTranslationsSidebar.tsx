@@ -179,9 +179,7 @@ export const EditTranslationsSidebar = ({
   useEffect(() => {
     if (group) {
       setGroupIdentifier(group?.identifier);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [group]);
+    }  }, [group]);
 
   const isUploadingPage = uploadFiles.length > 0;
 

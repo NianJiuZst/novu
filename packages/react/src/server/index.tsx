@@ -94,7 +94,13 @@ export type {
   Variables,
 } from '@novu/js/ui';
 
-export type { BellProps, InboxContentProps, InboxProps, NotificationProps, NovuProviderProps } from '../components';
+export type {
+  BellProps,
+  InboxContentProps,
+  InboxProps,
+  NotificationProps,
+  NovuProviderProps,
+} from '../components';
 
 export type {
   UseCountsProps,

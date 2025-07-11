@@ -53,9 +53,7 @@ export function OrganizationSelect() {
         return;
       }
 
-      if (Array.isArray(organizationId)) {
-        // eslint-disable-next-line no-param-reassign
-        [organizationId] = organizationId;
+      if (Array.isArray(organizationId)) {        [organizationId] = organizationId;
       }
 
       setIsLoading(true);

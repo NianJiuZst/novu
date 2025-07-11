@@ -56,9 +56,7 @@ export default function Content({
   useEffect(() => {
     if (bridge) {
       mutateAsync(controlVariables);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bridge, controlVariables]);
+    }  }, [bridge, controlVariables]);
 
   return (
     <PushBasePreview

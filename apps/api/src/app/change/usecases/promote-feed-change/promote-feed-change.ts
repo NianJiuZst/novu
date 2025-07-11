@@ -29,6 +29,9 @@ export class PromoteFeedChange {
       });
     }
 
-    return await this.feedRepository.delete({ _environmentId: command.environmentId, _id: item._id });
+    return await this.feedRepository.delete({
+      _environmentId: command.environmentId,
+      _id: item._id,
+    });
   }
 }

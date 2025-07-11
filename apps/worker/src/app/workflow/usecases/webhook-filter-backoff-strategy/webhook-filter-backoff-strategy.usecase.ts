@@ -21,7 +21,10 @@ export class WebhookFilterBackoffStrategy {
           status: ExecutionDetailsStatusEnum.PENDING,
           isTest: false,
           isRetry: true,
-          raw: JSON.stringify({ message: JSON.parse(error?.message).message, attempt: attemptsMade }),
+          raw: JSON.stringify({
+            message: JSON.parse(error?.message).message,
+            attempt: attemptsMade,
+          }),
         })
       );
     } catch (anotherError) {

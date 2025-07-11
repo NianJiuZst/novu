@@ -55,7 +55,10 @@ describe('Delete Message - /messages/:messageId (DELETE) #novu-v2', () => {
 
     await novuClient.messages.delete(message._id);
 
-    const result = await messageRepository.findOne({ _id: message._id, _environmentId: message._environmentId });
+    const result = await messageRepository.findOne({
+      _id: message._id,
+      _environmentId: message._environmentId,
+    });
     expect(result).to.not.be.ok;
   });
 });

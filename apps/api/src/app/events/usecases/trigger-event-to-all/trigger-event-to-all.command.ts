@@ -9,7 +9,7 @@ export class TriggerEventToAllCommand extends EnvironmentWithUserCommand {
   identifier: string;
 
   @IsDefined()
-  payload: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  payload: any;
 
   @IsString()
   @IsDefined()

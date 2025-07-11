@@ -307,7 +307,9 @@ export const completeAction = async ({
   } catch (error) {
     emitter.emit('notification.complete_action.resolved', { args, error });
 
-    return { error: new NovuError(`Failed to complete ${actionType} action on the notification`, error) };
+    return {
+      error: new NovuError(`Failed to complete ${actionType} action on the notification`, error),
+    };
   }
 };
 
@@ -414,11 +416,17 @@ export const readAll = async ({
           inboxService
         )
     );
-    emitter.emit('notifications.read_all.pending', { args: { tags, data }, data: optimisticNotifications });
+    emitter.emit('notifications.read_all.pending', {
+      args: { tags, data },
+      data: optimisticNotifications,
+    });
 
     await inboxService.readAll({ tags, data });
 
-    emitter.emit('notifications.read_all.resolved', { args: { tags, data }, data: optimisticNotifications });
+    emitter.emit('notifications.read_all.resolved', {
+      args: { tags, data },
+      data: optimisticNotifications,
+    });
 
     return {};
   } catch (error) {
@@ -457,11 +465,17 @@ export const archiveAll = async ({
           inboxService
         )
     );
-    emitter.emit('notifications.archive_all.pending', { args: { tags, data }, data: optimisticNotifications });
+    emitter.emit('notifications.archive_all.pending', {
+      args: { tags, data },
+      data: optimisticNotifications,
+    });
 
     await inboxService.archiveAll({ tags, data });
 
-    emitter.emit('notifications.archive_all.resolved', { args: { tags, data }, data: optimisticNotifications });
+    emitter.emit('notifications.archive_all.resolved', {
+      args: { tags, data },
+      data: optimisticNotifications,
+    });
 
     return {};
   } catch (error) {
@@ -494,11 +508,17 @@ export const archiveAllRead = async ({
           inboxService
         )
     );
-    emitter.emit('notifications.archive_all_read.pending', { args: { tags, data }, data: optimisticNotifications });
+    emitter.emit('notifications.archive_all_read.pending', {
+      args: { tags, data },
+      data: optimisticNotifications,
+    });
 
     await inboxService.archiveAllRead({ tags, data });
 
-    emitter.emit('notifications.archive_all_read.resolved', { args: { tags, data }, data: optimisticNotifications });
+    emitter.emit('notifications.archive_all_read.resolved', {
+      args: { tags, data },
+      data: optimisticNotifications,
+    });
 
     return {};
   } catch (error) {

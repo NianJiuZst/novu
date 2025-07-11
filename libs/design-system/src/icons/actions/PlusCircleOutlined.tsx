@@ -1,5 +1,4 @@
 import type React from 'react';
-/* eslint-disable */
 export function PlusCircleOutlined({
   fillColor,
   ...props

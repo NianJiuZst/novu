@@ -2,7 +2,13 @@ import { EmailProviderIdEnum, InAppProviderIdEnum, type ProvidersIdEnum, SmsProv
 import { chatProviders, emailProviders, inAppProviders, pushProviders, smsProviders } from './channels';
 import type { IProviderConfig } from './provider.interface';
 
-export { chatProviders, emailProviders, inAppProviders, pushProviders, smsProviders } from './channels';
+export {
+  chatProviders,
+  emailProviders,
+  inAppProviders,
+  pushProviders,
+  smsProviders,
+} from './channels';
 
 export const providers: IProviderConfig[] = [
   ...emailProviders,

@@ -16,8 +16,6 @@ export const LogDecorator = (options = DEFAULT_OPTIONS) => {
   return (target: any, propertyName: string, descriptor: TypedPropertyDescriptor<any>): void => {
     const logger = options?.logger || new Logger(target?.constructor?.name);
     const method = descriptor?.value;
-
-    // eslint-disable-next-line no-param-reassign
     descriptor.value = async function <T>(...args: unknown[]): Promise<T> {
       const currentTime = Date.now();
       logger.debug(

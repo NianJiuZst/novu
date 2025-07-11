@@ -18,7 +18,9 @@ export function useUpdateIntegration() {
 			return updateIntegration(integrationId, data, currentEnvironment!);
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: [QueryKeys.fetchIntegrations, currentEnvironment?._id] });
+			queryClient.invalidateQueries({
+				queryKey: [QueryKeys.fetchIntegrations, currentEnvironment?._id],
+			});
 		},
 	});
 }

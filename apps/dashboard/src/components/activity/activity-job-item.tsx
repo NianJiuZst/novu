@@ -223,7 +223,10 @@ function JobDetails({ job }: { job: IActivityJob }) {
 						{job.executionDetails.map((detail, index) => (
 							<ExecutionDetailItem
 								key={index}
-								detail={{ ...detail, status: job.executionDetails[job.executionDetails.length - 1].status }}
+								detail={{
+									...detail,
+									status: job.executionDetails[job.executionDetails.length - 1].status,
+								}}
 							/>
 						))}
 					</div>

@@ -5,7 +5,8 @@ import { type ValidationError, validateSync } from 'class-validator';
 
 export abstract class BaseCommand {
   static create<T extends BaseCommand>(this: new (...args: unknown[]) => T, data: T): T {
-    const convertedObject = plainToInstance<T, unknown>(BaseCommand, {
+    // biome-ignore lint/complexity/noThisInStatic: Using 'this' for concrete class reference
+    const convertedObject = plainToInstance<T, unknown>(this, {
       ...data,
     });
 

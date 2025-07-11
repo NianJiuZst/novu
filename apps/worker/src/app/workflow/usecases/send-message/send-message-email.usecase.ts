@@ -363,7 +363,6 @@ export class SendMessageEmail extends SendMessageBase {
       return getReplyToAddress(command.transactionId, environment._id, environment?.dns?.inboundParseDomain);
     } else {
       const detailEnum =
-        // eslint-disable-next-line no-nested-ternary
         !environment.dns?.mxRecordConfigured && !environment.dns?.inboundParseDomain
           ? DetailEnum.REPLY_CALLBACK_NOT_CONFIGURATION
           : !environment.dns?.mxRecordConfigured
@@ -519,7 +518,6 @@ export class SendMessageEmail extends SendMessageBase {
        * TODO: Handle this at the handler level globally
        */
       if (error?.isAxiosError && error.response) {
-        // eslint-disable-next-line no-ex-assign
         error = error.response;
       }
 

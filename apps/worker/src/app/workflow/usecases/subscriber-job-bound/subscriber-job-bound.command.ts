@@ -17,7 +17,7 @@ export class SubscriberJobBoundCommand extends EnvironmentWithUserCommand {
   transactionId: string;
 
   @IsDefined()
-  payload: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  payload: any;
 
   @IsDefined()
   @IsString()

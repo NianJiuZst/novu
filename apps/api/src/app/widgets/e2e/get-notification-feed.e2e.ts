@@ -182,7 +182,11 @@ describe('GET /widget/notifications/feed #novu-v0', () => {
     const payload = { ...partialPayload, bar: 'bar' };
 
     await novuClient.trigger({ workflowId: template.triggers[0].identifier, to: subscriberId });
-    await novuClient.trigger({ workflowId: template.triggers[0].identifier, to: subscriberId, payload });
+    await novuClient.trigger({
+      workflowId: template.triggers[0].identifier,
+      to: subscriberId,
+      payload,
+    });
     await session.waitForJobCompletion(template._id);
 
     const payloadQueryValue = Buffer.from(JSON.stringify(partialPayload)).toString('base64');
@@ -197,7 +201,11 @@ describe('GET /widget/notifications/feed #novu-v0', () => {
     const payload = { ...partialPayload, baz: 'baz' };
 
     await novuClient.trigger({ workflowId: template.triggers[0].identifier, to: subscriberId });
-    await novuClient.trigger({ workflowId: template.triggers[0].identifier, to: subscriberId, payload });
+    await novuClient.trigger({
+      workflowId: template.triggers[0].identifier,
+      to: subscriberId,
+      payload,
+    });
     await session.waitForJobCompletion(template._id);
 
     const payloadQueryValue = Buffer.from(JSON.stringify(partialPayload)).toString('base64');

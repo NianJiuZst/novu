@@ -71,7 +71,9 @@ export const getWorkflows = async ({
 		status.forEach((s) => params.append("status[]", s));
 	}
 
-	const { data } = await getV2<{ data: ListWorkflowResponse }>(`/workflows?${params.toString()}`, { environment });
+	const { data } = await getV2<{ data: ListWorkflowResponse }>(`/workflows?${params.toString()}`, {
+		environment,
+	});
 
 	return data;
 };
@@ -130,7 +132,10 @@ export async function syncWorkflow({
 	workflowSlug: string;
 	payload: SyncWorkflowDto;
 }) {
-	return putV2<{ data: WorkflowResponseDto }>(`/workflows/${workflowSlug}/sync`, { environment, body: payload });
+	return putV2<{ data: WorkflowResponseDto }>(`/workflows/${workflowSlug}/sync`, {
+		environment,
+		body: payload,
+	});
 }
 
 export const updateWorkflow = async ({

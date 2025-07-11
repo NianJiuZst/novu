@@ -31,9 +31,7 @@ const BaseWorkflowsDetailPage = () => {
     track('Workflow open - [Studio]', {
       workflowId: currentWorkflowId,
       env: isLocalStudio ? 'local' : 'cloud',
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    });  }, []);
 
   if (isLoading) {
     return <WorkflowsContentLoading />;

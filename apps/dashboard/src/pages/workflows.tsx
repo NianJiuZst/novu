@@ -242,7 +242,11 @@ export const WorkflowsPage = () => {
 										onClick={() => {
 											track(TelemetryEvent.CREATE_WORKFLOW_CLICK);
 
-											navigate(buildRoute(ROUTES.WORKFLOWS_CREATE, { environmentSlug: environmentSlug || "" }));
+											navigate(
+												buildRoute(ROUTES.WORKFLOWS_CREATE, {
+													environmentSlug: environmentSlug || "",
+												})
+											);
 										}}
 									>
 										<WorkflowCard name="Start from scratch" description="Create a workflow from scratch" steps={[]} />

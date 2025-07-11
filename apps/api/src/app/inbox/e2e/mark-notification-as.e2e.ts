@@ -153,7 +153,16 @@ describe('Mark Notification As - /inbox/notifications/:id/{read,unread,archive,u
     const now = new Date();
     await messageRepository.update(
       { _id: message._id, _environmentId: message._environmentId },
-      { $set: { seen: true, lastSeenDate: now, read: true, lastReadDate: now, archived: true, archivedAt: now } }
+      {
+        $set: {
+          seen: true,
+          lastSeenDate: now,
+          read: true,
+          lastReadDate: now,
+          archived: true,
+          archivedAt: now,
+        },
+      }
     );
 
     const { body, status } = await updateNotification({ id: message._id, status: 'unread' });
@@ -197,7 +206,16 @@ describe('Mark Notification As - /inbox/notifications/:id/{read,unread,archive,u
     const now = new Date();
     await messageRepository.update(
       { _id: message._id, _environmentId: message._environmentId },
-      { $set: { seen: true, lastSeenDate: now, read: true, lastReadDate: now, archived: true, archivedAt: now } }
+      {
+        $set: {
+          seen: true,
+          lastSeenDate: now,
+          read: true,
+          lastReadDate: now,
+          archived: true,
+          archivedAt: now,
+        },
+      }
     );
 
     const { body, status } = await updateNotification({ id: message._id, status: 'unarchive' });

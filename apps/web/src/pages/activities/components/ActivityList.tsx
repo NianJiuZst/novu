@@ -46,17 +46,13 @@ export function ActivityList({ data: userData, pagination = false, loading = fal
         <Button.Group>
           <Button
             variant="outline"
-            disabled={pagination?.current === 0 || loading}
-            // eslint-disable-next-line no-unsafe-optional-chaining
-            onClick={() => onPageChange(pagination?.current - 1)}
+            disabled={pagination?.current === 0 || loading}            onClick={() => onPageChange(pagination?.current - 1)}
           >
             <ChevronLeft />
           </Button>
           <Button
             variant="outline"
-            disabled={!pagination?.hasMore || loading}
-            // eslint-disable-next-line no-unsafe-optional-chaining
-            onClick={() => onPageChange(pagination?.current + 1)}
+            disabled={!pagination?.hasMore || loading}            onClick={() => onPageChange(pagination?.current + 1)}
           >
             <ChevronRight />
           </Button>

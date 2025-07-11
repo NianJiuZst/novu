@@ -10,6 +10,7 @@
     "includes": [
       "**",
       "!apps/web/**",
+      "!playground/**",
       "!node_modules/**",
       "!dist/**",
       "!build/**",
@@ -17,7 +18,6 @@
       "!libs/design-system/**",
       "!.github/**",
       "!scripts/**",
-      "!playground/**",
       "!coverage/**",
       "!.nx/**",
       "!.git/**",
@@ -60,7 +60,8 @@
         "noRedeclare": "warn",
         "noAssignInExpressions": "warn",
         "noExplicitAny": "warn",
-        "noExportsInTest": "warn"
+        "noExportsInTest": "warn",
+        "noPrototypeBuiltins": "off"
       },
       "style": {
         "noCommonJs": "warn",

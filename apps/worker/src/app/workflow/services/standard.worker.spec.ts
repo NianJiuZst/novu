@@ -86,7 +86,11 @@ describe('Standard Worker', () => {
     subscriber = await subscriberService.createSubscriber();
 
     const templateService = new NotificationTemplateService(user._id, organization._id, environment._id);
-    template = await templateService.createTemplate({ noFeedId: true, noLayoutId: true, noGroupId: true });
+    template = await templateService.createTemplate({
+      noFeedId: true,
+      noLayoutId: true,
+      noGroupId: true,
+    });
     const workflowInMemoryProviderService = moduleRef.get<WorkflowInMemoryProviderService>(
       WorkflowInMemoryProviderService
     );

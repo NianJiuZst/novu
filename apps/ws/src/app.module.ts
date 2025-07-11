@@ -22,8 +22,6 @@ const modules = [
     })
   ),
 ];
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const providers: any[] = [AppService];
 
 if (process.env.SENTRY_DSN) {

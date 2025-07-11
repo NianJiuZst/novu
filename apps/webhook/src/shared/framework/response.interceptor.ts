@@ -3,8 +3,6 @@ import { instanceToPlain } from 'class-transformer';
 import { isArray, isObject } from 'lodash';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-// eslint-disable-next-line
 export interface Response<T> {
   data: T;
 }

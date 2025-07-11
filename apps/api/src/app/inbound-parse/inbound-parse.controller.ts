@@ -34,7 +34,10 @@ export class InboundParseController {
     this.logger.info('Getting MX Record Status');
 
     return await this.getMxRecordUsecase.execute(
-      GetMxRecordCommand.create({ environmentId: user.environmentId, organizationId: user.organizationId })
+      GetMxRecordCommand.create({
+        environmentId: user.environmentId,
+        organizationId: user.organizationId,
+      })
     );
   }
 }

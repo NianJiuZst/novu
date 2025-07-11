@@ -169,7 +169,9 @@ describe('QueryParserService', () => {
 
     describe('doesNotBeginWith operator', () => {
       it('should return true when string does not begin with given value', () => {
-        const rule: RulesLogic<AdditionalOperation> = { doesNotBeginWith: [{ var: 'text' }, 'world'] };
+        const rule: RulesLogic<AdditionalOperation> = {
+          doesNotBeginWith: [{ var: 'text' }, 'world'],
+        };
         const data = { text: 'hello world' };
         const { result, error } = evaluateRules(rule, data);
         expect(error).to.be.undefined;
@@ -177,7 +179,9 @@ describe('QueryParserService', () => {
       });
 
       it('should return false when string begins with given value', () => {
-        const rule: RulesLogic<AdditionalOperation> = { doesNotBeginWith: [{ var: 'text' }, 'hello'] };
+        const rule: RulesLogic<AdditionalOperation> = {
+          doesNotBeginWith: [{ var: 'text' }, 'hello'],
+        };
         const data = { text: 'hello world' };
         const { result, error } = evaluateRules(rule, data);
         expect(error).to.be.undefined;
@@ -187,7 +191,9 @@ describe('QueryParserService', () => {
 
     describe('doesNotEndWith operator', () => {
       it('should return true when string does not end with given value', () => {
-        const rule: RulesLogic<AdditionalOperation> = { doesNotEndWith: [{ var: 'text' }, 'hello'] };
+        const rule: RulesLogic<AdditionalOperation> = {
+          doesNotEndWith: [{ var: 'text' }, 'hello'],
+        };
         const data = { text: 'hello world' };
         const { result, error } = evaluateRules(rule, data);
         expect(error).to.be.undefined;
@@ -195,7 +201,9 @@ describe('QueryParserService', () => {
       });
 
       it('should return false when string ends with given value', () => {
-        const rule: RulesLogic<AdditionalOperation> = { doesNotEndWith: [{ var: 'text' }, 'world'] };
+        const rule: RulesLogic<AdditionalOperation> = {
+          doesNotEndWith: [{ var: 'text' }, 'world'],
+        };
         const data = { text: 'hello world' };
         const { result, error } = evaluateRules(rule, data);
         expect(error).to.be.undefined;
@@ -241,7 +249,9 @@ describe('QueryParserService', () => {
 
     describe('notIn operator', () => {
       it('should return true when value is not in array', () => {
-        const rule: RulesLogic<AdditionalOperation> = { notIn: [{ var: 'value' }, ['a', 'b', 'c']] };
+        const rule: RulesLogic<AdditionalOperation> = {
+          notIn: [{ var: 'value' }, ['a', 'b', 'c']],
+        };
         const data = { value: 'd' };
         const { result, error } = evaluateRules(rule, data);
         expect(error).to.be.undefined;
@@ -249,7 +259,9 @@ describe('QueryParserService', () => {
       });
 
       it('should return false when value is in array', () => {
-        const rule: RulesLogic<AdditionalOperation> = { notIn: [{ var: 'value' }, ['a', 'b', 'c']] };
+        const rule: RulesLogic<AdditionalOperation> = {
+          notIn: [{ var: 'value' }, ['a', 'b', 'c']],
+        };
         const data = { value: 'b' };
         const { result, error } = evaluateRules(rule, data);
         expect(error).to.be.undefined;

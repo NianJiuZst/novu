@@ -63,13 +63,9 @@ export function PrivatePageLayout() {
     if (redirectURL) {
       // Note: Do not use react-router-dom. The version we have doesn't do instant cross origin redirects.
       window.location.replace(redirectURL);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    }  }, []);
 
-  if (IS_EE_AUTH_ENABLED) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const shouldRedirect = useOptInRedirect();
+  if (IS_EE_AUTH_ENABLED) {    const shouldRedirect = useOptInRedirect();
 
     if (shouldRedirect) {
       // prevent flickering of the legacy layout until the redirect is done

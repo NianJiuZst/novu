@@ -28,15 +28,24 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: { DEFAULT: defaultColor('nv-color-primary'), ...generateColorShades('nv-color-primary') },
+        primary: {
+          DEFAULT: defaultColor('nv-color-primary'),
+          ...generateColorShades('nv-color-primary'),
+        },
         'primary-alpha': generateColorShades('nv-color-primary-alpha'),
         'primary-foreground': defaultColor('nv-color-primary-foreground'),
         'primary-foreground-alpha': generateColorShades('nv-color-primary-foreground-alpha'),
-        secondary: { DEFAULT: defaultColor('nv-color-secondary'), ...generateColorShades('nv-color-secondary') },
+        secondary: {
+          DEFAULT: defaultColor('nv-color-secondary'),
+          ...generateColorShades('nv-color-secondary'),
+        },
         'secondary-alpha': generateColorShades('nv-color-secondary-alpha'),
         'secondary-foreground': defaultColor('nv-color-secondary-foreground'),
         'secondary-foreground-alpha': generateColorShades('nv-color-secondary-foreground-alpha'),
-        counter: { DEFAULT: defaultColor('nv-color-counter'), ...generateColorShades('nv-color-counter') },
+        counter: {
+          DEFAULT: defaultColor('nv-color-counter'),
+          ...generateColorShades('nv-color-counter'),
+        },
         'counter-foreground': defaultColor('nv-color-counter-foreground'),
         'counter-foreground-alpha': generateColorShades('nv-color-accent-foreground-alpha'),
         background: defaultColor('nv-color-background'),

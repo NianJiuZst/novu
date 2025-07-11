@@ -38,7 +38,11 @@ export const useTranslationValidation = ({
 		}
 
 		if (!availableKeys || availableKeys.length === 0) {
-			return { hasError: true, errorMessage: "Translation key not found in default locale.", isValidKey: false };
+			return {
+				hasError: true,
+				errorMessage: "Translation key not found in default locale.",
+				isValidKey: false,
+			};
 		}
 
 		const existingKeys = availableKeys.map((key) => key.name);
@@ -70,7 +74,11 @@ export const validateTranslationKey = (
 
 	// If no translation keys are provided, show error
 	if (!availableKeys || availableKeys.length === 0) {
-		return { hasError: true, errorMessage: "Translation key not found in default locale.", isValidKey: false };
+		return {
+			hasError: true,
+			errorMessage: "Translation key not found in default locale.",
+			isValidKey: false,
+		};
 	}
 
 	const existingKeys = availableKeys.map((key) => key.name);

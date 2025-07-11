@@ -59,7 +59,6 @@ export class TelnyxSmsProvider extends BaseProvider implements ISmsProvider {
 
   parseEventBody(body: any | any[], identifier: string): ISMSEventBody | undefined {
     if (Array.isArray(body)) {
-      // eslint-disable-next-line no-param-reassign
       body = body.find((item) => item.data.id === identifier);
     }
 

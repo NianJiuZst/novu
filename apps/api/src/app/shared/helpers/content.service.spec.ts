@@ -289,7 +289,12 @@ describe('ContentService', () => {
             type: StepTypeEnum.DIGEST,
             content: '',
           },
-          metadata: { type: DigestTypeEnum.REGULAR, digestKey: 'path', unit: DigestUnitEnum.SECONDS, amount: 1 },
+          metadata: {
+            type: DigestTypeEnum.REGULAR,
+            digestKey: 'path',
+            unit: DigestUnitEnum.SECONDS,
+            amount: 1,
+          },
         },
       ]);
 

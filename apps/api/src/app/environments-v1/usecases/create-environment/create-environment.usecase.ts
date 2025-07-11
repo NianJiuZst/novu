@@ -23,7 +23,6 @@ export class CreateEnvironment {
 
   async execute(command: CreateEnvironmentCommand): Promise<EnvironmentResponseDto> {
     if (command.returnApiKeys === undefined) {
-      // eslint-disable-next-line no-param-reassign
       command.returnApiKeys = command.system === true;
     }
 

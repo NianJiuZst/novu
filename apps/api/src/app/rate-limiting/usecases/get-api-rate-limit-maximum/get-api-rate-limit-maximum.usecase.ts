@@ -108,8 +108,6 @@ export class GetApiRateLimitMaximum implements OnModuleInit {
           const featureForTierAsNumber = getFeatureForTierAsNumber(featureName, apiServiceLevel);
           const envVarName = this.getEnvVarName(apiServiceLevel, apiRateLimitCategory);
           const envVarValue = processEnv[envVarName];
-
-          // eslint-disable-next-line no-param-reassign
           categoryAcc[apiRateLimitCategory] = envVarValue ? Number(envVarValue) : featureForTierAsNumber;
 
           return categoryAcc;

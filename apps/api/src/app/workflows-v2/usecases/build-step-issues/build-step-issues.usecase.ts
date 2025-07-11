@@ -159,11 +159,7 @@ export class BuildStepIssuesUsecase {
       // Prioritize invalid variable validation over content compilation since it provides more granular error details
       if (liquidTemplateIssues.invalidVariables.length > 0) {
         const controlKey = currentPath.join('.');
-
-        // eslint-disable-next-line no-param-reassign
         issues.controls = issues.controls || {};
-
-        // eslint-disable-next-line no-param-reassign
         issues.controls[controlKey] = liquidTemplateIssues.invalidVariables.map((invalidVariable) => {
           const message = invalidVariable.message ? invalidVariable.message.split(' line:')[0] : '';
           if ('filterMessage' in invalidVariable) {
@@ -184,9 +180,7 @@ export class BuildStepIssuesUsecase {
         const contentControlKey = currentPath.join('.');
         const contentIssue = this.validateContentCompilation(contentControlKey, currentValue);
         if (contentIssue) {
-          // eslint-disable-next-line no-param-reassign
           issues.controls = issues.controls || {};
-          // eslint-disable-next-line no-param-reassign
           issues.controls[contentControlKey] = [contentIssue];
 
           return;

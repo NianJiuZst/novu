@@ -67,7 +67,10 @@ function validateBooleanInput(dataInput: unknown): BooleanValidation {
     return { isValid: false };
   }
 
-  return { isValid: true, input: typeof dataInput === 'boolean' ? dataInput : dataInput === 'true' };
+  return {
+    isValid: true,
+    input: typeof dataInput === 'boolean' ? dataInput : dataInput === 'true',
+  };
 }
 
 function validateRelativeDateInput(ruleValue: unknown): RelativeDateValidation {

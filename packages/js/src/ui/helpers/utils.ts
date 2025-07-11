@@ -163,7 +163,6 @@ export function generateBorderRadiusRules(props: { id: string; baseRadius: strin
   const rules: string[] = [];
 
   Object.entries(radiusRatios).forEach(([key, ratio]) => {
-    // eslint-disable-next-line no-nested-ternary
     const value = key === 'none' ? '0px' : key === 'full' ? '9999px' : `calc(${baseRadius} * ${ratio})`;
 
     const cssVariableRule = `.${id} { --nv-radius-${key}: ${value}; }`;
@@ -178,31 +177,71 @@ export const parseVariables = (variables: Required<Variables>, id: string) => {
     generateDefaultColor({ color: variables.colorBackground, key: 'color-background', id }),
     generateDefaultColor({ color: variables.colorForeground, key: 'color-foreground', id }),
     generateDefaultColor({ color: variables.colorPrimary, key: 'color-primary', id }),
-    generateDefaultColor({ color: variables.colorPrimaryForeground, key: 'color-primary-foreground', id }),
+    generateDefaultColor({
+      color: variables.colorPrimaryForeground,
+      key: 'color-primary-foreground',
+      id,
+    }),
     generateDefaultColor({ color: variables.colorSecondary, key: 'color-secondary', id }),
-    generateDefaultColor({ color: variables.colorSecondaryForeground, key: 'color-secondary-foreground', id }),
+    generateDefaultColor({
+      color: variables.colorSecondaryForeground,
+      key: 'color-secondary-foreground',
+      id,
+    }),
     generateDefaultColor({ color: variables.colorCounter, key: 'color-counter', id }),
-    generateDefaultColor({ color: variables.colorCounterForeground, key: 'color-counter-foreground', id }),
+    generateDefaultColor({
+      color: variables.colorCounterForeground,
+      key: 'color-counter-foreground',
+      id,
+    }),
     generateDefaultColor({ color: variables.colorShadow, key: 'color-shadow', id }),
     generateDefaultColor({ color: variables.colorRing, key: 'color-ring', id }),
     generateDefaultColor({ color: variables.colorStripes, key: 'color-stripes', id }),
-    ...generateAlphaShadeRulesFromColor({ color: variables.colorBackground, key: 'color-background-alpha', id }),
-    ...generateAlphaShadeRulesFromColor({ color: variables.colorForeground, key: 'color-foreground-alpha', id }),
-    ...generateSolidShadeRulesFromColor({ color: variables.colorPrimary, key: 'color-primary', id }),
-    ...generateAlphaShadeRulesFromColor({ color: variables.colorPrimary, key: 'color-primary-alpha', id }),
+    ...generateAlphaShadeRulesFromColor({
+      color: variables.colorBackground,
+      key: 'color-background-alpha',
+      id,
+    }),
+    ...generateAlphaShadeRulesFromColor({
+      color: variables.colorForeground,
+      key: 'color-foreground-alpha',
+      id,
+    }),
+    ...generateSolidShadeRulesFromColor({
+      color: variables.colorPrimary,
+      key: 'color-primary',
+      id,
+    }),
+    ...generateAlphaShadeRulesFromColor({
+      color: variables.colorPrimary,
+      key: 'color-primary-alpha',
+      id,
+    }),
     ...generateAlphaShadeRulesFromColor({
       color: variables.colorPrimaryForeground,
       key: 'color-primary-foreground-alpha',
       id,
     }),
-    ...generateSolidShadeRulesFromColor({ color: variables.colorSecondary, key: 'color-secondary', id }),
-    ...generateAlphaShadeRulesFromColor({ color: variables.colorSecondary, key: 'color-secondary-alpha', id }),
+    ...generateSolidShadeRulesFromColor({
+      color: variables.colorSecondary,
+      key: 'color-secondary',
+      id,
+    }),
+    ...generateAlphaShadeRulesFromColor({
+      color: variables.colorSecondary,
+      key: 'color-secondary-alpha',
+      id,
+    }),
     ...generateAlphaShadeRulesFromColor({
       color: variables.colorSecondaryForeground,
       key: 'color-secondary-foreground-alpha',
       id,
     }),
-    ...generateAlphaShadeRulesFromColor({ color: variables.colorNeutral, key: 'color-neutral-alpha', id }),
+    ...generateAlphaShadeRulesFromColor({
+      color: variables.colorNeutral,
+      key: 'color-neutral-alpha',
+      id,
+    }),
     ...generateFontSizeRules({ id, baseFontSize: variables.fontSize }),
     ...generateBorderRadiusRules({ id, baseRadius: variables.borderRadius }),
   ];

@@ -119,7 +119,10 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
 			{
 				onSuccess: () => {
 					navigate(
-						buildRoute(ROUTES.EDIT_WORKFLOW, { environmentSlug: environment.slug!, workflowSlug: workflow.slug })
+						buildRoute(ROUTES.EDIT_WORKFLOW, {
+							environmentSlug: environment.slug!,
+							workflowSlug: workflow.slug,
+						})
 					);
 				},
 			}

@@ -34,8 +34,6 @@ export function getSettingsErrors(errors) {
 
 function findMessages(obj: object): string[] {
   let messages: string[] = [];
-
-  // eslint-disable-next-line guard-for-in
   for (const key in obj) {
     const value = obj[key];
 

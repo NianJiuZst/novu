@@ -7,9 +7,7 @@ export const BillingPage = () => {
   const segment = useSegment();
 
   useEffect(() => {
-    segment.track('Billing Page Viewed');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    segment.track('Billing Page Viewed');  }, []);
 
   return (
     <SubscriptionProvider>

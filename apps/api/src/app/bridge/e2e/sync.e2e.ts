@@ -97,7 +97,9 @@ describe('Bridge Sync - /bridge/sync (POST) #novu-v2', async () => {
     });
     expect(result.body.data?.length).to.equal(1);
 
-    const workflowsCount = await workflowsRepository.find({ _environmentId: session.environment._id });
+    const workflowsCount = await workflowsRepository.find({
+      _environmentId: session.environment._id,
+    });
     const workflowData = await workflowsRepository.findById(result.body.data[0]._id, session.environment._id);
 
     expect(workflowData).to.be.ok;
@@ -133,7 +135,9 @@ describe('Bridge Sync - /bridge/sync (POST) #novu-v2', async () => {
     });
     expect(result.body.data?.length).to.equal(1);
 
-    const workflowsCount = await workflowsRepository.find({ _environmentId: session.environment._id });
+    const workflowsCount = await workflowsRepository.find({
+      _environmentId: session.environment._id,
+    });
     const workflowData = await workflowsRepository.findById(result.body.data[0]._id, session.environment._id);
 
     expect(workflowData).to.be.ok;
@@ -190,7 +194,9 @@ describe('Bridge Sync - /bridge/sync (POST) #novu-v2', async () => {
     });
     expect(result.body.data?.length).to.equal(1);
 
-    const workflowsCount = await workflowsRepository.find({ _environmentId: session.environment._id });
+    const workflowsCount = await workflowsRepository.find({
+      _environmentId: session.environment._id,
+    });
     expect(workflowsCount.length).to.equal(1);
 
     const workflowData = await workflowsRepository.findById(result.body.data[0]._id, session.environment._id);
@@ -577,7 +583,9 @@ describe('Bridge Sync - /bridge/sync (POST) #novu-v2', async () => {
     });
     expect(firstSyncResponse.body.data?.length).to.equal(1);
 
-    const firstWorkflowCountResponse = await workflowsRepository.count({ _environmentId: session.environment._id });
+    const firstWorkflowCountResponse = await workflowsRepository.count({
+      _environmentId: session.environment._id,
+    });
     expect(firstWorkflowCountResponse).to.equal(1);
 
     const firstWorkflowResponse = await workflowsRepository.findById(
@@ -619,7 +627,9 @@ describe('Bridge Sync - /bridge/sync (POST) #novu-v2', async () => {
     });
     expect(secondSyncResponse.body.data?.length).to.equal(1);
 
-    const secondWorkflowCountResponse = await workflowsRepository.count({ _environmentId: session.environment._id });
+    const secondWorkflowCountResponse = await workflowsRepository.count({
+      _environmentId: session.environment._id,
+    });
     expect(secondWorkflowCountResponse).to.equal(1);
 
     const secondWorkflowResponse = await workflowsRepository.findById(

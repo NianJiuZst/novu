@@ -1,4 +1,3 @@
-/* eslint-disable local-rules/no-class-without-style */
 import { createMemo, For, Show } from 'solid-js';
 import { useInboxContext, useUnreadCounts } from '../../context';
 import { cn, getTagsFromTab, useStyle } from '../../helpers';

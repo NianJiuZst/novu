@@ -59,9 +59,7 @@ export function CreateTenantSidebar({
       return;
     }
 
-    setValue('identifier', newIdentifier);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name]);
+    setValue('identifier', newIdentifier);  }, [name]);
 
   const onCreateTenant = async (data) => {
     const { identifier: tenantIdentifier } = await createTenantMutation({

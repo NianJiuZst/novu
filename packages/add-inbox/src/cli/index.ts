@@ -517,7 +517,9 @@ async function init() {
     // Validate project structure
     const projectValid = validateProjectStructure();
     if (!projectValid) {
-      trackCliError(analytics, 'Invalid project structure', undefined, { step: 'validateProjectStructure' });
+      trackCliError(analytics, 'Invalid project structure', undefined, {
+        step: 'validateProjectStructure',
+      });
       errorOrCancelled = true;
       process.exit(1);
     }
@@ -547,7 +549,12 @@ async function init() {
       trackCliCompleted(analytics, config);
     }
   } catch (error) {
-    trackCliError(analytics, error, config ?? undefined, { step: 'init', appId, subscriberId, region });
+    trackCliError(analytics, error, config ?? undefined, {
+      step: 'init',
+      appId,
+      subscriberId,
+      region,
+    });
     logger.error('\n❌ An unexpected error occurred:');
     logger.error(error instanceof Error ? error.message : String(error));
     errorOrCancelled = true;

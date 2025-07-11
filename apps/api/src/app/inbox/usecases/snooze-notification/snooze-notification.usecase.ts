@@ -105,7 +105,11 @@ export class SnoozeNotification {
       name: job._id,
       data: jobData,
       groupId: job._organizationId,
-      options: { delay, attempts: this.RETRY_ATTEMPTS, backoff: { type: 'exponential', delay: 5000 } },
+      options: {
+        delay,
+        attempts: this.RETRY_ATTEMPTS,
+        backoff: { type: 'exponential', delay: 5000 },
+      },
     });
   }
 

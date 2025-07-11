@@ -161,7 +161,6 @@ export class IdempotencyInterceptor implements NestInterceptor {
   }
 
   private setHeaders(response: any, headers: Record<string, string>) {
-    // eslint-disable-next-line array-callback-return
     Object.keys(headers).map((key) => {
       if (headers[key]) {
         response.set(key, headers[key]);
@@ -207,7 +206,9 @@ export class IdempotencyInterceptor implements NestInterceptor {
         `Request with key "${idempotencyKey}" is being reused for a different body`
       );
     }
-    this.setHeaders(context.switchToHttp().getResponse(), { [HttpResponseHeaderKeysEnum.IDEMPOTENCY_REPLAY]: 'true' });
+    this.setHeaders(context.switchToHttp().getResponse(), {
+      [HttpResponseHeaderKeysEnum.IDEMPOTENCY_REPLAY]: 'true',
+    });
 
     // already seen the request return cached response
     if (parsed.status === ReqStatusEnum.ERROR) {
@@ -239,7 +240,9 @@ export class IdempotencyInterceptor implements NestInterceptor {
           IDEMPOTENCY_CACHE_TTL
         );
         this.logger.trace(`cached the success response for idempotency key: "${idempotencyKey}"`);
-        this.setHeaders(httpResponse, { [HttpResponseHeaderKeysEnum.IDEMPOTENCY_KEY]: idempotencyKey });
+        this.setHeaders(httpResponse, {
+          [HttpResponseHeaderKeysEnum.IDEMPOTENCY_KEY]: idempotencyKey,
+        });
 
         return response;
       }),

@@ -5,7 +5,6 @@ import { NovuError } from './utils/errors';
 
 interface CallQueueItem {
   fn: () => Promise<unknown>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resolve: (value: any | PromiseLike<any>) => void;
   reject: (reason?: unknown) => void;
 }
@@ -36,7 +35,9 @@ export class BaseModule {
         this.onSessionError(error);
         this.#sessionError = error;
         this.#callsQueue.forEach(({ resolve }) => {
-          resolve({ error: new NovuError('Failed to initialize session, please contact the support', error) });
+          resolve({
+            error: new NovuError('Failed to initialize session, please contact the support', error),
+          });
         });
         this.#callsQueue = [];
       }

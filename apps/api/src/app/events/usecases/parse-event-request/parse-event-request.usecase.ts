@@ -118,7 +118,6 @@ export class ParseEventRequest {
 
     if (template.validatePayload && template.payloadSchema) {
       const validatedPayload = this.validateAndApplyPayloadDefaults(command.payload, template.payloadSchema);
-      // eslint-disable-next-line no-param-reassign
       command.payload = validatedPayload;
     }
 
@@ -182,7 +181,6 @@ export class ParseEventRequest {
     if (command.payload && Array.isArray(command.payload.attachments)) {
       this.modifyAttachments(command);
       await this.storageHelperService.uploadAttachments(command.payload.attachments);
-      // eslint-disable-next-line no-param-reassign
       command.payload.attachments = command.payload.attachments.map(({ file, ...attachment }) => attachment);
     }
 
@@ -192,10 +190,14 @@ export class ParseEventRequest {
         template,
       })
     );
-    // eslint-disable-next-line no-param-reassign
     command.payload = merge({}, defaultPayload, command.payload);
 
-    const result = await this.dispatchEventToWorkflowQueue({ command, transactionId, environment, organization });
+    const result = await this.dispatchEventToWorkflowQueue({
+      command,
+      transactionId,
+      environment,
+      organization,
+    });
 
     return result;
   }
@@ -275,7 +277,11 @@ export class ParseEventRequest {
       bridgeWorkflow: discoveredWorkflow ?? undefined,
     };
 
-    await this.workflowQueueService.add({ name: transactionId, data: jobData, groupId: command.organizationId });
+    await this.workflowQueueService.add({
+      name: transactionId,
+      data: jobData,
+      groupId: command.organizationId,
+    });
     this.logger.info(
       { ...command, transactionId, discoveredWorkflowId: discoveredWorkflow?.workflowId },
       'Event dispatched to [Workflow] Queue'
@@ -336,7 +342,6 @@ export class ParseEventRequest {
   }
 
   private modifyAttachments(command: ParseEventRequestCommand): void {
-    // eslint-disable-next-line no-param-reassign
     command.payload.attachments = command.payload.attachments.map((attachment) => {
       const randomId = randomBytes(16).toString('hex');
 

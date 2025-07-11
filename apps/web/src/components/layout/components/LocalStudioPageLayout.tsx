@@ -22,9 +22,7 @@ export const LocalStudioPageLayout: WithLoadingSkeleton = () => {
   useEffect(() => {
     if (state.anonymousId) {
       segment.setAnonymousId(state.anonymousId);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
+    }  }, [state]);
 
   return (
     <ErrorBoundary

@@ -59,9 +59,7 @@ export function SingleTranslationFileEditSidebar({
 
     if (!locale) {
       handleClose();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uploadedFile, handleClose, mode]);
+    }  }, [uploadedFile, handleClose, mode]);
 
   const handleUpdateFile = async () => {
     if (mode === 'replace') {

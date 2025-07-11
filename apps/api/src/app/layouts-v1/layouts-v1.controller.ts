@@ -187,7 +187,10 @@ export class LayoutsControllerV1 {
   })
   @ApiParam({ name: 'layoutId', description: 'The layout id', type: String, required: true })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete layout', description: 'Execute a soft delete of a layout given a certain ID.' })
+  @ApiOperation({
+    summary: 'Delete layout',
+    description: 'Execute a soft delete of a layout given a certain ID.',
+  })
   async deleteLayout(@UserSession() user: UserSessionData, @Param('layoutId') layoutId: LayoutId): Promise<void> {
     return await this.deleteLayoutUseCase.execute(
       DeleteLayoutCommand.create({
@@ -210,7 +213,6 @@ export class LayoutsControllerV1 {
   })
   @ApiConflictResponse({
     description:
-      // eslint-disable-next-line max-len
       'One default layout is needed. If you are trying to turn a default layout as not default, you should turn a different layout as default first and automatically it will be done by the system.',
     schema: { example: `One default layout is required` },
   })

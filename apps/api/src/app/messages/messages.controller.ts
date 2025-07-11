@@ -75,7 +75,12 @@ export class MessagesController {
     description: `Delete a message entity from the Novu platform by **messageId**. 
     This action is irreversible. **messageId** is required and of mongodbId type.`,
   })
-  @ApiParam({ name: 'messageId', type: String, required: true, example: '507f1f77bcf86cd799439011' })
+  @ApiParam({
+    name: 'messageId',
+    type: String,
+    required: true,
+    example: '507f1f77bcf86cd799439011',
+  })
   @RequirePermissions(PermissionsEnum.MESSAGE_WRITE)
   async deleteMessage(
     @UserSession() user: UserSessionData,
@@ -99,7 +104,12 @@ export class MessagesController {
     description: `Delete multiple messages from the Novu platform using **transactionId** of triggered event. 
     This API supports filtering by **channel** and delete all messages associated with the **transactionId**.`,
   })
-  @ApiParam({ name: 'transactionId', type: String, required: true, example: '507f1f77bcf86cd799439011' })
+  @ApiParam({
+    name: 'transactionId',
+    type: String,
+    required: true,
+    example: '507f1f77bcf86cd799439011',
+  })
   @SdkMethodName('deleteByTransactionId')
   @RequirePermissions(PermissionsEnum.MESSAGE_WRITE)
   async deleteMessagesByTransactionId(

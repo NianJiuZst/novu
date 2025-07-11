@@ -50,7 +50,10 @@ export class ChatOauthCallback {
     await this.createSubscriber(_organizationId, command, webhookUrl);
 
     if (integrationCredentials && integrationCredentials.redirectUrl) {
-      return { typeOfResponse: ResponseTypeEnum.URL, resultString: integrationCredentials.redirectUrl };
+      return {
+        typeOfResponse: ResponseTypeEnum.URL,
+        resultString: integrationCredentials.redirectUrl,
+      };
     }
 
     return { typeOfResponse: ResponseTypeEnum.HTML, resultString: this.SCRIPT_CLOSE_TAB };
@@ -69,7 +72,10 @@ export class ChatOauthCallback {
       })
     );
 
-    const subscriberCredentials: IChannelCredentialsCommand = { webhookUrl, channel: command.providerId };
+    const subscriberCredentials: IChannelCredentialsCommand = {
+      webhookUrl,
+      channel: command.providerId,
+    };
 
     await this.updateSubscriberChannelUsecase.execute(
       UpdateSubscriberChannelCommand.create({

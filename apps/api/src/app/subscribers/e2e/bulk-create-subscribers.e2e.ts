@@ -117,7 +117,10 @@ describe('Bulk create subscribers - /v1/subscribers/bulk (POST) #novu-v2', () =>
   });
 
   it('should recreate deleted subscribers', async () => {
-    const existingSubscriber = { subscriberId: subscriber.subscriberId, firstName: 'existingSubscriber' };
+    const existingSubscriber = {
+      subscriberId: subscriber.subscriberId,
+      firstName: 'existingSubscriber',
+    };
     const newSubscriber1 = {
       subscriberId: 'test1',
       firstName: 'sub1',

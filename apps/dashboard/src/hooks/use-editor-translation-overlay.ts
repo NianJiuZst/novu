@@ -25,9 +25,10 @@ export function useEditorTranslationOverlay({
 	const isTranslationEnabled = useIsTranslationEnabled();
 	const shouldEnableTranslations = isTranslationEnabled && enableTranslations;
 
-	const [translationTriggerPosition, setTranslationTriggerPosition] = useState<{ top: number; left: number } | null>(
-		null
-	);
+	const [translationTriggerPosition, setTranslationTriggerPosition] = useState<{
+		top: number;
+		left: number;
+	} | null>(null);
 
 	const translationCompletionSource = useTranslationCompletionSource({ workflow });
 

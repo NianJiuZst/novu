@@ -11,6 +11,11 @@
     "build": "tsc -b && vite build",
     "docker:build": "docker buildx build --load -f ./dockerfile -t novu-dashboard ./../.. $DOCKER_BUILD_ARGUMENTS",
     "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
     "preview": "vite preview",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
@@ -164,6 +169,14 @@
   "nx": {
     "tags": [
       "type:app"
-    ]
+    ],
+    "targets": {
+      "lint": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "npx biome lint apps/dashboard"
+        }
+      }
+    }
   }
 }

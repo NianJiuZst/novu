@@ -215,7 +215,6 @@ export class UpsertWorkflowUseCase {
 
     for (const step of command.workflowDto.steps) {
       const existingStep: NotificationStepEntity | null | undefined =
-        // eslint-disable-next-line id-length
         '_id' in step ? existingWorkflow?.steps.find((s) => !!step._id && s._templateId === step._id) : null;
 
       const {
@@ -347,7 +346,11 @@ export class UpsertWorkflowUseCase {
       shouldDelete,
       step,
       controlValues,
-    }: { step: NotificationStepEntity; controlValues: Record<string, unknown> | null; shouldDelete: boolean },
+    }: {
+      step: NotificationStepEntity;
+      controlValues: Record<string, unknown> | null;
+      shouldDelete: boolean;
+    },
     workflowId: string,
     command: UpsertWorkflowCommand
   ) {

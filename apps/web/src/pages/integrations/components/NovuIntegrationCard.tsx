@@ -86,8 +86,7 @@ function TooltipLabel({
 }) {
   const label = isLimitReached
     ? `You have run out of available ${unit} for this month. Configure a different ${channel} provider to send more.`
-    : // eslint-disable-next-line max-len
-      `The predefined free Novu provider allows sending ${limit} ${unit} per month. Configure a different ${channel} provider to send more.`;
+    :      `The predefined free Novu provider allows sending ${limit} ${unit} per month. Configure a different ${channel} provider to send more.`;
 
   return (
     <StyledLabelContainer>
@@ -166,9 +165,7 @@ const StyledCard = styled.div<{ dark: boolean; active: boolean; clickable: boole
       opacity: 1;
     }
     cursor: ${({ clickable }) => (clickable ? 'pointer' : undefined)};
-    ${({ dark, clickable }) =>
-      // eslint-disable-next-line no-nested-ternary
-      clickable
+    ${({ dark, clickable }) =>      clickable
         ? dark
           ? `
             background-color: ${colors.B20};
@@ -202,17 +199,13 @@ const StyledLabel = styled(Text)<{ isLimitReached: boolean }>`
 `;
 
 const useStyles = createStyles((theme, { isLimitReached }: { isLimitReached: boolean }) => ({
-  tooltip: {
-    // eslint-disable-next-line no-nested-ternary
-    backgroundColor: isLimitReached ? colors.error : theme.colorScheme === 'dark' ? colors.B20 : colors.BGLight,
+  tooltip: {    backgroundColor: isLimitReached ? colors.error : theme.colorScheme === 'dark' ? colors.B20 : colors.BGLight,
     color: colors.B60,
     boxShadow: theme.colorScheme === 'dark' ? shadows.dark : shadows.medium,
     padding: '12px 15px',
     fontSize: '14px',
     fontWeight: 400,
   },
-  arrow: {
-    // eslint-disable-next-line no-nested-ternary
-    backgroundColor: isLimitReached ? colors.error : theme.colorScheme === 'dark' ? colors.B20 : theme.white,
+  arrow: {    backgroundColor: isLimitReached ? colors.error : theme.colorScheme === 'dark' ? colors.B20 : theme.white,
   },
 }));

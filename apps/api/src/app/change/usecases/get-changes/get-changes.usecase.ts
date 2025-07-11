@@ -131,7 +131,6 @@ export class GetChanges {
         _id: entityId,
         _environmentId: environmentId,
       });
-      // eslint-disable-next-line prefer-destructuring
       item = items[0];
     }
 
@@ -225,8 +224,10 @@ export class GetChanges {
     });
 
     if (!item) {
-      const items = await this.feedRepository.findDeleted({ _id: entityId, _environmentId: environmentId });
-      // eslint-disable-next-line prefer-destructuring
+      const items = await this.feedRepository.findDeleted({
+        _id: entityId,
+        _environmentId: environmentId,
+      });
       item = items[0];
       if (!item) {
         this.logger.error(`Could not find feed for id ${entityId}`);

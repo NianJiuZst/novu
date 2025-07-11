@@ -19,8 +19,6 @@ export function CachedResponse<TOutput = any, TArgs extends any[] = any[]>({
     const originalMethod = descriptor.value as (...args: TArgs) => Promise<TOutput>;
     const methodName = key;
     injectCache(target, 'cacheService');
-
-    // eslint-disable-next-line no-param-reassign
     descriptor.value = async function (this: any, ...args: TArgs): Promise<TOutput> {
       const cacheService = this.cacheService as CacheService;
 

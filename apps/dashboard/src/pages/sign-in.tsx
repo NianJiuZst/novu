@@ -21,7 +21,6 @@ export const SignInPage = () => {
 			...utmParams,
 			referrer,
 		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

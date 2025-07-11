@@ -13,7 +13,11 @@ export type ListNotificationsArgs = {
   useCache?: boolean;
 };
 
-export type ListNotificationsResponse = { notifications: Notification[]; hasMore: boolean; filter: NotificationFilter };
+export type ListNotificationsResponse = {
+  notifications: Notification[];
+  hasMore: boolean;
+  filter: NotificationFilter;
+};
 
 export type FilterCountArgs = {
   tags?: string[];

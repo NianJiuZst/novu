@@ -35,7 +35,10 @@ describe.skip('Events - Test email - /v1/events/test/email (POST) #novu-v2', () 
       channel: ChannelTypeEnum.EMAIL,
       _organizationId: session.organization._id,
     });
-    await integrationRepository.delete({ _id: emailIntegration?._id, _organizationId: session.organization._id });
+    await integrationRepository.delete({
+      _id: emailIntegration?._id,
+      _organizationId: session.organization._id,
+    });
   };
 
   const deactivateEmailIntegration = async () => {

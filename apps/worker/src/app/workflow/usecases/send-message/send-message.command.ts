@@ -10,10 +10,10 @@ export class SendMessageCommand extends EnvironmentWithUserCommand {
   identifier: string;
 
   @IsDefined()
-  payload: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  payload: any;
 
   @IsOptional()
-  compileContext?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  compileContext?: any;
 
   @IsDefined()
   overrides: TriggerOverrides;

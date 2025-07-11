@@ -55,7 +55,6 @@ export class VerifyPayloadService {
   private setNestedKey(obj, path, value) {
     if (path.length === 1) {
       if (value !== '') {
-        // eslint-disable-next-line no-param-reassign
         obj[path[0]] = value;
       }
 
@@ -63,7 +62,6 @@ export class VerifyPayloadService {
     }
 
     if (!obj[path[0]]) {
-      // eslint-disable-next-line no-param-reassign
       obj[path[0]] = {};
     }
 

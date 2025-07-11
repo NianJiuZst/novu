@@ -207,7 +207,12 @@ describe('Session', () => {
       },
     };
     const subscriber = { _id: 'subscriber-id' };
-    const environment = { _id: 'env-id', _organizationId: 'org-id', name: 'env-name', apiKeys: [{ key: 'api-key' }] };
+    const environment = {
+      _id: 'env-id',
+      _organizationId: 'org-id',
+      name: 'env-name',
+      apiKeys: [{ key: 'api-key' }],
+    };
     const notificationCount = { data: [{ count: 10, filter: {} }] };
     const token = 'token';
 
@@ -244,7 +249,12 @@ describe('Session', () => {
       origin: 'origin',
     };
 
-    const environment = { _id: 'env-id', _organizationId: 'org-id', name: 'env-name', apiKeys: [{ key: 'api-key' }] };
+    const environment = {
+      _id: 'env-id',
+      _organizationId: 'org-id',
+      name: 'env-name',
+      apiKeys: [{ key: 'api-key' }],
+    };
     const integration = { ...mockIntegration, credentials: { hmac: false } };
     const subscriber = { _id: 'subscriber-id' };
     const notificationCount = { data: [{ count: 10, filter: {} }] };
@@ -283,7 +293,12 @@ describe('Session', () => {
       },
     };
 
-    const environment = { _id: 'env-id', _organizationId: 'org-id', name: 'env-name', apiKeys: [{ key: 'api-key' }] };
+    const environment = {
+      _id: 'env-id',
+      _organizationId: 'org-id',
+      name: 'env-name',
+      apiKeys: [{ key: 'api-key' }],
+    };
     const integration = { ...mockIntegration, credentials: { hmac: false } };
     const subscriber = { _id: 'subscriber-id' };
     const notificationCount = { data: [{ count: 10, filter: {} }] };
@@ -310,12 +325,16 @@ describe('Session', () => {
     expect(proResponse.maxSnoozeDurationHours).to.equal(90 * 24);
 
     // BUSINESS/TEAM plan should have 90 days max snooze duration
-    organizationRepository.findOne.resolves({ apiServiceLevel: ApiServiceLevelEnum.BUSINESS } as any);
+    organizationRepository.findOne.resolves({
+      apiServiceLevel: ApiServiceLevelEnum.BUSINESS,
+    } as any);
     const businessResponse: SubscriberSessionResponseDto = await session.execute(command);
     expect(businessResponse.maxSnoozeDurationHours).to.equal(90 * 24);
 
     // ENTERPRISE plan should have 90 days max snooze duration
-    organizationRepository.findOne.resolves({ apiServiceLevel: ApiServiceLevelEnum.ENTERPRISE } as any);
+    organizationRepository.findOne.resolves({
+      apiServiceLevel: ApiServiceLevelEnum.ENTERPRISE,
+    } as any);
     const enterpriseResponse: SubscriberSessionResponseDto = await session.execute(command);
     expect(enterpriseResponse.maxSnoozeDurationHours).to.equal(90 * 24);
   });

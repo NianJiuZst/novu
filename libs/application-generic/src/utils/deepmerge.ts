@@ -76,13 +76,11 @@ function mergeObject(
 ): Record<string, unknown> {
   const destination = {};
   if (options.isMergeableObject(target)) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     getKeys(target).forEach((key: string) => {
       destination[key] = cloneUnlessOtherwiseSpecified(target[key] as Record<string, unknown>, options);
     });
   }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   getKeys(source).forEach((key: string) => {
     if (propertyIsUnsafe(target, key as string)) {

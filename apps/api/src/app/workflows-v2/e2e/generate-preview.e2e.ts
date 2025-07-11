@@ -2116,7 +2116,9 @@ describe('Workflow Step Preview - POST /:workflowId/step/:stepId/preview #novu-v
         _id: session.environment._id,
       },
       {
-        bridge: { url: `http://localhost:${process.env.PORT}/v1/environments/${session.environment._id}/bridge` },
+        bridge: {
+          url: `http://localhost:${process.env.PORT}/v1/environments/${session.environment._id}/bridge`,
+        },
       }
     );
   }

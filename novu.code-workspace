@@ -91,6 +91,6 @@
     "vsicons.presets.nestjs": true
   },
   "extensions": {
-    "recommendations": ["folke.vscode-monorepo-workspace", "esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
+    "recommendations": ["folke.vscode-monorepo-workspace", "biomejs.biome"]
   }
 }

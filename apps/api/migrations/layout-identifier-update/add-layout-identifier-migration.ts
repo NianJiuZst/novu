@@ -5,7 +5,6 @@ import { slugify } from '@novu/shared';
 import shortid from 'shortid';
 
 export async function addLayoutIdentifierMigration() {
-  // eslint-disable-next-line no-console
   console.log('start migration - add layout identifier migration');
 
   const organizationRepository = new OrganizationRepository();
@@ -14,7 +13,6 @@ export async function addLayoutIdentifierMigration() {
   const organizations = await organizationRepository.find({});
 
   for (const organization of organizations) {
-    // eslint-disable-next-line no-console
     console.log(`organization ${organization._id}`);
 
     const layouts = await layoutRepository.find({
@@ -49,13 +47,11 @@ export async function addLayoutIdentifierMigration() {
     } catch (e) {
       bulkResponse = e.result;
     }
-    // eslint-disable-next-line no-console
     console.log(
       `${bulkResponse.result.nMatched} matched, ${
         bulkResponse.result.nModified
       } modified, ${bulkResponse.getWriteErrorCount()} errors`
     );
   }
-  // eslint-disable-next-line no-console
   console.log('end migration');
 }

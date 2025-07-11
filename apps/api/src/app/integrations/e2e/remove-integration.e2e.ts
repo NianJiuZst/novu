@@ -251,7 +251,10 @@ describe('Delete Integration - /integration/:integrationId (DELETE) #novu-v2', (
     expect(isDeleted).to.equal(true);
 
     const deletedIntegration = (
-      await integrationRepository.findDeleted({ _environmentId: session.environment._id, _id: integrationId })
+      await integrationRepository.findDeleted({
+        _environmentId: session.environment._id,
+        _id: integrationId,
+      })
     )[0];
 
     expect(deletedIntegration.deleted).to.equal(true);

@@ -23,7 +23,15 @@ export const useFetchLayouts = ({
 
 	const layoutsQuery = useQuery({
 		queryKey: [QueryKeys.fetchLayouts, currentEnvironment?._id, { limit, offset, query, orderBy, orderDirection }],
-		queryFn: () => getLayouts({ environment: currentEnvironment!, limit, offset, query, orderBy, orderDirection }),
+		queryFn: () =>
+			getLayouts({
+				environment: currentEnvironment!,
+				limit,
+				offset,
+				query,
+				orderBy,
+				orderDirection,
+			}),
 		placeholderData: keepPreviousData,
 		enabled: !!currentEnvironment?._id,
 		refetchOnWindowFocus: true,

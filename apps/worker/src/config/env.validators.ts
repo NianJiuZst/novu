@@ -24,7 +24,10 @@ const str32 = makeValidator((variable) => {
 
 export const envValidators = {
   TZ: str({ default: 'UTC' }),
-  NODE_ENV: str({ choices: ['dev', 'test', 'production', 'ci', 'local', 'staging'], default: 'local' }),
+  NODE_ENV: str({
+    choices: ['dev', 'test', 'production', 'ci', 'local', 'staging'],
+    default: 'local',
+  }),
   PORT: port(),
   STORE_ENCRYPTION_KEY: str32(),
   STORE_NOTIFICATION_CONTENT: bool({ default: false }),
@@ -72,7 +75,9 @@ export const envValidators = {
   ...(processEnv.STORAGE_SERVICE === 'AZURE' && {
     AZURE_ACCOUNT_NAME: str(),
     AZURE_ACCOUNT_KEY: str(),
-    AZURE_HOST_NAME: str({ default: `https://${processEnv.AZURE_ACCOUNT_NAME}.blob.core.windows.net` }),
+    AZURE_HOST_NAME: str({
+      default: `https://${processEnv.AZURE_ACCOUNT_NAME}.blob.core.windows.net`,
+    }),
     AZURE_CONTAINER_NAME: str({ default: 'novu' }),
   }),
 

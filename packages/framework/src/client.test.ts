@@ -77,7 +77,10 @@ describe('Novu Client', () => {
 
     it('should set strictAuthentication to provided strictAuthentication', () => {
       const testStrictAuthentication = false;
-      const newClient = new Client({ secretKey: 'some-secret-key', strictAuthentication: testStrictAuthentication });
+      const newClient = new Client({
+        secretKey: 'some-secret-key',
+        strictAuthentication: testStrictAuthentication,
+      });
       expect(newClient.strictAuthentication).toBe(testStrictAuthentication);
     });
 
@@ -1344,7 +1347,10 @@ describe('Novu Client', () => {
 
           return { body: 'Test Body', subject: 'Subject' };
         });
-        await step.email('inactive-step-id', async () => ({ body: 'Test Body', subject: 'Subject' }));
+        await step.email('inactive-step-id', async () => ({
+          body: 'Test Body',
+          subject: 'Subject',
+        }));
       });
 
       await client.addWorkflows([newWorkflow]);
@@ -1471,7 +1477,10 @@ describe('Novu Client', () => {
       const workflowMock = workflow(
         'mock-workflow',
         async ({ step, payload }) => {
-          await step.email('send-email', async () => ({ body: `Test: ${payload.name}`, subject: 'Subject' }));
+          await step.email('send-email', async () => ({
+            body: `Test: ${payload.name}`,
+            subject: 'Subject',
+          }));
         },
         {
           payloadSchema: {
@@ -1948,7 +1957,6 @@ describe('Novu Client', () => {
 
       const executionResult = await client.executeWorkflow(event);
       expect(executionResult.outputs).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((executionResult.outputs.data as any).someVal).toBe(link);
     });
 

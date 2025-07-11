@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import type { JSX } from 'solid-js';
 
 export const MarkAsUnarchived = (props?: JSX.HTMLAttributes<SVGSVGElement>) => {

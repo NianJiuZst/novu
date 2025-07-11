@@ -9,7 +9,6 @@ export class CheckIntegration {
 
   public async execute(command: CheckIntegrationCommand) {
     try {
-      // eslint-disable-next-line default-case
       switch (command.channel) {
         case ChannelTypeEnum.EMAIL:
           return await this.checkIntegrationEmail.execute(command);

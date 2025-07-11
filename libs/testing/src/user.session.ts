@@ -421,7 +421,6 @@ export class UserSession {
   }
 
   async createFeed(name?: string) {
-    // eslint-disable-next-line no-param-reassign
     name = name || 'Activities';
     const feed = await this.feedRepository.create({
       name,

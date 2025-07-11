@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import type React from 'react';
 
 export function Workflow(props: React.ComponentPropsWithoutRef<'svg'>) {

@@ -79,7 +79,10 @@ export class GetVercelIntegrationProjects {
       })
     );
 
-    return { projects: this.mapProjects(response.data.projects), pagination: response.data.pagination };
+    return {
+      projects: this.mapProjects(response.data.projects),
+      pagination: response.data.pagination,
+    };
   }
 
   private mapProjects(projects) {

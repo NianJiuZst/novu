@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 export const StarEmpty = (props: React.ComponentPropsWithoutRef<'svg'>) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 13" width={18} height={18} {...props}>

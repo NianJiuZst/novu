@@ -11,9 +11,24 @@ describe('Verify Payload Usecase', () => {
 
   it('should handle empty and undefined strings', () => {
     const template = createTemplate([
-      { name: 'user.firstName', type: TemplateVariableTypeEnum.STRING, defaultValue: 'John', required: false },
-      { name: 'user.hej', type: TemplateVariableTypeEnum.STRING, required: false, defaultValue: '' },
-      { name: 'user.test', type: TemplateVariableTypeEnum.STRING, required: false, defaultValue: undefined },
+      {
+        name: 'user.firstName',
+        type: TemplateVariableTypeEnum.STRING,
+        defaultValue: 'John',
+        required: false,
+      },
+      {
+        name: 'user.hej',
+        type: TemplateVariableTypeEnum.STRING,
+        required: false,
+        defaultValue: '',
+      },
+      {
+        name: 'user.test',
+        type: TemplateVariableTypeEnum.STRING,
+        required: false,
+        defaultValue: undefined,
+      },
     ]);
 
     const payload = {
@@ -39,7 +54,12 @@ describe('Verify Payload Usecase', () => {
 
   it('should fill and merge as expected', () => {
     const template = createTemplate([
-      { name: 'user.firstName', type: TemplateVariableTypeEnum.STRING, defaultValue: 'John', required: false },
+      {
+        name: 'user.firstName',
+        type: TemplateVariableTypeEnum.STRING,
+        defaultValue: 'John',
+        required: false,
+      },
       { name: 'user.lastName', type: TemplateVariableTypeEnum.STRING, required: true },
     ]);
 
@@ -64,7 +84,12 @@ describe('Verify Payload Usecase', () => {
 
   it('should respect system variables', () => {
     const template = createTemplate([
-      { name: 'subscriber.firstName', type: TemplateVariableTypeEnum.STRING, defaultValue: 'John', required: false },
+      {
+        name: 'subscriber.firstName',
+        type: TemplateVariableTypeEnum.STRING,
+        defaultValue: 'John',
+        required: false,
+      },
       { name: 'subscriber.lastName', type: TemplateVariableTypeEnum.STRING, required: true },
     ]);
 

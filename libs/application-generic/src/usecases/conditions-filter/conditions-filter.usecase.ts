@@ -109,7 +109,6 @@ export class ConditionsFilter extends Filter {
   }
 
   private extractFilters(command: ConditionsFilterCommand) {
-    // eslint-disable-next-line no-nested-ternary
     return command.filters?.length ? command.filters : command.step?.filters?.length ? command.step.filters : [];
   }
 
@@ -352,7 +351,6 @@ export class ConditionsFilter extends Filter {
 
     if (child.on === FilterPartTypeEnum.WEBHOOK) {
       if (process.env.NODE_ENV === 'test') return true;
-      // eslint-disable-next-line no-param-reassign
       child.value = await this.compileFilter(child.value, variables, command.job);
       const res = await this.getWebhookResponse(child, variables, command);
       passed = this.processFilterEquality({ payload: undefined, webhook: res }, child, filterProcessingDetails);
@@ -363,7 +361,6 @@ export class ConditionsFilter extends Filter {
       child.on === FilterPartTypeEnum.PAYLOAD ||
       child.on === FilterPartTypeEnum.SUBSCRIBER
     ) {
-      // eslint-disable-next-line no-param-reassign
       child.value = await this.compileFilter(child.value, variables, command.job);
 
       passed = this.processFilterEquality(variables, child, filterProcessingDetails);

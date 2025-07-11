@@ -24,7 +24,9 @@ describe('Remove all the stale topic subscriber relations', () => {
 
   it('should remove topic subscriber relation record on removed subscribers', async () => {
     const subscriberId = '123';
-    const createdSubscriber = await subscriberService.createSubscriber({ subscriberId: subscriberId });
+    const createdSubscriber = await subscriberService.createSubscriber({
+      subscriberId: subscriberId,
+    });
     const firstTopicKey = `topic-key-1-trigger-event`;
     const firstTopicName = `topic-name-1-trigger-event`;
     const newTopic = await createTopic(session, firstTopicKey, firstTopicName);

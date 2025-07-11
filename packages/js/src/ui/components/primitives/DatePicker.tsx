@@ -263,7 +263,10 @@ export const DatePickerGridCell = (props: DatePickerGridCellProps) => {
   );
 };
 
-type DatePickerGridCellTriggerProps = JSX.IntrinsicElements['button'] & { appearanceKey?: AppearanceKey; date: Date };
+type DatePickerGridCellTriggerProps = JSX.IntrinsicElements['button'] & {
+  appearanceKey?: AppearanceKey;
+  date: Date;
+};
 export const DatePickerGridCellTrigger = (props: DatePickerGridCellTriggerProps) => {
   const [local, rest] = splitProps(props, ['class', 'appearanceKey', 'date']);
   const { selectedDate, viewMonth, setSelectedDate, currentDate, maxDays } = useDatePicker();

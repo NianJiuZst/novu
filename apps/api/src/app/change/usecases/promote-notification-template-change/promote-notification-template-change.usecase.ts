@@ -84,7 +84,6 @@ export class PromoteNotificationTemplateChange implements INotificationTemplateC
       });
 
       if (step.variants && step.variants.length > 0) {
-        // eslint-disable-next-line no-param-reassign
         step.variants = step.variants
           ?.map(mapNewVariantItem)
           .filter((variant): variant is NotificationStepData => variant !== undefined);
@@ -97,7 +96,6 @@ export class PromoteNotificationTemplateChange implements INotificationTemplateC
       }
 
       if (step?._templateId && oldMessage._id) {
-        // eslint-disable-next-line no-param-reassign
         step._templateId = oldMessage._id;
       }
 
@@ -116,7 +114,6 @@ export class PromoteNotificationTemplateChange implements INotificationTemplateC
       }
 
       if (step?._templateId && oldMessage._id) {
-        // eslint-disable-next-line no-param-reassign
         step._templateId = oldMessage._id;
       }
 
@@ -208,7 +205,10 @@ export class PromoteNotificationTemplateChange implements INotificationTemplateC
     });
 
     if (count === 0) {
-      await this.notificationTemplateRepository.delete({ _environmentId: command.environmentId, _id: item._id });
+      await this.notificationTemplateRepository.delete({
+        _environmentId: command.environmentId,
+        _id: item._id,
+      });
 
       await this.deleteWorkflowPreferences(item._id, command);
 

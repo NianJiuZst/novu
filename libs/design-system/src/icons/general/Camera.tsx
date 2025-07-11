@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import type React from 'react';
 
 export function Camera(props: React.ComponentPropsWithoutRef<'svg'>) {

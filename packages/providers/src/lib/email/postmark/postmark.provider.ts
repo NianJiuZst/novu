@@ -103,7 +103,6 @@ export class PostmarkEmailProvider extends BaseProvider implements IEmailProvide
 
   parseEventBody(body: any | any[], identifier: string): IEmailEventBody | undefined {
     if (Array.isArray(body)) {
-      // eslint-disable-next-line no-param-reassign
       body = body.find((item) => item.MessageID === identifier);
     }
 

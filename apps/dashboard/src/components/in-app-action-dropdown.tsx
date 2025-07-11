@@ -143,7 +143,10 @@ export const InAppActionDropdown = ({ onMenuItemClick }: { onMenuItemClick?: () 
 								},
 								primaryAction
 							);
-							setValue(primaryActionKey, primaryActionValue, { shouldDirty: true, shouldValidate: true });
+							setValue(primaryActionKey, primaryActionValue, {
+								shouldDirty: true,
+								shouldValidate: true,
+							});
 							setValue(secondaryActionKey, null, { shouldDirty: true, shouldValidate: true });
 							onMenuItemClick?.();
 						}}
@@ -170,8 +173,14 @@ export const InAppActionDropdown = ({ onMenuItemClick }: { onMenuItemClick?: () 
 								label: "Secondary action",
 								redirect: { target: "_self", url: "" },
 							};
-							setValue(primaryActionKey, primaryActionValue, { shouldDirty: true, shouldValidate: true });
-							setValue(secondaryActionKey, secondaryActionValue, { shouldDirty: true, shouldValidate: true });
+							setValue(primaryActionKey, primaryActionValue, {
+								shouldDirty: true,
+								shouldValidate: true,
+							});
+							setValue(secondaryActionKey, secondaryActionValue, {
+								shouldDirty: true,
+								shouldValidate: true,
+							});
 							onMenuItemClick?.();
 						}}
 					>
@@ -184,7 +193,12 @@ export const InAppActionDropdown = ({ onMenuItemClick }: { onMenuItemClick?: () 
 							>
 								Primary action
 							</button>
-							<button className={inboxButtonVariants({ variant: "secondary", className: "pointer-events-none h-6" })}>
+							<button
+								className={inboxButtonVariants({
+									variant: "secondary",
+									className: "pointer-events-none h-6",
+								})}
+							>
 								Secondary action
 							</button>
 						</>

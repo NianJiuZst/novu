@@ -93,8 +93,6 @@ export class VariablePillWidget extends WidgetType {
 			overflow: "hidden",
 			textOverflow: "ellipsis",
 			whiteSpace: "nowrap",
-
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			"-webkit-font-smoothing": "antialiased",
 			"-moz-osx-font-smoothing": "grayscale",
@@ -112,8 +110,6 @@ export class VariablePillWidget extends WidgetType {
 		return {
 			lineHeight: "1.2",
 			color: "hsl(var(--text-soft))",
-
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			"-webkit-font-smoothing": "antialiased",
 			"-moz-osx-font-smoothing": "grayscale",

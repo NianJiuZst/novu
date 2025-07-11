@@ -168,7 +168,6 @@ export class ExecuteBridgeJob {
 
   private normalizePayload(originalPayload: ITriggerPayload = {}) {
     // Remove internal params
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { __source, ...payload } = originalPayload;
 
     return payload;

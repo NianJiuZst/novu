@@ -123,7 +123,6 @@ export const Renderer = (props: RendererProps) => {
                       if (!['Notifications', 'Preferences', 'InboxContent'].includes(novuComponent().name)) return;
 
                       if (node instanceof HTMLElement) {
-                        // eslint-disable-next-line no-param-reassign
                         node.style.height = '100%';
                       }
                       if (portalDivElement) {

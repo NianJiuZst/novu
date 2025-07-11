@@ -9,7 +9,10 @@ export class SubscriberGlobalPreferenceDto {
   @IsNotEmpty({ message: 'Enabled status is required' })
   enabled: boolean;
 
-  @ApiProperty({ description: 'Channel-specific preference settings', type: SubscriberPreferenceChannels })
+  @ApiProperty({
+    description: 'Channel-specific preference settings',
+    type: SubscriberPreferenceChannels,
+  })
   @ValidateNested()
   @Type(() => SubscriberPreferenceChannels)
   channels: SubscriberPreferenceChannels;

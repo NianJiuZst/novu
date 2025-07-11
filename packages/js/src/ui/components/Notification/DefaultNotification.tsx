@@ -44,7 +44,10 @@ export const DefaultNotification = (props: DefaultNotificationProps) => {
   const createdAt = createMemo(() => {
     minutesPassed(); // register as dep
 
-    return formatToRelativeTime({ fromDate: new Date(props.notification.createdAt), locale: locale() });
+    return formatToRelativeTime({
+      fromDate: new Date(props.notification.createdAt),
+      locale: locale(),
+    });
   });
   const snoozedUntil = createMemo(() => {
     minutesPassed(); // register as dep
@@ -52,7 +55,10 @@ export const DefaultNotification = (props: DefaultNotificationProps) => {
       return null;
     }
 
-    return formatSnoozedUntil({ untilDate: new Date(props.notification.snoozedUntil), locale: locale() });
+    return formatSnoozedUntil({
+      untilDate: new Date(props.notification.snoozedUntil),
+      locale: locale(),
+    });
   });
   const deliveredAt = createMemo(() => {
     minutesPassed(); // register as dep

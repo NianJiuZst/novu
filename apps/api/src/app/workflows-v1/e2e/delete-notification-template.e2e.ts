@@ -39,7 +39,10 @@ describe('Delete workflow by id - /workflows/:workflowId (DELETE) #novu-v0', asy
     expect(isDeleted).to.equal(true);
 
     const deletedIntegration = (
-      await notificationTemplateRepository.findDeleted({ _environmentId: session.environment._id, _id: template._id })
+      await notificationTemplateRepository.findDeleted({
+        _environmentId: session.environment._id,
+        _id: template._id,
+      })
     )[0];
 
     expect(deletedIntegration.deleted).to.equal(true);
@@ -178,7 +181,10 @@ describe('Delete workflow by id - /workflows/:workflowId (DELETE) #novu-v0', asy
     expect(deletedNotificationTemplate).to.equal(null);
 
     const deletedIntegration = (
-      await notificationTemplateRepository.findDeleted({ _environmentId: session.environment._id, _id: template._id })
+      await notificationTemplateRepository.findDeleted({
+        _environmentId: session.environment._id,
+        _id: template._id,
+      })
     )[0];
 
     expect(deletedIntegration.deleted).to.equal(true);

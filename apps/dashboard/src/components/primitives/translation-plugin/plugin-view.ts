@@ -37,7 +37,10 @@ export class TranslationPluginView {
 		}
 	}
 
-	private validateTranslationKeyLocal(translationKey: string): { hasError: boolean; errorMessage?: string } {
+	private validateTranslationKeyLocal(translationKey: string): {
+		hasError: boolean;
+		errorMessage?: string;
+	} {
 		const result = validateTranslationKey(translationKey, this.translationKeys || [], this.isTranslationKeysLoading);
 
 		return {

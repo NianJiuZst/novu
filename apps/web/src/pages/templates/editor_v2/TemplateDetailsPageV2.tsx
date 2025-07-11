@@ -65,9 +65,7 @@ export const TemplateDetailsPageV2 = () => {
     track('Workflow open - [Studio]', {
       workflowId: workflow?.name,
       env: 'cloud',
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    });  }, []);
 
   return (
     <form name="workflow-form" noValidate onSubmit={submitWorkflow} className={css({ height: 'full' })}>

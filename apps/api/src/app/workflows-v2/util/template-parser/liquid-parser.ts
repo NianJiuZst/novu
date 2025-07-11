@@ -199,7 +199,12 @@ function parseByLiquid({
       if (isValidVariable) {
         const isAllowedVariable = isPropertyAllowed(variableSchema, variableName);
         if (isAllowedVariable) {
-          validVariables.push({ name: variableName, output: rawOutput, outputStart: 0, outputEnd: rawOutput.length });
+          validVariables.push({
+            name: variableName,
+            output: rawOutput,
+            outputStart: 0,
+            outputEnd: rawOutput.length,
+          });
           if (filters.length > 0) {
             filters.forEach((filter) => {
               const { args } = filter;

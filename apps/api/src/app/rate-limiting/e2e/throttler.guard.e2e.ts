@@ -93,8 +93,14 @@ describe('API Rate Limiting #novu-v2', () => {
           expectedRegex: `burst=${mockMaximumUnlimitedGlobal * (1 + mockBurstAllowance) * mockWindowDuration}`,
         },
         { name: 'comment', expectedRegex: `comment="[a-zA-Z ]*"` },
-        { name: 'category', expectedRegex: `category="(${Object.values(ApiRateLimitCategoryEnum).join('|')})"` },
-        { name: 'cost', expectedRegex: `cost="(${Object.values(ApiRateLimitCostEnum).join('|')})"` },
+        {
+          name: 'category',
+          expectedRegex: `category="(${Object.values(ApiRateLimitCategoryEnum).join('|')})"`,
+        },
+        {
+          name: 'cost',
+          expectedRegex: `cost="(${Object.values(ApiRateLimitCostEnum).join('|')})"`,
+        },
         {
           name: 'serviceLevel',
           expectedRegex: `serviceLevel="[a-zA-Z]*"`,
@@ -231,7 +237,9 @@ describe('API Rate Limiting #novu-v2', () => {
         expectedThrottledRequests: 0,
         async setupTest(userSession) {
           await userSession.updateOrganizationServiceLevel(ApiServiceLevelEnum.UNLIMITED);
-          await userSession.updateEnvironmentApiRateLimits({ [ApiRateLimitCategoryEnum.TRIGGER]: 60 });
+          await userSession.updateEnvironmentApiRateLimits({
+            [ApiRateLimitCategoryEnum.TRIGGER]: 60,
+          });
         },
       },
       {

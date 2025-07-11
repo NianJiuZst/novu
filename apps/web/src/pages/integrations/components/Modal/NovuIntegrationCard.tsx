@@ -150,9 +150,7 @@ const StyledCard = styled.div<{ dark: boolean; active: boolean; clickable: boole
       opacity: 1;
     }
     cursor: ${({ clickable }) => (clickable ? 'pointer' : undefined)};
-    ${({ dark, clickable }) =>
-      // eslint-disable-next-line no-nested-ternary
-      clickable
+    ${({ dark, clickable }) =>      clickable
         ? dark
           ? `
             background-color: ${colors.B20};

@@ -226,7 +226,6 @@ function updateOverrideReasons(
   const notFoundFlag = -1;
   const existsInOverrideReasons = index !== notFoundFlag;
   if (existsInOverrideReasons) {
-    // eslint-disable-next-line no-param-reassign
     overrideReasons[index] = currentOverride;
   } else {
     overrideReasons.push(currentOverride);

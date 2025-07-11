@@ -241,12 +241,10 @@ export const installTemplate = async ({
   await fs.writeFile(path.join(root, 'package.json'), JSON.stringify(packageJson, null, 2) + os.EOL);
 
   console.log('\nInstalling dependencies:');
-  // eslint-disable-next-line guard-for-in
   for (const dependency in packageJson.dependencies) console.log(`- ${cyan(dependency)}`);
 
   if (devDeps) {
     console.log('\nInstalling devDependencies:');
-    // eslint-disable-next-line guard-for-in
     for (const dependency in packageJson.devDependencies) console.log(`- ${cyan(dependency)}`);
   }
 

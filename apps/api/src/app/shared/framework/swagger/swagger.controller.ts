@@ -148,13 +148,24 @@ function generateWebhookDefinitions(document: OpenAPIObject) {
             type: 'string',
             description: 'Unique identifier of the webhook event (evt_✱).',
           },
-          type: { type: 'string', enum: [webhook.event], description: 'The type of the webhook event.' },
+          type: {
+            type: 'string',
+            enum: [webhook.event],
+            description: 'The type of the webhook event.',
+          },
           data: {
             description: 'The actual event data payload.',
             allOf: [{ $ref: payloadSchemaRef }], // Use allOf to correctly reference the payload schema
           },
-          timestamp: { type: 'string', format: 'date-time', description: 'ISO timestamp of when the event occurred.' },
-          environmentId: { type: 'string', description: 'The ID of the environment associated with the event.' },
+          timestamp: {
+            type: 'string',
+            format: 'date-time',
+            description: 'ISO timestamp of when the event occurred.',
+          },
+          environmentId: {
+            type: 'string',
+            description: 'The ID of the environment associated with the event.',
+          },
           object: {
             type: 'string',
             enum: [webhook.objectType],

@@ -71,7 +71,10 @@ export const LayoutRow = ({ layout }: LayoutRowProps) => {
 			className="group relative isolate cursor-pointer"
 			onClick={() => {
 				navigate(
-					buildRoute(ROUTES.LAYOUTS_EDIT, { environmentSlug: currentEnvironment?.slug ?? "", layoutSlug: layout.slug })
+					buildRoute(ROUTES.LAYOUTS_EDIT, {
+						environmentSlug: currentEnvironment?.slug ?? "",
+						layoutSlug: layout.slug,
+					})
 				);
 			}}
 		>

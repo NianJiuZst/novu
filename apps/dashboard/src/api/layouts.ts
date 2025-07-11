@@ -36,19 +36,26 @@ export const getLayouts = async ({
 		params.append("orderDirection", orderDirection.toUpperCase());
 	}
 
-	const { data } = await getV2<{ data: ListLayoutsResponse }>(`/layouts?${params.toString()}`, { environment });
+	const { data } = await getV2<{ data: ListLayoutsResponse }>(`/layouts?${params.toString()}`, {
+		environment,
+	});
 
 	return data;
 };
 
 export const createLayout = async ({ environment, layout }: { environment: IEnvironment; layout: CreateLayoutDto }) => {
-	const { data } = await postV2<{ data: LayoutResponseDto }>(`/layouts`, { environment, body: layout });
+	const { data } = await postV2<{ data: LayoutResponseDto }>(`/layouts`, {
+		environment,
+		body: layout,
+	});
 
 	return data;
 };
 
 export const getLayout = async ({ environment, layoutSlug }: { environment: IEnvironment; layoutSlug: string }) => {
-	const { data } = await getV2<{ data: LayoutResponseDto }>(`/layouts/${layoutSlug}`, { environment });
+	const { data } = await getV2<{ data: LayoutResponseDto }>(`/layouts/${layoutSlug}`, {
+		environment,
+	});
 
 	return data;
 };
@@ -62,7 +69,10 @@ export const updateLayout = async ({
 	layout: UpdateLayoutDto;
 	layoutSlug: string;
 }) => {
-	const { data } = await putV2<{ data: LayoutResponseDto }>(`/layouts/${layoutSlug}`, { environment, body: layout });
+	const { data } = await putV2<{ data: LayoutResponseDto }>(`/layouts/${layoutSlug}`, {
+		environment,
+		body: layout,
+	});
 
 	return data;
 };

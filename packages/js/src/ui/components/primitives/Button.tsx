@@ -35,9 +35,9 @@ export const buttonVariants = cva(
   }
 );
 
-type ButtonProps = JSX.IntrinsicElements['button'] & { appearanceKey?: AppearanceKey } & VariantProps<
-    typeof buttonVariants
-  >;
+type ButtonProps = JSX.IntrinsicElements['button'] & {
+  appearanceKey?: AppearanceKey;
+} & VariantProps<typeof buttonVariants>;
 export const Button = (props: ButtonProps) => {
   const [local, rest] = splitProps(props, ['class', 'appearanceKey']);
   const style = useStyle();

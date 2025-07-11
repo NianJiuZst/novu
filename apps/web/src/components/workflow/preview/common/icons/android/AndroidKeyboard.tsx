@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import type { ComponentProps } from 'react';
 
 interface AndroidKeyboardProps extends ComponentProps<'svg'> {

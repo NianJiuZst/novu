@@ -67,10 +67,22 @@ export const buildSubscriberSchema = (subscriber: unknown) => {
       firstName: { type: JsonSchemaTypeEnum.STRING, description: "Subscriber's first name" },
       lastName: { type: JsonSchemaTypeEnum.STRING, description: "Subscriber's last name" },
       email: { type: JsonSchemaTypeEnum.STRING, description: "Subscriber's email address" },
-      phone: { type: JsonSchemaTypeEnum.STRING, description: "Subscriber's phone number (optional)" },
-      avatar: { type: JsonSchemaTypeEnum.STRING, description: "URL to the subscriber's avatar image (optional)" },
-      locale: { type: JsonSchemaTypeEnum.STRING, description: 'Locale for the subscriber (optional)' },
-      subscriberId: { type: JsonSchemaTypeEnum.STRING, description: 'Unique identifier for the subscriber' },
+      phone: {
+        type: JsonSchemaTypeEnum.STRING,
+        description: "Subscriber's phone number (optional)",
+      },
+      avatar: {
+        type: JsonSchemaTypeEnum.STRING,
+        description: "URL to the subscriber's avatar image (optional)",
+      },
+      locale: {
+        type: JsonSchemaTypeEnum.STRING,
+        description: 'Locale for the subscriber (optional)',
+      },
+      subscriberId: {
+        type: JsonSchemaTypeEnum.STRING,
+        description: 'Unique identifier for the subscriber',
+      },
       isOnline: {
         type: JsonSchemaTypeEnum.BOOLEAN,
         description: 'Indicates if the subscriber is online (optional)',

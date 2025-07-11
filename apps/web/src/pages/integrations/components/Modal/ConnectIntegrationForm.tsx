@@ -266,10 +266,7 @@ export function ConnectIntegrationForm({
 
   const logoSrc = provider
     ? `${CONTEXT_PATH}/static/images/providers/${colorScheme}/${provider.logoFileName[`${colorScheme}`]}`
-    : '';
-
-  // eslint-disable-next-line max-len
-  const webhookUrl = `${API_ROOT}/v1/webhooks/organizations/${organization?._id}/environments/${environment?._id}/${provider?.channel}/${provider?.providerId}`;
+    : '';  const webhookUrl = `${API_ROOT}/v1/webhooks/organizations/${organization?._id}/environments/${environment?._id}/${provider?.channel}/${provider?.providerId}`;
 
   return (
     <FormStyled

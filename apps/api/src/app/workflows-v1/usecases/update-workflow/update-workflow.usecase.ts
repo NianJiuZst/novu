@@ -1,5 +1,3 @@
-/* eslint-disable global-require */
-// eslint-ignore max-len
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type { ModuleRef } from '@nestjs/core';
 import {

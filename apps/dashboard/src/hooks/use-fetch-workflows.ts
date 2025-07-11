@@ -32,7 +32,16 @@ export function useFetchWorkflows({
 			{ limit, offset, query, orderBy, orderDirection, tags, status },
 		],
 		queryFn: () =>
-			getWorkflows({ environment: currentEnvironment!, limit, offset, query, orderBy, orderDirection, tags, status }),
+			getWorkflows({
+				environment: currentEnvironment!,
+				limit,
+				offset,
+				query,
+				orderBy,
+				orderDirection,
+				tags,
+				status,
+			}),
 		placeholderData: keepPreviousData,
 		enabled: !!currentEnvironment?._id,
 		refetchOnWindowFocus: true,

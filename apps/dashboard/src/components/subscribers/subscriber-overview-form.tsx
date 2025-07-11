@@ -160,7 +160,10 @@ export function SubscriberOverviewForm(props: SubscriberOverviewFormProps) {
 				return { ...acc, data: data === "" ? {} : data };
 			}
 
-			return { ...acc, [typedKey]: formData[typedKey] === null ? null : formData[typedKey]?.trim() };
+			return {
+				...acc,
+				[typedKey]: formData[typedKey] === null ? null : formData[typedKey]?.trim(),
+			};
 		}, {});
 
 		if (!Object.keys(dirtyPayload).length) {

@@ -636,7 +636,6 @@ export class SubscribersV1Controller {
     }
 
     if (query.seen === undefined) {
-      // eslint-disable-next-line no-param-reassign
       query.seen = false;
     }
 
@@ -801,7 +800,10 @@ export class SubscribersV1Controller {
     status: 302,
     description: 'Redirects to the specified URL.',
     headers: {
-      Location: { description: 'The URL to redirect to.', schema: { type: 'string', example: 'https://www.novu.co' } },
+      Location: {
+        description: 'The URL to redirect to.',
+        schema: { type: 'string', example: 'https://www.novu.co' },
+      },
     },
   }) // Link to the interface
   @SdkGroupName('Subscribers.Authentication')

@@ -24,7 +24,12 @@ describe('Get a layout - /layouts/:layoutId (GET) #novu-v0', async () => {
     const expectedContent = '<html><body><div>Hello {{organizationName}} {{{body}}}</div></body></html>';
 
     const expectedVariables = [
-      { name: 'organizationName', type: TemplateVariableTypeEnum.STRING, defaultValue: 'Company', required: false },
+      {
+        name: 'organizationName',
+        type: TemplateVariableTypeEnum.STRING,
+        defaultValue: 'Company',
+        required: false,
+      },
     ];
 
     const url = `${BASE_PATH}/${createdLayout._id}`;

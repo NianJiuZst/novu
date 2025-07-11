@@ -39,9 +39,7 @@ const getOrdinal = (num: string | number) => {
 
     if (Number.isNaN(res)) {
       return num;
-    }
-    // eslint-disable-next-line no-param-reassign
-    num = res;
+    }    num = res;
   }
   const ord = ['st', 'nd', 'rd'];
   const exceptions = [11, 12, 13];

@@ -91,7 +91,12 @@ export class InboxService {
   count({
     filters,
   }: {
-    filters: Array<{ tags?: string[]; read?: boolean; archived?: boolean; data?: Record<string, unknown> }>;
+    filters: Array<{
+      tags?: string[];
+      read?: boolean;
+      archived?: boolean;
+      data?: Record<string, unknown>;
+    }>;
   }): Promise<{
     data: Array<{
       count: number;
@@ -124,7 +129,9 @@ export class InboxService {
   }
 
   snooze(notificationId: string, snoozeUntil: string): Promise<InboxNotification> {
-    return this.#httpClient.patch(`${INBOX_NOTIFICATIONS_ROUTE}/${notificationId}/snooze`, { snoozeUntil });
+    return this.#httpClient.patch(`${INBOX_NOTIFICATIONS_ROUTE}/${notificationId}/snooze`, {
+      snoozeUntil,
+    });
   }
 
   unsnooze(notificationId: string): Promise<InboxNotification> {

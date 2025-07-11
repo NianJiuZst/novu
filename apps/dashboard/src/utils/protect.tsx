@@ -1,5 +1,3 @@
-/* eslint-disable no-restricted-imports */
-
 import { Protect as ClerkProtect, type ProtectProps } from "@clerk/clerk-react";
 import { ApiServiceLevelEnum, FeatureFlagsKeysEnum, FeatureNameEnum, getFeatureForTierAsBoolean } from "@novu/shared";
 import { useFeatureFlag } from "@/hooks/use-feature-flag";

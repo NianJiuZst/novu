@@ -33,9 +33,7 @@ export interface INotificationTemplate {
   isBlueprint?: boolean;
   blueprintId?: string;
   type?: ResourceTypeEnum;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payloadSchema?: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rawData?: any;
   data?: CustomDataType;
   origin?: ResourceOriginEnum;

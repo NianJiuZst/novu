@@ -6,7 +6,7 @@ export function flattenJson(obj?: Object, parentKey = '', result = {}) {
   }
 
   for (const key in obj) {
-    if (Object.hasOwn(obj, key)) {
+    if (obj.hasOwnProperty(key)) {
       const newKey = parentKey ? `${parentKey}.${key}` : key;
 
       if (typeof obj[key] === 'object' && obj[key] !== null && !_.isArray(obj[key])) {
@@ -17,12 +17,10 @@ export function flattenJson(obj?: Object, parentKey = '', result = {}) {
           if (typeof item === 'object' && item !== null) {
             flattenJson(item, arrayKey, result);
           } else {
-            // eslint-disable-next-line no-param-reassign
             result[arrayKey] = item;
           }
         });
       } else {
-        // eslint-disable-next-line no-param-reassign
         result[newKey] = obj[key];
       }
     }
@@ -71,10 +69,8 @@ export function flattenToNested(flatJson: FlatJson, delimiter: string = '.'): Ne
     const keys = flatKey.split(delimiter);
     keys.reduce((accumulator, currentKey, index) => {
       if (index === keys.length - 1) {
-        // eslint-disable-next-line no-param-reassign
         accumulator[currentKey] = flatJson[flatKey];
       } else if (!accumulator[currentKey]) {
-        // eslint-disable-next-line no-param-reassign
         accumulator[currentKey] = {};
       }
 

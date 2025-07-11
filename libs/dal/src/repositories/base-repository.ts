@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DirectionEnum } from '@novu/shared';
 import { type ClassConstructor, plainToInstance } from 'class-transformer';
 import {
@@ -62,7 +61,10 @@ export class BaseRepository<TDBModel, TMappedEntity, TEnforcement> {
   async findOne(
     query: FilterQuery<TDBModel> & TEnforcement,
     select?: ProjectionType<TMappedEntity>,
-    options: { readPreference?: 'secondaryPreferred' | 'primary'; query?: QueryOptions<TDBModel> } = {}
+    options: {
+      readPreference?: 'secondaryPreferred' | 'primary';
+      query?: QueryOptions<TDBModel>;
+    } = {}
   ): Promise<TMappedEntity | null> {
     const data = await this.MongooseModel.findOne(query, select, options.query).read(
       options.readPreference || 'primary'
@@ -157,8 +159,13 @@ export class BaseRepository<TDBModel, TMappedEntity, TEnforcement> {
     if (paginateField && afterItem[paginateField]) {
       const paginatedFieldValue = afterItem[paginateField];
       cursorOrStatements = [
-        { [paginateField]: isSortDesc ? { $lt: paginatedFieldValue } : { $gt: paginatedFieldValue } } as any,
-        { [paginateField]: { $eq: paginatedFieldValue }, _id: isSortDesc ? { $lt: after } : { $gt: after } },
+        {
+          [paginateField]: isSortDesc ? { $lt: paginatedFieldValue } : { $gt: paginatedFieldValue },
+        } as any,
+        {
+          [paginateField]: { $eq: paginatedFieldValue },
+          _id: isSortDesc ? { $lt: after } : { $gt: after },
+        },
       ];
       const firstStatement = (queryOrStatements ?? []).map((item) => ({
         ...item,
@@ -245,7 +252,7 @@ export class BaseRepository<TDBModel, TMappedEntity, TEnforcement> {
     };
   }
 
-  async create(data: FilterQuery<T_DBModel> & T_Enforcement, options: IOptions = {}): Promise<T_MappedEntity> {
+  async create(data: FilterQuery<TDBModel> & TEnforcement, options: IOptions = {}): Promise<TMappedEntity> {
     const newEntity = new this.MongooseModel(data);
 
     const saveOptions = options?.writeConcern ? { w: options?.writeConcern } : {};
@@ -256,7 +263,7 @@ export class BaseRepository<TDBModel, TMappedEntity, TEnforcement> {
   }
 
   async insertMany(
-    data: FilterQuery<T_DBModel> & T_Enforcement[],
+    data: FilterQuery<TDBModel> & TEnforcement[],
     ordered = false
   ): Promise<{ acknowledged: boolean; insertedCount: number; insertedIds: Types.ObjectId[] }> {
     let result;
@@ -280,9 +287,9 @@ export class BaseRepository<TDBModel, TMappedEntity, TEnforcement> {
   }
 
   async update(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
-    updateBody: UpdateQuery<T_DBModel>,
-    options: QueryOptions<T_DBModel> = {}
+    query: FilterQuery<TDBModel> & TEnforcement,
+    updateBody: UpdateQuery<TDBModel>,
+    options: QueryOptions<TDBModel> = {}
   ): Promise<{
     matched: number;
     modified: number;
@@ -299,8 +306,8 @@ export class BaseRepository<TDBModel, TMappedEntity, TEnforcement> {
   }
 
   async updateOne(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
-    updateBody: UpdateQuery<T_DBModel>
+    query: FilterQuery<TDBModel> & TEnforcement,
+    updateBody: UpdateQuery<TDBModel>
   ): Promise<{
     matched: number;
     modified: number;
@@ -313,7 +320,7 @@ export class BaseRepository<TDBModel, TMappedEntity, TEnforcement> {
     };
   }
 
-  async upsertMany(data: (FilterQuery<T_DBModel> & T_Enforcement)[]) {
+  async upsertMany(data: (FilterQuery<TDBModel> & TEnforcement)[]) {
     const promises = data.map((entry) =>
       this.MongooseModel.findOneAndUpdate(entry, entry, { upsert: true, new: true })
     );
@@ -321,7 +328,7 @@ export class BaseRepository<TDBModel, TMappedEntity, TEnforcement> {
     return await Promise.all(promises);
   }
 
-  async upsert(query: FilterQuery<T_DBModel> & T_Enforcement, data: FilterQuery<T_DBModel> & T_Enforcement) {
+  async upsert(query: FilterQuery<TDBModel> & TEnforcement, data: FilterQuery<TDBModel> & TEnforcement) {
     return await this.MongooseModel.findOneAndUpdate(query, data, {
       upsert: true,
       new: true,
@@ -333,12 +340,12 @@ export class BaseRepository<TDBModel, TMappedEntity, TEnforcement> {
     return await this.MongooseModel.bulkWrite(bulkOperations, { ordered });
   }
 
-  protected mapEntity<TData>(data: TData): TData extends null ? null : T_MappedEntity {
+  protected mapEntity<TData>(data: TData): TData extends null ? null : TMappedEntity {
     return plainToInstance(this.entity, JSON.parse(JSON.stringify(data))) as any;
   }
 
-  protected mapEntities(data: any): T_MappedEntity[] {
-    return plainToInstance<T_MappedEntity, T_MappedEntity[]>(this.entity, JSON.parse(JSON.stringify(data)));
+  protected mapEntities(data: any): TMappedEntity[] {
+    return plainToInstance<TMappedEntity, TMappedEntity[]>(this.entity, JSON.parse(JSON.stringify(data)));
   }
 
   /*
@@ -355,7 +362,7 @@ export class BaseRepository<TDBModel, TMappedEntity, TEnforcement> {
   }
 
   async findWithCursorBasedPagination({
-    query = {} as FilterQuery<T_DBModel> & T_Enforcement,
+    query = {} as FilterQuery<TDBModel> & TEnforcement,
     limit,
     before,
     after,
@@ -365,16 +372,16 @@ export class BaseRepository<TDBModel, TMappedEntity, TEnforcement> {
     enhanceQuery,
     includeCursor,
   }: {
-    query?: FilterQuery<T_DBModel> & T_Enforcement;
+    query?: FilterQuery<TDBModel> & TEnforcement;
     limit: number;
     before?: { sortBy: string; paginateField: any };
     after?: { sortBy: string; paginateField: any };
     sortBy: string;
     sortDirection: DirectionEnum;
     paginateField: string;
-    enhanceQuery?: (query: QueryWithHelpers<Array<T_DBModel>, T_DBModel>) => any;
+    enhanceQuery?: (query: QueryWithHelpers<Array<TDBModel>, TDBModel>) => any;
     includeCursor?: boolean;
-  }): Promise<{ data: T_MappedEntity[]; next: string | null; previous: string | null }> {
+  }): Promise<{ data: TMappedEntity[]; next: string | null; previous: string | null }> {
     if (before && after) {
       throw new DalException('Cannot specify both "before" and "after" cursors at the same time.');
     }
@@ -514,7 +521,9 @@ export class BaseRepository<TDBModel, TMappedEntity, TEnforcement> {
         {
           $and: [
             { [sortBy]: { $eq: firstItem[sortBy] } },
-            { [paginateField]: isDesc ? { $gt: firstItem[paginateField] } : { $lt: firstItem[paginateField] } },
+            {
+              [paginateField]: isDesc ? { $gt: firstItem[paginateField] } : { $lt: firstItem[paginateField] },
+            },
           ],
         },
       ];

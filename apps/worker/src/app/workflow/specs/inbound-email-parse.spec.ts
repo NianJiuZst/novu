@@ -327,7 +327,13 @@ export async function sendTrigger(
     `${session.serverUrl}${eventTriggerPath}`,
     {
       name: template.triggers[0].identifier,
-      to: [{ subscriberId: newSubscriberIdInAppNotification, lastName: 'Smith', email: 'test@email.novu' }],
+      to: [
+        {
+          subscriberId: newSubscriberIdInAppNotification,
+          lastName: 'Smith',
+          email: 'test@email.novu',
+        },
+      ],
       payload: {
         organizationName: 'Umbrella Corp',
         compiledVariable: 'test-env',

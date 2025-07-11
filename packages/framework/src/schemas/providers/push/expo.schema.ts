@@ -21,7 +21,10 @@ const expoOutputSchema = {
       type: 'string',
       description: `The title to display in the notification. Often displayed above the notification body.`,
     },
-    subtitle: { type: 'string', description: `The subtitle to display in the notification below the title.` },
+    subtitle: {
+      type: 'string',
+      description: `The subtitle to display in the notification below the title.`,
+    },
     body: { type: 'string', description: `The message to display in the notification.` },
     sound: {
       anyOf: [

@@ -40,7 +40,18 @@ export function useFetchSubscribers(
 		queryKey: [
 			QueryKeys.fetchSubscribers,
 			currentEnvironment?._id,
-			{ after, before, limit, email, phone, subscriberId, name, orderDirection, orderBy, includeCursor },
+			{
+				after,
+				before,
+				limit,
+				email,
+				phone,
+				subscriberId,
+				name,
+				orderDirection,
+				orderBy,
+				includeCursor,
+			},
 		],
 		queryFn: () =>
 			getSubscribers({

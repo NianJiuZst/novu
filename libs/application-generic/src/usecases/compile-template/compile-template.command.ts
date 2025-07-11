@@ -7,5 +7,5 @@ export class CompileTemplateCommand extends BaseCommand {
   template: string;
 
   @IsObject()
-  data: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  data: any;
 }

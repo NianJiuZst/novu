@@ -74,7 +74,10 @@ export function SdkApiParam(options: ApiParamOptions, sdkOverrideOptions?: SDKOv
   let finalOptions: ApiParamOptions;
   if (sdkOverrideOptions) {
     finalOptions = sdkOverrideOptions.nameOverride
-      ? ({ ...options, 'x-speakeasy-name-override': sdkOverrideOptions.nameOverride } as unknown as ApiParamOptions)
+      ? ({
+          ...options,
+          'x-speakeasy-name-override': sdkOverrideOptions.nameOverride,
+        } as unknown as ApiParamOptions)
       : options;
   } else {
     finalOptions = options;
@@ -86,7 +89,10 @@ export function SdkApiProperty(options: ApiPropertyOptions, sdkOverrideOptions?:
   let finalOptions: ApiPropertyOptions;
   if (sdkOverrideOptions) {
     finalOptions = sdkOverrideOptions.nameOverride
-      ? ({ ...options, 'x-speakeasy-name-override': sdkOverrideOptions.nameOverride } as unknown as ApiPropertyOptions)
+      ? ({
+          ...options,
+          'x-speakeasy-name-override': sdkOverrideOptions.nameOverride,
+        } as unknown as ApiPropertyOptions)
       : options;
   } else {
     finalOptions = options;

@@ -325,8 +325,6 @@ export function SignUp() {
 		</div>
 	);
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function RedirectToSignIn({ children }: { children: any }) {
 	const navigate = useNavigate();
 
@@ -338,13 +336,9 @@ export function RedirectToSignIn({ children }: { children: any }) {
 
 	return <>{children}</>;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function SignedIn({ children }: { children: any }) {
 	return <>{children}</>;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function SignedOut({ children }: { children: any }) {
 	if ((window as any).Clerk.loggedIn) return null;
 

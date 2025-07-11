@@ -130,7 +130,12 @@ export const ComponentAuditTable: React.FC<ComponentAuditTableProps> = ({ data: 
       <tbody>
         {sortedData.map(({ name, instances, props, srcPkg }) => (
           <React.Fragment key={`${srcPkg}-${name}`}>
-            <tr className={css({ bg: 'surface.page', _even: { bg: { base: '[#DDDDDD]', _dark: '[#222233]' } } })}>
+            <tr
+              className={css({
+                bg: 'surface.page',
+                _even: { bg: { base: '[#DDDDDD]', _dark: '[#222233]' } },
+              })}
+            >
               <td
                 className={css({
                   py: '[2]',

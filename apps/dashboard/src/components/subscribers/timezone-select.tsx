@@ -17,7 +17,10 @@ type TimezoneSelectProps = ButtonProps & {
 export function TimezoneSelect(props: TimezoneSelectProps) {
 	const { value, disabled, readOnly, onChange, className, ...rest } = props;
 	const [open, setOpen] = useState(false);
-	const { options, parseTimezone } = useTimezoneSelect({ labelStyle: "abbrev", displayValue: "UTC" });
+	const { options, parseTimezone } = useTimezoneSelect({
+		labelStyle: "abbrev",
+		displayValue: "UTC",
+	});
 	const listRef = useRef<HTMLDivElement>(null);
 	const scrollId = useRef<ReturnType<typeof setTimeout>>();
 

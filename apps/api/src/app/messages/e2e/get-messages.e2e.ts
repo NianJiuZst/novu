@@ -70,7 +70,9 @@ describe('Get Message - /messages (GET) #novu-v2', () => {
     response = await novuClient.messages.retrieve({ transactionId: [transactionId1] });
     expect(response.result.data.length).to.be.equal(2);
 
-    response = await novuClient.messages.retrieve({ transactionId: [transactionId1, transactionId2] });
+    response = await novuClient.messages.retrieve({
+      transactionId: [transactionId1, transactionId2],
+    });
     expect(response.result.data.length).to.be.equal(4);
 
     response = await novuClient.messages.retrieve({ transactionId: [transactionId2] });

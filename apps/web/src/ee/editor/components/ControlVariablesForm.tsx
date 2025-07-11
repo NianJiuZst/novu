@@ -22,9 +22,7 @@ export const ControlVariablesForm = ({ schema, payloadSchema, formData, onChange
     onChange({
       controls: value,
       payload: payloadSchemaData,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, payloadSchemaData]);
+    });  }, [value, payloadSchemaData]);
 
   if (isLoading) {
     return null;

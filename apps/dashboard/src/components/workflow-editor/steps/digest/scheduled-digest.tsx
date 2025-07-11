@@ -67,7 +67,16 @@ export const ScheduledDigest = ({
 	};
 
 	const handlePeriodChange = (period: string) => {
-		onValueChange(getCronBasedOnPeriod(period as PeriodValues, { second, minute, hour, dayOfWeek, dayOfMonth, month }));
+		onValueChange(
+			getCronBasedOnPeriod(period as PeriodValues, {
+				second,
+				minute,
+				hour,
+				dayOfWeek,
+				dayOfMonth,
+				month,
+			})
+		);
 	};
 
 	return (

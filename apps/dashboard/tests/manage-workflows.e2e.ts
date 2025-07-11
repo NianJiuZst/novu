@@ -100,7 +100,10 @@ test("manage workflows", async ({ page }) => {
 
 	// update the step name
 	const inAppStepNameUpdated = `${inAppStepName}-updated`;
-	await stepConfigSidebar.updateStepName({ oldStepName: inAppStepName, newStepName: inAppStepNameUpdated });
+	await stepConfigSidebar.updateStepName({
+		oldStepName: inAppStepName,
+		newStepName: inAppStepNameUpdated,
+	});
 	await expect(page).toHaveTitle(`Configure ${inAppStepNameUpdated} | Novu Cloud Dashboard`);
 
 	// add a second step

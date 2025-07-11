@@ -15,7 +15,10 @@ export class SubscriberWorkflowPreferenceDto {
   @Type(() => SubscriberPreferenceChannels)
   channels: SubscriberPreferenceChannels;
 
-  @ApiProperty({ description: 'List of preference overrides', type: [SubscriberPreferenceOverrideDto] })
+  @ApiProperty({
+    description: 'List of preference overrides',
+    type: [SubscriberPreferenceOverrideDto],
+  })
   @Type(() => SubscriberPreferenceOverrideDto)
   overrides: SubscriberPreferenceOverrideDto[];
 

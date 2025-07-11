@@ -86,9 +86,7 @@ export function TestSendEmail({
         payload,
         controls,
         to: sendTo,
-        bridge,
-        // eslint-disable-next-line no-nested-ternary
-        content: bridge
+        bridge,        content: bridge
           ? ''
           : template.contentType === 'customHtml'
             ? (template.htmlContent as string)

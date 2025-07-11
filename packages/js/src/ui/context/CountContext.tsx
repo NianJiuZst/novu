@@ -89,7 +89,13 @@ export const CountProvider = (props: ParentProps) => {
     const notificationsCache = novu.notifications.cache;
     const limitValue = limit();
     // Use the global filter() as a base and override with specific tab's tags and data for cache operations
-    const tabSpecificFilterForCache = { ...filter(), tags, data, after: undefined, limit: limitValue };
+    const tabSpecificFilterForCache = {
+      ...filter(),
+      tags,
+      data,
+      after: undefined,
+      limit: limitValue,
+    };
 
     const hasEmptyCache = !notificationsCache.has(tabSpecificFilterForCache);
     if (!isOpened() && hasEmptyCache) {

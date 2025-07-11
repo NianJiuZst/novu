@@ -20,8 +20,6 @@ export function decryptSecret(text: string | EncryptedSecret): string {
 
 export function encryptCredentials(credentials: ICredentialsDto): ICredentialsDto {
   const encryptedCredentials: ICredentialsDto = {};
-
-  // eslint-disable-next-line guard-for-in
   for (const key in credentials) {
     encryptedCredentials[key] = isCredentialEncryptionRequired(key)
       ? encryptSecret(credentials[key])
@@ -33,8 +31,6 @@ export function encryptCredentials(credentials: ICredentialsDto): ICredentialsDt
 
 export function decryptCredentials(credentials: ICredentialsDto): ICredentialsDto {
   const decryptedCredentials: ICredentialsDto = {};
-
-  // eslint-disable-next-line guard-for-in
   for (const key in credentials) {
     decryptedCredentials[key] =
       typeof credentials[key] === 'string' && isNovuEncrypted(credentials[key])

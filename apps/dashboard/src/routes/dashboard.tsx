@@ -1,7 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-
 import { Outlet } from "react-router-dom";
+// @ts-expect-error - react-use-intercom has type issues with package.json exports
 import { IntercomProvider } from "react-use-intercom";
 
 import { Toaster } from "@/components/primitives/sonner";

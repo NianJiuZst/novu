@@ -15,7 +15,10 @@ export function useFetchVercelIntegration({
 	return useQuery({
 		queryKey: ["configurationDetails", configurationId],
 		queryFn: async () => {
-			const response = await fetchVercelIntegration({ configurationId, environment: currentEnvironment });
+			const response = await fetchVercelIntegration({
+				configurationId,
+				environment: currentEnvironment,
+			});
 
 			return response.data;
 		},

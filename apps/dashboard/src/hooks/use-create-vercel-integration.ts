@@ -17,7 +17,10 @@ export function useCreateVercelIntegration() {
 
 	const { mutateAsync, isPending, data } = useMutation({
 		mutationFn: async (payload: { code: string; configurationId: string }) => {
-			const response = await createVercelIntegration({ ...payload, environment: currentEnvironment });
+			const response = await createVercelIntegration({
+				...payload,
+				environment: currentEnvironment,
+			});
 
 			return response.data;
 		},

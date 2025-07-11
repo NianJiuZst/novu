@@ -64,7 +64,12 @@ describe('Find Deleted Layout Usecase', () => {
     const description = 'Amazing new layout';
     const content = '<html><body><div>Hello {{organizationName}} {{{body}}}</div></body></html>';
     const variables = [
-      { name: 'organizationName', type: TemplateVariableTypeEnum.STRING, defaultValue: 'Company', required: false },
+      {
+        name: 'organizationName',
+        type: TemplateVariableTypeEnum.STRING,
+        defaultValue: 'Company',
+        required: false,
+      },
     ];
     const isDefault = false;
 

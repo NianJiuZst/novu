@@ -177,7 +177,11 @@ subscriberSchema.index({
  */
 subscriberSchema.index(
   { subscriberId: 1, _environmentId: 1 },
-  { name: 'unique_subscriber_per_environment', unique: true, partialFilterExpression: { deleted: false } }
+  {
+    name: 'unique_subscriber_per_environment',
+    unique: true,
+    partialFilterExpression: { deleted: false },
+  }
 );
 subscriberSchema.index({
   _organizationId: 1,
@@ -204,10 +208,18 @@ subscriberSchema.index({
 
 subscriberSchema.index(
   { _environmentId: 1, subscriberId: 1 },
-  { name: 'unique_subscriber_per_environment', unique: true, partialFilterExpression: { deleted: false } }
+  {
+    name: 'unique_subscriber_per_environment',
+    unique: true,
+    partialFilterExpression: { deleted: false },
+  }
 );
 
-subscriberSchema.plugin(mongooseDelete, { deletedAt: true, deletedBy: true, overrideMethods: 'all' });
+subscriberSchema.plugin(mongooseDelete, {
+  deletedAt: true,
+  deletedBy: true,
+  overrideMethods: 'all',
+});
 
 export const Subscriber =
   (mongoose.models.Subscriber as mongoose.Model<SubscriberDBModel>) ||

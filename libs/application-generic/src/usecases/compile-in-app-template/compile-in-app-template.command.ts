@@ -8,7 +8,7 @@ export class CompileInAppTemplateCommand extends EnvironmentWithUserCommand {
   content?: string;
 
   @IsDefined()
-  payload: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  payload: any;
 
   @IsOptional()
   cta?: IMessageCTA;

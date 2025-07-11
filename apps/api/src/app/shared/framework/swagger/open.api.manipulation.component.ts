@@ -35,8 +35,6 @@ function liftDataProperty(scope) {
   if (!data) {
     return;
   }
-
-  // eslint-disable-next-line no-param-reassign
   scope.value.schema = data;
 }
 
@@ -46,11 +44,8 @@ export function removeEndpointsWithoutApiKey<T>(openApiDocument: T): T {
   if (!parsedDocument.paths) {
     throw new Error('Invalid OpenAPI document');
   }
-
-  // eslint-disable-next-line guard-for-in
   for (const path in parsedDocument.paths) {
     const operations = parsedDocument.paths[path];
-    // eslint-disable-next-line guard-for-in
     for (const method in operations) {
       const operation = operations[method];
       if (operation.security) {

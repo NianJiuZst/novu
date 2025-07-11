@@ -107,7 +107,12 @@ describe('Create Workflow - /workflows (POST) #novu-v0', async () => {
                 subject: 'Better subject',
                 preheader: 'Better pre header',
                 senderName: 'Better pre sender name',
-                content: [{ type: EmailBlockTypeEnum.TEXT, content: 'This is a sample of Better text block' }],
+                content: [
+                  {
+                    type: EmailBlockTypeEnum.TEXT,
+                    content: 'This is a sample of Better text block',
+                  },
+                ],
                 type: StepTypeEnum.EMAIL,
               },
               active: defaultMessageIsActive,
@@ -485,7 +490,10 @@ describe('Create Workflow - /workflows (POST) #novu-v0', async () => {
 
     await session.testAgent.delete(`/v1/workflows/${template._id}`).send();
 
-    const change = await changeRepository.findOne({ _environmentId: session.environment._id, _entityId: template._id });
+    const change = await changeRepository.findOne({
+      _environmentId: session.environment._id,
+      _entityId: template._id,
+    });
     await session.testAgent.post(`/v1/changes/${change?._id}/apply`);
 
     const prodEnv = await getProductionEnvironment();

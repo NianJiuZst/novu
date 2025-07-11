@@ -30,7 +30,9 @@ export function CreateIntegrationSidebar({ isOpened }: CreateIntegrationSidebarP
 	const { integrations } = useFetchIntegrations();
 
 	const handleIntegrationSelect = (integrationId: string) => {
-		navigate(buildRoute(ROUTES.INTEGRATIONS_CONNECT_PROVIDER, { providerId: integrationId }), { replace: true });
+		navigate(buildRoute(ROUTES.INTEGRATIONS_CONNECT_PROVIDER, { providerId: integrationId }), {
+			replace: true,
+		});
 	};
 
 	const handleBack = () => {

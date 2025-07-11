@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-
 export const AppleIcon = (props: React.ComponentPropsWithoutRef<'svg'>) => {
   return (
     <svg viewBox="0 0 15 16" fill="none" {...props}>

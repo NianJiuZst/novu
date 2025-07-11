@@ -52,7 +52,10 @@ export class RemoveSubscriber {
     });
 
     if (subscriberInternalIds.length === 0) {
-      throw new NotFoundException({ message: 'Subscriber was not found', externalSubscriberId: subscriberId });
+      throw new NotFoundException({
+        message: 'Subscriber was not found',
+        externalSubscriberId: subscriberId,
+      });
     }
 
     await this.subscriberRepository.withTransaction(async () => {

@@ -386,14 +386,11 @@ export class AddJob {
     }
 
     // Update the job digest directly to avoid an extra database call
-    // eslint-disable-next-line no-param-reassign
     command.job.digest = { ...command.job.digest, ...metadata } as IWorkflowStepMetadata;
 
     const bridgeAmount = this.mapBridgeTimedDigestAmount(bridgeResponse);
 
     validateDigest(job);
-
-    // eslint-disable-next-line no-param-reassign
     digestAmount =
       bridgeAmount ??
       this.computeJobWaitDurationService.calculateDelay({
@@ -419,7 +416,11 @@ export class AddJob {
       await this.handleDigestSkip(command, job);
     }
 
-    return { digestAmount, digestCreationResult, cronExpression: bridgeResponse?.outputs?.cron as string | undefined };
+    return {
+      digestAmount,
+      digestCreationResult,
+      cronExpression: bridgeResponse?.outputs?.cron as string | undefined,
+    };
   }
 
   private mapBridgeTimedDigestAmount(bridgeResponse: ExecuteOutput | null): number | null {
@@ -499,7 +500,6 @@ export class AddJob {
 
     if (delay) {
       const logMessage =
-        // eslint-disable-next-line no-nested-ternary
         job.type === StepTypeEnum.DELAY
           ? 'Delay is active, Creating execution details'
           : job.type === StepTypeEnum.DIGEST

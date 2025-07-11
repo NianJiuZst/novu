@@ -62,9 +62,13 @@ describe('Create expireAt - TTL support', () => {
 
   it('should set expireAt for notification and its jobs and execution details', async () => {
     await createExpireAt();
-    const notifications = await notificationRepository.find({ _environmentId: session.environment._id });
+    const notifications = await notificationRepository.find({
+      _environmentId: session.environment._id,
+    });
     const jobs = await jobRepository.find({ _environmentId: session.environment._id });
-    const executionDetails = await executionDetailsRepository.find({ _environmentId: session.environment._id });
+    const executionDetails = await executionDetailsRepository.find({
+      _environmentId: session.environment._id,
+    });
 
     notifications.forEach((msg) => {
       expect(msg.expireAt).to.exist;

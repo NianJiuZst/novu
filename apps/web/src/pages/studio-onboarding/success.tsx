@@ -62,10 +62,7 @@ export const StudioOnboardingSuccess = () => {
   useEffect(() => {
     track('Test workflow step completed - [Onboarding - Signup]');
 
-    setNovuOnboardingStepCookie();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setNovuOnboardingStepCookie();  }, []);
 
   return (
     <Wrapper>

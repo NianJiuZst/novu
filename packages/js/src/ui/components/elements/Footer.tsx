@@ -1,4 +1,3 @@
-/* eslint-disable local-rules/no-class-without-style */
 import { Show } from 'solid-js';
 import { useInboxContext, useNovu } from 'src/ui/context';
 import { isBrowser } from 'src/utils/is-browser';
@@ -128,7 +127,6 @@ function getCurrentDomain() {
 function getCurlCommand() {
   const identifier = window.localStorage.getItem('novu_keyless_application_identifier');
   if (!identifier) {
-    // eslint-disable-next-line no-console
     console.error('Novu application identifier not found for cURL command.');
 
     return '';

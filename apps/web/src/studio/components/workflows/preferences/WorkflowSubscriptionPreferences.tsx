@@ -106,9 +106,7 @@ export const WorkflowSubscriptionPreferences: FC<WorkflowSubscriptionPreferences
     // Don't dirty the form if the user didn't make any changes
     if (workflowUserPreferences !== null && isOverridingPreferences === false) {
       updateWorkflowPreferences(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOverridingPreferences, updateWorkflowPreferences]);
+    }  }, [isOverridingPreferences, updateWorkflowPreferences]);
 
   const preferenceRows = useMemo(
     () => mapPreferencesToRows(preferences, onChange, isDisabled),

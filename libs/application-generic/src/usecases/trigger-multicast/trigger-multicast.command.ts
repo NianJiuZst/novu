@@ -9,10 +9,10 @@ export class TriggerMulticastCommand extends TriggerEventMulticastCommand {
   template: NotificationTemplateEntity;
 
   @IsOptional()
-  actor?: SubscriberEntity | undefined;
+  declare actor?: SubscriberEntity | undefined;
 
   @ValidateNested()
-  tenant: ITenantDefine | null;
+  declare tenant: ITenantDefine | null;
 
   @IsDefined()
   @IsString()

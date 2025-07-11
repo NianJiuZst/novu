@@ -31,7 +31,6 @@ function constantTimeEquals(a: string, b: string): boolean {
 
   let result = 0;
   for (let i = 0; i < a.length; i += 1) {
-    // eslint-disable-next-line no-bitwise
     result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
 

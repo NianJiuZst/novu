@@ -8,9 +8,7 @@ export function FileNameInput({ currentFileName, readonly }: { currentFileName: 
   const { setFileName, fileName } = useEditTranslationFileContext();
 
   useEffect(() => {
-    setFileName(currentFileName);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentFileName]);
+    setFileName(currentFileName);  }, [currentFileName]);
 
   return (
     <Group align="center" spacing={12} noWrap>

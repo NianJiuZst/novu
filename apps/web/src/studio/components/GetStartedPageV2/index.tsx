@@ -108,9 +108,7 @@ export const GetStartedPageV2 = ({ location }: { location: 'onboarding' | 'get-s
   const navigate = useNavigate();
 
   useEffect(() => {
-    track('Get Started page visited - [Get started - V2]', { location });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    track('Get Started page visited - [Get started - V2]', { location });  }, []);
 
   return (
     <PageContainer className={css({ h: '100vh' })}>

@@ -33,11 +33,7 @@ export type ZodSchemaMinimal = {
  * type MySchema = InferZodSchema<typeof mySchema>;
  * ```
  */
-export type InferZodSchema<
-  T,
-  Options extends { validated: boolean },
-> = // Firstly, narrow to the minimal schema type without using the `zod` import
-T extends ZodSchemaMinimal
+export type InferZodSchema<T, Options extends { validated: boolean }> = T extends ZodSchemaMinimal // Firstly, narrow to the minimal schema type without using the `zod` import
   ? // Secondly, narrow to the Zod type to provide type-safety to `zod.infer` and `zod.input`
     T extends ZodSchema
     ? Options['validated'] extends true

@@ -1,6 +1,3 @@
-/* eslint-disable global-require */
-
-// eslint-disable-next-line no-restricted-imports
 import { Logger } from '@nestjs/common';
 import { ApiServiceLevelEnum, StripeBillingIntervalEnum } from '@novu/shared';
 import { expect } from 'chai';
@@ -14,11 +11,17 @@ const mockMonthlyBusinessSubscription = {
     data: [
       {
         id: 'item_id_usage_notifications',
-        price: { lookup_key: 'business_usage_notifications', recurring: { usage_type: StripeUsageTypeEnum.METERED } },
+        price: {
+          lookup_key: 'business_usage_notifications',
+          recurring: { usage_type: StripeUsageTypeEnum.METERED },
+        },
       },
       {
         id: 'item_id_flat',
-        price: { lookup_key: 'business_flat_monthly', recurring: { usage_type: StripeUsageTypeEnum.LICENSED } },
+        price: {
+          lookup_key: 'business_flat_monthly',
+          recurring: { usage_type: StripeUsageTypeEnum.LICENSED },
+        },
       },
     ],
   },
@@ -218,7 +221,10 @@ describe('CreateUsageRecords #novu-v2', () => {
         data: [
           {
             id: 'item_id_flat',
-            price: { lookup_key: 'business_flat_monthly', recurring: { usage_type: StripeUsageTypeEnum.LICENSED } },
+            price: {
+              lookup_key: 'business_flat_monthly',
+              recurring: { usage_type: StripeUsageTypeEnum.LICENSED },
+            },
           },
         ],
       },

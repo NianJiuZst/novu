@@ -1,4 +1,3 @@
-/* eslint-disable */
 import '../../src/config';
 
 import { NestFactory } from '@nestjs/core';

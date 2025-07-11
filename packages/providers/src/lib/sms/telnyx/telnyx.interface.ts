@@ -10,23 +10,17 @@ export interface ITelnyxSmsOptions {
   from?: string;
   messaging_profile_id?: string;
 }
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
 interface From {
   phone_number: string;
   carrier: string;
   line_type: string;
 }
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
 interface To {
   phone_number: string;
   status: string;
   carrier: string;
   line_type: string;
 }
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
 interface Data {
   record_type: string;
   direction: string;

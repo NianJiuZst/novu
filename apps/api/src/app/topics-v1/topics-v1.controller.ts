@@ -91,7 +91,10 @@ export class TopicsV1Controller {
   @ApiExcludeEndpoint()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: AssignSubscriberToTopicDto })
-  @ApiOperation({ summary: 'Subscribers addition', description: 'Add subscribers to a topic by key' })
+  @ApiOperation({
+    summary: 'Subscribers addition',
+    description: 'Add subscribers to a topic by key',
+  })
   @ApiParam({ name: 'topicKey', description: 'The topic key', type: String, required: true })
   @SdkGroupName('Topics.Subscribers')
   @SdkMethodName('assign')
@@ -123,9 +126,17 @@ export class TopicsV1Controller {
   @Get('/:topicKey/subscribers/:externalSubscriberId')
   @ExternalApiAccessible()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Check topic subscriber', description: 'Check if a subscriber belongs to a certain topic' })
+  @ApiOperation({
+    summary: 'Check topic subscriber',
+    description: 'Check if a subscriber belongs to a certain topic',
+  })
   @ApiParam({ name: 'topicKey', description: 'The topic key', type: String, required: true })
-  @ApiParam({ name: 'externalSubscriberId', description: 'The external subscriber id', type: String, required: true })
+  @ApiParam({
+    name: 'externalSubscriberId',
+    description: 'The external subscriber id',
+    type: String,
+    required: true,
+  })
   @SdkGroupName('Topics.Subscribers')
   @ApiOkResponse({ type: TopicSubscriberDto })
   async getTopicSubscriber(
@@ -203,7 +214,10 @@ export class TopicsV1Controller {
   })
   @ApiParam({ name: 'topicKey', description: 'The topic key', type: String, required: true })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete topic', description: 'Delete a topic by its topic key if it has no subscribers' })
+  @ApiOperation({
+    summary: 'Delete topic',
+    description: 'Delete a topic by its topic key if it has no subscribers',
+  })
   async deleteTopic(@UserSession() user: UserSessionData, @Param('topicKey') topicKey: TopicKey): Promise<void> {
     await this.deleteTopicUseCase.execute(
       DeleteTopicCommand.create({
@@ -237,7 +251,10 @@ export class TopicsV1Controller {
   @ApiExcludeEndpoint()
   @ExternalApiAccessible()
   @ApiResponse(RenameTopicResponseDto)
-  @ApiOperation({ summary: 'Rename a topic', description: 'Rename a topic by providing a new name' })
+  @ApiOperation({
+    summary: 'Rename a topic',
+    description: 'Rename a topic by providing a new name',
+  })
   @ApiParam({ name: 'topicKey', description: 'The topic key', type: String, required: true })
   @SdkMethodName('rename')
   async renameTopic(

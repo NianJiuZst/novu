@@ -3,7 +3,10 @@ import { type GetDecryptedSecretKey, GetDecryptedSecretKeyCommand } from '@novu/
 import { PostActionEnum, type Workflow } from '@novu/framework/internal';
 import { Client, NovuHandler, NovuRequestHandler } from '@novu/framework/nest';
 import type { Request, Response } from 'express';
-import { type ConstructFrameworkWorkflow, ConstructFrameworkWorkflowCommand } from './usecases/construct-framework-workflow';
+import {
+  type ConstructFrameworkWorkflow,
+  ConstructFrameworkWorkflowCommand,
+} from './usecases/construct-framework-workflow';
 
 /*
  * A custom framework name is specified for the Novu-managed Bridge endpoint

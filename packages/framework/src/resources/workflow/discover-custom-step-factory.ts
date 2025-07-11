@@ -49,7 +49,6 @@ export async function discoverCustomStepFactory(
         },
       },
       // TODO: fix typing for `resolve` to use generic typings
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as Awaited<StepOutput<any>>;
   };
 }

@@ -359,10 +359,7 @@ export class Sync {
   private getWorkflowTags(workflow: DiscoverWorkflowOutput): string[] {
     return workflow.tags || [];
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private castToAnyNotSupportedParam(param: any): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return param as any;
   }
 }

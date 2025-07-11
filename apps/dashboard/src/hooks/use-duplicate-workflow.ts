@@ -25,7 +25,9 @@ export function useDuplicateWorkflow({ workflowSlug, onSuccess }: UseDuplicateWo
 		mutationFn: async (workflow: DuplicateWorkflowDto) =>
 			duplicateWorkflow({ environment: currentEnvironment!, workflow, workflowSlug }),
 		onSuccess: async (result) => {
-			await queryClient.invalidateQueries({ queryKey: [QueryKeys.fetchWorkflows, currentEnvironment?._id] });
+			await queryClient.invalidateQueries({
+				queryKey: [QueryKeys.fetchWorkflows, currentEnvironment?._id],
+			});
 			queryClient.invalidateQueries({
 				queryKey: [QueryKeys.fetchTags, currentEnvironment?._id],
 			});

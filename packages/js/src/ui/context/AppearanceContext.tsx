@@ -26,7 +26,10 @@ type AppearanceContextType = {
 
 const AppearanceContext = createContext<AppearanceContextType | undefined>(undefined);
 
-type AppearanceProviderProps = ParentProps & { appearance?: Appearance; container?: Node | null | undefined } & {
+type AppearanceProviderProps = ParentProps & {
+  appearance?: Appearance;
+  container?: Node | null | undefined;
+} & {
   id: string;
 };
 

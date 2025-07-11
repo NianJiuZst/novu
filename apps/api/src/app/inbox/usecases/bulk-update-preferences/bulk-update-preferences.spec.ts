@@ -218,7 +218,10 @@ describe('BulkUpdatePreferences', () => {
     subscriberRepositoryMock.findBySubscriberId.resolves(mockedSubscriber);
     notificationTemplateRepositoryMock.find.resolves([
       mockedWorkflow1,
-      { ...mockedWorkflow2, triggers: [{ type: TriggerTypeEnum.EVENT, identifier: nonObjectIdString }] },
+      {
+        ...mockedWorkflow2,
+        triggers: [{ type: TriggerTypeEnum.EVENT, identifier: nonObjectIdString }],
+      },
     ]);
     updatePreferencesUsecaseMock.execute.onFirstCall().resolves(mockedInboxPreference1);
     updatePreferencesUsecaseMock.execute.onSecondCall().resolves({

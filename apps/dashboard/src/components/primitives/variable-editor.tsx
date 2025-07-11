@@ -107,7 +107,10 @@ export function VariableEditor({
 		: undefined;
 	const track = useTelemetry();
 
-	const [variableTriggerPosition, setVariableTriggerPosition] = useState<{ top: number; left: number } | null>(null);
+	const [variableTriggerPosition, setVariableTriggerPosition] = useState<{
+		top: number;
+		left: number;
+	} | null>(null);
 
 	const onVariableSelect = useCallback(
 		(completion: CompletionOption) => {

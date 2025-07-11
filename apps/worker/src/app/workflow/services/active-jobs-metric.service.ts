@@ -111,11 +111,8 @@ export class ActiveJobsMetricService {
             this.metricsService.recordMetric(`Queue/${deploymentName}/${queueService.topic}/delayed`, delayedCount);
             this.metricsService.recordMetric(`Queue/${deploymentName}/${queueService.topic}/active`, activeCount);
           }
-
-          // eslint-disable-next-line no-promise-executor-return
           return resolve();
         } catch (error) {
-          // eslint-disable-next-line no-promise-executor-return
           return reject(error);
         }
       });

@@ -44,7 +44,10 @@ export const WorkflowContext = createContext<WorkflowContextType>({} as Workflow
 
 export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
 	const { currentEnvironment } = useEnvironment();
-	const { workflowSlug = "", stepSlug = "" } = useParams<{ workflowSlug?: string; stepSlug?: string }>();
+	const { workflowSlug = "", stepSlug = "" } = useParams<{
+		workflowSlug?: string;
+		stepSlug?: string;
+	}>();
 	const [toastId, setToastId] = useState<string | number>("");
 	const navigate = useNavigate();
 
@@ -204,7 +207,15 @@ export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
 	}, [isAllowedToUnblock, blocker]);
 
 	const value = useMemo(
-		() => ({ update, patch, isPending, workflow, step: getStep(), digestStepBeforeCurrent, isUpdatePatchPending }),
+		() => ({
+			update,
+			patch,
+			isPending,
+			workflow,
+			step: getStep(),
+			digestStepBeforeCurrent,
+			isUpdatePatchPending,
+		}),
 		[update, patch, isPending, workflow, getStep, digestStepBeforeCurrent, isUpdatePatchPending]
 	);
 

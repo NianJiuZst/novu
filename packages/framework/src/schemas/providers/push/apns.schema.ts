@@ -6,7 +6,11 @@ const sound = {
     {
       type: 'object',
       additionalProperties: true,
-      properties: { name: { type: 'string' }, volume: { type: 'number' }, critical: { type: 'number' } },
+      properties: {
+        name: { type: 'string' },
+        volume: { type: 'number' },
+        critical: { type: 'number' },
+      },
       required: ['name', 'volume', 'critical'],
     },
   ],

@@ -23,7 +23,9 @@ export function getReactVersion(): string {
 
     // Fallback to installed React package
     try {
-      const reactPackageJsonPath = require.resolve('react/package.json', { paths: [process.cwd()] });
+      const reactPackageJsonPath = require.resolve('react/package.json', {
+        paths: [process.cwd()],
+      });
       const packageJson = JSON.parse(fs.readFileSync(reactPackageJsonPath, 'utf-8'));
 
       return packageJson.version;

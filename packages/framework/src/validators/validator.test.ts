@@ -40,7 +40,11 @@ describe('validators', () => {
         title: 'should remove additional properties and successfully validate',
         schemas: {
           zod: z.object({ name: z.string() }),
-          json: { type: 'object', properties: { name: { type: 'string' } }, additionalProperties: false } as const,
+          json: {
+            type: 'object',
+            properties: { name: { type: 'string' } },
+            additionalProperties: false,
+          } as const,
         },
         payload: { name: 'John', age: 30 },
         result: {
@@ -109,9 +113,21 @@ describe('validators', () => {
           zod: null, // Zod has no support for `oneOf`
           json: {
             oneOf: [
-              { type: 'object', properties: { stringType: { type: 'string' } }, required: ['stringType'] },
-              { type: 'object', properties: { numberType: { type: 'number' } }, required: ['numberType'] },
-              { type: 'object', properties: { booleanType: { type: 'boolean' } }, required: ['booleanType'] },
+              {
+                type: 'object',
+                properties: { stringType: { type: 'string' } },
+                required: ['stringType'],
+              },
+              {
+                type: 'object',
+                properties: { numberType: { type: 'number' } },
+                required: ['numberType'],
+              },
+              {
+                type: 'object',
+                properties: { booleanType: { type: 'boolean' } },
+                required: ['booleanType'],
+              },
             ],
           } as const,
         },
@@ -131,9 +147,21 @@ describe('validators', () => {
           zod: null, // Zod has no support for `oneOf`
           json: {
             oneOf: [
-              { type: 'object', properties: { stringType: { type: 'string' } }, required: ['stringType'] },
-              { type: 'object', properties: { numberType: { type: 'number' } }, required: ['numberType'] },
-              { type: 'object', properties: { booleanType: { type: 'boolean' } }, required: ['booleanType'] },
+              {
+                type: 'object',
+                properties: { stringType: { type: 'string' } },
+                required: ['stringType'],
+              },
+              {
+                type: 'object',
+                properties: { numberType: { type: 'number' } },
+                required: ['numberType'],
+              },
+              {
+                type: 'object',
+                properties: { booleanType: { type: 'boolean' } },
+                required: ['booleanType'],
+              },
             ],
           } as const,
         },
@@ -155,9 +183,21 @@ describe('validators', () => {
           zod: null, // Zod has no support for `oneOf`
           json: {
             allOf: [
-              { type: 'object', properties: { stringType: { type: 'string' } }, required: ['stringType'] },
-              { type: 'object', properties: { numberType: { type: 'number' } }, required: ['numberType'] },
-              { type: 'object', properties: { booleanType: { type: 'boolean' } }, required: ['booleanType'] },
+              {
+                type: 'object',
+                properties: { stringType: { type: 'string' } },
+                required: ['stringType'],
+              },
+              {
+                type: 'object',
+                properties: { numberType: { type: 'number' } },
+                required: ['numberType'],
+              },
+              {
+                type: 'object',
+                properties: { booleanType: { type: 'boolean' } },
+                required: ['booleanType'],
+              },
             ],
           } as const,
         },
@@ -181,9 +221,21 @@ describe('validators', () => {
           zod: null, // Zod has no support for `allOf`
           json: {
             allOf: [
-              { type: 'object', properties: { stringType: { type: 'string' } }, required: ['stringType'] },
-              { type: 'object', properties: { numberType: { type: 'number' } }, required: ['numberType'] },
-              { type: 'object', properties: { booleanType: { type: 'boolean' } }, required: ['booleanType'] },
+              {
+                type: 'object',
+                properties: { stringType: { type: 'string' } },
+                required: ['stringType'],
+              },
+              {
+                type: 'object',
+                properties: { numberType: { type: 'number' } },
+                required: ['numberType'],
+              },
+              {
+                type: 'object',
+                properties: { booleanType: { type: 'boolean' } },
+                required: ['booleanType'],
+              },
             ],
           } as const,
         },
@@ -210,19 +262,28 @@ describe('validators', () => {
             anyOf: [
               {
                 type: 'object',
-                properties: { type: { type: 'string', const: 'stringType' }, stringVal: { type: 'string' } },
+                properties: {
+                  type: { type: 'string', const: 'stringType' },
+                  stringVal: { type: 'string' },
+                },
                 additionalProperties: false,
                 required: ['type', 'stringVal'],
               },
               {
                 type: 'object',
-                properties: { type: { type: 'string', const: 'numberType' }, numVal: { type: 'number' } },
+                properties: {
+                  type: { type: 'string', const: 'numberType' },
+                  numVal: { type: 'number' },
+                },
                 additionalProperties: false,
                 required: ['type', 'numVal'],
               },
               {
                 type: 'object',
-                properties: { type: { type: 'string', const: 'booleanType' }, boolVal: { type: 'boolean' } },
+                properties: {
+                  type: { type: 'string', const: 'booleanType' },
+                  boolVal: { type: 'boolean' },
+                },
                 additionalProperties: false,
                 required: ['type', 'boolVal'],
               },
@@ -247,19 +308,28 @@ describe('validators', () => {
             anyOf: [
               {
                 type: 'object',
-                properties: { type: { type: 'string', const: 'stringType' }, stringVal: { type: 'string' } },
+                properties: {
+                  type: { type: 'string', const: 'stringType' },
+                  stringVal: { type: 'string' },
+                },
                 additionalProperties: false,
                 required: ['type', 'stringVal'],
               },
               {
                 type: 'object',
-                properties: { type: { type: 'string', const: 'numberType' }, numVal: { type: 'number' } },
+                properties: {
+                  type: { type: 'string', const: 'numberType' },
+                  numVal: { type: 'number' },
+                },
                 additionalProperties: false,
                 required: ['type', 'numVal'],
               },
               {
                 type: 'object',
-                properties: { type: { type: 'string', const: 'booleanType' }, boolVal: { type: 'boolean' } },
+                properties: {
+                  type: { type: 'string', const: 'booleanType' },
+                  boolVal: { type: 'boolean' },
+                },
                 additionalProperties: false,
                 required: ['type', 'boolVal'],
               },
@@ -401,17 +471,41 @@ describe('validators', () => {
           zod: null, // Zod has no support for `oneOf`
           json: {
             oneOf: [
-              { type: 'object', properties: { stringType: { type: 'string' } }, required: ['stringType'] },
-              { type: 'object', properties: { numberType: { type: 'string' } }, required: ['numberType'] },
-              { type: 'object', properties: { booleanType: { type: 'string' } }, required: ['booleanType'] },
+              {
+                type: 'object',
+                properties: { stringType: { type: 'string' } },
+                required: ['stringType'],
+              },
+              {
+                type: 'object',
+                properties: { numberType: { type: 'string' } },
+                required: ['numberType'],
+              },
+              {
+                type: 'object',
+                properties: { booleanType: { type: 'string' } },
+                required: ['booleanType'],
+              },
             ],
           } as const,
         },
         result: {
           oneOf: [
-            { type: 'object', properties: { stringType: { type: 'string' } }, required: ['stringType'] },
-            { type: 'object', properties: { numberType: { type: 'string' } }, required: ['numberType'] },
-            { type: 'object', properties: { booleanType: { type: 'string' } }, required: ['booleanType'] },
+            {
+              type: 'object',
+              properties: { stringType: { type: 'string' } },
+              required: ['stringType'],
+            },
+            {
+              type: 'object',
+              properties: { numberType: { type: 'string' } },
+              required: ['numberType'],
+            },
+            {
+              type: 'object',
+              properties: { booleanType: { type: 'string' } },
+              required: ['booleanType'],
+            },
           ],
         },
       },
@@ -421,17 +515,41 @@ describe('validators', () => {
           zod: null, // Zod has no support for `anyOf`
           json: {
             allOf: [
-              { type: 'object', properties: { stringType: { type: 'string' } }, required: ['stringType'] },
-              { type: 'object', properties: { numberType: { type: 'string' } }, required: ['numberType'] },
-              { type: 'object', properties: { booleanType: { type: 'string' } }, required: ['booleanType'] },
+              {
+                type: 'object',
+                properties: { stringType: { type: 'string' } },
+                required: ['stringType'],
+              },
+              {
+                type: 'object',
+                properties: { numberType: { type: 'string' } },
+                required: ['numberType'],
+              },
+              {
+                type: 'object',
+                properties: { booleanType: { type: 'string' } },
+                required: ['booleanType'],
+              },
             ],
           } as const,
         },
         result: {
           allOf: [
-            { type: 'object', properties: { stringType: { type: 'string' } }, required: ['stringType'] },
-            { type: 'object', properties: { numberType: { type: 'string' } }, required: ['numberType'] },
-            { type: 'object', properties: { booleanType: { type: 'string' } }, required: ['booleanType'] },
+            {
+              type: 'object',
+              properties: { stringType: { type: 'string' } },
+              required: ['stringType'],
+            },
+            {
+              type: 'object',
+              properties: { numberType: { type: 'string' } },
+              required: ['numberType'],
+            },
+            {
+              type: 'object',
+              properties: { booleanType: { type: 'string' } },
+              required: ['booleanType'],
+            },
           ],
         },
       },
@@ -456,19 +574,28 @@ describe('validators', () => {
                   anyOf: [
                     {
                       type: 'object',
-                      properties: { type: { type: 'string', const: 'stringType' }, stringVal: { type: 'string' } },
+                      properties: {
+                        type: { type: 'string', const: 'stringType' },
+                        stringVal: { type: 'string' },
+                      },
                       additionalProperties: false,
                       required: ['type', 'stringVal'],
                     },
                     {
                       type: 'object',
-                      properties: { type: { type: 'string', const: 'numberType' }, numVal: { type: 'number' } },
+                      properties: {
+                        type: { type: 'string', const: 'numberType' },
+                        numVal: { type: 'number' },
+                      },
                       additionalProperties: false,
                       required: ['type', 'numVal'],
                     },
                     {
                       type: 'object',
-                      properties: { type: { type: 'string', const: 'booleanType' }, boolVal: { type: 'boolean' } },
+                      properties: {
+                        type: { type: 'string', const: 'booleanType' },
+                        boolVal: { type: 'boolean' },
+                      },
                       additionalProperties: false,
                       required: ['type', 'boolVal'],
                     },
@@ -489,19 +616,28 @@ describe('validators', () => {
                 anyOf: [
                   {
                     type: 'object',
-                    properties: { type: { type: 'string', const: 'stringType' }, stringVal: { type: 'string' } },
+                    properties: {
+                      type: { type: 'string', const: 'stringType' },
+                      stringVal: { type: 'string' },
+                    },
                     additionalProperties: false,
                     required: ['type', 'stringVal'],
                   },
                   {
                     type: 'object',
-                    properties: { type: { type: 'string', const: 'numberType' }, numVal: { type: 'number' } },
+                    properties: {
+                      type: { type: 'string', const: 'numberType' },
+                      numVal: { type: 'number' },
+                    },
                     additionalProperties: false,
                     required: ['type', 'numVal'],
                   },
                   {
                     type: 'object',
-                    properties: { type: { type: 'string', const: 'booleanType' }, boolVal: { type: 'boolean' } },
+                    properties: {
+                      type: { type: 'string', const: 'booleanType' },
+                      boolVal: { type: 'boolean' },
+                    },
                     additionalProperties: false,
                     required: ['type', 'boolVal'],
                   },

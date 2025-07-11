@@ -24,7 +24,11 @@ export class UpdateSubscriberOnlineFlag {
     if (!subscriber) throw new NotFoundException(`Subscriber not found`);
 
     await this.subscriberRepository.update(
-      { _id: subscriber._id, _organizationId: command.organizationId, _environmentId: command.environmentId },
+      {
+        _id: subscriber._id,
+        _organizationId: command.organizationId,
+        _environmentId: command.environmentId,
+      },
       {
         $set: this.getUpdatedFields(command.isOnline),
       }

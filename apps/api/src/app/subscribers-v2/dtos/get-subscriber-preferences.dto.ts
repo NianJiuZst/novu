@@ -8,7 +8,10 @@ export class GetSubscriberPreferencesDto {
   @Type(() => SubscriberGlobalPreferenceDto)
   global: SubscriberGlobalPreferenceDto;
 
-  @ApiProperty({ description: 'Workflow-specific preference settings', type: [SubscriberWorkflowPreferenceDto] })
+  @ApiProperty({
+    description: 'Workflow-specific preference settings',
+    type: [SubscriberWorkflowPreferenceDto],
+  })
   @Type(() => SubscriberWorkflowPreferenceDto)
   workflows: SubscriberWorkflowPreferenceDto[];
 }

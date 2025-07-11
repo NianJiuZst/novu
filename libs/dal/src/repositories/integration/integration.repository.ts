@@ -20,7 +20,6 @@ export class IntegrationRepository extends BaseRepository<IntegrationDBModel, In
   async find(
     query: IntegrationQuery,
     select = '',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     options: { limit?: number; sort?: any; skip?: number } = {}
   ): Promise<IntegrationEntity[]> {
     return super.find(query, select, options);
@@ -70,7 +69,10 @@ export class IntegrationRepository extends BaseRepository<IntegrationDBModel, In
   }
 
   async delete(query: IntegrationQuery) {
-    return await this.integration.delete({ _id: query._id, _organizationId: query._organizationId });
+    return await this.integration.delete({
+      _id: query._id,
+      _organizationId: query._organizationId,
+    });
   }
 
   async deleteMany(query: IntegrationQuery): Promise<IDeleteResult> {

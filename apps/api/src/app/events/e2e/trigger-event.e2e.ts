@@ -708,7 +708,14 @@ describe('Trigger event - /v1/events/trigger (POST) #novu-v2', () => {
         _environmentId: session.environment._id,
         conditions: [
           {
-            children: [{ field: 'identifier', value: 'test', operator: FieldOperatorEnum.EQUAL, on: 'tenant' }],
+            children: [
+              {
+                field: 'identifier',
+                value: 'test',
+                operator: FieldOperatorEnum.EQUAL,
+                on: 'tenant',
+              },
+            ],
           },
         ],
         active: true,
@@ -749,8 +756,18 @@ describe('Trigger event - /v1/events/trigger (POST) #novu-v2', () => {
           {
             value: FieldLogicalOperatorEnum.OR,
             children: [
-              { field: 'identifier', value: 'test3', operator: FieldOperatorEnum.EQUAL, on: 'tenant' },
-              { field: 'identifier', value: 'test2', operator: FieldOperatorEnum.EQUAL, on: 'tenant' },
+              {
+                field: 'identifier',
+                value: 'test3',
+                operator: FieldOperatorEnum.EQUAL,
+                on: 'tenant',
+              },
+              {
+                field: 'identifier',
+                value: 'test2',
+                operator: FieldOperatorEnum.EQUAL,
+                on: 'tenant',
+              },
             ],
           },
         ],
@@ -807,7 +824,14 @@ describe('Trigger event - /v1/events/trigger (POST) #novu-v2', () => {
         _environmentId: session.environment._id,
         conditions: [
           {
-            children: [{ field: 'identifier', value: 'test1', operator: FieldOperatorEnum.EQUAL, on: 'tenant' }],
+            children: [
+              {
+                field: 'identifier',
+                value: 'test1',
+                operator: FieldOperatorEnum.EQUAL,
+                on: 'tenant',
+              },
+            ],
           },
         ],
         active: true,
@@ -2346,7 +2370,12 @@ describe('Trigger event - /v1/events/trigger (POST) #novu-v2', () => {
                 name: 'Bad Variant Message Template',
                 subject: 'Bad Variant subject',
                 preheader: 'Bad Variant pre header',
-                content: [{ type: EmailBlockTypeEnum.TEXT, content: 'This is a sample of Bad Variant text block' }],
+                content: [
+                  {
+                    type: EmailBlockTypeEnum.TEXT,
+                    content: 'This is a sample of Bad Variant text block',
+                  },
+                ],
                 type: StepTypeEnum.EMAIL,
                 active: true,
                 filters: [
@@ -2369,7 +2398,12 @@ describe('Trigger event - /v1/events/trigger (POST) #novu-v2', () => {
                 name: 'Better Variant Message Template',
                 subject: 'Better Variant subject',
                 preheader: 'Better Variant pre header',
-                content: [{ type: EmailBlockTypeEnum.TEXT, content: 'This is a sample of Better Variant text block' }],
+                content: [
+                  {
+                    type: EmailBlockTypeEnum.TEXT,
+                    content: 'This is a sample of Better Variant text block',
+                  },
+                ],
                 type: StepTypeEnum.EMAIL,
                 active: true,
                 filters: [
@@ -3256,7 +3290,13 @@ describe('Trigger event - /v1/events/trigger (POST) #novu-v2', () => {
   ): Promise<TriggerEventResponseDto> {
     const request = {
       workflowId: templateInner.triggers[0].identifier,
-      to: [{ subscriberId: newSubscriberIdInAppNotification, lastName: 'Smith', email: 'test@email.novu' }],
+      to: [
+        {
+          subscriberId: newSubscriberIdInAppNotification,
+          lastName: 'Smith',
+          email: 'test@email.novu',
+        },
+      ],
       payload: {
         organizationName: 'Umbrella Corp',
         compiledVariable: 'test-env',

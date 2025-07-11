@@ -10,9 +10,7 @@ export const ControlVariables = ({ schema = {}, onChange = (values) => {}, defau
     if (Object.keys(values).length === 0) {
       return;
     }
-    onChange(values);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values]);
+    onChange(values);  }, [values]);
 
   return (
     <>

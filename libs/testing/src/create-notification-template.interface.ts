@@ -47,8 +47,6 @@ interface IVariant {
 interface IStep extends IVariant {
   variants?: IStep[];
 }
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface CreateTemplatePayload extends Omit<NotificationTemplateEntity, 'steps'> {
   noFeedId?: boolean;
   noLayoutId?: boolean;

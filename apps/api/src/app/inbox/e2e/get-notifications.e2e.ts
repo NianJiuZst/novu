@@ -191,7 +191,10 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     );
     expect(body.hasMore).to.be.true;
 
-    const { body: nextPageBody, status: nextPageStatus } = await getNotifications({ limit, offset: 2 });
+    const { body: nextPageBody, status: nextPageStatus } = await getNotifications({
+      limit,
+      offset: 2,
+    });
 
     expect(nextPageStatus).to.equal(200);
     expect(nextPageBody.data).to.be.ok;
@@ -216,7 +219,10 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     );
     expect(body.hasMore).to.be.true;
 
-    const { body: nextPageBody, status: nextPageStatus } = await getNotifications({ limit, after: body.data[1].id });
+    const { body: nextPageBody, status: nextPageStatus } = await getNotifications({
+      limit,
+      after: body.data[1].id,
+    });
 
     expect(nextPageStatus).to.equal(200);
     expect(nextPageBody.data).to.be.ok;
@@ -318,7 +324,10 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     );
 
     const limit = 2;
-    const { body: firstPageBody, status: firstPageStatus } = await getNotifications({ limit, archived: true });
+    const { body: firstPageBody, status: firstPageStatus } = await getNotifications({
+      limit,
+      archived: true,
+    });
 
     expect(firstPageStatus).to.equal(200);
     expect(firstPageBody.data).to.be.ok;

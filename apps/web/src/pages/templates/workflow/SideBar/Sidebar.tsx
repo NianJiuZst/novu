@@ -8,9 +8,7 @@ import { AddStepMenu } from './AddStepMenu';
 export const Sidebar = () => {
   const { colorScheme } = useMantineColorScheme();
   const onDragStart = (event, nodeType) => {
-    event.dataTransfer.setData('application/reactflow', nodeType);
-    // eslint-disable-next-line no-param-reassign
-    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('application/reactflow', nodeType);    event.dataTransfer.effectAllowed = 'move';
   };
   const { setDragging }: any = useOutletContext();
   const { readonly } = useEnvironment();

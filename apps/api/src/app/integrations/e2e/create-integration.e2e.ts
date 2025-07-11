@@ -185,7 +185,10 @@ describe('Create Integration - /integration (POST) #novu-v2', () => {
   });
 
   it('should allow creating the integration in the chosen environment', async () => {
-    const prodEnv = await envRepository.findOne({ name: 'Production', _organizationId: session.organization._id });
+    const prodEnv = await envRepository.findOne({
+      name: 'Production',
+      _organizationId: session.organization._id,
+    });
     const payload = {
       providerId: EmailProviderIdEnum.SendGrid,
       channel: ChannelTypeEnum.EMAIL,
@@ -635,13 +638,17 @@ describe('Create Integration - /integration (POST) #novu-v2', () => {
 
 async function insertIntegrationTwice(
   session: UserSession,
-  payload: { credentials: { apiKey: string; secretKey: string }; providerId: string; channel: string; active: boolean },
+  payload: {
+    credentials: { apiKey: string; secretKey: string };
+    providerId: string;
+    channel: string;
+    active: boolean;
+  },
   createDiffChannels: boolean
 ) {
   await session.testAgent.post('/v1/integrations').send(payload);
 
   if (createDiffChannels) {
-    // eslint-disable-next-line no-param-reassign
     payload.channel = ChannelTypeEnum.SMS;
   }
 

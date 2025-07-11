@@ -30,7 +30,6 @@ export function CopyToClipboard(props: CopyToClipboardProps) {
         timeoutId = undefined;
       }, props.tooltipDuration ?? defaultTooltipDuration);
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('Failed to copy text: ', err);
     }
   }

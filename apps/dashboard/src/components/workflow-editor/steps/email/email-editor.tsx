@@ -26,7 +26,9 @@ export const EmailEditor = (props: EmailEditorProps) => {
 								component: disableOutputSanitization.component,
 							})}
 						{isHtmlEditorEnabled &&
-							getComponentByType({ component: editorType?.component ?? UiComponentEnum.EMAIL_EDITOR_SELECT })}
+							getComponentByType({
+								component: editorType?.component ?? UiComponentEnum.EMAIL_EDITOR_SELECT,
+							})}
 					</EmailPreviewHeader>
 				</div>
 

@@ -115,9 +115,7 @@ export function LayoutEditor({
     }
 
     const newIdentifier = slugify(layoutName);
-    setValue('identifier', newIdentifier);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editMode, layoutName]);
+    setValue('identifier', newIdentifier);  }, [editMode, layoutName]);
 
   useEffect(() => {
     if (environment && layout) {
@@ -148,9 +146,7 @@ export function LayoutEditor({
       }
     });
 
-    variablesArray.replace(arrayFields.filter((field) => !!field));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ast]);
+    variablesArray.replace(arrayFields.filter((field) => !!field));  }, [ast]);
 
   useEffect(() => {
     try {

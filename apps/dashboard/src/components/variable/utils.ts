@@ -48,7 +48,11 @@ export function validateEnhancedDigestFilters(filters: string[]): {
 		const isFirstParamEmpty = !firstParam || firstParam === "" || firstParam === "''" || firstParam === '""';
 
 		if (isFirstParamEmpty) {
-			return { message: "Object key path is required", name: "toSentence", filterParam: "Object key path" };
+			return {
+				message: "Object key path is required",
+				name: "toSentence",
+				filterParam: "Object key path",
+			};
 		}
 	}
 

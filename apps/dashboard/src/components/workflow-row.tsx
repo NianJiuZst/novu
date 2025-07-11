@@ -99,7 +99,9 @@ export const WorkflowRow = ({ workflow }: WorkflowRowProps) => {
 				workflowSlug: workflow.slug,
 			});
 	const triggerWorkflowLink = isV0Workflow
-		? buildRoute(`${LEGACY_DASHBOARD_URL}/workflows/edit/:workflowId/test-workflow`, { workflowId: workflow._id })
+		? buildRoute(`${LEGACY_DASHBOARD_URL}/workflows/edit/:workflowId/test-workflow`, {
+				workflowId: workflow._id,
+			})
 		: buildRoute(isV2TemplateEditorEnabled ? ROUTES.TRIGGER_WORKFLOW : ROUTES.TEST_WORKFLOW, {
 				environmentSlug: currentEnvironment?.slug ?? "",
 				workflowSlug: workflow.slug,

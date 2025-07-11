@@ -21,10 +21,12 @@ export class GetMessages {
       throw new BadRequestException('Limit can not be larger then 1000');
     }
 
-    const query: Partial<Omit<MessageEntity, 'transactionId'>> & { _environmentId: string; transactionId?: string[] } =
-      {
-        _environmentId: command.environmentId,
-      };
+    const query: Partial<Omit<MessageEntity, 'transactionId'>> & {
+      _environmentId: string;
+      transactionId?: string[];
+    } = {
+      _environmentId: command.environmentId,
+    };
 
     if (command.subscriberId) {
       const subscriber = await this.getSubscriberUseCase.execute(

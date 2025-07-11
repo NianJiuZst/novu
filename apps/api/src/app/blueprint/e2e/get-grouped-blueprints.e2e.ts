@@ -21,7 +21,6 @@ import sinon from 'sinon';
 import type { CreateWorkflowRequestDto } from '../../workflows-v1/dtos';
 import type { GroupedBlueprintResponse } from '../dtos/grouped-blueprint.response.dto';
 import { GetGroupedBlueprints, POPULAR_TEMPLATES_ID_LIST } from '../usecases/get-grouped-blueprints';
-// eslint-disable-next-line import/no-namespace
 import * as blueprintStaticModule from '../usecases/get-grouped-blueprints/consts';
 
 describe('Get grouped notification template blueprints - /blueprints/group-by-category (GET) #novu-v0', async () => {
@@ -144,9 +143,11 @@ describe('Get grouped notification template blueprints - /blueprints/group-by-ca
       .post(`/v1/notification-groups`)
       .send({ name: categoryName });
 
-    await session.testAgent
-      .post(`/v1/workflows`)
-      .send({ notificationGroupId: notificationGroupsResult.data._id, name: 'test email template', steps: [] });
+    await session.testAgent.post(`/v1/workflows`).send({
+      notificationGroupId: notificationGroupsResult.data._id,
+      name: 'test email template',
+      steps: [],
+    });
 
     await session.applyChanges({
       enabled: false,

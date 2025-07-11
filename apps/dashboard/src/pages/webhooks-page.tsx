@@ -105,7 +105,12 @@ export function WebhooksPage() {
 	const appId = portalData?.appId;
 
 	const tabDefinitions = [
-		{ value: "endpoints", label: "Endpoints", portalPath: "/endpoints", routePath: ROUTES.WEBHOOKS_ENDPOINTS },
+		{
+			value: "endpoints",
+			label: "Endpoints",
+			portalPath: "/endpoints",
+			routePath: ROUTES.WEBHOOKS_ENDPOINTS,
+		},
 		{
 			value: "event-catalog",
 			label: "Event Catalog",
@@ -113,7 +118,12 @@ export function WebhooksPage() {
 			routePath: ROUTES.WEBHOOKS_EVENT_CATALOG,
 		},
 		{ value: "logs", label: "Logs", portalPath: "/messages", routePath: ROUTES.WEBHOOKS_LOGS },
-		{ value: "activity", label: "Activity", portalPath: "/activity", routePath: ROUTES.WEBHOOKS_ACTIVITY },
+		{
+			value: "activity",
+			label: "Activity",
+			portalPath: "/activity",
+			routePath: ROUTES.WEBHOOKS_ACTIVITY,
+		},
 	];
 
 	const activeTabDefinition =

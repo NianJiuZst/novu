@@ -148,9 +148,7 @@ export function LocalStudioAuthenticator() {
     );
 
     // Redirect to Local Studio server
-    window.location.href = finalRedirectURL.href;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser, environments, isLoading]);
+    window.location.href = finalRedirectURL.href;  }, [currentUser, environments, isLoading]);
 
   return <LocalStudioPageLayout.LoadingDisplay />;
 }

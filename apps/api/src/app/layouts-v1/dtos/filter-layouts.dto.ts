@@ -10,14 +10,22 @@ export class FilterLayoutsRequestDto {
   @IsOptional()
   @IsInt()
   @Min(0)
-  @ApiPropertyOptional({ type: Number, description: 'Number of page for pagination', required: false })
+  @ApiPropertyOptional({
+    type: Number,
+    description: 'Number of page for pagination',
+    required: false,
+  })
   public page?: number;
 
   @Transform(({ value }) => Number(value))
   @IsOptional()
   @IsInt()
   @Min(0)
-  @ApiPropertyOptional({ type: Number, description: 'Size of page for pagination', required: false })
+  @ApiPropertyOptional({
+    type: Number,
+    description: 'Size of page for pagination',
+    required: false,
+  })
   public pageSize?: number;
 
   @IsOptional()

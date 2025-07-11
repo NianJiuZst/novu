@@ -37,10 +37,5 @@
   },
   "testExplorer.useNativeTesting": true,
   "vsicons.presets.nestjs": true,
-  // Biome configuration
-  "biome.lspBin": "npx biome",
-  "biome.enabled": true,
-  // Disable conflicting tools
-  "eslint.enable": false,
-  "prettier.enable": false
+  "biome.enabled": true
 }

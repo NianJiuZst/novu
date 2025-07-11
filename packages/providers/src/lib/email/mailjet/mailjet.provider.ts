@@ -139,7 +139,6 @@ export class MailjetEmailProvider extends BaseProvider implements IEmailProvider
 
   parseEventBody(body: any | any[], identifier: string): IEmailEventBody | undefined {
     if (Array.isArray(body)) {
-      // eslint-disable-next-line no-param-reassign
       body = body.find((item) => item.MessageID === identifier);
     }
 

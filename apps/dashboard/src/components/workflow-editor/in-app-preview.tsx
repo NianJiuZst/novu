@@ -153,7 +153,11 @@ export const InAppPreviewActions = (props: InAppPreviewActionsProps) => {
 	return <div className={cn("mt-3 flex flex-wrap gap-1 py-px", className)} {...rest} />;
 };
 
-type InAppPreviewPrimaryActionProps = { isPending?: boolean; children?: ReactNode; className?: string };
+type InAppPreviewPrimaryActionProps = {
+	isPending?: boolean;
+	children?: ReactNode;
+	className?: string;
+};
 
 export const InAppPreviewPrimaryAction = (props: InAppPreviewPrimaryActionProps) => {
 	const { className, isPending, children, ...rest } = props;

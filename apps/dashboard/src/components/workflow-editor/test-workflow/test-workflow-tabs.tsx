@@ -19,7 +19,10 @@ import { buildRoute, ROUTES } from "@/utils/routes";
 import { useWorkflow } from "../workflow-provider";
 
 export const TestWorkflowTabs = ({ testData }: { testData?: WorkflowTestDataResponseDto }) => {
-	const { environmentSlug = "", workflowSlug = "" } = useParams<{ environmentSlug: string; workflowSlug: string }>();
+	const { environmentSlug = "", workflowSlug = "" } = useParams<{
+		environmentSlug: string;
+		workflowSlug: string;
+	}>();
 	const { workflow } = useWorkflow();
 	const [transactionId, setTransactionId] = useState<string>();
 	const isPayloadSchemaEnabled = useIsPayloadSchemaEnabled();
@@ -49,7 +52,11 @@ export const TestWorkflowTabs = ({ testData }: { testData?: WorkflowTestDataResp
 		try {
 			const {
 				data: { transactionId: newTransactionId },
-			} = await triggerWorkflow({ name: workflow?.workflowId ?? "", to: data.to, payload: data.payload });
+			} = await triggerWorkflow({
+				name: workflow?.workflowId ?? "",
+				to: data.to,
+				payload: data.payload,
+			});
 
 			if (!newTransactionId) {
 				return showToast({

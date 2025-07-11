@@ -31,8 +31,6 @@ export {
 	SignedIn,
 	SignedOut,
 };
-
-// eslint-disable-next-line react-refresh/only-export-components
 export { useOrganization, useUser, useAuth };
 
 export const useOrganizationList = () => {
@@ -67,8 +65,6 @@ export function ClerkProvider({ children }: any) {
 		</ClerkContext.Provider>
 	);
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as any).Clerk = {
 	loggedIn: isJwtValid(getJwtToken()),
 	session: {

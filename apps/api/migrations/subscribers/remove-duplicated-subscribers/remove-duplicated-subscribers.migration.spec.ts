@@ -237,7 +237,13 @@ describe('Migration: Remove Duplicated Subscribers', () => {
       subscriberId: duplicatedSubscriberId,
       firstName: 'first_name_1',
       lastName: 'last_name_1',
-      channels: [{ _integrationId: '1', providerId: ChatProviderIdEnum.Slack, credentials: { webhookUrl: 'url_1' } }],
+      channels: [
+        {
+          _integrationId: '1',
+          providerId: ChatProviderIdEnum.Slack,
+          credentials: { webhookUrl: 'url_1' },
+        },
+      ],
       _environmentId: firstEnvironmentId,
       _organizationId: session.organization._id,
       deleted: false,

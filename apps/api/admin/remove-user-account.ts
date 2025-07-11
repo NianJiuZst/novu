@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import '../src/config';
 import { CommunityMemberRepository, CommunityUserRepository } from '@novu/dal';
 import { normalizeEmail } from '@novu/shared';

@@ -17,7 +17,10 @@ export class DevServer {
   constructor(private options: DevServerOptions) {}
 
   public async listen(): Promise<void> {
-    const port = await getPort({ host: this.options.studioHost, port: Number(this.options.studioPort) });
+    const port = await getPort({
+      host: this.options.studioHost,
+      port: Number(this.options.studioPort),
+    });
     this.server = http.createServer();
     this.server.on('request', async (req, res) => {
       try {
@@ -33,7 +36,6 @@ export class DevServer {
             .end();
         }
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.error(e);
       }
     });

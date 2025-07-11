@@ -37,11 +37,7 @@ export type JsonSchema = Exclude<JSONSchema, boolean> & JsonSchemaMinimal;
  * type MySchema = InferJsonSchema<typeof mySchema, { validated: true }>;
  * ```
  */
-export type InferJsonSchema<
-  T,
-  Options extends { validated: boolean },
-> = // Firstly, narrow to the minimal schema type without using the `json-schema-to-ts` import
-T extends JsonSchemaMinimal
+export type InferJsonSchema<T, Options extends { validated: boolean }> = T extends JsonSchemaMinimal // Firstly, narrow to the minimal schema type without using the `json-schema-to-ts` import
   ? // Secondly, narrow to the JSON schema type to provide type-safety to `json-schema-to-ts`
     T extends JSONSchema
     ? Options['validated'] extends true

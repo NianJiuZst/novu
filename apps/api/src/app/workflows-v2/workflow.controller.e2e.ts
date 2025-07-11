@@ -183,11 +183,15 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
       await session.updateOrganizationServiceLevel(ApiServiceLevelEnum.FREE);
       getFeatureForTierAsNumber(FeatureNameEnum.PLATFORM_MAX_WORKFLOWS, ApiServiceLevelEnum.FREE, false);
       for (let i = 0; i < 20; i += 1) {
-        const createWorkflowDto: CreateWorkflowDto = buildWorkflow({ name: new Date().toISOString() + i });
+        const createWorkflowDto: CreateWorkflowDto = buildWorkflow({
+          name: new Date().toISOString() + i,
+        });
         await createWorkflow(apiClient, createWorkflowDto);
       }
 
-      const createWorkflowDto: CreateWorkflowDto = buildWorkflow({ name: new Date().toISOString() });
+      const createWorkflowDto: CreateWorkflowDto = buildWorkflow({
+        name: new Date().toISOString(),
+      });
       const error = await createWorkflowAndExpectError(apiClient, createWorkflowDto);
       expect(error?.statusCode).eq(400);
     });
@@ -320,7 +324,10 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
       const updatedWorkflow = await updateWorkflow(workflowCreated.id, {
         ...mapResponseToUpdateDto(workflowCreated),
         preferences: {
-          user: { ...DEFAULT_WORKFLOW_PREFERENCES, all: { ...DEFAULT_WORKFLOW_PREFERENCES.all, enabled: false } },
+          user: {
+            ...DEFAULT_WORKFLOW_PREFERENCES,
+            all: { ...DEFAULT_WORKFLOW_PREFERENCES.all, enabled: false },
+          },
         },
       });
       expect(updatedWorkflow.preferences.user, JSON.stringify(updatedWorkflow, null, 2)).to.be.ok;
@@ -517,7 +524,11 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
         name: 'Promote Workflow',
         steps: [
           buildEmailStep({
-            controlValues: { body: 'Example body', subject: 'Example subject', disableOutputSanitization: false },
+            controlValues: {
+              body: 'Example body',
+              subject: 'Example subject',
+              disableOutputSanitization: false,
+            },
           }),
           buildInAppStep({
             controlValues: { body: 'Example body' },
@@ -618,7 +629,9 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
             name: 'Updated Email Step',
           },
           {
-            ...buildInAppStep({ controlValues: { body: 'Example body', disableOutputSanitization: false } }),
+            ...buildInAppStep({
+              controlValues: { body: 'Example body', disableOutputSanitization: false },
+            }),
             name: 'New InApp Step',
           },
         ],
@@ -834,7 +847,10 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
               subject: 'Welcome to our newsletter {{subjectText}} {{payload.prefixSubjectText}}',
             },
           },
-          { ...buildInAppStep(), controlValues: { subject: 'Welcome to our newsletter {{inAppSubjectText}}' } },
+          {
+            ...buildInAppStep(),
+            controlValues: { subject: 'Welcome to our newsletter {{inAppSubjectText}}' },
+          },
         ];
         const createWorkflowDto: CreateWorkflowDto = buildWorkflow({ steps } as CreateWorkflowDto);
         const res = await createWorkflow(apiClient, createWorkflowDto);
@@ -854,7 +870,10 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
       it('should serve previous step variables with payload schema', async () => {
         const steps = [
           buildDigestStep(),
-          { ...buildInAppStep(), controlValues: { subject: 'Welcome to our newsletter {{payload.inAppSubjectText}}' } },
+          {
+            ...buildInAppStep(),
+            controlValues: { subject: 'Welcome to our newsletter {{payload.inAppSubjectText}}' },
+          },
         ];
         const createWorkflowDto: CreateWorkflowDto = buildWorkflow({ steps } as CreateWorkflowDto);
         const res = await createWorkflow(apiClient, createWorkflowDto);
@@ -1004,7 +1023,9 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
     describe('steps validation', () => {
       it('should throw 400 when name is empty', async () => {
         // @ts-ignore
-        const overrideDto = { steps: [{ ...buildEmailStep(), name: '' } as unknown as StepUpsertDto] };
+        const overrideDto = {
+          steps: [{ ...buildEmailStep(), name: '' } as unknown as StepUpsertDto],
+        };
         const createWorkflowDto: CreateWorkflowDto = buildWorkflow();
         const dtoWithoutName = { ...createWorkflowDto, ...overrideDto };
 
@@ -1038,7 +1059,11 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
 
           const stepData = await getStepData(createdWorkflow!.id, createdWorkflow!.steps[0].id);
           expect(stepData.issues!.controls!.body).to.eql([
-            { message: 'Subject or body is required', issueType: 'MISSING_VALUE', variableName: 'body' },
+            {
+              message: 'Subject or body is required',
+              issueType: 'MISSING_VALUE',
+              variableName: 'body',
+            },
           ]);
 
           // TODO: This should return a different type such as 'INVALID_URL'
@@ -1130,7 +1155,6 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
     const slug = buildSlug(updateRequest.name, ShortIsPrefixEnum.WORKFLOW, updatedWorkflow.id);
 
     expect(updatedWorkflow.slug).to.equal(slug);
-    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < updateRequest.steps.length; i++) {
       const stepInRequest = updateRequest.steps[i];
       expect(stepInRequest.name).to.equal(updatedWorkflow.steps[i].name);
@@ -1151,7 +1175,6 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
   }
 
   async function create10Workflows(prefix: string = 'Test Workflow') {
-    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < 10; i++) {
       await createWorkflowAndValidate(`${prefix}-${i}`);
     }
@@ -1227,7 +1250,6 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
   }
 
   function assertStepResponse(workflowResponseDto: WorkflowResponseDto, createWorkflowDto: CreateWorkflowDto) {
-    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < workflowResponseDto.steps.length; i++) {
       const stepInRequest = createWorkflowDto.steps[i];
       const step = workflowResponseDto.steps[i];
@@ -1253,7 +1275,6 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
     let properties: string[] = [];
     // Check if the schema has properties
     if (schema.properties) {
-      // eslint-disable-next-line guard-for-in
       for (const key in schema.properties) {
         const propertySchema = schema.properties[key];
         if (!isJSONSchemaDto(propertySchema)) {

@@ -58,11 +58,7 @@ export async function createNovuIntegrations() {
   const app = await NestFactory.create(AppModule, {
     logger: false,
   });
-
-  // eslint-disable-next-line no-console
   console.log('start migration - novu integrations');
-
-  // eslint-disable-next-line no-console
   console.log('get organizations and its environments');
 
   const organizations = await organizationRepository.find({});
@@ -82,8 +78,6 @@ export async function createNovuIntegrations() {
 
     console.log(`Processed organization${organization._id}`);
   }
-
-  // eslint-disable-next-line no-console
   console.log('end migration');
 }
 

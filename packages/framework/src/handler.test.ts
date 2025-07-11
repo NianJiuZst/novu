@@ -32,7 +32,10 @@ describe('NovuRequestHandler', () => {
         bridgeUrl: 'http://example.com',
       };
 
-      const { workflowId, ...renamedWorkflowId } = { ...triggerEvent, name: triggerEvent.workflowId };
+      const { workflowId, ...renamedWorkflowId } = {
+        ...triggerEvent,
+        name: triggerEvent.workflowId,
+      };
 
       const postMock = vi.fn().mockResolvedValueOnce({
         ok: true,
@@ -50,7 +53,11 @@ describe('NovuRequestHandler', () => {
         'Content-Type': 'application/json',
       };
       const expectedMethod = 'POST';
-      const expectedPayload = { body: expectedBody, headers: expectedHeaders, method: expectedMethod };
+      const expectedPayload = {
+        body: expectedBody,
+        headers: expectedHeaders,
+        method: expectedMethod,
+      };
 
       const calledWithUrl = postMock.mock.calls[0][0];
       expect(calledWithUrl).toEqual('https://api.novu.co/v1/events/trigger');

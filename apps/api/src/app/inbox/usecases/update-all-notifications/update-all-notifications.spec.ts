@@ -15,7 +15,10 @@ import { AnalyticsEventsEnum } from '../../utils';
 import type { UpdateAllNotificationsCommand } from './update-all-notifications.command';
 import { UpdateAllNotifications } from './update-all-notifications.usecase';
 
-const mockSubscriber: any = { _id: '6447aff5d89122e250412c79', subscriberId: '6447aff5d89122e250412c79' };
+const mockSubscriber: any = {
+  _id: '6447aff5d89122e250412c79',
+  subscriberId: '6447aff5d89122e250412c79',
+};
 
 describe('UpdateAllNotifications', () => {
   let updateAllNotifications: UpdateAllNotifications;

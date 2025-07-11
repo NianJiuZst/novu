@@ -1,8 +1,6 @@
 import { act, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
-import type { PropsWithChildren } from 'react';
-// eslint-disable-next-line import/no-namespace
-import * as ReactRouterDOM from 'react-router-dom';
+import type { PropsWithChildren } from 'react';import * as ReactRouterDOM from 'react-router-dom';
 import { MemoryRouter, type useSearchParams } from 'react-router-dom';
 import { afterEach, expect, it, vi } from 'vitest';
 import {

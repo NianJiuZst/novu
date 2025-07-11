@@ -145,7 +145,11 @@ export class EnvironmentsControllerV1 {
     description: `Update an environment by its unique identifier **environmentId**. 
     You can modify the environment name, identifier, color, and other configuration settings.`,
   })
-  @ApiParam({ name: 'environmentId', description: 'The unique identifier of the environment', type: String })
+  @ApiParam({
+    name: 'environmentId',
+    description: 'The unique identifier of the environment',
+    type: String,
+  })
   @ApiResponse(EnvironmentResponseDto)
   @SdkGroupName('Environments')
   @SdkMethodName('update')
@@ -210,7 +214,11 @@ export class EnvironmentsControllerV1 {
     description: `Delete an environment by its unique identifier **environmentId**. 
     This action is irreversible and will remove the environment and all its associated data.`,
   })
-  @ApiParam({ name: 'environmentId', description: 'The unique identifier of the environment', type: String })
+  @ApiParam({
+    name: 'environmentId',
+    description: 'The unique identifier of the environment',
+    type: String,
+  })
   @ProductFeature(ProductFeatureKeyEnum.MANAGE_ENVIRONMENTS)
   @SdkGroupName('Environments')
   @SdkMethodName('delete')

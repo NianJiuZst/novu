@@ -85,7 +85,13 @@ export const createHeaderLogoWithText: (props: { track: ReturnType<typeof useTel
 					content: [
 						{
 							type: "columns",
-							attrs: { showIfKey: null, gap: 8, backgroundColor: "#FFFFFF", borderWidth: 0, borderTopWidth: 2 },
+							attrs: {
+								showIfKey: null,
+								gap: 8,
+								backgroundColor: "#FFFFFF",
+								borderWidth: 0,
+								borderTopWidth: 2,
+							},
 							content: [
 								{
 									type: "column",

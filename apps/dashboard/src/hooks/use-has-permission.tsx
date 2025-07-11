@@ -1,5 +1,3 @@
-/* eslint-disable no-restricted-syntax */
-
 import { useAuth } from "@clerk/clerk-react";
 import type { CheckAuthorizationWithCustomPermissions } from "@clerk/types";
 import {

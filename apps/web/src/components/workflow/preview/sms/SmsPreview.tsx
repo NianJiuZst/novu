@@ -42,9 +42,7 @@ export const SmsPreview = ({
   useEffect(() => {
     if (bridge) {
       mutateAsync(controlVariables);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bridge, controlVariables]);
+    }  }, [bridge, controlVariables]);
 
   const { selectedLocale, locales, areLocalesLoading, onLocaleChange } = useTemplateLocales({
     content: templateContent as string,

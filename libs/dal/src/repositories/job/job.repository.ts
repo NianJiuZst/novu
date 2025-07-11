@@ -38,7 +38,6 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
     const stored: JobEntity[] = [];
     for (let index = 0; index < jobs.length; index += 1) {
       if (index > 0) {
-        // eslint-disable-next-line no-param-reassign
         jobs[index]._parentId = stored[index - 1]._id;
       }
 
@@ -231,7 +230,9 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
       status: JobStatusEnum.COMPLETED,
       type: StepTypeEnum.TRIGGER,
       _organizationId: job._organizationId,
-      transactionId: { $in: otherDigestJobsWithSameDigestKeyValue.map((job1) => job1.transactionId) },
+      transactionId: {
+        $in: otherDigestJobsWithSameDigestKeyValue.map((job1) => job1.transactionId),
+      },
     });
   }
   private buildLookBackDigestQuery(metadata: IDigestRegularMetadata | undefined, job: JobEntity) {

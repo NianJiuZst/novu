@@ -26,7 +26,9 @@ export const InboxTabUnreadNotificationsCount = (props: { count: number }) => {
 export const InboxTab = (props: Tab & { class?: ClassName }) => {
   const { status } = useInboxContext();
   const style = useStyle();
-  const unreadCount = useUnreadCount({ filter: { tags: getTagsFromTab(props), data: props.filter?.data } });
+  const unreadCount = useUnreadCount({
+    filter: { tags: getTagsFromTab(props), data: props.filter?.data },
+  });
 
   return (
     <Tabs.Trigger
@@ -48,7 +50,9 @@ type InboxDropdownTabProps = Pick<ComponentProps<(typeof Dropdown)['Item']>, 'on
 export const InboxDropdownTab = (props: InboxDropdownTabProps) => {
   const { status } = useInboxContext();
   const style = useStyle();
-  const unreadCount = useUnreadCount({ filter: { tags: getTagsFromTab(props), data: props.filter?.data } });
+  const unreadCount = useUnreadCount({
+    filter: { tags: getTagsFromTab(props), data: props.filter?.data },
+  });
 
   return (
     <Dropdown.Item

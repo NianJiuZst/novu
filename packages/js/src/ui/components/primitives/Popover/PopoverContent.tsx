@@ -37,7 +37,10 @@ const PopoverContentBody = (props: PopoverContentProps) => {
   );
 };
 
-type PopoverContentProps = JSX.IntrinsicElements['div'] & { appearanceKey?: AppearanceKey; portal?: boolean };
+type PopoverContentProps = JSX.IntrinsicElements['div'] & {
+  appearanceKey?: AppearanceKey;
+  portal?: boolean;
+};
 export const PopoverContent = (props: PopoverContentProps) => {
   const { open, onClose, reference, floating } = usePopover();
   const { active } = useFocusManager();

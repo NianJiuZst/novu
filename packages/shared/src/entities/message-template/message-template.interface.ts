@@ -33,7 +33,6 @@ export interface IMessageTemplate {
     data: {
       url?: string;
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     action?: any;
   };
   active?: boolean;

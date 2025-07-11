@@ -80,9 +80,7 @@ export abstract class CronService implements OnApplicationBootstrap, OnApplicati
       const createTimeoutPromise = () =>
         new Promise((resolve, reject) => {
           setTimeout(
-            () =>
-              // eslint-disable-next-line prefer-promise-reject-errors
-              reject(`Timed out while starting the ${this.cronServiceName} CRON service`),
+            () => reject(`Timed out while starting the ${this.cronServiceName} CRON service`),
             CRON_STARTUP_TIMEOUT
           );
         });

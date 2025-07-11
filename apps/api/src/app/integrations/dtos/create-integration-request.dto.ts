@@ -25,7 +25,11 @@ export class CreateIntegrationRequestDto implements ICreateIntegrationBodyDto {
   @IsString()
   identifier?: string;
 
-  @ApiPropertyOptional({ type: String, description: 'The ID of the associated environment', format: 'uuid' })
+  @ApiPropertyOptional({
+    type: String,
+    description: 'The ID of the associated environment',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsMongoId()
   _environmentId?: string;
