@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { IActivity } from '@novu/shared';
+import type { IActivity } from '@novu/shared';
 
-import { getActivityList, ActivityFilters } from '@/api/activity';
+import { getActivityList, type ActivityFilters } from '@/api/activity';
 import { useEnvironment } from '../context/environment/hooks';
 import { QueryKeys } from '@/utils/query-keys';
 

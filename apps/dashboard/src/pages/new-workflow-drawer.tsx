@@ -18,7 +18,7 @@ import { useDuplicateWorkflow } from '@/hooks/use-duplicate-workflow';
 import { useFetchWorkflow } from '@/hooks/use-fetch-workflow';
 import { useOnElementUnmount } from '@/hooks/use-on-element-unmount';
 import { buildRoute, ROUTES } from '@/utils/routes';
-import { DuplicateWorkflowDto } from '@novu/shared';
+import type { DuplicateWorkflowDto } from '@novu/shared';
 import { useState } from 'react';
 import { RiArrowRightSLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';

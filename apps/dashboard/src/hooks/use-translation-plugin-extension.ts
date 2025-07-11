@@ -1,10 +1,10 @@
-import { MutableRefObject, useMemo } from 'react';
-import { EditorView } from '@uiw/react-codemirror';
+import { type MutableRefObject, useMemo } from 'react';
+import type { EditorView } from '@uiw/react-codemirror';
 
 import { useFetchTranslationKeys } from './use-fetch-translation-keys';
 import { createTranslationExtension } from '@/components/primitives/translation-plugin';
 import { useTranslations } from '@/hooks/use-translations';
-import { CompletionRange } from '@/components/primitives/variable-editor';
+import type { CompletionRange } from '@/components/primitives/variable-editor';
 
 export const useTranslationPluginExtension = ({
   viewRef,

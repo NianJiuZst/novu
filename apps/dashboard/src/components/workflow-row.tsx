@@ -28,8 +28,8 @@ import { ResourceOriginEnum, WorkflowStatusEnum } from '@/utils/enums';
 import { formatDateSimple } from '@/utils/format-date';
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { cn } from '@/utils/ui';
-import { IEnvironment, PermissionsEnum, WorkflowListResponseDto, FeatureFlagsKeysEnum } from '@novu/shared';
-import { ComponentProps, useState } from 'react';
+import { type IEnvironment, PermissionsEnum, type WorkflowListResponseDto, FeatureFlagsKeysEnum } from '@novu/shared';
+import { type ComponentProps, useState } from 'react';
 import { CgBolt } from 'react-icons/cg';
 import { FaCode } from 'react-icons/fa6';
 import {
@@ -45,7 +45,7 @@ import {
 
 import { FilesIcon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { type ExternalToast } from 'sonner';
+import type { ExternalToast } from 'sonner';
 import { ConfirmationModal } from './confirmation-modal';
 import { DeleteWorkflowDialog } from './delete-workflow-dialog';
 import { CompactButton } from './primitives/button-compact';

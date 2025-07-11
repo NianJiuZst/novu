@@ -1,7 +1,7 @@
 import { Tokenizer, TokenKind } from 'liquidjs';
 import { useMemo, useCallback } from 'react';
 import { getFilters } from '../constants';
-import { FilterWithParam } from '../types';
+import type { FilterWithParam } from '../types';
 
 type ParsedVariable = {
   parsedName: string;

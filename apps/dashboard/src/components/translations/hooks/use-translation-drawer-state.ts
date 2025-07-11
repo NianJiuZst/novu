@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { TranslationGroup } from '@/api/translations';
+import type { TranslationGroup } from '@/api/translations';
 
 export function useTranslationDrawerState(translationGroups?: TranslationGroup[]) {
   const [selectedTranslationGroup, setSelectedTranslationGroup] = useState<TranslationGroup | null>(null);

@@ -1,7 +1,7 @@
 import { CopyButton } from '@/components/primitives/copy-button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';
 import { cn } from '@/utils/ui';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface OverviewItemProps {
   children?: ReactNode;

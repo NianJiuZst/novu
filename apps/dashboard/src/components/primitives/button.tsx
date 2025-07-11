@@ -1,6 +1,6 @@
 import { Slot, Slottable } from '@radix-ui/react-slot';
 import * as React from 'react';
-import { IconType } from 'react-icons';
+import type { IconType } from 'react-icons';
 import { RiArrowRightSLine, RiLoader4Line } from 'react-icons/ri';
 
 import type { PolymorphicComponentProps } from '@/utils/polymorphic';

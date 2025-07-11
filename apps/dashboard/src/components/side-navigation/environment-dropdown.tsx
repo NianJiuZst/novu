@@ -1,4 +1,4 @@
-import { IEnvironment } from '@novu/shared';
+import type { IEnvironment } from '@novu/shared';
 import { RiExpandUpDownLine } from 'react-icons/ri';
 import { cn } from '../../utils/ui';
 import { EnvironmentBranchIcon } from '../primitives/environment-branch-icon';

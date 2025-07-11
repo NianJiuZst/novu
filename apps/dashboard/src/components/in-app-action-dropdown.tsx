@@ -22,7 +22,7 @@ import { inboxButtonVariants } from '@/utils/inbox';
 import { cn } from '@/utils/ui';
 import { urlTargetTypes } from '@/utils/url';
 import merge from 'lodash.merge';
-import { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { RiEdit2Line, RiExpandUpDownLine, RiForbid2Line } from 'react-icons/ri';
 import { CompactButton } from './primitives/button-compact';

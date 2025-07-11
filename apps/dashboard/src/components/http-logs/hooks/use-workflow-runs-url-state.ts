@@ -1,7 +1,7 @@
 import { DirectionEnum } from '@novu/shared';
 import { useCallback, useMemo } from 'react';
 import { createSearchParams, useSearchParams } from 'react-router-dom';
-import { ActivityFilters } from '@/api/activity';
+import type { ActivityFilters } from '@/api/activity';
 
 export const defaultWorkflowRunsFilter: ActivityFilters = {
   channels: [],

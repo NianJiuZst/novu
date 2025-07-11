@@ -1,9 +1,9 @@
 import {
   ChannelTypeEnum,
-  ChatRenderOutput,
-  GeneratePreviewResponseDto,
-  InAppRenderOutput,
-  PushRenderOutput,
+  type ChatRenderOutput,
+  type GeneratePreviewResponseDto,
+  type InAppRenderOutput,
+  type PushRenderOutput,
   StepTypeEnum,
 } from '@novu/shared';
 import { ChatPreview } from './workflow-editor/steps/chat/chat-preview';

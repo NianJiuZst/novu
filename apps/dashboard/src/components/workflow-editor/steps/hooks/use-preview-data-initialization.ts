@@ -1,8 +1,8 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { WorkflowResponseDto } from '@novu/shared';
+import type { WorkflowResponseDto } from '@novu/shared';
 import { parseJsonValue } from '../utils/preview-context.utils';
 import { mergePreviewContextData } from '../utils/preview-context-storage.utils';
-import { PayloadData, PreviewSubscriberData } from '../types/preview-context.types';
+import type { PayloadData, PreviewSubscriberData } from '../types/preview-context.types';
 
 type InitializationProps = {
   workflowId?: string;

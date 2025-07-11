@@ -1,7 +1,7 @@
 import { TableCell, TableRow } from '@/components/primitives/table';
 import { TimeDisplayHoverCard } from '@/components/time-display-hover-card';
 import { formatDateSimple } from '@/utils/format-date';
-import { RequestLog } from '../../types/logs';
+import type { RequestLog } from '../../types/logs';
 import { MethodBadge } from './method-badge';
 import { HttpStatusBadge } from './http-status-badge';
 

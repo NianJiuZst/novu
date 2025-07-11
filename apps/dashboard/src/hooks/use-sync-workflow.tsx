@@ -24,7 +24,7 @@ export function useSyncWorkflow(workflow: WorkflowResponseDto | WorkflowListResp
   const [targetEnvironmentId, setTargetEnvironmentId] = useState<string>();
   const navigate = useNavigate();
 
-  let loadingToast: string | number | undefined = undefined;
+  let loadingToast: string | number | undefined;
 
   const isSyncable = useMemo(
     () => workflow.origin === ResourceOriginEnum.NOVU_CLOUD && workflow.status !== WorkflowStatusEnum.ERROR,

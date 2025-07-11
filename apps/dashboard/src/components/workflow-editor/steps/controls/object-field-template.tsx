@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { RiExpandUpDownLine } from 'react-icons/ri';
 import { useFormContext } from 'react-hook-form';
-import { getTemplate, getUiOptions, ObjectFieldTemplateProps } from '@rjsf/utils';
+import { getTemplate, getUiOptions, type ObjectFieldTemplateProps } from '@rjsf/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/primitives/collapsible';
 import { getFieldName, ROOT_DELIMITER } from './template-utils';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/primitives/form/form';

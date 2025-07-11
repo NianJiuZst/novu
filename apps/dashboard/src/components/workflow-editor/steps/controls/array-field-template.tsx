@@ -1,6 +1,6 @@
 import { CollapsibleContent, CollapsibleTrigger } from '@/components/primitives/collapsible';
 import { Collapsible } from '@radix-ui/react-collapsible';
-import { ArrayFieldTemplateProps, getTemplate, getUiOptions } from '@rjsf/utils';
+import { type ArrayFieldTemplateProps, getTemplate, getUiOptions } from '@rjsf/utils';
 import { useMemo, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { RiExpandUpDownLine } from 'react-icons/ri';

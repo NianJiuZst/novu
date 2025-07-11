@@ -1,4 +1,4 @@
-import { getDateRangeInMs, IActivity, IEnvironment } from '@novu/shared';
+import { getDateRangeInMs, type IActivity, type IEnvironment } from '@novu/shared';
 import { get } from './api.client';
 
 export type ActivityFilters = {

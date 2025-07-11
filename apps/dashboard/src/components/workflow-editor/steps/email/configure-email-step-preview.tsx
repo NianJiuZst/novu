@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react';
-import { HTMLAttributes, useEffect } from 'react';
+import { type HTMLAttributes, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { Separator } from '@/components/primitives/separator';

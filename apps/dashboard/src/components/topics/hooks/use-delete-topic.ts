@@ -3,7 +3,7 @@ import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner
 import { useEnvironment } from '@/context/environment/hooks';
 import { QueryKeys } from '@/utils/query-keys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ExternalToast } from 'sonner';
+import type { ExternalToast } from 'sonner';
 
 const toastOptions: ExternalToast = {
   position: 'bottom-right',

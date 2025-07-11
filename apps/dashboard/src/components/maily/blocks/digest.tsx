@@ -1,8 +1,8 @@
 import { Badge } from '@/components/primitives/badge';
-import { useTelemetry } from '@/hooks/use-telemetry';
+import type { useTelemetry } from '@/hooks/use-telemetry';
 import { TelemetryEvent } from '@/utils/telemetry';
-import { BlockItem } from '@maily-to/core/blocks';
-import { StepResponseDto } from '@novu/shared';
+import type { BlockItem } from '@maily-to/core/blocks';
+import type { StepResponseDto } from '@novu/shared';
 import { RiShadowLine } from 'react-icons/ri';
 
 export const createDigestBlock = (props: {

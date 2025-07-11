@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { RiFullscreenLine, RiCloseFill } from 'react-icons/ri';
-import { IActivity } from '@novu/shared';
+import type { IActivity } from '@novu/shared';
 import { useState, useRef } from 'react';
 
 import { cn } from '@/utils/ui';

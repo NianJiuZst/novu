@@ -1,4 +1,4 @@
-import { FilterWithParam } from '../types';
+import type { FilterWithParam } from '../types';
 import { createLiquidEngine } from '@novu/framework/internal';
 
 const engine = createLiquidEngine();

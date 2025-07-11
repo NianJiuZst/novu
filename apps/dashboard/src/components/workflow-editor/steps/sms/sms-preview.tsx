@@ -1,6 +1,6 @@
 import { SmsPhone } from '@/components/workflow-editor/steps/sms/sms-phone';
-import { ChannelTypeEnum, SmsRenderOutput, type GeneratePreviewResponseDto } from '@novu/shared';
-import { ReactNode } from 'react';
+import { ChannelTypeEnum, type SmsRenderOutput, type GeneratePreviewResponseDto } from '@novu/shared';
+import type { ReactNode } from 'react';
 
 const SmsPreviewContainer = ({ children }: { children: ReactNode }) => {
   return <div className="flex items-center justify-center">{children}</div>;

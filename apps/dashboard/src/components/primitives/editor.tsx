@@ -9,12 +9,12 @@ import {
 import { useDataRef } from '@/hooks/use-data-ref';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
-import { type TagStyle } from '@codemirror/language';
+import type { TagStyle } from '@codemirror/language';
 
 import {
   default as CodeMirror,
   EditorView,
-  ReactCodeMirrorProps,
+  type ReactCodeMirrorProps,
   type ReactCodeMirrorRef,
 } from '@uiw/react-codemirror';
 import { cva } from 'class-variance-authority';

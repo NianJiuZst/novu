@@ -1,8 +1,8 @@
-import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
+import { useMutation, type UseMutationOptions, useQueryClient } from '@tanstack/react-query';
 import { deleteWorkflow } from '@/api/workflows';
 import { QueryKeys } from '@/utils/query-keys';
 import { useEnvironment } from '@/context/environment/hooks';
-import { OmitEnvironmentFromParameters } from '@/utils/types';
+import type { OmitEnvironmentFromParameters } from '@/utils/types';
 
 type DeleteWorkflowParameters = OmitEnvironmentFromParameters<typeof deleteWorkflow>;
 

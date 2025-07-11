@@ -1,4 +1,4 @@
-import Form, { FormProps } from '@rjsf/core';
+import Form, { type FormProps } from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import { ArrayFieldItemTemplate } from './array-field-item-template';
 import { ArrayFieldTemplate } from './array-field-template';

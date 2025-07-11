@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { IntegrationStep } from '../../types';
+import type { IntegrationStep } from '../../types';
 
 type UseSidebarNavigationManagerProps = {
   isOpened: boolean;

@@ -1,5 +1,5 @@
 import type { PopoverContentProps } from '@radix-ui/react-popover';
-import { KeyboardEventHandler, useMemo, useRef, useState } from 'react';
+import { type KeyboardEventHandler, useMemo, useRef, useState } from 'react';
 import { RiCornerDownLeftLine } from 'react-icons/ri';
 
 import { Button } from '@/components/primitives/button';

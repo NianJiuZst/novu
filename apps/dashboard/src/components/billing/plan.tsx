@@ -3,7 +3,7 @@ import { useFeatureFlagMap } from '@/hooks/use-feature-flag.tsx';
 import { useFetchSubscription } from '@/hooks/use-fetch-subscription';
 import {
   ApiServiceLevelEnum,
-  FeatureFlags,
+  type FeatureFlags,
   FeatureFlagsKeysEnum,
   FeatureNameEnum,
   getFeatureForTierAsBoolean,
@@ -18,10 +18,10 @@ import { TelemetryEvent } from '../../utils/telemetry';
 import { cn } from '../../utils/ui';
 import { showErrorToast, showSuccessToast } from '../primitives/sonner-helpers';
 import { ActivePlanBanner } from './active-plan-banner';
-import { BuildValuesParams, Feature, Features, PlanFeatureValue } from './features';
-import { HighlightsRow, PlanHighlights } from './highlights-row';
+import { type BuildValuesParams, type Feature, Features, type PlanFeatureValue } from './features';
+import { HighlightsRow, type PlanHighlights } from './highlights-row';
 import { PlanSwitcher } from './plan-switcher';
-import { PlanConfig, PlansRow } from './plans-row';
+import { type PlanConfig, PlansRow } from './plans-row';
 
 function getTierLabel(tierForLabel: ApiServiceLevelEnum) {
   return getFeatureForTierAsText(FeatureNameEnum.PLATFORM_PLAN_LABEL, tierForLabel);

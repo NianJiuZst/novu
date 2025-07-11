@@ -8,10 +8,10 @@ import { InAppTabs } from '@/components/workflow-editor/steps/in-app/in-app-tabs
 import { PushTabs } from '@/components/workflow-editor/steps/push/push-tabs';
 import { SaveFormContext } from '@/components/workflow-editor/steps/save-form-context';
 import { SmsTabs } from '@/components/workflow-editor/steps/sms/sms-tabs';
-import { UpdateWorkflowFn } from '@/components/workflow-editor/workflow-provider';
+import type { UpdateWorkflowFn } from '@/components/workflow-editor/workflow-provider';
 import { useDataRef } from '@/hooks/use-data-ref';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
-import { type StepResponseDto, StepTypeEnum, StepUpdateDto, type WorkflowResponseDto } from '@novu/shared';
+import { type StepResponseDto, StepTypeEnum, type StepUpdateDto, type WorkflowResponseDto } from '@novu/shared';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 

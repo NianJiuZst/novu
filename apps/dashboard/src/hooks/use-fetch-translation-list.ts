@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEnvironment } from '@/context/environment/hooks';
-import { getTranslationsList, TranslationsFilter } from '@/api/translations';
+import { getTranslationsList, type TranslationsFilter } from '@/api/translations';
 import { QueryKeys } from '@/utils/query-keys';
 
 export const useFetchTranslationList = (filterValues: TranslationsFilter) => {

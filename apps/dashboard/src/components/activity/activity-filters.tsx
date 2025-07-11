@@ -1,12 +1,12 @@
 import { Badge } from '@/components/primitives/badge';
 import { Tooltip, TooltipContent, TooltipPortal, TooltipTrigger } from '@/components/primitives/tooltip';
 import { useFetchSubscription } from '@/hooks/use-fetch-subscription';
-import { ActivityFiltersData } from '@/types/activity';
+import type { ActivityFiltersData } from '@/types/activity';
 import { buildActivityDateFilters } from '@/utils/activityFilters';
 import { ROUTES } from '@/utils/routes';
 import { cn } from '@/utils/ui';
 import { useOrganization } from '@clerk/clerk-react';
-import { ChannelTypeEnum } from '@novu/shared';
+import type { ChannelTypeEnum } from '@novu/shared';
 import { CalendarIcon } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';

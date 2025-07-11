@@ -1,6 +1,6 @@
 import { ToggleGroup, ToggleGroupItem } from '@/components/primitives/toggle-group';
 import { useTelemetry } from '@/hooks/use-telemetry';
-import { TelemetryEvent } from '@/utils/telemetry';
+import type { TelemetryEvent } from '@/utils/telemetry';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useRef, useState } from 'react';
 import { RiCloseFill } from 'react-icons/ri';

@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { LiquidVariable } from '../../../utils/parseStepVariables';
+import type { LiquidVariable } from '../../../utils/parseStepVariables';
 import { DigestCountSummaryPreview } from '@/components/variable/components/digest-count-summary-preview';
 import { DigestSentenceSummaryPreview } from '@/components/variable/components/digest-sentence-summary-preview';
 

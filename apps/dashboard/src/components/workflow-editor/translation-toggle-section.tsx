@@ -5,7 +5,7 @@ import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { ROUTES } from '@/utils/routes';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { InfoIcon } from 'lucide-react';
-import { Control, FieldValues, Path } from 'react-hook-form';
+import type { Control, FieldValues, Path } from 'react-hook-form';
 
 interface TranslationToggleSectionProps<T extends FieldValues> {
   control: Control<T>;

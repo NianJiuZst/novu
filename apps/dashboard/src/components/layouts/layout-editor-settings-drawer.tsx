@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { RiSettings4Line } from 'react-icons/ri';
-import { ExternalToast } from 'sonner';
+import type { ExternalToast } from 'sonner';
 import { useBlocker } from 'react-router-dom';
 
 import { Button } from '@/components/primitives/button';

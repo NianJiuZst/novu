@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { RiInformationLine, RiPencilLine, RiSearchLine } from 'react-icons/ri';
-import { type WorkflowResponseDto, type ISubscriberResponseDto } from '@novu/shared';
+import type { WorkflowResponseDto, ISubscriberResponseDto } from '@novu/shared';
 
 import { Button } from '@/components/primitives/button';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/primitives/form/form';
@@ -98,7 +98,12 @@ export function TestWorkflowContent({
           <h2 className="text-label-lg text-text-strong">Test workflow</h2>
           <p className="text-paragraph-xs text-text-soft">
             Time to test the workflow you just built.{' '}
-            <a href="https://docs.novu.co/platform/concepts/trigger" target="_blank" className="underline">
+            <a
+              href="https://docs.novu.co/platform/concepts/trigger"
+              target="_blank"
+              className="underline"
+              rel="noopener"
+            >
               Learn more ↗
             </a>
           </p>

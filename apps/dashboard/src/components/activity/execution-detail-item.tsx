@@ -1,4 +1,4 @@
-import { IExecutionDetail } from '@novu/shared';
+import type { IExecutionDetail } from '@novu/shared';
 import { format } from 'date-fns';
 import { formatJSONString } from '../../utils/string';
 import { ActivityDetailCard } from './activity-detail-card';

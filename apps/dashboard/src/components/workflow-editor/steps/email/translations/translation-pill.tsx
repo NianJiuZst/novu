@@ -1,4 +1,5 @@
-import React, { useMemo, useState, useRef } from 'react';
+import type React from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { cn } from '@/utils/ui';
 import { EditTranslationPopover } from './edit-translation-popover/edit-translation-popover';
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';

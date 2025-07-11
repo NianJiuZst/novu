@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { Controller, Path, useFormContext, useWatch, type Control } from 'react-hook-form';
+import { Controller, type Path, useFormContext, useWatch, type Control } from 'react-hook-form';
 
 import { Checkbox } from '@/components/primitives/checkbox';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';

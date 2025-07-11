@@ -1,5 +1,5 @@
-import { RegistryWidgetsType, UiSchema } from '@rjsf/utils';
-import { ComponentProps } from 'react';
+import type { RegistryWidgetsType, UiSchema } from '@rjsf/utils';
+import type { ComponentProps } from 'react';
 import { SelectWidget } from './select-widget';
 import { SwitchWidget } from './switch-widget';
 import { TextWidget } from './text-widget';

@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { IIntegration } from '@novu/shared';
+import type { IIntegration } from '@novu/shared';
 import { useEnvironment } from '../context/environment/hooks';
 import { QueryKeys } from '../utils/query-keys';
-import { updateIntegration, UpdateIntegrationData } from '../api/integrations';
+import { updateIntegration, type UpdateIntegrationData } from '../api/integrations';
 
 type UpdateIntegrationVariables = {
   integrationId: string;

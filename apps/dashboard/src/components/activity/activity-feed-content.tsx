@@ -13,7 +13,7 @@ import { defaultActivityFilters } from '@/components/activity/constants';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/primitives/resizable';
 import { useActivityUrlState } from '@/hooks/use-activity-url-state';
 import { usePullActivity } from '@/hooks/use-pull-activity';
-import { ActivityFiltersData } from '@/types/activity';
+import type { ActivityFiltersData } from '@/types/activity';
 import { cn } from '../../utils/ui';
 import { EmptyTopicsIllustration } from '../topics/empty-topics-illustration';
 

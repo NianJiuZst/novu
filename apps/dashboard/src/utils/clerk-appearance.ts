@@ -1,4 +1,4 @@
-import { SignUpTheme, SignInTheme } from '@clerk/types';
+import type { SignUpTheme, SignInTheme } from '@clerk/types';
 
 export const clerkSignupAppearance: SignUpTheme | SignInTheme = {
   elements: {

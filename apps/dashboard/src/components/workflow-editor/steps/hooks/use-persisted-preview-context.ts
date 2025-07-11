@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { ParsedData, PayloadData, PreviewSubscriberData } from '../types/preview-context.types';
+import type { ParsedData, PayloadData, PreviewSubscriberData } from '../types/preview-context.types';
 import {
   savePreviewContextData,
   loadPreviewContextData,

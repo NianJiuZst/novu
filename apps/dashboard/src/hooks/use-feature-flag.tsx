@@ -1,4 +1,4 @@
-import { FeatureFlags, FeatureFlagsKeysEnum, prepareBooleanStringFeatureFlag } from '@novu/shared';
+import { type FeatureFlags, type FeatureFlagsKeysEnum, prepareBooleanStringFeatureFlag } from '@novu/shared';
 import { useFlags } from 'launchdarkly-react-client-sdk';
 import { LAUNCH_DARKLY_CLIENT_SIDE_ID } from '../config';
 

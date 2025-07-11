@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEnvironment } from '../context/environment/hooks';
 import { createIntegration } from '../api/integrations';
-import { CreateIntegrationData } from '../api/integrations';
+import type { CreateIntegrationData } from '../api/integrations';
 import { QueryKeys } from '../utils/query-keys';
-import { IIntegration } from '@novu/shared';
+import type { IIntegration } from '@novu/shared';
 
 export function useCreateIntegration() {
   const { currentEnvironment } = useEnvironment();

@@ -1,8 +1,8 @@
 import { cn } from '@/utils/ui';
-import { cva, VariantProps } from 'class-variance-authority';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { useTheme } from 'next-themes';
 import React from 'react';
-import { IconBaseProps } from 'react-icons/lib';
+import type { IconBaseProps } from 'react-icons/lib';
 import {
   RiAlertFill,
   RiCheckboxCircleFill,

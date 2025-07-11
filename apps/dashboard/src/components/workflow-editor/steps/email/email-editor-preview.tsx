@@ -1,4 +1,4 @@
-import { ChannelTypeEnum, GeneratePreviewResponseDto, type WorkflowResponseDto } from '@novu/shared';
+import { ChannelTypeEnum, type GeneratePreviewResponseDto, type WorkflowResponseDto } from '@novu/shared';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { cn } from '@/utils/ui';

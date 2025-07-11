@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
-import { WorkflowResponseDto } from '@novu/shared';
+import type { WorkflowResponseDto } from '@novu/shared';
 import {
   loadPayloadData,
   savePayloadData,
   mergeObjectData,
 } from '@/components/workflow-editor/steps/utils/preview-context-storage.utils';
-import { PayloadData } from '@/components/workflow-editor/steps/types/preview-context.types';
+import type { PayloadData } from '@/components/workflow-editor/steps/types/preview-context.types';
 import { useIsPayloadSchemaEnabled } from './use-is-payload-schema-enabled';
 
 type UseWorkflowPayloadPersistenceProps = {

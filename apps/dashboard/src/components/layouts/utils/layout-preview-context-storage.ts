@@ -1,4 +1,4 @@
-import { SubscriberDto } from '@novu/shared';
+import type { SubscriberDto } from '@novu/shared';
 import { clearFromStorage, loadFromStorage, saveToStorage } from '@/utils/local-storage';
 
 export function getSubscriberStorageKey(layoutId: string, environmentId: string): string {

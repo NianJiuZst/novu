@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { getFilters } from '../constants';
-import { Filters, FilterWithParam } from '../types';
+import type { Filters, FilterWithParam } from '../types';
 
 type SuggestionGroup = {
   label: string;

@@ -17,13 +17,13 @@ import { useTags } from '@/hooks/use-tags';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   type CreateWorkflowDto,
-  DuplicateWorkflowDto,
+  type DuplicateWorkflowDto,
   slugify,
   MAX_DESCRIPTION_LENGTH,
   MAX_TAG_ELEMENTS,
 } from '@novu/shared';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import type { z } from 'zod';
 
 interface CreateWorkflowFormProps {
   onSubmit: (values: z.infer<typeof workflowSchema>) => void;

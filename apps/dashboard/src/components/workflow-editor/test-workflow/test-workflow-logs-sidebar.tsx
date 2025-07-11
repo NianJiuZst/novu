@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { RiCheckboxCircleFill } from 'react-icons/ri';
-import { WorkflowResponseDto } from '@novu/shared';
+import type { WorkflowResponseDto } from '@novu/shared';
 
 import { ActivityPanel } from '@/components/activity/activity-panel';
 import { useFetchActivities } from '../../../hooks/use-fetch-activities';
 import { WorkflowTriggerInboxIllustration } from '../../icons/workflow-trigger-inbox';
 import { Button } from '../../primitives/button';
-import { TestWorkflowFormType } from '../schema';
+import type { TestWorkflowFormType } from '../schema';
 import { TestWorkflowInstructions } from './test-workflow-instructions';
 import { ActivitySkeleton } from '@/components/activity/activity-skeleton';
 import { ActivityError } from '@/components/activity/activity-error';

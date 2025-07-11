@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react';
 import { cn } from '../../../../../utils/ui';
-import { FilterOption, SizeType } from '../types';
+import type { FilterOption, SizeType } from '../types';
 import { BaseFilterContent } from './base-filter-content';
 import { useKeyboardNavigation } from '../hooks/use-keyboard-navigation';
 

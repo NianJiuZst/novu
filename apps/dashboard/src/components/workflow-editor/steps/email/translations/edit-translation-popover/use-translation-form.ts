@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useCreateTranslationKey } from '@/hooks/use-create-translation-key';
-import { TranslationKey } from '@/types/translations';
+import type { TranslationKey } from '@/types/translations';
 import { useTranslationValidation } from '@/hooks/use-translation-validation';
 
 export const useTranslationForm = (

@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChannelTypeEnum, WorkflowPreferences, WorkflowResponseDto } from '@novu/shared';
+import { ChannelTypeEnum, type WorkflowPreferences, type WorkflowResponseDto } from '@novu/shared';
 import { motion } from 'motion/react';
 import { useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { RiArrowLeftSLine, RiCloseFill, RiInformationFill } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
-import { z } from 'zod';
+import type { z } from 'zod';
 
 import { STEP_TYPE_TO_ICON } from '@/components/icons/utils';
 import { PageMeta } from '@/components/page-meta';
@@ -19,10 +19,10 @@ import { Switch } from '@/components/primitives/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';
 import { SidebarContent, SidebarHeader } from '@/components/side-navigation/sidebar';
 import { UserPreferencesFormSchema } from '@/components/workflow-editor/schema';
-import { UpdateWorkflowFn } from '@/components/workflow-editor/workflow-provider';
+import type { UpdateWorkflowFn } from '@/components/workflow-editor/workflow-provider';
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { STEP_TYPE_TO_COLOR } from '@/utils/color';
-import { StepTypeEnum, ResourceOriginEnum } from '@/utils/enums';
+import { type StepTypeEnum, ResourceOriginEnum } from '@/utils/enums';
 import { capitalize } from '@/utils/string';
 import { TelemetryEvent } from '@/utils/telemetry';
 import { cn } from '@/utils/ui';

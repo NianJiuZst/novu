@@ -1,5 +1,11 @@
-import { WorkflowResponseDto, ISubscriberResponseDto, StepTypeEnum, IUserEntity, DEFAULT_LOCALE } from '@novu/shared';
-import { ParsedData, PreviewSubscriberData } from '../types/preview-context.types';
+import {
+  type WorkflowResponseDto,
+  type ISubscriberResponseDto,
+  type StepTypeEnum,
+  type IUserEntity,
+  DEFAULT_LOCALE,
+} from '@novu/shared';
+import type { ParsedData, PreviewSubscriberData } from '../types/preview-context.types';
 import { STEP_TYPE_ICONS, DEFAULT_STEP_ICON } from '../constants/preview-context.constants';
 
 export function parseJsonValue(value: string): ParsedData {

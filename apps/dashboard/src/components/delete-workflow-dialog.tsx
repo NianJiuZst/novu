@@ -1,4 +1,4 @@
-import { WorkflowListResponseDto, WorkflowResponseDto } from '@novu/shared';
+import type { WorkflowListResponseDto, WorkflowResponseDto } from '@novu/shared';
 import { ConfirmationModal } from './confirmation-modal';
 import TruncatedText from './truncated-text';
 

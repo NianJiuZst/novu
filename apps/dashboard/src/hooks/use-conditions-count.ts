@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { RQBJsonLogic } from 'react-querybuilder';
+import type { RQBJsonLogic } from 'react-querybuilder';
 
 import { countConditions } from '@/utils/conditions';
 

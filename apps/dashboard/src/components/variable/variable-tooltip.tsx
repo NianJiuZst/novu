@@ -1,6 +1,6 @@
-import React, { PropsWithChildren } from 'react';
+import React, { type PropsWithChildren } from 'react';
 import { Tooltip, TooltipContent, TooltipPortal, TooltipTrigger } from '../primitives/tooltip';
-import { validateEnhancedDigestFilters } from './utils';
+import type { validateEnhancedDigestFilters } from './utils';
 
 type Props = PropsWithChildren<{
   issues?: ReturnType<typeof validateEnhancedDigestFilters>;

@@ -6,7 +6,7 @@ import { InputPure, InputRoot, InputWrapper } from '@/components/primitives/inpu
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/primitives/tooltip';
 import { Code2 } from '../../icons/code-2';
 import { cn } from '@/utils/ui';
-import { SchemaEditorFormValues } from '../utils/validation-schema';
+import type { SchemaEditorFormValues } from '../utils/validation-schema';
 
 // path: the direct RHF path to the keyName field, e.g., "propertyList.0.keyName"
 type PropertyNameInputProps = {

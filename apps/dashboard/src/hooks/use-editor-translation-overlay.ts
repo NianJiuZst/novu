@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { EditorView } from '@uiw/react-codemirror';
+import type { EditorView } from '@uiw/react-codemirror';
 
-import { CompletionRange } from '@/components/primitives/variable-editor';
+import type { CompletionRange } from '@/components/primitives/variable-editor';
 import { useTranslationCompletionSource } from '@/hooks/use-translation-completion-source';
 import { useTranslationPluginExtension } from '@/hooks/use-translation-plugin-extension';
 import { TRANSLATION_PILL_HEIGHT } from '@/components/primitives/translation-plugin/constants';
-import { WorkflowResponseDto } from '@novu/shared';
+import type { WorkflowResponseDto } from '@novu/shared';
 import { useIsTranslationEnabled } from './use-is-translation-enabled';
 
 type UseTranslationEditorProps = {

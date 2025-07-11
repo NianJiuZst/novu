@@ -1,4 +1,4 @@
-import { DecodedJwt } from '.';
+import type { DecodedJwt } from '.';
 
 export interface SelfHostedUser {
   update: () => Promise<null>;

@@ -1,4 +1,9 @@
-import { EnvironmentEntity, EnvironmentRepository, LayoutRepository, NotificationGroupRepository } from '@novu/dal';
+import {
+  type EnvironmentEntity,
+  EnvironmentRepository,
+  LayoutRepository,
+  NotificationGroupRepository,
+} from '@novu/dal';
 import { faker } from '@faker-js/faker';
 import { createHash } from 'crypto';
 

@@ -2,9 +2,9 @@ import { EmailFooter } from '@/components/icons/email-footer';
 import { EmailFooterLogoWithTextStacked } from '@/components/icons/email-footer-logo-with-text-stacked';
 import { EmailFooterPlainText } from '@/components/icons/email-footer-plain-text';
 import { EmailHeaderLogoWithCoverImage } from '@/components/icons/email-header-logo-with-cover-image';
-import { useTelemetry } from '@/hooks/use-telemetry';
+import type { useTelemetry } from '@/hooks/use-telemetry';
 import { TelemetryEvent } from '@/utils/telemetry';
-import { BlockItem } from '@maily-to/core/blocks';
+import type { BlockItem } from '@maily-to/core/blocks';
 
 export const createFooterPlainText: (props: { track: ReturnType<typeof useTelemetry> }) => BlockItem = (props) => {
   const { track } = props;

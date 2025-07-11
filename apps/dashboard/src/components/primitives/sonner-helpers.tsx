@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import { ExternalToast, toast } from 'sonner';
-import { Toast, ToastIcon, ToastProps } from './sonner';
+import type { ReactNode } from 'react';
+import { type ExternalToast, toast } from 'sonner';
+import { Toast, ToastIcon, type ToastProps } from './sonner';
 
 export const showToast = ({
   options,

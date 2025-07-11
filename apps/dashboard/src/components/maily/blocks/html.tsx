@@ -1,6 +1,6 @@
-import { useTelemetry } from '@/hooks/use-telemetry';
+import type { useTelemetry } from '@/hooks/use-telemetry';
 import { TelemetryEvent } from '@/utils/telemetry';
-import { BlockItem } from '@maily-to/core/blocks';
+import type { BlockItem } from '@maily-to/core/blocks';
 import { CodeXmlIcon } from 'lucide-react';
 
 export const createHtmlCodeBlock = (props: { track: ReturnType<typeof useTelemetry> }): BlockItem => {

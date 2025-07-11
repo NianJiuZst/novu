@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { cn } from '@/utils/ui';
 import { LoadingIndicator } from '@/components/primitives/loading-indicator';
 

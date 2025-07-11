@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { RiMore2Fill } from 'react-icons/ri';
-import { ActionWithRulesProps, getParentPath, isRuleGroup } from 'react-querybuilder';
+import { type ActionWithRulesProps, getParentPath, isRuleGroup } from 'react-querybuilder';
 
 import { Delete } from '@/components/icons/delete';
 import { SquareTwoStack } from '@/components/icons/square-two-stack';

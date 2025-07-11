@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/primitives/table';
 import { ResizablePanel, ResizablePanelGroup } from '@/components/primitives/resizable';
 import { CursorPagination } from '@/components/cursor-pagination';
-import { RequestLog } from '../../types/logs';
+import type { RequestLog } from '../../types/logs';
 import { LogsTableRow } from './logs-table-row';
 import { LogsTableSkeletonRow } from './logs-table-skeleton-row';
 import { LogsDetailPanel } from './logs-detail-panel';

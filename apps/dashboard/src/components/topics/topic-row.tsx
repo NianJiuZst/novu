@@ -14,7 +14,7 @@ import { TimeDisplayHoverCard } from '@/components/time-display-hover-card';
 import { formatDateSimple } from '@/utils/format-date';
 import { QueryKeys } from '@/utils/query-keys';
 import { useQueryClient } from '@tanstack/react-query';
-import { ComponentProps, useState } from 'react';
+import { type ComponentProps, useState } from 'react';
 import { RiDeleteBin2Line, RiFileCopyLine, RiMore2Fill, RiPulseFill } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
 import { useEnvironment } from '../../context/environment/hooks';
@@ -23,7 +23,7 @@ import { cn } from '../../utils/ui';
 import { showErrorToast } from '../primitives/sonner-helpers';
 import { useDeleteTopic } from './hooks/use-delete-topic';
 import { useTopicsNavigate } from './hooks/use-topics-navigate';
-import { Topic } from './types';
+import type { Topic } from './types';
 import { Protect } from '@/utils/protect';
 import { PermissionsEnum } from '@novu/shared';
 

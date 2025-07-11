@@ -1,4 +1,4 @@
-import { SizeType } from '../types';
+import type { SizeType } from '../types';
 import { BaseFilterContent } from './base-filter-content';
 
 interface TextFilterContentProps {

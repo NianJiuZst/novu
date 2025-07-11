@@ -1,9 +1,9 @@
 import { getTopics } from '@/api/topics';
-import { Topic } from '@/components/topics/types';
+import type { Topic } from '@/components/topics/types';
 import { useEnvironment } from '@/context/environment/hooks';
 import { QueryKeys } from '@/utils/query-keys';
 import { DirectionEnum } from '@novu/shared';
-import { keepPreviousData, useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
 export type ListTopicsResponse = {
   data: Array<Topic>;

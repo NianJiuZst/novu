@@ -3,7 +3,7 @@ import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 import { INLINE_CONFIGURABLE_STEP_TYPES, TEMPLATE_CONFIGURABLE_STEP_TYPES } from '@/utils/constants';
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { FeatureFlagsKeysEnum, PermissionsEnum, ResourceOriginEnum } from '@novu/shared';
-import { BaseEdge, Edge, EdgeLabelRenderer, EdgeProps, getBezierPath } from '@xyflow/react';
+import { BaseEdge, type Edge, EdgeLabelRenderer, type EdgeProps, getBezierPath } from '@xyflow/react';
 import { useNavigate } from 'react-router-dom';
 import { AddStepMenu } from './add-step-menu';
 import { useHasPermission } from '@/hooks/use-has-permission';

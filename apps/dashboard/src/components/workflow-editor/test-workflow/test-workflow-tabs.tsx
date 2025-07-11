@@ -4,7 +4,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 import { ToastClose, ToastIcon } from '@/components/primitives/sonner';
 import { showErrorToast, showToast } from '@/components/primitives/sonner-helpers';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/primitives/tabs';
-import { buildDynamicFormSchema, TestWorkflowFormType } from '@/components/workflow-editor/schema';
+import { buildDynamicFormSchema, type TestWorkflowFormType } from '@/components/workflow-editor/schema';
 import { TestWorkflowForm } from '@/components/workflow-editor/test-workflow/test-workflow-form';
 import { TestWorkflowLogsSidebar } from '@/components/workflow-editor/test-workflow/test-workflow-logs-sidebar';
 import { useTriggerWorkflow } from '@/hooks/use-trigger-workflow';

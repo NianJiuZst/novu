@@ -1,4 +1,4 @@
-import { type CombinatorSelectorProps } from 'react-querybuilder';
+import type { CombinatorSelectorProps } from 'react-querybuilder';
 
 import { toSelectOptions } from '@/components/conditions-editor/select-option-utils';
 import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/primitives/select';

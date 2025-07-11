@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QueryKeys } from '@/utils/query-keys';
 import { useEnvironment } from '@/context/environment/hooks';
-import { IApiKey } from '@novu/shared';
+import type { IApiKey } from '@novu/shared';
 import { getApiKeys, regenerateApiKeys } from '../api/environments';
 
 export const useFetchApiKeys = ({ enabled = true }: { enabled?: boolean } = {}) => {

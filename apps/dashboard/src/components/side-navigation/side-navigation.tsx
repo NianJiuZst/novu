@@ -3,9 +3,9 @@ import { useEnvironment } from '@/context/environment/hooks';
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { TelemetryEvent } from '@/utils/telemetry';
-import { ApiServiceLevelEnum, FeatureFlagsKeysEnum, GetSubscriptionDto, PermissionsEnum } from '@novu/shared';
+import { ApiServiceLevelEnum, FeatureFlagsKeysEnum, type GetSubscriptionDto, PermissionsEnum } from '@novu/shared';
 import * as Sentry from '@sentry/react';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import {
   RiBarChartBoxLine,
   RiChat1Line,

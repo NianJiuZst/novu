@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useState, useCallback } from 'react';
-import { WorkflowResponseDto } from '@novu/shared';
+import type { WorkflowResponseDto } from '@novu/shared';
 
 import { ActivityPanel } from '@/components/activity/activity-panel';
 import { useFetchActivities } from '@/hooks/use-fetch-activities';

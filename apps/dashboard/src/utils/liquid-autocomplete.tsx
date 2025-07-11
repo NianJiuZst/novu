@@ -1,10 +1,10 @@
 import { getFilters } from '@/components/variable/constants';
 import { NewVariablePreview } from '@/components/variable/components/new-variable-preview';
-import { LiquidVariable } from '@/utils/parseStepVariables';
-import { Completion, CompletionContext, CompletionResult, CompletionSource } from '@codemirror/autocomplete';
-import { EditorView } from '@uiw/react-codemirror';
+import type { LiquidVariable } from '@/utils/parseStepVariables';
+import type { Completion, CompletionContext, CompletionResult, CompletionSource } from '@codemirror/autocomplete';
+import type { EditorView } from '@uiw/react-codemirror';
 import { createRoot } from 'react-dom/client';
-import React from 'react';
+import type React from 'react';
 import { getVariablesAtPositionWithLoopProperties } from './liquid-scope-analyzer';
 
 export interface CompletionOption {

@@ -1,4 +1,4 @@
-import { IWorkflowSuggestion } from '../templates/types';
+import type { IWorkflowSuggestion } from '../templates/types';
 import { WorkflowMode } from '../types';
 import { WorkflowCard } from '../workflow-card';
 

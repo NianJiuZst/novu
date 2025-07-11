@@ -1,10 +1,10 @@
-import { Decoration, DecorationSet, EditorView, Range } from '@uiw/react-codemirror';
-import { MutableRefObject } from 'react';
+import { Decoration, type DecorationSet, type EditorView, type Range } from '@uiw/react-codemirror';
+import type { MutableRefObject } from 'react';
 import { TRANSLATION_KEY_SINGLE_REGEX } from '@novu/shared';
 import { isTypingTranslation, parseTranslation } from './utils';
 import { TranslationPillWidget } from './pill-widget';
 import { validateTranslationKey } from '@/hooks/use-translation-validation';
-import { TranslationKey } from '@/types/translations';
+import type { TranslationKey } from '@/types/translations';
 
 export class TranslationPluginView {
   decorations: DecorationSet;

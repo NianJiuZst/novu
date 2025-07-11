@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { triggerWorkflow } from '@/api/workflows';
-import { IEnvironment } from '@novu/shared';
+import type { IEnvironment } from '@novu/shared';
 import { useEnvironment } from '../context/environment/hooks';
 
 export const useTriggerWorkflow = (environmentHint?: IEnvironment) => {

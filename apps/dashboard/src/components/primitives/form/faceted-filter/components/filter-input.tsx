@@ -2,7 +2,7 @@ import { cn } from '../../../../../utils/ui';
 import { EnterLineIcon } from '../../../../icons/enter-line';
 import { InputPure } from '../../../input';
 import { STYLES } from '../styles';
-import { SizeType } from '../types';
+import type { SizeType } from '../types';
 
 interface FilterInputProps {
   inputRef: React.RefObject<HTMLInputElement>;

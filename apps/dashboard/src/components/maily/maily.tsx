@@ -1,18 +1,18 @@
-import { ForwardRefExoticComponent, HTMLAttributes, useCallback, useMemo } from 'react';
+import { type ForwardRefExoticComponent, type HTMLAttributes, useCallback, useMemo } from 'react';
 import { Editor as MailyEditor } from '@maily-to/core';
 import type { Editor, NodeViewProps, Editor as TiptapEditor } from '@tiptap/core';
-import { Editor as TiptapEditorReact } from '@tiptap/react';
-import { BlockGroupItem } from '@maily-to/core/blocks';
-import { Variable } from '@maily-to/core/extensions';
+import type { Editor as TiptapEditorReact } from '@tiptap/react';
+import type { BlockGroupItem } from '@maily-to/core/blocks';
+import type { Variable } from '@maily-to/core/extensions';
 
 import { cn } from '@/utils/ui';
 import { createExtensions, DEFAULT_EDITOR_CONFIG, MAILY_EMAIL_WIDTH } from './maily-config';
 import { calculateVariables } from './variables';
 import { RepeatMenuDescription } from './repeat-menu-description';
 import { useRemoveGrammarly } from '@/hooks/use-remove-grammarly';
-import { EnhancedParsedVariables, IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
-import { TranslationKey } from '@/types/translations';
-import { VariableFrom } from './types';
+import type { EnhancedParsedVariables, IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import type { TranslationKey } from '@/types/translations';
+import type { VariableFrom } from './types';
 import { MailyVariablesListView } from './views/maily-variables-list-view';
 import { createVariableNodeView as defaultCreateVariableNodeView } from './views/variable-view';
 

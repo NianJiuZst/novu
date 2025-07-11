@@ -1,14 +1,21 @@
-import * as LabelPrimitive from '@radix-ui/react-label';
+import type * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import * as React from 'react';
-import { Controller, ControllerProps, FieldPath, FieldValues, FormProvider, useFormContext } from 'react-hook-form';
+import {
+  Controller,
+  type ControllerProps,
+  type FieldPath,
+  type FieldValues,
+  FormProvider,
+  useFormContext,
+} from 'react-hook-form';
 
 import { Input } from '@/components/primitives/input';
 import { Label, LabelAsterisk, LabelSub } from '@/components/primitives/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';
 import { cn } from '@/utils/ui';
 import { AnimatePresence, motion } from 'motion/react';
-import { IconType } from 'react-icons';
+import type { IconType } from 'react-icons';
 import { RiErrorWarningFill, RiInformationLine, RiQuestionLine } from 'react-icons/ri';
 import { Hint, HintIcon } from '../hint';
 import { FormFieldContext, FormItemContext, useFormField } from './form-context';

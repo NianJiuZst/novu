@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/primitives/tabs';
 import { CHANNEL_TYPE_TO_STRING } from '@/utils/channels';
-import { IProviderConfig } from '@novu/shared';
+import type { IProviderConfig } from '@novu/shared';
 import { IntegrationListItem } from './integration-list-item';
 import { INTEGRATION_CHANNELS } from '../utils/channels';
 

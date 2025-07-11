@@ -1,12 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ReactNode, useEffect, useMemo } from 'react';
+import { type ReactNode, useEffect, useMemo } from 'react';
 import {
   getFeatureForTierAsBoolean,
   FeatureNameEnum,
   ApiServiceLevelEnum,
-  PermissionsEnum,
+  type PermissionsEnum,
   FeatureFlagsKeysEnum,
-  MemberRoleEnum,
+  type MemberRoleEnum,
 } from '@novu/shared';
 import { showErrorToast } from '@/components/primitives/sonner-helpers';
 import { DashboardLayout } from '@/components/dashboard-layout';

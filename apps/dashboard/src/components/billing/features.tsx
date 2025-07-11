@@ -1,4 +1,4 @@
-import { ApiServiceLevelEnum, FeatureNameEnum } from '@novu/shared';
+import type { ApiServiceLevelEnum, FeatureNameEnum } from '@novu/shared';
 import { cn } from '../../utils/ui';
 
 export type PlanFeatureValue = {

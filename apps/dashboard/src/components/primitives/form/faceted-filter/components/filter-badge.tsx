@@ -1,7 +1,7 @@
 import { cn } from '../../../../../utils/ui';
 import { Badge } from '../../../badge';
 import { STYLES } from '../styles';
-import { SizeType } from '../types';
+import type { SizeType } from '../types';
 
 interface FilterBadgeProps {
   content: React.ReactNode;

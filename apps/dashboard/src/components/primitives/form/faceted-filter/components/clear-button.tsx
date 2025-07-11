@@ -1,5 +1,5 @@
 import { cn } from '../../../../../utils/ui';
-import { SizeType } from '../types';
+import type { SizeType } from '../types';
 import { STYLES } from '../styles';
 import { Button } from '../../../button';
 

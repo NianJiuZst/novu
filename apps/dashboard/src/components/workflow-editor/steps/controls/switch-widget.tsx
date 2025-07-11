@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { type WidgetProps } from '@rjsf/utils';
+import type { WidgetProps } from '@rjsf/utils';
 import { useFormContext } from 'react-hook-form';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/primitives/form/form';
 import { Switch } from '@/components/primitives/switch';

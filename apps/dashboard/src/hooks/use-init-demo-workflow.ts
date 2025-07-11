@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { IEnvironment } from '@novu/shared';
+import type { IEnvironment } from '@novu/shared';
 import { ONBOARDING_DEMO_WORKFLOW_ID } from '../config';
 import { useFetchWorkflows } from './use-fetch-workflows';
 import { createWorkflow } from '../api/workflows';

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Input, InputPure } from '@/components/primitives/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/primitives/select';
-import { display12HourValue, getArrowByType, getDateByType, setDateByType, TimePickerType } from '@/utils/time';
+import { display12HourValue, getArrowByType, getDateByType, setDateByType, type TimePickerType } from '@/utils/time';
 import { cn } from '@/utils/ui';
 
 interface TimePickerInputProps extends React.InputHTMLAttributes<HTMLInputElement> {

@@ -14,7 +14,7 @@ import { TelemetryEvent } from '@/utils/telemetry';
 import { useOrganization, useUser } from '@clerk/clerk-react';
 import {
   CompanySizeEnum,
-  JobTitleEnum,
+  type JobTitleEnum,
   jobTitleToLabelMapper,
   NewDashboardOptInStatusEnum,
   OrganizationTypeEnum,

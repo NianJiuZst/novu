@@ -6,7 +6,7 @@ import { useEnvironment } from '@/context/environment/hooks';
 import { useFetchActivities } from '@/hooks/use-fetch-activities';
 import { useFetchSubscription } from '@/hooks/use-fetch-subscription';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
-import { ActivityFiltersData } from '@/types/activity';
+import type { ActivityFiltersData } from '@/types/activity';
 import { getMaxAvailableActivityFeedDateRange } from '@/utils/activityFilters';
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { FeatureFlagsKeysEnum } from '@novu/shared';

@@ -5,9 +5,9 @@ import { useForm } from 'react-hook-form';
 import {
   formatQuery,
   generateID,
-  RQBJsonLogic,
-  RuleGroupType,
-  RuleType,
+  type RQBJsonLogic,
+  type RuleGroupType,
+  type RuleType,
   defaultRuleProcessorJsonLogic,
 } from 'react-querybuilder';
 import { parseJsonLogic } from 'react-querybuilder/parseJsonLogic';
@@ -20,7 +20,7 @@ import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 import { useDataRef } from '@/hooks/use-data-ref';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { useParseVariables } from '@/hooks/use-parse-variables';
-import { type EnhancedLiquidVariable } from '@/utils/parseStepVariables';
+import type { EnhancedLiquidVariable } from '@/utils/parseStepVariables';
 import { useTelemetry } from '@/hooks/use-telemetry';
 import {
   countConditions,

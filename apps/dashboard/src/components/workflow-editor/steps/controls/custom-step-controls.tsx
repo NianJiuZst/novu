@@ -8,8 +8,8 @@ import { useSaveForm } from '@/components/workflow-editor/steps/save-form-contex
 import { ResourceOriginEnum } from '@/utils/enums';
 import { buildDefaultValuesOfDataSchema } from '@/utils/schema';
 import { cn } from '@/utils/ui';
-import { type Controls } from '@novu/shared';
-import { RJSFSchema } from '@rjsf/utils';
+import type { Controls } from '@novu/shared';
+import type { RJSFSchema } from '@rjsf/utils';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';

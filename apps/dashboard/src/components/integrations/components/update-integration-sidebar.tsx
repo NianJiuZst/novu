@@ -8,7 +8,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { showSuccessToast } from '../../../components/primitives/sonner-helpers';
 import { useDeleteIntegration } from '../../../hooks/use-delete-integration';
 import { ROUTES } from '../../../utils/routes';
-import { IntegrationFormData } from '../types';
+import type { IntegrationFormData } from '../types';
 import { useIntegrationPrimaryModal } from './hooks/use-integration-primary-modal';
 import { IntegrationConfiguration } from './integration-configuration';
 import { IntegrationSheet } from './integration-sheet';

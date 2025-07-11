@@ -1,5 +1,5 @@
 import { clearFromStorage, loadFromStorage, saveToStorage } from '@/utils/local-storage';
-import { ParsedData, PayloadData, PreviewSubscriberData } from '../types/preview-context.types';
+import type { ParsedData, PayloadData, PreviewSubscriberData } from '../types/preview-context.types';
 
 export type PersistedPreviewData = {
   data: ParsedData;

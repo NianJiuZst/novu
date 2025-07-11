@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useFetchWorkflows } from './use-fetch-workflows';
 import { useOrganization } from '@clerk/clerk-react';
-import { ChannelTypeEnum, IIntegration } from '@novu/shared';
+import { ChannelTypeEnum, type IIntegration } from '@novu/shared';
 import { useFetchIntegrations } from './use-fetch-integrations';
 import { ONBOARDING_DEMO_WORKFLOW_ID } from '../config';
 import { IS_SELF_HOSTED } from '../config';

@@ -1,5 +1,5 @@
 import { RiAngularjsFill, RiJavascriptFill, RiNextjsFill, RiReactjsFill, RiRemixRunFill } from 'react-icons/ri';
-import { Language } from '../primitives/code-block';
+import type { Language } from '../primitives/code-block';
 import { API_HOSTNAME, WEBSOCKET_HOSTNAME, IS_EU } from '@/config';
 
 export interface Framework {
@@ -29,7 +29,12 @@ export const customizationTip = {
   description: (
     <>
       You can customize your inbox to match your app theme,{' '}
-      <a href="https://docs.novu.co/platform/inbox/react/styling#appearance-prop" target="_blank" className="underline">
+      <a
+        href="https://docs.novu.co/platform/inbox/react/styling#appearance-prop"
+        target="_blank"
+        className="underline"
+        rel="noopener"
+      >
         learn more
       </a>
       .

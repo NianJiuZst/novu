@@ -14,7 +14,7 @@ export function ContactSalesButton({ className, variant = 'outline' }: ContactSa
   const track = useTelemetry();
 
   useEffect(() => {
-    (async function () {
+    (async () => {
       const cal = await getCalApi({ namespace: 'novu-meeting' });
       cal('ui', { hideEventTypeDetails: false, layout: 'month_view' });
     })();

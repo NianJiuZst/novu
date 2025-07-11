@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { Variable } from '@maily-to/core/extensions';
+import type { Variable } from '@maily-to/core/extensions';
 
 import { FormField } from '@/components/primitives/form/form';
 import { Maily } from '../../../maily/maily';
@@ -17,14 +17,14 @@ import { useTelemetry } from '@/hooks/use-telemetry';
 import { createEditorBlocks } from '../../../maily/maily-config';
 import {
   MailyVariablesListView,
-  VariableSuggestionsPopoverRef,
+  type VariableSuggestionsPopoverRef,
 } from '@/components/maily/views/maily-variables-list-view';
 import { BubbleMenuVariablePill, NodeVariablePill } from '@/components/maily/views/variable-view';
-import { Editor, NodeViewProps } from '@tiptap/core';
-import { VariableFrom } from '@/components/maily/types';
-import { EnhancedParsedVariables, IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
-import { CompletionRange } from '@/components/primitives/variable-editor';
-import { EditorView } from '@uiw/react-codemirror';
+import type { Editor, NodeViewProps } from '@tiptap/core';
+import type { VariableFrom } from '@/components/maily/types';
+import type { EnhancedParsedVariables, IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import type { CompletionRange } from '@/components/primitives/variable-editor';
+import type { EditorView } from '@uiw/react-codemirror';
 import { useEditorTranslationOverlay } from '@/hooks/use-editor-translation-overlay';
 import { useEnhancedVariableValidation } from '@/hooks/use-enhanced-variable-validation';
 import { EditorOverlays } from '@/components/editor-overlays';

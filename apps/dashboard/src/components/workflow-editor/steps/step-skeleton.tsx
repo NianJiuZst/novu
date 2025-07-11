@@ -1,5 +1,5 @@
 import { StepTypeEnum } from '@novu/shared';
-import React from 'react';
+import type React from 'react';
 import { RiEdit2Line, RiPencilRuler2Line } from 'react-icons/ri';
 
 import { Notification5Fill } from '@/components/icons';

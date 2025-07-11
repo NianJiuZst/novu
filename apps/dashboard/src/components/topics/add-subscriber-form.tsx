@@ -1,4 +1,4 @@
-import { ISubscriberResponseDto } from '@novu/shared';
+import type { ISubscriberResponseDto } from '@novu/shared';
 import { useState } from 'react';
 import { RiAddFill } from 'react-icons/ri';
 import { SubscriberAutocomplete } from '../subscribers/subscriber-autocomplete';

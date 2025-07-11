@@ -1,5 +1,5 @@
-import { ChannelTypeEnum, IEnvironment, IIntegration, IProviderConfig } from '@novu/shared';
-import { TableIntegration } from '../types';
+import type { ChannelTypeEnum, IEnvironment, IIntegration, IProviderConfig } from '@novu/shared';
+import type { TableIntegration } from '../types';
 import { IntegrationCard } from './integration-card';
 import { CHANNEL_TYPE_TO_STRING } from '@/utils/channels';
 

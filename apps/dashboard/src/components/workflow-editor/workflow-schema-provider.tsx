@@ -1,9 +1,9 @@
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import { useWorkflowSchemaManager, type UseWorkflowSchemaManagerReturn } from './use-workflow-schema-manager';
 import { useWorkflow } from './workflow-provider';
 import { useEnvironment } from '@/context/environment/hooks';
 import { useIsPayloadSchemaEnabled } from '@/hooks/use-is-payload-schema-enabled';
-import { type IEnvironment, type WorkflowResponseDto } from '@novu/shared';
+import type { IEnvironment, WorkflowResponseDto } from '@novu/shared';
 
 interface WorkflowSchemaContextType extends UseWorkflowSchemaManagerReturn {
   isPayloadSchemaEnabled: boolean;

@@ -3,8 +3,8 @@ import { useEnvironment } from '../context/environment/hooks';
 import { QueryKeys } from '../utils/query-keys';
 import {
   updateOrganizationSettings,
-  UpdateOrganizationSettingsDto,
-  GetOrganizationSettingsDto,
+  type UpdateOrganizationSettingsDto,
+  type GetOrganizationSettingsDto,
 } from '../api/organization';
 import { showErrorToast } from '@/components/primitives/sonner-helpers';
 

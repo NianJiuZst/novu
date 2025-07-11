@@ -1,4 +1,4 @@
-import { IEnvironment, IIntegration, ChannelTypeEnum } from '@novu/shared';
+import type { IEnvironment, IIntegration, ChannelTypeEnum } from '@novu/shared';
 import { del, get, post, put } from './api.client';
 
 export type CreateIntegrationData = {

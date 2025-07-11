@@ -1,4 +1,4 @@
-import { NodeViewContent, NodeViewProps, NodeViewWrapper } from '@tiptap/react';
+import { NodeViewContent, type NodeViewProps, NodeViewWrapper } from '@tiptap/react';
 import { Repeat2 } from 'lucide-react';
 
 /**

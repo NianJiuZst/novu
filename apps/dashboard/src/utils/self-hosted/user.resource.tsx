@@ -1,7 +1,7 @@
 import React from 'react';
 import { createContextHook } from '../context';
-import { DecodedJwt } from '.';
-import { SelfHostedUser, createUserFromJwt } from './user.types';
+import type { DecodedJwt } from '.';
+import { type SelfHostedUser, createUserFromJwt } from './user.types';
 
 export const UserContext = React.createContext<{
   user: SelfHostedUser;

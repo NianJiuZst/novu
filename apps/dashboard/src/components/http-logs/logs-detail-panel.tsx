@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { RequestLog } from '../../types/logs';
+import type { RequestLog } from '../../types/logs';
 import { LogsDetailHeader } from './logs-detail-header';
 import { LogsDetailContent } from './logs-detail-content';
 import { LogsDetailSkeleton } from './logs-detail-skeleton';

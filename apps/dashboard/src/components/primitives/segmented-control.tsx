@@ -95,7 +95,7 @@ SegmentedControlContent.displayName = 'SegmentedControlContent';
 
 export {
   SegmentedControlRoot as SegmentedControl,
-  SegmentedControlList as SegmentedControlList,
-  SegmentedControlTrigger as SegmentedControlTrigger,
-  SegmentedControlContent as SegmentedControlContent,
+  SegmentedControlList,
+  SegmentedControlTrigger,
+  SegmentedControlContent,
 };

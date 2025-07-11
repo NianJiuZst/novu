@@ -1,4 +1,4 @@
-import { ResourceOriginEnum, StepResponseDto, WorkflowResponseDto } from '@novu/shared';
+import { ResourceOriginEnum, type StepResponseDto, type WorkflowResponseDto } from '@novu/shared';
 import React from 'react';
 import { FaCode } from 'react-icons/fa6';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';

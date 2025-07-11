@@ -1,5 +1,5 @@
 import { ChannelTypeEnum } from '@novu/shared';
-import { IconType } from 'react-icons/lib';
+import type { IconType } from 'react-icons/lib';
 import { STEP_TYPE_TO_ICON } from '../icons/utils';
 import { STEP_TYPE_TO_COLOR } from '../../utils/color';
 import { StepTypeEnum } from '@novu/shared';

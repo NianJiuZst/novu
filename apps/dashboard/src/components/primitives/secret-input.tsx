@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { RiEyeLine, RiEyeOffLine } from 'react-icons/ri';
 import { CopyButton } from './copy-button';
-import { Input, InputProps } from './input';
+import { Input, type InputProps } from './input';
 
 interface SecretInputProps extends Omit<InputProps, 'onChange'> {
   value: string;

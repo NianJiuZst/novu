@@ -1,5 +1,5 @@
-import { Inbox, InboxContent, InboxProps } from '@novu/react';
-import { SVGProps } from 'react';
+import { Inbox, InboxContent, type InboxProps } from '@novu/react';
+import type { SVGProps } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useFetchEnvironments } from '../../context/environment/hooks';
 import { useUser } from '@clerk/clerk-react';

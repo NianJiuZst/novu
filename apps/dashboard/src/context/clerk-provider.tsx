@@ -1,4 +1,4 @@
-import { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClerkProvider as _ClerkProvider } from '@clerk/clerk-react';
 import { CLERK_PUBLISHABLE_KEY } from '@/config';

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Editor } from '@tiptap/react';
+import type { Editor } from '@tiptap/react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Lightbulb } from 'lucide-react';
 import { Separator } from '@/components/primitives/separator';

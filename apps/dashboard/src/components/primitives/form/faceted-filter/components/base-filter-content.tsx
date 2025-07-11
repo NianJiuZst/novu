@@ -1,7 +1,7 @@
 import { RiArrowDownLine, RiArrowUpLine } from 'react-icons/ri';
 import { EnterLineIcon } from '../../../../icons/enter-line';
 import { Separator } from '../../../separator';
-import { SizeType } from '../types';
+import type { SizeType } from '../types';
 import { ClearButton } from './clear-button';
 import { FilterInput } from './filter-input';
 

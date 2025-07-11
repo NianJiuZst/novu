@@ -1,7 +1,7 @@
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { useEnvironment } from '@/context/environment/hooks';
 import { QueryKeys } from '@/utils/query-keys';
-import { getRequestLogs, GetRequestLogsParams, GetRequestLogsResponse } from '@/api/logs';
+import { getRequestLogs, type GetRequestLogsParams, type GetRequestLogsResponse } from '@/api/logs';
 
 interface UseFetchRequestLogsParams extends Omit<GetRequestLogsParams, 'environment'> {
   enabled?: boolean;

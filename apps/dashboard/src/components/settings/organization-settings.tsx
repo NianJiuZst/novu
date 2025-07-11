@@ -1,5 +1,5 @@
 import { OrganizationProfile } from '@clerk/clerk-react';
-import { Appearance } from '@clerk/types';
+import type { Appearance } from '@clerk/types';
 import { InfoIcon } from 'lucide-react';
 import { PermissionsEnum } from '@novu/shared';
 import { useFetchOrganizationSettings } from '@/hooks/use-fetch-organization-settings';

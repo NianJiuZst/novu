@@ -1,4 +1,4 @@
-import { IActivity } from '@novu/shared';
+import type { IActivity } from '@novu/shared';
 import { format } from 'date-fns';
 import { motion } from 'motion/react';
 import React from 'react';

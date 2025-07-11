@@ -4,7 +4,7 @@ import * as React from 'react';
 import type { PolymorphicComponentProps } from '@/utils/polymorphic';
 import { recursiveCloneChildren } from '@/utils/recursive-clone-children';
 import { tv, type VariantProps } from '@/utils/tv';
-import { IconType } from 'react-icons';
+import type { IconType } from 'react-icons';
 import { AUTOCOMPLETE_PASSWORD_MANAGERS_OFF } from '../../utils/constants';
 
 const INPUT_ROOT_NAME = 'InputRoot';
@@ -360,7 +360,7 @@ export {
   InputInlineAffix as InlineAffix,
   Input,
   InputEl as InputPure,
-  InputRoot as InputRoot,
-  InputWrapper as InputWrapper,
+  InputRoot,
+  InputWrapper,
   type InputProps,
 };

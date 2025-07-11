@@ -1,4 +1,4 @@
-import { ArrayFieldTemplateItemType } from '@rjsf/utils';
+import type { ArrayFieldTemplateItemType } from '@rjsf/utils';
 import { cn } from '@/utils/ui';
 import { RemoveButton } from './button-templates';
 

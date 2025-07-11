@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import * as mixpanel from 'mixpanel-browser';
 import { measure } from '@/api/telemetry';
 import { MIXPANEL_KEY, IS_SELF_HOSTED } from '@/config';
-import { TelemetryEvent } from '@/utils/telemetry';
+import type { TelemetryEvent } from '@/utils/telemetry';
 
 export const useTelemetry = () => {
   const { mutate } = useMutation<void, unknown, { event: string; data?: Record<string, unknown> }>({

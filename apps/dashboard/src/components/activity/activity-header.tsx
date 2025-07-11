@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { RiRouteFill, RiCloseLine } from 'react-icons/ri';
-import { IActivity, IEnvironment } from '@novu/shared';
+import { type IActivity, IEnvironment } from '@novu/shared';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 
 import { cn } from '@/utils/ui';

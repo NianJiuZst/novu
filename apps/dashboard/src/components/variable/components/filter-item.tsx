@@ -1,5 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';
-import { Filters } from '../types';
+import type { Filters } from '../types';
 
 type FilterItemProps = {
   filter: Filters;

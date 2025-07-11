@@ -1,5 +1,5 @@
 import { RiAddFill } from 'react-icons/ri';
-import { ActionWithRulesAndAddersProps } from 'react-querybuilder';
+import type { ActionWithRulesAndAddersProps } from 'react-querybuilder';
 
 import { Button } from '@/components/primitives/button';
 

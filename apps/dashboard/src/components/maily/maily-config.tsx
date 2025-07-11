@@ -1,6 +1,6 @@
-import { searchSlashCommands, Variable } from '@maily-to/core/extensions';
+import { searchSlashCommands, type Variable } from '@maily-to/core/extensions';
 import {
-  BlockGroupItem,
+  type BlockGroupItem,
   blockquote,
   bulletList,
   button,
@@ -20,25 +20,25 @@ import {
 } from '@maily-to/core/blocks';
 import {
   ButtonExtension,
-  ButtonAttributes as MailyButtonAttributes,
+  type ButtonAttributes as MailyButtonAttributes,
   ImageExtension,
-  ImageAttributes as MailyImageAttributes,
+  type ImageAttributes as MailyImageAttributes,
   InlineImageExtension,
-  InlineImageAttributes as MailyInlineImageAttributes,
-  LogoAttributes as MailyLogoAttributes,
+  type InlineImageAttributes as MailyInlineImageAttributes,
+  type LogoAttributes as MailyLogoAttributes,
   LinkExtension,
-  LinkAttributes as MailyLinkAttributes,
+  type LinkAttributes as MailyLinkAttributes,
   getSlashCommandSuggestions,
   getVariableSuggestions,
   HTMLCodeBlockExtension,
   RepeatExtension,
   SlashCommandExtension,
   VariableExtension,
-  Variables,
+  type Variables,
 } from '@maily-to/core/extensions';
 import { ReactNodeViewRenderer } from '@tiptap/react';
 import type { Editor, Editor as TiptapEditor, NodeViewProps } from '@tiptap/core';
-import { StepResponseDto } from '@novu/shared';
+import type { StepResponseDto } from '@novu/shared';
 
 import { createFooters } from '@/components/maily/blocks/footers';
 import { createHeaders } from '@/components/maily/blocks/headers';
@@ -47,13 +47,13 @@ import { createDigestBlock } from '@/components/maily//blocks/digest';
 import { createCards } from '@/components/maily//blocks/cards';
 import { ForView } from '@/components/maily/views/for-view';
 import { HTMLCodeBlockView } from '@/components/maily/views/html-view';
-import { useTelemetry } from '@/hooks/use-telemetry';
+import type { useTelemetry } from '@/hooks/use-telemetry';
 import { isInsideRepeatBlock, resolveRepeatBlockAlias } from './repeat-block-aliases';
-import { IsAllowedVariable, LiquidVariable, ParsedVariables } from '@/utils/parseStepVariables';
-import { TranslationKey } from '@/types/translations';
-import { CalculateVariablesProps, insertVariableToEditor } from './variables';
+import type { IsAllowedVariable, LiquidVariable, ParsedVariables } from '@/utils/parseStepVariables';
+import type { TranslationKey } from '@/types/translations';
+import { type CalculateVariablesProps, insertVariableToEditor } from './variables';
 import { createTranslationExtension } from '../workflow-editor/steps/email/translations';
-import { ForwardRefExoticComponent } from 'react';
+import type { ForwardRefExoticComponent } from 'react';
 
 export const VARIABLE_TRIGGER_CHARACTER = '{{';
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Translation } from '@/api/translations';
-import { UseMutationResult } from '@tanstack/react-query';
-import { UpdateTranslationValueParams } from '@/hooks/use-update-translation-value';
+import type { Translation } from '@/api/translations';
+import type { UseMutationResult } from '@tanstack/react-query';
+import type { UpdateTranslationValueParams } from '@/hooks/use-update-translation-value';
 
 const getTranslationValue = (content: Record<string, unknown> | undefined, key: string): string => {
   if (!content || !key) return '';

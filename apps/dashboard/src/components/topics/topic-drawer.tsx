@@ -1,4 +1,4 @@
-import { TopicSubscription } from '@/api/topics';
+import type { TopicSubscription } from '@/api/topics';
 import { Separator } from '@/components/primitives/separator';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/primitives/sheet';
 import { Skeleton } from '@/components/primitives/skeleton';

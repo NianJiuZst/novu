@@ -1,10 +1,10 @@
 export enum VariableFrom {
   // variable coming from bubble menu (e.g. 'showIf')
-  Bubble = 'bubble-variable',
+  BUBBLE = 'bubble-variable',
   // variable coming from repeat block 'each' input
-  RepeatEachKey = 'repeat-variable',
+  REPEAT_EACH_KEY = 'repeat-variable',
   // all the other variables
-  Content = 'content-variable',
+  CONTENT = 'content-variable',
   // variables inside Button component
-  Button = 'button-variable',
+  BUTTON = 'button-variable',
 }

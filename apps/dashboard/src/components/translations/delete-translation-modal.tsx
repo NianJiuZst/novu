@@ -1,4 +1,4 @@
-import { TranslationGroup } from '@/api/translations';
+import type { TranslationGroup } from '@/api/translations';
 import { ConfirmationModal } from '../confirmation-modal';
 
 type DeleteTranslationGroupDialogProps = {

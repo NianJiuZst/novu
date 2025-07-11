@@ -1,4 +1,4 @@
-import { StepEditorProps } from '@/components/workflow-editor/steps/configure-step-template-form';
+import type { StepEditorProps } from '@/components/workflow-editor/steps/configure-step-template-form';
 import { EmailEditor } from '@/components/workflow-editor/steps/email/email-editor';
 import { EmailEditorPreview } from '@/components/workflow-editor/steps/email/email-editor-preview';
 import { TemplateTabs } from '@/components/workflow-editor/steps/template-tabs';

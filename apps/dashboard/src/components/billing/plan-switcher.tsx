@@ -1,5 +1,5 @@
 import { Tabs, TabsList, TabsTrigger } from '@/components/primitives/tabs';
-import { StripeBillingIntervalEnum } from '@novu/shared';
+import type { StripeBillingIntervalEnum } from '@novu/shared';
 
 interface PlanSwitcherProps {
   selectedBillingInterval: 'month' | 'year';

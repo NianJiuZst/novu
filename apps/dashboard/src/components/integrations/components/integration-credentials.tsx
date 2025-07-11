@@ -3,8 +3,8 @@ import { SecretInput } from '@/components/primitives/secret-input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/primitives/select';
 import { Textarea } from '@/components/primitives/textarea';
 import { Switch } from '@/components/primitives/switch';
-import { CredentialsKeyEnum, IProviderConfig } from '@novu/shared';
-import { Control } from 'react-hook-form';
+import { CredentialsKeyEnum, type IProviderConfig } from '@novu/shared';
+import type { Control } from 'react-hook-form';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../../components/primitives/form/form';
 
 type IntegrationFormData = {

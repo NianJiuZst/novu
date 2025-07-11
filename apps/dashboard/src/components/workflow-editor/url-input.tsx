@@ -2,10 +2,10 @@ import { useFormContext } from 'react-hook-form';
 
 import { ControlInput } from '@/components/workflow-editor/control-input';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/primitives/form/form';
-import { InputProps, InputRoot } from '@/components/primitives/input';
+import { type InputProps, InputRoot } from '@/components/primitives/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/primitives/select';
 import { useSaveForm } from '@/components/workflow-editor/steps/save-form-context';
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import type { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
 
 type URLInputProps = Omit<InputProps, 'value' | 'onChange'> & {
   options: string[];

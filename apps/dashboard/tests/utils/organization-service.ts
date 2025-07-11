@@ -1,4 +1,4 @@
-import { ClerkClient } from '@clerk/backend';
+import type { ClerkClient } from '@clerk/backend';
 import { CommunityOrganizationRepository } from '@novu/dal';
 import { EEOrganizationRepository } from '@novu/ee-auth';
 

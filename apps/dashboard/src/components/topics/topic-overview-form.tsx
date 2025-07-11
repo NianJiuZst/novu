@@ -29,10 +29,10 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiDeleteBin2Line } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
-import { ExternalToast } from 'sonner';
+import type { ExternalToast } from 'sonner';
 import { z } from 'zod';
 import { ConfirmationModal } from '../confirmation-modal';
-import { Topic } from './types';
+import type { Topic } from './types';
 
 const TopicFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),

@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { ISubscriberResponseDto, SubscriberDto } from '@novu/shared';
+import type { ISubscriberResponseDto, SubscriberDto } from '@novu/shared';
 
 import { Accordion } from '@/components/primitives/accordion';
 import { PreviewSubscriberSection } from '../preview-subscriber-section';

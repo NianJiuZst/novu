@@ -1,7 +1,7 @@
 import { ActionType } from '@/components/billing/utils/action.button.constants.ts';
 import { Badge } from '@/components/primitives/badge';
 import { Card } from '@/components/primitives/card';
-import { ApiServiceLevelEnum, StripeBillingIntervalEnum } from '@novu/shared';
+import type { ApiServiceLevelEnum, StripeBillingIntervalEnum } from '@novu/shared';
 import { Check } from 'lucide-react';
 import { ContactSalesButton } from './contact-sales-button';
 import { PlanActionButton } from './plan-action-button';

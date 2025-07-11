@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
-import { JSONSchema7 } from 'json-schema';
+import type { JSONSchema7 } from 'json-schema';
 
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import type { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
 
 type UseEnhancedVariableValidationProps = {
   isAllowedVariable: IsAllowedVariable;

@@ -10,7 +10,7 @@ import {
   DialogPortal,
   DialogTitle,
 } from '@/components/primitives/dialog';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { RiAlertFill } from 'react-icons/ri';
 
 type ConfirmationModalProps = {

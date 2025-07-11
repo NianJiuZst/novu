@@ -2,7 +2,7 @@ import React from 'react';
 import { createContextHook } from '../context';
 import { useQuery } from '@tanstack/react-query';
 import { get } from '../../api/api.client';
-import { IOrganizationEntity } from '@novu/shared';
+import type { IOrganizationEntity } from '@novu/shared';
 import { QueryKeys } from '../../utils/query-keys';
 import { withJwtValidation } from './api-interceptor';
 import { getJwtToken } from './jwt-manager';

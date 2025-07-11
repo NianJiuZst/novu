@@ -7,8 +7,8 @@ import { usePatchSubscriberPreferences } from '@/hooks/use-patch-subscriber-pref
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { itemVariants, sectionVariants } from '@/utils/animation';
 import { TelemetryEvent } from '@/utils/telemetry';
-import { GetSubscriberPreferencesDto, PatchPreferenceChannelsDto } from '@novu/api/models/components';
-import { ChannelTypeEnum } from '@novu/shared';
+import type { GetSubscriberPreferencesDto, PatchPreferenceChannelsDto } from '@novu/api/models/components';
+import type { ChannelTypeEnum } from '@novu/shared';
 import { motion } from 'motion/react';
 import { useMemo } from 'react';
 import { RiQuestionLine } from 'react-icons/ri';

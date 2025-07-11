@@ -1,4 +1,4 @@
-import { ReactEventHandler } from 'react';
+import type { ReactEventHandler } from 'react';
 import { RiSearchLine } from 'react-icons/ri';
 import { Button } from './primitives/button';
 

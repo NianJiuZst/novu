@@ -1,6 +1,6 @@
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
-import { fetchVercelIntegration, GetVercelConfigurationDetails } from '@/api/partner-integrations';
+import { fetchVercelIntegration, type GetVercelConfigurationDetails } from '@/api/partner-integrations';
 import { useEnvironment } from '@/context/environment/hooks';
 
 export function useFetchVercelIntegration({

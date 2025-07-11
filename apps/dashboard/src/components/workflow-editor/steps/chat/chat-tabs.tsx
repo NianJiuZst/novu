@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ResourceOriginEnum } from '@novu/shared';
 
-import { StepEditorProps } from '@/components/workflow-editor/steps/configure-step-template-form';
+import type { StepEditorProps } from '@/components/workflow-editor/steps/configure-step-template-form';
 import { CustomStepControls } from '@/components/workflow-editor/steps/controls/custom-step-controls';
 import { TemplateTabs } from '@/components/workflow-editor/steps/template-tabs';
 import { ChatEditor } from '@/components/workflow-editor/steps/chat/chat-editor';

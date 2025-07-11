@@ -1,4 +1,4 @@
-import { Controls } from '@novu/shared';
+import type { Controls } from '@novu/shared';
 import { buildDefaultValues, buildDefaultValuesOfDataSchema } from '@/utils/schema';
 
 // Use the UI Schema to build the default values if it exists else use the data schema (code-first approach) values

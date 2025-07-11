@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TranslationKey } from '@/types/translations';
+import type { TranslationKey } from '@/types/translations';
 
 export interface TranslationValidationResult {
   hasError: boolean;

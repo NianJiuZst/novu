@@ -1,8 +1,9 @@
-import React, { HTMLAttributes, useMemo, useRef, useState } from 'react';
+import type React from 'react';
+import { type HTMLAttributes, useMemo, useRef, useState } from 'react';
 
 import { InputPure, InputRoot, InputWrapper } from '@/components/primitives/input';
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/primitives/popover';
-import { VariableList, VariableListRef } from '@/components/variable/variable-list';
+import { VariableList, type VariableListRef } from '@/components/variable/variable-list';
 import { AUTOCOMPLETE_PASSWORD_MANAGERS_OFF } from '@/utils/constants';
 import { cn } from '@/utils/ui';
 

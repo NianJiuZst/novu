@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 import { RiCloseLine, RiEdit2Line, RiPencilRuler2Line } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 

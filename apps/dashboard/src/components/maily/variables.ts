@@ -1,7 +1,7 @@
 import { DIGEST_VARIABLES } from '@/components/variable/utils/digest-variables';
-import { Variable } from '@maily-to/core/extensions';
+import type { Variable } from '@maily-to/core/extensions';
 
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import type { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
 import type { Editor, Range, Editor as TiptapEditor } from '@tiptap/core';
 import {
   REPEAT_BLOCK_ITERABLE_ALIAS,
@@ -160,7 +160,7 @@ const getVariablesByContext = ({
 
   switch (from) {
     // Case 1: Inside repeat block's "each" key input - only allow iterables
-    case VariableFrom.RepeatEachKey:
+    case VariableFrom.REPEAT_EACH_KEY:
       if (isInRepeatBlock) {
         updateRepeatBlockChildAliases(editor);
         return iterables;
@@ -169,11 +169,11 @@ const getVariablesByContext = ({
       return [];
 
     // Case 2: Bubble menu (showIf) - allow only primitives and namespaces
-    case VariableFrom.Bubble:
+    case VariableFrom.BUBBLE:
       return getVariables();
 
     // Case 3: Regular content
-    case VariableFrom.Content: {
+    case VariableFrom.CONTENT: {
       return getVariables();
     }
 
@@ -254,7 +254,7 @@ export const calculateVariables = ({
    * 3. For now bubble variables can be only added via Enter key which triggers a separate insertion flow
    *    (which is external somewhere in TipTap or Maily)
    */
-  if (from === VariableFrom.Content && isAllowedVariable({ name: queryWithoutSuffix })) {
+  if (from === VariableFrom.CONTENT && isAllowedVariable({ name: queryWithoutSuffix })) {
     insertVariableToEditor({ query, editor });
   }
 

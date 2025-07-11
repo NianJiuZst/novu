@@ -1,4 +1,4 @@
-import { FieldPath, FieldValues, UseFormSetError } from 'react-hook-form';
+import type { FieldPath, FieldValues, UseFormSetError } from 'react-hook-form';
 
 type ValidationIssues = Record<
   string,

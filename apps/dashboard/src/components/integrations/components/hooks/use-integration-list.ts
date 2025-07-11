@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { ChannelTypeEnum, ChatProviderIdEnum, IProviderConfig, PushProviderIdEnum } from '@novu/shared';
+import { ChannelTypeEnum, ChatProviderIdEnum, type IProviderConfig, PushProviderIdEnum } from '@novu/shared';
 import { providers, EmailProviderIdEnum, SmsProviderIdEnum } from '@novu/shared';
-import { ProvidersIdEnum } from '@novu/shared';
+import type { ProvidersIdEnum } from '@novu/shared';
 
 export function useIntegrationList(searchQuery: string = '') {
   const filteredIntegrations = useMemo(() => {

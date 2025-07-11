@@ -4,14 +4,20 @@ import {
   ApiServiceLevelEnum,
   FeatureNameEnum,
   getFeatureForTierAsBoolean,
-  IEnvironment,
+  type IEnvironment,
 } from '@novu/shared';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/primitives/tabs';
 import { Button } from '@/components/primitives/button';
 import { DashboardLayout } from '../components/dashboard-layout';
 import { Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { ROUTES, buildRoute } from '@/utils/routes';
-import { useQuery, useMutation, useQueryClient, UseQueryResult, UseMutationResult } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  type UseQueryResult,
+  type UseMutationResult,
+} from '@tanstack/react-query';
 import { useEnvironment } from '@/context/environment/hooks';
 import { getWebhookPortalToken, createWebhookPortalToken } from '@/api/webhooks';
 import { AppPortal, SvixProvider } from 'svix-react';

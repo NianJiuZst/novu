@@ -1,8 +1,8 @@
 import { FeatureFlagsKeysEnum, PermissionsEnum, ResourceOriginEnum } from '@novu/shared';
-import { Node as FlowNode, Handle, NodeProps, Position } from '@xyflow/react';
-import { ComponentProps } from 'react';
+import { type Node as FlowNode, Handle, type NodeProps, Position } from '@xyflow/react';
+import type { ComponentProps } from 'react';
 import { RiFilter3Fill, RiPlayCircleLine } from 'react-icons/ri';
-import { RQBJsonLogic } from 'react-querybuilder';
+import type { RQBJsonLogic } from 'react-querybuilder';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { createStep } from '@/components/workflow-editor/step-utils';
@@ -23,7 +23,7 @@ import { useEnvironment } from '@/context/environment/hooks';
 import { AnimatePresence } from 'motion/react';
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { useState, useCallback, useRef } from 'react';
-import { StepCreateDto } from '@novu/shared';
+import type { StepCreateDto } from '@novu/shared';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 
 export type NodeData = {

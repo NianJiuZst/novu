@@ -12,22 +12,22 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from
 import { Form, FormRoot } from '@/components/primitives/form/form';
 import { WorkflowResults } from '@/components/template-store/components/workflow-results';
 import { getTemplates } from '@/components/template-store/templates';
-import { IWorkflowSuggestion } from '@/components/template-store/templates/types';
+import type { IWorkflowSuggestion } from '@/components/template-store/templates/types';
 import { WorkflowMode } from '@/components/template-store/types';
 import { WorkflowSidebar } from '@/components/template-store/workflow-sidebar';
 import TruncatedText from '@/components/truncated-text';
 import { CreateWorkflowForm } from '@/components/workflow-editor/create-workflow-form';
-import { workflowSchema } from '@/components/workflow-editor/schema';
+import type { workflowSchema } from '@/components/workflow-editor/schema';
 import { WorkflowCanvas } from '@/components/workflow-editor/workflow-canvas';
 import { useCreateWorkflow } from '@/hooks/use-create-workflow';
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { TelemetryEvent } from '@/utils/telemetry';
-import { ComponentProps, useEffect, useState } from 'react';
+import { type ComponentProps, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiArrowLeftSLine } from 'react-icons/ri';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { z } from 'zod';
+import type { z } from 'zod';
 
 const WORKFLOW_TEMPLATES = getTemplates();
 

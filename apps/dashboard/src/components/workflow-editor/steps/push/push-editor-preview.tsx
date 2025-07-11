@@ -1,7 +1,7 @@
 import { InlineToast } from '@/components/primitives/inline-toast';
 import { PushPreview } from '@/components/workflow-editor/steps/push/push-preview';
 import { TabsSection } from '@/components/workflow-editor/steps/tabs-section';
-import { GeneratePreviewResponseDto, type WorkflowResponseDto } from '@novu/shared';
+import type { GeneratePreviewResponseDto, WorkflowResponseDto } from '@novu/shared';
 import { ConfigurePreviewAccordion } from '../shared/configure-preview-accordion';
 
 type PushEditorPreviewProps = {

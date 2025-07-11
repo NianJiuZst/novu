@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Translation } from '@/api/translations';
+import type { Translation } from '@/api/translations';
 
 export function useTranslationEditor(selectedTranslation: Translation | undefined) {
   const [modifiedContent, setModifiedContent] = useState<Record<string, unknown> | null>(null);

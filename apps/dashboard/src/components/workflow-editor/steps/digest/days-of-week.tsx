@@ -1,4 +1,4 @@
-import { ChangeEventHandler, KeyboardEventHandler, useRef } from 'react';
+import { type ChangeEventHandler, type KeyboardEventHandler, useRef } from 'react';
 
 const dayContainerClassName =
   'flex h-full items-center justify-center border-r border-r-neutral-200 last:border-r-0 last:rounded-r-lg first:rounded-l-lg first:border-l-0 [&_label]:first:rounded-l-lg [&_label]:last:rounded-r-lg';

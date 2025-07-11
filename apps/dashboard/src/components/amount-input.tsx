@@ -1,4 +1,4 @@
-import { FocusEventHandler } from 'react';
+import type { FocusEventHandler } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 import { FormControl, FormField, FormItem, FormMessagePure } from '@/components/primitives/form/form';

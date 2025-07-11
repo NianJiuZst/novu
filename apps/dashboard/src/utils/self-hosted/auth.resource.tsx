@@ -1,6 +1,6 @@
 import React from 'react';
 import { createContextHook } from '../context';
-import { DecodedJwt } from '.';
+import type { DecodedJwt } from '.';
 import { getJwtToken, isJwtValid } from './jwt-manager';
 import { createUserFromJwt } from './user.types';
 

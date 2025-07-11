@@ -1,4 +1,4 @@
-import { ApiServiceLevelEnum } from '@novu/shared';
+import type { ApiServiceLevelEnum } from '@novu/shared';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { post } from '../api/api.client';

@@ -2,7 +2,7 @@ import { STEP_TYPE_TO_ICON } from '@/components/icons/utils';
 import { STEP_TYPE_LABELS } from '@/utils/constants';
 import { Badge } from '@/components/primitives/badge';
 import { cn } from '@/utils/ui';
-import { IActivityJob, JobStatusEnum, StepTypeEnum } from '@novu/shared';
+import { type IActivityJob, JobStatusEnum, type StepTypeEnum } from '@novu/shared';
 import { format } from 'date-fns';
 import { RiCheckLine, RiCloseCircleLine, RiLoader4Line, RiPauseLine, RiStopLine } from 'react-icons/ri';
 import { JOB_STATUS_CONFIG } from '../constants';

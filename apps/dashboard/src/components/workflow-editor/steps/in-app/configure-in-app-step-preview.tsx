@@ -1,4 +1,4 @@
-import { HTMLAttributes, useEffect } from 'react';
+import { type HTMLAttributes, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { ChannelTypeEnum } from '@novu/shared';

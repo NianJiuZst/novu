@@ -1,5 +1,5 @@
 import { cn } from '@/utils/ui';
-import { IEnvironment } from '@novu/shared';
+import type { IEnvironment } from '@novu/shared';
 import { cva } from 'class-variance-authority';
 import { RiGitBranchLine } from 'react-icons/ri';
 

@@ -1,8 +1,8 @@
 import { cn } from '@/utils/ui';
-import { ISubscriberResponseDto } from '@novu/shared';
+import type { ISubscriberResponseDto } from '@novu/shared';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { IconType } from 'react-icons';
+import type { IconType } from 'react-icons';
 import { RiAddFill, RiArrowDownLine, RiArrowUpLine, RiLoader4Line, RiSearchLine } from 'react-icons/ri';
 import { EnterLineIcon } from '../icons/enter-line';
 import { Avatar, AvatarFallback, AvatarImage } from '../primitives/avatar';
@@ -11,7 +11,7 @@ import { Input } from '../primitives/input';
 import { Popover, PopoverContent, PopoverTrigger } from '../primitives/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../primitives/select';
 import { Separator } from '../primitives/separator';
-import { SearchField, useSubscriberSearch } from './hooks/use-subscriber-search';
+import { type SearchField, useSubscriberSearch } from './hooks/use-subscriber-search';
 
 type SubscriberAutocompleteProps = {
   value: string;

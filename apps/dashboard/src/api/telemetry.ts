@@ -1,4 +1,4 @@
-import { CompanySizeEnum, JobTitleEnum, OrganizationTypeEnum } from '@novu/shared';
+import type { CompanySizeEnum, JobTitleEnum, OrganizationTypeEnum } from '@novu/shared';
 import * as Sentry from '@sentry/react';
 import { post } from './api.client';
 

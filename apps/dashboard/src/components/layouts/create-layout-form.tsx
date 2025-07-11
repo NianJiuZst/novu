@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import type { z } from 'zod';
 import { LayoutCreationSourceEnum, slugify } from '@novu/shared';
 
 import {

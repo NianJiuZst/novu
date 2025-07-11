@@ -1,6 +1,6 @@
 import { Button } from '@/components/primitives/button';
 import { UnsavedChangesAlertDialog } from '@/components/unsaved-changes-alert-dialog';
-import { TranslationGroup } from '@/api/translations';
+import type { TranslationGroup } from '@/api/translations';
 import { TranslationHeader } from './translation-header';
 import { LocaleList } from './locale-list';
 import { EditorPanel } from './editor-panel';

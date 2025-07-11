@@ -1,4 +1,4 @@
-import { ActivityFilters } from '@/api/activity';
+import type { ActivityFilters } from '@/api/activity';
 import { Skeleton } from '@/components/primitives/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/primitives/table';
 import { TimeDisplayHoverCard } from '@/components/time-display-hover-card';

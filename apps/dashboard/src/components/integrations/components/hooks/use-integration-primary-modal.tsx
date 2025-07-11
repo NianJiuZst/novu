@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { CHANNELS_WITH_PRIMARY, IIntegration, ChannelTypeEnum } from '@novu/shared';
-import { IntegrationFormData } from '../../types';
+import { CHANNELS_WITH_PRIMARY, type IIntegration, ChannelTypeEnum } from '@novu/shared';
+import type { IntegrationFormData } from '../../types';
 import { handleIntegrationError } from '../utils/handle-integration-error';
-import { UseMutateAsyncFunction } from '@tanstack/react-query';
+import type { UseMutateAsyncFunction } from '@tanstack/react-query';
 import { ROUTES } from '../../../../utils/routes';
 import { useNavigate } from 'react-router-dom';
 

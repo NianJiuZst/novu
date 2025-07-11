@@ -1,14 +1,14 @@
-import { Completion } from '@codemirror/autocomplete';
+import type { Completion } from '@codemirror/autocomplete';
 
 import { isAllowedAlias } from '@/components/maily/repeat-block-aliases';
 
 import type { JSONSchemaDefinition } from '@novu/shared';
 import {
   DIGEST_VARIABLES,
-  DIGEST_VARIABLES_ENUM,
+  type DIGEST_VARIABLES_ENUM,
   getDynamicDigestVariable,
 } from '../components/variable/utils/digest-variables';
-import { JSONSchema7 } from 'json-schema';
+import type { JSONSchema7 } from 'json-schema';
 
 export interface LiquidVariable {
   type?: 'variable' | 'digest' | 'new-variable' | 'local';

@@ -1,7 +1,7 @@
-import { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
 import { RiDeleteBin2Line, RiFileCopyLine, RiMore2Fill } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
-import { PermissionsEnum, LayoutResponseDto } from '@novu/shared';
+import { PermissionsEnum, type LayoutResponseDto } from '@novu/shared';
 
 import { CompactButton } from '@/components/primitives/button-compact';
 import { CopyButton } from '@/components/primitives/copy-button';

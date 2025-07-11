@@ -1,4 +1,4 @@
-import { TopicSubscription } from '@/api/topics';
+import type { TopicSubscription } from '@/api/topics';
 import { Skeleton } from '@/components/primitives/skeleton';
 import { useFetchSubscriberSubscriptions } from '@/hooks/use-fetch-subscriber-subscriptions';
 import { itemVariants, listVariants } from '@/utils/animation';

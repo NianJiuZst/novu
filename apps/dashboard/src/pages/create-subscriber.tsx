@@ -15,7 +15,7 @@ import { cn } from '@/utils/ui';
 import { useState } from 'react';
 import { RiGroup2Line, RiInformationFill } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
-import { ExternalToast } from 'sonner';
+import type { ExternalToast } from 'sonner';
 
 const toastOptions: ExternalToast = {
   position: 'bottom-right',

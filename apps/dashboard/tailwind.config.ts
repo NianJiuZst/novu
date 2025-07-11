@@ -681,7 +681,7 @@ export default {
   },
   plugins: [
     animate,
-    function ({ addUtilities }: { addUtilities: (utilities: Record<string, any>) => void }) {
+    ({ addUtilities }: { addUtilities: (utilities: Record<string, any>) => void }) => {
       addUtilities({
         '.overflow-initial': { overflow: 'initial' },
         '.overflow-inherit': { overflow: 'inherit' },

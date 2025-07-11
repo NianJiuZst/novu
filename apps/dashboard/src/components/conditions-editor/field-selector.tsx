@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { FieldSelectorProps } from 'react-querybuilder';
+import type { FieldSelectorProps } from 'react-querybuilder';
 
 import { VariableSelect } from '@/components/conditions-editor/variable-select';
 import { Code2 } from '@/components/icons/code-2';

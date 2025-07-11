@@ -1,7 +1,7 @@
 import { TimeUnitEnum } from '@novu/shared';
 import { Tabs } from '@radix-ui/react-tabs';
 import { useState } from 'react';
-import { FieldValues, useFormContext } from 'react-hook-form';
+import { type FieldValues, useFormContext } from 'react-hook-form';
 
 import { FormField, FormLabel, FormMessagePure } from '@/components/primitives/form/form';
 import { Separator } from '@/components/primitives/separator';

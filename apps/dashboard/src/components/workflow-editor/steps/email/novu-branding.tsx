@@ -1,4 +1,4 @@
-import { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 import { cn } from '@/utils/ui';
 import { UpgradeCTATooltip } from '@/components/upgrade-cta-tooltip';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';

@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { type IEnvironment } from '@novu/shared';
+import type { IEnvironment } from '@novu/shared';
 
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { useAuth } from '@/context/auth/hooks';

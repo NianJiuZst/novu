@@ -1,8 +1,16 @@
 import { createContext, useCallback, useContext, useMemo } from 'react';
-import { RuleType, remove, add, isRuleGroup, RuleGroupTypeAny, Path, RuleGroupType } from 'react-querybuilder';
+import {
+  type RuleType,
+  remove,
+  add,
+  isRuleGroup,
+  type RuleGroupTypeAny,
+  type Path,
+  type RuleGroupType,
+} from 'react-querybuilder';
 import { generateUUID } from '@/utils/uuid';
 
-import { ConditionsEditorContextType } from './types';
+import type { ConditionsEditorContextType } from './types';
 import { useDataRef } from '@/hooks/use-data-ref';
 
 export const ConditionsEditorContext = createContext<ConditionsEditorContextType>({

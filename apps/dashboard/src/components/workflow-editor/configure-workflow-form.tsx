@@ -3,7 +3,7 @@ import { useMemo, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import type { ExternalToast } from 'sonner';
-import { z } from 'zod';
+import type { z } from 'zod';
 
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { DeleteWorkflowDialog } from '@/components/delete-workflow-dialog';
@@ -45,7 +45,7 @@ import { Tooltip, TooltipContent, TooltipPortal, TooltipTrigger } from '@/compon
 import { usePromotionalBanner } from '@/components/promotional/coming-soon-banner';
 import { SidebarContent, SidebarHeader } from '@/components/side-navigation/sidebar';
 import { workflowSchema } from '@/components/workflow-editor/schema';
-import { UpdateWorkflowFn } from '@/components/workflow-editor/workflow-provider';
+import type { UpdateWorkflowFn } from '@/components/workflow-editor/workflow-provider';
 import { useAuth } from '@/context/auth/hooks';
 import { useEnvironment, useFetchEnvironments } from '@/context/environment/hooks';
 import { useDeleteWorkflow } from '@/hooks/use-delete-workflow';
@@ -72,7 +72,12 @@ import { Protect } from '@/utils/protect';
 
 import { PayloadSchemaDrawer } from './payload-schema-drawer';
 import { TranslationToggleSection } from './translation-toggle-section';
-import { ResourceOriginEnum, WorkflowResponseDto, UpdateWorkflowDto, MAX_DESCRIPTION_LENGTH } from '@novu/shared';
+import {
+  ResourceOriginEnum,
+  type WorkflowResponseDto,
+  type UpdateWorkflowDto,
+  MAX_DESCRIPTION_LENGTH,
+} from '@novu/shared';
 import { useFeatureFlag } from '../../hooks/use-feature-flag';
 
 interface ConfigureWorkflowFormProps {

@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/primitives/dialog';
-import { IEnvironment } from '@novu/shared';
+import type { IEnvironment } from '@novu/shared';
 
 interface DeleteEnvironmentDialogProps {
   environment?: IEnvironment;

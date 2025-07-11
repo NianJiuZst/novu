@@ -2,7 +2,7 @@ import { Card } from '@/components/primitives/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/primitives/tabs';
 import { ROUTES } from '@/utils/routes';
 import { OrganizationProfile, UserProfile } from '@clerk/clerk-react';
-import { Appearance } from '@clerk/types';
+import type { Appearance } from '@clerk/types';
 import { motion } from 'motion/react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Plan } from '../components/billing/plan';
@@ -13,7 +13,7 @@ import {
   FeatureFlagsKeysEnum,
   FeatureNameEnum,
   getFeatureForTierAsBoolean,
-  GetSubscriptionDto,
+  type GetSubscriptionDto,
 } from '@novu/shared';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { InlineToast } from '@/components/primitives/inline-toast';

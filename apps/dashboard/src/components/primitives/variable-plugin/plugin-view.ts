@@ -1,6 +1,6 @@
-import { IsAllowedVariable } from '@/utils/parseStepVariables';
-import { Decoration, DecorationSet, EditorView, Range } from '@uiw/react-codemirror';
-import { MutableRefObject } from 'react';
+import type { IsAllowedVariable } from '@/utils/parseStepVariables';
+import { Decoration, type DecorationSet, type EditorView, type Range } from '@uiw/react-codemirror';
+import type { MutableRefObject } from 'react';
 import { isTypingVariable } from './utils';
 import { VariablePillWidget } from './variable-pill-widget';
 import { parseVariable } from '@/utils/liquid';

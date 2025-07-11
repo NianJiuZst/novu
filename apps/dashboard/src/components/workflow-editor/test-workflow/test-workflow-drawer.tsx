@@ -21,7 +21,7 @@ import { useHasPermission } from '@/hooks/use-has-permission';
 import { useAuth } from '@/context/auth/hooks';
 import { useWorkflow } from '../workflow-provider';
 import { RiPlayCircleLine, RiArrowDownSLine, RiFileCopyLine } from 'react-icons/ri';
-import { PayloadData } from '@/components/workflow-editor/steps/types/preview-context.types';
+import type { PayloadData } from '@/components/workflow-editor/steps/types/preview-context.types';
 import { useEnvironment } from '../../../context/environment/hooks';
 import {
   DropdownMenu,

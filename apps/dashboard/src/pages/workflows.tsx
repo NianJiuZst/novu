@@ -12,10 +12,10 @@ import {
 import { FacetedFormFilter } from '@/components/primitives/form/faceted-filter/facated-form-filter';
 import { ScrollArea, ScrollBar } from '@/components/primitives/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';
-import { getTemplates, WorkflowTemplate } from '@/components/template-store/templates';
+import { getTemplates, type WorkflowTemplate } from '@/components/template-store/templates';
 import { WorkflowCard } from '@/components/template-store/workflow-card';
 import { WorkflowTemplateModal } from '@/components/template-store/workflow-template-modal';
-import { SortableColumn, WorkflowList } from '@/components/workflow-list';
+import { type SortableColumn, WorkflowList } from '@/components/workflow-list';
 import { useEnvironment } from '@/context/environment/hooks';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useFetchWorkflows } from '@/hooks/use-fetch-workflows';
@@ -23,7 +23,7 @@ import { useTags } from '@/hooks/use-tags';
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { TelemetryEvent } from '@/utils/telemetry';
-import { DirectionEnum, PermissionsEnum, StepTypeEnum, WorkflowStatusEnum } from '@novu/shared';
+import { DirectionEnum, PermissionsEnum, type StepTypeEnum, WorkflowStatusEnum } from '@novu/shared';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -316,7 +316,12 @@ const CreateWorkflowButton = () => {
         </TooltipTrigger>
         <TooltipContent>
           Almost there! Your role just doesn't have permission for this one.{' '}
-          <a href="https://docs.novu.co/platform/account/roles-and-permissions" target="_blank" className="underline">
+          <a
+            href="https://docs.novu.co/platform/account/roles-and-permissions"
+            target="_blank"
+            className="underline"
+            rel="noopener"
+          >
             Learn More ↗
           </a>
         </TooltipContent>

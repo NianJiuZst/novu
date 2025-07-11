@@ -1,10 +1,10 @@
 import { useMemo, useRef } from 'react';
-import { EditorView } from '@uiw/react-codemirror';
+import type { EditorView } from '@uiw/react-codemirror';
 import { cva } from 'class-variance-authority';
 
 import { cn } from '@/utils/ui';
-import { CompletionRange, VariableEditor } from '@/components/primitives/variable-editor';
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import { type CompletionRange, VariableEditor } from '@/components/primitives/variable-editor';
+import type { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 import { useCreateVariable } from '@/components/variable/hooks/use-create-variable';
 import { useWorkflowSchema } from '@/components/workflow-editor/workflow-schema-provider';

@@ -4,9 +4,9 @@ import { useTelemetry } from '@/hooks/use-telemetry';
 import { StepTypeEnum } from '@/utils/enums';
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { TelemetryEvent } from '@/utils/telemetry';
-import { Step } from '@/utils/types';
+import type { Step } from '@/utils/types';
 import { useUser } from '@clerk/clerk-react';
-import { ChannelTypeEnum, WorkflowResponseDto } from '@novu/shared';
+import { ChannelTypeEnum, type WorkflowResponseDto } from '@novu/shared';
 import { motion } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
 import {

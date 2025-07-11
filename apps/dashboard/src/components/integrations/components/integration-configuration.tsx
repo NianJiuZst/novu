@@ -4,7 +4,7 @@ import { Label } from '@/components/primitives/label';
 import { Separator } from '@/components/primitives/separator';
 import { useEnvironment } from '@/context/environment/hooks';
 import { ROUTES } from '@/utils/routes';
-import { ChannelTypeEnum, IIntegration, IProviderConfig, PermissionsEnum } from '@novu/shared';
+import { ChannelTypeEnum, type IIntegration, type IProviderConfig, PermissionsEnum } from '@novu/shared';
 import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { RiInputField } from 'react-icons/ri';

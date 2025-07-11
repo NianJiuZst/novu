@@ -1,5 +1,5 @@
 import { WidgetType } from '@uiw/react-codemirror';
-import { CSSProperties, createElement } from 'react';
+import { type CSSProperties, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RiErrorWarningLine } from 'react-icons/ri';
 import { TranslateVariableIcon } from '@/components/icons/translate-variable';

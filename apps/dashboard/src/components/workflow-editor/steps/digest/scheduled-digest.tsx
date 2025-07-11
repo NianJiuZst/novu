@@ -8,7 +8,7 @@ import {
   PeriodValues,
   toCronFields,
   toUiFields,
-  UiCronFields,
+  type UiCronFields,
 } from '@/components/workflow-editor/steps/digest/utils';
 import { Period } from '@/components/workflow-editor/steps/digest/period';
 import { NumbersPicker } from '@/components/workflow-editor/steps/digest/numbers-picker';

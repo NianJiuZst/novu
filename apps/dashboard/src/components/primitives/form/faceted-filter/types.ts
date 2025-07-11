@@ -1,4 +1,4 @@
-import { ComponentType } from 'react';
+import type { ComponentType } from 'react';
 
 export type ValueType = 'single' | 'multi' | 'text';
 export type SizeType = 'default' | 'small';

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { TranslationGroup } from '@/api/translations';
+import type { TranslationGroup } from '@/api/translations';
 import { useDeleteTranslationGroup } from '@/hooks/use-delete-translation-group';
 
 export function useDeleteTranslationModal() {

@@ -1,5 +1,5 @@
 import { ROUTES } from '@/utils/routes';
-import { GetSubscriptionDto } from '@novu/shared';
+import type { GetSubscriptionDto } from '@novu/shared';
 import { RiArrowRightDoubleLine, RiInformationFill } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
 import { LogoCircle } from '../icons';

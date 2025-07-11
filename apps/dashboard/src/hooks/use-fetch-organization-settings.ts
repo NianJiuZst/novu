@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { QueryKeys } from '@/utils/query-keys';
 import { useEnvironment } from '@/context/environment/hooks';
-import { getOrganizationSettings, GetOrganizationSettingsDto } from '../api/organization';
+import { getOrganizationSettings, type GetOrganizationSettingsDto } from '../api/organization';
 
 export const useFetchOrganizationSettings = () => {
   const { currentEnvironment } = useEnvironment();

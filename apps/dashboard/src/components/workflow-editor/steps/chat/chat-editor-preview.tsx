@@ -1,4 +1,4 @@
-import { GeneratePreviewResponseDto, type WorkflowResponseDto } from '@novu/shared';
+import type { GeneratePreviewResponseDto, WorkflowResponseDto } from '@novu/shared';
 
 import { InlineToast } from '@/components/primitives/inline-toast';
 import { ChatPreview } from '@/components/workflow-editor/steps/chat/chat-preview';

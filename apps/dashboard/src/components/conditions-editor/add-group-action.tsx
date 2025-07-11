@@ -1,4 +1,4 @@
-import { ActionWithRulesAndAddersProps } from 'react-querybuilder';
+import type { ActionWithRulesAndAddersProps } from 'react-querybuilder';
 
 import { StackedPlusLine } from '@/components/icons/stacked-plus-line';
 import { Button } from '@/components/primitives/button';

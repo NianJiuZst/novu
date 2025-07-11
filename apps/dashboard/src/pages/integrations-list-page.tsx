@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { DashboardLayout } from '../components/dashboard-layout';
 import { IntegrationsList } from '../components/integrations/components/integrations-list';
-import { TableIntegration } from '../components/integrations/types';
+import type { TableIntegration } from '../components/integrations/types';
 import { Badge } from '../components/primitives/badge';
 import { PermissionsEnum } from '@novu/shared';
 import { PermissionButton } from '@/components/primitives/permission-button';
@@ -14,7 +14,7 @@ import { PermissionButton } from '@/components/primitives/permission-button';
 export function IntegrationsListPage() {
   const navigate = useNavigate();
 
-  const onItemClick = function (item: TableIntegration) {
+  const onItemClick = (item: TableIntegration) => {
     navigate(buildRoute(ROUTES.INTEGRATIONS_UPDATE, { integrationId: item.integrationId }));
   };
 

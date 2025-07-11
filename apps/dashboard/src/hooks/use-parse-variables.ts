@@ -1,6 +1,6 @@
 import { parseStepVariables, type EnhancedParsedVariables } from '@/utils/parseStepVariables';
-import { type JSONSchemaDefinition } from '@novu/shared';
-import { JSONSchema7 } from 'json-schema';
+import type { JSONSchemaDefinition } from '@novu/shared';
+import type { JSONSchema7 } from 'json-schema';
 import { useMemo } from 'react';
 
 export function useParseVariables(

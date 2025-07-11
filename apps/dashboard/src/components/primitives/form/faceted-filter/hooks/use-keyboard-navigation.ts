@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FilterOption } from '../types';
+import type { FilterOption } from '../types';
 
 interface UseKeyboardNavigationProps {
   options: FilterOption[];

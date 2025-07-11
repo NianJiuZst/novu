@@ -1,5 +1,5 @@
 import { RiEarthLine } from 'react-icons/ri';
-import { type Country } from 'react-phone-number-input';
+import type { Country } from 'react-phone-number-input';
 import flags from 'react-phone-number-input/flags';
 import { cn } from '@/utils/ui';
 

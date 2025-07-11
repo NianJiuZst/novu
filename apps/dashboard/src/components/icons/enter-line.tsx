@@ -1,4 +1,4 @@
-import { SVGProps } from 'react';
+import type { SVGProps } from 'react';
 
 export function EnterLineIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (

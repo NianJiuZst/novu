@@ -2,7 +2,7 @@ import { Accordion } from '@/components/primitives/accordion';
 import { useIsPayloadSchemaEnabled } from '@/hooks/use-is-payload-schema-enabled';
 import { useMemo, useEffect, useCallback } from 'react';
 import { useEnvironment } from '@/context/environment/hooks';
-import {
+import type {
   PreviewContextPanelProps,
   ParsedData,
   PreviewSubscriberData,
@@ -16,7 +16,7 @@ import { usePreviewDataInitialization } from './hooks/use-preview-data-initializ
 import { StepTypeEnum } from '@/utils/enums';
 import { useCreateVariable } from '@/components/variable/hooks/use-create-variable';
 import { PayloadSchemaDrawer } from '../payload-schema-drawer';
-import { DEFAULT_LOCALE, ISubscriberResponseDto } from '@novu/shared';
+import { DEFAULT_LOCALE, type ISubscriberResponseDto } from '@novu/shared';
 import { createSubscriberData, parseJsonValue } from './utils/preview-context.utils';
 import { DEFAULT_ACCORDION_VALUES } from './constants/preview-context.constants';
 

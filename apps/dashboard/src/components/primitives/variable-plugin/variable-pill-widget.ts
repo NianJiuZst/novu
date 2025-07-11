@@ -1,6 +1,6 @@
 import { validateEnhancedDigestFilters, getFirstFilterAndItsArgs } from '@/components/variable/utils';
 import { WidgetType } from '@uiw/react-codemirror';
-import { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 
 export const DEFAULT_VARIABLE_PILL_HEIGHT = 18;
 

@@ -4,7 +4,7 @@ import { UserButton } from './user-button';
 import { OrganizationContextProvider, useOrganization } from './organization.resource';
 import { UserContextProvider, useUser } from './user.resource';
 import { AuthContextProvider, useAuth } from './auth.resource';
-import { IOrganizationEntity } from '@novu/shared';
+import type { IOrganizationEntity } from '@novu/shared';
 import { getJwtToken, isJwtValid } from './jwt-manager';
 
 import {

@@ -1,8 +1,8 @@
 import { deleteSubscriber } from '@/api/subscribers';
 import { useEnvironment } from '@/context/environment/hooks';
-import { OmitEnvironmentFromParameters } from '@/utils/types';
-import { RemoveSubscriberResponseDto } from '@novu/api/models/components';
-import { useMutation, UseMutationOptions } from '@tanstack/react-query';
+import type { OmitEnvironmentFromParameters } from '@/utils/types';
+import type { RemoveSubscriberResponseDto } from '@novu/api/models/components';
+import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 
 type DeleteSubscriberParameters = OmitEnvironmentFromParameters<typeof deleteSubscriber>;
 

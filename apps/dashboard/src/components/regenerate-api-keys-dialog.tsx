@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/primitives/dialog';
 import { Input } from '@/components/primitives/input';
-import { IEnvironment } from '@novu/shared';
+import type { IEnvironment } from '@novu/shared';
 import { useState } from 'react';
 import { RiAlertFill } from 'react-icons/ri';
 

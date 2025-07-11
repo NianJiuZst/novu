@@ -4,7 +4,7 @@ import { Input, InputRoot, InputWrapper } from '@/components/primitives/input';
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 import { useParseVariables } from '@/hooks/use-parse-variables';
 import { capitalize } from '@/utils/string';
-import { type WidgetProps } from '@rjsf/utils';
+import type { WidgetProps } from '@rjsf/utils';
 import { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { getFieldName } from './template-utils';
@@ -38,8 +38,8 @@ export function TextWidget(props: WidgetProps) {
                   }
 
                   const val = Number(e.target.value);
-                  const isNaN = Number.isNaN(val);
-                  const finalValue = isNaN ? '' : val;
+                  const isNotANumber = Number.isNaN(val);
+                  const finalValue = isNotANumber ? '' : val;
                   field.onChange(finalValue);
                 }}
                 required={required}

@@ -1,6 +1,6 @@
 import { Badge } from '@/components/primitives/badge';
 import { Card } from '@/components/primitives/card';
-import { ApiServiceLevelEnum } from '@novu/shared';
+import type { ApiServiceLevelEnum } from '@novu/shared';
 
 export interface HighlightsRowParams {
   highlightsArray: Partial<PlanHighlights>;
@@ -12,7 +12,7 @@ export interface PlanHighLight {
 }
 
 export type PlanHighlights = {
-  [key in ApiServiceLevelEnum]: PlanHighLight[];
+  [Key in ApiServiceLevelEnum]: PlanHighLight[];
 };
 
 function PlanHighlights({ highlights }: { highlights: PlanHighLight[] }) {

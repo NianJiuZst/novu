@@ -1,4 +1,4 @@
-import { ClerkClient } from '@clerk/backend';
+import type { ClerkClient } from '@clerk/backend';
 import { CommunityUserRepository } from '@novu/dal';
 import { EEUserRepository } from '@novu/ee-auth';
 import { NewDashboardOptInStatusEnum } from '@novu/shared';

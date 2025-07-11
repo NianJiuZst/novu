@@ -1,4 +1,4 @@
-import {
+import type {
   CreateSubscriberRequestDto,
   GetSubscriberPreferencesDto,
   PatchSubscriberPreferencesDto,
@@ -8,7 +8,7 @@ import {
 } from '@novu/api/models/components';
 import type { DirectionEnum, IEnvironment, ISubscriberResponseDto } from '@novu/shared';
 import { delV2, getV2, patchV2, postV2 } from './api.client';
-import { ListTopicSubscriptionsResponse } from './topics';
+import type { ListTopicSubscriptionsResponse } from './topics';
 
 export type ListSubscribersResponse = {
   data: Array<ISubscriberResponseDto>;

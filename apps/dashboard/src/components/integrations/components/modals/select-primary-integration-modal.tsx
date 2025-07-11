@@ -1,6 +1,6 @@
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/primitives/select';
-import { IIntegration } from '@novu/shared';
+import type { IIntegration } from '@novu/shared';
 import { useState } from 'react';
 
 export type SelectPrimaryIntegrationModalProps = {

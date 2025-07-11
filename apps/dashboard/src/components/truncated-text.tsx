@@ -1,6 +1,6 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';
 import { cn } from '@/utils/ui';
-import { Slot, SlotProps } from '@radix-ui/react-slot';
+import { Slot, type SlotProps } from '@radix-ui/react-slot';
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 type TruncatedTextProps = SlotProps & { asChild?: boolean };

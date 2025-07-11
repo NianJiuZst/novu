@@ -18,7 +18,7 @@ import { SubscriberDrawerButton } from '../subscribers/subscriber-drawer';
 import { useRemoveTopicSubscriber } from './hooks/use-topic-subscribers';
 import { TimeDisplayHoverCard } from '../time-display-hover-card';
 import { format } from 'date-fns';
-import { TopicSubscription } from '@/api/topics';
+import type { TopicSubscription } from '@/api/topics';
 import { ConfirmationModal } from '../confirmation-modal';
 import TruncatedText from '../truncated-text';
 

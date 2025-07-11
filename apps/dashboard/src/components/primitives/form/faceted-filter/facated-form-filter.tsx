@@ -8,7 +8,7 @@ import { MultiFilterContent } from './components/multi-filter-content';
 import { SingleFilterContent } from './components/single-filter-content';
 import { TextFilterContent } from './components/text-filter-content';
 import { STYLES } from './styles';
-import { FacetedFilterProps } from './types';
+import type { FacetedFilterProps } from './types';
 
 export function FacetedFormFilter({
   title,

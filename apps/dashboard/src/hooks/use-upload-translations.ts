@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEnvironment } from '@/context/environment/hooks';
 import { uploadTranslations } from '@/api/translations';
 import { QueryKeys } from '@/utils/query-keys';
-import { OmitEnvironmentFromParameters } from '@/utils/types';
+import type { OmitEnvironmentFromParameters } from '@/utils/types';
 import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner-helpers';
 
 type UploadTranslationsParameters = OmitEnvironmentFromParameters<typeof uploadTranslations>;

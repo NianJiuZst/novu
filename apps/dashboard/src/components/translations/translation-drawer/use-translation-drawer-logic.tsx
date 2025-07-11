@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { TranslationGroup } from '@/api/translations';
+import type { TranslationGroup } from '@/api/translations';
 import { useFetchTranslation } from '@/hooks/use-fetch-translation';
 import { useSaveTranslation } from '@/hooks/use-save-translation';
 import { useDeleteTranslation } from '@/hooks/use-delete-translation';

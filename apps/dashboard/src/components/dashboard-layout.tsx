@@ -1,6 +1,4 @@
-import { ReactNode } from 'react';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import type { ReactNode } from 'react';
 import { SideNavigation } from '@/components/side-navigation/side-navigation';
 import { HeaderNavigation } from '@/components/header-navigation/header-navigation';
 

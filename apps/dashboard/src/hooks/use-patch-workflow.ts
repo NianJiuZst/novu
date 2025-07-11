@@ -1,8 +1,8 @@
-import { OmitEnvironmentFromParameters } from '@/utils/types';
+import type { OmitEnvironmentFromParameters } from '@/utils/types';
 import { patchWorkflow } from '@/api/workflows';
 import { QueryKeys } from '@/utils/query-keys';
 import { useEnvironment } from '@/context/environment/hooks';
-import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
+import { useMutation, type UseMutationOptions, useQueryClient } from '@tanstack/react-query';
 import type { WorkflowResponseDto } from '@novu/shared';
 
 type PatchWorkflowParameters = OmitEnvironmentFromParameters<typeof patchWorkflow>;

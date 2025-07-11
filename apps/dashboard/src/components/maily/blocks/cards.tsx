@@ -2,9 +2,9 @@ import { CardBlocks } from '@/components/icons/cards-blocks';
 import { HorizontalCardWithImage } from '@/components/icons/horizontal-card-with-image';
 import { InformationCardWithLogo } from '@/components/icons/information-card-with-logo';
 import { ParagraphWithImage } from '@/components/icons/paragraph-with-image';
-import { useTelemetry } from '@/hooks/use-telemetry';
+import type { useTelemetry } from '@/hooks/use-telemetry';
 import { TelemetryEvent } from '@/utils/telemetry';
-import { BlockItem } from '@maily-to/core/blocks';
+import type { BlockItem } from '@maily-to/core/blocks';
 import { BlockCustomPreview } from './block-custom-preview';
 import { Badge } from '@/components/primitives/badge';
 

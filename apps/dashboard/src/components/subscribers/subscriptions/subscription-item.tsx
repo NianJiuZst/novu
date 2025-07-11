@@ -1,4 +1,4 @@
-import { TopicSubscription } from '@/api/topics';
+import type { TopicSubscription } from '@/api/topics';
 import { TopicDrawerButton } from '@/components/topics/topic-drawer';
 import TruncatedText from '@/components/truncated-text';
 import { cn } from '@/utils/ui';

@@ -1,5 +1,5 @@
 import { getFilters } from './constants';
-import { FilterWithParam } from './types';
+import type { FilterWithParam } from './types';
 
 function escapeString(str: string): string {
   return str.replace(/'/g, "\\'");

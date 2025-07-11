@@ -1,4 +1,4 @@
-import { ChannelTypeEnum, ChatRenderOutput, GeneratePreviewResponseDto } from '@novu/shared';
+import { ChannelTypeEnum, type ChatRenderOutput, type GeneratePreviewResponseDto } from '@novu/shared';
 import { RiSendPlane2Fill } from 'react-icons/ri';
 
 import { LogoCircle } from '@/components/icons';

@@ -1,9 +1,9 @@
 import { getIdFromSlug, WORKFLOW_DIVIDER } from '@/utils/id-utils';
-import { OmitEnvironmentFromParameters } from '@/utils/types';
+import type { OmitEnvironmentFromParameters } from '@/utils/types';
 import { QueryKeys } from '@/utils/query-keys';
 import { updateWorkflow } from '@/api/workflows';
 import { useEnvironment } from '@/context/environment/hooks';
-import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
+import { useMutation, type UseMutationOptions, useQueryClient } from '@tanstack/react-query';
 import type { WorkflowResponseDto } from '@novu/shared';
 
 type UpdateWorkflowParameters = OmitEnvironmentFromParameters<typeof updateWorkflow>;

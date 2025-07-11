@@ -7,7 +7,7 @@ import { flattenIssues, updateStepInWorkflow } from '@/components/workflow-edito
 import { SaveFormContext } from '@/components/workflow-editor/steps/save-form-context';
 import { useDataRef } from '@/hooks/use-data-ref';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
-import { StepUpdateDto } from '@novu/shared';
+import type { StepUpdateDto } from '@novu/shared';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 

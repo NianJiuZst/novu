@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { CodeBlock, Language } from '../primitives/code-block';
+import { CodeBlock, type Language } from '../primitives/code-block';
 import { InlineToast } from '../primitives/inline-toast';
-import { Framework, InstallationStep } from './framework-guides.instructions';
+import type { Framework, InstallationStep } from './framework-guides.instructions';
 import { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '../primitives/tabs';
 import { fadeIn } from '@/utils/animation';

@@ -1,5 +1,5 @@
 import { Info } from 'lucide-react';
-import { Controller, UseFormReturn } from 'react-hook-form';
+import { Controller, type UseFormReturn } from 'react-hook-form';
 import { RiLayoutLine } from 'react-icons/ri';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/primitives/accordion';
 import { ColorPicker } from '@/components/primitives/color-picker';

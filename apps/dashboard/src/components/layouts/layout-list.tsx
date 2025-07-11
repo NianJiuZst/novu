@@ -1,7 +1,7 @@
-import { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 import { RiAddCircleLine } from 'react-icons/ri';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { DirectionEnum, PermissionsEnum } from '@novu/shared';
+import { type DirectionEnum, PermissionsEnum } from '@novu/shared';
 
 import { cn } from '@/utils/ui';
 import {
@@ -14,9 +14,9 @@ import {
   TableRow,
 } from '@/components/primitives/table';
 import {
-  LayoutsFilter,
-  LayoutsSortableColumn,
-  LayoutsUrlState,
+  type LayoutsFilter,
+  type LayoutsSortableColumn,
+  type LayoutsUrlState,
   useLayoutsUrlState,
 } from '@/components/layouts/hooks/use-layouts-url-state';
 import { LayoutListBlank } from '@/components/layouts/layout-list-blank';

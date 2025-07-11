@@ -3,12 +3,12 @@ import {
   Background,
   BackgroundVariant,
   BaseEdge,
-  EdgeProps,
-  Node,
+  type EdgeProps,
+  type Node,
   ReactFlow,
   ReactFlowProvider,
   useReactFlow,
-  ViewportHelperFunctionOptions,
+  type ViewportHelperFunctionOptions,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
@@ -19,11 +19,11 @@ import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 import { useEnvironment } from '@/context/environment/hooks';
 import { StepTypeEnum } from '@/utils/enums';
 import { buildRoute, ROUTES } from '@/utils/routes';
-import { Step } from '@/utils/types';
+import type { Step } from '@/utils/types';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NODE_HEIGHT, NODE_WIDTH } from './base-node';
-import { AddNodeEdge, AddNodeEdgeType } from './edges';
+import { AddNodeEdge, type AddNodeEdgeType } from './edges';
 import {
   AddNode,
   ChatNode,
@@ -32,7 +32,7 @@ import {
   DigestNode,
   EmailNode,
   InAppNode,
-  NodeData,
+  type NodeData,
   PushNode,
   SmsNode,
   TriggerNode,

@@ -1,5 +1,5 @@
 import { useTriggerWorkflow } from '@/hooks/use-trigger-workflow';
-import { IEnvironment } from '@novu/shared';
+import type { IEnvironment } from '@novu/shared';
 import { RiCheckboxCircleFill, RiLoader3Line, RiNotification2Fill } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import { ONBOARDING_DEMO_WORKFLOW_ID } from '../../config';

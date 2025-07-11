@@ -1,6 +1,6 @@
 import { cn } from '@/utils/ui';
 import { ChevronDown } from 'lucide-react';
-import { ReactNode, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 
 interface ActivityDetailCardProps {
   title: ReactNode;

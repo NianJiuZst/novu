@@ -1,4 +1,4 @@
-import { isOptionGroupArray, OptionList, BaseOption } from 'react-querybuilder';
+import { isOptionGroupArray, type OptionList, type BaseOption } from 'react-querybuilder';
 
 import { SelectGroup, SelectItem, SelectLabel } from '@/components/primitives/select';
 import { capitalize } from '@/utils/string';

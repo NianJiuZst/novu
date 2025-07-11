@@ -22,7 +22,7 @@ import {
 import { ExternalLink } from '@/components/shared/external-link';
 import { useUpdateEnvironment } from '@/hooks/use-environments';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { IEnvironment } from '@novu/shared';
+import type { IEnvironment } from '@novu/shared';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiArrowRightSLine } from 'react-icons/ri';

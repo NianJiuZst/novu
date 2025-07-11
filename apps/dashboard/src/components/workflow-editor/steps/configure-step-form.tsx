@@ -1,19 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   FeatureFlagsKeysEnum,
-  IEnvironment,
-  StepResponseDto,
+  type IEnvironment,
+  type StepResponseDto,
   StepTypeEnum,
-  StepUpdateDto,
+  type StepUpdateDto,
   ResourceOriginEnum,
-  WorkflowResponseDto,
+  type WorkflowResponseDto,
 } from '@novu/shared';
 import { AnimatePresence, motion } from 'motion/react';
-import { HTMLAttributes, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { type HTMLAttributes, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiArrowLeftSLine, RiArrowRightSLine, RiCloseFill, RiDeleteBin2Line, RiEdit2Line } from 'react-icons/ri';
 import { Link, useNavigate } from 'react-router-dom';
-import { z } from 'zod';
+import type { z } from 'zod';
 
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { PageMeta } from '@/components/page-meta';
@@ -51,7 +51,7 @@ import { SdkBanner } from '@/components/workflow-editor/steps/sdk-banner';
 import { SkipConditionsButton } from '@/components/workflow-editor/steps/skip-conditions-button';
 import { ConfigureSmsStepPreview } from '@/components/workflow-editor/steps/sms/configure-sms-step-preview';
 
-import { UpdateWorkflowFn } from '@/components/workflow-editor/workflow-provider';
+import type { UpdateWorkflowFn } from '@/components/workflow-editor/workflow-provider';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { INLINE_CONFIGURABLE_STEP_TYPES, STEP_TYPE_LABELS, TEMPLATE_CONFIGURABLE_STEP_TYPES } from '@/utils/constants';
 import { buildRoute, ROUTES } from '@/utils/routes';

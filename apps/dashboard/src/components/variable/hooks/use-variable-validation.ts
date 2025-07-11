@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { JSONSchema7 } from '@/components/schema-editor/json-schema';
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import type { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
 
 export const extractVariableKey = (variableName: string): string => {
   return variableName?.replace(/^(current\.)?payload\./, '') || '';

@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-namespace
+// biome-ignore lint/style/noNamespace: Clerk global namespace declaration needed for type safety
 declare namespace Clerk {
   export const session: {
     getToken: () => Promise<string | null>;

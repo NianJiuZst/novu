@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect } from 'react';
+import { type PropsWithChildren, useEffect } from 'react';
 import { NewDashboardOptInStatusEnum } from '@novu/shared';
 import { useNewDashboardOptIn } from '@/hooks/use-new-dashboard-opt-in';
 import { useUser } from '@clerk/clerk-react';

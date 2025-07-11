@@ -4,10 +4,10 @@ import { Form, FormField, FormItem, FormRoot } from '@/components/primitives/for
 import { QueryKeys } from '@/utils/query-keys';
 import { cn } from '@/utils/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { HTMLAttributes, useCallback, useEffect, useMemo, useRef } from 'react';
+import { type HTMLAttributes, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiLoader4Line } from 'react-icons/ri';
-import { TopicsFilter } from './hooks/use-topics-url-state';
+import type { TopicsFilter } from './hooks/use-topics-url-state';
 
 type FilterFormValues = {
   key: string;

@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo } from 'react';
-import { Path, useFieldArray, useWatch, type Control } from 'react-hook-form';
+import { type Path, useFieldArray, useWatch, type Control } from 'react-hook-form';
 import { RiAddLine } from 'react-icons/ri';
 import { v4 as uuidv4 } from 'uuid';
 

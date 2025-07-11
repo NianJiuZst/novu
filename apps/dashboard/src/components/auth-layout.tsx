@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Toaster } from './primitives/sonner';
 
 export const AuthLayout = ({ children }: { children: ReactNode }) => {

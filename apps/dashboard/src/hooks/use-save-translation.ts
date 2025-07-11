@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEnvironment } from '@/context/environment/hooks';
 import { saveTranslation } from '@/api/translations';
 import { QueryKeys } from '@/utils/query-keys';
-import { OmitEnvironmentFromParameters } from '@/utils/types';
+import type { OmitEnvironmentFromParameters } from '@/utils/types';
 import { showSuccessToast, showErrorToast } from '@/components/primitives/sonner-helpers';
 
 type SaveTranslationParameters = OmitEnvironmentFromParameters<typeof saveTranslation>;

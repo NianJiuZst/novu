@@ -1,4 +1,4 @@
-import { HTMLAttributes, ReactNode } from 'react';
+import type { HTMLAttributes, ReactNode } from 'react';
 import { UserProfile } from '@/components/user-profile';
 import { InboxButton } from '@/components/inbox-button';
 import { CustomerSupportButton } from './customer-support-button';

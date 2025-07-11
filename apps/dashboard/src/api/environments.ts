@@ -1,4 +1,4 @@
-import { IApiKey, IEnvironment, ITagsResponse } from '@novu/shared';
+import type { IApiKey, IEnvironment, ITagsResponse } from '@novu/shared';
 import { del, get, getV2, post, put } from './api.client';
 
 export async function getEnvironments() {

@@ -1,4 +1,4 @@
-import { CompletionContext } from '@codemirror/autocomplete';
+import type { CompletionContext } from '@codemirror/autocomplete';
 import { TRANSLATION_KEY_SINGLE_REGEX } from '@novu/shared';
 
 export function isTypingTranslation(content: string, pos: number): boolean {

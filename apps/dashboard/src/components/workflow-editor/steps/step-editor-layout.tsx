@@ -1,4 +1,4 @@
-import { WorkflowResponseDto, StepResponseDto, PermissionsEnum } from '@novu/shared';
+import { type WorkflowResponseDto, type StepResponseDto, PermissionsEnum } from '@novu/shared';
 import { cn } from '@/utils/ui';
 import { RiCodeBlock, RiEdit2Line, RiEyeLine, RiPlayCircleLine } from 'react-icons/ri';
 import { useState } from 'react';

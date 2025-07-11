@@ -1,6 +1,6 @@
 import { Separator } from '@/components/primitives/separator';
 import { cn } from '@/utils/ui';
-import * as React from 'react';
+import type * as React from 'react';
 
 interface TextSeparatorProps extends React.HTMLAttributes<HTMLDivElement> {
   text: string;

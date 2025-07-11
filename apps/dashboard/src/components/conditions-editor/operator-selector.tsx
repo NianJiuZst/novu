@@ -1,5 +1,5 @@
 import React from 'react';
-import { OperatorSelectorProps } from 'react-querybuilder';
+import type { OperatorSelectorProps } from 'react-querybuilder';
 
 import { toSelectOptions } from '@/components/conditions-editor/select-option-utils';
 import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/primitives/select';

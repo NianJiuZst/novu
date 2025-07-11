@@ -2,7 +2,7 @@ import { StepTypeEnum } from '@novu/shared';
 import React from 'react';
 import { RiAddFill } from 'react-icons/ri';
 import { Card, CardContent } from '../primitives/card';
-import { StepType } from '../step-preview-hover-card';
+import type { StepType } from '../step-preview-hover-card';
 import { WorkflowStep } from '../workflow-step';
 
 type WorkflowCardProps = {

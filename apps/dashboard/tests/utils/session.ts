@@ -1,8 +1,8 @@
-import { ClerkClient, createClerkClient } from '@clerk/backend';
+import { type ClerkClient, createClerkClient } from '@clerk/backend';
 import { clerk, clerkSetup } from '@clerk/testing/playwright';
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { faker } from '@faker-js/faker';
-import { DalService, EnvironmentEntity, OrganizationEntity, UserEntity } from '@novu/dal';
+import { DalService, type EnvironmentEntity, type OrganizationEntity, type UserEntity } from '@novu/dal';
 
 import { UserService } from './user-service';
 import { OrganizationService } from './organization-service';

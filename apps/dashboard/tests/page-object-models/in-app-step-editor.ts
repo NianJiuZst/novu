@@ -1,4 +1,4 @@
-import { type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import os from 'node:os';
 
 const isMac = os.platform() === 'darwin';

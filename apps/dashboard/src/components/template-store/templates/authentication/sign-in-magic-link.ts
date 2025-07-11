@@ -1,5 +1,5 @@
 import { StepTypeEnum, WorkflowCreationSourceEnum } from '@novu/shared';
-import { WorkflowTemplate } from '../types';
+import type { WorkflowTemplate } from '../types';
 
 export const signInMagicLinkTemplate: WorkflowTemplate = {
   id: 'magic-link-sign-in',

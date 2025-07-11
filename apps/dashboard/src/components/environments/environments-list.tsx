@@ -1,7 +1,7 @@
 import { useEnvironment } from '@/context/environment/hooks';
 import { useDeleteEnvironment } from '@/hooks/use-environments';
 import { cn } from '@/utils/ui';
-import { EnvironmentEnum, IEnvironment, PermissionsEnum, PROTECTED_ENVIRONMENTS } from '@novu/shared';
+import { type EnvironmentEnum, type IEnvironment, PermissionsEnum, PROTECTED_ENVIRONMENTS } from '@novu/shared';
 import { useState } from 'react';
 import { RiDeleteBin2Line, RiMore2Fill } from 'react-icons/ri';
 import { DeleteEnvironmentDialog } from './delete-environment-dialog';

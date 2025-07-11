@@ -2,7 +2,7 @@ import { Sms } from '@/components/icons';
 import { InlineToast } from '@/components/primitives/inline-toast';
 import { SmsPreview } from '@/components/workflow-editor/steps/sms/sms-preview';
 import { TabsSection } from '@/components/workflow-editor/steps/tabs-section';
-import { GeneratePreviewResponseDto, type WorkflowResponseDto } from '@novu/shared';
+import type { GeneratePreviewResponseDto, WorkflowResponseDto } from '@novu/shared';
 import { ConfigurePreviewAccordion } from '../shared/configure-preview-accordion';
 
 type SmsEditorPreviewProps = {

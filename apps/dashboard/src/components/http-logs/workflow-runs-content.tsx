@@ -9,10 +9,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/primitive
 import { useFetchActivities } from '@/hooks/use-fetch-activities';
 import { useEnvironment } from '@/context/environment/hooks';
 import { buildRoute, ROUTES } from '@/utils/routes';
-import { RequestLog } from '../../types/logs';
+import type { RequestLog } from '../../types/logs';
 import { WorkflowRunsFilters } from './workflow-runs-filters';
 import { useWorkflowRunsUrlState } from './hooks/use-workflow-runs-url-state';
-import { type ActivityFilters } from '@/api/activity';
+import type { ActivityFilters } from '@/api/activity';
 import { formatDateSimple } from '../../utils/format-date';
 import { ActivityTableRow } from '@/components/activity/components/activity-table-row';
 import { WorkflowRunActivityDrawer } from './workflow-run-activity-drawer';

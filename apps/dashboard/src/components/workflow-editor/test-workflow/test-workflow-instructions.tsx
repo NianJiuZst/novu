@@ -24,11 +24,11 @@ import type { WorkflowResponseDto } from '@novu/shared';
 import { PermissionsEnum } from '@novu/shared';
 import { motion } from 'motion/react';
 import { useEffect } from 'react';
-import { CodeBlock, Language } from '../../primitives/code-block';
+import { CodeBlock, type Language } from '../../primitives/code-block';
 import { InlineToast } from '../../primitives/inline-toast';
 import { Separator } from '../../primitives/separator';
 import { ExternalLink } from '../../shared/external-link';
-import { SnippetLanguage } from './types';
+import type { SnippetLanguage } from './types';
 
 interface TestWorkflowInstructionsProps {
   isOpen: boolean;

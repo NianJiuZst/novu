@@ -3,10 +3,10 @@
 import { Slot, Slottable } from '@radix-ui/react-slot';
 import * as React from 'react';
 
-import { PolymorphicComponentProps } from '@/utils/polymorphic';
+import type { PolymorphicComponentProps } from '@/utils/polymorphic';
 import { recursiveCloneChildren } from '@/utils/recursive-clone-children';
 import { tv, type VariantProps } from '@/utils/tv';
-import { IconType } from 'react-icons';
+import type { IconType } from 'react-icons';
 
 const LINK_BUTTON_ROOT_NAME = 'LinkButtonRoot';
 const LINK_BUTTON_ICON_NAME = 'LinkButtonIcon';

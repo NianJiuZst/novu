@@ -1,4 +1,4 @@
-import { ReactNode, useState, useCallback, useMemo, useEffect, useId, useRef } from 'react';
+import { type ReactNode, useState, useCallback, useMemo, useEffect, useId, useRef } from 'react';
 import {
   RiDeleteBin2Line,
   RiQuestionLine,
@@ -9,7 +9,7 @@ import {
 } from 'react-icons/ri';
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/primitives/popover';
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import type { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
 import {
   Command,
   CommandEmpty,

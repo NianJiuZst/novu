@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RiLockStarLine, RiExternalLinkLine } from 'react-icons/ri';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';

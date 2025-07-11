@@ -22,10 +22,10 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../
 import { Input } from '../../primitives/input';
 import { Panel, PanelContent, PanelHeader } from '../../primitives/panel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../primitives/tabs';
-import { TestWorkflowFormType } from '../schema';
+import type { TestWorkflowFormType } from '../schema';
 import { SnippetEditor } from './snippet-editor';
 import { TestWorkflowInstructions } from './test-workflow-instructions';
-import { SnippetLanguage } from './types';
+import type { SnippetLanguage } from './types';
 import { useIsPayloadSchemaEnabled } from '@/hooks/use-is-payload-schema-enabled';
 import { EditableJsonViewer } from '../steps/shared/editable-json-viewer/editable-json-viewer';
 

@@ -1,7 +1,13 @@
 import { Badge } from '@/components/primitives/badge';
 import { Button } from '@/components/primitives/button';
 import { cn } from '@/utils/ui';
-import { IActivityJob, IDelayRegularMetadata, IDigestRegularMetadata, JobStatusEnum, StepTypeEnum } from '@novu/shared';
+import {
+  type IActivityJob,
+  type IDelayRegularMetadata,
+  type IDigestRegularMetadata,
+  JobStatusEnum,
+  StepTypeEnum,
+} from '@novu/shared';
 import { format } from 'date-fns';
 import { ChevronDown, Info, Route } from 'lucide-react';
 import { useState } from 'react';

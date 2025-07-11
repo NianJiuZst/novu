@@ -2,7 +2,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/primitives/input';
 import { Separator } from '@/components/primitives/separator';
 import { Switch } from '@/components/primitives/switch';
-import { Control } from 'react-hook-form';
+import type { Control } from 'react-hook-form';
 
 type IntegrationFormData = {
   name: string;

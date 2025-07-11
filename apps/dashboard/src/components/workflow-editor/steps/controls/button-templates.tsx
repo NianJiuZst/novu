@@ -1,4 +1,4 @@
-import { Registry, RJSFSchema } from '@rjsf/utils';
+import type { Registry, RJSFSchema } from '@rjsf/utils';
 import { RiAddLine, RiSubtractFill } from 'react-icons/ri';
 import { CompactButton } from '../../../primitives/button-compact';
 

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
-import { CreateLayoutDto, LayoutResponseDto } from '@novu/shared';
+import { useMutation, type UseMutationOptions, useQueryClient } from '@tanstack/react-query';
+import type { CreateLayoutDto, LayoutResponseDto } from '@novu/shared';
 
 import { createLayout } from '@/api/layouts';
 import { useEnvironment } from '@/context/environment/hooks';

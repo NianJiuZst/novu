@@ -1,4 +1,5 @@
-import React, { useCallback, useId } from 'react';
+import type React from 'react';
+import { useCallback, useId } from 'react';
 import { RiDeleteBin2Line, RiListView, RiQuestionLine, RiErrorWarningLine } from 'react-icons/ri';
 
 import { Popover, PopoverContent, PopoverAnchor } from '@/components/primitives/popover';
@@ -11,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives
 import { TranslateVariableIcon } from '@/components/icons/translate-variable';
 import { EscapeKeyManagerPriority } from '@/context/escape-key-manager/priority';
 import { useEscapeKeyManager } from '@/context/escape-key-manager/hooks';
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import type { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
 import { useFetchTranslationKeys } from '@/hooks/use-fetch-translation-keys';
 import { useUpdateTranslationValue } from '@/hooks/use-update-translation-value';
 import { buildRoute, ROUTES } from '@/utils/routes';

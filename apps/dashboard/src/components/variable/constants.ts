@@ -1,4 +1,4 @@
-import { Filters } from './types';
+import type { Filters } from './types';
 
 const FILTERS: Filters[] = [
   // Text Transformations

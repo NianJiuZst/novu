@@ -1,6 +1,6 @@
-import { ReactNode, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { RiErrorWarningFill } from 'react-icons/ri';
-import { cva, VariantProps } from 'class-variance-authority';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
 
 import { useFeatureFlag } from '@/hooks/use-feature-flag';

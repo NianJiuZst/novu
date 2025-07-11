@@ -1,7 +1,7 @@
-import { ActivityFilters } from '@/api/activity';
+import type { ActivityFilters } from '@/api/activity';
 import { DEFAULT_DATE_RANGE } from '@/components/activity/constants';
-import { ActivityFiltersData, ActivityUrlState } from '@/types/activity';
-import { ChannelTypeEnum } from '@novu/shared';
+import type { ActivityFiltersData, ActivityUrlState } from '@/types/activity';
+import type { ChannelTypeEnum } from '@novu/shared';
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 

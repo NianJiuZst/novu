@@ -1,5 +1,5 @@
 import { ApiServiceLevelEnum, FeatureNameEnum, getFeatureForTierAsNumber, type GetSubscriptionDto } from '@novu/shared';
-import { type OrganizationResource } from '@clerk/types';
+import type { OrganizationResource } from '@clerk/types';
 import { IS_SELF_HOSTED } from '../config';
 
 export const DATE_RANGE_OPTIONS = [

@@ -2,9 +2,9 @@ import { CursorPagination } from '@/components/cursor-pagination';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/primitives/table';
 import { useSubscribersNavigate } from '@/components/subscribers/hooks/use-subscribers-navigate';
 import {
-  SubscribersFilter,
-  SubscribersSortableColumn,
-  SubscribersUrlState,
+  type SubscribersFilter,
+  type SubscribersSortableColumn,
+  type SubscribersUrlState,
   useSubscribersUrlState,
 } from '@/components/subscribers/hooks/use-subscribers-url-state';
 import { SubscriberListBlank } from '@/components/subscribers/subscriber-list-blank';
@@ -12,8 +12,8 @@ import { SubscriberRow, SubscriberRowSkeleton } from '@/components/subscribers/s
 import { SubscribersFilters } from '@/components/subscribers/subscribers-filters';
 import { useFetchSubscribers } from '@/hooks/use-fetch-subscribers';
 import { cn } from '@/utils/ui';
-import { DirectionEnum, PermissionsEnum } from '@novu/shared';
-import { HTMLAttributes, useEffect, useState } from 'react';
+import { type DirectionEnum, PermissionsEnum } from '@novu/shared';
+import { type HTMLAttributes, useEffect, useState } from 'react';
 import { RiUserSharedLine } from 'react-icons/ri';
 import { PermissionButton } from '@/components/primitives/permission-button';
 import { ListNoResults } from '../list-no-results';

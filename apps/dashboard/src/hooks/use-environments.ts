@@ -1,6 +1,6 @@
 import { createEnvironment, deleteEnvironment, updateEnvironment } from '@/api/environments';
 import { QueryKeys } from '@/utils/query-keys';
-import { IEnvironment } from '@novu/shared';
+import type { IEnvironment } from '@novu/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export function useCreateEnvironment() {

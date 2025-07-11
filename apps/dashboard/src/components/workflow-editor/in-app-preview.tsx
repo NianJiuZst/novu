@@ -1,11 +1,11 @@
 import { parseMarkdownIntoTokens } from '@novu/js/internal';
-import { HTMLAttributes, ReactNode, useMemo } from 'react';
+import { type HTMLAttributes, type ReactNode, useMemo } from 'react';
 
 import { InboxArrowDown } from '@/components/icons/inbox-arrow-down';
 import { InboxBell } from '@/components/icons/inbox-bell';
 import { InboxEllipsis } from '@/components/icons/inbox-ellipsis';
 import { InboxSettings } from '@/components/icons/inbox-settings';
-import { Button, ButtonProps } from '@/components/primitives/button';
+import { Button, type ButtonProps } from '@/components/primitives/button';
 import { cn } from '@/utils/ui';
 import { Skeleton } from '../primitives/skeleton';
 import { inboxButtonVariants } from '@/utils/inbox';

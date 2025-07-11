@@ -1,9 +1,9 @@
 import { Loader } from 'lucide-react';
 import { Card, CardContent } from '../primitives/card';
 import { useState, useEffect } from 'react';
-import { IEnvironment } from '@novu/shared';
+import type { IEnvironment } from '@novu/shared';
 import { motion, AnimatePresence } from 'motion/react';
-import { Framework, getFrameworks } from './framework-guides.instructions';
+import { type Framework, getFrameworks } from './framework-guides.instructions';
 import { FrameworkInstructions, FrameworkCliInstructions } from './framework-guides';
 import { TelemetryEvent } from '../../utils/telemetry';
 import { useTelemetry } from '../../hooks/use-telemetry';

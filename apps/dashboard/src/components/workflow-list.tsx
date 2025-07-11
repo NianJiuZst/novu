@@ -7,12 +7,12 @@ import {
   TableFooter,
   TableHead,
   TableHeader,
-  TableHeadSortDirection,
+  type TableHeadSortDirection,
   TableRow,
 } from '@/components/primitives/table';
 import { WorkflowListEmpty } from '@/components/workflow-list-empty';
 import { WorkflowRow } from '@/components/workflow-row';
-import { DirectionEnum, ListWorkflowResponse } from '@novu/shared';
+import { DirectionEnum, type ListWorkflowResponse } from '@novu/shared';
 import { RiMore2Fill } from 'react-icons/ri';
 import { createSearchParams, useLocation, useSearchParams } from 'react-router-dom';
 import { ServerErrorPage } from '@/pages/server-error-page';

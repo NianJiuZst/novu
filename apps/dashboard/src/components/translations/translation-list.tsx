@@ -1,4 +1,4 @@
-import { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 
 import { cn } from '@/utils/ui';
 import { DefaultPagination } from '@/components/default-pagination';
@@ -11,10 +11,10 @@ import {
   TableFooter,
   TableCell,
 } from '@/components/primitives/table';
-import { TranslationGroup } from '@/api/translations';
+import type { TranslationGroup } from '@/api/translations';
 import { DEFAULT_TRANSLATIONS_LIMIT } from './constants';
 
-import { TranslationsFilter, TranslationsUrlState } from './hooks/use-translations-url-state';
+import type { TranslationsFilter, TranslationsUrlState } from './hooks/use-translations-url-state';
 import { useTranslationListLogic } from './hooks/use-translation-list-logic';
 import { useTranslationDrawerState } from './hooks/use-translation-drawer-state';
 import { useDeleteTranslationModal } from './hooks/use-delete-translation-modal';

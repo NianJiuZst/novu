@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from 'react';
-import { type Field, QueryBuilder, RuleGroupType, Translations } from 'react-querybuilder';
+import { type Field, QueryBuilder, type RuleGroupType, type Translations } from 'react-querybuilder';
 import 'react-querybuilder/dist/query-builder.css';
 
 import { AddConditionAction } from '@/components/conditions-editor/add-condition-action';
@@ -10,11 +10,11 @@ import { FieldSelector } from '@/components/conditions-editor/field-selector';
 import { OperatorSelector } from '@/components/conditions-editor/operator-selector';
 import { RuleActions } from '@/components/conditions-editor/rule-actions';
 import { ValueEditor } from '@/components/conditions-editor/value-editor';
-import {
+import type {
   IsAllowedVariable,
   LiquidVariable,
   EnhancedLiquidVariable,
-  type FieldDataType,
+  FieldDataType,
 } from '@/utils/parseStepVariables';
 import { getOperatorsForFieldType } from '@/components/conditions-editor/field-type-operators';
 import {

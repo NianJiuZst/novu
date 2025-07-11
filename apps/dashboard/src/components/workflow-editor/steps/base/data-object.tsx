@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FieldError, FieldValues, useFormContext } from 'react-hook-form';
+import { type FieldError, type FieldValues, useFormContext } from 'react-hook-form';
 
 import { Button } from '@/components/primitives/button';
 import { Card, CardContent } from '@/components/primitives/card';

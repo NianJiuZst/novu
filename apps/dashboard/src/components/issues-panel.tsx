@@ -1,6 +1,6 @@
 import { RiErrorWarningLine, RiErrorWarningFill } from 'react-icons/ri';
 import { motion, AnimatePresence } from 'motion/react';
-import { Issue } from '@novu/shared';
+import type { Issue } from '@novu/shared';
 
 import { countIssues, getFirstErrorMessage, getAllStepIssues } from '@/components/workflow-editor/step-utils';
 import { cn } from '@/utils/ui';

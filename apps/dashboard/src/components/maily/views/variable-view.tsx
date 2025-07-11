@@ -1,15 +1,15 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { Editor as TiptapEditor } from '@tiptap/core';
-import { NodeViewProps } from '@tiptap/core';
+import type { NodeViewProps } from '@tiptap/core';
 import { NodeViewWrapper } from '@tiptap/react';
-import { JSONSchema7 } from 'json-schema';
+import type { JSONSchema7 } from 'json-schema';
 
 import { EditVariablePopover } from '@/components/variable/edit-variable-popover';
 import { validateEnhancedDigestFilters } from '@/components/variable/utils';
 import { VariablePill } from '@/components/variable/variable-pill';
 import { useVariableValidation } from '@/components/variable/hooks/use-variable-validation';
 import { parseVariable } from '@/utils/liquid';
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import type { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
 import { resolveRepeatBlockAlias } from '../repeat-block-aliases';
 import { DIGEST_VARIABLES_ENUM, getDynamicDigestVariable } from '@/components/variable/utils/digest-variables';
 import { VariableFrom } from '@/components/maily/types';
@@ -214,7 +214,7 @@ export function BubbleMenuVariablePill({
 
   const handleUpdate = useCallback(
     (newValue: string) => {
-      if (!editor || from !== VariableFrom.Button) return;
+      if (!editor || from !== VariableFrom.BUTTON) return;
 
       const newParsedData = parseVariableWithFallback(newValue, variableName || '', digestStepName);
       if (!newParsedData.fullLiquidExpression) return;
@@ -230,7 +230,7 @@ export function BubbleMenuVariablePill({
   );
 
   const handleDelete = useCallback(() => {
-    if (!editor || from !== VariableFrom.Button) return;
+    if (!editor || from !== VariableFrom.BUTTON) return;
 
     editor.commands.updateButtonAttributes({
       text: 'Button Text',
@@ -251,7 +251,7 @@ export function BubbleMenuVariablePill({
     openSchemaDrawer(parsedData.name);
   }, [editor, openSchemaDrawer, parsedData.name]);
 
-  const canEdit = from !== VariableFrom.Bubble;
+  const canEdit = from !== VariableFrom.BUBBLE;
 
   return (
     <>

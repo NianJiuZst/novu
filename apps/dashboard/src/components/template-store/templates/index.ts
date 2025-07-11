@@ -15,7 +15,7 @@ import { appointmentReminderTemplate } from './appointment-reminder';
 import { paymentConfirmedTemplate } from './payment-confirmed';
 import { usageLimitTemplate } from './usage-limit';
 
-import { WorkflowTemplate } from './types';
+import type { WorkflowTemplate } from './types';
 
 export function getTemplates(): WorkflowTemplate[] {
   return [

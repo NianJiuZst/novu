@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { cn } from '../../utils/ui';
 
 interface AnimatedPageProps {

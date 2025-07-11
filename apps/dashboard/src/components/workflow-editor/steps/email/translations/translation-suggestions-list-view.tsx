@@ -1,6 +1,6 @@
 import React, { useImperativeHandle, useMemo, useRef } from 'react';
-import { VariableList, VariableListRef } from '@/components/variable/variable-list';
-import { TranslationKey } from '@/types/translations';
+import { VariableList, type VariableListRef } from '@/components/variable/variable-list';
+import type { TranslationKey } from '@/types/translations';
 import { NewTranslationKeyPreview } from './new-translation-key-preview';
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { useParams } from 'react-router-dom';

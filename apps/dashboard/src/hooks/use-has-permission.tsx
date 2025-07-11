@@ -6,10 +6,10 @@ import {
   ApiServiceLevelEnum,
   FeatureNameEnum,
   getFeatureForTierAsBoolean,
-  GetSubscriptionDto,
+  type GetSubscriptionDto,
 } from '@novu/shared';
 import { useFetchSubscription } from '@/hooks/use-fetch-subscription';
-import { CheckAuthorizationWithCustomPermissions } from '@clerk/types';
+import type { CheckAuthorizationWithCustomPermissions } from '@clerk/types';
 import { useAuth } from '@clerk/clerk-react';
 
 function isRbacEnabled(isRbacFlagEnabled: boolean, subscription: GetSubscriptionDto | undefined): boolean {

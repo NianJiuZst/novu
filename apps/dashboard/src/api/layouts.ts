@@ -1,4 +1,10 @@
-import { ListLayoutsResponse, IEnvironment, CreateLayoutDto, LayoutResponseDto, UpdateLayoutDto } from '@novu/shared';
+import type {
+  ListLayoutsResponse,
+  IEnvironment,
+  CreateLayoutDto,
+  LayoutResponseDto,
+  UpdateLayoutDto,
+} from '@novu/shared';
 import { getV2, postV2, putV2, delV2 } from './api.client';
 
 export const getLayouts = async ({

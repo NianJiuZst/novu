@@ -1,5 +1,5 @@
-import { ActivityFilters } from '@/api/activity';
-import { ChannelTypeEnum } from '@novu/shared';
+import type { ActivityFilters } from '@/api/activity';
+import type { ChannelTypeEnum } from '@novu/shared';
 
 export type ActivityFiltersData = {
   dateRange: string;

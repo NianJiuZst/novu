@@ -1,5 +1,5 @@
 import { cn } from '@/utils/ui';
-import { NodeViewProps, NodeViewRendererProps } from '@tiptap/core';
+import type { NodeViewProps, NodeViewRendererProps } from '@tiptap/core';
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
 import { useEffect, useMemo, useRef } from 'react';
 import { RiCodeBlock } from 'react-icons/ri';

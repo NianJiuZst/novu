@@ -1,6 +1,6 @@
 import { createContext, useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { LayoutResponseDto, ResourceOriginEnum } from '@novu/shared';
+import { type LayoutResponseDto, ResourceOriginEnum } from '@novu/shared';
 
 import { useFetchLayout } from '@/hooks/use-fetch-layout';
 import { createContextHook } from '@/utils/context';

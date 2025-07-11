@@ -1,11 +1,11 @@
 import { useMemo, useEffect, useRef, useState } from 'react';
-import { CustomNodeDefinition, JsonEditor, UpdateFunctionProps } from 'json-edit-react';
+import { type CustomNodeDefinition, JsonEditor, type UpdateFunctionProps } from 'json-edit-react';
 import { cn } from '@/utils/ui';
 import JSON5 from 'json5';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
-import { EditableJsonViewerProps } from './types';
+import type { EditableJsonViewerProps } from './types';
 import { CUSTOM_THEME } from './constants';
 import { SingleClickEditableValue } from './single-click-editable-value';
 import { CustomTextEditor } from './custom-text-editor';

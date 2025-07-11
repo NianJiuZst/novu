@@ -1,8 +1,8 @@
-import { useMutation, UseMutationOptions, useQueryClient } from '@tanstack/react-query';
+import { useMutation, type UseMutationOptions, useQueryClient } from '@tanstack/react-query';
 import { useEnvironment } from '@/context/environment/hooks';
 import { deleteLayout } from '@/api/layouts';
 import { QueryKeys } from '@/utils/query-keys';
-import { OmitEnvironmentFromParameters } from '@/utils/types';
+import type { OmitEnvironmentFromParameters } from '@/utils/types';
 
 type DeleteLayoutParameters = OmitEnvironmentFromParameters<typeof deleteLayout>;
 

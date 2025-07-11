@@ -1,5 +1,5 @@
 import { addSubscribersToTopic, getTopicSubscriptions, removeSubscribersFromTopic } from '@/api/topics';
-import { NovuApiError } from '@/api/api.client';
+import type { NovuApiError } from '@/api/api.client';
 import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner-helpers';
 import { useEnvironment } from '@/context/environment/hooks';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

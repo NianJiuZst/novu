@@ -1,4 +1,4 @@
-import { StepEditorProps } from '@/components/workflow-editor/steps/configure-step-template-form';
+import type { StepEditorProps } from '@/components/workflow-editor/steps/configure-step-template-form';
 import { CustomStepControls } from '@/components/workflow-editor/steps/controls/custom-step-controls';
 import { SmsEditor } from '@/components/workflow-editor/steps/sms/sms-editor';
 import { SmsEditorPreview } from '@/components/workflow-editor/steps/sms/sms-editor-preview';

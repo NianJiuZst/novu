@@ -1,9 +1,9 @@
-import { Completion, CompletionContext, CompletionSource } from '@codemirror/autocomplete';
-import { EditorView } from '@uiw/react-codemirror';
+import type { Completion, CompletionContext, CompletionSource } from '@codemirror/autocomplete';
+import type { EditorView } from '@uiw/react-codemirror';
 import { TRANSLATION_TRIGGER_CHARACTER } from '@novu/shared';
 import { TRANSLATION_PREFIX_LENGTH } from './constants';
 import { isInsideVariableContext } from './utils';
-import { TranslationKey, TranslationCompletionOption, TranslationAutocompleteConfig } from '@/types/translations';
+import type { TranslationKey, TranslationCompletionOption, TranslationAutocompleteConfig } from '@/types/translations';
 import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { NewTranslationKeyPreview } from '@/components/workflow-editor/steps/email/translations/new-translation-key-preview';

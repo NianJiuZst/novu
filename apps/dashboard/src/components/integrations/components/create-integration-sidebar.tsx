@@ -9,7 +9,7 @@ import { IntegrationConfiguration } from './integration-configuration';
 import { handleIntegrationError } from './utils/handle-integration-error';
 import { useSetPrimaryIntegration } from '../../../hooks/use-set-primary-integration';
 import { SelectPrimaryIntegrationModal } from './modals/select-primary-integration-modal';
-import { IntegrationFormData } from '../types';
+import type { IntegrationFormData } from '../types';
 import { useIntegrationPrimaryModal } from './hooks/use-integration-primary-modal';
 import { useFetchIntegrations } from '@/hooks/use-fetch-integrations';
 import { buildRoute, ROUTES } from '../../../utils/routes';

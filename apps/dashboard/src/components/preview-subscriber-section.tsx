@@ -4,7 +4,7 @@ import { RiInformationLine, RiRefreshLine } from 'react-icons/ri';
 import { useState } from 'react';
 import { EditableJsonViewer } from './workflow-editor/steps/shared/editable-json-viewer/editable-json-viewer';
 import { SubscriberAutocomplete } from '@/components/subscribers/subscriber-autocomplete';
-import { SubscriberSectionProps } from './workflow-editor/steps/types/preview-context.types';
+import type { SubscriberSectionProps } from './workflow-editor/steps/types/preview-context.types';
 import { ACCORDION_STYLES } from './workflow-editor/steps/constants/preview-context.constants';
 import { buttonVariants } from './primitives/button';
 import { cn } from '@/utils/ui';

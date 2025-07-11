@@ -21,7 +21,7 @@ import { ROUTES } from '../../../utils/routes';
 import { cn } from '../../../utils/ui';
 import { EnvironmentBranchIcon } from '../../primitives/environment-branch-icon';
 import { StatusBadge, StatusBadgeIcon } from '../../primitives/status-badge';
-import { TableIntegration } from '../types';
+import type { TableIntegration } from '../types';
 import { ProviderIcon } from './provider-icon';
 import { isDemoIntegration } from './utils/helpers';
 import { useFetchSubscription } from '../../../hooks/use-fetch-subscription';

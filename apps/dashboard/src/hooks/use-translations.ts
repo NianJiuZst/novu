@@ -1,5 +1,5 @@
-import { EditorView } from '@uiw/react-codemirror';
-import { MutableRefObject, useCallback, useState } from 'react';
+import type { EditorView } from '@uiw/react-codemirror';
+import { type MutableRefObject, useCallback, useState } from 'react';
 
 export interface SelectedTranslation {
   translationKey: string;

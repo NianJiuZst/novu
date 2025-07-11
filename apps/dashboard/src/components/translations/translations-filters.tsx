@@ -1,4 +1,4 @@
-import { HTMLAttributes, useEffect } from 'react';
+import { type HTMLAttributes, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiLoader4Line } from 'react-icons/ri';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -12,7 +12,7 @@ import { buildRoute, ROUTES } from '@/utils/routes';
 import { useFetchOrganizationSettings } from '@/hooks/use-fetch-organization-settings';
 import { DEFAULT_LOCALE } from '@novu/shared';
 
-import { defaultTranslationsFilter, TranslationsFilter } from './hooks/use-translations-url-state';
+import { defaultTranslationsFilter, type TranslationsFilter } from './hooks/use-translations-url-state';
 
 type SearchFilterProps = {
   value: string;

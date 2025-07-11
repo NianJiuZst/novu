@@ -1,4 +1,4 @@
-import { ActivityFilters } from '@/api/activity';
+import type { ActivityFilters } from '@/api/activity';
 import { defaultActivityFilters } from '@/components/activity/constants';
 import { Button } from '@/components/primitives/button';
 import { useEnvironment } from '@/context/environment/hooks';

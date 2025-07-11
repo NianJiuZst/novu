@@ -1,9 +1,9 @@
 import { InlineDecoratorExtension, getInlineDecoratorSuggestionsReact } from '@maily-to/core/extensions';
 import { TranslationPill } from './translation-pill';
-import { AnyExtension } from '@tiptap/core';
+import type { AnyExtension } from '@tiptap/core';
 import { TRANSLATION_KEY_SINGLE_REGEX, TRANSLATION_TRIGGER_CHARACTER } from '@novu/shared';
-import { TranslationSuggestionsListView, TranslationKeyItem } from './translation-suggestions-list-view';
-import { TranslationKey } from '@/types/translations';
+import { TranslationSuggestionsListView, type TranslationKeyItem } from './translation-suggestions-list-view';
+import type { TranslationKey } from '@/types/translations';
 import { forwardRef } from 'react';
 
 export const createTranslationExtension = (

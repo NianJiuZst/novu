@@ -2,7 +2,7 @@ import { cn } from '../../../../../utils/ui';
 import { Label } from '../../../label';
 import { RadioGroup, RadioGroupItem } from '../../../radio-group';
 import { useKeyboardNavigation } from '../hooks/use-keyboard-navigation';
-import { FilterOption, SizeType } from '../types';
+import type { FilterOption, SizeType } from '../types';
 import { BaseFilterContent } from './base-filter-content';
 
 interface SingleFilterContentProps {

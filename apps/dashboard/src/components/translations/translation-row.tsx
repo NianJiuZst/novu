@@ -1,9 +1,9 @@
-import { ComponentProps, useCallback } from 'react';
+import { type ComponentProps, useCallback } from 'react';
 import { RiDeleteBin2Line, RiMore2Fill, RiRouteFill } from 'react-icons/ri';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { buildRoute, ROUTES } from '@/utils/routes';
-import { TranslationGroup } from '@/api/translations';
+import type { TranslationGroup } from '@/api/translations';
 import { formatDateSimple } from '@/utils/format-date';
 import { cn } from '@/utils/ui';
 

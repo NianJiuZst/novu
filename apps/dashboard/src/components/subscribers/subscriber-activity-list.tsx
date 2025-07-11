@@ -1,4 +1,4 @@
-import { IActivity, JobStatusEnum, ResourceOriginEnum } from '@novu/shared';
+import { type IActivity, JobStatusEnum, ResourceOriginEnum } from '@novu/shared';
 import { motion } from 'motion/react';
 import { FaCode } from 'react-icons/fa6';
 

@@ -1,8 +1,8 @@
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/primitives/sheet';
 import { VisuallyHidden } from '@/components/primitives/visually-hidden';
 import { UnsavedChangesAlertDialog } from '@/components/unsaved-changes-alert-dialog';
-import { TranslationGroup } from '@/api/translations';
-import { TranslationDrawerContent, TranslationDrawerContentRef } from './translation-drawer-content';
+import type { TranslationGroup } from '@/api/translations';
+import { TranslationDrawerContent, type TranslationDrawerContentRef } from './translation-drawer-content';
 import { useState, useRef, useCallback } from 'react';
 
 type TranslationDrawerProps = {

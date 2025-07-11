@@ -1,5 +1,5 @@
 import { StepTypeEnum, WorkflowCreationSourceEnum } from '@novu/shared';
-import { WorkflowTemplate } from '../types';
+import type { WorkflowTemplate } from '../types';
 
 export const upcomingInvoiceTemplate: WorkflowTemplate = {
   id: 'upcoming-invoice',

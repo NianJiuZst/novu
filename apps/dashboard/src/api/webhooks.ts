@@ -1,4 +1,4 @@
-import { IEnvironment } from '@novu/shared';
+import type { IEnvironment } from '@novu/shared';
 import { getV2, postV2 } from './api.client';
 
 // Matches the response DTO defined in the API

@@ -1,4 +1,4 @@
-import { ForwardedRef, useCallback } from 'react';
+import { type ForwardedRef, useCallback } from 'react';
 
 type CallbackRef<T> = ((node: T | null) => void) | ForwardedRef<T>;
 

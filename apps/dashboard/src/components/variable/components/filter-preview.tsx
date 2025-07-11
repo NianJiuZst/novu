@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FilterWithParam } from '../types';
+import type { FilterWithParam } from '../types';
 import { processFilters } from '../utils/process-filters';
 
 type FilterPreviewProps = {

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { HeaderNavigation } from '@/components/header-navigation/header-navigation';
 
 export const FullPageLayout = ({

@@ -3,7 +3,7 @@ import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';
 import { RiInformationLine, RiContractUpDownLine, RiExpandUpDownLine } from 'react-icons/ri';
 import { EditableJsonViewer } from '../shared/editable-json-viewer/editable-json-viewer';
-import { StepResultsSectionProps } from '../types/preview-context.types';
+import type { StepResultsSectionProps } from '../types/preview-context.types';
 import { ACCORDION_STYLES } from '../constants/preview-context.constants';
 import { getStepName, getStepType, getStepTypeIcon } from '../utils/preview-context.utils';
 import { synchronizeDigestStepData } from '../utils/digest-sync.utils';

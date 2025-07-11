@@ -1,14 +1,14 @@
 import { cn } from '@/utils/ui';
-import { autocompletion, CompletionSource } from '@codemirror/autocomplete';
+import { autocompletion, type CompletionSource } from '@codemirror/autocomplete';
 import { EditorView } from '@uiw/react-codemirror';
-import { useCallback, useMemo, useRef, useState, useEffect, MutableRefObject } from 'react';
-import { JSONSchema7 } from 'json-schema';
+import { useCallback, useMemo, useRef, useState, useEffect, type MutableRefObject } from 'react';
+import type { JSONSchema7 } from 'json-schema';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
 
-import { Editor, EditorProps } from '@/components/primitives/editor';
+import { Editor, type EditorProps } from '@/components/primitives/editor';
 import { EditVariablePopover } from '@/components/variable/edit-variable-popover';
-import { CompletionOption, createAutocompleteSource } from '@/utils/liquid-autocomplete';
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import { type CompletionOption, createAutocompleteSource } from '@/utils/liquid-autocomplete';
+import type { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
 import { useVariables } from '../../hooks/use-variables';
 import { createVariableExtension } from '@/components/primitives/variable-plugin';
 import { variablePillTheme } from '@/components/primitives/variable-plugin/variable-theme';
