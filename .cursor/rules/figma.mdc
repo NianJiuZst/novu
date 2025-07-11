@@ -1,7 +1,7 @@
 ---
 description: Figma Dev Mode MCP rules
-globs:
-alwaysApply: true
+globs: apps/dashboard/**/*
+alwaysApply: false
 ---
 
 - The Figma Dev Mode MCP Server provides an assets endpoint which can serve image and SVG assets
