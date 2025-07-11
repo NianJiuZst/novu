@@ -19,6 +19,8 @@ const mapDetailToEventType = {
   [DetailEnum.STEP_FILTERED_BY_SUBSCRIBER_GLOBAL_PREFERENCES]: 'step_filtered',
   [DetailEnum.STEP_FILTERED_BY_WORKFLOW_RESOURCE_PREFERENCES]: 'step_filtered',
   [DetailEnum.STEP_FILTERED_BY_USER_WORKFLOW_PREFERENCES]: 'step_filtered',
+  [DetailEnum.STEP_FILTERED_BY_AI_PREFERENCE]: 'step_filtered',
+  [DetailEnum.STEP_PASSED_AI_PREFERENCE]: 'step_filter_processing',
   [DetailEnum.FILTER_STEPS]: 'step_filtered',
   [DetailEnum.PROCESSING_STEP_FILTER]: 'step_filter_processing',
   [DetailEnum.PROCESSING_STEP_FILTER_ERROR]: 'step_filter_failed',

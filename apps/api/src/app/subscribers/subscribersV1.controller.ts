@@ -483,7 +483,7 @@ export class SubscribersV1Controller {
       includeInactiveChannels: includeInactiveChannels ?? true,
     });
 
-    return await this.getPreferenceUsecase.execute(command);
+    return (await this.getPreferenceUsecase.execute(command)) as GetSubscriberPreferencesResponseDto[];
   }
 
   // @ts-ignore

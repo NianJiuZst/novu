@@ -31,7 +31,6 @@ import {
   PlatformException,
 } from '@novu/application-generic';
 import {
-  CustomNotificationsRepository,
   JobEntity,
   JobRepository,
   JobStatusEnum,
@@ -54,11 +53,6 @@ import { ExecuteStepCustom } from './execute-step-custom.usecase';
 import { ExecuteBridgeJob } from '../execute-bridge-job';
 import { SendMessageResult } from './send-message-type.usecase';
 import { EvaluateAIPreference, AIEvaluationResult } from './evaluate-ai-preference.usecase';
-import {
-  EvaluateCustomNotifications,
-  CustomNotificationEvaluationResult,
-} from './evaluate-custom-notifications.usecase';
-import { GenerateCustomEmailContent, GeneratedEmailContent } from './generate-custom-email-content.usecase';
 
 @Injectable()
 export class SendMessage {
@@ -81,10 +75,7 @@ export class SendMessage {
     private analyticsService: AnalyticsService,
     private normalizeVariablesUsecase: NormalizeVariables,
     private executeBridgeJob: ExecuteBridgeJob,
-    private evaluateAIPreference: EvaluateAIPreference,
-    private customNotificationsRepository: CustomNotificationsRepository,
-    private evaluateCustomNotifications: EvaluateCustomNotifications,
-    private generateCustomEmailContent: GenerateCustomEmailContent
+    private evaluateAIPreference: EvaluateAIPreference
   ) {}
 
   @InstrumentUsecase()
@@ -113,113 +104,6 @@ export class SendMessage {
       });
     }
     const isBridgeSkipped = bridgeResponse?.options?.skip;
-
-    // Handle custom notifications workflow
-    const workflow = await this.getWorkflow({
-      _id: command.job._templateId,
-      environmentId: command.environmentId,
-    });
-
-    if (workflow?.triggers?.[0]?.identifier === 'my-notifications') {
-      const customNotificationResult = await this.evaluateCustomNotificationsForWorkflow(command, variables);
-
-      if (!customNotificationResult.shouldSend) {
-        await this.jobRepository.updateStatus(command.environmentId, command.jobId, JobStatusEnum.CANCELED);
-
-        await this.createExecutionDetails.execute(
-          CreateExecutionDetailsCommand.create({
-            ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
-            detail: DetailEnum.FILTER_STEPS,
-            source: ExecutionDetailsSourceEnum.INTERNAL,
-            status: ExecutionDetailsStatusEnum.SUCCESS,
-            isTest: false,
-            isRetry: false,
-            raw: JSON.stringify({
-              customNotifications: {
-                totalMatches: customNotificationResult.totalMatches,
-                evaluatedRules: customNotificationResult.matches.length,
-                reason: 'No custom notification rules matched the event',
-              },
-            }),
-          })
-        );
-
-        return { status: 'canceled' };
-      }
-
-      // Generate custom email content for matching notifications
-      const matchingNotifications = customNotificationResult.matches.filter((match) => match.shouldSend);
-      let generatedContent: GeneratedEmailContent | null = null;
-
-      if (matchingNotifications.length > 0) {
-        // Use the first matching notification's content prompt to generate email
-        const firstMatch = matchingNotifications[0];
-        if (firstMatch.contentPrompt) {
-          const eventName = command.payload?.eventName || command.payload?.event || 'unknown';
-          const eventContext = command.payload?.eventContext || command.payload?.context || command.payload || {};
-
-          generatedContent = await this.generateCustomEmailContent.execute({
-            contentPrompt: firstMatch.contentPrompt,
-            context: variables,
-            eventName,
-            eventContext,
-            workflowName: workflow?.name,
-          });
-
-          // Store the generated content in the command payload for email step to use
-          command.payload = {
-            ...command.payload,
-            customEmailContent: {
-              subject: generatedContent.subject,
-              body: generatedContent.body,
-              generated: generatedContent.success,
-              reason: generatedContent.reason,
-            },
-          };
-        }
-      }
-
-      // Store matching notifications for later completion marking
-      const oneTimeNotificationIds = matchingNotifications
-        .filter((match) => match.notification.isOneTime)
-        .map((match) => match.notification._id);
-
-      // Store this in the command for later use after successful send
-      command.oneTimeNotificationIds = oneTimeNotificationIds;
-
-      // Log successful custom notification matches
-      await this.createExecutionDetails.execute(
-        CreateExecutionDetailsCommand.create({
-          ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
-          detail: DetailEnum.STEP_CREATED,
-          source: ExecutionDetailsSourceEnum.INTERNAL,
-          status: ExecutionDetailsStatusEnum.SUCCESS,
-          isTest: false,
-          isRetry: false,
-          raw: JSON.stringify({
-            customNotifications: {
-              totalMatches: customNotificationResult.totalMatches,
-              evaluatedRules: customNotificationResult.matches.length,
-              matchingRules: matchingNotifications.map((match) => ({
-                id: match.notification._id,
-                query: match.notification.query,
-                reason: match.reason,
-                contentPrompt: match.contentPrompt,
-                isOneTime: match.notification.isOneTime,
-              })),
-              generatedContent: generatedContent
-                ? {
-                    subject: generatedContent.subject,
-                    bodyLength: generatedContent.body.length,
-                    success: generatedContent.success,
-                    reason: generatedContent.reason,
-                  }
-                : null,
-            },
-          }),
-        })
-      );
-    }
 
     const { stepCondition, channelPreference } = await this.evaluateFilters(isBridgeSkipped, command, variables);
 
@@ -671,25 +555,6 @@ export class SendMessage {
     }
 
     return tenant;
-  }
-
-  @Instrument()
-  private async evaluateCustomNotificationsForWorkflow(
-    command: SendMessageCommand,
-    variables: IFilterVariables
-  ): Promise<CustomNotificationEvaluationResult> {
-    // Extract event name and context from payload
-    const eventName = command.payload?.eventName || command.payload?.event || 'unknown';
-    const eventContext = command.payload?.eventContext || command.payload?.context || command.payload || {};
-
-    return await this.evaluateCustomNotifications.execute({
-      environmentId: command.environmentId,
-      organizationId: command.organizationId,
-      subscriberId: command.subscriberId,
-      eventName,
-      eventContext,
-      context: variables,
-    });
   }
 }
 

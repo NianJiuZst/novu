@@ -42,7 +42,6 @@ import { PlatformException } from '../../../shared/utils';
 import { SendMessageResult } from './send-message-type.usecase';
 import { SendMessageBase } from './send-message.base';
 import { SendMessageCommand } from './send-message.command';
-import { EvaluateCustomNotifications } from './evaluate-custom-notifications.usecase';
 
 const LOG_CONTEXT = 'SendMessageEmail';
 
@@ -61,8 +60,7 @@ export class SendMessageEmail extends SendMessageBase {
     protected getNovuProviderCredentials: GetNovuProviderCredentials,
     protected selectVariant: SelectVariant,
     protected moduleRef: ModuleRef,
-    private featureFlagService: FeatureFlagsService,
-    private evaluateCustomNotifications: EvaluateCustomNotifications
+    private featureFlagService: FeatureFlagsService
   ) {
     super(
       messageRepository,
@@ -174,10 +172,6 @@ export class SendMessageEmail extends SendMessageBase {
     let content;
     let senderName;
 
-    // Check if this is a custom notification with generated content
-    const customEmailContent = command.payload?.customEmailContent;
-    const isCustomNotification = customEmailContent && customEmailContent.generated;
-
     const payload = {
       senderName: step.template.senderName,
       subject,
@@ -251,7 +245,7 @@ export class SendMessageEmail extends SendMessageBase {
           user: { _id: command.userId } as UserEntity,
         });
 
-        if (!shouldDisableInlineCss && !isCustomNotification) {
+        if (!shouldDisableInlineCss) {
           /*
            * Skip inline CSS for custom content as it's already formatted HTML
            * this is causing rendering issues in Gmail (especially when media queries are used), so we are disabling it
@@ -314,38 +308,11 @@ export class SendMessageEmail extends SendMessageBase {
         }
     );
 
-    if (isCustomNotification) {
-      // Use the AI-generated custom content
-      subject = customEmailContent.subject;
-      html = customEmailContent.body;
-      content = customEmailContent.body;
-      senderName = step.template.senderName; // Keep the original sender name
-
-      // Log that we're using custom generated content
-      await this.createExecutionDetails.execute(
-        CreateExecutionDetailsCommand.create({
-          ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
-          detail: DetailEnum.CUSTOM_EMAIL_CONTENT_GENERATED,
-          source: ExecutionDetailsSourceEnum.INTERNAL,
-          status: ExecutionDetailsStatusEnum.SUCCESS,
-          isTest: false,
-          isRetry: false,
-          raw: JSON.stringify({
-            customContent: {
-              subject: customEmailContent.subject,
-              bodyLength: customEmailContent.body.length,
-              reason: customEmailContent.reason,
-            },
-          }),
-        })
-      );
-    }
-
     const mailData: IEmailOptions = createMailData(
       {
         to: email,
         subject,
-        html: isCustomNotification ? html : (bridgeOutputs as EmailOutput)?.body || html,
+        html: (bridgeOutputs as EmailOutput)?.body || html,
         from: integration?.credentials.from || 'no-reply@novu.co',
         attachments,
         senderName,
@@ -538,42 +505,6 @@ export class SendMessageEmail extends SendMessageBase {
           },
         }
       );
-
-      // Mark one-time custom notifications as completed after successful send
-      if (command.oneTimeNotificationIds && command.oneTimeNotificationIds.length > 0) {
-        try {
-          const completedIds = await this.evaluateCustomNotifications.markOneTimeNotificationsAsCompleted(
-            command.environmentId,
-            command.organizationId,
-            command.subscriberId,
-            command.oneTimeNotificationIds
-          );
-
-          if (completedIds.length > 0) {
-            await this.createExecutionDetails.execute(
-              CreateExecutionDetailsCommand.create({
-                ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
-                messageId: message._id,
-                detail: DetailEnum.CUSTOM_NOTIFICATION_ONE_TIME_COMPLETED,
-                source: ExecutionDetailsSourceEnum.INTERNAL,
-                status: ExecutionDetailsStatusEnum.SUCCESS,
-                isTest: false,
-                isRetry: false,
-                raw: JSON.stringify({
-                  completedOneTimeNotifications: completedIds,
-                }),
-              })
-            );
-          }
-        } catch (error) {
-          // Log error but don't fail the email sending
-          Logger.error(
-            { error, oneTimeNotificationIds: command.oneTimeNotificationIds },
-            'Failed to mark one-time notifications as completed after successful email send',
-            LOG_CONTEXT
-          );
-        }
-      }
 
       return {
         status: 'success',

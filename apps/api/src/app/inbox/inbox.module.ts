@@ -8,18 +8,9 @@ import { InboxController } from './inbox.controller';
 import { USE_CASES } from './usecases';
 import { PreferencesModule } from '../preferences';
 import { OrganizationModule } from '../organization/organization.module';
-import { CustomNotificationsModule } from '../custom-notifications/custom-notifications.module';
 
 @Module({
-  imports: [
-    SharedModule,
-    SubscribersV1Module,
-    AuthModule,
-    IntegrationModule,
-    PreferencesModule,
-    OrganizationModule,
-    CustomNotificationsModule,
-  ],
+  imports: [SharedModule, SubscribersV1Module, AuthModule, IntegrationModule, PreferencesModule, OrganizationModule],
   providers: [...USE_CASES, CommunityOrganizationRepository],
   exports: [...USE_CASES],
   controllers: [InboxController],

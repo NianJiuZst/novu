@@ -45,38 +45,6 @@ export const defaultLocalization = {
   'snooze.options.inOneDay': 'Tomorrow',
   'snooze.options.inOneWeek': 'Next week',
 
-  // My Notifications
-  'myNotifications.title': 'My notifications',
-  'myNotifications.badge': 'AI',
-  'myNotifications.description':
-    'Create custom notification rules using natural language. AI will match system events against your preferences and send personalized notifications.',
-  'myNotifications.addButton': 'Add custom notification',
-  'myNotifications.form.title': 'Create Custom Notification',
-  'myNotifications.form.description': 'Describe what you want to be notified about and how you want to be notified.',
-  'myNotifications.form.label': 'What do you want to be notified about?',
-  'myNotifications.form.placeholder': 'e.g., "Notify me about critical security issues in production"',
-  'myNotifications.form.hint': 'Be specific about the events or conditions you care about',
-  'myNotifications.form.contentLabel': 'How should we notify you?',
-  'myNotifications.form.contentPlaceholder': 'e.g., "Security Alert: Critical issue detected in {{environment}}"',
-  'myNotifications.form.contentHint': 'This template will be used to generate your notification content',
-  'myNotifications.form.oneTimeLabel': 'One-time notification',
-  'myNotifications.form.oneTimeHint': 'This notification will be automatically deactivated after being triggered once',
-  'myNotifications.form.cancel': 'Cancel',
-  'myNotifications.form.submit': 'Create notification',
-  'myNotifications.form.submitting': 'Creating...',
-  'myNotifications.list.title': 'Your custom notifications',
-  'myNotifications.list.createdAt': 'Created',
-  'myNotifications.empty': 'No custom notifications yet. Create your first one above!',
-
-  // Notify Component
-  'notify.button': 'Smart Notify',
-  'notify.tooltip': 'Create AI-powered notifications',
-  'notify.form.title': 'Smart Notification',
-  'notify.form.description':
-    "Describe what you want to be notified about and we'll create a smart notification for you.",
-  'notify.form.success': 'Notification created successfully!',
-  'notify.form.error': 'Failed to create notification. Please try again.',
-
   'inbox.status.options.unread': 'Unread',
   'inbox.status.options.unreadRead': 'All',
   'inbox.status.options.archived': 'Archived',

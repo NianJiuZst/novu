@@ -32,7 +32,6 @@ import { SendMessageCommand } from './send-message.command';
 import { SendMessageBase } from './send-message.base';
 import { PlatformException } from '../../../shared/utils';
 import { SendMessageResult } from './send-message-type.usecase';
-import { EvaluateCustomNotifications } from './evaluate-custom-notifications.usecase';
 
 @Injectable()
 export class SendMessageInApp extends SendMessageBase {
@@ -48,8 +47,7 @@ export class SendMessageInApp extends SendMessageBase {
     protected getNovuProviderCredentials: GetNovuProviderCredentials,
     protected selectVariant: SelectVariant,
     protected moduleRef: ModuleRef,
-    protected compileInAppTemplate: CompileInAppTemplate,
-    private evaluateCustomNotifications: EvaluateCustomNotifications
+    protected compileInAppTemplate: CompileInAppTemplate
   ) {
     super(
       messageRepository,
@@ -304,42 +302,6 @@ export class SendMessageInApp extends SendMessageBase {
         isRetry: false,
       })
     );
-
-    // Mark one-time custom notifications as completed after successful send
-    if (command.oneTimeNotificationIds && command.oneTimeNotificationIds.length > 0) {
-      try {
-        const completedIds = await this.evaluateCustomNotifications.markOneTimeNotificationsAsCompleted(
-          command.environmentId,
-          command.organizationId,
-          command.subscriberId,
-          command.oneTimeNotificationIds
-        );
-
-        if (completedIds.length > 0) {
-          await this.createExecutionDetails.execute(
-            CreateExecutionDetailsCommand.create({
-              ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
-              messageId: message._id,
-              detail: DetailEnum.CUSTOM_NOTIFICATION_ONE_TIME_COMPLETED,
-              source: ExecutionDetailsSourceEnum.INTERNAL,
-              status: ExecutionDetailsStatusEnum.SUCCESS,
-              isTest: false,
-              isRetry: false,
-              raw: JSON.stringify({
-                completedOneTimeNotifications: completedIds,
-              }),
-            })
-          );
-        }
-      } catch (error) {
-        // Log error but don't fail the in-app message sending
-        Logger.error(
-          { error, oneTimeNotificationIds: command.oneTimeNotificationIds },
-          'Failed to mark one-time notifications as completed after successful in-app message send',
-          'SendMessageInApp'
-        );
-      }
-    }
 
     return {
       status: 'success',

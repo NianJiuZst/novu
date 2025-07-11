@@ -204,6 +204,7 @@ export class InboxService {
       ...channels,
       ...(aiPreference && { aiPreference }),
     };
+
     return this.#httpClient.patch(`${INBOX_ROUTE}/preferences`, body);
   }
 
@@ -220,6 +221,7 @@ export class InboxService {
       ...channels,
       ...(aiPreference && { aiPreference }),
     };
+
     return this.#httpClient.patch(`${INBOX_ROUTE}/preferences/${workflowId}`, body);
   }
 
@@ -240,59 +242,5 @@ export class InboxService {
     };
 
     return this.#httpClient.post('/inbox/events', payload);
-  }
-
-  // Custom Notifications methods
-  fetchCustomNotifications(): Promise<
-    Array<{
-      _id: string;
-      query: string;
-      content: string;
-      enabled: boolean;
-      isOneTime: boolean;
-      completedAt: string | null;
-      createdAt: string;
-      updatedAt: string;
-    }>
-  > {
-    return this.#httpClient.get(`${INBOX_ROUTE}/custom-notifications`);
-  }
-
-  createCustomNotification(data: { query: string; content: string; enabled?: boolean; isOneTime?: boolean }): Promise<{
-    _id: string;
-    query: string;
-    content: string;
-    enabled: boolean;
-    isOneTime: boolean;
-    completedAt: string | null;
-    createdAt: string;
-    updatedAt: string;
-  }> {
-    return this.#httpClient.post(`${INBOX_ROUTE}/custom-notifications`, data);
-  }
-
-  updateCustomNotification(
-    id: string,
-    data: {
-      query?: string;
-      content?: string;
-      enabled?: boolean;
-      isOneTime?: boolean;
-    }
-  ): Promise<{
-    _id: string;
-    query: string;
-    content: string;
-    enabled: boolean;
-    isOneTime: boolean;
-    completedAt: string | null;
-    createdAt: string;
-    updatedAt: string;
-  }> {
-    return this.#httpClient.patch(`${INBOX_ROUTE}/custom-notifications/${id}`, data);
-  }
-
-  deleteCustomNotification(id: string): Promise<{ success: boolean }> {
-    return this.#httpClient.delete(`${INBOX_ROUTE}/custom-notifications/${id}`);
   }
 }

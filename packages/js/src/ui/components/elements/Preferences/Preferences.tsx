@@ -10,7 +10,6 @@ import { PreferencesRow } from './PreferencesRow';
 import { DefaultPreferences } from './DefaultPreferences';
 import { GroupedPreferences } from './GroupedPreferences';
 import { PreferencesListSkeleton } from './PreferencesListSkeleton';
-import { MyNotifications } from './MyNotifications';
 
 /* This is also going to be exported as a separate component. Keep it pure. */
 export const Preferences = () => {
@@ -116,11 +115,6 @@ export const Preferences = () => {
         onChange={() => updatePreference(allPreferences().globalPreference)}
         onAIPreferenceChange={() => updateAIPreference(allPreferences().globalPreference)}
       />
-
-      {/* My Notifications Section */}
-      <div class={style('myNotificationsSection', 'nt-mt-4 nt-mb-6')}>
-        <MyNotifications />
-      </div>
 
       <Show
         when={groupedPreferences().length > 0}

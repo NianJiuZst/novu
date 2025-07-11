@@ -10,7 +10,6 @@ import {
   Query,
   UseGuards,
   Headers,
-  Delete,
 } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
@@ -67,21 +66,6 @@ import { TriggerEventRequestDto } from '../events/dtos';
 import { ParseEventRequest } from '../events/usecases/parse-event-request/parse-event-request.usecase';
 import { ParseEventRequestMulticastCommand } from '../events/usecases/parse-event-request';
 
-// Custom Notifications imports
-import {
-  CreateCustomNotificationDto,
-  UpdateCustomNotificationDto,
-  CustomNotificationResponseDto,
-} from '../custom-notifications/dtos';
-import { CreateCustomNotificationUseCase } from '../custom-notifications/usecases/create-custom-notification/create-custom-notification.usecase';
-import { CreateCustomNotificationCommand } from '../custom-notifications/usecases/create-custom-notification/create-custom-notification.command';
-import { GetCustomNotificationsUseCase } from '../custom-notifications/usecases/get-custom-notifications/get-custom-notifications.usecase';
-import { GetCustomNotificationsCommand } from '../custom-notifications/usecases/get-custom-notifications/get-custom-notifications.command';
-import { UpdateCustomNotificationUseCase } from '../custom-notifications/usecases/update-custom-notification/update-custom-notification.usecase';
-import { UpdateCustomNotificationCommand } from '../custom-notifications/usecases/update-custom-notification/update-custom-notification.command';
-import { DeleteCustomNotificationUseCase } from '../custom-notifications/usecases/delete-custom-notification/delete-custom-notification.usecase';
-import { DeleteCustomNotificationCommand } from '../custom-notifications/usecases/delete-custom-notification/delete-custom-notification.command';
-
 @ApiCommonResponses()
 @Controller('/inbox')
 @ApiExcludeController()
@@ -98,12 +82,7 @@ export class InboxController {
     private bulkUpdatePreferencesUsecase: BulkUpdatePreferences,
     private snoozeNotificationUsecase: SnoozeNotification,
     private unsnoozeNotificationUsecase: UnsnoozeNotification,
-    private parseEventRequest: ParseEventRequest,
-    // Custom Notifications use cases
-    private createCustomNotificationUsecase: CreateCustomNotificationUseCase,
-    private getCustomNotificationsUsecase: GetCustomNotificationsUseCase,
-    private updateCustomNotificationUsecase: UpdateCustomNotificationUseCase,
-    private deleteCustomNotificationUsecase: DeleteCustomNotificationUseCase
+    private parseEventRequest: ParseEventRequest
   ) {}
 
   @KeylessAccessible()
@@ -452,111 +431,6 @@ export class InboxController {
         to: {
           archived: true,
         },
-      })
-    );
-  }
-
-  // Custom Notifications endpoints
-
-  @UseGuards(AuthGuard('subscriberJwt'))
-  @Get('/custom-notifications')
-  async getCustomNotifications(
-    @SubscriberSession() subscriberSession: SubscriberEntity
-  ): Promise<CustomNotificationResponseDto[]> {
-    const customNotifications = await this.getCustomNotificationsUsecase.execute(
-      GetCustomNotificationsCommand.create({
-        organizationId: subscriberSession._organizationId,
-        environmentId: subscriberSession._environmentId,
-        subscriberId: subscriberSession.subscriberId,
-      })
-    );
-
-    return customNotifications.map((notification) => ({
-      _id: notification._id,
-      query: notification.query,
-      content: notification.content,
-      enabled: notification.enabled,
-      isOneTime: notification.isOneTime,
-      completedAt: notification.completedAt,
-      createdAt: notification.createdAt,
-      updatedAt: notification.updatedAt,
-    }));
-  }
-
-  @UseGuards(AuthGuard('subscriberJwt'))
-  @Post('/custom-notifications')
-  async createCustomNotification(
-    @SubscriberSession() subscriberSession: SubscriberEntity,
-    @Body() body: CreateCustomNotificationDto
-  ): Promise<CustomNotificationResponseDto> {
-    const customNotification = await this.createCustomNotificationUsecase.execute(
-      CreateCustomNotificationCommand.create({
-        organizationId: subscriberSession._organizationId,
-        environmentId: subscriberSession._environmentId,
-        subscriberId: subscriberSession.subscriberId,
-        query: body.query,
-        content: body.content,
-        enabled: body.enabled,
-        isOneTime: body.isOneTime,
-      })
-    );
-
-    return {
-      _id: customNotification._id,
-      query: customNotification.query,
-      content: customNotification.content,
-      enabled: customNotification.enabled,
-      isOneTime: customNotification.isOneTime,
-      completedAt: customNotification.completedAt,
-      createdAt: customNotification.createdAt,
-      updatedAt: customNotification.updatedAt,
-    };
-  }
-
-  @UseGuards(AuthGuard('subscriberJwt'))
-  @Patch('/custom-notifications/:id')
-  async updateCustomNotification(
-    @SubscriberSession() subscriberSession: SubscriberEntity,
-    @Param('id') id: string,
-    @Body() body: UpdateCustomNotificationDto
-  ): Promise<CustomNotificationResponseDto> {
-    const customNotification = await this.updateCustomNotificationUsecase.execute(
-      UpdateCustomNotificationCommand.create({
-        organizationId: subscriberSession._organizationId,
-        environmentId: subscriberSession._environmentId,
-        subscriberId: subscriberSession.subscriberId,
-        id,
-        query: body.query,
-        content: body.content,
-        enabled: body.enabled,
-        isOneTime: body.isOneTime,
-      })
-    );
-
-    return {
-      _id: customNotification._id,
-      query: customNotification.query,
-      content: customNotification.content,
-      enabled: customNotification.enabled,
-      isOneTime: customNotification.isOneTime,
-      completedAt: customNotification.completedAt,
-      createdAt: customNotification.createdAt,
-      updatedAt: customNotification.updatedAt,
-    };
-  }
-
-  @UseGuards(AuthGuard('subscriberJwt'))
-  @Delete('/custom-notifications/:id')
-  async deleteCustomNotification(
-    @SubscriberSession() subscriberSession: SubscriberEntity,
-    @Param('id') id: string
-  ): Promise<{ success: boolean }> {
-    return await this.deleteCustomNotificationUsecase.execute(
-      DeleteCustomNotificationCommand.create({
-        organizationId: subscriberSession._organizationId,
-        environmentId: subscriberSession._environmentId,
-        subscriberId: subscriberSession.subscriberId,
-        id,
       })
     );
   }

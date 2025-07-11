@@ -14,7 +14,7 @@ import {
   NovuProvider,
 } from '../context';
 import type { Appearance, Localization, PreferenceGroups, PreferencesFilter, RouterPush, Tab } from '../types';
-import { Bell, Root, Notify } from './elements';
+import { Bell, Root } from './elements';
 import { Inbox, InboxContent, InboxContentProps, InboxPage } from './Inbox';
 import { NOVU_DEFAULT_CSS_ID } from '../helpers/utils';
 
@@ -22,7 +22,6 @@ export const novuComponents = {
   Inbox,
   InboxContent,
   Bell,
-  Notify,
   Notifications: (props: Omit<InboxContentProps, 'hideNav' | 'initialPage'>) => {
     if (props.renderNotification) {
       const { renderBody, renderSubject, ...propsWithoutBodyAndSubject } = props;

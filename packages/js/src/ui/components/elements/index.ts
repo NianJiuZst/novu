@@ -3,4 +3,3 @@ export * from './Footer';
 export * from './Header';
 export * from './Root';
 export * from './Preferences';
-export * from './Notify';
