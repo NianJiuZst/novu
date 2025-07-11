@@ -15,15 +15,9 @@ import {
   buildWorkflowPreferencesFromPreferenceChannels,
   DEFAULT_WORKFLOW_PREFERENCES,
   UserSessionData,
-  WorkflowOriginEnum,
-  WorkflowTypeEnum,
+  ResourceOriginEnum,
+  ResourceTypeEnum,
 } from '@novu/shared';
-import {
-  CreateWorkflow,
-  CreateWorkflowCommand,
-  UpdateWorkflow,
-  UpdateWorkflowCommand,
-} from '@novu/application-generic';
 
 import { ApiExcludeController, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserSession } from '../shared/framework/user.decorator';
@@ -45,6 +39,10 @@ import { DataBooleanDto } from '../shared/dtos/data-wrapper-dto';
 import { CreateWorkflowQuery } from './queries';
 import { DeleteNotificationTemplateCommand } from './usecases/delete-notification-template/delete-notification-template.command';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
+import { CreateWorkflow } from './usecases/create-workflow/create-workflow.usecase';
+import { CreateWorkflowCommand } from './usecases/create-workflow/create-workflow.command';
+import { UpdateWorkflow } from './usecases/update-workflow/update-workflow.usecase';
+import { UpdateWorkflowCommand } from './usecases/update-workflow/update-workflow.command';
 
 /**
  * @deprecated use controller in /workflows directory
@@ -121,7 +119,7 @@ export class NotificationTemplateController {
         steps: body.steps,
         notificationGroupId: body.notificationGroupId,
         data: body.data,
-        type: WorkflowTypeEnum.REGULAR,
+        type: ResourceTypeEnum.REGULAR,
       })
     );
   }
@@ -144,7 +142,7 @@ export class NotificationTemplateController {
         organizationId: user.organizationId,
         userId: user._id,
         templateId,
-        type: WorkflowTypeEnum.REGULAR,
+        type: ResourceTypeEnum.REGULAR,
       })
     );
   }
@@ -206,8 +204,8 @@ export class NotificationTemplateController {
         blueprintId: body.blueprintId,
         data: body.data,
         __source: query?.__source,
-        type: WorkflowTypeEnum.REGULAR,
-        origin: WorkflowOriginEnum.NOVU_CLOUD,
+        type: ResourceTypeEnum.REGULAR,
+        origin: ResourceOriginEnum.NOVU_CLOUD,
       })
     );
   }

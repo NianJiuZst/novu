@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsValidLocale } from '@novu/application-generic';
 import { IsBoolean, IsOptional } from 'class-validator';
 
 export class UpdateOrganizationSettingsDto {
@@ -9,4 +10,12 @@ export class UpdateOrganizationSettingsDto {
   @IsOptional()
   @IsBoolean()
   removeNovuBranding?: boolean;
+
+  @ApiProperty({
+    description: 'Default locale',
+    example: 'en-US',
+  })
+  @IsOptional()
+  @IsValidLocale()
+  defaultLocale?: string;
 }

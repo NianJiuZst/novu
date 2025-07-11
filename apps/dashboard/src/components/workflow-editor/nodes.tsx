@@ -1,4 +1,4 @@
-import { FeatureFlagsKeysEnum, PermissionsEnum, WorkflowOriginEnum } from '@novu/shared';
+import { FeatureFlagsKeysEnum, PermissionsEnum, ResourceOriginEnum } from '@novu/shared';
 import { Node as FlowNode, Handle, NodeProps, Position } from '@xyflow/react';
 import { ComponentProps } from 'react';
 import { RiFilter3Fill, RiPlayCircleLine } from 'react-icons/ri';
@@ -12,7 +12,7 @@ import { STEP_TYPE_TO_COLOR } from '@/utils/color';
 import { INLINE_CONFIGURABLE_STEP_TYPES, TEMPLATE_CONFIGURABLE_STEP_TYPES } from '@/utils/constants';
 import { StepTypeEnum } from '@/utils/enums';
 import { buildRoute, ROUTES } from '@/utils/routes';
-import { getWorkflowIdFromSlug, STEP_DIVIDER } from '@/utils/step';
+import { getIdFromSlug, STEP_DIVIDER } from '@/utils/id-utils';
 import { cn } from '@/utils/ui';
 import { STEP_TYPE_TO_ICON } from '../icons/utils';
 import { AddStepMenu } from './add-step-menu';
@@ -108,14 +108,14 @@ const StepNode = (props: StepNodeProps) => {
   const conditionsCount = useConditionsCount(data.controlValues?.skip as RQBJsonLogic);
 
   const isSelected =
-    getWorkflowIdFromSlug({ slug: stepSlug ?? '', divider: STEP_DIVIDER }) ===
-      getWorkflowIdFromSlug({ slug: data.stepSlug ?? '', divider: STEP_DIVIDER }) &&
+    getIdFromSlug({ slug: stepSlug ?? '', divider: STEP_DIVIDER }) ===
+      getIdFromSlug({ slug: data.stepSlug ?? '', divider: STEP_DIVIDER }) &&
     !!stepSlug &&
     !!data.stepSlug;
 
   const hasConditions = conditionsCount > 0;
   const isReadOnly =
-    currentWorkflow?.origin === WorkflowOriginEnum.EXTERNAL || !has({ permission: PermissionsEnum.WORKFLOW_WRITE });
+    currentWorkflow?.origin === ResourceOriginEnum.EXTERNAL || !has({ permission: PermissionsEnum.WORKFLOW_WRITE });
 
   const handleMouseEnter = () => {
     if (hoverTimeoutRef.current) {
@@ -560,7 +560,7 @@ export const AddNode = (_props: NodeProps<NodeType>) => {
   }
 
   const isReadOnly =
-    workflow.origin === WorkflowOriginEnum.EXTERNAL || !has({ permission: PermissionsEnum.WORKFLOW_WRITE });
+    workflow.origin === ResourceOriginEnum.EXTERNAL || !has({ permission: PermissionsEnum.WORKFLOW_WRITE });
 
   if (isReadOnly) {
     return null;

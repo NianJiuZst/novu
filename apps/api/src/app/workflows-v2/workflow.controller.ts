@@ -13,23 +13,21 @@ import {
 } from '@nestjs/common/decorators';
 import { ApiBody, ApiExcludeEndpoint, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
-  DeleteWorkflowCommand,
-  DeleteWorkflowUseCase,
   ExternalApiAccessible,
   UserSession,
   RequirePermissions,
+  ParseSlugEnvironmentIdPipe,
+  ParseSlugIdPipe,
 } from '@novu/application-generic';
 import {
   ApiRateLimitCategoryEnum,
   DirectionEnum,
   UserSessionData,
-  WorkflowOriginEnum,
+  ResourceOriginEnum,
   PermissionsEnum,
 } from '@novu/shared';
 import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
-import { ParseSlugEnvironmentIdPipe } from './pipes/parse-slug-env-id.pipe';
-import { ParseSlugIdPipe } from './pipes/parse-slug-id.pipe';
 import {
   BuildStepDataCommand,
   BuildStepDataUsecase,
@@ -67,6 +65,8 @@ import {
   StepUpsertDto,
 } from './dtos';
 import { ThrottlerCategory } from '../rate-limiting/guards/throttler.decorator';
+import { DeleteWorkflowCommand } from '../workflows-v1/usecases/delete-workflow/delete-workflow.command';
+import { DeleteWorkflowUseCase } from '../workflows-v1/usecases/delete-workflow/delete-workflow.usecase';
 
 @ThrottlerCategory(ApiRateLimitCategoryEnum.CONFIGURATION)
 @ApiCommonResponses()
@@ -111,7 +111,7 @@ export class WorkflowController {
         workflowDto: {
           ...createWorkflowDto,
           steps: upsertSteps,
-          origin: WorkflowOriginEnum.NOVU_CLOUD,
+          origin: ResourceOriginEnum.NOVU_CLOUD,
         },
         user,
       })

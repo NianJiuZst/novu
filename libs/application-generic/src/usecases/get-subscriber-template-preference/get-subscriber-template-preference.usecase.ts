@@ -308,5 +308,6 @@ export function mapTemplateConfiguration(template: NotificationTemplateEntity): 
     triggers: template.triggers,
     ...(template.data ? { data: template.data } : {}),
     updatedAt: template.updatedAt,
+    createdAt: template.createdAt,
   };
 }

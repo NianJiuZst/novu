@@ -16,9 +16,10 @@ import {
   UnlessTag,
   LiquidError,
 } from 'liquidjs';
+import { LAYOUT_CONTENT_VARIABLE } from '@novu/shared';
 import { DIGEST_EVENTS_VARIABLE_PATTERN, isLiquidErrors, isValidDynamicPath, isValidTemplate } from './parser-utils';
-import { JSONSchemaDto } from '../../dtos';
-import type { ProcessContext, TemplateVariables, Variable } from './types';
+import { JSONSchemaDto } from '../../../shared/dtos/json-schema.dto';
+import type { ProcessContext, VariableDetails, Variable } from './types';
 import { buildLiquidParser } from './liquid-engine';
 
 const parserEngine = buildLiquidParser();
@@ -38,7 +39,7 @@ export function extractLiquidTemplateVariables({
 }: {
   template: string;
   variableSchema?: JSONSchemaDto;
-}): TemplateVariables {
+}): VariableDetails {
   if (!isValidTemplate(template)) {
     return { validVariables: [], invalidVariables: [] };
   }
@@ -52,7 +53,7 @@ function processLiquidRawOutput({
 }: {
   template: string;
   variableSchema?: JSONSchemaDto;
-}): TemplateVariables {
+}): VariableDetails {
   const validVariables: Array<Variable> = [];
   const invalidVariables: Array<Variable> = [];
   const processedOutputs = new Set<string>();
@@ -112,7 +113,7 @@ function parseByLiquid({
 }: {
   template: string;
   variableSchema?: JSONSchemaDto;
-}): TemplateVariables {
+}): VariableDetails {
   const validVariables: Array<Variable> = [];
   const invalidVariables: Array<Variable> = [];
   const parsed = parserEngine.parse(template);
@@ -234,11 +235,14 @@ function validateVariable({
   const isLocalVariable = Array.from(localVariables).some(
     (localVar) => variableName === localVar || variableName.startsWith(`${localVar}.`)
   );
+
+  const isAllowedVariable = isPropertyAllowed(variableSchema, variableName);
+  const isContentVariable = variableName === LAYOUT_CONTENT_VARIABLE && isAllowedVariable;
   if (isLocalVariable) {
     return;
   }
 
-  if (hasNoNamespace || (!variableSchema && isNotStepVariable)) {
+  if ((hasNoNamespace && !isContentVariable) || (!variableSchema && isNotStepVariable)) {
     // Otherwise, it's invalid (missing namespace)
     invalidVariables.push({
       name: variableName,
@@ -251,7 +255,6 @@ function validateVariable({
     return;
   }
 
-  const isAllowedVariable = isPropertyAllowed(variableSchema, variableName);
   if (isAllowedVariable) {
     validVariables.push({
       name: variableName,

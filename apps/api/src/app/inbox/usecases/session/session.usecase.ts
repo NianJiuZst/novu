@@ -20,6 +20,7 @@ import {
   UpsertControlValuesUseCase,
   UpsertControlValuesCommand,
   FeatureFlagsService,
+  generateTimestampHex,
 } from '@novu/application-generic';
 import {
   CommunityOrganizationRepository,
@@ -38,11 +39,12 @@ import {
   getFeatureForTierAsNumber,
   InAppProviderIdEnum,
   CustomDataType,
-  WorkflowTypeEnum,
-  WorkflowOriginEnum,
+  ResourceTypeEnum,
+  ResourceOriginEnum,
   StepTypeEnum,
   PreferencesTypeEnum,
   FeatureFlagsKeysEnum,
+  ControlValuesLevelEnum,
 } from '@novu/shared';
 import { AuthService } from '../../../auth/services/auth.service';
 import { SubscriberSessionResponseDto } from '../../dtos/subscriber-session-response.dto';
@@ -358,7 +360,7 @@ export class Session {
     const encryptedApiKey = encryptApiKey(key);
     const hashedApiKey = createHash('sha256').update(key).digest('hex');
 
-    const encodedDate = dateToTimestampHex(new Date());
+    const encodedDate = generateTimestampHex();
     const identifier = `${this.KEYLESS_ENVIRONMENT_PREFIX}${encodedDate}_${shortId(4)}`;
     const environment = await this.environmentRepository.create({
       _organizationId: organization._id,
@@ -557,8 +559,8 @@ export class Session {
       draft: false,
       critical: false,
       tags: [],
-      type: WorkflowTypeEnum.BRIDGE,
-      origin: WorkflowOriginEnum.NOVU_CLOUD,
+      type: ResourceTypeEnum.BRIDGE,
+      origin: ResourceOriginEnum.NOVU_CLOUD,
       steps: [
         {
           name: 'In-App Notification',
@@ -658,7 +660,8 @@ export class Session {
       UpsertControlValuesCommand.create({
         organizationId,
         environmentId,
-        notificationStepEntity: workflow.steps[0],
+        stepId: workflow.steps[0]._templateId,
+        level: ControlValuesLevelEnum.STEP_CONTROLS,
         workflowId: workflow._id,
         newControlValues: {
           body: '{{payload.body}}',
@@ -707,14 +710,6 @@ export class Session {
 
     return dto;
   }
-}
-
-function dateToTimestampHex(date) {
-  const timeInSeconds = Math.floor(date.getTime() / 1000);
-  const buffer = Buffer.alloc(4);
-  buffer.writeUInt32BE(timeInSeconds, 0);
-
-  return buffer.toString('hex');
 }
 
 function timestampHexToDate(timestampHex) {

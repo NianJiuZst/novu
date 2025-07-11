@@ -3,6 +3,7 @@
  */
 
 import { cancel } from "../funcs/cancel.js";
+import { retrieve } from "../funcs/retrieve.js";
 import { trigger } from "../funcs/trigger.js";
 import { triggerBroadcast } from "../funcs/triggerBroadcast.js";
 import { triggerBulk } from "../funcs/triggerBulk.js";
@@ -12,6 +13,7 @@ import * as operations from "../models/operations/index.js";
 import { unwrapAsync } from "../types/fp.js";
 import { Environments } from "./environments.js";
 import { Integrations } from "./integrations.js";
+import { Layouts } from "./layouts.js";
 import { Messages } from "./messages.js";
 import { Notifications } from "./notifications.js";
 import { Subscribers } from "./subscribers.js";
@@ -19,6 +21,11 @@ import { Topics } from "./topics.js";
 import { Workflows } from "./workflows.js";
 
 export class Novu extends ClientSDK {
+  private _layouts?: Layouts;
+  get layouts(): Layouts {
+    return (this._layouts ??= new Layouts(this._options));
+  }
+
   private _subscribers?: Subscribers;
   get subscribers(): Subscribers {
     return (this._subscribers ??= new Subscribers(this._options));
@@ -134,6 +141,23 @@ export class Novu extends ClientSDK {
       this,
       bulkTriggerEventDto,
       idempotencyKey,
+      options,
+    ));
+  }
+
+  /**
+   * Retrieve workflow step
+   *
+   * @remarks
+   * Retrieves data for a specific step in a workflow
+   */
+  async retrieve(
+    request: operations.LogsControllerGetLogsRequest,
+    options?: RequestOptions,
+  ): Promise<operations.LogsControllerGetLogsResponseBody> {
+    return unwrapAsync(retrieve(
+      this,
+      request,
       options,
     ));
   }

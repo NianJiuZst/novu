@@ -14,7 +14,9 @@ import {
   ActivityFeed,
   ApiKeysPage,
   CreateWorkflowPage,
+  CreateLayoutPage,
   LayoutsPage,
+  TranslationsPage,
   ErrorPage,
   IntegrationsListPage,
   OrganizationListPage,
@@ -56,6 +58,8 @@ import { overrideZodErrorMap } from './utils/validation';
 import { IS_SELF_HOSTED } from './config';
 import { ProtectedRoute } from './routes/protected-route';
 import { EditStepTemplateV2Page } from '@/pages/edit-step-template-v2';
+import { TranslationSettingsPage } from '@/pages/translation-settings-page';
+import { EditLayoutPage } from './pages/edit-layout';
 
 initializeSentry();
 overrideZodErrorMap();
@@ -234,6 +238,34 @@ const router = createBrowserRouter([
                     <LayoutsPage />
                   </ProtectedRoute>
                 ),
+                children: [
+                  {
+                    path: ROUTES.LAYOUTS_CREATE,
+                    element: (
+                      <ProtectedRoute permission={PermissionsEnum.LAYOUT_WRITE} isDrawerRoute>
+                        <CreateLayoutPage />
+                      </ProtectedRoute>
+                    ),
+                  },
+                ],
+              },
+              {
+                path: ROUTES.LAYOUTS_EDIT,
+                element: (
+                  <ProtectedRoute permission={PermissionsEnum.LAYOUT_READ}>
+                    <EditLayoutPage />
+                  </ProtectedRoute>
+                ),
+              },
+              {
+                path: ROUTES.TRANSLATIONS,
+                element: <TranslationsPage />,
+                children: [
+                  {
+                    path: ROUTES.TRANSLATION_SETTINGS,
+                    element: <TranslationSettingsPage />,
+                  },
+                ],
               },
               {
                 path: ROUTES.API_KEYS,
@@ -249,6 +281,22 @@ const router = createBrowserRouter([
               },
               {
                 path: ROUTES.ACTIVITY_FEED,
+                element: (
+                  <ProtectedRoute permission={PermissionsEnum.NOTIFICATION_READ}>
+                    <ActivityFeed />
+                  </ProtectedRoute>
+                ),
+              },
+              {
+                path: ROUTES.ACTIVITY_RUNS,
+                element: (
+                  <ProtectedRoute permission={PermissionsEnum.NOTIFICATION_READ}>
+                    <ActivityFeed />
+                  </ProtectedRoute>
+                ),
+              },
+              {
+                path: ROUTES.ACTIVITY_LOGS,
                 element: (
                   <ProtectedRoute permission={PermissionsEnum.NOTIFICATION_READ}>
                     <ActivityFeed />

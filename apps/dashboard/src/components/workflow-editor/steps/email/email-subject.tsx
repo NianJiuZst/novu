@@ -1,4 +1,4 @@
-import { ControlInput } from '@/components/primitives/control-input';
+import { ControlInput } from '@/components/workflow-editor/control-input';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/primitives/form/form';
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 import { useParseVariables } from '@/hooks/use-parse-variables';
@@ -32,6 +32,7 @@ export const EmailSubject = () => {
                 isAllowedVariable={isAllowedVariable}
                 value={field.value}
                 onChange={(val) => field.onChange(val)}
+                enableTranslations
               />
             </FormControl>
             <FormMessage className="mb-2">

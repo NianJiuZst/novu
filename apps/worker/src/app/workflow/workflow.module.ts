@@ -26,14 +26,11 @@ import {
   WorkflowInMemoryProviderService,
 } from '@novu/application-generic';
 import {
-  CommunityMemberRepository,
   CommunityOrganizationRepository,
   CommunityUserRepository,
   CustomNotificationsRepository,
   JobRepository,
-  MemberRepository,
   PreferencesRepository,
-  UserRepository,
 } from '@novu/dal';
 
 import { ForwardReference } from '@nestjs/common/interfaces/modules/forward-reference.interface';

@@ -3,7 +3,7 @@ import { cn } from '@/utils/ui';
 import { RiCodeBlock, RiEdit2Line, RiEyeLine, RiPlayCircleLine } from 'react-icons/ri';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { StepIssuesPanel } from '@/components/workflow-editor/steps/step-issues-panel';
+import { IssuesPanel } from '@/components/issues-panel';
 import { StepEditorFactory } from '@/components/workflow-editor/steps/editor/step-editor-factory';
 import { StepPreviewFactory } from '@/components/workflow-editor/steps/preview/step-preview-factory';
 import { ResizableLayout } from '@/components/workflow-editor/steps/layout/resizable-layout';
@@ -16,6 +16,9 @@ import { TestWorkflowDrawer } from '@/components/workflow-editor/test-workflow/t
 import { useFetchWorkflowTestData } from '@/hooks/use-fetch-workflow-test-data';
 import { Protect } from '../../../utils/protect';
 import { parseJsonValue } from '@/components/workflow-editor/steps/utils/preview-context.utils';
+import { LocaleSelect } from '@/components/primitives/locale-select';
+import { useFetchTranslations, type FetchTranslationsParams } from '@/hooks/use-fetch-translations';
+import { useIsTranslationEnabled } from '@/hooks/use-is-translation-enabled';
 
 type StepEditorLayoutProps = {
   workflow: WorkflowResponseDto;
@@ -24,11 +27,22 @@ type StepEditorLayoutProps = {
 };
 
 function StepEditorContent() {
-  const { step, isSubsequentLoad, editorValue } = useStepEditor();
+  const { step, isSubsequentLoad, editorValue, workflow, selectedLocale, setSelectedLocale } = useStepEditor();
   const editorTitle = getEditorTitle(step.type);
   const { workflowSlug = '' } = useParams<{ workflowSlug: string }>();
   const [isTestDrawerOpen, setIsTestDrawerOpen] = useState(false);
   const { testData } = useFetchWorkflowTestData({ workflowSlug });
+  const isTranslationsEnabled = useIsTranslationEnabled();
+
+  // Fetch translations for the current workflow
+  const { data: translationsData } = useFetchTranslations({
+    resourceId: workflow._id,
+    resourceType: 'workflow' as FetchTranslationsParams['resourceType'],
+    enabled: isTranslationsEnabled,
+  });
+
+  // Extract available locales from translations
+  const availableLocales = translationsData?.data?.map((translation) => translation.locale) || [];
 
   const handleTestWorkflowClick = () => {
     setIsTestDrawerOpen(true);
@@ -76,7 +90,16 @@ function StepEditorContent() {
             <ResizableLayout.Handle />
 
             <ResizableLayout.PreviewPanel>
-              <PanelHeader icon={RiEyeLine} title="Preview" isLoading={isSubsequentLoad} />
+              <PanelHeader icon={RiEyeLine} title="Preview" isLoading={isSubsequentLoad}>
+                {isTranslationsEnabled && availableLocales.length > 0 && (
+                  <LocaleSelect
+                    value={selectedLocale}
+                    onChange={setSelectedLocale}
+                    placeholder="Select locale"
+                    availableLocales={availableLocales}
+                  />
+                )}
+              </PanelHeader>
               <div className="flex-1 overflow-hidden">
                 <div
                   className="bg-bg-weak relative h-full overflow-y-auto p-3"
@@ -92,7 +115,7 @@ function StepEditorContent() {
           </ResizableLayout>
         </div>
 
-        <StepIssuesPanel step={step} />
+        <IssuesPanel issues={step.issues} />
       </ResizableLayout.MainContentPanel>
 
       <TestWorkflowDrawer

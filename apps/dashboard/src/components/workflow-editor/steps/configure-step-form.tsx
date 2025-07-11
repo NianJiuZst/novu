@@ -5,7 +5,7 @@ import {
   StepResponseDto,
   StepTypeEnum,
   StepUpdateDto,
-  WorkflowOriginEnum,
+  ResourceOriginEnum,
   WorkflowResponseDto,
 } from '@novu/shared';
 import { AnimatePresence, motion } from 'motion/react';
@@ -34,7 +34,7 @@ import { Separator } from '@/components/primitives/separator';
 import { SidebarContent, SidebarFooter, SidebarHeader } from '@/components/side-navigation/sidebar';
 import TruncatedText from '@/components/truncated-text';
 import { stepSchema } from '@/components/workflow-editor/schema';
-import { getStepDefaultValues } from '@/components/workflow-editor/step-default-values';
+import { getControlsDefaultValues } from '@/utils/default-values';
 import { flattenIssues, getFirstErrorMessage, updateStepInWorkflow } from '@/components/workflow-editor/step-utils';
 import { ConfigureChatStepPreview } from '@/components/workflow-editor/steps/chat/configure-chat-step-preview';
 import {
@@ -104,7 +104,7 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
   ];
 
   const isSupportedStep = supportedStepTypes.includes(step.type);
-  const isReadOnly = !isSupportedStep || workflow.origin === WorkflowOriginEnum.EXTERNAL;
+  const isReadOnly = !isSupportedStep || workflow.origin === ResourceOriginEnum.EXTERNAL;
 
   const isTemplateConfigurableStep = isSupportedStep && TEMPLATE_CONFIGURABLE_STEP_TYPES.includes(step.type);
   const isInlineConfigurableStep = isSupportedStep && INLINE_CONFIGURABLE_STEP_TYPES.includes(step.type);
@@ -131,7 +131,7 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
     return (step: StepResponseDto) => {
       if (isInlineConfigurableStep) {
         return {
-          controlValues: getStepDefaultValues(step),
+          controlValues: getControlsDefaultValues(step),
         };
       }
 

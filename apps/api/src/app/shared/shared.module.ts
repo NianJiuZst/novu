@@ -32,6 +32,7 @@ import {
   analyticsService,
   cacheService,
   CacheServiceHealthIndicator,
+  clickHouseService,
   ComputeJobWaitDurationService,
   CreateExecutionDetails,
   createNestLoggingModuleOptions,
@@ -42,7 +43,9 @@ import {
   InvalidateCacheService,
   LoggerModule,
   QueuesModule,
+  RequestLogRepository,
   storageService,
+  TraceLogRepository,
 } from '@novu/application-generic';
 
 import { isClerkEnabled, JobTopicNameEnum } from '@novu/shared';
@@ -110,6 +113,15 @@ const dalService = {
   },
 };
 
+const ANALYTICS_PROVIDERS = [
+  // Repositories
+  RequestLogRepository,
+  TraceLogRepository,
+
+  // Services
+  clickHouseService,
+];
+
 const PROVIDERS = [
   analyticsService,
   cacheService,
@@ -124,6 +136,7 @@ const PROVIDERS = [
   CreateExecutionDetails,
   ExecuteBridgeRequest,
   GetDecryptedSecretKey,
+  ...ANALYTICS_PROVIDERS,
 ];
 
 const IMPORTS = [

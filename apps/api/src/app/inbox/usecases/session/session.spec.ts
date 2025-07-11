@@ -183,7 +183,10 @@ describe('Session', () => {
     createSubscriber.execute.resolves(subscriber as any);
     notificationsCount.execute.resolves(notificationCount);
     authService.getSubscriberWidgetToken.resolves(token);
-    getOrganizationSettingsUsecase.execute.resolves({ removeNovuBranding: false });
+    getOrganizationSettingsUsecase.execute.resolves({
+      removeNovuBranding: false,
+      defaultLocale: 'en_US',
+    });
 
     const validateHmacEncryptionStub = sinon.stub(encryption, 'validateHmacEncryption');
 
@@ -214,11 +217,17 @@ describe('Session', () => {
     notificationsCount.execute.resolves(notificationCount);
     authService.getSubscriberWidgetToken.resolves(token);
 
-    getOrganizationSettingsUsecase.execute.resolves({ removeNovuBranding: false });
+    getOrganizationSettingsUsecase.execute.resolves({
+      removeNovuBranding: false,
+      defaultLocale: 'en_US',
+    });
     const response: SubscriberSessionResponseDto = await session.execute(command);
     expect(response.removeNovuBranding).to.equal(false);
 
-    getOrganizationSettingsUsecase.execute.resolves({ removeNovuBranding: true });
+    getOrganizationSettingsUsecase.execute.resolves({
+      removeNovuBranding: true,
+      defaultLocale: 'en_US',
+    });
     const responseWithRemoveNovuBranding: SubscriberSessionResponseDto = await session.execute(command);
     expect(responseWithRemoveNovuBranding.removeNovuBranding).to.equal(true);
   });
@@ -246,7 +255,10 @@ describe('Session', () => {
     createSubscriber.execute.resolves(subscriber as any);
     notificationsCount.execute.resolves(notificationCount);
     authService.getSubscriberWidgetToken.resolves(token);
-    getOrganizationSettingsUsecase.execute.resolves({ removeNovuBranding: false });
+    getOrganizationSettingsUsecase.execute.resolves({
+      removeNovuBranding: false,
+      defaultLocale: 'en_US',
+    });
 
     const response: SubscriberSessionResponseDto = await session.execute(command);
 
@@ -282,7 +294,10 @@ describe('Session', () => {
     createSubscriber.execute.resolves(subscriber as any);
     notificationsCount.execute.resolves(notificationCount);
     authService.getSubscriberWidgetToken.resolves(token);
-    getOrganizationSettingsUsecase.execute.resolves({ removeNovuBranding: false });
+    getOrganizationSettingsUsecase.execute.resolves({
+      removeNovuBranding: false,
+      defaultLocale: 'en_US',
+    });
 
     // FREE plan should have 24 hours max snooze duration
     organizationRepository.findOne.resolves({ apiServiceLevel: ApiServiceLevelEnum.FREE } as any);

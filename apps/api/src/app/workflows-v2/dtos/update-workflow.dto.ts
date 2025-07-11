@@ -1,7 +1,7 @@
 import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 import { IsArray, IsBoolean, IsEnum, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { StepTypeEnum, WorkflowOriginEnum } from '@novu/shared';
+import { StepTypeEnum, ResourceOriginEnum } from '@novu/shared';
 import { WorkflowCommonsFields } from './workflow-commons.dto';
 import { PreferencesRequestDto } from './preferences.request.dto';
 import {
@@ -104,28 +104,9 @@ export class UpdateWorkflowDto extends WorkflowCommonsFields {
 
   @ApiProperty({
     description: 'Origin of the workflow',
-    enum: [...Object.values(WorkflowOriginEnum)],
-    enumName: 'WorkflowOriginEnum',
+    enum: [...Object.values(ResourceOriginEnum)],
+    enumName: 'ResourceOriginEnum',
   })
-  @IsEnum(WorkflowOriginEnum)
-  origin: WorkflowOriginEnum;
-
-  @ApiPropertyOptional({
-    description: 'The payload JSON Schema for the workflow',
-    type: 'object',
-    additionalProperties: true,
-  })
-  @IsOptional()
-  @IsValidJsonSchema({
-    message: 'payloadSchema must be a valid JSON schema',
-  })
-  payloadSchema?: object;
-
-  @ApiPropertyOptional({
-    description: 'Enable or disable payload schema validation',
-    type: 'boolean',
-  })
-  @IsOptional()
-  @IsBoolean()
-  validatePayload?: boolean;
+  @IsEnum(ResourceOriginEnum)
+  origin: ResourceOriginEnum;
 }

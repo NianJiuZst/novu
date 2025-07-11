@@ -5,9 +5,11 @@ import { SubscriberActivityList } from '@/components/subscribers/subscriber-acti
 import { useEnvironment } from '@/context/environment/hooks';
 import { useFetchActivities } from '@/hooks/use-fetch-activities';
 import { useFetchSubscription } from '@/hooks/use-fetch-subscription';
+import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { ActivityFiltersData } from '@/types/activity';
 import { getMaxAvailableActivityFeedDateRange } from '@/utils/activityFilters';
 import { buildRoute, ROUTES } from '@/utils/routes';
+import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { useOrganization } from '@clerk/clerk-react';
 import { AnimatePresence } from 'motion/react';
 import { useMemo, useState } from 'react';
@@ -26,6 +28,7 @@ export const TopicActivity = ({ topicKey }: { topicKey: string }) => {
   const { organization } = useOrganization();
   const { currentEnvironment } = useEnvironment();
   const { subscription } = useFetchSubscription();
+  const isHttpLogsPageEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_HTTP_LOGS_PAGE_ENABLED, false);
 
   const maxAvailableActivityFeedDateRange = useMemo(
     () =>
@@ -103,7 +106,7 @@ export const TopicActivity = ({ topicKey }: { topicKey: string }) => {
             onFiltersChange={setFilters}
             onReset={handleClearFilters}
             hide={['dateRange', 'topicKey']}
-            className="min-h-max overflow-x-auto"
+            className="min-h-max overflow-x-auto px-2.5 pt-2.5"
           />
           <SubscriberActivityList
             isLoading={isLoading}
@@ -116,7 +119,9 @@ export const TopicActivity = ({ topicKey }: { topicKey: string }) => {
             To view more detailed activity, View{' '}
             <Link
               className="underline"
-              to={`${buildRoute(ROUTES.ACTIVITY_FEED, { environmentSlug: currentEnvironment?.slug ?? '' })}?${searchParams.toString()}`}
+              to={`${buildRoute(isHttpLogsPageEnabled ? ROUTES.ACTIVITY_RUNS : ROUTES.ACTIVITY_FEED, {
+                environmentSlug: currentEnvironment?.slug ?? '',
+              })}?${searchParams.toString()}`}
             >
               Activity Feed
             </Link>{' '}

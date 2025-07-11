@@ -3,10 +3,12 @@ import { post, get, patch } from './api.client';
 
 export type GetOrganizationSettingsDto = {
   removeNovuBranding: boolean;
+  defaultLocale: string;
 };
 
 export type UpdateOrganizationSettingsDto = {
   removeNovuBranding?: boolean;
+  defaultLocale?: string;
 };
 
 export function updateClerkOrgMetadata({

@@ -1,7 +1,14 @@
-import { createContext, useContext, ReactNode, useMemo } from 'react';
+import { createContext, useContext, ReactNode, useMemo, useState, useEffect, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { WorkflowResponseDto, StepResponseDto, WorkflowOriginEnum, GeneratePreviewResponseDto } from '@novu/shared';
+import {
+  WorkflowResponseDto,
+  StepResponseDto,
+  ResourceOriginEnum,
+  GeneratePreviewResponseDto,
+  DEFAULT_LOCALE,
+} from '@novu/shared';
 import { useEditorPreview } from '@/components/workflow-editor/steps/use-editor-preview';
+import { useFetchOrganizationSettings } from '@/hooks/use-fetch-organization-settings';
 
 type StepEditorContextType = {
   workflow: WorkflowResponseDto;
@@ -15,6 +22,8 @@ type StepEditorContextType = {
   isSubsequentLoad: boolean;
   isNovuCloud: boolean;
   isStepEditable: boolean;
+  selectedLocale: string;
+  setSelectedLocale: (locale: string) => void;
 };
 
 const StepEditorContext = createContext<StepEditorContextType | null>(null);
@@ -28,6 +37,17 @@ type StepEditorProviderProps = {
 export function StepEditorProvider({ children, workflow, step }: StepEditorProviderProps) {
   const form = useFormContext();
   const controlValues = form.watch();
+  const { data: organizationSettings } = useFetchOrganizationSettings();
+  const [selectedLocale, setSelectedLocale] = useState<string>(DEFAULT_LOCALE);
+  const hasInitialized = useRef(false);
+
+  // Set to organization default when settings load (only once)
+  useEffect(() => {
+    if (organizationSettings?.data?.defaultLocale && !hasInitialized.current) {
+      setSelectedLocale(organizationSettings.data.defaultLocale);
+      hasInitialized.current = true;
+    }
+  }, [organizationSettings?.data?.defaultLocale]);
 
   const { editorValue, setEditorValue, previewData, isPreviewPending, isFetching } = useEditorPreview({
     workflowSlug: workflow.workflowId,
@@ -36,8 +56,8 @@ export function StepEditorProvider({ children, workflow, step }: StepEditorProvi
     payloadSchema: workflow.payloadSchema,
   });
   const { uiSchema } = step.controls;
-  const isNovuCloud = workflow.origin === WorkflowOriginEnum.NOVU_CLOUD && Boolean(uiSchema);
-  const isExternal = workflow.origin === WorkflowOriginEnum.EXTERNAL;
+  const isNovuCloud = workflow.origin === ResourceOriginEnum.NOVU_CLOUD && Boolean(uiSchema);
+  const isExternal = workflow.origin === ResourceOriginEnum.EXTERNAL;
   const isStepEditable = isExternal || (isNovuCloud && Boolean(uiSchema));
 
   const isInitialLoad = isPreviewPending;
@@ -56,6 +76,8 @@ export function StepEditorProvider({ children, workflow, step }: StepEditorProvi
       isSubsequentLoad,
       isNovuCloud,
       isStepEditable,
+      selectedLocale,
+      setSelectedLocale,
     }),
     [
       workflow,
@@ -69,6 +91,8 @@ export function StepEditorProvider({ children, workflow, step }: StepEditorProvi
       isSubsequentLoad,
       isNovuCloud,
       isStepEditable,
+      selectedLocale,
+      setSelectedLocale,
     ]
   );
 

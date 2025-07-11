@@ -11,6 +11,7 @@ import {
   RiChat1Line,
   RiDatabase2Line,
   RiDiscussLine,
+  RiFileTextLine,
   RiGroup2Line,
   RiKey2Line,
   RiLayout5Line,
@@ -19,6 +20,7 @@ import {
   RiSignalTowerLine,
   RiStore3Line,
   RiUserAddLine,
+  RiTranslate2,
 } from 'react-icons/ri';
 import { useFetchSubscription } from '../../hooks/use-fetch-subscription';
 import { ChangelogStack } from './changelog-cards';
@@ -110,6 +112,8 @@ export const SideNavigation = () => {
   const isWebhooksManagementEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_WEBHOOKS_MANAGEMENT_ENABLED);
   const isTopicsPageActive = useFeatureFlag(FeatureFlagsKeysEnum.IS_TOPICS_PAGE_ACTIVE, false);
   const isEmailLayoutsPageActive = useFeatureFlag(FeatureFlagsKeysEnum.IS_LAYOUTS_PAGE_ACTIVE, false);
+  const isHttpLogsPageEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_HTTP_LOGS_PAGE_ENABLED, false);
+  const isTranslationEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_TRANSLATION_ENABLED, false);
 
   const { currentEnvironment, environments, switchEnvironment } = useEnvironment();
 
@@ -119,7 +123,7 @@ export const SideNavigation = () => {
   };
 
   return (
-    <aside className="bg-neutral-alpha-50 relative flex h-full w-[275px] flex-shrink-0 flex-col">
+    <aside className="bg-neutral-alpha-50 relative flex h-full w-[275px] flex-shrink-0 flex-col overflow-auto">
       <SidebarContent className="h-full">
         <OrganizationDropdown />
         <EnvironmentDropdown
@@ -153,9 +157,9 @@ export const SideNavigation = () => {
                 </Protect>
               )}
             </NavigationGroup>
-            {isEmailLayoutsPageActive && (
-              <Protect permission={PermissionsEnum.LAYOUT_READ}>
-                <NavigationGroup label="Resources">
+            {(isEmailLayoutsPageActive || isTranslationEnabled) && (
+              <NavigationGroup label="Resources">
+                {isEmailLayoutsPageActive && (
                   <Protect permission={PermissionsEnum.LAYOUT_READ}>
                     <NavigationLink
                       to={buildRoute(ROUTES.LAYOUTS, { environmentSlug: currentEnvironment?.slug ?? '' })}
@@ -164,14 +168,24 @@ export const SideNavigation = () => {
                       <span>Email Layouts</span>
                     </NavigationLink>
                   </Protect>
-                </NavigationGroup>
-              </Protect>
+                )}
+                {isTranslationEnabled && (
+                  <NavigationLink
+                    to={buildRoute(ROUTES.TRANSLATIONS, { environmentSlug: currentEnvironment?.slug ?? '' })}
+                  >
+                    <RiTranslate2 className="size-4" />
+                    <span>Translations</span>
+                  </NavigationLink>
+                )}
+              </NavigationGroup>
             )}
             <Protect permission={PermissionsEnum.NOTIFICATION_READ}>
               <NavigationGroup label="Monitor">
                 <Protect permission={PermissionsEnum.NOTIFICATION_READ}>
                   <NavigationLink
-                    to={buildRoute(ROUTES.ACTIVITY_FEED, { environmentSlug: currentEnvironment?.slug ?? '' })}
+                    to={buildRoute(isHttpLogsPageEnabled ? ROUTES.ACTIVITY_RUNS : ROUTES.ACTIVITY_FEED, {
+                      environmentSlug: currentEnvironment?.slug ?? '',
+                    })}
                   >
                     <RiBarChartBoxLine className="size-4" />
                     <span>Activity Feed</span>

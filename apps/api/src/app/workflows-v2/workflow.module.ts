@@ -1,14 +1,10 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import {
-  CreateWorkflow,
   DeletePreferencesUseCase,
-  DeleteWorkflowUseCase,
   GetPreferences,
   GetWorkflowByIdsUseCase,
-  GetWorkflowWithPreferencesUseCase,
   ResourceValidatorService,
   TierRestrictionsValidateUsecase,
-  UpdateWorkflow,
   UpsertControlValuesUseCase,
   UpsertPreferences,
 } from '@novu/application-generic';
@@ -31,21 +27,34 @@ import {
   UpsertWorkflowUseCase,
 } from './usecases';
 import { PatchWorkflowUsecase } from './usecases/patch-workflow';
-import { CreateVariablesObject } from './usecases/create-variables-object/create-variables-object.usecase';
+import { CreateVariablesObject } from '../shared/usecases/create-variables-object/create-variables-object.usecase';
 import { BuildStepIssuesUsecase } from './usecases/build-step-issues/build-step-issues.usecase';
 import { WorkflowController } from './workflow.controller';
 import { DuplicateWorkflowUseCase } from './usecases/duplicate-workflow/duplicate-workflow.usecase';
 import { WebhooksModule } from '../webhooks/webhooks.module';
-import { ControlValueSanitizerService } from './usecases/preview/services/control-value-sanitizer.service';
+import { ControlValueSanitizerService } from '../shared/services/control-value-sanitizer.service';
 import { PayloadMergerService } from './usecases/preview/services/payload-merger.service';
 import { SchemaBuilderService } from './usecases/preview/services/schema-builder.service';
 import { PreviewPayloadProcessorService } from './usecases/preview/services/preview-payload-processor.service';
 import { MockDataGeneratorService } from './usecases/preview/services/mock-data-generator.service';
 import { PreviewErrorHandler } from './usecases/preview/utils/preview-error-handler';
+import { LayoutsV2Module } from '../layouts-v2/layouts.module';
+import { CreateWorkflow } from '../workflows-v1/usecases/create-workflow/create-workflow.usecase';
+import { UpdateWorkflow } from '../workflows-v1/usecases/update-workflow/update-workflow.usecase';
+import { DeleteWorkflowUseCase } from '../workflows-v1/usecases/delete-workflow/delete-workflow.usecase';
+import { GetWorkflowWithPreferencesUseCase } from '../workflows-v1/usecases/get-workflow-with-preferences/get-workflow-with-preferences.usecase';
 
 const DAL_REPOSITORIES = [CommunityOrganizationRepository];
 
-const MODULES = [SharedModule, MessageTemplateModule, ChangeModule, AuthModule, BridgeModule, IntegrationModule];
+const MODULES = [
+  SharedModule,
+  MessageTemplateModule,
+  ChangeModule,
+  AuthModule,
+  BridgeModule,
+  IntegrationModule,
+  LayoutsV2Module,
+];
 
 if (process.env.NOVU_ENTERPRISE === 'true') {
   MODULES.push(WebhooksModule);

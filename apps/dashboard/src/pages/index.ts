@@ -1,6 +1,7 @@
 export * from './activity-feed';
 export * from './api-keys';
 export * from './create-workflow';
+export * from './create-layout';
 export * from './access-denied-page';
 export * from './error-page';
 export * from './integrations-list-page';
@@ -13,3 +14,4 @@ export * from './usecase-select-page';
 export * from './welcome-page';
 export * from './workflows';
 export * from './layouts';
+export * from './translations';

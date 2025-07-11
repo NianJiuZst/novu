@@ -13,9 +13,9 @@ import {
   StepIssues,
   TriggerTypeEnum,
   WorkflowIssueTypeEnum,
-  WorkflowOriginEnum,
+  ResourceOriginEnum,
   WorkflowStatusEnum,
-  WorkflowTypeEnum,
+  ResourceTypeEnum,
 } from '@novu/shared';
 import { Types } from 'mongoose';
 import type { ChangePropsValueType } from '../../types';
@@ -75,15 +75,17 @@ export class NotificationTemplateEntity {
 
   data?: CustomDataType;
 
-  type?: WorkflowTypeEnum;
+  type?: ResourceTypeEnum;
 
-  origin?: WorkflowOriginEnum;
+  origin?: ResourceOriginEnum;
 
   rawData?: any;
 
   payloadSchema?: any;
 
   validatePayload?: boolean;
+
+  isTranslationEnabled?: boolean;
 
   issues: Record<string, RuntimeIssue[]>;
 

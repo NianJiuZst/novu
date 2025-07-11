@@ -32,7 +32,7 @@ import {
   TriggerContextTypeEnum,
   TriggerEventStatusEnum,
   TriggerRecipientsPayload,
-  WorkflowOriginEnum,
+  ResourceOriginEnum,
 } from '@novu/shared';
 import { addBreadcrumb } from '@sentry/node';
 import { randomBytes } from 'crypto';
@@ -48,6 +48,7 @@ import {
   ParseEventRequestCommand,
   ParseEventRequestMulticastCommand,
 } from './parse-event-request.command';
+import { generateTransactionId } from '../../../shared/helpers';
 
 @Injectable()
 export class ParseEventRequest {
@@ -70,7 +71,7 @@ export class ParseEventRequest {
 
   @InstrumentUsecase()
   public async execute(command: ParseEventRequestCommand) {
-    const transactionId = command.transactionId || uuidv4();
+    const transactionId = command.transactionId || generateTransactionId();
 
     const [environment, organization] = await Promise.all([
       this.environmentRepository.findOne({ _id: command.environmentId }),
@@ -209,7 +210,7 @@ export class ParseEventRequest {
         statelessBridgeUrl: command.bridgeUrl,
         environmentId: command.environmentId,
         action: GetActionEnum.DISCOVER,
-        workflowOrigin: WorkflowOriginEnum.EXTERNAL,
+        workflowOrigin: ResourceOriginEnum.EXTERNAL,
       })
     )) as ExecuteBridgeRequestDto<GetActionEnum.DISCOVER>;
 

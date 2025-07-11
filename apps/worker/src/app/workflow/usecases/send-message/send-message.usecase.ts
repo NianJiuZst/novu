@@ -8,7 +8,7 @@ import {
   IPreferenceChannels,
   PreferencesTypeEnum,
   StepTypeEnum,
-  WorkflowTypeEnum,
+  ResourceTypeEnum,
 } from '@novu/shared';
 import {
   AnalyticsService,
@@ -378,7 +378,7 @@ export class SendMessage {
      * This is intentional, so that mixpanel can automatically reshard it.
      */
     this.analyticsService.mixpanelTrack('Process Workflow Step - [Triggers]', '', {
-      workflowType: isBridgeWorkflow ? WorkflowTypeEnum.BRIDGE : WorkflowTypeEnum.REGULAR,
+      workflowType: isBridgeWorkflow ? ResourceTypeEnum.BRIDGE : ResourceTypeEnum.REGULAR,
       _template: command.job._templateId,
       _organization: command.organizationId,
       _environment: command.environmentId,

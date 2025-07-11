@@ -1,5 +1,5 @@
 import { Avatar, AvatarImage } from '@/components/primitives/avatar';
-import { MAILY_EMAIL_WIDTH } from '@/components/workflow-editor/steps/email/maily-config';
+import { MAILY_EMAIL_WIDTH } from '@/components/maily/maily-config';
 import { cn } from '@/utils/ui';
 import { HTMLAttributes, useCallback, useEffect, useRef } from 'react';
 import { RiArrowDownSFill } from 'react-icons/ri';
@@ -82,6 +82,8 @@ export const EmailPreviewBody = (props: EmailPreviewBodyProps) => {
 
     if (lastStyleTag) {
       lastStyleTag.after(style);
+    } else {
+      doc.prepend(style);
     }
 
     // give a bit of time for the dom changes to be applied
