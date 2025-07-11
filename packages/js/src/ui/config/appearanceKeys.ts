@@ -256,11 +256,4 @@ export const appearanceKeys = [
   'aiPreferencePromptLabel',
   'aiPreferencePromptInput',
   'aiPreferencePromptHint',
-
-  // Demo
-  'preferencesDemo',
-  'preferencesDemoTitle',
-  'preferencesDemoInfo',
-  'preferencesDemoInfoTitle',
-  'preferencesDemoInfoList',
 ] as const;
