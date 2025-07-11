@@ -24,13 +24,13 @@ export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
     }
   }
 
-  async getFlag<T_Result>({
+  async getFlag<TResult>({
     key,
     defaultValue,
     environment,
     organization,
     user,
-  }: FeatureFlagContext<T_Result>): Promise<T_Result> {
+  }: FeatureFlagContext<TResult>): Promise<TResult> {
     const context = this.buildLDContext({ user, organization, environment });
     const newVar = await this.client.variation(key, context, defaultValue);
 

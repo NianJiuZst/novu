@@ -92,7 +92,7 @@ export class ActiveJobsMetricService {
 
   private getWorkerProcessor() {
     return async () => {
-      // eslint-disable-next-line no-async-promise-executor
+      // biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
       return await new Promise<void>(async (resolve, reject): Promise<void> => {
         Logger.log('metric job started', LOG_CONTEXT);
         const deploymentName = process.env.FLEET_NAME ?? 'default';

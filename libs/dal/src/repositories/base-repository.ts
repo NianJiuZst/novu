@@ -14,12 +14,12 @@ import {
 } from 'mongoose';
 import { DalException } from '../shared';
 
-export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
-  public _model: Model<T_DBModel>;
+export class BaseRepository<TDBModel, TMappedEntity, TEnforcement> {
+  public _model: Model<TDBModel>;
 
   constructor(
-    protected MongooseModel: Model<T_DBModel>,
-    protected entity: ClassConstructor<T_MappedEntity>
+    protected MongooseModel: Model<TDBModel>,
+    protected entity: ClassConstructor<TMappedEntity>
   ) {
     this._model = MongooseModel;
   }
@@ -45,7 +45,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     return new Types.ObjectId(value);
   }
 
-  async count(query: FilterQuery<T_DBModel> & T_Enforcement, limit?: number): Promise<number> {
+  async count(query: FilterQuery<TDBModel> & TEnforcement, limit?: number): Promise<number> {
     return this.MongooseModel.countDocuments(query, {
       limit,
     });
@@ -60,10 +60,10 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async findOne(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
-    select?: ProjectionType<T_MappedEntity>,
-    options: { readPreference?: 'secondaryPreferred' | 'primary'; query?: QueryOptions<T_DBModel> } = {}
-  ): Promise<T_MappedEntity | null> {
+    query: FilterQuery<TDBModel> & TEnforcement,
+    select?: ProjectionType<TMappedEntity>,
+    options: { readPreference?: 'secondaryPreferred' | 'primary'; query?: QueryOptions<TDBModel> } = {}
+  ): Promise<TMappedEntity | null> {
     const data = await this.MongooseModel.findOne(query, select, options.query).read(
       options.readPreference || 'primary'
     );
@@ -73,10 +73,10 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async findOneAndUpdate(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
-    update: UpdateQuery<T_DBModel>,
-    options: QueryOptions<T_DBModel> = {}
-  ): Promise<T_MappedEntity | null> {
+    query: FilterQuery<TDBModel> & TEnforcement,
+    update: UpdateQuery<TDBModel>,
+    options: QueryOptions<TDBModel> = {}
+  ): Promise<TMappedEntity | null> {
     const data = await this.MongooseModel.findOneAndUpdate(query, update, {
       ...options,
       upsert: options.upsert || false,
@@ -88,7 +88,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     return this.mapEntity(data.toObject());
   }
 
-  async delete(query: FilterQuery<T_DBModel> & T_Enforcement): Promise<{
+  async delete(query: FilterQuery<TDBModel> & TEnforcement): Promise<{
     /** Indicates whether this writes result was acknowledged. If not, then all other members of this result will be undefined. */
     acknowledged: boolean;
     /** The number of documents that were deleted */
@@ -97,7 +97,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     return await this.MongooseModel.deleteMany(query);
   }
 
-  async findOneAndDelete(query: FilterQuery<T_DBModel> & T_Enforcement): Promise<T_MappedEntity | null> {
+  async findOneAndDelete(query: FilterQuery<TDBModel> & TEnforcement): Promise<TMappedEntity | null> {
     const data = await this.MongooseModel.findOneAndDelete(query).lean();
     if (!data) return null;
 
@@ -105,10 +105,10 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async find(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
-    select: ProjectionType<T_MappedEntity> = '',
+    query: FilterQuery<TDBModel> & TEnforcement,
+    select: ProjectionType<TMappedEntity> = '',
     options: { limit?: number; sort?: any; skip?: number } = {}
-  ): Promise<T_MappedEntity[]> {
+  ): Promise<TMappedEntity[]> {
     const data = await this.MongooseModel.find(query, select, {
       sort: options.sort || null,
     })
@@ -121,7 +121,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async *findBatch(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
+    query: FilterQuery<TDBModel> & TEnforcement,
     select = '',
     options: { limit?: number; sort?: any; skip?: number } = {},
     batchSize = 500
@@ -146,14 +146,14 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     paginateField?: string;
     after: string;
     queryOrStatements?: object[];
-  }): Promise<FilterQuery<T_DBModel>[]> {
+  }): Promise<FilterQuery<TDBModel>[]> {
     const afterItem = await this.MongooseModel.findOne({ _id: after });
     if (!afterItem) {
       throw new DalException('Invalid after id');
     }
 
-    let cursorOrStatements: FilterQuery<T_DBModel>[] = [];
-    let enhancedCursorOrStatements: FilterQuery<T_DBModel>[] = [];
+    let cursorOrStatements: FilterQuery<TDBModel>[] = [];
+    let enhancedCursorOrStatements: FilterQuery<TDBModel>[] = [];
     if (paginateField && afterItem[paginateField]) {
       const paginatedFieldValue = afterItem[paginateField];
       cursorOrStatements = [
@@ -194,14 +194,14 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     paginateField,
     enhanceQuery,
   }: {
-    query?: FilterQuery<T_DBModel> & T_Enforcement;
+    query?: FilterQuery<TDBModel> & TEnforcement;
     limit: number;
     offset: number;
     after?: string;
     sort?: any;
     paginateField?: string;
-    enhanceQuery?: (query: QueryWithHelpers<Array<T_DBModel>, T_DBModel>) => any;
-  }): Promise<{ data: T_MappedEntity[]; hasMore: boolean }> {
+    enhanceQuery?: (query: QueryWithHelpers<Array<TDBModel>, TDBModel>) => any;
+  }): Promise<{ data: TMappedEntity[]; hasMore: boolean }> {
     const isAfterDefined = typeof after !== 'undefined';
     const sortKeys = Object.keys(sort ?? {});
     const isSortDesc = sortKeys.length > 0 && sort[sortKeys[0]] === -1;

@@ -1610,6 +1610,7 @@ const JSONSchemaFaker = (() => {
           };
           exports.tokenizeClass = (str, regexpStr) => {
             var tokens = [];
+            // biome-ignore lint/correctness/noEmptyCharacterClassInRegex: <explanation>
             var regexp = /\\(?:(w)|(d)|(s)|(W)|(D)|(S))|((?:(?:\\)(.)|([^\]\\]))-(?:\\)?([^\]]))|(\])|(?:\\)?([^])/g;
             var rs, c;
             while ((rs = regexp.exec(str)) != null) {
@@ -1720,6 +1721,7 @@ const JSONSchemaFaker = (() => {
                   last.push(positions.end());
                   break;
                 case '[': {
+                  // biome-ignore lint/correctness/noInnerDeclarations: <explanation>
                   var not;
                   if (str[i] === '^') {
                     not = true;
@@ -1727,6 +1729,7 @@ const JSONSchemaFaker = (() => {
                   } else {
                     not = false;
                   }
+                  // biome-ignore lint/correctness/noInnerDeclarations: <explanation>
                   var classTokens = util.tokenizeClass(str.slice(i), regexpStr);
                   i += classTokens[1];
                   last.push({
@@ -1740,6 +1743,7 @@ const JSONSchemaFaker = (() => {
                   last.push(sets.anyChar());
                   break;
                 case '(': {
+                  // biome-ignore lint/correctness/noInnerDeclarations: <explanation>
                   var group = {
                     type: types2.GROUP,
                     stack: [],
@@ -1776,12 +1780,14 @@ const JSONSchemaFaker = (() => {
                     lastGroup.options = [lastGroup.stack];
                     delete lastGroup.stack;
                   }
+                  // biome-ignore lint/correctness/noInnerDeclarations: <explanation>
                   var stack = [];
                   lastGroup.options.push(stack);
                   last = stack;
                   break;
                 }
                 case '{': {
+                  // biome-ignore lint/correctness/noInnerDeclarations: <explanation>
                   var rs = /^(\d+)(,(\d+)?)?\}/.exec(str.slice(i)),
                     min,
                     max;
@@ -1886,6 +1892,7 @@ const JSONSchemaFaker = (() => {
               }
             }
             toString() {
+              // biome-ignore lint/suspicious/noDoubleEquals: <explanation>
               return this.low == this.high ? this.low.toString() : this.low + '-' + this.high;
             }
           };
@@ -1953,7 +1960,9 @@ const JSONSchemaFaker = (() => {
                   i++;
                 }
                 while (i < this.ranges.length && subrange.overlaps(this.ranges[i])) {
+                  // biome-ignore lint/correctness/noInnerDeclarations: <explanation>
                   var low = Math.max(this.ranges[i].low, subrange.low);
+                  // biome-ignore lint/correctness/noInnerDeclarations: <explanation>
                   var high = Math.min(this.ranges[i].high, subrange.high);
                   newRanges.push(new SubRange(low, high));
                   i++;
@@ -2081,6 +2090,7 @@ const JSONSchemaFaker = (() => {
                 case types2.POSITION:
                   return '';
                 case types2.SET: {
+                  // biome-ignore lint/correctness/noInnerDeclarations: <explanation>
                   var expandedSet = this._expand(token);
                   if (!expandedSet.length) {
                     return '';
@@ -2097,6 +2107,7 @@ const JSONSchemaFaker = (() => {
                 case types2.REFERENCE:
                   return groups[token.value - 1] || '';
                 case types2.CHAR: {
+                  // biome-ignore lint/correctness/noInnerDeclarations: <explanation>
                   var code = this.ignoreCase && this._randBool() ? this._toOtherCase(token.value) : token.value;
                   return String.fromCharCode(code);
                 }
@@ -3891,6 +3902,7 @@ ${indent}`
                   return null;
               }
             };
+            // biome-ignore lint/suspicious/noControlCharactersInRegex: <explanation>
             if (type !== PlainValue.Type.QUOTE_DOUBLE && /[\x00-\x08\x0b-\x1f\x7f-\x9f]/.test(value)) {
               type = PlainValue.Type.QUOTE_DOUBLE;
             } else if (

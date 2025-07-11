@@ -166,7 +166,7 @@ export abstract class CronService implements OnApplicationBootstrap, OnApplicati
             ObservabilityBackgroundTransactionEnum.CRON_JOB_QUEUE,
             `cron-${jobName}`,
             function transactionHandler() {
-              // eslint-disable-next-line no-async-promise-executor
+              // biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
               return new Promise<void>(async (resolve, reject) => {
                 const transaction = nr.getTransaction();
                 try {

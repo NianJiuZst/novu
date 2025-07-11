@@ -104,7 +104,7 @@ export const DefaultNotification = (props: DefaultNotificationProps) => {
   };
 
   return (
-    <a
+    <button
       class={style(
         'notification',
         cn(
@@ -248,6 +248,6 @@ export const DefaultNotification = (props: DefaultNotificationProps) => {
       <Show when={!props.notification.isRead}>
         <span class={style('notificationDot', 'nt-size-1.5 nt-bg-primary nt-rounded-full nt-shrink-0')} />
       </Show>
-    </a>
+    </button>
   );
 };

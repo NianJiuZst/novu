@@ -66,6 +66,7 @@ WithIcon.args = {
   rightSection: <IconContentCopy />,
 };
 
+// biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
 export const Error = Template.bind({});
 Error.args = {
   label: 'Your Email',

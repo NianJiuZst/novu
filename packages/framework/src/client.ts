@@ -195,18 +195,19 @@ export class Client {
 
     if (!result.success) {
       switch (component) {
+        // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
         case 'event':
           this.throwInvalidEvent(dataType, workflowId, result.errors);
 
-        // eslint-disable-next-line no-fallthrough
+        // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
         case 'step':
           this.throwInvalidStep(stepId, dataType, workflowId, result.errors);
 
-        // eslint-disable-next-line no-fallthrough
+        // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
         case 'provider':
           this.throwInvalidProvider(stepId, providerId, dataType, workflowId, result.errors);
 
-        // eslint-disable-next-line no-fallthrough
+        // biome-ignore lint/suspicious/noFallthroughSwitchClause: <explanation>
         default:
           throw new Error(`Invalid component: '${component}'`);
       }

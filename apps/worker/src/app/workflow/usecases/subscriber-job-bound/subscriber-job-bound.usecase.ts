@@ -247,7 +247,7 @@ export class SubscriberJobBound {
   ): Promise<Record<ChannelTypeEnum, ProvidersIdEnum>> {
     const providers = {} as Record<ChannelTypeEnum, ProvidersIdEnum>;
 
-    // eslint-disable-next-line no-unsafe-optional-chaining
+    // biome-ignore lint/correctness/noUnsafeOptionalChaining: <explanation>
     for (const step of template?.steps) {
       const type = step.template?.type;
       if (!type) continue;

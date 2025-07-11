@@ -20,9 +20,9 @@ export type FeatureFlagContextBase =
       user: PartialWithId<UserEntity>;
     };
 
-export type FeatureFlagContext<T_Result> = FeatureFlagContextBase & {
+export type FeatureFlagContext<TResult> = FeatureFlagContextBase & {
   key: FeatureFlagsKeysEnum;
-  defaultValue: T_Result;
+  defaultValue: TResult;
 };
 export interface IFeatureFlagsService {
   isEnabled: boolean;
@@ -31,5 +31,5 @@ export interface IFeatureFlagsService {
 
   gracefullyShutdown: () => Promise<void>;
 
-  getFlag: <T_Result>(context: FeatureFlagContext<T_Result>) => Promise<T_Result>;
+  getFlag: <TResult>(context: FeatureFlagContext<TResult>) => Promise<TResult>;
 }

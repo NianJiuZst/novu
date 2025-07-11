@@ -2,7 +2,7 @@ import Handlebars from 'handlebars';
 import { type IAttachmentOptions, ITriggerPayload } from '../template/template.interface';
 
 Handlebars.registerHelper('equals', function helper(this: typeof Handlebars, arg1, arg2, options) {
-  // eslint-disable-next-line eqeqeq
+  // biome-ignore lint/suspicious/noDoubleEquals: <explanation>
   return arg1 == arg2 ? options.fn(this) : options.inverse(this);
 });
 

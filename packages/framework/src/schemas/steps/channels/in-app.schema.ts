@@ -23,6 +23,7 @@ const redirectSchema = {
       },
     },
   },
+  // biome-ignore lint/suspicious/noThenProperty: <explanation>
   then: {
     properties: {
       target: {

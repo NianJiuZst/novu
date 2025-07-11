@@ -43,7 +43,7 @@ function createHandlebarsInstance(i18next: any) {
 
   handlebars.registerHelper(HandlebarHelpersEnum.EQUALS, function (arg1, arg2, options) {
     // @ts-expect-error
-    // eslint-disable-next-line eqeqeq
+    // biome-ignore lint/suspicious/noDoubleEquals: <explanation>
     return arg1 == arg2 ? options.fn(this) : options.inverse(this);
   });
 

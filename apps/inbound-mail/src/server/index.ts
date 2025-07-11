@@ -2,6 +2,7 @@
 
 import fs from 'node:fs';
 import { BullMqService } from '@novu/application-generic';
+// biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
 import Promise from 'bluebird';
 import dns from 'dns';
 import events from 'events';

@@ -169,6 +169,7 @@ describe('User login - /auth/login (POST) #novu-v0-os', async () => {
   context('with OAuth', async () => {
     const userEmail = 'testoauth@gmail.com';
 
+    // biome-ignore lint/suspicious/noDuplicateTestHooks: <explanation>
     before(async () => {
       // Create a mock OAuth user without a password
       await userRepository.create({

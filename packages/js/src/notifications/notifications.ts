@@ -305,7 +305,7 @@ export class Notifications extends BaseModule {
     );
   }
 
-  clearCache({ filter }: { filter?: NotificationFilter } = {}): void {
+  clearCache({ filter }: { filter?: NotificationFilter } = {}) {
     if (filter) {
       return this.cache.clear(filter ?? {});
     }

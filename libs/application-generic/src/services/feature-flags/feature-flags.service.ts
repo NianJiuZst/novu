@@ -36,7 +36,7 @@ export class FeatureFlagsService {
     }
   }
   // the T_Result is inferred from the usage within the context.defaultValue in FeatureFlagContext
-  public async getFlag<T_Result>(context: FeatureFlagContext<T_Result>): Promise<T_Result> {
+  public async getFlag<TResult>(context: FeatureFlagContext<TResult>): Promise<TResult> {
     return this.service.getFlag(context);
   }
 }

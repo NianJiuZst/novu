@@ -27,6 +27,7 @@ export class JSONSchema {
   oneOf?: JSONSchema[];
   not?: JSONSchema;
   if?: JSONSchema;
+  // biome-ignore lint/suspicious/noThenProperty: <explanation>
   then?: JSONSchema;
   else?: JSONSchema;
   contentEncoding?: string;

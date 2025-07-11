@@ -252,6 +252,7 @@ export class JSONSchemaDto {
   @IsOptional()
   @ValidateNested()
   @Type(() => JSONSchemaDto)
+  // biome-ignore lint/suspicious/noThenProperty: <explanation>
   then?: JSONSchemaDto;
 
   @ApiPropertyOptional({

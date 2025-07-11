@@ -65,6 +65,7 @@ export class ProcessUnsnoozeJob {
               deliveredAt: {
                 $cond: {
                   if: { $isArray: '$deliveredAt' },
+                  // biome-ignore lint/suspicious/noThenProperty: <explanation>
                   then: { $concatArrays: ['$deliveredAt', [nowDate]] },
                   else: [createdAtDate, nowDate],
                 },

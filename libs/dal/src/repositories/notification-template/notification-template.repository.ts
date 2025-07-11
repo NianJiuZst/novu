@@ -314,6 +314,7 @@ export class NotificationTemplateRepository extends BaseRepository<
             $sum: {
               $cond: {
                 if: { $isArray: '$steps' },
+                // biome-ignore lint/suspicious/noThenProperty: <explanation>
                 then: { $size: '$steps' },
                 else: 0,
               },

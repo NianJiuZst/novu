@@ -88,7 +88,7 @@ testHttpHeaderEnumValidity(ValidHeaderEnum);
 // Invalid
 enum InvalidKeyHeaderEnum {
   SINGLE = 'Single',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // biome-ignore lint/style/useNamingConvention: <explanation>
   Invalid_Key = 'Invalid-Key',
 }
 // @ts-expect-error - Invalid key - Invalid_Key should be 'INVALID_KEY'

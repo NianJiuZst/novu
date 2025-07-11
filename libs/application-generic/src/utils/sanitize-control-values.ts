@@ -17,7 +17,7 @@ import type {
 import type { InAppActionType, InAppControlType } from '../schemas/control/in-app-control.schema';
 
 // Cast input T_Type to trigger Ajv validation errors - possible undefined
-function sanitizeEmptyInput<T_Type>(input: T_Type, defaultValue: T_Type = undefined as unknown as T_Type): T_Type {
+function sanitizeEmptyInput<TType>(input: TType, defaultValue: TType = undefined as unknown as TType): TType {
   return isEmpty(input) ? defaultValue : input;
 }
 

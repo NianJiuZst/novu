@@ -1,27 +1,27 @@
 import { Inject } from '@nestjs/common';
 import { CacheService, type CachingConfig } from '../cache.service';
 
-type CachedEntityOptions<T_Output, T_Args extends any[]> = CachingConfig & {
-  skipCache?: (...args: T_Args) => boolean;
-  skipSaveToCache?: (response: T_Output) => boolean;
+type CachedEntityOptions<TOutput, TArgs extends any[]> = CachingConfig & {
+  skipCache?: (...args: TArgs) => boolean;
+  skipSaveToCache?: (response: TOutput) => boolean;
 };
 
-export function CachedResponse<T_Output = any, T_Args extends any[] = any[]>({
+export function CachedResponse<TOutput = any, TArgs extends any[] = any[]>({
   builder,
   options,
 }: {
-  builder: (...args: T_Args) => string;
-  options?: CachedEntityOptions<T_Output, T_Args>;
+  builder: (...args: TArgs) => string;
+  options?: CachedEntityOptions<TOutput, TArgs>;
 }) {
   const injectCache = Inject(CacheService);
 
   return (target: any, key: string, descriptor: PropertyDescriptor) => {
-    const originalMethod = descriptor.value as (...args: T_Args) => Promise<T_Output>;
+    const originalMethod = descriptor.value as (...args: TArgs) => Promise<TOutput>;
     const methodName = key;
     injectCache(target, 'cacheService');
 
     // eslint-disable-next-line no-param-reassign
-    descriptor.value = async function (this: any, ...args: T_Args): Promise<T_Output> {
+    descriptor.value = async function (this: any, ...args: TArgs): Promise<TOutput> {
       const cacheService = this.cacheService as CacheService;
 
       // Check if cache is disabled
@@ -45,13 +45,13 @@ export function CachedResponse<T_Output = any, T_Args extends any[] = any[]>({
         if (value) {
           const parsedValue = parseValueFromCache(value);
 
-          return parsedValue as T_Output;
+          return parsedValue as TOutput;
         }
       } catch (err) {
         // Silently handle cache retrieval error
       }
 
-      const response: T_Output = await originalMethod.apply(this, args);
+      const response: TOutput = await originalMethod.apply(this, args);
 
       try {
         if (!options?.skipSaveToCache?.(response)) {

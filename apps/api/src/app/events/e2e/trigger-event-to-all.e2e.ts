@@ -114,6 +114,22 @@ describe('TriggerMulticast #novu-v2', () => {
     triggerMulticast = moduleRef.get<TriggerMulticast>(TriggerMulticast);
     subscriberProcessQueueService = moduleRef.get<SubscriberProcessQueueService>(SubscriberProcessQueueService);
     addBulkStub = sinon.stub(subscriberProcessQueueService, 'addBulk');
+
+    session = new UserSession();
+    await session.initialize();
+    template = await session.createTemplate();
+    subscriberService = new SubscribersService(session.organization._id, session.environment._id);
+
+    firstSubscriber = await subscriberService.createSubscriber();
+    secondSubscriber = await subscriberService.createSubscriber();
+    firstTopicSubscribers = [firstSubscriber, secondSubscriber];
+    bootstrapFirstTopic = await initializeTopic(firstTopicSubscribers, '1');
+    to = [bootstrapFirstTopic];
+
+    thirdSubscriber = await subscriberService.createSubscriber();
+    forthSubscriber = await subscriberService.createSubscriber();
+    secondTopicSubscribers = [thirdSubscriber, forthSubscriber];
+    bootstrapSecondTopic = await initializeTopic(secondTopicSubscribers, '2');
   });
 
   afterEach(() => {
@@ -151,24 +167,6 @@ describe('TriggerMulticast #novu-v2', () => {
 
     return res;
   }
-
-  beforeEach(async () => {
-    session = new UserSession();
-    await session.initialize();
-    template = await session.createTemplate();
-    subscriberService = new SubscribersService(session.organization._id, session.environment._id);
-
-    firstSubscriber = await subscriberService.createSubscriber();
-    secondSubscriber = await subscriberService.createSubscriber();
-    firstTopicSubscribers = [firstSubscriber, secondSubscriber];
-    bootstrapFirstTopic = await initializeTopic(firstTopicSubscribers, '1');
-    to = [bootstrapFirstTopic];
-
-    thirdSubscriber = await subscriberService.createSubscriber();
-    forthSubscriber = await subscriberService.createSubscriber();
-    secondTopicSubscribers = [thirdSubscriber, forthSubscriber];
-    bootstrapSecondTopic = await initializeTopic(secondTopicSubscribers, '2');
-  });
 
   it('should call addBulk with correct parameters', async () => {
     const command: TriggerMulticastCommand = triggerMulticastCommandMock as any;

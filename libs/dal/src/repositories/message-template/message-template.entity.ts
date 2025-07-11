@@ -137,6 +137,7 @@ export class JSONSchemaEntity {
   oneOf?: JSONSchemaEntity[];
   not?: JSONSchemaEntity;
   if?: JSONSchemaEntity;
+  // biome-ignore lint/suspicious/noThenProperty: <explanation>
   then?: JSONSchemaEntity;
   else?: JSONSchemaEntity;
   contentEncoding?: string;

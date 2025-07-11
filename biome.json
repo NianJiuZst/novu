@@ -9,10 +9,15 @@
     "ignoreUnknown": false,
     "includes": [
       "**",
+      "!apps/web/**",
       "!node_modules/**",
       "!dist/**",
       "!build/**",
+      "!libs/internal-sdk/**",
+      "!libs/design-system/**",
       "!.github/**",
+      "!scripts/**",
+      "!playground/**",
       "!coverage/**",
       "!.nx/**",
       "!.git/**",
@@ -20,7 +25,8 @@
       "!pnpm-lock.yaml",
       "!swagger-spec.json",
       "!**/*.d.ts",
-      "!**/*.generated.ts"
+      "!**/*.generated.ts",
+      "!packages/framework/scripts/**"
     ]
   },
   "formatter": {
@@ -42,7 +48,8 @@
         "noLabelWithoutControl": "warn",
         "useAriaPropsSupportedByRole": "warn",
         "useFocusableInteractive": "warn",
-        "useAriaPropsForRole": "warn"
+        "useAriaPropsForRole": "warn",
+        "useAltText": "off"
       },
       "complexity": {
         "noForEach": "warn"
@@ -52,7 +59,8 @@
         "noImplicitAnyLet": "warn",
         "noRedeclare": "warn",
         "noAssignInExpressions": "warn",
-        "noExplicitAny": "warn"
+        "noExplicitAny": "warn",
+        "noExportsInTest": "warn"
       },
       "style": {
         "noCommonJs": "warn",
@@ -60,6 +68,9 @@
         "useConst": "error",
         "useArrayLiterals": "error",
         "useAsConstAssertion": "error"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "warn"
       }
     }
   },
@@ -68,6 +79,9 @@
       "quoteStyle": "single",
       "semicolons": "always",
       "trailingCommas": "es5"
+    },
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
     }
   },
   "json": {
@@ -94,7 +108,6 @@
           },
           "correctness": {
             "noUnusedVariables": "warn",
-            "useExhaustiveDependencies": "warn",
             "useHookAtTopLevel": "error"
           },
           "style": {

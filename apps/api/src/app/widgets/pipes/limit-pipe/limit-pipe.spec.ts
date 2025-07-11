@@ -59,6 +59,7 @@ describe('LimitPipe', () => {
 
   it('should throw exception if the input value is not optional', () => {
     pipe = new LimitPipe(1, 1000, false);
+    // biome-ignore lint/style/useConst: <explanation>
     let limit: undefined | null;
     expect(() => pipe.transform(limit, metadata)).to.throw(
       `${MetadataEnum.DATA} must be a number conforming to the specified constraints`
