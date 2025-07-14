@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { EnvironmentBranchIcon } from '../primitives/environment-branch-icon';
 import { Skeleton } from '../primitives/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../primitives/tooltip';
+import TruncatedText from '../truncated-text';
 import { useAuth } from '@/context/auth/hooks';
 import { useEnvironment, useFetchEnvironments } from '@/context/environment/hooks';
 import { useDiffEnvironments, usePublishEnvironments } from '@/hooks/use-environments';
@@ -65,7 +66,12 @@ const EnvironmentDiffCard = ({
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-2">
           <EnvironmentBranchIcon environment={environment} size="sm" />
-          <span className="font-medium">Publish to {environment.name}</span>
+          <span className="text-text-sub font-medium">
+            Publish to{' '}
+            <TruncatedText className="text-text-strong max-w-[20ch] font-bold" asChild>
+              <b>{environment.name}</b>
+            </TruncatedText>
+          </span>
         </div>
 
         <div className="ml-auto">
@@ -93,7 +99,9 @@ const EnvironmentDiffCard = ({
       <Tooltip>
         <TooltipTrigger asChild>{cardContent}</TooltipTrigger>
         <TooltipContent>
-          <p>No changes to publish to {environment.name}</p>
+          <p className="font-normal">
+            No changes to publish to <b>{environment.name}</b>
+          </p>
         </TooltipContent>
       </Tooltip>
     );
