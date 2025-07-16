@@ -72,6 +72,23 @@ export const deleteLayout = async ({ environment, layoutSlug }: { environment: I
   await delV2(`/layouts/${layoutSlug}`, { environment });
 };
 
+export const duplicateLayout = async ({
+  environment,
+  layoutSlug,
+  data,
+}: {
+  environment: IEnvironment;
+  layoutSlug: string;
+  data: { name: string };
+}) => {
+  const { data: result } = await postV2<{ data: LayoutResponseDto }>(`/layouts/${layoutSlug}/duplicate`, {
+    environment,
+    body: data,
+  });
+
+  return result;
+};
+
 export const previewLayout = async ({
   environment,
   layoutSlug,
