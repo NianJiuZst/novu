@@ -15,6 +15,7 @@ export type TranslationGroup = {
   locales: string[];
   createdAt: string;
   updatedAt: string;
+  outdatedLocales?: string[];
 };
 
 export type Translation = {
@@ -98,6 +99,20 @@ export const getTranslations = async ({
   const endpoint = `/translations?${queryString}`;
 
   return getV2<GetTranslationsResponse>(endpoint, { environment });
+};
+
+export const getTranslationGroup = async ({
+  environment,
+  resourceId,
+  resourceType,
+}: {
+  environment: IEnvironment;
+  resourceId: string;
+  resourceType: LocalizationResourceEnum;
+}): Promise<TranslationGroup> => {
+  const endpoint = `/translations/group/${resourceType}/${resourceId}`;
+  const response = await getV2<{ data: TranslationGroup }>(endpoint, { environment });
+  return response.data;
 };
 
 export type GetTranslationResponse = {
@@ -200,6 +215,58 @@ export const uploadTranslations = async ({
 
   const endpoint = '/translations/upload';
   const response = await postV2<UploadTranslationsResponse>(endpoint, {
+    body: formData,
+    environment,
+  });
+
+  return response.data;
+};
+
+export type GetMasterJsonResponse = {
+  data: Record<string, unknown>;
+};
+
+export const getMasterJson = async ({
+  environment,
+  locale,
+}: {
+  environment: IEnvironment;
+  locale: string;
+}): Promise<Record<string, unknown>> => {
+  const searchParams = new URLSearchParams();
+  searchParams.append('locale', locale);
+
+  const endpoint = `/translations/master-json?${searchParams.toString()}`;
+  const response = await getV2<GetMasterJsonResponse>(endpoint, { environment });
+  return response.data;
+};
+
+export type UploadMasterJsonRequest = {
+  locale: string;
+  file: File;
+};
+
+export type UploadMasterJsonResponse = {
+  data: {
+    success: boolean;
+    message: string;
+    successful?: string[];
+    failed?: string[];
+  };
+};
+
+export const uploadMasterJson = async ({
+  environment,
+  locale,
+  file,
+}: UploadMasterJsonRequest & { environment: IEnvironment }): Promise<UploadMasterJsonResponse['data']> => {
+  const formData = new FormData();
+
+  formData.append('locale', locale);
+  formData.append('file', file);
+
+  const endpoint = '/translations/master-json/upload';
+  const response = await postV2<UploadMasterJsonResponse>(endpoint, {
     body: formData,
     environment,
   });
