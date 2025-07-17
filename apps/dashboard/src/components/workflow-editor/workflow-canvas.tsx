@@ -336,7 +336,11 @@ export const WorkflowCanvas = ({
                     : 'Content visible but locked for editing. Contact an admin for edit access.'
                 }
                 title="View-only:"
-                ctaLabel="Switch environment"
+                ctaLabel={
+                  hasPermission && currentEnvironment?.type !== EnvironmentTypeEnum.DEV
+                    ? 'Switch environment'
+                    : undefined
+                }
                 onCtaClick={handleSwitchToDevelopment}
               />
             </div>
