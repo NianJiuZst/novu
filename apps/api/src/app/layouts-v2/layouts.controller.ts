@@ -32,7 +32,7 @@ import {
   GetLayoutUsageResponseDto,
 } from './dtos';
 import { ThrottlerCategory } from '../rate-limiting/guards/throttler.decorator';
-import { UpsertLayoutCommand, UpsertLayoutUseCase } from './usecases/upsert-layout';
+import { UpsertLayoutCommand, UpsertLayout } from './usecases/upsert-layout';
 import { GetLayoutCommand, GetLayoutUseCase } from './usecases/get-layout';
 import { DeleteLayoutCommand, DeleteLayoutUseCase } from './usecases/delete-layout';
 import { DuplicateLayoutCommand, DuplicateLayoutUseCase } from './usecases/duplicate-layout';
@@ -53,7 +53,7 @@ import { EMPTY_LAYOUT } from './utils/layout-templates';
 @ApiTags('Layouts')
 export class LayoutsController {
   constructor(
-    private upsertLayoutUseCase: UpsertLayoutUseCase,
+    private upsertLayoutUseCase: UpsertLayout,
     private getLayoutUseCase: GetLayoutUseCase,
     private deleteLayoutUseCase: DeleteLayoutUseCase,
     private duplicateLayoutUseCase: DuplicateLayoutUseCase,
@@ -86,7 +86,9 @@ export class LayoutsController {
             },
           },
         },
-        user,
+        environmentId: user.environmentId,
+        organizationId: user.organizationId,
+        userId: user._id,
       })
     );
   }
@@ -110,7 +112,9 @@ export class LayoutsController {
         layoutDto: {
           ...updateLayoutDto,
         },
-        user,
+        environmentId: user.environmentId,
+        organizationId: user.organizationId,
+        userId: user._id,
         layoutIdOrInternalId,
       })
     );
@@ -153,7 +157,9 @@ export class LayoutsController {
     await this.deleteLayoutUseCase.execute(
       DeleteLayoutCommand.create({
         layoutIdOrInternalId,
-        user,
+        environmentId: user.environmentId,
+        organizationId: user.organizationId,
+        userId: user._id,
       })
     );
   }
@@ -178,7 +184,9 @@ export class LayoutsController {
       DuplicateLayoutCommand.create({
         layoutIdOrInternalId,
         overrides: duplicateLayoutDto,
-        user,
+        environmentId: user.environmentId,
+        organizationId: user.organizationId,
+        userId: user._id,
       })
     );
   }
