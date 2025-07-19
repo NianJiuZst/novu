@@ -1,6 +1,7 @@
 import { forwardRef, useMemo, useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate } from 'react-router-dom';
 import { type WorkflowTestDataResponseDto, type ISubscriberResponseDto, PermissionsEnum } from '@novu/shared';
 
 import { Button } from '@/components/primitives/button';
@@ -20,7 +21,7 @@ import { useFetchApiKeys } from '@/hooks/use-fetch-api-keys';
 import { useHasPermission } from '@/hooks/use-has-permission';
 import { useAuth } from '@/context/auth/hooks';
 import { useWorkflow } from '../workflow-provider';
-import { RiPlayCircleLine, RiArrowDownSLine, RiFileCopyLine } from 'react-icons/ri';
+import { RiArrowDownSLine, RiFileCopyLine, RiSendPlaneLine } from 'react-icons/ri';
 import { PayloadData } from '@/components/workflow-editor/steps/types/preview-context.types';
 import { useEnvironment } from '../../../context/environment/hooks';
 import {
@@ -29,6 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/primitives/dropdown-menu';
+import { buildRoute, ROUTES } from '@/utils/routes';
 import { API_HOSTNAME } from '@/config';
 import * as z from 'zod';
 
@@ -91,6 +93,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
   const { currentEnvironment } = useEnvironment();
   const { workflow } = useWorkflow();
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const { triggerWorkflow, isPending } = useTriggerWorkflow();
 
   // API key management
@@ -345,6 +348,90 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
     }
   }, [workflow?.workflowId, subscriberData, apiKey, form]);
 
+  const handleFireAndForget = useCallback(async () => {
+    if (!workflow?.workflowId || !subscriberData) {
+      showErrorToast('Workflow information or subscriber is missing');
+      return;
+    }
+
+    try {
+      const formData = form.getValues();
+
+      const {
+        data: { transactionId },
+      } = await triggerWorkflow({
+        name: workflow.workflowId,
+        to: subscriberData,
+        payload: formData.payload,
+      });
+
+      if (!transactionId) {
+        return showToast({
+          variant: 'lg',
+          children: ({ close }) => (
+            <>
+              <ToastIcon variant="error" />
+              <div className="flex flex-col gap-2">
+                <span className="font-medium">Test workflow failed</span>
+                <span className="text-foreground-600 inline">
+                  Workflow <span className="font-bold">{workflow?.name}</span> cannot be triggered. Ensure that it is
+                  active and requires no further actions.
+                </span>
+              </div>
+              <ToastClose onClick={close} />
+            </>
+          ),
+          options: {
+            position: 'bottom-right',
+          },
+        });
+      }
+
+      showToast({
+        children: ({ close }) => (
+          <>
+            <ToastIcon variant="success" />
+            <div className="flex flex-1 flex-col items-start gap-2.5">
+              <div className="flex flex-col items-start justify-center gap-1 self-stretch">
+                <div className="text-foreground-950 text-sm font-medium">Workflow triggered successfully</div>
+                <div className="text-foreground-600 text-sm">Transaction ID: {transactionId}</div>
+              </div>
+              <div className="flex items-center justify-end gap-2 self-stretch">
+                <Button
+                  variant="secondary"
+                  mode="ghost"
+                  size="xs"
+                  onClick={() => {
+                    const activityUrl =
+                      buildRoute(ROUTES.EDIT_WORKFLOW_ACTIVITY, {
+                        environmentSlug: currentEnvironment?.slug ?? '',
+                        workflowSlug: workflow?.slug ?? '',
+                      }) + `?transactionId=${transactionId}`;
+                    navigate(activityUrl);
+                    close();
+                    onOpenChange(false);
+                  }}
+                >
+                  View in Activity
+                </Button>
+              </div>
+            </div>
+            <ToastClose className="absolute right-3 top-3" onClick={close} />
+          </>
+        ),
+        options: {
+          position: 'bottom-right',
+          duration: 6000,
+        },
+      });
+    } catch (e) {
+      showErrorToast(
+        e instanceof Error ? e.message : 'There was an error triggering the workflow.',
+        'Failed to trigger workflow'
+      );
+    }
+  }, [workflow, subscriberData, triggerWorkflow, form]);
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent ref={forwardedRef} className="w-[500px]">
@@ -397,6 +484,10 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
                         <DropdownMenuItem onClick={handleOpenInPostman} className="cursor-pointer">
                           <RiFileCopyLine />
                           Copy Postman Collection
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleFireAndForget} className="cursor-pointer" disabled={isPending}>
+                          <RiSendPlaneLine />
+                          Trigger
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
