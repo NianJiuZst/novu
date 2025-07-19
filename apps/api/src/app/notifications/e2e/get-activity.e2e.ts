@@ -50,9 +50,10 @@ describe('Get activity - /notifications/:notificationId (GET) #novu-v2', async (
       (process.env as any).IS_TRACE_LOGS_ENABLED = originalTraceWriteValue;
     }
     if (originalStepRunEnvValue === undefined) {
-      delete (process.env as any).IS_STEP_RUN_LOGS_ENABLED;
-    } else {
-      (process.env as any).IS_STEP_RUN_LOGS_ENABLED = originalStepRunEnvValue;
+      delete (process.env as any).IS_STEP_RUN_LOGS_READ_ENABLED;
+    }
+    if (originalStepRunEnvValue !== undefined) {
+      (process.env as any).IS_STEP_RUN_LOGS_READ_ENABLED = originalStepRunEnvValue;
     }
   });
 
@@ -243,7 +244,7 @@ describe('Get activity - /notifications/:notificationId (GET) #novu-v2', async (
 
   it('should use step runs when both trace and step run feature flags are enabled', async () => {
     // Enable both feature flags
-    (process.env as any).IS_STEP_RUN_LOGS_ENABLED = 'true';
+    (process.env as any).IS_STEP_RUN_LOGS_READ_ENABLED = 'true';
 
     const triggerResponse = await novuClient.trigger({
       workflowId: template.triggers[0].identifier,
@@ -275,13 +276,13 @@ describe('Get activity - /notifications/:notificationId (GET) #novu-v2', async (
     expect(activity.jobs?.[1].status).to.be.equal(JobStatusEnum.COMPLETED);
 
     // Reset feature flag
-    delete (process.env as any).IS_STEP_RUN_LOGS_ENABLED;
+    delete (process.env as any).IS_STEP_RUN_LOGS_READ_ENABLED;
   });
 
   it('should fallback to trace log method when step runs are not found', async () => {
     /*
      *  Enable both feature flags
-     * (process.env as any).IS_STEP_RUN_LOGS_ENABLED = 'true';
+     * (process.env as any).IS_STEP_RUN_LOGS_READ_ENABLED = 'true';
      */
 
     const triggerResponse = await novuClient.trigger({
@@ -321,11 +322,6 @@ describe('Get activity - /notifications/:notificationId (GET) #novu-v2', async (
     expect(activity.jobs?.length).to.be.equal(1);
     expect(activity.jobs?.[0].type).to.be.equal(StepTypeEnum.IN_APP);
     expect(activity.jobs?.[0].status).to.be.equal(JobStatusEnum.COMPLETED);
-
-    /*
-     * Reset feature flag
-     * delete (process.env as any).IS_STEP_RUN_LOGS_ENABLED;
-     */
   });
 
   it('should fallback to old method when traces query fails', async () => {

@@ -8,7 +8,7 @@ import { ClickHouseService } from '../clickhouse.service';
 import { FeatureFlagsService } from '../../feature-flags/feature-flags.service';
 import { stepRunSchema, ORDER_BY, TABLE_NAME, StepRun, StepType } from './step-run.schema';
 
-type StepRunInsertData = Omit<StepRun, 'id'>;
+type StepRunInsertData = Omit<StepRun, 'id' | 'expires_at'>;
 
 type StepOptions = {
   status?: JobStatusEnum;
@@ -62,7 +62,7 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
   async create(job: JobEntity, options: StepOptions = {}): Promise<void> {
     try {
       const isEnabled = await this.featureFlagsService.getFlag({
-        key: FeatureFlagsKeysEnum.IS_STEP_RUN_LOGS_ENABLED,
+        key: FeatureFlagsKeysEnum.IS_STEP_RUN_LOGS_WRITE_ENABLED,
         organization: { _id: job._organizationId },
         environment: { _id: job._environmentId },
         user: { _id: job._userId },
@@ -81,7 +81,7 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
       };
 
       const stepRunData = this.mapJobToStepRun(job, finalOptions);
-      await this.insert(stepRunData, {
+      await super.insert(stepRunData, {
         organizationId: job._organizationId,
         environmentId: job._environmentId,
         userId: job._userId,
@@ -101,6 +101,50 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
     }
   }
 
+  async insert(
+    data: StepRunInsertData,
+    context: {
+      organizationId?: string;
+      environmentId?: string;
+      userId?: string;
+    }
+  ): Promise<void> {
+    const isEnabled = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.IS_STEP_RUN_LOGS_WRITE_ENABLED,
+      organization: { _id: context.organizationId },
+      environment: { _id: context.environmentId },
+      user: { _id: context.userId },
+      defaultValue: false,
+    });
+
+    if (!isEnabled) {
+      return;
+    }
+    await super.insert(data, context);
+  }
+
+  async insertMany(
+    data: StepRunInsertData[],
+    context: {
+      organizationId?: string;
+      environmentId?: string;
+      userId?: string;
+    }
+  ): Promise<void> {
+    const isEnabled = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.IS_STEP_RUN_LOGS_WRITE_ENABLED,
+      organization: { _id: context.organizationId },
+      environment: { _id: context.environmentId },
+      user: { _id: context.userId },
+      defaultValue: false,
+    });
+
+    if (!isEnabled) {
+      return;
+    }
+    await super.insertMany(data, context);
+  }
+
   async createMany(jobs: JobEntity[], options: StepOptions = {}): Promise<void> {
     if (jobs.length === 0) {
       return;
@@ -109,7 +153,7 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
     try {
       const firstJob = jobs[0];
       const isEnabled = await this.featureFlagsService.getFlag({
-        key: FeatureFlagsKeysEnum.IS_STEP_RUN_LOGS_ENABLED,
+        key: FeatureFlagsKeysEnum.IS_STEP_RUN_LOGS_WRITE_ENABLED,
         organization: { _id: firstJob._organizationId },
         environment: { _id: firstJob._environmentId },
         user: { _id: firstJob._userId },
@@ -134,7 +178,7 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
         stepRunDataArray.push(stepRunData);
       }
 
-      await this.insertMany(stepRunDataArray, {
+      await super.insertMany(stepRunDataArray, {
         organizationId: firstJob._organizationId,
         environmentId: firstJob._environmentId,
         userId: firstJob._userId,
@@ -231,12 +275,6 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
 
       // Correlation
       transaction_id: job.transactionId,
-
-      /*
-       * Data retention
-       * todo remove this should be maintained in base repository, its already implemented in another pr
-       */
-      expires_at: this.formatDateTime64(addYears(now, 1)),
     };
   }
 
