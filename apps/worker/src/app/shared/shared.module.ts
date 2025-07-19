@@ -20,6 +20,7 @@ import {
   MetricsModule,
   ProcessTenant,
   QueuesModule,
+  StepRunRepository,
   StorageHelperService,
   storageService,
   UpdateSubscriber,
@@ -86,6 +87,7 @@ const dalService = {
 const ANALYTICS_PROVIDERS = [
   // Repositories
   TraceLogRepository,
+  StepRunRepository,
 
   // Services
   clickHouseService,
