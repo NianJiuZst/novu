@@ -40,6 +40,11 @@ export const useSaveTranslation = () => {
         queryKey: [QueryKeys.fetchTranslationKeys, variables.resourceId, variables.locale, currentEnvironment?._id],
       });
 
+      // Invalidate diff environment queries when translations are updated
+      queryClient.invalidateQueries({
+        queryKey: [QueryKeys.diffEnvironments],
+      });
+
       showSuccessToast('Translation saved successfully');
     },
     onError: (error) => {

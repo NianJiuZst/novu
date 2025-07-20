@@ -99,6 +99,11 @@ export const useUpdateTranslationValue = () => {
       queryClient.invalidateQueries({
         queryKey: ['preview-step'],
       });
+
+      // Invalidate diff environment queries when translations are updated
+      queryClient.invalidateQueries({
+        queryKey: [QueryKeys.diffEnvironments],
+      });
     },
     onError: (error, variables) => {
       showErrorToast(
