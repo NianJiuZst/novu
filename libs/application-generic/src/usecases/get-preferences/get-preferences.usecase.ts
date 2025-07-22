@@ -108,8 +108,7 @@ export class GetPreferences {
    */
   public async bulkFetchWorkflowPreferences(
     templateIds: string[],
-    environmentId: string,
-    organizationId: string
+    environmentId: string
   ): Promise<Map<string, GetPreferencesResponseDto>> {
     if (templateIds.length === 0) {
       return new Map();

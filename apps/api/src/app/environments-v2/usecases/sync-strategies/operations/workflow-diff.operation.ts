@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PinoLogger } from '@novu/application-generic';
+import { PinoLogger, GetPreferences } from '@novu/application-generic';
 import { NotificationTemplateEntity } from '@novu/dal';
 import { ResourceTypeEnum, IUserInfo } from '../../../types/sync.types';
 import { BaseDiffOperation } from '../base/operations/base-diff.operation';
@@ -10,7 +10,8 @@ export class WorkflowDiffOperation extends BaseDiffOperation<NotificationTemplat
   constructor(
     protected logger: PinoLogger,
     protected repositoryAdapter: WorkflowRepositoryAdapter,
-    protected comparatorAdapter: WorkflowComparatorAdapter
+    protected comparatorAdapter: WorkflowComparatorAdapter,
+    private getPreferences: GetPreferences
   ) {
     super(logger, repositoryAdapter, comparatorAdapter);
   }

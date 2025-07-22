@@ -83,34 +83,47 @@ export class WorkflowComparator {
   async compareWorkflows(
     sourceWorkflow: NotificationTemplateEntity,
     targetWorkflow: NotificationTemplateEntity,
-    userContext: UserSessionData
+    userContext: UserSessionData,
+    sourcePreferences?: any,
+    targetPreferences?: any
   ): Promise<IWorkflowComparison> {
     try {
       if (!sourceWorkflow || !targetWorkflow) {
         throw new Error('Source and target workflows must not be null');
       }
 
-      // Fetch preferences for both workflows to ensure proper comparison
+      // If preferences are provided, use them directly
+      if (sourcePreferences && targetPreferences) {
+        return this.compareWorkflowsWithPreferences(
+          sourceWorkflow,
+          targetWorkflow,
+          sourcePreferences,
+          targetPreferences,
+          userContext
+        );
+      }
+
+      // Fallback: fetch preferences for both workflows individually (backwards compatibility)
       const [sourcePreferencesMap, targetPreferencesMap] = await Promise.all([
         this.bulkFetchPreferences([sourceWorkflow]),
         this.bulkFetchPreferences([targetWorkflow]),
       ]);
 
-      const sourcePreferences = sourcePreferencesMap.get(sourceWorkflow._id);
-      const targetPreferences = targetPreferencesMap.get(targetWorkflow._id);
+      const fetchedSourcePreferences = sourcePreferencesMap.get(sourceWorkflow._id);
+      const fetchedTargetPreferences = targetPreferencesMap.get(targetWorkflow._id);
 
-      if (!sourcePreferences) {
+      if (!fetchedSourcePreferences) {
         throw new Error(`No preferences found for source workflow: ${sourceWorkflow._id}`);
       }
-      if (!targetPreferences) {
+      if (!fetchedTargetPreferences) {
         throw new Error(`No preferences found for target workflow: ${targetWorkflow._id}`);
       }
 
       return this.compareWorkflowsWithPreferences(
         sourceWorkflow,
         targetWorkflow,
-        sourcePreferences,
-        targetPreferences,
+        fetchedSourcePreferences,
+        fetchedTargetPreferences,
         userContext
       );
     } catch (error) {
@@ -195,7 +208,7 @@ export class WorkflowComparator {
       const orgId = envWorkflows[0]._organizationId;
 
       try {
-        const bulkPreferences = await this.getPreferences.bulkFetchWorkflowPreferences(templateIds, envId, orgId);
+        const bulkPreferences = await this.getPreferences.bulkFetchWorkflowPreferences(templateIds, envId);
 
         // Merge results into main map
         for (const [templateId, preferences] of bulkPreferences.entries()) {
@@ -248,8 +261,8 @@ export class WorkflowComparator {
     }
 
     return {
-      user: preferences.user || null,
-      default: preferences.default || DEFAULT_WORKFLOW_PREFERENCES,
+      user: preferences.source?.USER_WORKFLOW || null,
+      default: preferences.source?.WORKFLOW_RESOURCE || DEFAULT_WORKFLOW_PREFERENCES,
     };
   }
 

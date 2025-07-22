@@ -31,4 +31,34 @@ export class WorkflowComparatorAdapter implements IBaseComparator<NotificationTe
       otherDiffs,
     };
   }
+
+  /**
+   * Compare resources with pre-fetched preferences to avoid individual preference fetching
+   */
+  async compareResourcesWithPreferences(
+    sourceResource: NotificationTemplateEntity,
+    targetResource: NotificationTemplateEntity,
+    userContext: UserSessionData,
+    sourcePreferences?: any,
+    targetPreferences?: any
+  ): Promise<{
+    resourceChanges: {
+      previous: Record<string, any> | null;
+      new: Record<string, any> | null;
+    } | null;
+    otherDiffs?: IResourceDiff[];
+  }> {
+    const { workflowChanges, otherDiffs } = await this.workflowComparator.compareWorkflows(
+      sourceResource,
+      targetResource,
+      userContext,
+      sourcePreferences,
+      targetPreferences
+    );
+
+    return {
+      resourceChanges: workflowChanges,
+      otherDiffs,
+    };
+  }
 }
