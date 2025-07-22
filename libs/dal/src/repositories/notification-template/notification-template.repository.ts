@@ -28,7 +28,8 @@ export class NotificationTemplateRepository extends BaseRepository<
     const items = await this.MongooseModel.find({
       _environmentId: environmentId,
       _organizationId: organizationId,
-      origin: { $in: [ResourceOriginEnum.NOVU_CLOUD] },
+      type: ResourceTypeEnum.BRIDGE,
+      origin: ResourceOriginEnum.NOVU_CLOUD,
     })
       .populate('steps.template')
       .populate('steps.variants.template')
