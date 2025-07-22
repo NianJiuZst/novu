@@ -217,6 +217,15 @@ const featuresDefinition: Feature<SupportedPlansEnum>[] = [
     },
   },
   {
+    label: 'Translations',
+    values: {
+      [SupportedPlansEnum.FREE]: { value: '-' },
+      [SupportedPlansEnum.PRO]: { value: '-' },
+      [SupportedPlansEnum.TEAM]: { value: <IconCheck /> },
+      [SupportedPlansEnum.ENTERPRISE]: { value: <IconCheck /> },
+    },
+  },
+  {
     label: 'Inbox',
     isTitle: true,
     values: {
