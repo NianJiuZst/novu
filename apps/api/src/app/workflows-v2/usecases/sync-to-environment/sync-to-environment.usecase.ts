@@ -88,7 +88,13 @@ export class SyncToEnvironmentUseCase {
       })
     );
 
-    await this.publishTranslationGroup(sourceWorkflow.workflowId, command);
+    // Handle translation groups based on source workflow's translation status
+    if (sourceWorkflow.isTranslationEnabled) {
+      await this.publishTranslationGroup(sourceWorkflow.workflowId, command);
+    } else {
+      // If source workflow has translations disabled, delete the translation group in target environment
+      await this.deleteTranslationGroup(sourceWorkflow.workflowId, command);
+    }
 
     return upsertedWorkflow;
   }
@@ -115,6 +121,35 @@ export class SyncToEnvironmentUseCase {
       sourceEnvironmentId: user.environmentId,
       targetEnvironmentId,
     });
+  }
+
+  private async deleteTranslationGroup(workflowIdentifier: string, command: SyncToEnvironmentCommand): Promise<void> {
+    const isEnterprise = process.env.NOVU_ENTERPRISE === 'true' || process.env.CI_EE_TEST === 'true';
+    const isSelfHosted = process.env.NOVU_SELF_HOSTED === 'true';
+
+    if (!isEnterprise || isSelfHosted) {
+      return;
+    }
+
+    try {
+      // eslint-disable-next-line global-require
+      const deleteTranslationGroup = this.moduleRef.get(require('@novu/ee-translation')?.DeleteTranslationGroup, {
+        strict: false,
+      });
+
+      const { user, targetEnvironmentId } = command;
+
+      await deleteTranslationGroup.execute({
+        resourceId: workflowIdentifier,
+        resourceType: LocalizationResourceEnum.WORKFLOW,
+        organizationId: user.organizationId,
+        environmentId: targetEnvironmentId,
+        userId: user._id,
+      });
+    } catch (error) {
+      // Translation group might not exist in target environment, ignore the error
+      // This is expected when syncing a workflow that never had translations enabled in the target
+    }
   }
 
   private isSyncable(workflow: WorkflowResponseDto): boolean {
