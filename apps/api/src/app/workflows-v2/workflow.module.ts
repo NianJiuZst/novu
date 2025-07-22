@@ -95,7 +95,13 @@ if (process.env.NOVU_ENTERPRISE === 'true') {
     MockDataGeneratorService,
     PreviewErrorHandler,
   ],
-  exports: [UpsertWorkflowUseCase, SyncToEnvironmentUseCase, GetWorkflowUseCase, DeleteWorkflowUseCase],
+  exports: [
+    UpsertWorkflowUseCase,
+    SyncToEnvironmentUseCase,
+    GetWorkflowUseCase,
+    DeleteWorkflowUseCase,
+    BuildStepDataUsecase,
+  ],
 })
 export class WorkflowModule implements NestModule {
   configure(consumer: MiddlewareConsumer): MiddlewareConsumer | void {}

@@ -51,6 +51,46 @@ export class BuildStepDataUsecase {
     } as StepResponseDto;
   }
 
+  /**
+   * Bulk fetch control values for multiple steps in a workflow to optimize sync operations
+   */
+  public async bulkFetchControlValues(
+    workflowId: string,
+    stepIds: string[],
+    environmentId: string,
+    organizationId: string
+  ): Promise<Map<string, Record<string, unknown>>> {
+    if (stepIds.length === 0) {
+      return new Map();
+    }
+
+    const controlValuesEntities = await this.controlValuesRepository.find({
+      _environmentId: environmentId,
+      _organizationId: organizationId,
+      _workflowId: workflowId,
+      _stepId: { $in: stepIds },
+      level: ControlValuesLevelEnum.STEP_CONTROLS,
+    });
+
+    const controlValuesMap = new Map<string, Record<string, unknown>>();
+
+    // Map the results back to step IDs
+    for (const entity of controlValuesEntities) {
+      if (entity._stepId) {
+        controlValuesMap.set(entity._stepId, entity.controls || {});
+      }
+    }
+
+    // Ensure all requested step IDs have an entry (even if empty)
+    for (const stepId of stepIds) {
+      if (!controlValuesMap.has(stepId)) {
+        controlValuesMap.set(stepId, {});
+      }
+    }
+
+    return controlValuesMap;
+  }
+
   private async buildAvailableVariableSchema(
     command: BuildStepDataCommand,
     currentStep: NotificationStepEntity,

@@ -7,6 +7,7 @@ import { ModuleRef } from '@nestjs/core';
 import { IWorkflowComparison, INormalizedStep, INormalizedWorkflow } from '../types/workflow-sync.types';
 import { IResourceDiff, DiffActionEnum, ResourceTypeEnum } from '../../../types/sync.types';
 import { WorkflowRepositoryService } from '../operations/workflow-repository.service';
+import { BuildStepDataUsecase } from '../../../../workflows-v2/usecases/build-step-data/build-step-data.usecase';
 
 @Injectable()
 export class WorkflowComparator {
@@ -14,7 +15,8 @@ export class WorkflowComparator {
     private logger: PinoLogger,
     private workflowRepositoryService: WorkflowRepositoryService,
     private getPreferences: GetPreferences,
-    private moduleRef: ModuleRef
+    private moduleRef: ModuleRef,
+    private buildStepDataUsecase: BuildStepDataUsecase
   ) {}
 
   /**
@@ -128,9 +130,17 @@ export class WorkflowComparator {
     targetPreferences: any,
     userContext: UserSessionData
   ): Promise<IWorkflowComparison> {
-    // Use direct entity normalization with proper preferences
-    const normalizedSource = this.normalizeWorkflowEntity(sourceWorkflow, sourcePreferences);
-    const normalizedTarget = this.normalizeWorkflowEntity(targetWorkflow, targetPreferences);
+    // Fetch control values for both workflows
+    const [sourceControlValuesMap, targetControlValuesMap] = await Promise.all([
+      this.bulkFetchControlValues(sourceWorkflow),
+      this.bulkFetchControlValues(targetWorkflow),
+    ]);
+
+    // Use direct entity normalization with proper preferences and control values
+    const [normalizedSource, normalizedTarget] = await Promise.all([
+      this.normalizeWorkflowEntity(sourceWorkflow, sourcePreferences, sourceControlValuesMap),
+      this.normalizeWorkflowEntity(targetWorkflow, targetPreferences, targetControlValuesMap),
+    ]);
 
     // Separate steps from workflow fields
     const { steps: sourceSteps, ...sourceWithoutSteps } = normalizedSource;
@@ -206,6 +216,26 @@ export class WorkflowComparator {
   }
 
   /**
+   * Bulk fetch control values for all steps in a workflow
+   */
+  private async bulkFetchControlValues(
+    workflow: NotificationTemplateEntity
+  ): Promise<Map<string, Record<string, unknown>>> {
+    if (!workflow.steps || workflow.steps.length === 0) {
+      return new Map();
+    }
+
+    const stepIds = workflow.steps.map((step) => step._templateId).filter(Boolean);
+
+    return this.buildStepDataUsecase.bulkFetchControlValues(
+      workflow._id,
+      stepIds,
+      workflow._environmentId,
+      workflow._organizationId
+    );
+  }
+
+  /**
    * Build preferences structure from bulk fetch result
    */
   private buildPreferencesStructure(preferences: any, workflow: NotificationTemplateEntity) {
@@ -226,7 +256,18 @@ export class WorkflowComparator {
   /**
    * Normalize workflow entity to a simplified structure for comparison
    */
-  private normalizeWorkflowEntity(workflow: NotificationTemplateEntity, preferences: any): INormalizedWorkflow {
+  private async normalizeWorkflowEntity(
+    workflow: NotificationTemplateEntity,
+    preferences: any,
+    controlValuesMap?: Map<string, Record<string, unknown>>
+  ): Promise<INormalizedWorkflow> {
+    const steps =
+      workflow.steps?.map((step, index) => {
+        const stepControlValues = controlValuesMap?.get(step._templateId) || {};
+
+        return this.normalizeStepEntity(step, index, stepControlValues);
+      }) || [];
+
     return {
       workflowId: workflow.triggers?.[0]?.identifier || '',
       name: workflow.name,
@@ -237,19 +278,19 @@ export class WorkflowComparator {
       validatePayload: workflow.validatePayload,
       isTranslationEnabled: workflow.isTranslationEnabled,
       preferences,
-      steps: workflow.steps?.map((step, index) => this.normalizeStepEntity(step, index)) || [],
+      steps,
     };
   }
 
   /**
    * Normalize step entity to a simplified structure for comparison
    */
-  private normalizeStepEntity(step: any, index: number): INormalizedStep {
+  private normalizeStepEntity(step: any, index: number, controlValues?: Record<string, unknown>): INormalizedStep {
     return {
       stepId: step.stepId || step.uuid || step._id,
       name: step.name || `Step ${index + 1}`,
       type: step.template?.type || 'unknown',
-      controlValues: {},
+      controlValues: controlValues || {},
     };
   }
 
