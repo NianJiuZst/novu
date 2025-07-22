@@ -13,4 +13,21 @@ export interface IBaseComparator<T> {
     } | null;
     otherDiffs?: IResourceDiff[];
   }>;
+
+  bulkCompareResources?(
+    sourceResources: T[],
+    targetResources: T[],
+    userContext: UserSessionData
+  ): Promise<
+    Map<
+      string,
+      {
+        resourceChanges: {
+          previous: Record<string, any> | null;
+          new: Record<string, any> | null;
+        } | null;
+        otherDiffs?: IResourceDiff[];
+      }
+    >
+  >;
 }

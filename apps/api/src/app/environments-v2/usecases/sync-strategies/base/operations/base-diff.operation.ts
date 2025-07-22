@@ -90,6 +90,103 @@ export abstract class BaseDiffOperation<T> {
     resultBuilder: DiffResultBuilder,
     userContext: UserSessionData
   ): Promise<void> {
+    // Check if bulk comparison is available and use it for better performance
+    if (this.comparator.bulkCompareResources && sourceResources.length > 1) {
+      await this.processBatchWithBulkComparison(sourceResources, targetResourceMap, resultBuilder, userContext);
+    } else {
+      await this.processBatchIndividually(sourceResources, targetResourceMap, resultBuilder, userContext);
+    }
+  }
+
+  @Instrument()
+  private async processBatchWithBulkComparison(
+    sourceResources: T[],
+    targetResourceMap: Map<string, T>,
+    resultBuilder: DiffResultBuilder,
+    userContext: UserSessionData
+  ): Promise<void> {
+    // Separate workflows that have targets from those that don't
+    const workflowsWithTargets: { source: T; target: T; identifier: string }[] = [];
+    const workflowsWithoutTargets: T[] = [];
+
+    for (const sourceResource of sourceResources) {
+      const sourceIdentifier = this.repositoryService.getResourceIdentifier(sourceResource);
+      const targetResource = targetResourceMap.get(sourceIdentifier);
+
+      if (targetResource) {
+        workflowsWithTargets.push({
+          source: sourceResource,
+          target: targetResource,
+          identifier: sourceIdentifier,
+        });
+      } else {
+        workflowsWithoutTargets.push(sourceResource);
+      }
+    }
+
+    // Handle workflows without targets (additions)
+    for (const sourceResource of workflowsWithoutTargets) {
+      resultBuilder.addResourceAdded({
+        id: this.repositoryService.getResourceIdentifier(sourceResource),
+        name: this.getResourceName(sourceResource),
+        updatedBy: this.extractUpdatedByInfo(sourceResource),
+        updatedAt: this.extractUpdatedAtInfo(sourceResource),
+      });
+    }
+
+    // Bulk compare workflows that have targets
+    if (workflowsWithTargets.length > 0) {
+      try {
+        const sourceResourcesToCompare = workflowsWithTargets.map((workflowTarget) => workflowTarget.source);
+        const targetResourcesToCompare = workflowsWithTargets.map((workflowTarget) => workflowTarget.target);
+
+        const bulkComparisonResults = await this.comparator.bulkCompareResources!(
+          sourceResourcesToCompare,
+          targetResourcesToCompare,
+          userContext
+        );
+
+        // Process results for each workflow
+        for (const { source, target, identifier } of workflowsWithTargets) {
+          const comparisonResult = bulkComparisonResults.get(identifier);
+
+          if (comparisonResult) {
+            const { resourceChanges, otherDiffs } = comparisonResult;
+            const allDiffs = this.createResourceDiffs(source, target, resourceChanges, otherDiffs ?? []);
+
+            if (allDiffs.length > 0) {
+              resultBuilder.addResourceDiff(
+                {
+                  id: this.repositoryService.getResourceIdentifier(source),
+                  name: this.getResourceName(source),
+                  updatedBy: this.extractUpdatedByInfo(source),
+                  updatedAt: this.extractUpdatedAtInfo(source),
+                },
+                {
+                  id: this.repositoryService.getResourceIdentifier(target),
+                  name: this.getResourceName(target),
+                  updatedBy: this.extractUpdatedByInfo(target),
+                  updatedAt: this.extractUpdatedAtInfo(target),
+                },
+                allDiffs
+              );
+            }
+          }
+        }
+      } catch (error) {
+        this.logger.error(`Failed to bulk compare resources: ${error.message}`);
+        throw error;
+      }
+    }
+  }
+
+  @Instrument()
+  private async processBatchIndividually(
+    sourceResources: T[],
+    targetResourceMap: Map<string, T>,
+    resultBuilder: DiffResultBuilder,
+    userContext: UserSessionData
+  ): Promise<void> {
     const batchPromises = sourceResources.map(async (sourceResource) => {
       const sourceIdentifier = this.repositoryService.getResourceIdentifier(sourceResource);
       const targetResource = targetResourceMap.get(sourceIdentifier);

@@ -64,6 +64,8 @@ export class BuildStepDataUsecase {
       return new Map();
     }
 
+    const controlValuesMap = new Map<string, Record<string, unknown>>();
+
     const controlValuesEntities = await this.controlValuesRepository.find({
       _environmentId: environmentId,
       _organizationId: organizationId,
@@ -71,8 +73,6 @@ export class BuildStepDataUsecase {
       _stepId: { $in: stepIds },
       level: ControlValuesLevelEnum.STEP_CONTROLS,
     });
-
-    const controlValuesMap = new Map<string, Record<string, unknown>>();
 
     // Map the results back to step IDs
     for (const entity of controlValuesEntities) {
@@ -89,6 +89,85 @@ export class BuildStepDataUsecase {
     }
 
     return controlValuesMap;
+  }
+
+  /**
+   * Bulk fetch control values for multiple workflows to optimize sync operations.
+   * This method batches control values fetching across all workflows and steps at once.
+   */
+  public async bulkFetchControlValuesForAllWorkflows(
+    workflows: Array<{ workflowId: string; stepIds: string[]; environmentId: string; organizationId: string }>
+  ): Promise<Map<string, Map<string, Record<string, unknown>>>> {
+    if (workflows.length === 0) {
+      return new Map();
+    }
+
+    const resultMap = new Map<string, Map<string, Record<string, unknown>>>();
+
+    // Group workflows by environment and organization for bulk fetching
+    const workflowsByEnvAndOrg = new Map<string, typeof workflows>();
+    for (const workflow of workflows) {
+      const key = `${workflow.environmentId}:${workflow.organizationId}`;
+      if (!workflowsByEnvAndOrg.has(key)) {
+        workflowsByEnvAndOrg.set(key, []);
+      }
+      workflowsByEnvAndOrg.get(key)!.push(workflow);
+    }
+
+    // Process each environment-organization group
+    for (const [envOrgKey, envWorkflows] of workflowsByEnvAndOrg.entries()) {
+      const [environmentId, organizationId] = envOrgKey.split(':');
+
+      // Collect all workflow IDs and step IDs for this environment
+      const allWorkflowIds = envWorkflows.map((workflow) => workflow.workflowId);
+      const allStepIds = envWorkflows.flatMap((workflow) => workflow.stepIds);
+
+      if (allStepIds.length === 0) {
+        // Initialize empty maps for workflows with no steps
+        for (const workflow of envWorkflows) {
+          resultMap.set(workflow.workflowId, new Map());
+        }
+        continue;
+      }
+
+      // Fetch all control values for this environment in one query
+      const controlValuesEntities = await this.controlValuesRepository.find({
+        _environmentId: environmentId,
+        _organizationId: organizationId,
+        _workflowId: { $in: allWorkflowIds },
+        _stepId: { $in: allStepIds },
+        level: ControlValuesLevelEnum.STEP_CONTROLS,
+      });
+
+      // Initialize result maps for each workflow
+      for (const workflow of envWorkflows) {
+        resultMap.set(workflow.workflowId, new Map());
+      }
+
+      // Group results by workflow and step
+      for (const entity of controlValuesEntities) {
+        if (entity._workflowId && entity._stepId) {
+          const workflowMap = resultMap.get(entity._workflowId);
+          if (workflowMap) {
+            workflowMap.set(entity._stepId, entity.controls || {});
+          }
+        }
+      }
+
+      // Ensure all requested step IDs have an entry (even if empty)
+      for (const workflow of envWorkflows) {
+        const workflowMap = resultMap.get(workflow.workflowId);
+        if (workflowMap) {
+          for (const stepId of workflow.stepIds) {
+            if (!workflowMap.has(stepId)) {
+              workflowMap.set(stepId, {});
+            }
+          }
+        }
+      }
+    }
+
+    return resultMap;
   }
 
   private async buildAvailableVariableSchema(

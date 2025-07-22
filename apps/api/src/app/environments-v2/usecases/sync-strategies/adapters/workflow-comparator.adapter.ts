@@ -61,4 +61,51 @@ export class WorkflowComparatorAdapter implements IBaseComparator<NotificationTe
       otherDiffs,
     };
   }
+
+  /**
+   * Bulk compare multiple workflows with optimized preference and control values fetching
+   */
+  async bulkCompareResources(
+    sourceResources: NotificationTemplateEntity[],
+    targetResources: NotificationTemplateEntity[],
+    userContext: UserSessionData
+  ): Promise<
+    Map<
+      string,
+      {
+        resourceChanges: {
+          previous: Record<string, any> | null;
+          new: Record<string, any> | null;
+        } | null;
+        otherDiffs?: IResourceDiff[];
+      }
+    >
+  > {
+    const comparisonResults = await this.workflowComparator.bulkCompareWorkflows(
+      sourceResources,
+      targetResources,
+      userContext
+    );
+
+    // Transform the results to match the expected format
+    const adaptedResults = new Map<
+      string,
+      {
+        resourceChanges: {
+          previous: Record<string, any> | null;
+          new: Record<string, any> | null;
+        } | null;
+        otherDiffs?: IResourceDiff[];
+      }
+    >();
+
+    for (const [workflowId, comparison] of comparisonResults.entries()) {
+      adaptedResults.set(workflowId, {
+        resourceChanges: comparison.workflowChanges,
+        otherDiffs: comparison.otherDiffs,
+      });
+    }
+
+    return adaptedResults;
+  }
 }

@@ -40,6 +40,12 @@ export class WorkflowComparator {
         this.bulkFetchPreferences(targetWorkflows),
       ]);
 
+      // Fetch control values for all workflows in bulk
+      const [sourceControlValuesMap, targetControlValuesMap] = await Promise.all([
+        this.bulkFetchControlValuesForAllWorkflows(sourceWorkflows),
+        this.bulkFetchControlValuesForAllWorkflows(targetWorkflows),
+      ]);
+
       // Create workflow maps for easy lookup
       const targetWorkflowMap = new Map(
         targetWorkflows.map((workflow) => [this.workflowRepositoryService.getWorkflowIdentifier(workflow), workflow])
@@ -53,6 +59,8 @@ export class WorkflowComparator {
         if (targetWorkflow) {
           const sourcePreferences = sourcePreferencesMap.get(sourceWorkflow._id);
           const targetPreferences = targetPreferencesMap.get(targetWorkflow._id);
+          const sourceControlValues = sourceControlValuesMap.get(sourceWorkflow._id);
+          const targetControlValues = targetControlValuesMap.get(targetWorkflow._id);
 
           if (!sourcePreferences) {
             throw new Error(`No preferences found for source workflow: ${sourceWorkflow._id}`);
@@ -60,12 +68,20 @@ export class WorkflowComparator {
           if (!targetPreferences) {
             throw new Error(`No preferences found for target workflow: ${targetWorkflow._id}`);
           }
+          if (!sourceControlValues) {
+            throw new Error(`No control values found for source workflow: ${sourceWorkflow._id}`);
+          }
+          if (!targetControlValues) {
+            throw new Error(`No control values found for target workflow: ${targetWorkflow._id}`);
+          }
 
-          const comparison = await this.compareWorkflowsWithPreferences(
+          const comparison = await this.compareWorkflowsWithPreferencesAndControlValues(
             sourceWorkflow,
             targetWorkflow,
             sourcePreferences,
             targetPreferences,
+            sourceControlValues,
+            targetControlValues,
             userContext
           );
 
@@ -183,6 +199,51 @@ export class WorkflowComparator {
   }
 
   /**
+   * Core workflow comparison logic with pre-fetched preferences and control values
+   */
+  private async compareWorkflowsWithPreferencesAndControlValues(
+    sourceWorkflow: NotificationTemplateEntity,
+    targetWorkflow: NotificationTemplateEntity,
+    sourcePreferences: any,
+    targetPreferences: any,
+    sourceControlValuesMap: Map<string, Record<string, unknown>>,
+    targetControlValuesMap: Map<string, Record<string, unknown>>,
+    userContext: UserSessionData
+  ): Promise<IWorkflowComparison> {
+    // Use direct entity normalization with proper preferences and control values
+    const [normalizedSource, normalizedTarget] = await Promise.all([
+      this.normalizeWorkflowEntity(sourceWorkflow, sourcePreferences, sourceControlValuesMap),
+      this.normalizeWorkflowEntity(targetWorkflow, targetPreferences, targetControlValuesMap),
+    ]);
+
+    // Separate steps from workflow fields
+    const { steps: sourceSteps, ...sourceWithoutSteps } = normalizedSource;
+    const { steps: targetSteps, ...targetWithoutSteps } = normalizedTarget;
+
+    const workflowDifferences = diff(targetWithoutSteps, sourceWithoutSteps);
+
+    let workflowChanges: {
+      previous: Partial<INormalizedWorkflow> | null;
+      new: Partial<INormalizedWorkflow> | null;
+    } | null = null;
+
+    if (Object.keys(workflowDifferences).length > 0) {
+      workflowChanges = {
+        previous: targetWithoutSteps,
+        new: sourceWithoutSteps,
+      };
+    }
+
+    // Compare steps and generate step-level diffs
+    const stepDiffs = this.compareStepsAsEntities(sourceSteps, targetSteps);
+
+    // Get localization group diffs for this workflow
+    const localizationDiffs = await this.getLocalizationDiffs(sourceWorkflow, targetWorkflow, userContext._id);
+
+    return { workflowChanges, otherDiffs: [...stepDiffs, ...localizationDiffs] };
+  }
+
+  /**
    * Bulk fetch preferences for multiple workflows
    */
   private async bulkFetchPreferences(workflows: NotificationTemplateEntity[]): Promise<Map<string, any>> {
@@ -230,6 +291,7 @@ export class WorkflowComparator {
 
   /**
    * Bulk fetch control values for all steps in a workflow
+   * @deprecated Use bulkFetchControlValuesForAllWorkflows for better performance across multiple workflows
    */
   private async bulkFetchControlValues(
     workflow: NotificationTemplateEntity
@@ -246,6 +308,27 @@ export class WorkflowComparator {
       workflow._environmentId,
       workflow._organizationId
     );
+  }
+
+  /**
+   * Bulk fetch control values for all workflows in a single batch
+   */
+  private async bulkFetchControlValuesForAllWorkflows(
+    workflows: NotificationTemplateEntity[]
+  ): Promise<Map<string, Map<string, Record<string, unknown>>>> {
+    if (workflows.length === 0) {
+      return new Map();
+    }
+
+    // Prepare workflow data for the bulk fetch
+    const workflowData = workflows.map((workflow) => ({
+      workflowId: workflow._id,
+      stepIds: workflow.steps?.map((step) => step._templateId).filter(Boolean) || [],
+      environmentId: workflow._environmentId,
+      organizationId: workflow._organizationId,
+    }));
+
+    return this.buildStepDataUsecase.bulkFetchControlValuesForAllWorkflows(workflowData);
   }
 
   /**
