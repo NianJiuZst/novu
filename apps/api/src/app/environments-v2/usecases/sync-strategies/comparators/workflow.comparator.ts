@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Instrument, PinoLogger } from '@novu/application-generic';
+import { Instrument, PinoLogger, GetPreferences } from '@novu/application-generic';
 import { diff } from 'deep-object-diff';
-import { UserSessionData } from '@novu/shared';
+import { UserSessionData, DEFAULT_WORKFLOW_PREFERENCES } from '@novu/shared';
 import { LocalizationResourceEnum, NotificationTemplateEntity } from '@novu/dal';
 import { ModuleRef } from '@nestjs/core';
-import { GetWorkflowUseCase, GetWorkflowCommand } from '../../../../workflows-v2/usecases/get-workflow';
-import { WorkflowNormalizer } from '../normalizers/workflow.normalizer';
 import { IWorkflowComparison, INormalizedStep, INormalizedWorkflow } from '../types/workflow-sync.types';
 import { IResourceDiff, DiffActionEnum, ResourceTypeEnum } from '../../../types/sync.types';
 import { WorkflowRepositoryService } from '../operations/workflow-repository.service';
@@ -14,11 +12,71 @@ import { WorkflowRepositoryService } from '../operations/workflow-repository.ser
 export class WorkflowComparator {
   constructor(
     private logger: PinoLogger,
-    private getWorkflowUseCase: GetWorkflowUseCase,
-    private workflowNormalizer: WorkflowNormalizer,
     private workflowRepositoryService: WorkflowRepositoryService,
+    private getPreferences: GetPreferences,
     private moduleRef: ModuleRef
   ) {}
+
+  /**
+   * Bulk compare multiple workflows with optimized preference fetching
+   */
+  async bulkCompareWorkflows(
+    sourceWorkflows: NotificationTemplateEntity[],
+    targetWorkflows: NotificationTemplateEntity[],
+    userContext: UserSessionData
+  ): Promise<Map<string, IWorkflowComparison>> {
+    const results = new Map<string, IWorkflowComparison>();
+
+    if (sourceWorkflows.length === 0) {
+      return results;
+    }
+
+    try {
+      // Fetch preferences for all workflows in bulk
+      const [sourcePreferencesMap, targetPreferencesMap] = await Promise.all([
+        this.bulkFetchPreferences(sourceWorkflows),
+        this.bulkFetchPreferences(targetWorkflows),
+      ]);
+
+      // Create workflow maps for easy lookup
+      const targetWorkflowMap = new Map(
+        targetWorkflows.map((workflow) => [this.workflowRepositoryService.getWorkflowIdentifier(workflow), workflow])
+      );
+
+      // Compare each source workflow with its target counterpart
+      for (const sourceWorkflow of sourceWorkflows) {
+        const workflowId = this.workflowRepositoryService.getWorkflowIdentifier(sourceWorkflow);
+        const targetWorkflow = targetWorkflowMap.get(workflowId);
+
+        if (targetWorkflow) {
+          const sourcePreferences = sourcePreferencesMap.get(sourceWorkflow._id);
+          const targetPreferences = targetPreferencesMap.get(targetWorkflow._id);
+
+          if (!sourcePreferences) {
+            throw new Error(`No preferences found for source workflow: ${sourceWorkflow._id}`);
+          }
+          if (!targetPreferences) {
+            throw new Error(`No preferences found for target workflow: ${targetWorkflow._id}`);
+          }
+
+          const comparison = await this.compareWorkflowsWithPreferences(
+            sourceWorkflow,
+            targetWorkflow,
+            sourcePreferences,
+            targetPreferences,
+            userContext
+          );
+
+          results.set(workflowId, comparison);
+        }
+      }
+
+      return results;
+    } catch (error) {
+      this.logger.error({ err: error }, `Failed to bulk compare workflows: ${error.message}`);
+      throw error;
+    }
+  }
 
   async compareWorkflows(
     sourceWorkflow: NotificationTemplateEntity,
@@ -30,60 +88,169 @@ export class WorkflowComparator {
         throw new Error('Source and target workflows must not be null');
       }
 
-      const [sourceWorkflowDto, targetWorkflowDto] = await Promise.all([
-        this.getWorkflowUseCase.execute(
-          GetWorkflowCommand.create({
-            user: {
-              ...userContext,
-              environmentId: sourceWorkflow._environmentId,
-            },
-            workflowIdOrInternalId: sourceWorkflow._id,
-          })
-        ),
-        this.getWorkflowUseCase.execute(
-          GetWorkflowCommand.create({
-            user: {
-              ...userContext,
-              environmentId: targetWorkflow._environmentId,
-            },
-            workflowIdOrInternalId: targetWorkflow._id,
-          })
-        ),
+      // Fetch preferences for both workflows to ensure proper comparison
+      const [sourcePreferencesMap, targetPreferencesMap] = await Promise.all([
+        this.bulkFetchPreferences([sourceWorkflow]),
+        this.bulkFetchPreferences([targetWorkflow]),
       ]);
 
-      const normalizedSource = this.workflowNormalizer.normalizeWorkflow(sourceWorkflowDto);
-      const normalizedTarget = this.workflowNormalizer.normalizeWorkflow(targetWorkflowDto);
+      const sourcePreferences = sourcePreferencesMap.get(sourceWorkflow._id);
+      const targetPreferences = targetPreferencesMap.get(targetWorkflow._id);
 
-      // Separate steps from workflow fields
-      const { steps: sourceSteps, ...sourceWithoutSteps } = normalizedSource;
-      const { steps: targetSteps, ...targetWithoutSteps } = normalizedTarget;
-
-      const workflowDifferences = diff(targetWithoutSteps, sourceWithoutSteps);
-
-      let workflowChanges: {
-        previous: Partial<INormalizedWorkflow> | null;
-        new: Partial<INormalizedWorkflow> | null;
-      } | null = null;
-
-      if (Object.keys(workflowDifferences).length > 0) {
-        workflowChanges = {
-          previous: targetWithoutSteps,
-          new: sourceWithoutSteps,
-        };
+      if (!sourcePreferences) {
+        throw new Error(`No preferences found for source workflow: ${sourceWorkflow._id}`);
+      }
+      if (!targetPreferences) {
+        throw new Error(`No preferences found for target workflow: ${targetWorkflow._id}`);
       }
 
-      // Compare steps and generate step-level diffs
-      const stepDiffs = this.compareStepsAsEntities(sourceSteps, targetSteps);
-
-      // Get localization group diffs for this workflow
-      const localizationDiffs = await this.getLocalizationDiffs(sourceWorkflow, targetWorkflow, userContext._id);
-
-      return { workflowChanges, otherDiffs: [...stepDiffs, ...localizationDiffs] };
+      return this.compareWorkflowsWithPreferences(
+        sourceWorkflow,
+        targetWorkflow,
+        sourcePreferences,
+        targetPreferences,
+        userContext
+      );
     } catch (error) {
       this.logger.error({ err: error }, `Failed to compare workflows ${error.message}`);
 
       return { workflowChanges: null, otherDiffs: [] };
     }
+  }
+
+  /**
+   * Core workflow comparison logic with pre-fetched preferences
+   */
+  private async compareWorkflowsWithPreferences(
+    sourceWorkflow: NotificationTemplateEntity,
+    targetWorkflow: NotificationTemplateEntity,
+    sourcePreferences: any,
+    targetPreferences: any,
+    userContext: UserSessionData
+  ): Promise<IWorkflowComparison> {
+    // Use direct entity normalization with proper preferences
+    const normalizedSource = this.normalizeWorkflowEntity(sourceWorkflow, sourcePreferences);
+    const normalizedTarget = this.normalizeWorkflowEntity(targetWorkflow, targetPreferences);
+
+    // Separate steps from workflow fields
+    const { steps: sourceSteps, ...sourceWithoutSteps } = normalizedSource;
+    const { steps: targetSteps, ...targetWithoutSteps } = normalizedTarget;
+
+    const workflowDifferences = diff(targetWithoutSteps, sourceWithoutSteps);
+
+    let workflowChanges: {
+      previous: Partial<INormalizedWorkflow> | null;
+      new: Partial<INormalizedWorkflow> | null;
+    } | null = null;
+
+    if (Object.keys(workflowDifferences).length > 0) {
+      workflowChanges = {
+        previous: targetWithoutSteps,
+        new: sourceWithoutSteps,
+      };
+    }
+
+    // Compare steps and generate step-level diffs
+    const stepDiffs = this.compareStepsAsEntities(sourceSteps, targetSteps);
+
+    // Get localization group diffs for this workflow
+    const localizationDiffs = await this.getLocalizationDiffs(sourceWorkflow, targetWorkflow, userContext._id);
+
+    return { workflowChanges, otherDiffs: [...stepDiffs, ...localizationDiffs] };
+  }
+
+  /**
+   * Bulk fetch preferences for multiple workflows
+   */
+  private async bulkFetchPreferences(workflows: NotificationTemplateEntity[]): Promise<Map<string, any>> {
+    const preferencesMap = new Map<string, any>();
+
+    if (workflows.length === 0) {
+      return preferencesMap;
+    }
+
+    // Group workflows by environment for bulk fetching
+    const workflowsByEnv = new Map<string, NotificationTemplateEntity[]>();
+    for (const workflow of workflows) {
+      const envId = workflow._environmentId;
+      if (!workflowsByEnv.has(envId)) {
+        workflowsByEnv.set(envId, []);
+      }
+      workflowsByEnv.get(envId)!.push(workflow);
+    }
+
+    // Fetch preferences for each environment in bulk
+    for (const [envId, envWorkflows] of workflowsByEnv.entries()) {
+      const templateIds = envWorkflows.map((workflow) => workflow._id);
+      const orgId = envWorkflows[0]._organizationId;
+
+      try {
+        const bulkPreferences = await this.getPreferences.bulkFetchWorkflowPreferences(templateIds, envId, orgId);
+
+        // Merge results into main map
+        for (const [templateId, preferences] of bulkPreferences.entries()) {
+          const foundWorkflow = envWorkflows.find((wf) => wf._id === templateId);
+          if (!foundWorkflow) {
+            throw new Error(`Workflow not found for template ID: ${templateId}`);
+          }
+
+          preferencesMap.set(templateId, this.buildPreferencesStructure(preferences, foundWorkflow));
+        }
+      } catch (error) {
+        this.logger.error({ err: error }, `Failed to fetch preferences for environment ${envId}: ${error.message}`);
+        throw error;
+      }
+    }
+
+    return preferencesMap;
+  }
+
+  /**
+   * Build preferences structure from bulk fetch result
+   */
+  private buildPreferencesStructure(preferences: any, workflow: NotificationTemplateEntity) {
+    if (!preferences) {
+      throw new Error(`No preferences found for workflow: ${workflow._id}`);
+    }
+
+    if (!workflow.name) {
+      throw new Error(`Workflow name is required for: ${workflow._id}`);
+    }
+
+    return {
+      user: preferences.user || null,
+      default: preferences.default || DEFAULT_WORKFLOW_PREFERENCES,
+    };
+  }
+
+  /**
+   * Normalize workflow entity to a simplified structure for comparison
+   */
+  private normalizeWorkflowEntity(workflow: NotificationTemplateEntity, preferences: any): INormalizedWorkflow {
+    return {
+      workflowId: workflow.triggers?.[0]?.identifier || '',
+      name: workflow.name,
+      description: workflow.description,
+      tags: workflow.tags || [],
+      active: workflow.active,
+      payloadSchema: workflow.payloadSchema ?? null,
+      validatePayload: workflow.validatePayload,
+      isTranslationEnabled: workflow.isTranslationEnabled,
+      preferences,
+      steps: workflow.steps?.map((step, index) => this.normalizeStepEntity(step, index)) || [],
+    };
+  }
+
+  /**
+   * Normalize step entity to a simplified structure for comparison
+   */
+  private normalizeStepEntity(step: any, index: number): INormalizedStep {
+    return {
+      stepId: step.stepId || step.uuid || step._id,
+      name: step.name || `Step ${index + 1}`,
+      type: step.template?.type || 'unknown',
+      controlValues: {},
+    };
   }
 
   @Instrument()
@@ -121,7 +288,7 @@ export class WorkflowComparator {
     }
   }
 
-  compareStepsAsEntities(sourceSteps: INormalizedStep[], targetSteps: INormalizedStep[]): IResourceDiff[] {
+  private compareStepsAsEntities(sourceSteps: INormalizedStep[], targetSteps: INormalizedStep[]): IResourceDiff[] {
     const stepDiffs: IResourceDiff[] = [];
 
     const targetStepMap = new Map(targetSteps.map((step, index) => [step.stepId, { step, index }]));

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { DeletePreferencesUseCase, GetWorkflowByIdsUseCase } from '@novu/application-generic';
+import { DeletePreferencesUseCase, GetWorkflowByIdsUseCase, GetPreferences } from '@novu/application-generic';
 import { SharedModule } from '../../../shared/shared.module';
 import { WorkflowSyncOperation } from './operations/workflow-sync.operation';
 import { WorkflowDiffOperation } from './operations/workflow-diff.operation';
@@ -66,6 +66,7 @@ import { LayoutsV2Module } from '../../../layouts-v2/layouts.module';
     DeleteWorkflowUseCase,
     GetWorkflowByIdsUseCase,
     DeletePreferencesUseCase,
+    GetPreferences,
     LayoutSyncToEnvironmentUseCase,
     DeleteLayoutUseCase,
 

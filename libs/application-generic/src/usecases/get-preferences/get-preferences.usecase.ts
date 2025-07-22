@@ -103,6 +103,55 @@ export class GetPreferences {
     return mappedPreferences;
   }
 
+  /**
+   * Bulk fetch preferences for multiple workflows to optimize sync operations
+   */
+  public async bulkFetchWorkflowPreferences(
+    templateIds: string[],
+    environmentId: string,
+    organizationId: string
+  ): Promise<Map<string, GetPreferencesResponseDto>> {
+    if (templateIds.length === 0) {
+      return new Map();
+    }
+
+    // Bulk fetch all workflow preferences
+    const [workflowResourcePreferences, workflowUserPreferences] = await Promise.all([
+      this.preferencesRepository.find({
+        _templateId: { $in: templateIds },
+        _environmentId: environmentId,
+        type: PreferencesTypeEnum.WORKFLOW_RESOURCE,
+      }),
+      this.preferencesRepository.find({
+        _templateId: { $in: templateIds },
+        _environmentId: environmentId,
+        type: PreferencesTypeEnum.USER_WORKFLOW,
+      }),
+    ]);
+
+    // Group preferences by template ID
+    const workflowResourceMap = new Map(workflowResourcePreferences.map((pref) => [pref._templateId, pref]));
+    const workflowUserMap = new Map(workflowUserPreferences.map((pref) => [pref._templateId, pref]));
+
+    // Build preference result for each template
+    const result = new Map<string, GetPreferencesResponseDto>();
+
+    for (const templateId of templateIds) {
+      const preferenceSet: PreferenceSet = {
+        workflowResourcePreference: workflowResourceMap.get(templateId) as PreferenceSet['workflowResourcePreference'],
+        workflowUserPreference: workflowUserMap.get(templateId) as PreferenceSet['workflowUserPreference'],
+      };
+
+      const mergedPreferences = MergePreferences.execute(MergePreferencesCommand.create(preferenceSet));
+
+      if (mergedPreferences.preferences) {
+        result.set(templateId, mergedPreferences);
+      }
+    }
+
+    return result;
+  }
+
   private async getPreferencesFromDb(command: GetPreferencesCommand): Promise<PreferenceSet> {
     // Always fetch workflow-level preferences
     const workflowPreferencesPromises = [
