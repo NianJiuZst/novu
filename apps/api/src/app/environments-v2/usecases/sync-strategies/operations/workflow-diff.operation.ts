@@ -10,8 +10,7 @@ export class WorkflowDiffOperation extends BaseDiffOperation<NotificationTemplat
   constructor(
     protected logger: PinoLogger,
     protected repositoryAdapter: WorkflowRepositoryAdapter,
-    protected comparatorAdapter: WorkflowComparatorAdapter,
-    private getPreferences: GetPreferences
+    protected comparatorAdapter: WorkflowComparatorAdapter
   ) {
     super(logger, repositoryAdapter, comparatorAdapter);
   }
