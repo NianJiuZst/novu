@@ -54,13 +54,16 @@ export function InboxPreviewContent() {
         inboxContent: {
           maxHeight: '460px',
         },
+        notificationList__skeleton: {
+          maxHeight: '300px',        
+        },
       },
     },
     tabs: defaultTabs,
   };
 
   return (
-    <div className="hide-inbox-footer nv-no-scrollbar mt-1 h-[470px] w-[375px] overflow-y-auto overflow-x-hidden">
+    <div className="hide-inbox-footer h-[470px] w-[375px]">
       <Inbox
         {...configuration}
         routerPush={(path: string) => {
