@@ -88,11 +88,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/onboarding',
-        element: (
-          <ProtectedRoute permission={PermissionsEnum.ORG_METADATA_WRITE}>
-            <OnboardingParentRoute />
-          </ProtectedRoute>
-        ),
+        element: <OnboardingParentRoute />,
         children: [
           {
             path: ROUTES.INBOX_USECASE,

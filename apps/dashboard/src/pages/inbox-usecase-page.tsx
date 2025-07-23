@@ -153,9 +153,10 @@ export function InboxUsecasePage() {
   const telemetry = useTelemetry();
   const { currentUser, currentOrganization } = useAuth();
   const { currentEnvironment: envFromContext } = useEnvironment();
+  const [envLoaded, setEnvLoaded] = useState(false);
   const { environments } = useFetchEnvironments({
-    organizationId: currentOrganization?._id || 'org',
-    refetchInterval: 1000,
+    organizationId: !envLoaded ? 'org' : '',
+    refetchInterval: !envLoaded ? 1000 : undefined,
     showError: false,
   });
 
@@ -164,13 +165,17 @@ export function InboxUsecasePage() {
   const requiredData = getRequiredData(environment, currentUser?._id, currentOrganization?._id);
 
   useEffect(() => {
-    telemetry(TelemetryEvent.INBOX_USECASE_PAGE_VIEWED);
+    setTimeout(() => {
+      // this is a little workaround to prevent race conditions during initial sync flow of new organizations
+      telemetry(TelemetryEvent.INBOX_USECASE_PAGE_VIEWED);
+    }, 2000);
   }, [telemetry]);
 
   useEffect(() => {
     if (environments?.length) {
       user?.reload();
       organization?.reload();
+      setEnvLoaded(true);
     }
   }, [environments]);
 
