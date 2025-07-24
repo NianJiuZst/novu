@@ -7,21 +7,30 @@ import { useNovu } from './NovuProvider';
  *
  * @example
  * ```tsx
- * // Get unread notifications
+ * // Get unread, non-archived, non-snoozed notifications (typical inbox view)
  * const { notifications } = useNotifications({
- *   read: false
+ *   read: false,
+ *   archived: false,
+ *   snoozed: false
+ * });
+ *
+ * // Get all notifications (read and unread, non-archived, non-snoozed)
+ * const { notifications } = useNotifications({
+ *   archived: false,
+ *   snoozed: false
+ * });
+ *
+ * // Get archived notifications
+ * const { notifications } = useNotifications({
+ *   archived: true
  * });
  *
  * // Get unseen notifications with specific tags
  * const { notifications } = useNotifications({
  *   seen: false,
+ *   archived: false,
+ *   snoozed: false,
  *   tags: ['important']
- * });
- *
- * // Get seen but unread notifications
- * const { notifications } = useNotifications({
- *   seen: true,
- *   read: false
  * });
  * ```
  */
@@ -68,8 +77,8 @@ export const useNotifications = (props?: UseNotificationsProps): UseNotification
     tags,
     data: dataFilter,
     read,
-    archived = false,
-    snoozed = false,
+    archived,
+    snoozed,
     seen,
     limit,
     onSuccess,

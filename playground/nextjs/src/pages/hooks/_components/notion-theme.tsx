@@ -75,12 +75,12 @@ export const NotionTheme = () => {
   const { status } = useStatus();
   const filter = useMemo(() => {
     if (status === 'unread') {
-      return { read: false };
+      return { read: false, archived: false, snoozed: false };
     } else if (status === 'archived') {
       return { archived: true };
     }
 
-    return { archived: false };
+    return { archived: false, snoozed: false };
   }, [status]);
 
   const { counts } = useCounts({ filters: [{ read: false, tags: ['chat'] }] });

@@ -19,7 +19,10 @@ npm install @novu/react-native
 import { NovuProvider, useNotifications } from '@novu/react-native';
 
 function YourCustomInbox() {
-  const { notifications, isLoading, fetchMore, hasMore } = useNotifications();
+  const { notifications, isLoading, fetchMore, hasMore } = useNotifications({
+    archived: false,
+    snoozed: false
+  });
 
   return (
     <Show when={!isLoading} fallback={<NotificationListSkeleton />}>
