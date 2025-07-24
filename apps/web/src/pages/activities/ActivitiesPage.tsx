@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams, useNavigate } from 'react-router-dom';
 import { ChannelTypeEnum } from '@novu/shared';
 import styled from '@emotion/styled';
 
@@ -41,10 +41,15 @@ const initialFormState: IFiltersForm = {
 
 export function ActivitiesPage() {
   const { templates, loading: loadingTemplates } = useTemplates(FIRST_100_WORKFLOWS);
-  const [page, setPage] = useState<number>(0);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [isModalOpen, setToggleModal] = useState<boolean>(false);
   const [notificationId, setNotificationId] = useState<string>('');
   const [filters, setFilters] = useState<IFiltersForm>(initialFormState);
+  
+  // Parse page from URL parameters, default to 0
+  const page = parseInt(searchParams.get('page') || '0', 10);
+  
   const { data, isLoading, isFetching } = useQuery<{ data: any[]; hasMore: boolean; pageSize: number }>(
     ['activitiesList', page, filters],
     () => getActivityList(page, filters),
@@ -54,10 +59,23 @@ export function ActivitiesPage() {
 
   const onFiltersChange = useCallback((formData: Partial<IFiltersForm>) => {
     setFilters((old) => ({ ...old, ...formData }));
-  }, []);
+    // Reset to first page when filters change
+    if (page !== 0) {
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('page');
+      setSearchParams(newSearchParams, { replace: true });
+    }
+  }, [page, searchParams, setSearchParams]);
 
   function handleTableChange(pageIndex) {
-    setPage(pageIndex);
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (pageIndex === 0) {
+      // Remove page parameter when going to first page
+      newSearchParams.delete('page');
+    } else {
+      newSearchParams.set('page', pageIndex.toString());
+    }
+    setSearchParams(newSearchParams, { replace: true });
   }
 
   const {
@@ -89,7 +107,11 @@ export function ActivitiesPage() {
 
   const onClearClick = () => {
     reset(initialFormState);
-    onFiltersChange(initialFormState);
+    setFilters(initialFormState);
+    // Reset to first page when clearing filters
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.delete('page');
+    setSearchParams(newSearchParams, { replace: true });
   };
 
   useEffect(() => {
