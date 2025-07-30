@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import axios from 'axios';
-import {
+import type {
   EnvironmentRepository,
   ExecutionDetailsRepository,
   JobEntity,
@@ -14,27 +13,28 @@ import {
   ChannelTypeEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
+  FILTER_TO_LABEL,
   FieldLogicalOperatorEnum,
   FieldOperatorEnum,
-  FILTER_TO_LABEL,
-  FilterParts,
+  type FilterParts,
   FilterPartTypeEnum,
-  ICondition,
-  IOnlineInLastFilterPart,
-  IPreviousStepFilterPart,
-  IRealtimeOnlineFilterPart,
-  IWebhookFilterPart,
+  type ICondition,
+  type IOnlineInLastFilterPart,
+  type IPreviousStepFilterPart,
+  type IRealtimeOnlineFilterPart,
+  type IWebhookFilterPart,
   PreviousStepTypeEnum,
   TimeOperatorEnum,
 } from '@novu/shared';
-import { differenceInDays, differenceInHours, differenceInMinutes, parseISO } from 'date-fns';
 import { EmailEventStatusEnum } from '@novu/stateless';
-import { createHash, Filter, FilterProcessingDetails, IFilterVariables, PlatformException } from '../../utils';
-import { ConditionsFilterCommand } from './conditions-filter.command';
-import { buildSubscriberKey, CachedResponse } from '../../services';
-import { CompileTemplate } from '../compile-template';
-import { CreateExecutionDetails, CreateExecutionDetailsCommand, DetailEnum } from '../create-execution-details';
+import axios from 'axios';
+import { differenceInDays, differenceInHours, differenceInMinutes, parseISO } from 'date-fns';
 import { decryptApiKey } from '../../encryption';
+import { buildSubscriberKey, CachedResponse } from '../../services';
+import { createHash, Filter, FilterProcessingDetails, type IFilterVariables, PlatformException } from '../../utils';
+import type { CompileTemplate } from '../compile-template';
+import { CreateExecutionDetails, CreateExecutionDetailsCommand, DetailEnum } from '../create-execution-details';
+import type { ConditionsFilterCommand } from './conditions-filter.command';
 
 export interface IConditionsFilterResponse {
   passed: boolean;
@@ -109,7 +109,6 @@ export class ConditionsFilter extends Filter {
   }
 
   private extractFilters(command: ConditionsFilterCommand) {
-    // eslint-disable-next-line no-nested-ternary
     return command.filters?.length ? command.filters : command.step?.filters?.length ? command.step.filters : [];
   }
 
@@ -352,7 +351,7 @@ export class ConditionsFilter extends Filter {
 
     if (child.on === FilterPartTypeEnum.WEBHOOK) {
       if (process.env.NODE_ENV === 'test') return true;
-      // eslint-disable-next-line no-param-reassign
+
       child.value = await this.compileFilter(child.value, variables, command.job);
       const res = await this.getWebhookResponse(child, variables, command);
       passed = this.processFilterEquality({ payload: undefined, webhook: res }, child, filterProcessingDetails);
@@ -363,7 +362,6 @@ export class ConditionsFilter extends Filter {
       child.on === FilterPartTypeEnum.PAYLOAD ||
       child.on === FilterPartTypeEnum.SUBSCRIBER
     ) {
-      // eslint-disable-next-line no-param-reassign
       child.value = await this.compileFilter(child.value, variables, command.job);
 
       passed = this.processFilterEquality(variables, child, filterProcessingDetails);

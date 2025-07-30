@@ -1,9 +1,8 @@
-/* eslint-disable global-require */
+import { ApiServiceLevelEnum } from '@novu/shared';
 import { UserSession } from '@novu/testing';
 import { expect } from 'chai';
-import { ApiServiceLevelEnum } from '@novu/shared';
 import sinon from 'sinon';
-import { Stripe } from 'stripe';
+import type { Stripe } from 'stripe';
 
 type DeepPartial<T> = T extends object ? { [P in keyof T]?: DeepPartial<T[P]> } : T;
 

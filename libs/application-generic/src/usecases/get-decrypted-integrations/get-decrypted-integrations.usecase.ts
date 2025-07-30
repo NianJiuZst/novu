@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { IntegrationEntity, IntegrationRepository } from '@novu/dal';
+import type { IntegrationEntity, IntegrationRepository } from '@novu/dal';
 
 import { decryptCredentials } from '../../encryption';
-import { GetDecryptedIntegrationsCommand } from './get-decrypted-integrations.command';
+import type { GetDecryptedIntegrationsCommand } from './get-decrypted-integrations.command';
 
 @Injectable()
 export class GetDecryptedIntegrations {
@@ -44,7 +44,6 @@ export class GetDecryptedIntegrations {
   }
 
   public static getDecryptedCredentials(integration: IntegrationEntity) {
-    // eslint-disable-next-line no-param-reassign
     integration.credentials = decryptCredentials(integration.credentials);
 
     return integration;

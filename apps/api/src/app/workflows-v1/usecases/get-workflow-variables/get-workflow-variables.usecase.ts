@@ -1,9 +1,8 @@
-/* eslint-disable global-require */
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import type { ModuleRef } from '@nestjs/core';
+import { buildVariablesKey, CachedResponse, type PinoLogger } from '@novu/application-generic';
 import { SystemVariablesWithTypes } from '@novu/shared';
-import { buildVariablesKey, CachedResponse, PinoLogger } from '@novu/application-generic';
-import { GetWorkflowVariablesCommand } from './get-workflow-variables.command';
+import type { GetWorkflowVariablesCommand } from './get-workflow-variables.command';
 
 /**
  * @deprecated use usecases in /workflows directory

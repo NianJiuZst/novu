@@ -1,7 +1,7 @@
-import { Component, createSignal, splitProps } from 'solid-js';
+import { type Component, createSignal, splitProps } from 'solid-js';
 import { useStyle } from '../../helpers';
 import { cn } from '../../helpers/utils';
-import { AppearanceKey } from '../../types';
+import type { AppearanceKey } from '../../types';
 import { Input, inputVariants } from './Input';
 
 export interface TimeValue {
@@ -151,16 +151,14 @@ const enforceMinMax = (el: HTMLInputElement) => {
 
     if (value < min || value > max) {
       // Reject the extra digit by reverting to the previous valid value
-      // eslint-disable-next-line no-param-reassign
+
       el.value = el.value.slice(0, -1);
 
       // If still invalid after removing the last digit, set to min/max
       const newValue = parseInt(el.value, 10);
       if (Number.isNaN(newValue) || newValue < min) {
-        // eslint-disable-next-line no-param-reassign
         el.value = el.min;
       } else if (newValue > max) {
-        // eslint-disable-next-line no-param-reassign
         el.value = el.max;
       }
     }

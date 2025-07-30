@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+
 
 export const MadeByNovu = (props: React.ComponentPropsWithoutRef<'svg'>) => {
   return (

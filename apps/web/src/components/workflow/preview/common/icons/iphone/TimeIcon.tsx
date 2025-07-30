@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+
 import { ComponentProps } from 'react';
 
 export const TimeIcon = (props: ComponentProps<'svg'>) => {

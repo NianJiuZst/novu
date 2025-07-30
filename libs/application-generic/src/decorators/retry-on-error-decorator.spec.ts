@@ -1,4 +1,4 @@
-import { RetryOnError, RetryOptions } from './retry-on-error-decorator';
+import { RetryOnError, type RetryOptions } from './retry-on-error-decorator';
 
 // Mock console.warn to verify logging
 const mockConsoleWarn = jest.spyOn(console, 'warn');
@@ -8,7 +8,6 @@ class TestService {
 
   @RetryOnError('CustomError', { maxRetries: 3, delay: 10 })
   async riskyMethod(shouldFail: boolean = true): Promise<string> {
-    // eslint-disable-next-line no-plusplus
     this.attempts++;
 
     if (shouldFail && this.attempts < 3) {
@@ -83,7 +82,6 @@ describe('RetryOnError Decorator', () => {
 
       @RetryOnError('CustomError', customOptions)
       async methodWithCustomOptions(): Promise<string> {
-        // eslint-disable-next-line no-plusplus
         this.attempts++;
 
         if (this.attempts < 2) {

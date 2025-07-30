@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+
 
 export const PageGradient = (props: React.ComponentPropsWithoutRef<'svg'>) => {
   return (

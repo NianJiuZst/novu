@@ -22,7 +22,7 @@ export const useUploadToStorage = (
         transformRequest: [
           (data, headers) => {
             if (headers) {
-              // eslint-disable-next-line
+
               delete headers.Authorization;
             }
 

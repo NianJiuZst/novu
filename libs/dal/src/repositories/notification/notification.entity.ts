@@ -1,8 +1,8 @@
-import { ISubscribersDefine, StatelessControls, StepTypeEnum } from '@novu/shared';
+import type { ISubscribersDefine, StatelessControls, StepTypeEnum } from '@novu/shared';
 
 import type { ChangePropsValueType } from '../../types/helpers';
 import type { EnvironmentId } from '../environment';
-import { NotificationTemplateEntity } from '../notification-template';
+import type { NotificationTemplateEntity } from '../notification-template';
 import type { OrganizationId } from '../organization';
 
 export class NotificationEntity {
@@ -33,10 +33,9 @@ export class NotificationEntity {
    * This is a field that is used to define the subscriber that will receive the notification.
    * This field simplifies metric retrieval by associating external subscriber data, such as subscriberId.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   to?: ISubscribersDefine | any;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload?: any;
 
   createdAt?: string;

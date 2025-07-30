@@ -1,18 +1,18 @@
 import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
+import type { ModuleRef } from '@nestjs/core';
 import {
-  ExecuteBridgeRequest,
+  type ExecuteBridgeRequest,
   ExecuteBridgeRequestCommand,
-  ExecuteBridgeRequestDto,
-  FeatureFlagsService,
+  type ExecuteBridgeRequestDto,
+  type FeatureFlagsService,
   Instrument,
   InstrumentUsecase,
-  IWorkflowDataDto,
-  PinoLogger,
-  StorageHelperService,
-  WorkflowQueueService,
+  type IWorkflowDataDto,
+  type PinoLogger,
+  type StorageHelperService,
+  type WorkflowQueueService,
 } from '@novu/application-generic';
-import {
+import type {
   CommunityOrganizationRepository,
   EnvironmentEntity,
   EnvironmentRepository,
@@ -25,30 +25,30 @@ import {
   WorkflowOverrideEntity,
   WorkflowOverrideRepository,
 } from '@novu/dal';
-import { DiscoverWorkflowOutput, GetActionEnum } from '@novu/framework/internal';
+import { type DiscoverWorkflowOutput, GetActionEnum } from '@novu/framework/internal';
 import {
   FeatureFlagsKeysEnum,
   ReservedVariablesMap,
-  TriggerContextTypeEnum,
-  TriggerEventStatusEnum,
-  TriggerRecipientsPayload,
   ResourceOriginEnum,
+  type TriggerContextTypeEnum,
+  TriggerEventStatusEnum,
+  type TriggerRecipientsPayload,
 } from '@novu/shared';
 import { addBreadcrumb } from '@sentry/node';
+import Ajv, { ErrorObject } from 'ajv';
+import addFormats from 'ajv-formats';
 import { randomBytes } from 'crypto';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import Ajv, { ErrorObject } from 'ajv';
-import addFormats from 'ajv-formats';
+import { generateTransactionId } from '../../../shared/helpers';
 import { PayloadValidationException } from '../../exceptions/payload-validation-exception';
 import { RecipientSchema, RecipientsSchema } from '../../utils/trigger-recipient-validation';
-import { VerifyPayload, VerifyPayloadCommand } from '../verify-payload';
-import {
+import { type VerifyPayload, VerifyPayloadCommand } from '../verify-payload';
+import type {
   ParseEventRequestBroadcastCommand,
   ParseEventRequestCommand,
   ParseEventRequestMulticastCommand,
 } from './parse-event-request.command';
-import { generateTransactionId } from '../../../shared/helpers';
 
 @Injectable()
 export class ParseEventRequest {
@@ -118,7 +118,7 @@ export class ParseEventRequest {
 
     if (template.validatePayload && template.payloadSchema) {
       const validatedPayload = this.validateAndApplyPayloadDefaults(command.payload, template.payloadSchema);
-      // eslint-disable-next-line no-param-reassign
+
       command.payload = validatedPayload;
     }
 
@@ -182,7 +182,7 @@ export class ParseEventRequest {
     if (command.payload && Array.isArray(command.payload.attachments)) {
       this.modifyAttachments(command);
       await this.storageHelperService.uploadAttachments(command.payload.attachments);
-      // eslint-disable-next-line no-param-reassign
+
       command.payload.attachments = command.payload.attachments.map(({ file, ...attachment }) => attachment);
     }
 
@@ -192,7 +192,7 @@ export class ParseEventRequest {
         template,
       })
     );
-    // eslint-disable-next-line no-param-reassign
+
     command.payload = merge({}, defaultPayload, command.payload);
 
     const result = await this.dispatchEventToWorkflowQueue({ command, transactionId, environment, organization });
@@ -336,7 +336,6 @@ export class ParseEventRequest {
   }
 
   private modifyAttachments(command: ParseEventRequestCommand): void {
-    // eslint-disable-next-line no-param-reassign
     command.payload.attachments = command.payload.attachments.map((attachment) => {
       const randomId = randomBytes(16).toString('hex');
 

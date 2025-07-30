@@ -1,18 +1,18 @@
+import { BadRequestException } from '@nestjs/common';
+import { isRegularDigest } from '@novu/application-generic';
+import type { JobEntity } from '@novu/dal';
 import {
+  DaysEnum,
   DigestTypeEnum,
   DigestUnitEnum,
-  IDigestRegularMetadata,
-  StepTypeEnum,
-  DaysEnum,
+  type IDigestBaseMetadata,
+  type IDigestRegularMetadata,
+  type ITimedConfig,
   MonthlyTypeEnum,
-  ITimedConfig,
   OrdinalEnum,
   OrdinalValueEnum,
-  IDigestBaseMetadata,
+  StepTypeEnum,
 } from '@novu/shared';
-import { JobEntity } from '@novu/dal';
-import { isRegularDigest } from '@novu/application-generic';
-import { BadRequestException } from '@nestjs/common';
 
 const validateAmountAndUnit = (digest: IDigestBaseMetadata) => {
   if (!digest?.amount) {
@@ -95,7 +95,6 @@ export const validateDigest = (job: JobEntity): void => {
 
     validateAmountAndUnit(job.digest);
 
-    // eslint-disable-next-line default-case
     switch (job.digest.unit) {
       case DigestUnitEnum.DAYS:
       case DigestUnitEnum.WEEKS:

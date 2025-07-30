@@ -1,3 +1,6 @@
+import { DirectionEnum, type ListWorkflowResponse } from '@novu/shared';
+import { RiMore2Fill } from 'react-icons/ri';
+import { createSearchParams, useLocation, useSearchParams } from 'react-router-dom';
 import { DefaultPagination } from '@/components/default-pagination';
 import { Skeleton } from '@/components/primitives/skeleton';
 import {
@@ -7,14 +10,11 @@ import {
   TableFooter,
   TableHead,
   TableHeader,
-  TableHeadSortDirection,
+  type TableHeadSortDirection,
   TableRow,
 } from '@/components/primitives/table';
 import { WorkflowListEmpty } from '@/components/workflow-list-empty';
 import { WorkflowRow } from '@/components/workflow-row';
-import { DirectionEnum, ListWorkflowResponse } from '@novu/shared';
-import { RiMore2Fill } from 'react-icons/ri';
-import { createSearchParams, useLocation, useSearchParams } from 'react-router-dom';
 import { ServerErrorPage } from '@/pages/server-error-page';
 
 export type SortableColumn = 'name' | 'updatedAt' | 'lastTriggeredAt';
@@ -147,7 +147,11 @@ export function WorkflowList({
           {isLoading ? (
             <WorkflowListSkeleton limit={limit} />
           ) : (
-            <>{data?.workflows.map((workflow) => <WorkflowRow key={workflow._id} workflow={workflow} />)}</>
+            <>
+              {data?.workflows.map((workflow) => (
+                <WorkflowRow key={workflow._id} workflow={workflow} />
+              ))}
+            </>
           )}
         </TableBody>
         {data && limit < data.totalCount && (

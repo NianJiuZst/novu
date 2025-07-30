@@ -1,16 +1,16 @@
 import { SmsProviderIdEnum } from '@novu/shared';
 import {
   ChannelTypeEnum,
-  ISendMessageSuccessResponse,
-  ISMSEventBody,
-  ISmsOptions,
-  ISmsProvider,
+  type ISendMessageSuccessResponse,
+  type ISMSEventBody,
+  type ISmsOptions,
+  type ISmsProvider,
   SmsEventStatusEnum,
 } from '@novu/stateless';
 import { SDK } from '@ringcentral/sdk';
-import Platform from '@ringcentral/sdk/lib/platform/Platform';
+import type Platform from '@ringcentral/sdk/lib/platform/Platform';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 export class RingCentralSmsProvider extends BaseProvider implements ISmsProvider {
   id = SmsProviderIdEnum.RingCentral;
@@ -70,7 +70,6 @@ export class RingCentralSmsProvider extends BaseProvider implements ISmsProvider
 
   parseEventBody(body: any | any[], identifier: string): ISMSEventBody | undefined {
     if (Array.isArray(body)) {
-      // eslint-disable-next-line no-param-reassign
       body = body.find((item) => item.id === identifier);
     }
 

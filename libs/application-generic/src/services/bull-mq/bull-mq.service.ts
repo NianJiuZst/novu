@@ -1,22 +1,21 @@
-/* eslint-disable global-require */
+import { Injectable, Logger } from '@nestjs/common';
+import type { IEventJobData, IJobData, JobTopicNameEnum } from '@novu/shared';
 import {
   BulkJobOptions,
-  ConnectionOptions as RedisConnectionOptions,
   Job,
   JobsOptions,
-  Metrics,
+  type Metrics,
   MetricsTime,
   Processor,
   Queue,
   QueueBaseOptions,
   QueueOptions,
+  ConnectionOptions as RedisConnectionOptions,
   Worker,
   WorkerOptions,
 } from 'bullmq';
-import { Injectable, Logger } from '@nestjs/common';
-import { IEventJobData, IJobData, JobTopicNameEnum } from '@novu/shared';
 
-import { WorkflowInMemoryProviderService } from '../in-memory-provider';
+import type { WorkflowInMemoryProviderService } from '../in-memory-provider';
 
 interface IQueueMetrics {
   completed: Metrics;

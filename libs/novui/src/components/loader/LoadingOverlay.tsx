@@ -1,13 +1,13 @@
-import { LoaderProps as ExternalLoaderProps, LoadingOverlay as ExternalLoadingOverlay } from '@mantine/core';
-import React from 'react';
-import { PolymorphicComponentPropWithRef, PolymorphicRef, forwardRefWithAs } from '../../types/props-helpers';
-import { JsxStyleProps } from '../../../styled-system/types';
+import { type LoaderProps as ExternalLoaderProps, LoadingOverlay as ExternalLoadingOverlay } from '@mantine/core';
+import type React from 'react';
 import { css, cx } from '../../../styled-system/css';
-import { loadingOverlay, type LoadingOverlayVariant } from '../../../styled-system/recipes';
-import { CoreProps } from '../../types';
 import { splitCssProps } from '../../../styled-system/jsx';
-import { IconSize } from '../../icons';
-import { ZIndexToken, token } from '../../../styled-system/tokens';
+import { type LoadingOverlayVariant, loadingOverlay } from '../../../styled-system/recipes';
+import { token, type ZIndexToken } from '../../../styled-system/tokens';
+import type { JsxStyleProps } from '../../../styled-system/types';
+import type { IconSize } from '../../icons';
+import type { CoreProps } from '../../types';
+import { forwardRefWithAs, type PolymorphicComponentPropWithRef, type PolymorphicRef } from '../../types/props-helpers';
 
 export type LoaderSize = IconSize | '64';
 
@@ -39,7 +39,10 @@ type PolymorphicComponent = <C extends React.ElementType = LoadingOverlayDefault
  * TODO: Add support for container-scoped loader. For now, only full-page works.
  * To work around this, use position: relative in the parent component
  */
-export const LoadingOverlay: PolymorphicComponent = forwardRefWithAs<LoadingOverlayDefaultElement, JsxStyleProps & Partial<LoadingOverlayVariant> & CoreProps & LoadingOverlayCoreProps>(
+export const LoadingOverlay: PolymorphicComponent = forwardRefWithAs<
+  LoadingOverlayDefaultElement,
+  JsxStyleProps & Partial<LoadingOverlayVariant> & CoreProps & LoadingOverlayCoreProps
+>(
   <C extends React.ElementType = LoadingOverlayDefaultElement>(
     { variant, isVisible = true, size = DEFAULT_SIZE, zIndex = DEFAULT_Z_INDEX, ...props }: LoadingOverlayProps<C>,
     ref?: PolymorphicRef<C>

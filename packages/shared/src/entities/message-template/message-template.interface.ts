@@ -1,16 +1,16 @@
+import type { JSONSchemaDto, UiSchema } from '../../dto';
 import {
-  ChannelCTATypeEnum,
-  EnvironmentId,
-  IEmailBlock,
-  ITemplateVariable,
-  MessageTemplateContentType,
-  OrganizationId,
-  StepTypeEnum,
+  type ChannelCTATypeEnum,
+  type EnvironmentId,
+  type IEmailBlock,
+  type ITemplateVariable,
+  type MessageTemplateContentType,
+  type OrganizationId,
+  type StepTypeEnum,
   TemplateVariableTypeEnum,
   TriggerContextTypeEnum,
 } from '../../types';
-import type { JSONSchemaDto, UiSchema } from '../../dto';
-import { IActor } from '../actor';
+import type { IActor } from '../actor';
 
 export interface IMessageTemplate {
   id?: string;
@@ -33,7 +33,7 @@ export interface IMessageTemplate {
     data: {
       url?: string;
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     action?: any;
   };
   active?: boolean;

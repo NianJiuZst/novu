@@ -1,26 +1,26 @@
 import {
   BadRequestException,
-  CallHandler,
+  type CallHandler,
   ConflictException,
-  ExecutionContext,
+  type ExecutionContext,
   HttpException,
   Injectable,
   InternalServerErrorException,
-  NestInterceptor,
+  type NestInterceptor,
   ServiceUnavailableException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import {
-  CacheService,
+  type CacheService,
+  type FeatureFlagsService,
   HttpResponseHeaderKeysEnum,
   Instrument,
-  FeatureFlagsService,
-  PinoLogger,
+  type PinoLogger,
 } from '@novu/application-generic';
-import { Observable, of, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { ApiAuthSchemeEnum, FeatureFlagsKeysEnum, type UserSessionData } from '@novu/shared';
 import { createHash } from 'crypto';
-import { ApiAuthSchemeEnum, FeatureFlagsKeysEnum, UserSessionData } from '@novu/shared';
+import { type Observable, of, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 const IDEMPOTENCY_CACHE_TTL = 60 * 60 * 24; // 24h
 const IDEMPOTENCY_PROGRESS_TTL = 60 * 5; // 5min
@@ -161,7 +161,6 @@ export class IdempotencyInterceptor implements NestInterceptor {
   }
 
   private setHeaders(response: any, headers: Record<string, string>) {
-    // eslint-disable-next-line array-callback-return
     Object.keys(headers).map((key) => {
       if (headers[key]) {
         response.set(key, headers[key]);

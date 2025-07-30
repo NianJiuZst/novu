@@ -3,7 +3,7 @@ import { novuConfig } from '@/utils/config';
 import { Inbox } from '@novu/nextjs';
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   interface NotificationData {
     foo: string;
   }

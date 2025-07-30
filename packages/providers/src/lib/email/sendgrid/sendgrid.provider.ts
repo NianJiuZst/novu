@@ -1,18 +1,17 @@
+import { EmailProviderIdEnum, type IEmailOptions } from '@novu/shared';
 import {
   ChannelTypeEnum,
-  EmailEventStatusEnum,
-  IEmailProvider,
-  ISendMessageSuccessResponse,
-  ICheckIntegrationResponse,
   CheckIntegrationResponseEnum,
-  IEmailEventBody,
-  IAttachmentOptions,
+  EmailEventStatusEnum,
+  type IAttachmentOptions,
+  type ICheckIntegrationResponse,
+  type IEmailEventBody,
+  type IEmailProvider,
+  type ISendMessageSuccessResponse,
 } from '@novu/stateless';
-
-import { MailDataRequired, MailService } from '@sendgrid/mail';
-import { EmailProviderIdEnum, IEmailOptions } from '@novu/shared';
+import { type MailDataRequired, MailService } from '@sendgrid/mail';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 type AttachmentJSON = MailDataRequired['attachments'][0];
 
@@ -79,9 +78,9 @@ export class SendgridEmailProvider extends BaseProvider implements IEmailProvide
      * deleted below values from customData to avoid passing them
      * in customArgs because customArgs has max limit of 10,000 bytes
      */
-    // eslint-disable-next-line no-param-reassign
+
     delete options.customData?.dynamicTemplateData;
-    // eslint-disable-next-line no-param-reassign
+
     delete options.customData?.templateId;
 
     const attachments = options.attachments?.map((attachment: IAttachmentOptions) => {
@@ -161,7 +160,6 @@ export class SendgridEmailProvider extends BaseProvider implements IEmailProvide
 
   parseEventBody(body: any | any[], identifier: string): IEmailEventBody | undefined {
     if (Array.isArray(body)) {
-      // eslint-disable-next-line no-param-reassign
       body = body.find((item) => item.id === identifier);
     }
 

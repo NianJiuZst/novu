@@ -19,7 +19,7 @@ export const Highlight = (props: { children: ReactNode }) => {
     }
 
     hljs.highlightBlock(ref.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [ref.current, props.children]);
 
   return <code {...props} ref={ref} />;

@@ -1,7 +1,6 @@
-/* eslint-disable no-console */
-import { NestInterceptor, RequestMethod } from '@nestjs/common';
-import { getLoggerToken, Logger, LoggerErrorInterceptor, LoggerModule, Params, PinoLogger } from 'nestjs-pino';
-import { storage, Store } from 'nestjs-pino/storage';
+import { type NestInterceptor, RequestMethod } from '@nestjs/common';
+import { getLoggerToken, Logger, LoggerErrorInterceptor, LoggerModule, type Params, PinoLogger } from 'nestjs-pino';
+import { Store, storage } from 'nestjs-pino/storage';
 import { sensitiveFields } from './masking';
 
 export * from './LogDecorator';

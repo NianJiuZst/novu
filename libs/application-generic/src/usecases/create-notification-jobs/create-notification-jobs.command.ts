@@ -1,7 +1,6 @@
-import { IsDefined, IsOptional, IsString } from 'class-validator';
 // TODO: We shouldn't be importing from DAL here. Needs big refactor throughout monorepo.
-import { NotificationTemplateEntity, SubscriberEntity, TopicEntity } from '@novu/dal';
-import {
+import type { NotificationTemplateEntity, SubscriberEntity, TopicEntity } from '@novu/dal';
+import type {
   ChannelTypeEnum,
   ISubscribersDefine,
   ITenantDefine,
@@ -10,6 +9,7 @@ import {
   TriggerOverrides,
   WorkflowPreferences,
 } from '@novu/shared';
+import { IsDefined, IsOptional, IsString } from 'class-validator';
 
 import { EnvironmentWithUserCommand } from '../../commands';
 
@@ -22,7 +22,7 @@ export class CreateNotificationJobsCommand extends EnvironmentWithUserCommand {
   overrides: TriggerOverrides;
 
   @IsDefined()
-  payload: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  payload: any;
 
   @IsDefined()
   subscriber: SubscriberEntity;

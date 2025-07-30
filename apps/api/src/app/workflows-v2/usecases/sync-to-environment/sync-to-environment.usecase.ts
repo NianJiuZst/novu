@@ -1,28 +1,28 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
-import { PreferencesTypeEnum, WorkflowCreationSourceEnum, ResourceOriginEnum, StepTypeEnum } from '@novu/shared';
-import {
-  PreferencesEntity,
-  PreferencesRepository,
-  ClientSession,
-  LocalizationResourceEnum,
-  NotificationTemplateRepository,
-} from '@novu/dal';
+import type { ModuleRef } from '@nestjs/core';
 import { Instrument, InstrumentUsecase } from '@novu/application-generic';
-import { SyncToEnvironmentCommand } from './sync-to-environment.command';
-import { GetWorkflowCommand, GetWorkflowUseCase } from '../get-workflow';
 import {
-  UpsertStepDataCommand,
-  UpsertWorkflowCommand,
-  UpsertWorkflowDataCommand,
-  UpsertWorkflowUseCase,
-} from '../upsert-workflow';
-import { StepResponseDto, WorkflowPreferencesDto, WorkflowResponseDto } from '../../dtos';
-import { WorkflowNotSyncableException } from '../../exceptions/workflow-not-syncable-exception';
+  type ClientSession,
+  LocalizationResourceEnum,
+  type NotificationTemplateRepository,
+  type PreferencesEntity,
+  type PreferencesRepository,
+} from '@novu/dal';
+import { PreferencesTypeEnum, ResourceOriginEnum, StepTypeEnum, WorkflowCreationSourceEnum } from '@novu/shared';
 import {
   LayoutSyncToEnvironmentCommand,
-  LayoutSyncToEnvironmentUseCase,
+  type LayoutSyncToEnvironmentUseCase,
 } from '../../../layouts-v2/usecases/sync-to-environment';
+import type { StepResponseDto, WorkflowPreferencesDto, WorkflowResponseDto } from '../../dtos';
+import { WorkflowNotSyncableException } from '../../exceptions/workflow-not-syncable-exception';
+import { GetWorkflowCommand, type GetWorkflowUseCase } from '../get-workflow';
+import {
+  type UpsertStepDataCommand,
+  UpsertWorkflowCommand,
+  type UpsertWorkflowDataCommand,
+  type UpsertWorkflowUseCase,
+} from '../upsert-workflow';
+import type { SyncToEnvironmentCommand } from './sync-to-environment.command';
 
 export const SYNCABLE_WORKFLOW_ORIGINS = [ResourceOriginEnum.NOVU_CLOUD];
 
@@ -116,7 +116,6 @@ export class SyncToEnvironmentUseCase {
       return;
     }
 
-    // eslint-disable-next-line global-require
     const publishTranslationGroup = this.moduleRef.get(require('@novu/ee-translation')?.PublishTranslationGroup, {
       strict: false,
     });

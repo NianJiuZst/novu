@@ -1,5 +1,5 @@
-import { Novu } from '@novu/api';
-import { SubscriberEntity, TopicSubscribersRepository } from '@novu/dal';
+import type { Novu } from '@novu/api';
+import { type SubscriberEntity, TopicSubscribersRepository } from '@novu/dal';
 import { SubscribersService, UserSession } from '@novu/testing';
 import { expect } from 'chai';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
@@ -22,7 +22,7 @@ describe('List subscriber subscriptions - /v2/subscribers/:subscriberId/subscrip
     subscriber = await subscribersService.createSubscriber();
 
     // Create multiple topics
-    // eslint-disable-next-line no-plusplus
+
     for (let i = 0; i < 3; i++) {
       const topicKey = `topic-key-${Date.now()}-${i}`;
       topicKeys.push(topicKey);

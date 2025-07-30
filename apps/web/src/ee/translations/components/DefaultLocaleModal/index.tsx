@@ -79,7 +79,7 @@ export const DefaultLocaleModal = ({
         defaultLocale,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [defaultLocale]);
 
   return (

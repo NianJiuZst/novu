@@ -41,7 +41,7 @@ const getOrdinal = (num: string | number) => {
     if (Number.isNaN(res)) {
       return num;
     }
-    // eslint-disable-next-line no-param-reassign
+
     num = res;
   }
   const ord = ['st', 'nd', 'rd'];

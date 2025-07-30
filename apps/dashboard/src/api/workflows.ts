@@ -106,7 +106,7 @@ export async function triggerWorkflow({
     body: {
       name,
       to,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       payload: { ...(payload ?? {}), __source: (payload as any)?.__source ?? 'dashboard' },
     },
   });

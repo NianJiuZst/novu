@@ -1,12 +1,17 @@
-import { expect } from 'chai';
-import { NotificationTemplateEntity, SubscriberEntity, NotificationEntity, NotificationRepository } from '@novu/dal';
-import { StepTypeEnum, EmailBlockTypeEnum } from '@novu/shared';
-import { SubscribersService, UserSession } from '@novu/testing';
-import { Novu } from '@novu/api';
+import type { Novu } from '@novu/api';
 import { WorkflowRunRepository, WorkflowRunStatusEnum } from '@novu/application-generic';
-import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
+import {
+  type NotificationEntity,
+  NotificationRepository,
+  type NotificationTemplateEntity,
+  type SubscriberEntity,
+} from '@novu/dal';
+import { EmailBlockTypeEnum, StepTypeEnum } from '@novu/shared';
+import { SubscribersService, UserSession } from '@novu/testing';
+import { expect } from 'chai';
 import { sleep } from '../../events/e2e/utils/sleep.util';
-import { GetWorkflowRunsResponseDto } from '../dtos/workflow-runs-response.dto';
+import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
+import type { GetWorkflowRunsResponseDto } from '../dtos/workflow-runs-response.dto';
 
 describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs #novu-v2', () => {
   let session: UserSession;
@@ -468,7 +473,6 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
       .query({ statuses: [WorkflowRunStatusEnum.SUCCESS] })
       .expect(200);
 
-    // eslint-disable-next-line no-console
     console.log('BODY', JSON.stringify(body, null, 2));
 
     expect(body.data.length).to.be.equal(2);

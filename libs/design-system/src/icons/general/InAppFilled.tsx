@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+
 import React from 'react';
 
 export function InAppFilled(props: React.ComponentPropsWithoutRef<'svg'>) {

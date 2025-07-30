@@ -1,10 +1,14 @@
-/* eslint-disable no-console */
-import { testServer } from '@novu/testing';
-import sinon from 'sinon';
-import chai from 'chai';
-import { Connection } from 'mongoose';
+import {
+  type ClickHouseClient,
+  ClickHouseService,
+  createClickHouseClient,
+  PinoLogger,
+} from '@novu/application-generic';
 import { DalService } from '@novu/dal';
-import { ClickHouseClient, ClickHouseService, createClickHouseClient, PinoLogger } from '@novu/application-generic';
+import { testServer } from '@novu/testing';
+import chai from 'chai';
+import type { Connection } from 'mongoose';
+import sinon from 'sinon';
 import { bootstrap } from '../src/bootstrap';
 
 let databaseConnection: Connection;

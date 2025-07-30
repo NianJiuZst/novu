@@ -1,21 +1,20 @@
-/* eslint-disable global-require */
-import { Body, Controller, Post, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import type { ModuleRef } from '@nestjs/core';
 import { ApiExcludeController } from '@nestjs/swagger';
+import {
+  type CompileEmailTemplate,
+  CompileEmailTemplateCommand,
+  type CompileInAppTemplate,
+  CompileInAppTemplateCommand,
+  type CompileStepTemplate,
+  CompileStepTemplateCommand,
+  type PinoLogger,
+} from '@novu/application-generic';
+import type { IEmailBlock, IMessageCTA, MessageTemplateContentType, UserSessionData } from '@novu/shared';
 import { format } from 'date-fns';
 import i18next from 'i18next';
-import { ModuleRef } from '@nestjs/core';
-import {
-  CompileEmailTemplate,
-  CompileEmailTemplateCommand,
-  CompileInAppTemplate,
-  CompileInAppTemplateCommand,
-  CompileStepTemplate,
-  CompileStepTemplateCommand,
-  PinoLogger,
-} from '@novu/application-generic';
-import { IEmailBlock, IMessageCTA, MessageTemplateContentType, UserSessionData } from '@novu/shared';
-import { UserSession } from '../shared/framework/user.decorator';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
+import { UserSession } from '../shared/framework/user.decorator';
 
 @Controller('/content-templates')
 @RequireAuthentication()

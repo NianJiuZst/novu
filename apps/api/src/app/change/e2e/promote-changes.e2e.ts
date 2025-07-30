@@ -1,13 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { expect } from 'chai';
 import {
   ChangeRepository,
+  type EnvironmentEntity,
   EnvironmentRepository,
+  FeedRepository,
   MessageTemplateRepository,
   NotificationGroupRepository,
   NotificationTemplateRepository,
-  EnvironmentEntity,
-  FeedRepository,
 } from '@novu/dal';
 import {
   ChangeEntityTypeEnum,
@@ -15,12 +13,13 @@ import {
   EmailBlockTypeEnum,
   FieldLogicalOperatorEnum,
   FieldOperatorEnum,
-  StepTypeEnum,
   FilterPartTypeEnum,
+  StepTypeEnum,
   TemplateVariableTypeEnum,
 } from '@novu/shared';
 import { UserSession } from '@novu/testing';
-import { CreateWorkflowRequestDto, UpdateWorkflowRequestDto } from '../../workflows-v1/dtos';
+import { expect } from 'chai';
+import type { CreateWorkflowRequestDto, UpdateWorkflowRequestDto } from '../../workflows-v1/dtos';
 
 describe('Promote changes #novu-v0', () => {
   let session: UserSession;

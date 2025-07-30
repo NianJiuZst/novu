@@ -1,45 +1,44 @@
 import 'cross-fetch/polyfill';
 import { faker } from '@faker-js/faker';
-import request, { SuperTest, Test } from 'supertest';
-import jwt from 'jsonwebtoken';
-import superAgentDefaults from 'superagent-defaults';
 import {
-  ApiServiceLevelEnum,
-  EmailBlockTypeEnum,
-  IApiRateLimitMaximum,
-  IEmailBlock,
-  isClerkEnabled,
-  MemberRoleEnum,
-  ALL_PERMISSIONS,
-  StepTypeEnum,
-} from '@novu/shared';
-import {
-  ChangeEntity,
+  type ChangeEntity,
   ChangeRepository,
   CommunityOrganizationRepository,
-  EnvironmentEntity,
+  type EnvironmentEntity,
   FeedRepository,
   LayoutRepository,
-  NotificationGroupEntity,
+  type NotificationGroupEntity,
   NotificationGroupRepository,
-  OrganizationEntity,
+  type OrganizationEntity,
   SubscriberRepository,
-  UserEntity,
+  type UserEntity,
 } from '@novu/dal';
-
-import { NotificationTemplateService } from './notification-template.service';
-import { TestServer, testServer } from './test-server.service';
-import { OrganizationService } from './organization.service';
-import { EnvironmentService } from './environment.service';
-import { CreateTemplatePayload } from './create-notification-template.interface';
-import { IntegrationService } from './integration.service';
-import { UserService } from './user.service';
-import { JobsService } from './jobs.service';
-import { EEUserService } from './ee/ee.user.service';
-import { EEOrganizationService } from './ee/ee.organization.service';
+import {
+  ALL_PERMISSIONS,
+  type ApiServiceLevelEnum,
+  EmailBlockTypeEnum,
+  type IApiRateLimitMaximum,
+  type IEmailBlock,
+  isClerkEnabled,
+  MemberRoleEnum,
+  StepTypeEnum,
+} from '@novu/shared';
+import jwt from 'jsonwebtoken';
+import superAgentDefaults from 'superagent-defaults';
+import request, { type SuperTest, type Test } from 'supertest';
 import { TEST_USER_PASSWORD } from './constants';
-import { ClerkJwtPayload } from './ee/types';
+import type { CreateTemplatePayload } from './create-notification-template.interface';
 import { CLERK_ORGANIZATION_1, CLERK_USER_1 } from './ee/clerk-mock-data';
+import { EEOrganizationService } from './ee/ee.organization.service';
+import { EEUserService } from './ee/ee.user.service';
+import type { ClerkJwtPayload } from './ee/types';
+import { EnvironmentService } from './environment.service';
+import { IntegrationService } from './integration.service';
+import { JobsService } from './jobs.service';
+import { NotificationTemplateService } from './notification-template.service';
+import { OrganizationService } from './organization.service';
+import { type TestServer, testServer } from './test-server.service';
+import { UserService } from './user.service';
 
 type UserSessionOptions = {
   noOrganization?: boolean;
@@ -425,7 +424,6 @@ export class UserSession {
   }
 
   async createFeed(name?: string) {
-    // eslint-disable-next-line no-param-reassign
     name = name || 'Activities';
     const feed = await this.feedRepository.create({
       name,

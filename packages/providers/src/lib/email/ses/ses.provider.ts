@@ -1,19 +1,19 @@
+import { SESClient, SendRawEmailCommand } from '@aws-sdk/client-ses';
+import { EmailProviderIdEnum } from '@novu/shared';
 import {
   ChannelTypeEnum,
   CheckIntegrationResponseEnum,
   EmailEventStatusEnum,
-  ICheckIntegrationResponse,
-  IEmailEventBody,
-  IEmailOptions,
-  IEmailProvider,
-  ISendMessageSuccessResponse,
+  type ICheckIntegrationResponse,
+  type IEmailEventBody,
+  type IEmailOptions,
+  type IEmailProvider,
+  type ISendMessageSuccessResponse,
 } from '@novu/stateless';
-import { SESClient, SendRawEmailCommand } from '@aws-sdk/client-ses';
 import nodemailer from 'nodemailer';
-import { EmailProviderIdEnum } from '@novu/shared';
-import { SESConfig } from './ses.config';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
+import type { SESConfig } from './ses.config';
 
 export class SESEmailProvider extends BaseProvider implements IEmailProvider {
   id = EmailProviderIdEnum.SES;
@@ -100,7 +100,6 @@ export class SESEmailProvider extends BaseProvider implements IEmailProvider {
 
   parseEventBody(body: any | any[], identifier: string): IEmailEventBody | undefined {
     if (Array.isArray(body)) {
-      // eslint-disable-next-line no-param-reassign
       body = body.find((item) => item.mail.messageId === identifier);
     }
 

@@ -1,15 +1,19 @@
 import { Injectable, Optional } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
-import { UserSessionData, WebhookObjectTypeEnum, WebhookEventEnum, WorkflowStatusEnum } from '@novu/shared';
-import { LocalizationResourceEnum, NotificationTemplateEntity, NotificationTemplateRepository } from '@novu/dal';
-import { SendWebhookMessage, PinoLogger, Instrument, InstrumentUsecase } from '@novu/application-generic';
-import { PatchWorkflowCommand } from './patch-workflow.command';
-import { GetWorkflowUseCase } from '../get-workflow';
-import { WorkflowResponseDto } from '../../dtos';
-import { BuildStepIssuesUsecase } from '../build-step-issues/build-step-issues.usecase';
+import type { ModuleRef } from '@nestjs/core';
+import { Instrument, InstrumentUsecase, type PinoLogger, type SendWebhookMessage } from '@novu/application-generic';
+import {
+  LocalizationResourceEnum,
+  type NotificationTemplateEntity,
+  type NotificationTemplateRepository,
+} from '@novu/dal';
+import { type UserSessionData, WebhookEventEnum, WebhookObjectTypeEnum, WorkflowStatusEnum } from '@novu/shared';
+import type { WorkflowWithPreferencesResponseDto } from '../../../workflows-v1/dtos/get-workflow-with-preferences.dto';
+import type { GetWorkflowWithPreferencesUseCase } from '../../../workflows-v1/usecases/get-workflow-with-preferences/get-workflow-with-preferences.usecase';
+import type { WorkflowResponseDto } from '../../dtos';
 import { stepTypeToControlSchema } from '../../shared';
-import { GetWorkflowWithPreferencesUseCase } from '../../../workflows-v1/usecases/get-workflow-with-preferences/get-workflow-with-preferences.usecase';
-import { WorkflowWithPreferencesResponseDto } from '../../../workflows-v1/dtos/get-workflow-with-preferences.dto';
+import type { BuildStepIssuesUsecase } from '../build-step-issues/build-step-issues.usecase';
+import type { GetWorkflowUseCase } from '../get-workflow';
+import type { PatchWorkflowCommand } from './patch-workflow.command';
 
 @Injectable()
 export class PatchWorkflowUsecase {
@@ -163,7 +167,6 @@ export class PatchWorkflowUsecase {
     }
 
     try {
-      // eslint-disable-next-line global-require
       const manageTranslations = this.moduleRef.get(require('@novu/ee-translation')?.ManageTranslations, {
         strict: false,
       });

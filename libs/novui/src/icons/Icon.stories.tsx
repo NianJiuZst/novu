@@ -1,12 +1,11 @@
+import { ActionIcon, Code, Grid, Group, Input } from '@mantine/core';
+import type { Meta, StoryFn } from '@storybook/react';
 import React, { useState } from 'react';
-import { StoryFn, Meta } from '@storybook/react';
-import { Grid, Group, ActionIcon, Code, Input } from '@mantine/core';
-import { DEFAULT_ICON_SIZE } from './Icon.const';
-import { IIconProps, IconSize } from './Icon.types';
-// eslint-disable-next-line import/no-namespace
-import * as allIcons from './icon-registry';
 import { styled, VStack } from '../../styled-system/jsx';
 import { text } from '../../styled-system/recipes';
+import { DEFAULT_ICON_SIZE } from './Icon.const';
+import type { IconSize, IIconProps } from './Icon.types';
+import * as allIcons from './icon-registry';
 
 export default {
   title: 'Icons/Icons',

@@ -1,11 +1,10 @@
-/* eslint-disable */
 import '../../src/config';
 
-import { EnvironmentRepository, IApiKey } from '@novu/dal';
-import { encryptSecret, PinoLogger } from '@novu/application-generic';
-import { EncryptedSecret } from '@novu/shared';
-import { createHash } from 'crypto';
 import { NestFactory } from '@nestjs/core';
+import { encryptSecret, PinoLogger } from '@novu/application-generic';
+import { EnvironmentRepository, type IApiKey } from '@novu/dal';
+import type { EncryptedSecret } from '@novu/shared';
+import { createHash } from 'crypto';
 
 import { AppModule } from '../../src/app.module';
 

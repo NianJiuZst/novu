@@ -1,18 +1,8 @@
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
-import {
-  ChatProviderIdEnum,
-  IChannelCredentials,
-  PushProviderIdEnum,
-} from '@novu/shared';
-import { SubscriberEntity } from '@novu/dal';
+import type { SubscriberEntity } from '@novu/dal';
+import type { ChatProviderIdEnum, IChannelCredentials, PushProviderIdEnum } from '@novu/shared';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { EnvironmentCommand } from '../../../commands';
-import { OAuthHandlerEnum } from '../types';
+import type { OAuthHandlerEnum } from '../types';
 
 export class SubscriberChannel {
   providerId: ChatProviderIdEnum | PushProviderIdEnum;
@@ -49,10 +39,7 @@ export class IChannelCredentialsCommand implements IChannelCredentials {
   externalUrl?: string;
 }
 
-export class UpdateSubscriberChannelCommand
-  extends EnvironmentCommand
-  implements SubscriberChannel
-{
+export class UpdateSubscriberChannelCommand extends EnvironmentCommand implements SubscriberChannel {
   @IsString()
   subscriberId: string;
 

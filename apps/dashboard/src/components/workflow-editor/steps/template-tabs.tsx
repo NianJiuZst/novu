@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 import { RiCloseLine, RiEdit2Line, RiPencilRuler2Line } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 
@@ -29,7 +30,6 @@ export const TemplateTabs = ({
     if (tabsValue === 'preview') {
       previewStep?.();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabsValue]);
 
   return (

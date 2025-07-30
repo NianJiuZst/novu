@@ -1,17 +1,17 @@
 import {
   ActorTypeEnum,
   ButtonTypeEnum,
-  ChannelTypeEnum,
-  MessageActionStatusEnum,
+  type ChannelTypeEnum,
+  type MessageActionStatusEnum,
   MessagesStatusEnum,
 } from '@novu/shared';
-import { FilterQuery, Types } from 'mongoose';
+import { type FilterQuery, Types } from 'mongoose';
 
 import { DalException } from '../../shared';
-import { EnforceEnvId } from '../../types/enforce';
+import type { EnforceEnvId } from '../../types/enforce';
 import { BaseRepository } from '../base-repository';
 import { FeedRepository } from '../feed';
-import { MessageDBModel, MessageEntity } from './message.entity';
+import { type MessageDBModel, MessageEntity } from './message.entity';
 import { Message } from './message.schema';
 
 type MessageQuery = FilterQuery<MessageDBModel>;
@@ -453,7 +453,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     environmentId: string,
     id: string,
     status: 'error' | 'sent' | 'warning',
-    // eslint-disable-next-line
+
     providerPayload: any = {},
     errorId: string,
     errorText: string

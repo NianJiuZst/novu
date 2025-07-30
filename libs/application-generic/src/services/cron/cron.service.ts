@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
+import { Injectable, Logger, type OnApplicationBootstrap, type OnApplicationShutdown } from '@nestjs/common';
 import {
   CronExpressionEnum,
   JobCronNameEnum,
@@ -6,8 +6,14 @@ import {
   TimezoneEnum,
 } from '@novu/shared';
 import { captureException } from '@sentry/node';
-import { MetricsService } from '../metrics';
-import { CronJobData, CronJobProcessor, CronMetrics, CronMetricsEventEnum, CronOptions } from './cron.types';
+import type { MetricsService } from '../metrics';
+import {
+  type CronJobData,
+  type CronJobProcessor,
+  type CronMetrics,
+  CronMetricsEventEnum,
+  type CronOptions,
+} from './cron.types';
 
 const nr = require('newrelic');
 
@@ -74,9 +80,7 @@ export abstract class CronService implements OnApplicationBootstrap, OnApplicati
       const createTimeoutPromise = () =>
         new Promise((resolve, reject) => {
           setTimeout(
-            () =>
-              // eslint-disable-next-line prefer-promise-reject-errors
-              reject(`Timed out while starting the ${this.cronServiceName} CRON service`),
+            () => reject(`Timed out while starting the ${this.cronServiceName} CRON service`),
             CRON_STARTUP_TIMEOUT
           );
         });
@@ -160,7 +164,6 @@ export abstract class CronService implements OnApplicationBootstrap, OnApplicati
             ObservabilityBackgroundTransactionEnum.CRON_JOB_QUEUE,
             `cron-${jobName}`,
             function transactionHandler() {
-              // eslint-disable-next-line no-async-promise-executor
               return new Promise<void>(async (resolve, reject) => {
                 const transaction = nr.getTransaction();
                 try {

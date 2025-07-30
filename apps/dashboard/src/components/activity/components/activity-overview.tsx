@@ -1,4 +1,4 @@
-import { IActivity } from '@novu/shared';
+import type { IActivity } from '@novu/shared';
 import { format } from 'date-fns';
 import { motion } from 'motion/react';
 import React from 'react';
@@ -77,7 +77,10 @@ export function ActivityOverview({ activity }: ActivityOverviewProps) {
   return (
     <motion.div {...fadeIn} className="px-3 py-2">
       <div className="mb-2 flex flex-col gap-[12px]">
-        <OverviewItem label="Workflow Identifier" value={activity.template?.triggers?.[0]?.identifier || 'Deleted workflow'}>
+        <OverviewItem
+          label="Workflow Identifier"
+          value={activity.template?.triggers?.[0]?.identifier || 'Deleted workflow'}
+        >
           <Link
             to={activity.template?._id ? workflowPath : '#'}
             className={cn('text-foreground-600 cursor-pointer font-mono text-xs group-hover:underline', {

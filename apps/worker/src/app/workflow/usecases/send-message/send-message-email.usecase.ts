@@ -1,50 +1,49 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
-import { addBreadcrumb } from '@sentry/node';
-import inlineCss from 'inline-css';
-
+import type { ModuleRef } from '@nestjs/core';
 import {
-  CompileEmailTemplate,
+  type CompileEmailTemplate,
   CompileEmailTemplateCommand,
-  CreateExecutionDetails,
+  type CreateExecutionDetails,
   CreateExecutionDetailsCommand,
   DetailEnum,
-  FeatureFlagsService,
+  type FeatureFlagsService,
   GetLayoutCommand,
-  GetLayoutUseCase as GetLayoutUseCaseV1,
-  GetNovuProviderCredentials,
+  type GetLayoutUseCase as GetLayoutUseCaseV1,
+  type GetNovuProviderCredentials,
   InstrumentUsecase,
   MailFactory,
-  SelectIntegration,
-  SelectVariant,
+  type SelectIntegration,
+  type SelectVariant,
 } from '@novu/application-generic';
 import {
-  EnvironmentEntity,
-  EnvironmentRepository,
-  IntegrationEntity,
+  type EnvironmentEntity,
+  type EnvironmentRepository,
+  type IntegrationEntity,
   LayoutEntity,
-  LayoutRepository,
-  MessageEntity,
-  MessageRepository,
-  OrganizationEntity,
-  SubscriberRepository,
-  UserEntity,
+  type LayoutRepository,
+  type MessageEntity,
+  type MessageRepository,
+  type OrganizationEntity,
+  type SubscriberRepository,
+  type UserEntity,
 } from '@novu/dal';
-import { EmailOutput } from '@novu/framework/internal';
+import type { EmailOutput } from '@novu/framework/internal';
 import {
   ChannelTypeEnum,
   EmailProviderIdEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
   FeatureFlagsKeysEnum,
-  IAttachmentOptions,
-  IEmailOptions,
+  type IAttachmentOptions,
+  type IEmailOptions,
 } from '@novu/shared';
+import { addBreadcrumb } from '@sentry/node';
+import inlineCss from 'inline-css';
 
 import { PlatformException } from '../../../shared/utils';
-import { SendMessageResult } from './send-message-type.usecase';
 import { SendMessageBase } from './send-message.base';
-import { SendMessageCommand } from './send-message.command';
+import type { SendMessageCommand } from './send-message.command';
+import type { SendMessageResult } from './send-message-type.usecase';
 
 const LOG_CONTEXT = 'SendMessageEmail';
 
@@ -368,7 +367,6 @@ export class SendMessageEmail extends SendMessageBase {
       return getReplyToAddress(command.transactionId, environment._id, environment?.dns?.inboundParseDomain);
     } else {
       const detailEnum =
-        // eslint-disable-next-line no-nested-ternary
         !environment.dns?.mxRecordConfigured && !environment.dns?.inboundParseDomain
           ? DetailEnum.REPLY_CALLBACK_NOT_CONFIGURATION
           : !environment.dns?.mxRecordConfigured
@@ -524,7 +522,6 @@ export class SendMessageEmail extends SendMessageBase {
        * TODO: Handle this at the handler level globally
        */
       if (error?.isAxiosError && error.response) {
-        // eslint-disable-next-line no-ex-assign
         error = error.response;
       }
 

@@ -60,7 +60,7 @@ export function InAppPreview({ showVariables = true }: { showVariables?: boolean
     if (bridge) {
       mutateAsync();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [bridge]);
 
   const { selectedLocale, locales, areLocalesLoading, onLocaleChange } = useTemplateLocales({

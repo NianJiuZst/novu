@@ -12,9 +12,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { OrderByEnum, OrderDirectionEnum, UserSessionData } from '@novu/shared';
-import { GetLayoutCommand, GetLayoutUseCase, OtelSpan, PinoLogger } from '@novu/application-generic';
 import { ApiExcludeController } from '@nestjs/swagger/dist/decorators/api-exclude-controller.decorator';
+import { GetLayoutCommand, type GetLayoutUseCase, OtelSpan, type PinoLogger } from '@novu/application-generic';
+import { OrderByEnum, OrderDirectionEnum, type UserSessionData } from '@novu/shared';
+import { RequireAuthentication } from '../auth/framework/auth.decorator';
+import { ExternalApiAccessible } from '../auth/framework/external-api.decorator';
 import {
   ApiBadRequestResponse,
   ApiCommonResponses,
@@ -24,33 +26,30 @@ import {
   ApiOkResponse,
   ApiResponse,
 } from '../shared/framework/response.decorator';
-
+import { SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
+import { UserSession } from '../shared/framework/user.decorator';
 import {
-  CreateLayoutRequestDto,
+  type CreateLayoutRequestDto,
   CreateLayoutResponseDto,
-  FilterLayoutsRequestDto,
-  FilterLayoutsResponseDto,
+  type FilterLayoutsRequestDto,
+  type FilterLayoutsResponseDto,
   GetLayoutResponseDto,
-  UpdateLayoutRequestDto,
+  type UpdateLayoutRequestDto,
   UpdateLayoutResponseDto,
 } from './dtos';
+import type { LayoutId } from './types';
 import {
   CreateLayoutCommand,
-  CreateLayoutUseCase,
+  type CreateLayoutUseCase,
   DeleteLayoutCommand,
-  DeleteLayoutUseCase,
+  type DeleteLayoutUseCase,
   FilterLayoutsCommand,
-  FilterLayoutsUseCase,
+  type FilterLayoutsUseCase,
   SetDefaultLayoutCommand,
-  SetDefaultLayoutUseCase,
+  type SetDefaultLayoutUseCase,
   UpdateLayoutCommand,
-  UpdateLayoutUseCase,
+  type UpdateLayoutUseCase,
 } from './usecases';
-import { LayoutId } from './types';
-import { ExternalApiAccessible } from '../auth/framework/external-api.decorator';
-import { UserSession } from '../shared/framework/user.decorator';
-import { RequireAuthentication } from '../auth/framework/auth.decorator';
-import { SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 
 @ApiCommonResponses()
 @Controller('/layouts')
@@ -211,7 +210,6 @@ export class LayoutsControllerV1 {
   })
   @ApiConflictResponse({
     description:
-      // eslint-disable-next-line max-len
       'One default layout is needed. If you are trying to turn a default layout as not default, you should turn a different layout as default first and automatically it will be done by the system.',
     schema: { example: `One default layout is required` },
   })

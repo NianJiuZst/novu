@@ -1,24 +1,26 @@
-import { cn } from '@/utils/ui';
-import { autocompletion, CompletionSource, CompletionContext } from '@codemirror/autocomplete';
-import { EditorView, Extension } from '@uiw/react-codemirror';
-import { useCallback, useMemo, useRef, useState, useEffect, MutableRefObject } from 'react';
-import { JSONSchema7 } from 'json-schema';
+import { autocompletion, type CompletionContext, type CompletionSource } from '@codemirror/autocomplete';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
-
-import { Editor, EditorProps } from '@/components/primitives/editor';
-import { EditVariablePopover } from '@/components/variable/edit-variable-popover';
-import { CompletionOption, createAutocompleteSource } from '@/utils/liquid-autocomplete';
-import { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
-import { useVariables } from '../../hooks/use-variables';
+import { EditorView, type Extension } from '@uiw/react-codemirror';
+import type { JSONSchema7 } from 'json-schema';
+import { type MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Editor, type EditorProps } from '@/components/primitives/editor';
 import { createVariableExtension } from '@/components/primitives/variable-plugin';
-import { variablePillTheme } from '@/components/primitives/variable-plugin/variable-theme';
 import { DEFAULT_VARIABLE_PILL_HEIGHT } from '@/components/primitives/variable-plugin/variable-pill-widget';
-import { DIGEST_VARIABLES_ENUM, getDynamicDigestVariable } from '@/components/variable/utils/digest-variables';
-import { useTelemetry } from '@/hooks/use-telemetry';
-import { TelemetryEvent } from '@/utils/telemetry';
-import { DIGEST_VARIABLES_FILTER_MAP } from '@/components/variable/utils/digest-variables';
-import { DEFAULT_SIDE_OFFSET } from './popover';
+import { variablePillTheme } from '@/components/primitives/variable-plugin/variable-theme';
+import { EditVariablePopover } from '@/components/variable/edit-variable-popover';
+import {
+  DIGEST_VARIABLES_ENUM,
+  DIGEST_VARIABLES_FILTER_MAP,
+  getDynamicDigestVariable,
+} from '@/components/variable/utils/digest-variables';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
+import { useTelemetry } from '@/hooks/use-telemetry';
+import { type CompletionOption, createAutocompleteSource } from '@/utils/liquid-autocomplete';
+import type { IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import { TelemetryEvent } from '@/utils/telemetry';
+import { cn } from '@/utils/ui';
+import { useVariables } from '../../hooks/use-variables';
+import { DEFAULT_SIDE_OFFSET } from './popover';
 
 export type CompletionRange = {
   from: number;
@@ -236,7 +238,6 @@ export function VariableEditor({
         return '';
       },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const variablePluginExtension = useMemo(() => {
@@ -248,7 +249,6 @@ export function VariableEditor({
       isDigestEventsVariable: (variableName: string) => callbacksRef.current.isDigestEventsVariable(variableName),
       isCustomHtmlEditorEnabled,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const editorExtensions = useMemo(() => {
@@ -270,7 +270,6 @@ export function VariableEditor({
 
     extensionsRef.current = allExtensions;
     return extensionsRef.current;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [extensions]);
 
   const handleVariablePopoverOpenChange = useCallback(

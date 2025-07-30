@@ -4,7 +4,7 @@ import { Grid, Group, ActionIcon, Code, Text } from '@mantine/core';
 import { DEFAULT_ICON_SIZE } from './Icon.const';
 import { IIconProps, IconSize } from './Icon.types';
 import { Input } from '../input/Input';
-// eslint-disable-next-line import/no-namespace
+
 import * as allIcons from './icon-registry';
 
 export default {

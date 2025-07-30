@@ -1,5 +1,5 @@
 import { Inject } from '@nestjs/common';
-import { CacheService, CachingConfig } from '../cache.service';
+import { CacheService, type CachingConfig } from '../cache.service';
 
 type CachedEntityOptions<T_Output, T_Args extends any[]> = CachingConfig & {
   skipCache?: (...args: T_Args) => boolean;
@@ -20,7 +20,6 @@ export function CachedResponse<T_Output = any, T_Args extends any[] = any[]>({
     const methodName = key;
     injectCache(target, 'cacheService');
 
-    // eslint-disable-next-line no-param-reassign
     descriptor.value = async function (this: any, ...args: T_Args): Promise<T_Output> {
       const cacheService = this.cacheService as CacheService;
 

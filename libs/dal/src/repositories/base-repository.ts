@@ -1,16 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DirectionEnum } from '@novu/shared';
-import { ClassConstructor, plainToInstance } from 'class-transformer';
+import { type ClassConstructor, plainToInstance } from 'class-transformer';
 import {
-  ClientSession,
-  FilterQuery,
-  Model,
-  ProjectionType,
-  QueryOptions,
-  QueryWithHelpers,
-  SortOrder,
+  type ClientSession,
+  type FilterQuery,
+  type Model,
+  type ProjectionType,
+  type QueryOptions,
+  type QueryWithHelpers,
+  type SortOrder,
   Types,
-  UpdateQuery,
+  type UpdateQuery,
 } from 'mongoose';
 import { DalException } from '../shared';
 
@@ -398,7 +397,6 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
         error.message?.includes('transaction') ||
         error.codeName === 'IllegalOperation'
       ) {
-        // eslint-disable-next-line no-console
         console.warn('MongoDB is not running in replica set mode, execute without transaction');
 
         // MongoDB is not running in replica set mode, execute without transaction

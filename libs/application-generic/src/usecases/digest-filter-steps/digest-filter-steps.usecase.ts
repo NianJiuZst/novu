@@ -1,17 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { NotificationStepEntity } from '@novu/dal';
+import type { NotificationStepEntity } from '@novu/dal';
 import { StepTypeEnum } from '@novu/shared';
 
-import { DigestFilterStepsCommand } from './digest-filter-steps.command';
+import type { DigestFilterStepsCommand } from './digest-filter-steps.command';
 
 const LOG_CONTEXT = 'DigestFilterSteps';
 
 // TODO; Potentially rename this use case
 @Injectable()
 export class DigestFilterSteps {
-  public async execute(
-    command: DigestFilterStepsCommand,
-  ): Promise<NotificationStepEntity[]> {
+  public async execute(command: DigestFilterStepsCommand): Promise<NotificationStepEntity[]> {
     const { steps } = command;
 
     const triggerStep = this.createTriggerStep(command);
@@ -19,9 +17,7 @@ export class DigestFilterSteps {
     return [triggerStep, ...steps];
   }
 
-  private createTriggerStep(
-    command: DigestFilterStepsCommand,
-  ): NotificationStepEntity {
+  private createTriggerStep(command: DigestFilterStepsCommand): NotificationStepEntity {
     return {
       template: {
         _environmentId: command.environmentId,

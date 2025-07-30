@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+
 import { css, cx } from '@emotion/css';
 import styled from '@emotion/styled';
 import { Group, useMantineTheme } from '@mantine/core';

@@ -1,4 +1,4 @@
-import { HTTPClient, HTTPClientOptions } from '@novu/api/lib/http';
+import { HTTPClient, type HTTPClientOptions } from '@novu/api/lib/http';
 
 export class MockHTTPClient extends HTTPClient {
   private mockResponses: Map<string, Array<{ response: Response; remaining: number }>> = new Map();
@@ -82,7 +82,6 @@ export class MockHTTPClient extends HTTPClient {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface MockConfig {
   baseUrl: string;
   path: string;

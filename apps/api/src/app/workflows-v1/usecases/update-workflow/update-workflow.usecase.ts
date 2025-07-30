@@ -1,19 +1,42 @@
-/* eslint-disable global-require */
-// eslint-ignore max-len
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
-
+import type { ModuleRef } from '@nestjs/core';
 import {
-  ChangeRepository,
-  ControlValuesRepository,
+  type AnalyticsService,
+  ContentService,
+  type CreateChange,
+  CreateChangeCommand,
+  type CreateMessageTemplate,
+  CreateMessageTemplateCommand,
+  type DeleteMessageTemplate,
+  DeleteMessageTemplateCommand,
+  DeletePreferencesCommand,
+  type DeletePreferencesUseCase,
+  GetPreferences,
+  Instrument,
+  InstrumentUsecase,
+  isVariantEmpty,
+  type NotificationStep,
+  type NotificationStepVariantCommand,
+  type PinoLogger,
+  PlatformException,
+  type ResourceValidatorService,
+  type UpdateMessageTemplate,
+  UpdateMessageTemplateCommand,
+  type UpsertPreferences,
+  UpsertUserWorkflowPreferencesCommand,
+  UpsertWorkflowPreferencesCommand,
+} from '@novu/application-generic';
+import {
+  type ChangeRepository,
+  type ClientSession,
+  type ControlValuesRepository,
   LocalizationResourceEnum,
-  MessageTemplateRepository,
-  NotificationGroupRepository,
-  NotificationStepData,
-  NotificationStepEntity,
-  NotificationTemplateEntity,
-  NotificationTemplateRepository,
-  ClientSession,
+  type MessageTemplateRepository,
+  type NotificationGroupRepository,
+  type NotificationStepData,
+  type NotificationStepEntity,
+  type NotificationTemplateEntity,
+  type NotificationTemplateRepository,
 } from '@novu/dal';
 import {
   buildWorkflowPreferences,
@@ -23,37 +46,10 @@ import {
   PreferencesTypeEnum,
   ResourceOriginEnum,
 } from '@novu/shared';
-
-import {
-  AnalyticsService,
-  ContentService,
-  CreateChange,
-  CreateChangeCommand,
-  CreateMessageTemplate,
-  CreateMessageTemplateCommand,
-  DeletePreferencesCommand,
-  DeletePreferencesUseCase,
-  GetPreferences,
-  UpsertPreferences,
-  UpsertUserWorkflowPreferencesCommand,
-  UpsertWorkflowPreferencesCommand,
-  NotificationStep,
-  NotificationStepVariantCommand,
-  DeleteMessageTemplate,
-  DeleteMessageTemplateCommand,
-  UpdateMessageTemplate,
-  UpdateMessageTemplateCommand,
-  Instrument,
-  InstrumentUsecase,
-  ResourceValidatorService,
-  isVariantEmpty,
-  PlatformException,
-  PinoLogger,
-} from '@novu/application-generic';
-import { UpdateWorkflowCommand } from './update-workflow.command';
+import type { WorkflowWithPreferencesResponseDto } from '../../dtos/get-workflow-with-preferences.dto';
 import { GetWorkflowWithPreferencesCommand } from '../get-workflow-with-preferences/get-workflow-with-preferences.command';
-import { GetWorkflowWithPreferencesUseCase } from '../get-workflow-with-preferences/get-workflow-with-preferences.usecase';
-import { WorkflowWithPreferencesResponseDto } from '../../dtos/get-workflow-with-preferences.dto';
+import type { GetWorkflowWithPreferencesUseCase } from '../get-workflow-with-preferences/get-workflow-with-preferences.usecase';
+import type { UpdateWorkflowCommand } from './update-workflow.command';
 
 /**
  * @deprecated - use `UpsertWorkflow` instead

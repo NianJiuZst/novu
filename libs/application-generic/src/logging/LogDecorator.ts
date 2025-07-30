@@ -1,4 +1,4 @@
-import { Logger, LoggerService } from '@nestjs/common';
+import { Logger, type LoggerService } from '@nestjs/common';
 
 export type Transform = (data: any) => any;
 
@@ -17,7 +17,6 @@ export const LogDecorator = (options = DEFAULT_OPTIONS) => {
     const logger = options?.logger || new Logger(target?.constructor?.name);
     const method = descriptor?.value;
 
-    // eslint-disable-next-line no-param-reassign
     descriptor.value = async function <T>(...args: unknown[]): Promise<T> {
       const currentTime = Date.now();
       logger.debug(

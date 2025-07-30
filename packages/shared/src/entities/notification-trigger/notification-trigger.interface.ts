@@ -20,7 +20,7 @@ export interface ITriggerReservedVariable {
 
 export interface INotificationTriggerVariable {
   name: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   value?: any;
   type?: TemplateVariableTypeEnum;
 }

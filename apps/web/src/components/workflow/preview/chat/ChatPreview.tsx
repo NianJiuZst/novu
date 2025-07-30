@@ -43,7 +43,7 @@ export function ChatPreview({
     if (bridge) {
       mutateAsync(controlVariables);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [bridge, controlVariables]);
 
   const { selectedLocale, locales, areLocalesLoading, onLocaleChange } = useTemplateLocales({

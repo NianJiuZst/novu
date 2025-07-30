@@ -40,7 +40,7 @@ export default function InvitationPage() {
         navigate(ROUTES.WORKFLOWS);
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [acceptInvite, invitationToken, isLoggedInAsInvitedUser]);
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 /**
  * Cron expression helper.
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 export enum CronExpression {
   EVERY_SECOND = '* * * * * *',
   EVERY_5_SECONDS = '*/5 * * * * *',

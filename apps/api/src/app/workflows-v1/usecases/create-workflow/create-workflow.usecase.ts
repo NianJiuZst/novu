@@ -1,55 +1,52 @@
-/* eslint-disable global-require */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
-
+import type { ModuleRef } from '@nestjs/core';
 import {
+  type AnalyticsService,
+  ContentService,
+  type CreateChange,
+  CreateChangeCommand,
+  type CreateMessageTemplate,
+  CreateMessageTemplateCommand,
+  type FeatureFlagsService,
+  GetPreferences,
+  Instrument,
+  InstrumentUsecase,
+  isVariantEmpty,
+  type NotificationStep,
+  type NotificationStepVariantCommand,
+  type PinoLogger,
+  PlatformException,
+  type ResourceValidatorService,
+  shortId,
+  type UpsertPreferences,
+  UpsertUserWorkflowPreferencesCommand,
+  UpsertWorkflowPreferencesCommand,
+} from '@novu/application-generic';
+import {
+  type ClientSession,
   JsonSchemaTypeEnum,
   LocalizationResourceEnum,
-  NotificationGroupEntity,
+  type NotificationGroupEntity,
   NotificationGroupRepository,
   NotificationTemplateRepository,
-  ClientSession,
 } from '@novu/dal';
 import {
   ChangeEntityTypeEnum,
   DEFAULT_WORKFLOW_PREFERENCES,
   FeatureFlagsKeysEnum,
-  INotificationTemplateStep,
-  INotificationTrigger,
+  type INotificationTemplateStep,
+  type INotificationTrigger,
+  type IStepVariant,
   isBridgeWorkflow,
-  IStepVariant,
-  slugify,
-  TriggerTypeEnum,
   ResourceOriginEnum,
   ResourceTypeEnum,
+  slugify,
+  TriggerTypeEnum,
 } from '@novu/shared';
-
-import {
-  CreateChange,
-  CreateChangeCommand,
-  AnalyticsService,
-  ContentService,
-  FeatureFlagsService,
-  CreateMessageTemplate,
-  CreateMessageTemplateCommand,
-  isVariantEmpty,
-  PlatformException,
-  shortId,
-  UpsertPreferences,
-  UpsertUserWorkflowPreferencesCommand,
-  UpsertWorkflowPreferencesCommand,
-  GetPreferences,
-  Instrument,
-  InstrumentUsecase,
-  ResourceValidatorService,
-  PinoLogger,
-  NotificationStep,
-  NotificationStepVariantCommand,
-} from '@novu/application-generic';
-import { CreateWorkflowCommand } from './create-workflow.command';
+import type { WorkflowWithPreferencesResponseDto } from '../../dtos/get-workflow-with-preferences.dto';
 import { GetWorkflowWithPreferencesCommand } from '../get-workflow-with-preferences/get-workflow-with-preferences.command';
-import { GetWorkflowWithPreferencesUseCase } from '../get-workflow-with-preferences/get-workflow-with-preferences.usecase';
-import { WorkflowWithPreferencesResponseDto } from '../../dtos/get-workflow-with-preferences.dto';
+import type { GetWorkflowWithPreferencesUseCase } from '../get-workflow-with-preferences/get-workflow-with-preferences.usecase';
+import { CreateWorkflowCommand } from './create-workflow.command';
 
 /**
  * @deprecated - use `UpsertWorkflow` instead

@@ -1,11 +1,11 @@
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { HttpRequestHeaderKeysEnum, Instrument } from '@novu/application-generic';
+import type { EnvironmentRepository } from '@novu/dal';
+import { ApiAuthSchemeEnum, type UserSessionData } from '@novu/shared';
 import type http from 'http';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { Instrument, HttpRequestHeaderKeysEnum } from '@novu/application-generic';
-import { ApiAuthSchemeEnum, UserSessionData } from '@novu/shared';
-import { EnvironmentRepository } from '@novu/dal';
-import { AuthService } from '../auth.service';
+import type { AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -22,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   @Instrument()
   async validate(req: http.IncomingMessage, session: UserSessionData) {
     // Set the scheme to Bearer, meaning the user is authenticated via a JWT coming from Dashboard
-    // eslint-disable-next-line no-param-reassign
+
     session.scheme = ApiAuthSchemeEnum.BEARER;
 
     const user = await this.authService.validateUser(session);
@@ -32,7 +32,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     const environmentId = this.resolveEnvironmentId(req, session);
 
-    // eslint-disable-next-line no-param-reassign
     session.environmentId = environmentId;
 
     if (session.environmentId) {

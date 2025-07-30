@@ -1,4 +1,4 @@
-/* eslint-disable import/extensions */
+
 import { dark } from '@novu/nextjs/themes';
 import { useState, useEffect } from 'react';
 import { Inbox } from '@novu/nextjs';

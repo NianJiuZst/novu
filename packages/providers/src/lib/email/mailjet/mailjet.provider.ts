@@ -1,17 +1,17 @@
 import { EmailProviderIdEnum } from '@novu/shared';
 import {
   ChannelTypeEnum,
-  IEmailOptions,
-  IEmailProvider,
-  ISendMessageSuccessResponse,
-  ICheckIntegrationResponse,
   CheckIntegrationResponseEnum,
-  IEmailEventBody,
   EmailEventStatusEnum,
+  type ICheckIntegrationResponse,
+  type IEmailEventBody,
+  type IEmailOptions,
+  type IEmailProvider,
+  type ISendMessageSuccessResponse,
 } from '@novu/stateless';
 import { Client, type SendEmailV3_1 } from 'node-mailjet';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
-import { WithPassthrough } from '../../../utils/types';
+import type { WithPassthrough } from '../../../utils/types';
 
 const MAILJET_API_VERSION = 'v3.1';
 
@@ -139,7 +139,6 @@ export class MailjetEmailProvider extends BaseProvider implements IEmailProvider
 
   parseEventBody(body: any | any[], identifier: string): IEmailEventBody | undefined {
     if (Array.isArray(body)) {
-      // eslint-disable-next-line no-param-reassign
       body = body.find((item) => item.MessageID === identifier);
     }
 

@@ -37,7 +37,7 @@ export const WorkflowTestControlsPanel: FC<IWorkflowTestControlsPanelProps> = ({
     });
 
     return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [watch]);
 
   return (

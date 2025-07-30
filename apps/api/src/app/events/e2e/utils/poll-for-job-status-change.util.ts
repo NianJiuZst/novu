@@ -1,4 +1,4 @@
-import { JobEntity, JobRepository, JobStatusEnum } from '@novu/dal';
+import { type JobEntity, type JobRepository, JobStatusEnum } from '@novu/dal';
 import { sleep } from './sleep.util';
 
 type EnforceEnvOrOrgIds = { _environmentId: string } | { _organizationId: string };
@@ -28,7 +28,6 @@ export async function pollForJobStatusChange({
 }: IPollForJobOptions & { findMultiple?: boolean }): Promise<JobEntity | JobEntity[] | null> {
   const startTime = Date.now();
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     if (findMultiple) {
       const jobs = await jobRepository.find(query);

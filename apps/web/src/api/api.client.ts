@@ -115,7 +115,7 @@ export function buildApiHttpClient({
   });
 
   const get = async (url, params?: Record<string, string | string[] | number>) => {
-    // eslint-disable-next-line no-useless-catch
+
     try {
       const response = await httpClient.get(url, { params });
 
@@ -127,7 +127,7 @@ export function buildApiHttpClient({
   };
 
   const post = async (url, data = {}) => {
-    // eslint-disable-next-line no-useless-catch
+
     try {
       const response = await httpClient.post(url, data);
 
@@ -139,7 +139,7 @@ export function buildApiHttpClient({
   };
 
   const del = async (url, data = {}) => {
-    // eslint-disable-next-line no-useless-catch
+
     try {
       const response = await httpClient.delete(url, data);
 

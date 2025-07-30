@@ -1,11 +1,11 @@
-import { InboxService } from './api';
-import { NovuEventEmitter } from './event-emitter';
-import { Result, Session } from './types';
+import type { InboxService } from './api';
+import type { NovuEventEmitter } from './event-emitter';
+import type { Result, Session } from './types';
 import { NovuError } from './utils/errors';
 
 interface CallQueueItem {
   fn: () => Promise<unknown>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   resolve: (value: any | PromiseLike<any>) => void;
   reject: (reason?: unknown) => void;
 }

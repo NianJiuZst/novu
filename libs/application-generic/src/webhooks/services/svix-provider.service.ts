@@ -1,5 +1,5 @@
-import { Provider } from '@nestjs/common';
-// eslint-disable-next-line no-restricted-imports
+import type { Provider } from '@nestjs/common';
+
 import { Svix } from 'svix';
 
 export type SvixClient = Svix | null;
