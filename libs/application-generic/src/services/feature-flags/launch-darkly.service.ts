@@ -56,6 +56,7 @@ export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
         createdAt: organization.createdAt,
         updatedAt: organization.updatedAt,
         externalId: organization.externalId,
+        apiServiceLevel: organization.apiServiceLevel,
       };
     }
 
@@ -65,6 +66,18 @@ export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         externalId: user.externalId,
+      };
+    }
+
+    /*
+     * LaunchDarkly requires at least one context kind in multi-kind contexts
+     * Add a fallback global context to prevent "A multi-kind context must contain at least one kind" error
+     */
+    const hasAnyContext = mappedContext.environment || mappedContext.organization || mappedContext.user;
+    if (!hasAnyContext) {
+      mappedContext.global = {
+        key: 'global-context',
+        anonymous: true,
       };
     }
 

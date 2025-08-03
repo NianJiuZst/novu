@@ -1,7 +1,12 @@
-import { captureException } from '@sentry/node';
-import { MessageEntity, MessageRepository } from '@novu/dal';
 import { CreateExecutionDetails } from '@novu/application-generic';
+import { MessageEntity, MessageRepository } from '@novu/dal';
+import { captureException } from '@sentry/node';
 import { SendMessageCommand } from './send-message.command';
+
+export type SendMessageResult = {
+  status: 'success' | 'failed' | 'skippedByConditionsOrPreferences';
+  reason?: string;
+};
 
 export abstract class SendMessageType {
   protected constructor(
@@ -9,7 +14,7 @@ export abstract class SendMessageType {
     protected createExecutionDetails: CreateExecutionDetails
   ) {}
 
-  public abstract execute(command: SendMessageCommand): void;
+  public abstract execute(command: SendMessageCommand): Promise<SendMessageResult>;
 
   protected async sendErrorStatus(
     message: MessageEntity,
@@ -20,10 +25,6 @@ export abstract class SendMessageType {
     error?: any
   ): Promise<void> {
     const errorString = this.stringifyError(error) || errorMessageFallback;
-
-    if (error) {
-      captureException(errorString);
-    }
 
     await this.messageRepository.updateMessageStatus(
       command.environmentId,

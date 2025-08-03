@@ -1,36 +1,36 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { addBreadcrumb } from '@sentry/node';
 import { ModuleRef } from '@nestjs/core';
-
-import { MessageRepository, NotificationStepEntity, SubscriberRepository, MessageEntity } from '@novu/dal';
 import {
+  buildFeedKey,
+  buildMessageCountKey,
+  CompileInAppTemplate,
+  CompileInAppTemplateCommand,
+  CreateExecutionDetails,
+  CreateExecutionDetailsCommand,
+  DetailEnum,
+  GetNovuProviderCredentials,
+  InstrumentUsecase,
+  InvalidateCacheService,
+  SelectIntegration,
+  SelectVariant,
+  WebSocketsQueueService,
+} from '@novu/application-generic';
+
+import { MessageEntity, MessageRepository, NotificationStepEntity, SubscriberRepository } from '@novu/dal';
+import { InAppOutput } from '@novu/framework/internal';
+import {
+  ActorTypeEnum,
   ChannelTypeEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
-  ActorTypeEnum,
-  WebSocketEventEnum,
   inAppMessageFromBridgeOutputs,
+  WebSocketEventEnum,
 } from '@novu/shared';
-import {
-  InstrumentUsecase,
-  InvalidateCacheService,
-  DetailEnum,
-  SelectIntegration,
-  buildFeedKey,
-  buildMessageCountKey,
-  GetNovuProviderCredentials,
-  SelectVariant,
-  CompileInAppTemplate,
-  CompileInAppTemplateCommand,
-  WebSocketsQueueService,
-  CreateExecutionDetails,
-  CreateExecutionDetailsCommand,
-} from '@novu/application-generic';
-import { InAppOutput } from '@novu/framework/internal';
-
-import { SendMessageCommand } from './send-message.command';
-import { SendMessageBase } from './send-message.base';
+import { addBreadcrumb } from '@sentry/node';
 import { PlatformException } from '../../../shared/utils';
+import { SendMessageBase } from './send-message.base';
+import { SendMessageCommand } from './send-message.command';
+import { SendMessageResult } from './send-message-type.usecase';
 
 @Injectable()
 export class SendMessageInApp extends SendMessageBase {
@@ -60,7 +60,7 @@ export class SendMessageInApp extends SendMessageBase {
   }
 
   @InstrumentUsecase()
-  public async execute(command: SendMessageCommand) {
+  public async execute(command: SendMessageCommand): Promise<SendMessageResult> {
     if (!command.step.template) throw new PlatformException('Template not found');
 
     addBreadcrumb({
@@ -89,7 +89,10 @@ export class SendMessageInApp extends SendMessageBase {
         })
       );
 
-      return;
+      return {
+        status: 'failed',
+        reason: DetailEnum.SUBSCRIBER_NO_ACTIVE_INTEGRATION,
+      };
     }
 
     const { step } = command;
@@ -138,7 +141,10 @@ export class SendMessageInApp extends SendMessageBase {
     } catch (e) {
       await this.sendErrorHandlebars(command.job, e.message);
 
-      return;
+      return {
+        status: 'failed',
+        reason: DetailEnum.MESSAGE_CONTENT_NOT_GENERATED,
+      };
     }
 
     const messagePayload = { ...command.payload };
@@ -234,17 +240,21 @@ export class SendMessageInApp extends SendMessageBase {
     }
 
     if (oldMessage) {
-      await this.messageRepository.update(
+      message = await this.messageRepository.findOneAndUpdate(
         { _environmentId: command.environmentId, _id: oldMessage._id },
         {
           $set: {
             seen: false,
             createdAt: new Date(),
+            updatedAt: new Date(),
             ...channelData,
           },
+        },
+        {
+          timestamps: false,
+          strict: false,
         }
       );
-      message = await this.messageRepository.findOne({ _id: oldMessage._id, _environmentId: command.environmentId });
     }
 
     if (!message) throw new PlatformException('Message not found');
@@ -291,5 +301,9 @@ export class SendMessageInApp extends SendMessageBase {
         isRetry: false,
       })
     );
+
+    return {
+      status: 'success',
+    };
   }
 }

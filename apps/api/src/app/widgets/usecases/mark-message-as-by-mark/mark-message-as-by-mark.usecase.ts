@@ -1,19 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-
-import { MessageEntity, MessageRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
-import { MessagesStatusEnum } from '@novu/shared';
 import {
   AnalyticsService,
   buildFeedKey,
   buildMessageCountKey,
   buildSubscriberKey,
-  CachedEntity,
+  CachedResponse,
   InvalidateCacheService,
   WebSocketsQueueService,
 } from '@novu/application-generic';
-import { MarkMessageAsByMarkCommand } from './mark-message-as-by-mark.command';
+import { MessageEntity, MessageRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
+import { MessagesStatusEnum } from '@novu/shared';
 import { mapMarkMessageToWebSocketEvent } from '../../../shared/helpers';
 import { MessageResponseDto } from '../../dtos/message-response.dto';
+import { MarkMessageAsByMarkCommand } from './mark-message-as-by-mark.command';
 
 @Injectable()
 export class MarkMessageAsByMark {
@@ -100,7 +99,7 @@ export class MarkMessageAsByMark {
     });
   }
 
-  @CachedEntity({
+  @CachedResponse({
     builder: (command: { subscriberId: string; _environmentId: string }) =>
       buildSubscriberKey({
         _environmentId: command._environmentId,
@@ -137,6 +136,8 @@ export function mapMessageEntityToResponseDto(entity: MessageEntity): MessageRes
   responseDto.channel = entity.channel;
   responseDto.read = entity.read;
   responseDto.seen = entity.seen;
+  responseDto.snoozedUntil = entity.snoozedUntil;
+  responseDto.deliveredAt = entity.deliveredAt; // snoozed notifications can have multiple delivery dates
   responseDto.email = entity.email;
   responseDto.phone = entity.phone;
   responseDto.directWebhookUrl = entity.directWebhookUrl;

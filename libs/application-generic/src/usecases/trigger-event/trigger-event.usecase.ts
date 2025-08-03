@@ -1,5 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { addBreadcrumb } from '@sentry/node';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import {
   EnvironmentRepository,
@@ -16,16 +15,16 @@ import {
   TriggerRecipientSubscriber,
   TriggerTenantContext,
 } from '@novu/shared';
+import { addBreadcrumb } from '@sentry/node';
 import { Instrument, InstrumentUsecase } from '../../instrumentation';
 import { PinoLogger } from '../../logging';
 import { AnalyticsService } from '../../services/analytics.service';
-import { ApiException } from '../../utils/exceptions';
+import { CreateOrUpdateSubscriberCommand, CreateOrUpdateSubscriberUseCase } from '../create-or-update-subscriber';
 import { ProcessTenant, ProcessTenantCommand } from '../process-tenant';
 import { TriggerBroadcastCommand } from '../trigger-broadcast/trigger-broadcast.command';
 import { TriggerBroadcast } from '../trigger-broadcast/trigger-broadcast.usecase';
 import { TriggerMulticast, TriggerMulticastCommand } from '../trigger-multicast';
 import { TriggerEventCommand } from './trigger-event.command';
-import { CreateOrUpdateSubscriberCommand, CreateOrUpdateSubscriberUseCase } from '../create-or-update-subscriber';
 
 const LOG_CONTEXT = 'TriggerEventUseCase';
 
@@ -49,7 +48,6 @@ export class TriggerEvent {
 
   @InstrumentUsecase()
   async execute(command: TriggerEventCommand) {
-    this.logger.info(command, 'TriggerEventUseCase - START');
     try {
       const mappedCommand = {
         ...command,
@@ -64,7 +62,7 @@ export class TriggerEvent {
       });
 
       if (!environment) {
-        throw new ApiException('Environment not found');
+        throw new BadRequestException('Environment not found');
       }
 
       this.logger.assign({
@@ -96,7 +94,7 @@ export class TriggerEvent {
       }
 
       if (!storedWorkflow && !command.bridgeWorkflow) {
-        throw new ApiException('Notification template could not be found');
+        throw new BadRequestException('Notification template could not be found');
       }
 
       if (mappedCommand.tenant) {
@@ -201,7 +199,6 @@ export class TriggerEvent {
       data: subscriberPayload?.data,
       channels: subscriberPayload?.channels,
       activeWorkerName: getActiveWorker(),
-      isUpsert: true,
     });
   }
   private async getAndUpdateWorkflowById(command: {
@@ -252,7 +249,7 @@ export class TriggerEvent {
     )) as Pick<JobEntity, '_id'>;
 
     if (found) {
-      throw new ApiException(
+      throw new BadRequestException(
         'transactionId property is not unique, please make sure all triggers have a unique transactionId'
       );
     }

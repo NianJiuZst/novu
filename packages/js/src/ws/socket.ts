@@ -1,24 +1,26 @@
 import io, { Socket as SocketIO } from 'socket.io-client';
 import { InboxService } from '../api';
 import { BaseModule } from '../base-module';
-
 import {
   NotificationReceivedEvent,
-  NotificationUnseenEvent,
   NotificationUnreadEvent,
+  NotificationUnseenEvent,
   NovuEventEmitter,
   SocketEventNames,
 } from '../event-emitter';
 import { Notification } from '../notifications';
 import {
   ActionTypeEnum,
-  NotificationActionStatus,
   InboxNotification,
+  NotificationActionStatus,
+  Result,
   Session,
   Subscriber,
   TODO,
   WebSocketEvent,
 } from '../types';
+import { NovuError } from '../utils/errors';
+import type { BaseSocketInterface } from './base-socket';
 
 const PRODUCTION_SOCKET_URL = 'https://ws.novu.co';
 const NOTIFICATION_RECEIVED: NotificationReceivedEvent = 'notifications.notification_received';
@@ -29,9 +31,13 @@ const mapToNotification = ({
   _id,
   content,
   read,
+  seen,
   archived,
+  snoozedUntil,
+  deliveredAt,
   createdAt,
   lastReadDate,
+  firstSeenDate,
   archivedAt,
   channel,
   subscriber,
@@ -40,13 +46,19 @@ const mapToNotification = ({
   cta,
   tags,
   data,
+  workflow,
 }: TODO): InboxNotification => {
   const to: Subscriber = {
-    id: subscriber?._id ?? '',
+    id: subscriber?._id,
+    subscriberId: subscriber?.subscriberId,
     firstName: subscriber?.firstName,
     lastName: subscriber?.lastName,
     avatar: subscriber?.avatar,
-    subscriberId: subscriber?.subscriberId ?? '',
+    locale: subscriber?.locale,
+    data: subscriber?.data,
+    timezone: subscriber?.timezone,
+    email: subscriber?.email,
+    phone: subscriber?.phone,
   };
   const primaryCta = cta.action?.buttons?.find((button: any) => button.type === ActionTypeEnum.PRIMARY);
   const secondaryCta = cta.action?.buttons?.find((button: any) => button.type === ActionTypeEnum.SECONDARY);
@@ -59,9 +71,18 @@ const mapToNotification = ({
     body: content as string,
     to,
     isRead: read,
+    isSeen: seen,
     isArchived: archived,
+    isSnoozed: !!snoozedUntil,
+    ...(deliveredAt && {
+      deliveredAt,
+    }),
+    ...(snoozedUntil && {
+      snoozedUntil,
+    }),
     createdAt,
     readAt: lastReadDate,
+    firstSeenAt: firstSeenDate,
     archivedAt,
     avatar,
     primaryAction: primaryCta && {
@@ -93,10 +114,11 @@ const mapToNotification = ({
         }
       : undefined,
     data,
+    workflow,
   };
 };
 
-export class Socket extends BaseModule {
+export class Socket extends BaseModule implements BaseSocketInterface {
   #token: string;
   #emitter: NovuEventEmitter;
   #socketIo: SocketIO | undefined;
@@ -142,8 +164,7 @@ export class Socket extends BaseModule {
   };
 
   async #initializeSocket(): Promise<void> {
-    // eslint-disable-next-line no-extra-boolean-cast
-    if (!!this.#socketIo) {
+    if (this.#socketIo) {
       return;
     }
 
@@ -171,27 +192,46 @@ export class Socket extends BaseModule {
     this.#socketIo?.on(WebSocketEvent.UNREAD, this.#unreadCountChanged);
   }
 
+  async #handleConnectSocket(): Result<void> {
+    try {
+      await this.#initializeSocket();
+
+      return {};
+    } catch (error) {
+      return { error: new NovuError('Failed to initialize the socket', error) };
+    }
+  }
+
+  async #handleDisconnectSocket(): Result<void> {
+    try {
+      this.#socketIo?.disconnect();
+      this.#socketIo = undefined;
+
+      return {};
+    } catch (error) {
+      return { error: new NovuError('Failed to disconnect from the socket', error) };
+    }
+  }
+
   isSocketEvent(eventName: string): eventName is SocketEventNames {
     return (
       eventName === NOTIFICATION_RECEIVED || eventName === UNSEEN_COUNT_CHANGED || eventName === UNREAD_COUNT_CHANGED
     );
   }
 
-  initialize(): void {
+  async connect(): Result<void> {
     if (this.#token) {
-      this.#initializeSocket().catch((error) => {
-        console.error(error);
-      });
-
-      return;
+      return this.#handleConnectSocket();
     }
 
-    this.callWithSession(async () => {
-      this.#initializeSocket().catch((error) => {
-        console.error(error);
-      });
+    return this.callWithSession(this.#handleConnectSocket.bind(this));
+  }
 
-      return {};
-    });
+  async disconnect(): Result<void> {
+    if (this.#socketIo) {
+      return this.#handleDisconnectSocket();
+    }
+
+    return this.callWithSession(this.#handleDisconnectSocket.bind(this));
   }
 }

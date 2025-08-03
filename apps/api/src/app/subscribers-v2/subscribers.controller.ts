@@ -10,39 +10,55 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CreateOrUpdateSubscriberUseCase, ExternalApiAccessible, UserSession } from '@novu/application-generic';
-import { ApiRateLimitCategoryEnum, UserSessionData } from '@novu/shared';
+import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  CreateOrUpdateSubscriberCommand,
+  CreateOrUpdateSubscriberUseCase,
+  ExternalApiAccessible,
+  RequirePermissions,
+  UserSession,
+} from '@novu/application-generic';
+import {
+  ApiRateLimitCategoryEnum,
+  DirectionEnum,
+  PermissionsEnum,
+  SubscriberCustomData,
+  UserSessionData,
+} from '@novu/shared';
+import { RequireAuthentication } from '../auth/framework/auth.decorator';
+import { ThrottlerCategory } from '../rate-limiting/guards/throttler.decorator';
 import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
-import { UserAuthentication } from '../shared/framework/swagger/api.key.security';
-import { ListSubscribersCommand } from './usecases/list-subscribers/list-subscribers.command';
-import { ListSubscribersUseCase } from './usecases/list-subscribers/list-subscribers.usecase';
-import { GetSubscriber } from './usecases/get-subscriber/get-subscriber.usecase';
-import { GetSubscriberCommand } from './usecases/get-subscriber/get-subscriber.command';
-import { PatchSubscriber } from './usecases/patch-subscriber/patch-subscriber.usecase';
-import { PatchSubscriberCommand } from './usecases/patch-subscriber/patch-subscriber.command';
-import { GetSubscriberPreferences } from './usecases/get-subscriber-preferences/get-subscriber-preferences.usecase';
-import { GetSubscriberPreferencesCommand } from './usecases/get-subscriber-preferences/get-subscriber-preferences.command';
+import { SdkGroupName, SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
+import { SubscriberResponseDto } from '../subscribers/dtos';
+import { ListSubscriberSubscriptionsQueryDto } from '../topics-v2/dtos/list-subscriber-subscriptions-query.dto';
+import { ListTopicSubscriptionsResponseDto } from '../topics-v2/dtos/list-topic-subscriptions-response.dto';
+import { ListSubscriberSubscriptionsCommand } from '../topics-v2/usecases/list-subscriber-subscriptions/list-subscriber-subscriptions.command';
+import { ListSubscriberSubscriptionsUseCase } from '../topics-v2/usecases/list-subscriber-subscriptions/list-subscriber-subscriptions.usecase';
+import { CreateSubscriberRequestDto } from './dtos/create-subscriber.dto';
+import { GetSubscriberPreferencesDto } from './dtos/get-subscriber-preferences.dto';
 import { ListSubscribersQueryDto } from './dtos/list-subscribers-query.dto';
 import { ListSubscribersResponseDto } from './dtos/list-subscribers-response.dto';
-import { SdkGroupName, SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
-import { DirectionEnum } from '../shared/dtos/base-responses';
 import { PatchSubscriberRequestDto } from './dtos/patch-subscriber.dto';
-import { SubscriberResponseDto } from '../subscribers/dtos';
+import { PatchSubscriberPreferencesDto } from './dtos/patch-subscriber-preferences.dto';
+import { RemoveSubscriberResponseDto } from './dtos/remove-subscriber.dto';
+import { GetSubscriberCommand } from './usecases/get-subscriber/get-subscriber.command';
+import { GetSubscriber } from './usecases/get-subscriber/get-subscriber.usecase';
+import { GetSubscriberPreferencesCommand } from './usecases/get-subscriber-preferences/get-subscriber-preferences.command';
+import { GetSubscriberPreferences } from './usecases/get-subscriber-preferences/get-subscriber-preferences.usecase';
+import { ListSubscribersCommand } from './usecases/list-subscribers/list-subscribers.command';
+import { ListSubscribersUseCase } from './usecases/list-subscribers/list-subscribers.usecase';
+import { mapSubscriberEntityToDto } from './usecases/list-subscribers/map-subscriber-entity-to.dto';
+import { PatchSubscriberCommand } from './usecases/patch-subscriber/patch-subscriber.command';
+import { PatchSubscriber } from './usecases/patch-subscriber/patch-subscriber.usecase';
 import { RemoveSubscriberCommand } from './usecases/remove-subscriber/remove-subscriber.command';
 import { RemoveSubscriber } from './usecases/remove-subscriber/remove-subscriber.usecase';
-import { RemoveSubscriberResponseDto } from './dtos/remove-subscriber.dto';
-import { GetSubscriberPreferencesDto } from './dtos/get-subscriber-preferences.dto';
-import { PatchSubscriberPreferencesDto } from './dtos/patch-subscriber-preferences.dto';
 import { UpdateSubscriberPreferencesCommand } from './usecases/update-subscriber-preferences/update-subscriber-preferences.command';
 import { UpdateSubscriberPreferences } from './usecases/update-subscriber-preferences/update-subscriber-preferences.usecase';
-import { ThrottlerCategory } from '../rate-limiting/guards/throttler.decorator';
-import { CreateSubscriberRequestDto } from './dtos/create-subscriber.dto';
-import { mapSubscriberEntityToResponseDto, mapSubscriberRequestToCommand } from './utils/create-subscriber.mapper';
 
 @ThrottlerCategory(ApiRateLimitCategoryEnum.CONFIGURATION)
 @Controller({ path: '/subscribers', version: '2' })
 @UseInterceptors(ClassSerializerInterceptor)
+@RequireAuthentication()
 @ApiTags('Subscribers')
 @SdkGroupName('Subscribers')
 @ApiCommonResponses()
@@ -54,15 +70,20 @@ export class SubscribersController {
     private removeSubscriberUsecase: RemoveSubscriber,
     private getSubscriberPreferencesUsecase: GetSubscriberPreferences,
     private updateSubscriberPreferencesUsecase: UpdateSubscriberPreferences,
-    private createOrUpdateSubscriberUseCase: CreateOrUpdateSubscriberUseCase
+    private createOrUpdateSubscriberUsecase: CreateOrUpdateSubscriberUseCase,
+    private listSubscriberSubscriptionsUsecase: ListSubscriberSubscriptionsUseCase
   ) {}
 
   @Get('')
-  @UserAuthentication()
   @ExternalApiAccessible()
   @SdkMethodName('search')
-  @ApiOperation({ summary: 'Search for subscribers' })
+  @ApiOperation({
+    summary: 'Search subscribers',
+    description: `Search subscribers by their **email**, **phone**, **subscriberId** and **name**. 
+    The search is case sensitive and supports pagination.Checkout all available filters in the query section.`,
+  })
   @ApiResponse(ListSubscribersResponseDto)
+  @RequirePermissions(PermissionsEnum.SUBSCRIBER_READ)
   async searchSubscribers(
     @UserSession() user: UserSessionData,
     @Query() query: ListSubscribersQueryDto
@@ -79,19 +100,21 @@ export class SubscribersController {
         phone: query.phone,
         subscriberId: query.subscriberId,
         name: query.name,
+        includeCursor: query.includeCursor,
       })
     );
   }
 
   @Get('/:subscriberId')
-  @UserAuthentication()
   @ExternalApiAccessible()
   @ApiOperation({
-    summary: 'Get subscriber',
-    description: 'Get subscriber by your internal id used to identify the subscriber',
+    summary: 'Retrieve a subscriber',
+    description: `Retrieve a subscriber by its unique key identifier **subscriberId**. 
+    **subscriberId** field is required.`,
   })
   @ApiResponse(SubscriberResponseDto)
   @SdkMethodName('retrieve')
+  @RequirePermissions(PermissionsEnum.SUBSCRIBER_READ)
   async getSubscriber(
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string
@@ -106,33 +129,58 @@ export class SubscribersController {
   }
 
   @Post('')
-  @UserAuthentication()
   @ExternalApiAccessible()
   @ApiOperation({
-    summary: 'Create subscriber',
-    description: 'Create subscriber with the given data',
+    summary: 'Create a subscriber',
+    description: `Create a subscriber with the subscriber attributes. 
+      **subscriberId** is a required field, rest other fields are optional, if the subscriber already exists, it will be updated`,
   })
   @ApiResponse(SubscriberResponseDto, 201)
+  @ApiResponse(SubscriberResponseDto, 409, false, false, {
+    description: 'Subscriber already exists (when query param failIfExists=true)',
+  })
   @SdkMethodName('create')
+  @RequirePermissions(PermissionsEnum.SUBSCRIBER_WRITE)
   async createSubscriber(
     @UserSession() user: UserSessionData,
-    @Body() body: CreateSubscriberRequestDto
+    @Body() body: CreateSubscriberRequestDto,
+    @Query('failIfExists') failIfExists?: boolean
   ): Promise<SubscriberResponseDto> {
-    const command = mapSubscriberRequestToCommand(body, user);
-    const subscriberEntity = await this.createOrUpdateSubscriberUseCase.execute(command);
+    const subscriberEntity = await this.createOrUpdateSubscriberUsecase.execute(
+      CreateOrUpdateSubscriberCommand.create({
+        environmentId: user.environmentId,
+        organizationId: user.organizationId,
+        subscriberId: body.subscriberId,
+        email: body.email || undefined,
+        firstName: body.firstName || undefined,
+        lastName: body.lastName || undefined,
+        phone: body.phone || undefined,
+        avatar: body.avatar || undefined,
+        locale: body.locale || undefined,
+        timezone: body.timezone || undefined,
+        // TODO: Change shared type to
+        data: (body.data || {}) as SubscriberCustomData,
+        /*
+         * TODO: In Subscriber V2 API endpoint we haven't added channels yet.
+         * channels: body.channels || [],
+         */
+        failIfExists,
+      })
+    );
 
-    return mapSubscriberEntityToResponseDto(subscriberEntity);
+    return mapSubscriberEntityToDto(subscriberEntity);
   }
 
   @Patch('/:subscriberId')
-  @UserAuthentication()
   @ExternalApiAccessible()
   @ApiOperation({
-    summary: 'Patch subscriber',
-    description: 'Patch subscriber by your internal id used to identify the subscriber',
+    summary: 'Update a subscriber',
+    description: `Update a subscriber by its unique key identifier **subscriberId**. 
+    **subscriberId** is a required field, rest other fields are optional`,
   })
   @ApiResponse(SubscriberResponseDto)
   @SdkMethodName('patch')
+  @RequirePermissions(PermissionsEnum.SUBSCRIBER_WRITE)
   async patchSubscriber(
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string,
@@ -144,19 +192,21 @@ export class SubscribersController {
         environmentId: user.environmentId,
         organizationId: user.organizationId,
         patchSubscriberRequestDto: body,
+        userId: user._id,
       })
     );
   }
 
   @Delete('/:subscriberId')
   @ApiResponse(RemoveSubscriberResponseDto, 200)
-  @UserAuthentication()
   @ExternalApiAccessible()
   @ApiOperation({
-    summary: 'Delete subscriber',
-    description: 'Deletes a subscriber entity from the Novu platform',
+    summary: 'Delete a subscriber',
+    description: `Deletes a subscriber entity from the Novu platform along with associated messages, preferences, and topic subscriptions. 
+      **subscriberId** is a required field.`,
   })
   @SdkMethodName('delete')
+  @RequirePermissions(PermissionsEnum.SUBSCRIBER_WRITE)
   async removeSubscriber(
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string
@@ -171,15 +221,16 @@ export class SubscribersController {
   }
 
   @Get('/:subscriberId/preferences')
-  @UserAuthentication()
   @ExternalApiAccessible()
   @ApiOperation({
-    summary: 'Get subscriber preferences',
-    description: 'Get subscriber global and workflow specific preferences',
+    summary: 'Retrieve subscriber preferences',
+    description: `Retrieve subscriber channel preferences by its unique key identifier **subscriberId**. 
+    This API returns all five channels preferences for all workflows and global preferences.`,
   })
   @ApiResponse(GetSubscriberPreferencesDto)
   @SdkGroupName('Subscribers.Preferences')
   @SdkMethodName('list')
+  @RequirePermissions(PermissionsEnum.SUBSCRIBER_READ)
   async getSubscriberPreferences(
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string
@@ -194,15 +245,17 @@ export class SubscribersController {
   }
 
   @Patch('/:subscriberId/preferences')
-  @UserAuthentication()
   @ExternalApiAccessible()
   @ApiOperation({
-    summary: 'Update subscriber global or workflow specific preferences',
-    description: 'Update subscriber global or workflow specific preferences',
+    summary: 'Update subscriber preferences',
+    description: `Update subscriber preferences by its unique key identifier **subscriberId**. 
+    **workflowId** is optional field, if provided, this API will update that workflow preference, 
+    otherwise it will update global preferences`,
   })
   @ApiResponse(GetSubscriberPreferencesDto)
   @SdkGroupName('Subscribers.Preferences')
   @SdkMethodName('update')
+  @RequirePermissions(PermissionsEnum.SUBSCRIBER_WRITE)
   async updateSubscriberPreferences(
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string,
@@ -213,8 +266,41 @@ export class SubscribersController {
         environmentId: user.environmentId,
         organizationId: user.organizationId,
         subscriberId,
-        workflowId: body.workflowId,
+        workflowIdOrInternalId: body.workflowId,
         channels: body.channels,
+      })
+    );
+  }
+
+  @Get('/:subscriberId/subscriptions')
+  @ExternalApiAccessible()
+  @ApiOperation({
+    summary: 'Retrieve subscriber subscriptions',
+    description: `Retrieve subscriber's topic subscriptions by its unique key identifier **subscriberId**. 
+    Checkout all available filters in the query section.`,
+  })
+  @ApiParam({ name: 'subscriberId', description: 'The identifier of the subscriber', type: String })
+  @ApiResponse(ListTopicSubscriptionsResponseDto)
+  @SdkGroupName('Subscribers.Topics')
+  @SdkMethodName('list')
+  @RequirePermissions(PermissionsEnum.SUBSCRIBER_READ)
+  async listSubscriberTopics(
+    @UserSession() user: UserSessionData,
+    @Param('subscriberId') subscriberId: string,
+    @Query() query: ListSubscriberSubscriptionsQueryDto
+  ): Promise<ListTopicSubscriptionsResponseDto> {
+    return await this.listSubscriberSubscriptionsUsecase.execute(
+      ListSubscriberSubscriptionsCommand.create({
+        environmentId: user.environmentId,
+        organizationId: user.organizationId,
+        subscriberId,
+        topicKey: query.key,
+        limit: query.limit ? Number(query.limit) : 10,
+        after: query.after,
+        before: query.before,
+        orderDirection: query.orderDirection === DirectionEnum.ASC ? 1 : -1,
+        orderBy: query.orderBy || '_id',
+        includeCursor: query.includeCursor,
       })
     );
   }

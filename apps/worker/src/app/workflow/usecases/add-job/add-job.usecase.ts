@@ -1,28 +1,11 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { parseExpression as parseCronExpression } from 'cron-parser';
-import { differenceInMilliseconds } from 'date-fns';
-import _ from 'lodash';
-
-import { JobEntity, JobRepository, JobStatusEnum } from '@novu/dal';
-import {
-  castUnitToDigestUnitEnum,
-  DigestCreationResultEnum,
-  DigestTypeEnum,
-  ExecutionDetailsSourceEnum,
-  ExecutionDetailsStatusEnum,
-  IDigestRegularMetadata,
-  IDigestTimedMetadata,
-  IWorkflowStepMetadata,
-  StepTypeEnum,
-} from '@novu/shared';
-import { DigestOutput, ExecuteOutput } from '@novu/framework/internal';
 import {
   ComputeJobWaitDurationService,
   ConditionsFilter,
   ConditionsFilterCommand,
-  DetailEnum,
   CreateExecutionDetails,
   CreateExecutionDetailsCommand,
+  DetailEnum,
   getDigestType,
   IFilterVariables,
   InstrumentUsecase,
@@ -34,16 +17,33 @@ import {
   NormalizeVariables,
   NormalizeVariablesCommand,
   StandardQueueService,
+  StepRunRepository,
   TierRestrictionsValidateCommand,
   TierRestrictionsValidateUsecase,
 } from '@novu/application-generic';
-
+import { JobEntity, JobRepository, JobStatusEnum, SubscriberRepository } from '@novu/dal';
+import { DigestOutput, ExecuteOutput } from '@novu/framework/internal';
+import {
+  castUnitToDigestUnitEnum,
+  DigestCreationResultEnum,
+  DigestTypeEnum,
+  ExecutionDetailsSourceEnum,
+  ExecutionDetailsStatusEnum,
+  IDigestBaseMetadata,
+  IDigestRegularMetadata,
+  IDigestTimedMetadata,
+  IWorkflowStepMetadata,
+  StepTypeEnum,
+} from '@novu/shared';
+import { parseExpression as parseCronExpression } from 'cron-parser';
+import { differenceInMilliseconds } from 'date-fns';
+import _ from 'lodash';
+import { ExecuteBridgeJob, ExecuteBridgeJobCommand } from '../execute-bridge-job';
 import { AddDelayJob } from './add-delay-job.usecase';
+import { AddJobCommand } from './add-job.command';
 import { MergeOrCreateDigestCommand } from './merge-or-create-digest.command';
 import { MergeOrCreateDigest } from './merge-or-create-digest.usecase';
-import { AddJobCommand } from './add-job.command';
 import { validateDigest } from './validation';
-import { ExecuteBridgeJob, ExecuteBridgeJobCommand } from '../execute-bridge-job';
 
 export enum BackoffStrategiesEnum {
   WEBHOOK_FILTER_BACKOFF = 'webhookFilterBackoff',
@@ -67,7 +67,9 @@ export class AddJob {
     private conditionsFilter: ConditionsFilter,
     private normalizeVariablesUsecase: NormalizeVariables,
     private tierRestrictionsValidateUsecase: TierRestrictionsValidateUsecase,
-    private executeBridgeJob: ExecuteBridgeJob
+    private executeBridgeJob: ExecuteBridgeJob,
+    private stepRunRepository: StepRunRepository,
+    private subscriberRepository: SubscriberRepository
   ) {}
 
   @InstrumentUsecase()
@@ -167,12 +169,25 @@ export class AddJob {
 
     const delay = this.getExecutionDelayAmount(filtered, digestAmount, delayAmount);
 
-    await this.validateDeferDuration(delay, job, command, digestResult?.cronExpression);
+    const valid = await this.validateDeferDuration(delay, job, command, digestResult?.cronExpression);
+
+    if (!valid) {
+      throw new Error('Defer duration limit exceeded');
+    }
+
+    await this.stepRunRepository.create(command.job, {
+      status: JobStatusEnum.DELAYED,
+    });
 
     await this.queueJob(job, delay);
   }
 
-  private async validateDeferDuration(delay: number, job: JobEntity, command: AddJobCommand, cronExpression?: string) {
+  private async validateDeferDuration(
+    delay: number,
+    job: JobEntity,
+    command: AddJobCommand,
+    cronExpression?: string
+  ): Promise<boolean> {
     const errors = await this.tierRestrictionsValidateUsecase.execute(
       TierRestrictionsValidateCommand.create({
         deferDurationMs: delay,
@@ -197,7 +212,11 @@ export class AddJob {
           raw: JSON.stringify({ errors: uniqueErrors }),
         })
       );
+
+      return false;
     }
+
+    return true;
   }
 
   private async executeNoneDeferredJob(command: AddJobCommand): Promise<void> {
@@ -205,6 +224,10 @@ export class AddJob {
 
     Logger.verbose(`Updating status to queued for job ${job._id}`, LOG_CONTEXT);
     await this.jobRepository.updateStatus(command.environmentId, job._id, JobStatusEnum.QUEUED);
+
+    await this.stepRunRepository.create(job, {
+      status: JobStatusEnum.QUEUED,
+    });
 
     await this.queueJob(job, 0);
   }
@@ -257,9 +280,10 @@ export class AddJob {
 
     return response;
   }
-
   private async updateMetadata(response: ExecuteOutput, command: AddJobCommand) {
     let metadata = {} as IWorkflowStepMetadata;
+    const digest = command.job.digest as IDigestBaseMetadata;
+
     const outputs = response.outputs as DigestOutput;
     // digest value is pre-computed by framework and passed as digestKey
     const outputDigestValue = outputs?.digestKey;
@@ -268,10 +292,10 @@ export class AddJob {
     if (isTimedDigestOutput(outputs)) {
       metadata = {
         type: DigestTypeEnum.TIMED,
-        digestValue: outputDigestValue,
+        digestValue: outputDigestValue || 'No-Value-Provided',
+        digestKey: digest.digestKey || 'No-Key-Provided',
         timed: { cronExpression: outputs?.cron },
       } as IDigestTimedMetadata;
-
       await this.jobRepository.updateOne(
         {
           _id: command.job._id,
@@ -281,6 +305,7 @@ export class AddJob {
           $set: {
             'digest.type': metadata.type,
             'digest.digestValue': metadata.digestValue,
+            'digest.digestKey': metadata.digestKey,
             'digest.amount': metadata.amount,
             'digest.unit': metadata.unit,
             'digest.timed.cronExpression': metadata.timed?.cronExpression,
@@ -293,7 +318,8 @@ export class AddJob {
       metadata = {
         type: digestType,
         amount: outputs?.amount,
-        digestValue: outputDigestValue,
+        digestValue: outputDigestValue || 'No-Value-Provided',
+        digestKey: digest.digestKey || 'No-Key-Provided',
         unit: outputs.unit ? castUnitToDigestUnitEnum(outputs?.unit) : undefined,
         backoff: digestType === DigestTypeEnum.BACKOFF,
         backoffAmount: outputs.lookBackWindow?.amount,
@@ -309,6 +335,7 @@ export class AddJob {
           $set: {
             'digest.type': metadata.type,
             'digest.digestValue': metadata.digestValue,
+            'digest.digestKey': metadata.digestKey,
             'digest.amount': metadata.amount,
             'digest.unit': metadata.unit,
             'digest.backoff': metadata.backoff,
@@ -320,10 +347,16 @@ export class AddJob {
     }
 
     if (isRegularDigestOutput(outputs)) {
+      if (!outputs.amount && !outputs.unit) {
+        outputs.amount = 0;
+        outputs.unit = 'seconds';
+      }
+
       metadata = {
         type: digestType,
         amount: outputs?.amount,
-        digestValue: outputDigestValue,
+        digestKey: digest.digestKey || 'No-Key-Provided',
+        digestValue: outputDigestValue || 'No-Value-Provided',
         unit: outputs.unit ? castUnitToDigestUnitEnum(outputs?.unit) : undefined,
       } as IDigestRegularMetadata;
 
@@ -335,6 +368,7 @@ export class AddJob {
         {
           $set: {
             'digest.type': metadata.type,
+            'digest.digestKey': metadata.digestKey,
             'digest.digestValue': metadata.digestValue,
             'digest.amount': metadata.amount,
             'digest.unit': metadata.unit,
@@ -349,7 +383,7 @@ export class AddJob {
   private async handleDigest(
     command: AddJobCommand,
     filterVariables: IFilterVariables,
-    job,
+    job: JobEntity,
     digestAmount: number | undefined,
     filtered: boolean
   ) {
@@ -359,24 +393,33 @@ export class AddJob {
     if (bridgeResponse) {
       metadata = await this.updateMetadata(bridgeResponse, command);
     } else {
+      // @ts-ignore - job.digest is not typed
       metadata = job.digest;
     }
 
     // Update the job digest directly to avoid an extra database call
-    // eslint-disable-next-line no-param-reassign
     command.job.digest = { ...command.job.digest, ...metadata } as IWorkflowStepMetadata;
 
-    const bridgeAmount = this.mapBridgeTimedDigestAmount(bridgeResponse);
+    const subscriber = await this.subscriberRepository.findOne(
+      {
+        _id: job._subscriberId,
+        _environmentId: job._environmentId,
+      },
+      'timezone',
+      { readPreference: 'secondaryPreferred' }
+    );
+
+    const bridgeAmount = this.mapBridgeTimedDigestAmount(bridgeResponse, subscriber?.timezone);
 
     validateDigest(job);
 
-    // eslint-disable-next-line no-param-reassign
     digestAmount =
       bridgeAmount ??
       this.computeJobWaitDurationService.calculateDelay({
         stepMetadata: metadata,
         payload: job.payload,
         overrides: job.overrides,
+        timezone: subscriber?.timezone,
       });
 
     Logger.debug(`Digest step amount is: ${digestAmount}`, LOG_CONTEXT);
@@ -399,7 +442,7 @@ export class AddJob {
     return { digestAmount, digestCreationResult, cronExpression: bridgeResponse?.outputs?.cron as string | undefined };
   }
 
-  private mapBridgeTimedDigestAmount(bridgeResponse: ExecuteOutput | null): number | null {
+  private mapBridgeTimedDigestAmount(bridgeResponse: ExecuteOutput | null, timezone?: string): number | null {
     let bridgeAmount: number | null = null;
     const outputs = bridgeResponse?.outputs as DigestOutput;
 
@@ -407,8 +450,9 @@ export class AddJob {
       return null;
     }
 
-    const bridgeAmountExpression = parseCronExpression(outputs?.cron);
+    const bridgeAmountExpression = parseCronExpression(outputs?.cron, { tz: timezone });
     const bridgeAmountDate = bridgeAmountExpression.next();
+
     bridgeAmount = differenceInMilliseconds(bridgeAmountDate.toDate(), new Date());
 
     return bridgeAmount;
@@ -476,7 +520,6 @@ export class AddJob {
 
     if (delay) {
       const logMessage =
-        // eslint-disable-next-line no-nested-ternary
         job.type === StepTypeEnum.DELAY
           ? 'Delay is active, Creating execution details'
           : job.type === StepTypeEnum.DIGEST

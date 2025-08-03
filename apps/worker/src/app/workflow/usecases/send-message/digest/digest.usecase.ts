@@ -1,36 +1,33 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  MessageRepository,
+  CreateExecutionDetails,
+  CreateExecutionDetailsCommand,
+  DetailEnum,
+  FeatureFlagsService,
+} from '@novu/application-generic';
+import {
+  EnvironmentEntity,
+  JobEntity,
   JobRepository,
   JobStatusEnum,
-  JobEntity,
-  EnvironmentEntity,
+  MessageRepository,
   OrganizationEntity,
   UserEntity,
 } from '@novu/dal';
 import {
-  StepTypeEnum,
+  DigestTypeEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
-  DigestTypeEnum,
-  IDigestRegularMetadata,
   FeatureFlagsKeysEnum,
+  IDigestRegularMetadata,
+  StepTypeEnum,
 } from '@novu/shared';
-import {
-  DetailEnum,
-  CreateExecutionDetails,
-  CreateExecutionDetailsCommand,
-  FeatureFlagsService,
-} from '@novu/application-generic';
-
-import { GetDigestEventsRegular } from './get-digest-events-regular.usecase';
-import { GetDigestEventsBackoff } from './get-digest-events-backoff.usecase';
-
 import { PlatformException } from '../../../../shared/utils';
-
 import { SendMessageCommand } from '../send-message.command';
-import { SendMessageType } from '../send-message-type.usecase';
+import { SendMessageResult, SendMessageType } from '../send-message-type.usecase';
 import { DigestEventsCommand } from './digest-events.command';
+import { GetDigestEventsBackoff } from './get-digest-events-backoff.usecase';
+import { GetDigestEventsRegular } from './get-digest-events-regular.usecase';
 
 const LOG_CONTEXT = 'Digest';
 
@@ -47,7 +44,7 @@ export class Digest extends SendMessageType {
     super(messageRepository, createExecutionDetails);
   }
 
-  public async execute(command: SendMessageCommand) {
+  public async execute(command: SendMessageCommand): Promise<SendMessageResult> {
     const currentJob = await this.getCurrentJob(command);
 
     const useMergedDigestIdEnabled = await this.featureFlagService.getFlag({
@@ -92,6 +89,10 @@ export class Digest extends SendMessageType {
         },
       }
     );
+
+    return {
+      status: 'success',
+    };
   }
 
   private async getEvents(command: SendMessageCommand, currentJob: JobEntity) {

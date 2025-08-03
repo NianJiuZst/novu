@@ -44,8 +44,6 @@ export const envValidators = {
   REDIS_CACHE_KEEP_ALIVE: str({ default: undefined }),
   REDIS_CACHE_FAMILY: str({ default: undefined }),
   REDIS_CACHE_KEY_PREFIX: str({ default: undefined }),
-  /** @deprecated - use `MONGO_AUTO_CREATE_INDEXES` instead */
-  AUTO_CREATE_INDEXES: bool({ default: false }),
   MONGO_AUTO_CREATE_INDEXES: bool({ default: false }),
   MONGO_MAX_IDLE_TIME_IN_MS: num({ default: 1000 * 30 }),
   MONGO_MAX_POOL_SIZE: num({ default: 50 }),
@@ -57,6 +55,8 @@ export const envValidators = {
   NOTIFICATION_RETENTION_DAYS: num({ default: DEFAULT_NOTIFICATION_RETENTION_DAYS }),
   API_ROOT_URL: url(),
   SUBSCRIBER_WIDGET_JWT_EXPIRATION_TIME: str({ default: '15 days' }),
+  SOCKET_WORKER_URL: str({ default: undefined }),
+  INTERNAL_SERVICES_API_KEY: str({ default: undefined }),
   // Feature Flags
   ...Object.keys(FeatureFlagsKeysEnum).reduce(
     (acc, key) => {
@@ -87,8 +87,6 @@ export const envValidators = {
     S3_LOCAL_STACK: str({ default: '' }),
     S3_BUCKET_NAME: str(),
     S3_REGION: str(),
-    AWS_ACCESS_KEY_ID: str(),
-    AWS_SECRET_ACCESS_KEY: str(),
   }),
 
   // Production validators

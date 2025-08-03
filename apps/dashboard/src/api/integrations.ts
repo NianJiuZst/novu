@@ -1,4 +1,4 @@
-import { IEnvironment, IIntegration, ChannelTypeEnum } from '@novu/shared';
+import { ChannelTypeEnum, IEnvironment, IIntegration } from '@novu/shared';
 import { del, get, post, put } from './api.client';
 
 export type CreateIntegrationData = {
@@ -10,7 +10,6 @@ export type CreateIntegrationData = {
   active: boolean;
   primary?: boolean;
   _environmentId: string;
-  removeNovuBranding?: boolean;
 };
 
 export enum CheckIntegrationResponseEnum {
@@ -27,7 +26,6 @@ export type UpdateIntegrationData = {
   primary: boolean;
   credentials: Record<string, string>;
   check: boolean;
-  removeNovuBranding?: boolean;
 };
 
 export async function getIntegrations({ environment }: { environment: IEnvironment }) {

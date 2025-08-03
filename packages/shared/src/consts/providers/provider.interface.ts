@@ -1,4 +1,4 @@
-import { CredentialsKeyEnum, ProvidersIdEnum, ChannelTypeEnum } from '../../types';
+import { ChannelTypeEnum, CredentialsKeyEnum, ProvidersIdEnum } from '../../types';
 
 export interface IProviderConfig {
   id: ProvidersIdEnum;
@@ -26,6 +26,11 @@ export interface IConfigCredentials {
     name: string;
     value: string | null;
   }>;
+  validation?: {
+    pattern?: RegExp;
+    message?: string;
+    validate?: (value: string) => boolean | string;
+  };
 }
 
 export interface ILogoFileName {

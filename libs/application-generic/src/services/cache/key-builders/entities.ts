@@ -1,19 +1,13 @@
-import { createHash } from './crypto';
-import {
-  BLUEPRINT_IDENTIFIER,
-  CacheKeyPrefixEnum,
-  CacheKeyTypeEnum,
-  IdentifierPrefixEnum,
-  ServiceConfigIdentifierEnum,
-} from './identifiers';
+import { ResourceEnum } from '@novu/shared';
+import { buildUnscopedKey } from './builder.base';
 import {
   buildEnvironmentScopedKey,
   buildEnvironmentScopedKeyById,
   buildOrganizationScopedKey,
   buildOrganizationScopedKeyById,
-  buildServiceConfigKey,
 } from './builder.scoped';
-import { buildUnscopedKey } from './builder.base';
+import { createHash } from './crypto';
+import { BLUEPRINT_IDENTIFIER, CacheKeyPrefixEnum, CacheKeyTypeEnum, IdentifierPrefixEnum } from './identifiers';
 
 export const buildSubscriberKey = ({
   subscriberId,
@@ -63,14 +57,6 @@ export const buildUserKey = ({ _id }: { _id: string }): string =>
     keyEntity: CacheKeyPrefixEnum.USER,
     identifier: _id,
     identifierPrefix: IdentifierPrefixEnum.ID,
-  });
-
-export const buildEnvironmentByApiKey = ({ apiKey }: { apiKey: string }): string =>
-  buildUnscopedKey({
-    type: CacheKeyTypeEnum.ENTITY,
-    keyEntity: CacheKeyPrefixEnum.ENVIRONMENT_BY_API_KEY,
-    identifier: apiKey,
-    identifierPrefix: IdentifierPrefixEnum.API_KEY,
   });
 
 export const buildGroupedBlueprintsKey = (environmentId: string): string =>
@@ -123,31 +109,21 @@ export const buildEvaluateApiRateLimitKey = ({
     identifier: apiRateLimitCategory,
   });
 
-export const buildHasNotificationKey = ({ _organizationId }: { _organizationId: string }): string =>
-  buildOrganizationScopedKey({
-    type: CacheKeyTypeEnum.ENTITY,
-    keyEntity: CacheKeyPrefixEnum.HAS_NOTIFICATION,
-    organizationId: _organizationId,
-  });
-
 export const buildUsageKey = ({
   _organizationId,
   resourceType,
-  periodStart,
-  periodEnd,
 }: {
   _organizationId: string;
-  resourceType: string;
-  periodStart: number;
-  periodEnd: number;
-}): string =>
-  buildOrganizationScopedKeyById({
+  resourceType: ResourceEnum;
+}): string => {
+  return buildOrganizationScopedKeyById({
     type: CacheKeyTypeEnum.ENTITY,
     keyEntity: CacheKeyPrefixEnum.USAGE,
-    identifierPrefix: IdentifierPrefixEnum.RESOURCE_TYPE,
-    identifier: `${resourceType}_${periodStart}_${periodEnd}`,
     organizationId: _organizationId,
+    identifierPrefix: IdentifierPrefixEnum.RESOURCE_TYPE,
+    identifier: resourceType,
   });
+};
 
 export const buildSubscriptionKey = ({ organizationId }: { organizationId: string }): string =>
   buildOrganizationScopedKey({
@@ -155,9 +131,6 @@ export const buildSubscriptionKey = ({ organizationId }: { organizationId: strin
     keyEntity: CacheKeyPrefixEnum.SUBSCRIPTION,
     organizationId,
   });
-
-export const buildServiceConfigApiRateLimitMaximumKey = (): string =>
-  buildServiceConfigKey(ServiceConfigIdentifierEnum.API_RATE_LIMIT_SERVICE_MAXIMUM);
 
 export const buildSubscriberTopicsKey = ({
   subscriberId,

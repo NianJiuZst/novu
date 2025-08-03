@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-
 export enum CredentialsKeyEnum {
   ApiKey = 'apiKey',
   User = 'user',
@@ -105,6 +103,8 @@ export enum SmsProviderIdEnum {
   BrevoSms = 'brevo-sms',
   EazySms = 'eazy-sms',
   Mobishastra = 'mobishastra',
+  AfroSms = 'afro-message',
+  IMedia = 'imedia',
 }
 
 export enum ChatProviderIdEnum {
@@ -118,6 +118,7 @@ export enum ChatProviderIdEnum {
   GetStream = 'getstream',
   RocketChat = 'rocket-chat',
   WhatsAppBusiness = 'whatsapp-business',
+  ChatWebhook = 'chat-webhook',
 }
 
 export enum PushProviderIdEnum {

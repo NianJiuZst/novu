@@ -1,14 +1,14 @@
-import { expect } from 'chai';
+import { Novu } from '@novu/api';
+import { DetailEnum } from '@novu/application-generic';
 import {
   ExecutionDetailsRepository,
   IntegrationRepository,
   MessageRepository,
   NotificationTemplateEntity,
 } from '@novu/dal';
-import { DetailEnum } from '@novu/application-generic';
 import { ChannelTypeEnum, PushProviderIdEnum, StepTypeEnum } from '@novu/shared';
 import { UserSession } from '@novu/testing';
-import { Novu } from '@novu/api';
+import { expect } from 'chai';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
 describe('Trigger event - Send Push Notification - /v1/events/trigger (POST) #novu-v2', () => {
@@ -129,7 +129,7 @@ describe('Trigger event - Send Push Notification - /v1/events/trigger (POST) #no
         _subscriberId: session.subscriberId,
       });
 
-      expect(messages.length).to.equal(0);
+      expect(messages.length, 'expected messages to be 0').to.equal(0);
 
       const executionDetails = await executionDetailsRepository.find({
         _environmentId: session.environment._id,
@@ -137,20 +137,19 @@ describe('Trigger event - Send Push Notification - /v1/events/trigger (POST) #no
 
       expect(executionDetails.length).to.equal(11);
       const fcmMessageCreated = executionDetails.find(
-        (ex) =>
-          ex.detail === `${DetailEnum.MESSAGE_CREATED}: ${PushProviderIdEnum.FCM}` &&
-          ex.providerId === PushProviderIdEnum.FCM
+        (ex) => ex.detail === DetailEnum.MESSAGE_CREATED && ex.providerId === PushProviderIdEnum.FCM
       );
-      expect(fcmMessageCreated).to.be.ok;
+      expect(fcmMessageCreated, 'expected fcm message created to be ok').to.be.ok;
+
       const fcmProviderError = executionDetails.find(
         (ex) => ex.detail === DetailEnum.PROVIDER_ERROR && ex.providerId === PushProviderIdEnum.FCM
       );
-      expect(fcmProviderError).to.be.ok;
+      expect(fcmProviderError, 'expected fcm provider error to be ok').to.be.ok;
 
       const expo = executionDetails.find(
         (ex) => ex.detail === DetailEnum.PUSH_MISSING_DEVICE_TOKENS && ex.providerId === PushProviderIdEnum.EXPO
       );
-      expect(expo).to.be.ok;
+      expect(expo, 'expected expo to be ok').to.be.ok;
       const genericError = executionDetails.find((ex) => ex.detail === DetailEnum.NOTIFICATION_ERROR);
       expect(genericError).to.be.ok;
     });

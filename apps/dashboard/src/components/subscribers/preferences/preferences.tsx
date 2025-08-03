@@ -1,3 +1,8 @@
+import { GetSubscriberPreferencesDto, PatchPreferenceChannelsDto } from '@novu/api/models/components';
+import { ChannelTypeEnum } from '@novu/shared';
+import { motion } from 'motion/react';
+import { useMemo } from 'react';
+import { RiQuestionLine } from 'react-icons/ri';
 import { showSuccessToast } from '@/components/primitives/sonner-helpers';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';
 import { SidebarContent } from '@/components/side-navigation/sidebar';
@@ -7,11 +12,7 @@ import { usePatchSubscriberPreferences } from '@/hooks/use-patch-subscriber-pref
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { itemVariants, sectionVariants } from '@/utils/animation';
 import { TelemetryEvent } from '@/utils/telemetry';
-import { GetSubscriberPreferencesDto, PatchPreferenceChannelsDto } from '@novu/api/models/components';
-import { ChannelTypeEnum } from '@novu/shared';
-import { motion } from 'motion/react';
-import { useMemo } from 'react';
-import { RiQuestionLine } from 'react-icons/ri';
+import { PreferencesBlank } from './preferences-blank';
 
 type PreferencesProps = {
   subscriberPreferences: GetSubscriberPreferencesDto;
@@ -30,12 +31,14 @@ export const Preferences = (props: PreferencesProps) => {
     },
   });
 
-  const { workflows, globalChannelsKeys } = useMemo(() => {
+  const { workflows, globalChannelsKeys, hasZeroPreferences } = useMemo(() => {
     const global = subscriberPreferences?.global ?? { channels: {} };
     const workflows = subscriberPreferences?.workflows ?? [];
     const globalChannelsKeys = Object.entries(global?.channels ?? {}) as [ChannelTypeEnum, boolean][];
 
-    return { global, workflows, globalChannelsKeys };
+    const hasZeroPreferences = workflows.length === 0 && globalChannelsKeys.length === 0;
+
+    return { global, workflows, globalChannelsKeys, hasZeroPreferences };
   }, [subscriberPreferences]);
 
   const handleChannelToggle = async (channels: PatchPreferenceChannelsDto, workflowId?: string) => {
@@ -44,6 +47,10 @@ export const Preferences = (props: PreferencesProps) => {
       preferences: { channels, workflowId },
     });
   };
+
+  if (hasZeroPreferences) {
+    return <PreferencesBlank />;
+  }
 
   return (
     <motion.div

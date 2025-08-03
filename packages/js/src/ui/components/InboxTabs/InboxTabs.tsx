@@ -1,19 +1,21 @@
-/* eslint-disable local-rules/no-class-without-style */
 import { createMemo, For, Show } from 'solid-js';
 import { useInboxContext, useUnreadCounts } from '../../context';
 import { cn, getTagsFromTab, useStyle } from '../../helpers';
 import { useTabsDropdown } from '../../helpers/useTabsDropdown';
-import { Check } from '../../icons';
-import { ArrowDown } from '../../icons/ArrowDown';
+import { Check as DefaultCheck } from '../../icons';
+import { ArrowDown as DefaultArrowDown } from '../../icons/ArrowDown';
 import {
+  BodyRenderer,
   NotificationActionClickHandler,
   NotificationClickHandler,
   NotificationRenderer,
   NotificationStatus,
+  SubjectRenderer,
   Tab,
 } from '../../types';
 import { NotificationList } from '../Notification';
 import { Button, Dropdown, Tabs } from '../primitives';
+import { IconRendererWrapper } from '../shared/IconRendererWrapper';
 import { InboxDropdownTab, InboxTab as InboxTabComponent, InboxTabUnreadNotificationsCount } from './InboxTab';
 
 const tabsDropdownTriggerVariants = () =>
@@ -21,6 +23,8 @@ const tabsDropdownTriggerVariants = () =>
   `after:nt-w-full after:nt-h-[2px] after:nt-border-b-2 nt-mb-[0.625rem]`;
 type InboxTabsProps = {
   renderNotification?: NotificationRenderer;
+  renderSubject?: SubjectRenderer;
+  renderBody?: BodyRenderer;
   onNotificationClick?: NotificationClickHandler;
   onPrimaryActionClick?: NotificationActionClickHandler;
   onSecondaryActionClick?: NotificationActionClickHandler;
@@ -31,15 +35,22 @@ export const InboxTabs = (props: InboxTabsProps) => {
   const { activeTab, status, setActiveTab, filter } = useInboxContext();
   const { dropdownTabs, setTabsList, visibleTabs } = useTabsDropdown({ tabs: props.tabs });
   const dropdownTabsUnreadCounts = useUnreadCounts({
-    filters: dropdownTabs().map((tab) => ({ tags: getTagsFromTab(tab) })),
+    filters: dropdownTabs().map((tab) => ({ tags: getTagsFromTab(tab), data: tab.filter?.data })),
   });
 
+  const checkIconClass = style('moreTabs__dropdownItemRight__icon', 'nt-size-3', {
+    iconKey: 'check',
+  });
   const options = createMemo(() =>
     dropdownTabs().map((tab) => ({
       ...tab,
       rightIcon:
         tab.label === activeTab() ? (
-          <Check class={style('moreTabs__dropdownItemRight__icon', 'nt-size-3')} />
+          <IconRendererWrapper
+            iconKey="check"
+            class={checkIconClass}
+            fallback={<DefaultCheck class={checkIconClass} />}
+          />
         ) : undefined,
     }))
   );
@@ -52,6 +63,10 @@ export const InboxTabs = (props: InboxTabsProps) => {
       .map((tab) => tab.label)
       .includes(activeTab())
   );
+
+  const moreTabsIconClass = style('moreTabs__icon', 'nt-size-5', {
+    iconKey: 'arrowDown',
+  });
 
   return (
     <Tabs.Root
@@ -77,7 +92,7 @@ export const InboxTabs = (props: InboxTabsProps) => {
         <Tabs.List appearanceKey="notificationsTabs__tabsList" class="nt-bg-neutral-alpha-25 nt-px-4">
           <For each={visibleTabs()}>{(tab) => <InboxTabComponent {...tab} />}</For>
           <Show when={dropdownTabs().length > 0}>
-            <Dropdown.Root fallbackPlacements={['bottom', 'top']} placement={'bottom-start'}>
+            <Dropdown.Root>
               <Dropdown.Trigger
                 appearanceKey="moreTabs__dropdownTrigger"
                 asChild={(triggerProps) => (
@@ -94,7 +109,11 @@ export const InboxTabs = (props: InboxTabsProps) => {
                         : 'after:nt-border-b-transparent nt-text-foreground-alpha-700'
                     )}
                   >
-                    <ArrowDown class={style('moreTabs__icon', 'nt-size-5')} />
+                    <IconRendererWrapper
+                      iconKey="arrowDown"
+                      class={moreTabsIconClass}
+                      fallback={<DefaultArrowDown class={moreTabsIconClass} />}
+                    />
                     <Show when={status() !== NotificationStatus.ARCHIVED && dropdownTabsUnreadSum()}>
                       <InboxTabUnreadNotificationsCount count={dropdownTabsUnreadSum()} />
                     </Show>
@@ -124,10 +143,12 @@ export const InboxTabs = (props: InboxTabsProps) => {
         >
           <NotificationList
             renderNotification={props.renderNotification}
+            renderSubject={props.renderSubject}
+            renderBody={props.renderBody}
             onNotificationClick={props.onNotificationClick}
             onPrimaryActionClick={props.onPrimaryActionClick}
             onSecondaryActionClick={props.onSecondaryActionClick}
-            filter={{ ...filter(), tags: getTagsFromTab(tab) }}
+            filter={{ ...filter(), tags: getTagsFromTab(tab), data: tab.filter?.data }}
           />
         </Tabs.Content>
       ))}

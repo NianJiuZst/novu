@@ -1,13 +1,10 @@
-import { expect } from 'chai';
-
 import {
-  IntegrationRepository,
-  EnvironmentRepository,
+  CommunityMemberRepository,
   CommunityOrganizationRepository,
   CommunityUserRepository,
-  CommunityMemberRepository,
+  EnvironmentRepository,
+  IntegrationRepository,
 } from '@novu/dal';
-import { UserSession } from '@novu/testing';
 import {
   ApiServiceLevelEnum,
   ChannelTypeEnum,
@@ -18,8 +15,10 @@ import {
   MemberRoleEnum,
   SmsProviderIdEnum,
 } from '@novu/shared';
+import { UserSession } from '@novu/testing';
+import { expect } from 'chai';
 
-describe('Create Organization - /organizations (POST) #novu-v1-os', async () => {
+describe('Create Organization - /organizations (POST) #novu-v0-os', async () => {
   let session: UserSession;
   const organizationRepository = new CommunityOrganizationRepository();
   const userRepository = new CommunityUserRepository();
@@ -48,7 +47,7 @@ describe('Create Organization - /organizations (POST) #novu-v1-os', async () => 
 
       expect(members.length).to.eq(1);
       expect(members[0]._userId).to.eq(session.user._id);
-      expect(members[0].roles[0]).to.eq(MemberRoleEnum.ADMIN);
+      expect(members[0].roles[0]).to.eq(MemberRoleEnum.OSS_ADMIN);
     });
 
     it('should create organization with correct name', async () => {

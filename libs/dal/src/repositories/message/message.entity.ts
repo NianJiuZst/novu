@@ -1,12 +1,11 @@
-import { Exclude } from 'class-transformer';
 import { ChannelTypeEnum, IActor, IMessageCTA } from '@novu/shared';
-
+import { Exclude } from 'class-transformer';
+import type { ChangePropsValueType } from '../../types/helpers';
+import type { EnvironmentId } from '../environment';
 import { IEmailBlock } from '../message-template';
-import { SubscriberEntity } from '../subscriber';
 import { NotificationTemplateEntity } from '../notification-template';
 import type { OrganizationId } from '../organization';
-import type { EnvironmentId } from '../environment';
-import type { ChangePropsValueType } from '../../types/helpers';
+import { SubscriberEntity } from '../subscriber';
 
 export class MessageEntity {
   _id: string;
@@ -51,8 +50,15 @@ export class MessageEntity {
 
   read: boolean;
 
+  snoozedUntil?: string;
+
+  deliveredAt?: string[];
+
   archived: boolean;
 
+  /**
+   * todo: remove deleted field after all the soft deletes are removed task nv-5688
+   */
   deleted: boolean;
 
   email?: string;
@@ -71,20 +77,19 @@ export class MessageEntity {
 
   lastSeenDate: string;
 
+  firstSeenDate: string;
+
   lastReadDate: string;
 
   cta: IMessageCTA;
 
-  _feedId: string;
+  _feedId?: string;
 
   status: 'sent' | 'error' | 'warning';
 
   errorId: string;
 
   errorText: string;
-
-  @Exclude()
-  providerResponse: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   payload: Record<string, unknown>;
 

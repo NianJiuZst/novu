@@ -11,9 +11,9 @@ import {
   OrdinalValueEnum,
   ProvidersIdEnum,
   ProvidersIdEnumConst,
+  ResourceOriginEnum,
   StepTypeEnum,
   TriggerTypeEnum,
-  WorkflowOriginEnum,
 } from '@novu/shared';
 import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { StepFilterDto } from '../../shared/dtos/step-filter-dto';
@@ -24,7 +24,15 @@ export class DigestTimedConfigDto {
   @IsString()
   atTime?: string;
 
-  @ApiPropertyOptional({ description: 'Days of the week for the digest', type: [String], enum: DaysEnum })
+  @ApiPropertyOptional({
+    description: 'Days of the week for the digest',
+    type: 'array',
+    items: {
+      type: 'string',
+      enum: Object.values(DaysEnum),
+    },
+    enumName: 'DaysEnum',
+  })
   @IsOptional()
   @IsArray()
   @IsEnum(DaysEnum, { each: true })
@@ -237,6 +245,18 @@ export class ActivityNotificationJobResponseDto {
   })
   step: ActivityNotificationStepResponseDto;
 
+  @ApiPropertyOptional({
+    description: 'Optional context object for additional error details.',
+    type: 'object',
+    required: false,
+    additionalProperties: true,
+    example: {
+      workflowId: 'some_wf_id',
+      stepId: 'some_wf_id',
+    },
+  })
+  overrides?: Record<string, unknown>;
+
   @ApiPropertyOptional({ description: 'Optional payload for the job', type: Object })
   payload?: Record<string, unknown>;
 
@@ -315,20 +335,28 @@ export class ActivityNotificationTemplateResponseDto {
   name: string;
 
   @ApiProperty({
-    enum: [...Object.values(WorkflowOriginEnum)],
-    enumName: 'WorkflowOriginEnum',
+    enum: [...Object.values(ResourceOriginEnum)],
+    enumName: 'ResourceOriginEnum',
     description: 'Origin of the workflow',
     type: String,
   })
   @IsString()
-  @IsEnum(WorkflowOriginEnum)
-  origin?: WorkflowOriginEnum;
+  @IsEnum(ResourceOriginEnum)
+  origin?: ResourceOriginEnum;
 
   @ApiProperty({
     description: 'Triggers of the template',
     type: [NotificationTriggerDto],
   })
   triggers: NotificationTriggerDto[];
+}
+
+export class ActivityTopicDto {
+  @ApiProperty({ description: 'Internal Topic ID of the notification', type: String })
+  _topicId: string;
+
+  @ApiProperty({ description: 'Topic Key of the notification', type: String })
+  topicKey: string;
 }
 
 // Activity Notification Response DTO
@@ -410,7 +438,11 @@ export class ActivityNotificationResponseDto {
     type: Object, // Adjust type as necessary
   })
   to?: any; // Added to align with NotificationEntity
+
+  @ApiPropertyOptional({ description: 'Topics of the notification', type: [ActivityTopicDto] })
+  topics?: ActivityTopicDto[];
 }
+
 // Activities Response DTO
 export class ActivitiesResponseDto {
   @ApiProperty({ description: 'Indicates if there are more activities in the result set', type: Boolean })

@@ -1,24 +1,13 @@
 import { Injectable } from '@nestjs/common';
-
-import {
-  DigestTypeEnum,
-  ExecutionDetailsSourceEnum,
-  ExecutionDetailsStatusEnum,
-  IDigestRegularMetadata,
-  IPreferenceChannels,
-  PreferencesTypeEnum,
-  StepTypeEnum,
-  WorkflowTypeEnum,
-} from '@novu/shared';
 import {
   AnalyticsService,
   buildSubscriberKey,
-  CachedEntity,
+  CachedResponse,
   ConditionsFilter,
   ConditionsFilterCommand,
-  DetailEnum,
   CreateExecutionDetails,
   CreateExecutionDetailsCommand,
+  DetailEnum,
   GetPreferences,
   GetSubscriberTemplatePreference,
   GetSubscriberTemplatePreferenceCommand,
@@ -28,6 +17,7 @@ import {
   InstrumentUsecase,
   NormalizeVariables,
   NormalizeVariablesCommand,
+  PlatformException,
 } from '@novu/application-generic';
 import {
   JobEntity,
@@ -39,18 +29,27 @@ import {
   TenantRepository,
 } from '@novu/dal';
 import { ExecuteOutput } from '@novu/framework/internal';
-
+import {
+  DigestTypeEnum,
+  ExecutionDetailsSourceEnum,
+  ExecutionDetailsStatusEnum,
+  IDigestRegularMetadata,
+  IPreferenceChannels,
+  PreferencesTypeEnum,
+  ResourceTypeEnum,
+  StepTypeEnum,
+} from '@novu/shared';
+import { ExecuteBridgeJob } from '../execute-bridge-job';
+import { Digest } from './digest';
+import { ExecuteStepCustom } from './execute-step-custom.usecase';
 import { SendMessageCommand } from './send-message.command';
+import { SendMessageChat } from './send-message-chat.usecase';
 import { SendMessageDelay } from './send-message-delay.usecase';
 import { SendMessageEmail } from './send-message-email.usecase';
-import { SendMessageSms } from './send-message-sms.usecase';
 import { SendMessageInApp } from './send-message-in-app.usecase';
-import { SendMessageChat } from './send-message-chat.usecase';
 import { SendMessagePush } from './send-message-push.usecase';
-import { Digest } from './digest';
-import { PlatformException } from '../../../shared/utils';
-import { ExecuteStepCustom } from './execute-step-custom.usecase';
-import { ExecuteBridgeJob } from '../execute-bridge-job';
+import { SendMessageSms } from './send-message-sms.usecase';
+import { SendMessageResult } from './send-message-type.usecase';
 
 @Injectable()
 export class SendMessage {
@@ -76,7 +75,7 @@ export class SendMessage {
   ) {}
 
   @InstrumentUsecase()
-  public async execute(command: SendMessageCommand): Promise<{ status: 'success' | 'canceled' }> {
+  public async execute(command: SendMessageCommand): Promise<SendMessageResult> {
     const payload = await this.buildCompileContext(command);
 
     const variables = await this.normalizeVariablesUsecase.execute(
@@ -133,14 +132,24 @@ export class SendMessage {
         })
       );
 
-      return { status: 'canceled' };
+      return { status: 'skippedByConditionsOrPreferences' };
     }
 
     if (stepType !== StepTypeEnum.DELAY) {
+      let detail = DetailEnum.START_SENDING;
+
+      if (stepType === StepTypeEnum.TRIGGER) {
+        detail = DetailEnum.STEP_COMPLETED;
+      }
+
+      if (stepType === StepTypeEnum.DIGEST) {
+        detail = DetailEnum.START_DIGESTING;
+      }
+
       await this.createExecutionDetails.execute(
         CreateExecutionDetailsCommand.create({
           ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
-          detail: stepType === StepTypeEnum.DIGEST ? DetailEnum.START_DIGESTING : DetailEnum.START_SENDING,
+          detail,
           source: ExecutionDetailsSourceEnum.INTERNAL,
           status: ExecutionDetailsStatusEnum.PENDING,
           isTest: false,
@@ -156,44 +165,37 @@ export class SendMessage {
     });
 
     switch (stepType) {
+      case StepTypeEnum.TRIGGER: {
+        return { status: 'success' };
+      }
       case StepTypeEnum.SMS: {
-        await this.sendMessageSms.execute(sendMessageCommand);
-        break;
+        return await this.sendMessageSms.execute(sendMessageCommand);
       }
       case StepTypeEnum.IN_APP: {
-        await this.sendMessageInApp.execute(sendMessageCommand);
-        break;
+        return await this.sendMessageInApp.execute(sendMessageCommand);
       }
       case StepTypeEnum.EMAIL: {
-        await this.sendMessageEmail.execute(sendMessageCommand);
-        break;
+        return await this.sendMessageEmail.execute(sendMessageCommand);
       }
       case StepTypeEnum.CHAT: {
-        await this.sendMessageChat.execute(sendMessageCommand);
-        break;
+        return await this.sendMessageChat.execute(sendMessageCommand);
       }
       case StepTypeEnum.PUSH: {
-        await this.sendMessagePush.execute(sendMessageCommand);
-        break;
+        return await this.sendMessagePush.execute(sendMessageCommand);
       }
       case StepTypeEnum.DIGEST: {
-        await this.digest.execute(command);
-        break;
+        return await this.digest.execute(command);
       }
       case StepTypeEnum.DELAY: {
-        await this.sendMessageDelay.execute(command);
-        break;
+        return await this.sendMessageDelay.execute(command);
       }
       case StepTypeEnum.CUSTOM: {
-        await this.executeStepCustom.execute(sendMessageCommand);
-        break;
+        return await this.executeStepCustom.execute(sendMessageCommand);
       }
       default: {
-        break;
+        throw new Error(`Unsupported step type: ${stepType}`);
       }
     }
-
-    return { status: 'success' };
   }
 
   private async evaluateFilters(
@@ -247,7 +249,6 @@ export class SendMessage {
     });
 
     const { digest } = command.job;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let timedInfo: any = {};
 
     if (digest && digest.type === DigestTypeEnum.TIMED && digest.timed) {
@@ -265,7 +266,7 @@ export class SendMessage {
      * This is intentional, so that mixpanel can automatically reshard it.
      */
     this.analyticsService.mixpanelTrack('Process Workflow Step - [Triggers]', '', {
-      workflowType: isBridgeWorkflow ? WorkflowTypeEnum.BRIDGE : WorkflowTypeEnum.REGULAR,
+      workflowType: isBridgeWorkflow ? ResourceTypeEnum.BRIDGE : ResourceTypeEnum.REGULAR,
       _template: command.job._templateId,
       _organization: command.organizationId,
       _environment: command.environmentId,
@@ -403,7 +404,7 @@ export class SendMessage {
     return await this.notificationTemplateRepository.findById(_id, environmentId);
   }
 
-  @CachedEntity({
+  @CachedResponse({
     builder: (command: { subscriberId: string; _environmentId: string }) =>
       buildSubscriberKey({
         _environmentId: command._environmentId,

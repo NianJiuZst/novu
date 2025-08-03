@@ -22,11 +22,10 @@ type PreservedFormValuesByType = { [key: string]: FieldValues | undefined };
 export const DigestWindow = () => {
   const { control, getFieldState, setValue, setError, getValues, trigger } = useFormContext();
   const formValues = getValues();
-  const { amount } = formValues.controlValues;
+  const { cron } = formValues.controlValues;
   const { saveForm } = useSaveForm();
-  const [digestType, setDigestType] = useState(
-    typeof amount !== 'undefined' ? REGULAR_DIGEST_TYPE : SCHEDULED_DIGEST_TYPE
-  );
+  const [digestType, setDigestType] = useState(!cron ? REGULAR_DIGEST_TYPE : SCHEDULED_DIGEST_TYPE);
+
   const [preservedFormValuesByType, setPreservedFormValuesByType] = useState<PreservedFormValuesByType>({
     regular: undefined,
     scheduled: undefined,
@@ -92,7 +91,7 @@ export const DigestWindow = () => {
                 <TooltipContent className="max-w-56" side="top" sideOffset={10}>
                   <span>
                     Set the amount of time to digest events for. Once the defined time has elapsed, the digested events
-                    are sent, and another digest begins immediately.
+                    are sent.
                   </span>
                 </TooltipContent>
               </Tooltip>
@@ -139,9 +138,16 @@ export const DigestWindow = () => {
           </div>
         </div>
       </Tabs>
-      <FormMessagePure
-        error={digestType === REGULAR_DIGEST_TYPE ? regularDigestError?.message : scheduledDigestError?.message}
-      />
+      {/* TODO: Use <FormMessage /> instead, see how we did it in <URLInput /> */}
+      {(regularDigestError || scheduledDigestError) && (
+        <FormMessagePure
+          hasError={
+            digestType === REGULAR_DIGEST_TYPE ? !!regularDigestError?.message : !!scheduledDigestError?.message
+          }
+        >
+          {digestType === REGULAR_DIGEST_TYPE ? regularDigestError?.message : scheduledDigestError?.message}
+        </FormMessagePure>
+      )}
     </div>
   );
 };

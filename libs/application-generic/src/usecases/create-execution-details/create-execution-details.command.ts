@@ -1,9 +1,9 @@
-import { IsNotEmpty, IsOptional, IsString, IsDate, IsMongoId } from 'class-validator';
-import { ExecutionDetailsEntity, ExecutionDetailsRepository } from '@novu/dal';
-import { ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum, IJob, StepTypeEnum } from '@novu/shared';
+import { ExecutionDetailsEntity, ExecutionDetailsRepository, JobEntity } from '@novu/dal';
+import { ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum, StepTypeEnum } from '@novu/shared';
 import { EmailEventStatusEnum, SmsEventStatusEnum } from '@novu/stateless';
-
-import { EnvironmentWithSubscriber } from '../../commands/project.command';
+import { IsDate, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { EnvironmentWithSubscriber } from '../../commands';
+import { DetailEnum } from './types';
 
 export class CreateExecutionDetailsCommand extends EnvironmentWithSubscriber {
   @IsOptional()
@@ -28,7 +28,7 @@ export class CreateExecutionDetailsCommand extends EnvironmentWithSubscriber {
   channel?: StepTypeEnum;
 
   @IsNotEmpty()
-  detail: string;
+  detail: DetailEnum;
 
   @IsNotEmpty()
   source: ExecutionDetailsSourceEnum;
@@ -48,6 +48,7 @@ export class CreateExecutionDetailsCommand extends EnvironmentWithSubscriber {
 
   @IsOptional()
   @IsString()
+  // todo check if this can required
   _subscriberId?: string;
 
   @IsOptional()
@@ -61,7 +62,7 @@ export class CreateExecutionDetailsCommand extends EnvironmentWithSubscriber {
   webhookStatus?: EmailEventStatusEnum | SmsEventStatusEnum;
 
   static getDetailsFromJob(
-    job: IJob
+    job: JobEntity
   ): Pick<
     CreateExecutionDetailsCommand,
     | 'environmentId'

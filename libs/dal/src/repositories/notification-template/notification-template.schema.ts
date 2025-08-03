@@ -1,4 +1,4 @@
-import { WorkflowTypeEnum } from '@novu/shared';
+import { ResourceTypeEnum } from '@novu/shared';
 import mongoose, { Schema } from 'mongoose';
 
 import { schemaOptions } from '../schema-default.options';
@@ -28,7 +28,7 @@ const variantSchemePart = {
   name: Schema.Types.String,
   type: {
     type: Schema.Types.String,
-    default: WorkflowTypeEnum.REGULAR,
+    default: ResourceTypeEnum.REGULAR,
   },
   filters: [
     {
@@ -115,7 +115,7 @@ const notificationTemplateSchema = new Schema<NotificationTemplateDBModel>(
     },
     type: {
       type: Schema.Types.String,
-      default: WorkflowTypeEnum.REGULAR,
+      default: ResourceTypeEnum.REGULAR,
     },
     draft: {
       type: Schema.Types.Boolean,
@@ -211,6 +211,14 @@ const notificationTemplateSchema = new Schema<NotificationTemplateDBModel>(
       type: Schema.Types.Date,
       default: null,
     },
+    lastPublishedAt: {
+      type: Schema.Types.Date,
+      default: null,
+    },
+    _lastPublishedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
     _environmentId: {
       type: Schema.Types.ObjectId,
       ref: 'Environment',
@@ -223,6 +231,10 @@ const notificationTemplateSchema = new Schema<NotificationTemplateDBModel>(
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
+    _updatedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
     _parentId: {
       type: Schema.Types.ObjectId,
       ref: 'NotificationTemplate',
@@ -230,6 +242,14 @@ const notificationTemplateSchema = new Schema<NotificationTemplateDBModel>(
     data: Schema.Types.Mixed,
     rawData: Schema.Types.Mixed,
     payloadSchema: Schema.Types.Mixed,
+    validatePayload: {
+      type: Schema.Types.Boolean,
+      default: false,
+    },
+    isTranslationEnabled: {
+      type: Schema.Types.Boolean,
+      default: false,
+    },
     issues: Schema.Types.Mixed,
   },
   { ...schemaOptions, minimize: false }
@@ -262,6 +282,30 @@ notificationTemplateSchema.virtual('notificationGroup', {
   justOne: true,
 });
 
+notificationTemplateSchema.virtual('updatedBy', {
+  ref: 'User',
+  localField: '_updatedBy',
+  foreignField: '_id',
+  justOne: true,
+  select: '_id firstName lastName externalId',
+});
+
+notificationTemplateSchema.virtual('lastPublishedBy', {
+  ref: 'User',
+  localField: '_lastPublishedBy',
+  foreignField: '_id',
+  justOne: true,
+  select: '_id firstName lastName externalId',
+});
+
+notificationTemplateSchema.virtual('lastPublishedByUser', {
+  ref: 'User',
+  localField: '_lastPublishedBy',
+  foreignField: '_id',
+  justOne: true,
+  select: '_id firstName lastName externalId',
+});
+
 notificationTemplateSchema.index({
   _environmentId: 1,
   'triggers.identifier': 1,
@@ -281,13 +325,6 @@ notificationTemplateSchema.index({
 // TODO: Deprecate this index. Use the envId, triggerId instead
 notificationTemplateSchema.index({
   _environmentId: 1,
-  name: 1,
-});
-
-// TODO: Deprecate this index. Use the envId, triggerId instead
-notificationTemplateSchema.index({
-  _environmentId: 1,
-  'triggers.identifier': 1,
   name: 1,
 });
 

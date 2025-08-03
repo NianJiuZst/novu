@@ -1,13 +1,11 @@
-import { IsBoolean, IsEmail, IsLocale, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Transform } from 'class-transformer';
 import { SubscriberEntity } from '@novu/dal';
 import { ISubscriberChannel, SubscriberCustomData } from '@novu/shared';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsEmail, IsLocale, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 import { EnvironmentCommand } from '../../commands';
 
 export class CreateOrUpdateSubscriberCommand extends EnvironmentCommand {
-  @IsBoolean()
-  isUpsert?: boolean;
   @IsString()
   @IsNotEmpty()
   @Transform(({ value }) => value?.toString().trim())
@@ -57,4 +55,12 @@ export class CreateOrUpdateSubscriberCommand extends EnvironmentCommand {
    */
   @IsOptional()
   activeWorkerName?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  allowUpdate?: boolean = true;
+
+  @IsOptional()
+  @IsBoolean()
+  failIfExists?: boolean = false;
 }

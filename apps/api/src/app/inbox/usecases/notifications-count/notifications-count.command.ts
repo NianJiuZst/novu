@@ -15,6 +15,14 @@ class NotificationsFilter implements NotificationFilter {
   @IsOptional()
   @IsBoolean()
   archived?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  snoozed?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  seen?: boolean;
 }
 
 export class NotificationsCountCommand extends EnvironmentWithSubscriber {

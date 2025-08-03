@@ -1,21 +1,24 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { JobEntity, JobRepository, JobStatusEnum, NotificationRepository } from '@novu/dal';
-import { StepTypeEnum } from '@novu/shared';
-import { setUser } from '@sentry/node';
 import {
   getJobDigest,
   Instrument,
   InstrumentUsecase,
   PinoLogger,
+  StepRunRepository,
   StorageHelperService,
+  WorkflowRunRepository,
+  WorkflowRunStatusEnum,
 } from '@novu/application-generic';
-
-import { RunJobCommand } from './run-job.command';
-import { SendMessage, SendMessageCommand } from '../send-message';
-import { PlatformException, EXCEPTION_MESSAGE_ON_WEBHOOK_FILTER, shouldHaltOnStepFailure } from '../../../shared/utils';
-import { SetJobAsFailed } from '../update-job-status/set-job-as-failed.usecase';
+import { JobEntity, JobRepository, JobStatusEnum, NotificationRepository } from '@novu/dal';
+import { StepTypeEnum } from '@novu/shared';
+import { setUser } from '@sentry/node';
+import { EXCEPTION_MESSAGE_ON_WEBHOOK_FILTER, PlatformException, shouldHaltOnStepFailure } from '../../../shared/utils';
 import { AddJob } from '../add-job';
+import { ProcessUnsnoozeJob, ProcessUnsnoozeJobCommand } from '../process-unsnooze-job';
+import { SendMessage, SendMessageCommand } from '../send-message';
 import { SetJobAsFailedCommand } from '../update-job-status/set-job-as.command';
+import { SetJobAsFailed } from '../update-job-status/set-job-as-failed.usecase';
+import { RunJobCommand } from './run-job.command';
 
 const nr = require('newrelic');
 
@@ -30,8 +33,13 @@ export class RunJob {
     @Inject(forwardRef(() => SetJobAsFailed)) private setJobAsFailed: SetJobAsFailed,
     private storageHelperService: StorageHelperService,
     private notificationRepository: NotificationRepository,
-    private logger?: PinoLogger
-  ) {}
+    private processUnsnoozeJob: ProcessUnsnoozeJob,
+    private stepRunRepository: StepRunRepository,
+    private workflowRunRepository: WorkflowRunRepository,
+    private logger: PinoLogger
+  ) {
+    this.logger.setContext(this.constructor.name);
+  }
 
   @InstrumentUsecase()
   public async execute(command: RunJobCommand): Promise<JobEntity | undefined> {
@@ -46,12 +54,19 @@ export class RunJob {
       throw new PlatformException(`Job with id ${command.jobId} not found`);
     }
 
+    await this.stepRunRepository.create(job, {
+      status: JobStatusEnum.RUNNING,
+    });
+
     this.assignLogger(job);
 
     const { canceled, activeDigestFollower } = await this.delayedEventIsCanceled(job);
 
     if (canceled && !activeDigestFollower) {
       Logger.verbose({ canceled }, `Job ${job._id} that had been delayed has been cancelled`, LOG_CONTEXT);
+      await this.stepRunRepository.create(job, {
+        status: JobStatusEnum.CANCELED,
+      });
 
       return;
     }
@@ -85,6 +100,18 @@ export class RunJob {
         throw new PlatformException(`Notification with id ${job._notificationId} not found`);
       }
 
+      if (this.isUnsnoozeJob(job)) {
+        await this.processUnsnoozeJob.execute(
+          ProcessUnsnoozeJobCommand.create({
+            jobId: job._id,
+            environmentId: job._environmentId,
+            organizationId: job._organizationId,
+          })
+        );
+
+        return;
+      }
+
       const sendMessageResult = await this.sendMessage.execute(
         SendMessageCommand.create({
           identifier: job.identifier,
@@ -110,8 +137,51 @@ export class RunJob {
 
       if (sendMessageResult.status === 'success') {
         await this.jobRepository.updateStatus(job._environmentId, job._id, JobStatusEnum.COMPLETED);
+
+        await this.stepRunRepository.create(job, {
+          status: JobStatusEnum.COMPLETED,
+        });
+      } else if (sendMessageResult.status === 'failed') {
+        await this.jobRepository.update(
+          {
+            _environmentId: job._environmentId,
+            _id: job._id,
+          },
+          {
+            $set: {
+              status: JobStatusEnum.FAILED,
+              error: sendMessageResult.reason,
+            },
+          }
+        );
+
+        await this.stepRunRepository.create(job, {
+          status: JobStatusEnum.FAILED,
+          errorCode: 'send_message_failed',
+          errorMessage: sendMessageResult.reason,
+        });
+
+        if (shouldHaltOnStepFailure(job)) {
+          shouldQueueNextJob = false;
+          await this.jobRepository.cancelPendingJobs({
+            transactionId: job.transactionId,
+            _environmentId: job._environmentId,
+            _subscriberId: job._subscriberId,
+            _templateId: job._templateId,
+          });
+        }
+      } else if (sendMessageResult.status === 'skippedByConditionsOrPreferences') {
+        await this.stepRunRepository.create(job, {
+          status: JobStatusEnum.CANCELED,
+        });
       }
     } catch (error: any) {
+      await this.stepRunRepository.create(job, {
+        status: JobStatusEnum.FAILED,
+        errorCode: 'execution_error',
+        errorMessage: error.message,
+      });
+
       if (shouldHaltOnStepFailure(job) && !this.shouldBackoff(error)) {
         await this.jobRepository.cancelPendingJobs({
           transactionId: job.transactionId,
@@ -135,15 +205,19 @@ export class RunJob {
     }
   }
 
+  private isUnsnoozeJob(job: JobEntity) {
+    return job.type === StepTypeEnum.IN_APP && job.delay && job.payload?.unsnooze;
+  }
+
   /**
    * Attempts to queue subsequent jobs in the workflow chain.
    * If queueNextJob.execute returns undefined, we stop the workflow.
    * Otherwise, we continue trying to queue the next job in the chain.
    */
   private async tryQueueNextJobs(job: JobEntity): Promise<void> {
-    let currentFailedJob: JobEntity | null = job;
+    let currentJob: JobEntity | null = job;
     let nextJob: JobEntity | null = null;
-    if (!currentFailedJob) {
+    if (!currentJob) {
       return;
     }
 
@@ -151,16 +225,18 @@ export class RunJob {
 
     while (shouldContinueQueueNextJob) {
       try {
-        if (!currentFailedJob) {
+        if (!currentJob) {
           return;
         }
 
         nextJob = await this.jobRepository.findOne({
-          _environmentId: currentFailedJob._environmentId,
-          _parentId: currentFailedJob._id,
+          _environmentId: currentJob._environmentId,
+          _parentId: currentJob._id,
         });
 
         if (!nextJob) {
+          await this.updateWorkflowRunStatus(currentJob, WorkflowRunStatusEnum.SUCCESS);
+
           return;
         }
 
@@ -189,6 +265,7 @@ export class RunJob {
         );
 
         if (shouldHaltOnStepFailure(nextJob) && !this.shouldBackoff(error)) {
+          await this.updateWorkflowRunStatus(nextJob, WorkflowRunStatusEnum.ERROR);
           await this.jobRepository.cancelPendingJobs({
             transactionId: nextJob.transactionId,
             _environmentId: nextJob._environmentId,
@@ -198,11 +275,10 @@ export class RunJob {
         }
 
         if (shouldHaltOnStepFailure(nextJob) || this.shouldBackoff(error)) {
-          shouldContinueQueueNextJob = false;
-          throw error;
+          return;
         }
 
-        currentFailedJob = nextJob;
+        currentJob = nextJob;
       } finally {
         if (nextJob) {
           await this.storageHelperService.deleteAttachments(nextJob.payload?.attachments);
@@ -213,13 +289,14 @@ export class RunJob {
 
   private assignLogger(job) {
     try {
-      this.logger?.assign({
-        transactionId: job.transactionId,
-        environmentId: job._environmentId,
-        organizationId: job._organizationId,
-        jobId: job._id,
-        jobType: job.type,
-      });
+      if (this.logger) {
+        this.logger.assign({
+          transactionId: job.transactionId,
+          jobId: job._id,
+          environmentId: job._environmentId,
+          organizationId: job._organizationId,
+        });
+      }
     } catch (e) {
       Logger.error(e, 'RunJob', LOG_CONTEXT);
     }
@@ -284,7 +361,35 @@ export class RunJob {
     return await this.jobRepository.findOne(jobQuery);
   }
 
+  private async updateWorkflowRunStatus(job: JobEntity, status: WorkflowRunStatusEnum): Promise<void> {
+    try {
+      await this.workflowRunRepository.updateWorkflowRunStatus(job._notificationId, status, {
+        organizationId: job._organizationId,
+        environmentId: job._environmentId,
+      });
+
+      this.logger.debug(
+        {
+          jobId: job._id,
+          notificationId: job._notificationId,
+          organizationId: job._organizationId,
+          environmentId: job._environmentId,
+        },
+        `Updated workflow run status to ${status}`
+      );
+    } catch (error) {
+      this.logger.error(
+        {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          jobId: job._id,
+          notificationId: job._notificationId,
+        },
+        `Failed to update workflow run status to ${status}`
+      );
+    }
+  }
+
   public shouldBackoff(error: Error): boolean {
-    return error.message.includes(EXCEPTION_MESSAGE_ON_WEBHOOK_FILTER);
+    return error?.message?.includes(EXCEPTION_MESSAGE_ON_WEBHOOK_FILTER);
   }
 }
