@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { LayoutCreationSourceEnum } from '@novu/shared';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { LayoutCreationSourceEnum } from '../types';
 
 export class CreateLayoutDto {
   @ApiProperty({ description: 'Unique identifier for the layout' })

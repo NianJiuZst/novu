@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common';
-
 import { ControlValuesRepository } from '@novu/dal';
 import { ControlValuesLevelEnum, ResourceOriginEnum, ResourceTypeEnum } from '@novu/shared';
 import { LayoutResponseDto } from '../../../dtos/layouts-v2';
 import { AnalyticsService } from '../../../services';
 import { GetLayoutV1Command, GetLayoutV1Usecase } from '../../get-layout-v1';
-import { LayoutVariablesSchemaUseCase } from '../layout-variables-schema';
-import { LayoutVariablesSchemaCommand } from '../layout-variables-schema/layout-variables-schema.command';
-import { mapToResponseDto } from '../mapper/mapper';
-import { GetLayoutCommand } from './get-layout.command';
+import { GetLayoutCommand } from '../../layouts-v2/get-layout';
+import { LayoutVariablesSchemaCommand, LayoutVariablesSchemaUseCase } from '../../layouts-v2/layout-variables-schema';
+import { mapToResponseDto } from '../mapper';
 
 @Injectable()
 export class GetLayoutUseCase {

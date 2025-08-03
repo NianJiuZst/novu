@@ -15,7 +15,7 @@ import { AnalyticsService, ClickHouseService, FeatureFlagsService, TraceLogRepos
 import { CreateExecutionDetails } from '../create-execution-details';
 import { CreateVariablesObject } from '../create-variables-object/create-variables-object.usecase';
 import { GetDecryptedSecretKey } from '../get-decrypted-secret-key';
-import { GetLayoutUseCase as GetLayoutUseCaseV1 } from '../get-layout';
+import { GetLayoutV1Usecase as GetLayoutUseCaseV1 } from '../get-layout-v1';
 import { GetOrganizationSettings } from '../get-organization-settings/get-organization-settings.usecase';
 import { GetLayoutUseCase } from '../layouts-v2/get-layout';
 import { LayoutVariablesSchemaUseCase } from '../layouts-v2/layout-variables-schema';

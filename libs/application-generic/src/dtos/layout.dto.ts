@@ -1,9 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserEntity } from '@novu/dal';
-import { ResourceOriginEnum, ResourceTypeEnum } from '@novu/shared';
+import { ChannelTypeEnum, ITemplateVariable, ResourceOriginEnum, ResourceTypeEnum } from '@novu/shared';
 import { Type } from 'class-transformer';
-import { ControlsMetadataDto } from '../../workflows-v2/dtos/controls-metadata.dto';
-import { ChannelTypeEnum, ITemplateVariable } from '../types';
+import { ControlsMetadataDto } from './controls-metadata.dto';
 
 export class LayoutDto {
   @ApiPropertyOptional()

@@ -1,9 +1,9 @@
 import { ContentIssueEnum, RuntimeIssue, StepTypeEnum } from '@novu/shared';
 import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
+import { capitalize } from 'lodash';
 
 import { JSONSchemaDto } from '../dtos/json-schema.dto';
-import { capitalize } from '../services/helper/helper.service';
 import { buildVariables } from './build-variables';
 import { buildLiquidParser } from './template-parser/liquid-engine';
 
@@ -119,7 +119,7 @@ const validateContentCompilation = (controlKey: string, currentValue: unknown): 
     parserEngine.parse(typeof currentValue === 'string' ? currentValue : JSON.stringify(currentValue));
 
     return null;
-  } catch (error) {
+  } catch (error: any) {
     const message = error.message ? error.message.split(', line:1')[0] || error.message.split(' line:1')[0] : '';
 
     return {

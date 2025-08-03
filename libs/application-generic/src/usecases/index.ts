@@ -15,7 +15,7 @@ export * from './digest-filter-steps';
 export * from './execute-bridge-request';
 export * from './get-decrypted-integrations';
 export * from './get-decrypted-secret-key';
-export * from './get-layout';
+export * from './get-layout-v1';
 export * from './get-novu-layout';
 export * from './get-novu-provider-credentials';
 export * from './get-preferences';

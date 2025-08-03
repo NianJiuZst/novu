@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsOptional, ValidateNested } from 'class-validator';
-import { SubscriberResponseDtoOptional } from '../../subscribers/dtos';
+import { SubscriberResponseDtoOptional } from '../subscribers';
 
 export class LayoutPreviewPayloadDto {
   @ApiPropertyOptional({

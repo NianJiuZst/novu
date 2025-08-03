@@ -5,7 +5,7 @@ import { readFile } from 'fs/promises';
 import { merge } from 'lodash';
 import { VerifyPayloadService } from '../../services';
 import { CompileTemplate, CompileTemplateBase } from '../compile-template';
-import { GetLayoutCommand, GetLayoutUseCase, LayoutDto } from '../get-layout';
+import { GetLayoutV1Command, GetLayoutV1Usecase, LayoutDto } from '../get-layout-v1';
 import { GetNovuLayout } from '../get-novu-layout';
 import { CompileEmailTemplateCommand } from './compile-email-template.command';
 
@@ -14,7 +14,7 @@ export class CompileEmailTemplate extends CompileTemplateBase {
   constructor(
     private compileTemplate: CompileTemplate,
     protected communityOrganizationRepository: CommunityOrganizationRepository,
-    private getLayoutUsecase: GetLayoutUseCase,
+    private getLayoutUsecase: GetLayoutV1Usecase,
     private getNovuLayoutUsecase: GetNovuLayout,
     protected moduleRef: ModuleRef
   ) {
@@ -36,7 +36,7 @@ export class CompileEmailTemplate extends CompileTemplateBase {
 
     if (command.layoutId) {
       layout = await this.getLayoutUsecase.execute(
-        GetLayoutCommand.create({
+        GetLayoutV1Command.create({
           layoutIdOrInternalId: command.layoutId,
           environmentId: command.environmentId,
           organizationId: command.organizationId,

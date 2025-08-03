@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ArrayVariable } from '../../shared/usecases/create-variables-object/create-variables-object.usecase';
+import { ArrayVariable } from '../../../usecases/create-variables-object';
 import { keysToObject } from './utils';
 
 describe('keysToObject', () => {

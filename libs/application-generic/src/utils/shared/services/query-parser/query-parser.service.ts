@@ -381,7 +381,7 @@ export function evaluateRules(
 ): { result: boolean; error: string | undefined } {
   try {
     return { result: jsonLogic.apply(rule, data), error: undefined };
-  } catch (error) {
+  } catch (error: any) {
     if (safe) {
       return { result: false, error };
     }

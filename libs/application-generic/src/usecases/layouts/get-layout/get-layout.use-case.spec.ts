@@ -3,9 +3,9 @@ import { ChannelTypeEnum, ControlValuesLevelEnum, ResourceOriginEnum, ResourceTy
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { AnalyticsService } from '../../../services';
-import { GetLayoutV1Command, GetLayoutV1Usecase } from '../../get-layout-v1';
-import { LayoutVariablesSchemaUseCase } from '../layout-variables-schema';
-import { GetLayoutCommand } from './get-layout.command';
+import { GetLayoutV1Usecase } from '../../get-layout-v1';
+import { GetLayoutCommand } from '../../layouts-v2/get-layout';
+import { LayoutVariablesSchemaUseCase } from '../../layouts-v2/layout-variables-schema';
 import { GetLayoutUseCase } from './get-layout.use-case';
 
 describe('GetLayoutUseCase', () => {

@@ -1,4 +1,4 @@
-import { PaginationRequestDto } from '../../shared/dtos/pagination-request';
+import { PaginationRequestDto } from '../../utils/shared/dtos/pagination-request';
 
 const LIMIT = {
   DEFAULT: 10,

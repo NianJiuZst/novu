@@ -14,6 +14,7 @@ import {
 } from '@novu/shared';
 import { Liquid } from 'liquidjs';
 import { PinoLogger } from 'nestjs-pino';
+import { InstrumentUsecase } from '../../../../instrumentation';
 import { EmailControlType, LayoutControlType } from '../../../../schemas/control';
 import { FeatureFlagsService, sanitizeHTML } from '../../../../services';
 import { MailyAttrsEnum } from '../../../../utils/shared/helpers/maily.types';
@@ -29,9 +30,9 @@ import {
 } from '../../../../utils/shared/helpers/maily-utils';
 import { removeBrandingFromHtml } from '../../../../utils/shared/utils/html';
 import { CreateExecutionDetails, CreateExecutionDetailsCommand, DetailEnum } from '../../../create-execution-details';
-import { GetLayoutCommand, GetLayoutUseCase } from '../../../get-layout';
 import { GetOrganizationSettingsCommand } from '../../../get-organization-settings/get-organization-settings.command';
 import { GetOrganizationSettings } from '../../../get-organization-settings/get-organization-settings.usecase';
+import { GetLayoutCommand, GetLayoutUseCase } from '../../../layouts-v2/get-layout';
 import { BaseTranslationRendererUsecase } from './base-translation-renderer.usecase';
 import { NOVU_BRANDING_HTML } from './novu-branding-html';
 import { FullPayloadForRender, RenderCommand } from './render-command';
@@ -280,7 +281,7 @@ export class EmailOutputRendererUsecase extends BaseTranslationRendererUsecase {
               this.logger.error({ error: promiseError }, 'Failed to create execution details');
             });
         }
-      } catch (error) {
+      } catch (error: any) {
         if (job) {
           this.createExecutionDetails
             .execute(
@@ -632,7 +633,7 @@ export class EmailOutputRendererUsecase extends BaseTranslationRendererUsecase {
       }
 
       return parsedArray;
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to parse iterable value for "${iterablePath}": ${error.message}`);
     }
   }

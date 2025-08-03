@@ -4,8 +4,7 @@ import { LAYOUT_CONTENT_VARIABLE } from '@novu/shared';
 import { InstrumentUsecase } from '../../../instrumentation';
 import { JSONSchemaDto } from '../../../utils/shared/dtos/json-schema.dto';
 import { buildSubscriberSchema } from '../../../utils/shared/utils/create-schema';
-import { CreateVariablesObjectCommand } from '../../create-variables-object/create-variables-object.command';
-import { CreateVariablesObject } from '../../create-variables-object/create-variables-object.usecase';
+import { CreateVariablesObject, CreateVariablesObjectCommand } from '../../create-variables-object';
 import { LayoutVariablesSchemaCommand } from './layout-variables-schema.command';
 
 @Injectable()

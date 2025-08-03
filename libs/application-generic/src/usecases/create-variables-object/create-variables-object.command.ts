@@ -1,6 +1,6 @@
-import { EnvironmentCommand } from '@novu/application-generic';
 import { IsArray, IsDefined, IsObject, IsOptional } from 'class-validator';
-import { JSONSchemaDto } from '../../dtos/json-schema.dto';
+import { EnvironmentCommand } from '../../commands';
+import { JSONSchemaDto } from '../../utils/shared/dtos/json-schema.dto';
 
 export class CreateVariablesObjectCommand extends EnvironmentCommand {
   @IsDefined()

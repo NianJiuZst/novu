@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { SubscriberPreferenceChannels } from '../../shared/dtos/preference-channels';
+import { SubscriberPreferenceChannels } from '../preference-channels';
 import { SubscriberPreferenceOverrideDto } from './subscriber-preference-override.dto';
 
 export class SubscriberPreferenceDto {

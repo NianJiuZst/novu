@@ -1,15 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { LayoutEntity, LayoutRepository } from '@novu/dal';
 import { ITemplateVariable } from '@novu/shared';
-
-import { GetLayoutCommand } from './get-layout.command';
+import { GetLayoutV1Command } from './get-layout.command';
 import { LayoutDto } from './layout.dto';
 
 @Injectable()
-export class GetLayoutUseCase {
+export class GetLayoutV1Usecase {
   constructor(private layoutRepository: LayoutRepository) {}
 
-  async execute(command: GetLayoutCommand): Promise<LayoutDto> {
+  async execute(command: GetLayoutV1Command): Promise<LayoutDto> {
     let layout: LayoutEntity;
     if (typeof command.layoutIdOrInternalId === 'undefined') {
       layout = await this.layoutRepository.findOne({

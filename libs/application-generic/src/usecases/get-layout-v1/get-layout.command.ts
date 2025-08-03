@@ -3,7 +3,7 @@ import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 import { EnvironmentCommand } from '../../commands/project.command';
 
-export class GetLayoutCommand extends EnvironmentCommand {
+export class GetLayoutV1Command extends EnvironmentCommand {
   @IsString()
   @IsOptional()
   layoutIdOrInternalId?: LayoutId;
