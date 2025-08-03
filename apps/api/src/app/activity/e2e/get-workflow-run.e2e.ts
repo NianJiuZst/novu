@@ -1,9 +1,9 @@
-import { expect } from 'chai';
-import { NotificationTemplateEntity, SubscriberEntity } from '@novu/dal';
-import { StepTypeEnum, EmailBlockTypeEnum } from '@novu/shared';
-import { SubscribersService, UserSession } from '@novu/testing';
 import { Novu } from '@novu/api';
 import { WorkflowRunRepository } from '@novu/application-generic';
+import { NotificationTemplateEntity, SubscriberEntity } from '@novu/dal';
+import { EmailBlockTypeEnum, StepTypeEnum } from '@novu/shared';
+import { SubscribersService, UserSession } from '@novu/testing';
+import { expect } from 'chai';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
 describe('Workflow Run - GET /v1/activity/workflow-runs/:workflowRunId #novu-v2', () => {
@@ -48,11 +48,11 @@ describe('Workflow Run - GET /v1/activity/workflow-runs/:workflowRunId #novu-v2'
     await session.waitForSubscriberQueueCompletion();
 
     const workflowRun = await workflowRunRepository.findOne({
-      where: {
-        environment_id: session.environment._id,
-        organization_id: session.organization._id,
-        subscriber_id: subscriber._id,
-      },
+      where: [
+        { environment_id: { operator: '=', value: session.environment._id } },
+        { organization_id: { operator: '=', value: session.organization._id } },
+        { subscriber_id: { operator: '=', value: subscriber._id } },
+      ],
     });
 
     const workflowRunId = workflowRun?.data?.workflow_run_id;

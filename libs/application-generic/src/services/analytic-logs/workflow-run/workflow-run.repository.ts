@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { PinoLogger } from 'nestjs-pino';
 import { NotificationEntity, NotificationTemplateEntity } from '@novu/dal';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { InferClickhouseSchemaType } from 'clickhouse-schema';
-import { LogRepository, SchemaKeys, Where } from '../log.repository';
-import { ClickHouseService, InsertOptions } from '../clickhouse.service';
+import { PinoLogger } from 'nestjs-pino';
 import { FeatureFlagsService } from '../../feature-flags/feature-flags.service';
-import { workflowRunSchema, ORDER_BY, TABLE_NAME, WorkflowRun, WorkflowRunStatusEnum } from './workflow-run.schema';
+import { ClickHouseService, InsertOptions } from '../clickhouse.service';
+import { LogRepository, SchemaKeys, Where } from '../log.repository';
 import { getInsertOptions } from '../shared';
+import { ORDER_BY, TABLE_NAME, WorkflowRun, WorkflowRunStatusEnum, workflowRunSchema } from './workflow-run.schema';
 
 type WorkflowRunInsertData = Omit<InferClickhouseSchemaType<typeof workflowRunSchema>, 'id' | 'expires_at'>;
 
@@ -174,11 +174,11 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
       }
 
       const existingRuns = await this.find({
-        where: {
-          workflow_run_id: workflowRunId,
-          organization_id: context.organizationId,
-          environment_id: context.environmentId,
-        },
+        where: [
+          { workflow_run_id: { operator: '=', value: workflowRunId } },
+          { organization_id: { operator: '=', value: context.organizationId } },
+          { environment_id: { operator: '=', value: context.environmentId } },
+        ],
         limit: 1,
         useFinal: true,
       });
@@ -304,27 +304,9 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
     }
 
     // Extract and handle date range conditions
-    const processedWhere = { ...where };
+    const processedWhere = where;
     const dateRangeConditions: string[] = [];
     const dateRangeParams: Record<string, any> = {};
-
-    // Handle created_at_gte condition
-    if ('created_at_gte' in processedWhere) {
-      const gteCondition = processedWhere.created_at_gte as any;
-      const gteValue = gteCondition.value || gteCondition;
-      dateRangeParams.created_at_gte = gteValue;
-      dateRangeConditions.push("created_at >= {created_at_gte:DateTime64(3, 'UTC')}");
-      delete processedWhere.created_at_gte;
-    }
-
-    // Handle created_at_lte condition
-    if ('created_at_lte' in processedWhere) {
-      const lteCondition = processedWhere.created_at_lte as any;
-      const lteValue = lteCondition.value || lteCondition;
-      dateRangeParams.created_at_lte = lteValue;
-      dateRangeConditions.push("created_at <= {created_at_lte:DateTime64(3, 'UTC')}");
-      delete processedWhere.created_at_lte;
-    }
 
     // Build the base WHERE clause with processed conditions
     const { clause: baseClause, params: baseParams } = this.buildWhereClause(processedWhere);
