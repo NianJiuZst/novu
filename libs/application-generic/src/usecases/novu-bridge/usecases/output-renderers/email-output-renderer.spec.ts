@@ -1,6 +1,5 @@
 import { JSONContent as MailyJSONContent } from '@maily-to/render';
 import { ModuleRef } from '@nestjs/core';
-import { CreateExecutionDetails, DetailEnum, FeatureFlagsService, PinoLogger } from '@novu/application-generic';
 import { ControlValuesRepository, JobEntity, JobRepository } from '@novu/dal';
 import {
   ControlValuesLevelEnum,
@@ -11,9 +10,12 @@ import {
   StepTypeEnum,
 } from '@novu/shared';
 import { expect } from 'chai';
+import { PinoLogger } from 'nestjs-pino';
 import sinon from 'sinon';
-import { GetLayoutUseCase } from '../../../layouts-v2/usecases/get-layout';
-import { GetOrganizationSettings } from '../../../organization/usecases/get-organization-settings/get-organization-settings.usecase';
+import { FeatureFlagsService } from '../../../../services';
+import { CreateExecutionDetails, DetailEnum } from '../../../create-execution-details';
+import { GetOrganizationSettings } from '../../../get-organization-settings/get-organization-settings.usecase';
+import { GetLayoutUseCase } from '../../../layouts-v2/get-layout';
 import { EmailOutputRendererCommand, EmailOutputRendererUsecase } from './email-output-renderer.usecase';
 import { FullPayloadForRender } from './render-command';
 

@@ -1,11 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import {
-  emailControlSchema,
-  FeatureFlagsService,
-  Instrument,
-  InstrumentUsecase,
-  PinoLogger,
-} from '@novu/application-generic';
+
 import {
   EnvironmentRepository,
   NotificationStepEntity,
@@ -22,8 +16,12 @@ import {
 } from '@novu/shared';
 import { AdditionalOperation, RulesLogic } from 'json-logic-js';
 import _ from 'lodash';
-import { evaluateRules } from '../../../shared/services/query-parser/query-parser.service';
-import { isMatchingJsonSchema } from '../../../workflows-v2/util/jsonToSchema';
+import { PinoLogger } from 'nestjs-pino';
+import { Instrument, InstrumentUsecase } from '../../../../instrumentation';
+import { emailControlSchema } from '../../../../schemas/control';
+import { FeatureFlagsService } from '../../../../services';
+import { evaluateRules } from '../../../../utils/shared/services/query-parser/query-parser.service';
+import { isMatchingJsonSchema } from '../../../../utils/workflows-v2/util/jsonToSchema';
 import {
   ChatOutputRendererUsecase,
   EmailOutputRendererUsecase,

@@ -1,5 +1,5 @@
-import { BaseCommand } from '@novu/application-generic';
 import { LAYOUT_CONTENT_VARIABLE } from '@novu/shared';
+import { BaseCommand } from '../../../../commands';
 
 export class RenderCommand extends BaseCommand {
   controlValues: Record<string, unknown>;

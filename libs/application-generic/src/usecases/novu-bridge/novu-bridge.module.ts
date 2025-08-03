@@ -1,13 +1,4 @@
 import { Module } from '@nestjs/common';
-import {
-  AnalyticsService,
-  ClickHouseService,
-  CreateExecutionDetails,
-  FeatureFlagsService,
-  GetDecryptedSecretKey,
-  GetLayoutUseCase as GetLayoutUseCaseV1,
-  TraceLogRepository,
-} from '@novu/application-generic';
 
 import {
   CommunityOrganizationRepository,
@@ -20,10 +11,14 @@ import {
   NotificationTemplateRepository,
 } from '@novu/dal';
 import { NovuClient, NovuHandler } from '@novu/framework/nest';
-import { GetLayoutUseCase } from '../layouts-v2/usecases/get-layout';
-import { LayoutVariablesSchemaUseCase } from '../layouts-v2/usecases/layout-variables-schema';
-import { GetOrganizationSettings } from '../organization/usecases/get-organization-settings/get-organization-settings.usecase';
-import { CreateVariablesObject } from '../shared/usecases/create-variables-object';
+import { AnalyticsService, ClickHouseService, FeatureFlagsService, TraceLogRepository } from '../../services';
+import { CreateExecutionDetails } from '../create-execution-details';
+import { CreateVariablesObject } from '../create-variables-object/create-variables-object.usecase';
+import { GetDecryptedSecretKey } from '../get-decrypted-secret-key';
+import { GetLayoutUseCase as GetLayoutUseCaseV1 } from '../get-layout';
+import { GetOrganizationSettings } from '../get-organization-settings/get-organization-settings.usecase';
+import { GetLayoutUseCase } from '../layouts-v2/get-layout';
+import { LayoutVariablesSchemaUseCase } from '../layouts-v2/layout-variables-schema';
 import { NovuBridgeController } from './novu-bridge.controller';
 import { NovuBridgeClient } from './novu-bridge-client';
 import { ConstructFrameworkWorkflow } from './usecases/construct-framework-workflow';

@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InstrumentUsecase } from '@novu/application-generic';
 import { DigestRenderOutput } from '@novu/shared';
+import { InstrumentUsecase } from '../../../../instrumentation';
 import { RenderCommand } from './render-command';
 
 @Injectable()

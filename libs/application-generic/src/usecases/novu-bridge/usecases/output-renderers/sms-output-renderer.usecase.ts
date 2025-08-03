@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { FeatureFlagsService, InstrumentUsecase, PinoLogger } from '@novu/application-generic';
 import { NotificationTemplateEntity } from '@novu/dal';
 import { SmsRenderOutput } from '@novu/shared';
+import { PinoLogger } from 'nestjs-pino';
+import { InstrumentUsecase } from '../../../../instrumentation';
+import { FeatureFlagsService } from '../../../../services';
 import { BaseTranslationRendererUsecase } from './base-translation-renderer.usecase';
 import { RenderCommand } from './render-command';
 

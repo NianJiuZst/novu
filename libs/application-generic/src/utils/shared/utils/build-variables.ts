@@ -1,5 +1,5 @@
-import { PinoLogger } from '@novu/application-generic';
 import { AdditionalOperation, RulesLogic } from 'json-logic-js';
+import { PinoLogger } from 'nestjs-pino';
 import { JSONSchemaDto } from '../dtos/json-schema.dto';
 import { isStringifiedMailyJSONContent, wrapMailyInLiquid } from '../helpers/maily-utils';
 import { extractFieldsFromRules, isValidRule } from '../services/query-parser/query-parser.service';

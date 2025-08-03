@@ -1,17 +1,7 @@
 import { JSONContent as MailyJSONContent, render as mailyRender } from '@maily-to/render';
 import { Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import {
-  CreateExecutionDetails,
-  CreateExecutionDetailsCommand,
-  DetailEnum,
-  EmailControlType,
-  FeatureFlagsService,
-  InstrumentUsecase,
-  LayoutControlType,
-  PinoLogger,
-  sanitizeHTML,
-} from '@novu/application-generic';
+
 import { ControlValuesEntity, ControlValuesRepository, JobEntity, JobRepository } from '@novu/dal';
 import { createLiquidEngine } from '@novu/framework/internal';
 import {
@@ -23,10 +13,10 @@ import {
   LAYOUT_CONTENT_VARIABLE,
 } from '@novu/shared';
 import { Liquid } from 'liquidjs';
-import { GetLayoutCommand, GetLayoutUseCase } from '../../../layouts-v2/usecases/get-layout';
-import { GetOrganizationSettingsCommand } from '../../../organization/usecases/get-organization-settings/get-organization-settings.command';
-import { GetOrganizationSettings } from '../../../organization/usecases/get-organization-settings/get-organization-settings.usecase';
-import { MailyAttrsEnum } from '../../../shared/helpers/maily.types';
+import { PinoLogger } from 'nestjs-pino';
+import { EmailControlType, LayoutControlType } from '../../../../schemas/control';
+import { FeatureFlagsService, sanitizeHTML } from '../../../../services';
+import { MailyAttrsEnum } from '../../../../utils/shared/helpers/maily.types';
 import {
   hasShow,
   isButtonNode,
@@ -36,8 +26,12 @@ import {
   isVariableNode,
   replaceMailyNodesByCondition,
   wrapMailyInLiquid,
-} from '../../../shared/helpers/maily-utils';
-import { removeBrandingFromHtml } from '../../../shared/utils/html';
+} from '../../../../utils/shared/helpers/maily-utils';
+import { removeBrandingFromHtml } from '../../../../utils/shared/utils/html';
+import { CreateExecutionDetails, CreateExecutionDetailsCommand, DetailEnum } from '../../../create-execution-details';
+import { GetLayoutCommand, GetLayoutUseCase } from '../../../get-layout';
+import { GetOrganizationSettingsCommand } from '../../../get-organization-settings/get-organization-settings.command';
+import { GetOrganizationSettings } from '../../../get-organization-settings/get-organization-settings.usecase';
 import { BaseTranslationRendererUsecase } from './base-translation-renderer.usecase';
 import { NOVU_BRANDING_HTML } from './novu-branding-html';
 import { FullPayloadForRender, RenderCommand } from './render-command';

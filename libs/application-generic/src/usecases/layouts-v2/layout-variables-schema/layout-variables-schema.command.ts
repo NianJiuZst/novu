@@ -1,5 +1,5 @@
-import { EnvironmentCommand } from '@novu/application-generic';
 import { IsObject } from 'class-validator';
+import { EnvironmentCommand } from '../../../commands';
 
 export class LayoutVariablesSchemaCommand extends EnvironmentCommand {
   @IsObject()

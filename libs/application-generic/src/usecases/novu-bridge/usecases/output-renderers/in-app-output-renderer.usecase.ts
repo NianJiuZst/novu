@@ -1,18 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { FeatureFlagsService, InstrumentUsecase, PinoLogger } from '@novu/application-generic';
 import { NotificationTemplateEntity } from '@novu/dal';
-import { PushRenderOutput } from '@novu/shared';
+import { InAppRenderOutput } from '@novu/shared';
+import { PinoLogger } from 'nestjs-pino';
+import { InstrumentUsecase } from '../../../../instrumentation';
+import { FeatureFlagsService, sanitizeHtmlInObject } from '../../../../services';
 import { BaseTranslationRendererUsecase } from './base-translation-renderer.usecase';
 import { RenderCommand } from './render-command';
 
-export class PushOutputRendererCommand extends RenderCommand {
+export class InAppOutputRendererCommand extends RenderCommand {
   dbWorkflow: NotificationTemplateEntity;
   locale?: string;
 }
 
 @Injectable()
-export class PushOutputRendererUsecase extends BaseTranslationRendererUsecase {
+export class InAppOutputRendererUsecase extends BaseTranslationRendererUsecase {
   constructor(
     protected moduleRef: ModuleRef,
     protected logger: PinoLogger,
@@ -22,8 +24,8 @@ export class PushOutputRendererUsecase extends BaseTranslationRendererUsecase {
   }
 
   @InstrumentUsecase()
-  async execute(renderCommand: PushOutputRendererCommand): Promise<PushRenderOutput> {
-    const { skip, ...outputControls } = renderCommand.controlValues ?? {};
+  async execute(renderCommand: InAppOutputRendererCommand): Promise<InAppRenderOutput> {
+    const { skip, disableOutputSanitization, ...outputControls } = renderCommand.controlValues ?? {};
     const { _environmentId, _organizationId, _id: workflowId } = renderCommand.dbWorkflow;
 
     const translatedControls = await this.processTranslations({
@@ -35,6 +37,15 @@ export class PushOutputRendererUsecase extends BaseTranslationRendererUsecase {
       locale: renderCommand.locale,
     });
 
-    return translatedControls as any;
+    if (disableOutputSanitization) {
+      return translatedControls as any;
+    }
+
+    const { data, ...restOutputControls } = translatedControls;
+
+    return {
+      ...sanitizeHtmlInObject(restOutputControls),
+      ...(data ? { data } : {}),
+    } as any;
   }
 }

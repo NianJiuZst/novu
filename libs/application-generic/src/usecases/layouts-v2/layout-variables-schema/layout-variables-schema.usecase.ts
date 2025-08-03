@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { InstrumentUsecase } from '@novu/application-generic';
 import { JsonSchemaTypeEnum } from '@novu/dal';
 import { LAYOUT_CONTENT_VARIABLE } from '@novu/shared';
-
-import { JSONSchemaDto } from '../../../shared/dtos/json-schema.dto';
-import { CreateVariablesObjectCommand } from '../../../shared/usecases/create-variables-object/create-variables-object.command';
-import { CreateVariablesObject } from '../../../shared/usecases/create-variables-object/create-variables-object.usecase';
-import { buildSubscriberSchema } from '../../../shared/utils/create-schema';
+import { InstrumentUsecase } from '../../../instrumentation';
+import { JSONSchemaDto } from '../../../utils/shared/dtos/json-schema.dto';
+import { buildSubscriberSchema } from '../../../utils/shared/utils/create-schema';
+import { CreateVariablesObjectCommand } from '../../create-variables-object/create-variables-object.command';
+import { CreateVariablesObject } from '../../create-variables-object/create-variables-object.usecase';
 import { LayoutVariablesSchemaCommand } from './layout-variables-schema.command';
 
 @Injectable()

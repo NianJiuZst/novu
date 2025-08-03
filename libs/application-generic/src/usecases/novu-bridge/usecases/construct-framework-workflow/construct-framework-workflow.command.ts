@@ -1,6 +1,6 @@
-import { EnvironmentLevelCommand } from '@novu/application-generic';
 import { PostActionEnum } from '@novu/framework/internal';
 import { IsBoolean, IsDefined, IsEnum, IsObject, IsOptional, IsString } from 'class-validator';
+import { EnvironmentLevelCommand } from '../../../../commands';
 
 export class ConstructFrameworkWorkflowCommand extends EnvironmentLevelCommand {
   @IsString()

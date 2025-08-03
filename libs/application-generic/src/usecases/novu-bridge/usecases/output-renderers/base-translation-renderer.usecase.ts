@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { FeatureFlagsService, PinoLogger } from '@novu/application-generic';
 import { createLiquidEngine } from '@novu/framework/internal';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
+import { PinoLogger } from 'nestjs-pino';
+import { FeatureFlagsService } from '../../../../services';
 import { FullPayloadForRender } from './render-command';
 
 @Injectable()
