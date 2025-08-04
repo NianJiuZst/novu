@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import { v4 as uuidv4 } from 'uuid';
 import { DevCommandOptions, devCommand } from './commands';
 import { IInitCommandOptions, init } from './commands/init';
+import { PushCommandOptions, push } from './commands/push';
 import { sync } from './commands/sync';
 import { NOVU_API_URL, NOVU_SECRET_KEY } from './constants';
 import { AnalyticService, ConfigService } from './services';
@@ -18,6 +19,14 @@ const anonymousId = anonymousIdLocalState || uuidv4();
 const program = new Command();
 
 program.name('novu').description(`A CLI tool to interact with Novu Cloud`);
+
+program
+  .command('push')
+  .description('Push your local bridge to the cloud')
+  .option('-s, --secret-key <secret-key>', `The Novu environment Secret Key.`)
+  .action(async (options: PushCommandOptions) => {
+    return await push(options);
+  });
 
 program
   .command('sync')

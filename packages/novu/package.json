@@ -30,10 +30,11 @@
     "start:mode": "cross-env NODE_ENV=dev CLI_SEGMENT_WRITE_KEY=GdQ594CEBj4pU6RFldDOjKJwZjxZOsIj nodemon",
     "start:dev:mode": "cross-env NODE_ENV=dev CLI_SEGMENT_WRITE_KEY=GdQ594CEBj4pU6RFldDOjKJwZjxZOsIj nodemon dev --dashboard-url http://localhost:4200",
     "start:init:mode": "cross-env NODE_ENV=dev nodemon init",
+    "start:push:mode": "cross-env NODE_ENV=dev nodemon push",
     "start:sync:mode": "cross-env NODE_ENV=dev CLI_SEGMENT_WRITE_KEY=GdQ594CEBj4pU6RFldDOjKJwZjxZOsIj nodemon sync",
     "start:test": "cross-env NODE_ENV=test PORT=1336 nodemon init",
     "start:debug": "cross-env nodemon --config nodemon-debug.json",
-    "start:prod": "cross-env node dist/src/index.js",
+    "start:prod": "cross-env node dist/src/index.js push --secret-key 1234",
     "print:project-path": "echo \"$PWD\" | sed 's|.*/novu/||'"
   },
   "keywords": [

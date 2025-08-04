@@ -8,19 +8,34 @@ import gradient from 'gradient-string';
 
 const { log } = console;
 let currentAnimation = null;
+let consolePatched = false;
 
-const consoleFunctions = {
-  log: log.bind(console),
+const originalConsoleFunctions = {
+  log: console.log.bind(console),
   info: console.info.bind(console),
   warn: console.warn.bind(console),
   error: console.error.bind(console),
 };
 
-for (const func in consoleFunctions) {
-  console[func] = () => {
-    stopLastAnimation();
-    consoleFunctions[func].apply(console, arguments);
-  };
+function patchConsole() {
+  if (consolePatched) return;
+
+  for (const func in originalConsoleFunctions) {
+    console[func] = (...args) => {
+      stopLastAnimation();
+      originalConsoleFunctions[func].apply(console, args);
+    };
+  }
+  consolePatched = true;
+}
+
+function unpatchConsole() {
+  if (!consolePatched) return;
+
+  for (const func in originalConsoleFunctions) {
+    console[func] = originalConsoleFunctions[func];
+  }
+  consolePatched = false;
 }
 
 const glitchChars = 'x*0987654321[]0-~@#(____!!!!\\|?????....0000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t';
@@ -132,6 +147,7 @@ const effects = {
 
 function animateString(str, effect, delay, speed) {
   stopLastAnimation();
+  patchConsole();
 
   speed = speed === undefined ? 1 : parseFloat(speed);
   if (!speed || speed <= 0) {
@@ -191,6 +207,7 @@ function animateString(str, effect, delay, speed) {
 function stopLastAnimation() {
   if (currentAnimation) {
     currentAnimation.stop();
+    unpatchConsole();
   }
 }
 
