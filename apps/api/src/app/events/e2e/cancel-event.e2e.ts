@@ -78,7 +78,6 @@ describe('Cancel event - /v1/events/trigger/:transactionId (DELETE) #novu-v2', (
       },
       findMultiple: true,
     });
-
     expect(cancelledDigestJobs?.length).to.eql(1);
   });
 
