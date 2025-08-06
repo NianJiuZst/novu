@@ -1,52 +1,53 @@
+import { DirectionEnum, PermissionsEnum } from '@novu/shared';
+import { HTMLAttributes, useEffect, useState } from 'react';
+import { RiUserSharedLine } from 'react-icons/ri';
 import { CursorPagination } from '@/components/cursor-pagination';
+import { PermissionButton } from '@/components/primitives/permission-button';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/primitives/table';
-import { SubscriberListBlank } from '@/components/subscribers/subscriber-list-blank';
-import { SubscriberListNoResults } from '@/components/subscribers/subscriber-list-no-results';
-import { SubscriberRow, SubscriberRowSkeleton } from '@/components/subscribers/subscriber-row';
-import { SubscribersFilters } from '@/components/subscribers/subscribers-filters';
-import { useFetchSubscribers } from '@/hooks/use-fetch-subscribers';
+import { useSubscribersNavigate } from '@/components/subscribers/hooks/use-subscribers-navigate';
 import {
   SubscribersFilter,
   SubscribersSortableColumn,
   SubscribersUrlState,
   useSubscribersUrlState,
-} from '@/hooks/use-subscribers-url-state';
+} from '@/components/subscribers/hooks/use-subscribers-url-state';
+import { SubscriberListBlank } from '@/components/subscribers/subscriber-list-blank';
+import { SubscriberRow, SubscriberRowSkeleton } from '@/components/subscribers/subscriber-row';
+import { SubscribersFilters } from '@/components/subscribers/subscribers-filters';
+import { useFetchSubscribers } from '@/hooks/use-fetch-subscribers';
 import { cn } from '@/utils/ui';
-import { DirectionEnum } from '@novu/shared';
-import { HTMLAttributes, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from '../primitives/button';
-import { RiUserSharedLine } from 'react-icons/ri';
-import { buildRoute, ROUTES } from '@/utils/routes';
+import { ListNoResults } from '../list-no-results';
 
 type SubscriberListFiltersProps = HTMLAttributes<HTMLDivElement> &
-  Pick<SubscribersUrlState, 'filterValues' | 'handleFiltersChange' | 'resetFilters'>;
+  Pick<SubscribersUrlState, 'filterValues' | 'handleFiltersChange' | 'resetFilters'> & {
+    isFetching?: boolean;
+  };
 
 const SubscriberListWrapper = (props: SubscriberListFiltersProps) => {
-  const { className, children, filterValues, handleFiltersChange, resetFilters, ...rest } = props;
-  const navigate = useNavigate();
-  const { environmentSlug } = useParams();
+  const { className, children, filterValues, handleFiltersChange, resetFilters, isFetching, ...rest } = props;
+  const { navigateToCreateSubscriberPage } = useSubscribersNavigate();
 
   return (
-    <div className={cn('flex h-full flex-col p-2', className)} {...rest}>
+    <div className={cn('flex h-full flex-col', className)} {...rest}>
       <div className="flex items-center justify-between">
         <SubscribersFilters
           onFiltersChange={handleFiltersChange}
           filterValues={filterValues}
           onReset={resetFilters}
-          className="py-2"
+          isFetching={isFetching}
+          className="py-2.5"
         />
-
-        <Button
+        <PermissionButton
+          permission={PermissionsEnum.SUBSCRIBER_WRITE}
           mode="gradient"
-          className="rounded-l-lg border-none px-1.5 py-2 text-white"
+          className="rounded-l-lg border-none text-white"
           variant="primary"
           size="xs"
           leadingIcon={RiUserSharedLine}
-          onClick={() => navigate(buildRoute(ROUTES.CREATE_SUBSCRIBER, { environmentSlug: environmentSlug || '' }))}
+          onClick={navigateToCreateSubscriberPage}
         >
           Add subscriber
-        </Button>
+        </PermissionButton>
       </div>
       {children}
     </div>
@@ -98,7 +99,6 @@ export const SubscriberList = (props: SubscriberListProps) => {
   const [previousPageBefore, setPreviousPageBefore] = useState<string | undefined>(undefined);
   const { filterValues, handleFiltersChange, toggleSort, resetFilters, handleNext, handlePrevious, handleFirst } =
     useSubscribersUrlState({
-      debounceMs: 300,
       after: nextPageAfter,
       before: previousPageBefore,
     });
@@ -107,7 +107,7 @@ export const SubscriberList = (props: SubscriberListProps) => {
   );
   const limit = 10;
 
-  const { data, isPending } = useFetchSubscribers(filterValues, {
+  const { data, isPending, isFetching } = useFetchSubscribers(filterValues, {
     meta: { errorMessage: 'Issue fetching subscribers' },
   });
 
@@ -127,6 +127,7 @@ export const SubscriberList = (props: SubscriberListProps) => {
         filterValues={filterValues}
         handleFiltersChange={handleFiltersChange}
         resetFilters={resetFilters}
+        isFetching={isFetching}
         {...rest}
       >
         <SubscriberListTable
@@ -148,6 +149,7 @@ export const SubscriberList = (props: SubscriberListProps) => {
         filterValues={filterValues}
         handleFiltersChange={handleFiltersChange}
         resetFilters={resetFilters}
+        isFetching={isFetching}
         {...rest}
       >
         <SubscriberListBlank />
@@ -161,12 +163,22 @@ export const SubscriberList = (props: SubscriberListProps) => {
         filterValues={filterValues}
         handleFiltersChange={handleFiltersChange}
         resetFilters={resetFilters}
+        isFetching={isFetching}
         {...rest}
       >
-        <SubscriberListNoResults />
+        <ListNoResults
+          title="No subscribers found"
+          description="We couldn't find any subscribers that match your search criteria. Try adjusting your filters or import subscribers via API."
+          onClearFilters={resetFilters}
+        />
       </SubscriberListWrapper>
     );
   }
+
+  const firstTwoSubscribersInternalIds = data.data.reduce<string[]>((acc, s) => {
+    if (s._id) acc.push(s._id);
+    return acc.length < 2 ? acc : acc.slice(0, 2);
+  }, []);
 
   return (
     <SubscriberListWrapper
@@ -181,7 +193,12 @@ export const SubscriberList = (props: SubscriberListProps) => {
         toggleSort={toggleSort}
       >
         {data.data.map((subscriber) => (
-          <SubscriberRow key={subscriber.id} subscriber={subscriber} />
+          <SubscriberRow
+            key={subscriber._id}
+            subscriber={subscriber}
+            subscribersCount={data.data.length}
+            firstTwoSubscribersInternalIds={firstTwoSubscribersInternalIds}
+          />
         ))}
       </SubscriberListTable>
 

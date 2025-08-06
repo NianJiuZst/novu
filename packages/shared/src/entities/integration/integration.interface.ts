@@ -1,4 +1,4 @@
-import { ChannelTypeEnum, OrganizationId, EnvironmentId, IPreviousStepFilterPart } from '../../types';
+import { ChannelTypeEnum, EnvironmentId, IPreviousStepFilterPart, OrganizationId } from '../../types';
 import { ICredentials } from './credential.interface';
 
 export interface IIntegration {
@@ -31,8 +31,6 @@ export interface IIntegration {
   deletedBy: string;
 
   conditions?: IPreviousStepFilterPart[];
-
-  removeNovuBranding?: boolean;
 
   connected?: boolean;
 }

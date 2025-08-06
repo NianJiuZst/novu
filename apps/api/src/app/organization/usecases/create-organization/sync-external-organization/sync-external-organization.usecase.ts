@@ -1,17 +1,16 @@
-/* eslint-disable global-require */
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { AnalyticsService } from '@novu/application-generic';
-import { OrganizationEntity, OrganizationRepository, UserRepository } from '@novu/dal';
-
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
+import { AnalyticsService, FeatureFlagsService, PinoLogger } from '@novu/application-generic';
+import { OrganizationEntity, OrganizationRepository, UserRepository } from '@novu/dal';
+import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { CreateEnvironmentCommand } from '../../../../environments-v1/usecases/create-environment/create-environment.command';
 import { CreateEnvironment } from '../../../../environments-v1/usecases/create-environment/create-environment.usecase';
-import { GetOrganizationCommand } from '../../get-organization/get-organization.command';
-import { GetOrganization } from '../../get-organization/get-organization.usecase';
-
 import { CreateNovuIntegrationsCommand } from '../../../../integrations/usecases/create-novu-integrations/create-novu-integrations.command';
 import { CreateNovuIntegrations } from '../../../../integrations/usecases/create-novu-integrations/create-novu-integrations.usecase';
-import { ApiException } from '../../../../shared/exceptions/api.exception';
+import { UpsertLayout, UpsertLayoutCommand } from '../../../../layouts-v2/usecases/upsert-layout';
+import { createDefaultLayout } from '../../../../layouts-v2/utils/layout-templates';
+import { GetOrganizationCommand } from '../../get-organization/get-organization.command';
+import { GetOrganization } from '../../get-organization/get-organization.usecase';
 import { SyncExternalOrganizationCommand } from './sync-external-organization.command';
 
 // TODO: eventually move to @novu/ee-auth
@@ -32,13 +31,23 @@ export class SyncExternalOrganization {
     private readonly userRepository: UserRepository,
     private readonly createEnvironmentUsecase: CreateEnvironment,
     private readonly createNovuIntegrations: CreateNovuIntegrations,
+    private readonly upsertLayoutUsecase: UpsertLayout,
     private analyticsService: AnalyticsService,
-    private moduleRef: ModuleRef
-  ) {}
+    private featureFlagsService: FeatureFlagsService,
+    private moduleRef: ModuleRef,
+    private logger: PinoLogger
+  ) {
+    this.logger.setContext(this.constructor.name);
+  }
 
   async execute(command: SyncExternalOrganizationCommand): Promise<OrganizationEntity> {
     const user = await this.userRepository.findById(command.userId);
-    if (!user) throw new ApiException('User not found');
+    if (!user) throw new BadRequestException('User not found');
+    if (!user._id) {
+      this.logger.error({ err: 'User not found' }, 'User not found when syncing external organization');
+
+      throw new BadRequestException('User not found');
+    }
 
     const organization = await this.organizationRepository.create({
       externalId: command.externalId,
@@ -58,8 +67,34 @@ export class SyncExternalOrganization {
         environmentId: devEnv._id,
         organizationId: devEnv._organizationId,
         userId: user._id,
+        name: devEnv.name,
       })
     );
+
+    const isLayoutsPageActive = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.IS_LAYOUTS_PAGE_ACTIVE,
+      defaultValue: false,
+      organization: { _id: organization._id },
+    });
+
+    if (isLayoutsPageActive) {
+      await this.upsertLayoutUsecase.execute(
+        UpsertLayoutCommand.create({
+          environmentId: devEnv._id,
+          organizationId: devEnv._organizationId,
+          userId: user._id,
+          layoutDto: {
+            name: 'Default layout',
+            controlValues: {
+              email: {
+                body: JSON.stringify(createDefaultLayout(organization.name)),
+                editorType: 'block',
+              },
+            },
+          },
+        })
+      );
+    }
 
     const prodEnv = await this.createEnvironmentUsecase.execute(
       CreateEnvironmentCommand.create({
@@ -76,8 +111,28 @@ export class SyncExternalOrganization {
         environmentId: prodEnv._id,
         organizationId: prodEnv._organizationId,
         userId: user._id,
+        name: prodEnv.name,
       })
     );
+
+    if (isLayoutsPageActive) {
+      await this.upsertLayoutUsecase.execute(
+        UpsertLayoutCommand.create({
+          environmentId: prodEnv._id,
+          organizationId: prodEnv._organizationId,
+          userId: user._id,
+          layoutDto: {
+            name: 'Default layout',
+            controlValues: {
+              email: {
+                body: JSON.stringify(createDefaultLayout(organization.name)),
+                editorType: 'block',
+              },
+            },
+          },
+        })
+      );
+    }
 
     this.analyticsService.upsertGroup(organization._id, organization, user);
 
@@ -93,19 +148,19 @@ export class SyncExternalOrganization {
     );
 
     if (organizationAfterChanges !== null) {
-      await this.startFreeTrial(user.email, organizationAfterChanges._id);
+      await this.createCustomer(user.email, organizationAfterChanges._id);
     }
 
     return organizationAfterChanges as OrganizationEntity;
   }
 
-  private async startFreeTrial(billingEmail: string, organizationId: string) {
+  private async createCustomer(billingEmail: string, organizationId: string) {
     try {
       if (process.env.NOVU_ENTERPRISE === 'true' || process.env.CI_EE_TEST === 'true') {
-        if (!require('@novu/ee-billing')?.StartReverseFreeTrial) {
+        if (!require('@novu/ee-billing')?.GetOrCreateCustomer) {
           throw new BadRequestException('Billing module is not loaded');
         }
-        const usecase = this.moduleRef.get(require('@novu/ee-billing')?.StartReverseFreeTrial, {
+        const usecase = this.moduleRef.get(require('@novu/ee-billing')?.GetOrCreateCustomer, {
           strict: false,
         });
         await usecase.execute({
@@ -114,7 +169,7 @@ export class SyncExternalOrganization {
         });
       }
     } catch (e) {
-      Logger.error(e, `Unexpected error while importing enterprise modules`, 'StartReverseFreeTrial');
+      this.logger.error({ err: e }, `Unexpected error while importing enterprise modules`);
     }
   }
 }

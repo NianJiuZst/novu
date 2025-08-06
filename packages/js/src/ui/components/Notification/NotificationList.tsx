@@ -1,15 +1,24 @@
-import { createEffect, createMemo, For, JSX, Show } from 'solid-js';
+import { createEffect, createMemo, For, JSX, onCleanup, Show } from 'solid-js';
 import type { NotificationFilter } from '../../../types';
 import { useNotificationsInfiniteScroll } from '../../api';
 import { DEFAULT_LIMIT, useInboxContext, useNewMessagesCount } from '../../context';
 import { useStyle } from '../../helpers';
-import type { NotificationActionClickHandler, NotificationClickHandler, NotificationRenderer } from '../../types';
+import { useNotificationVisibility } from '../../helpers/useNotificationVisibility';
+import type {
+  BodyRenderer,
+  NotificationActionClickHandler,
+  NotificationClickHandler,
+  NotificationRenderer,
+  SubjectRenderer,
+} from '../../types';
 import { NewMessagesCta } from './NewMessagesCta';
 import { Notification } from './Notification';
 import { NotificationListSkeleton } from './NotificationListSkeleton';
 
 type NotificationListProps = {
   renderNotification?: NotificationRenderer;
+  renderSubject?: SubjectRenderer;
+  renderBody?: BodyRenderer;
   onNotificationClick?: NotificationClickHandler;
   onPrimaryActionClick?: NotificationActionClickHandler;
   onSecondaryActionClick?: NotificationActionClickHandler;
@@ -21,9 +30,12 @@ export const NotificationList = (props: NotificationListProps) => {
   const options = createMemo(() => ({ ...props.filter, limit: props.limit }));
   const style = useStyle();
   const { data, setEl, end, refetch, initialLoading } = useNotificationsInfiniteScroll({ options });
-  const { count, reset: resetNewMessagesCount } = useNewMessagesCount({ filter: { tags: props.filter?.tags ?? [] } });
+  const { count, reset: resetNewMessagesCount } = useNewMessagesCount({
+    filter: { tags: props.filter?.tags ?? [], data: props.filter?.data ?? {} },
+  });
   const { setLimit } = useInboxContext();
   const ids = createMemo(() => data().map((n) => n.id));
+  const { observeNotification, unobserveNotification } = useNotificationVisibility();
   let notificationListElement: HTMLDivElement;
 
   createEffect(() => {
@@ -57,19 +69,50 @@ export const NotificationList = (props: NotificationListProps) => {
               const notification = () => data()[index()];
 
               return (
-                <Notification
-                  notification={notification()}
-                  renderNotification={props.renderNotification}
-                  onNotificationClick={props.onNotificationClick}
-                  onPrimaryActionClick={props.onPrimaryActionClick}
-                  onSecondaryActionClick={props.onSecondaryActionClick}
-                />
+                <div
+                  ref={(el) => {
+                    // Start observing this notification for visibility tracking
+                    observeNotification(el, notification().id);
+
+                    // Set up cleanup when element is removed
+                    const observer = new MutationObserver((mutations) => {
+                      mutations.forEach((mutation) => {
+                        mutation.removedNodes.forEach((node) => {
+                          if (node === el) {
+                            unobserveNotification(el);
+                            observer.disconnect();
+                          }
+                        });
+                      });
+                    });
+
+                    if (el.parentElement) {
+                      observer.observe(el.parentElement, { childList: true });
+                    }
+
+                    // Cleanup function to disconnect observer when ref changes
+                    onCleanup(() => {
+                      observer.disconnect();
+                      unobserveNotification(el);
+                    });
+                  }}
+                >
+                  <Notification
+                    notification={notification()}
+                    renderNotification={props.renderNotification}
+                    renderSubject={props.renderSubject}
+                    renderBody={props.renderBody}
+                    onNotificationClick={props.onNotificationClick}
+                    onPrimaryActionClick={props.onPrimaryActionClick}
+                    onSecondaryActionClick={props.onSecondaryActionClick}
+                  />
+                </div>
               );
             }}
           </For>
           <Show when={!end()}>
             <div ref={setEl}>
-              <For each={Array.from({ length: 3 })}>{() => <NotificationListSkeleton loading={true} />}</For>
+              <NotificationListSkeleton loading={true} />
             </div>
           </Show>
         </Show>

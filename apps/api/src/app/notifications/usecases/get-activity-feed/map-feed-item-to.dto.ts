@@ -66,6 +66,10 @@ export function mapFeedItemToDto(entity: NotificationFeedItemEntity): ActivityNo
     _organizationId: entity._organizationId,
     _subscriberId: entity._subscriberId,
     _templateId: entity._templateId,
+    topics: entity.topics?.map((topic) => ({
+      _topicId: topic._topicId,
+      topicKey: topic.topicKey,
+    })),
     channels: entity.channels,
     createdAt: entity.createdAt,
     jobs: entity.jobs.map(mapJobToDto),
@@ -237,6 +241,7 @@ function mapJobToDto(item: JobFeedItem): ActivityNotificationJobResponseDto {
     digest: mapDigest(item.digest),
     executionDetails: item.executionDetails.map(convertExecutionDetail),
     step: convertStepToResponse(item.step),
+    overrides: item.overrides,
     payload: item.payload,
     providerId: item.providerId as ProvidersIdEnum,
     status: item.status,

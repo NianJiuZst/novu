@@ -4,7 +4,10 @@ import { Notification } from './notification';
 export type ListNotificationsArgs = {
   tags?: string[];
   read?: boolean;
+  data?: Record<string, unknown>;
   archived?: boolean;
+  snoozed?: boolean;
+  seen?: boolean;
   limit?: number;
   after?: string;
   offset?: number;
@@ -15,12 +18,22 @@ export type ListNotificationsResponse = { notifications: Notification[]; hasMore
 
 export type FilterCountArgs = {
   tags?: string[];
+  data?: Record<string, unknown>;
   read?: boolean;
   archived?: boolean;
+  snoozed?: boolean;
+  seen?: boolean;
 };
 
 export type FiltersCountArgs = {
-  filters: Array<{ tags?: string[]; read?: boolean; archived?: boolean }>;
+  filters: Array<{
+    tags?: string[];
+    read?: boolean;
+    archived?: boolean;
+    snoozed?: boolean;
+    seen?: boolean;
+    data?: Record<string, unknown>;
+  }>;
 };
 
 export type CountArgs = undefined | FilterCountArgs | FiltersCountArgs;
@@ -53,5 +66,10 @@ export type ReadArgs = BaseArgs | InstanceArgs;
 export type UnreadArgs = BaseArgs | InstanceArgs;
 export type ArchivedArgs = BaseArgs | InstanceArgs;
 export type UnarchivedArgs = BaseArgs | InstanceArgs;
+export type SeenArgs = BaseArgs | InstanceArgs;
+export type SnoozeArgs = (BaseArgs | InstanceArgs) & {
+  snoozeUntil: string;
+};
+export type UnsnoozeArgs = BaseArgs | InstanceArgs;
 export type CompleteArgs = BaseArgs | InstanceArgs;
 export type RevertArgs = BaseArgs | InstanceArgs;

@@ -1,6 +1,3 @@
-import { useTelemetry } from '@/hooks/use-telemetry';
-import { TelemetryEvent } from '@/utils/telemetry';
-import { FeatureFlagsKeysEnum } from '@novu/shared';
 import {
   Calendar,
   Code2,
@@ -12,14 +9,17 @@ import {
   Sparkles,
   Users,
   Wand2,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import { ReactNode } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useFeatureFlag } from '../../hooks/use-feature-flag';
-import { buildRoute, ROUTES } from '../../utils/routes';
-import { Badge } from '../primitives/badge';
-import { WorkflowMode } from './types';
+} from "lucide-react";
+import { motion } from "motion/react";
+import { ReactNode } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useTelemetry } from "@/hooks/use-telemetry";
+import { TelemetryEvent } from "@/utils/telemetry";
+import { buildRoute, ROUTES } from "../../utils/routes";
+import { Badge } from "../primitives/badge";
+import { WorkflowMode } from "./types";
+import { useFeatureFlag } from "../../hooks/use-feature-flag";
+import { FeatureFlagsKeysEnum } from "@novu/shared";
 
 interface WorkflowSidebarProps {
   selectedCategory: string;
@@ -55,18 +55,25 @@ function SidebarButton({
   label,
   onClick,
   isActive,
-  bgColor = 'bg-blue-50',
+  bgColor = "bg-blue-50",
   beta,
   hasExternalLink,
 }: SidebarButtonProps) {
   const content = (
     <div className="flex items-center gap-3">
-      <motion.div variants={iconVariants} className={`rounded-lg p-[5px] ${bgColor}`}>
+      <motion.div
+        variants={iconVariants}
+        className={`rounded-lg p-[5px] ${bgColor}`}
+      >
         {icon}
       </motion.div>
       <span className="text-label-sm text-strong-950">{label}</span>
       {hasExternalLink && (
-        <motion.div whileHover={{ x: 2 }} transition={{ type: 'spring', stiffness: 300 }} className="ml-auto">
+        <motion.div
+          whileHover={{ x: 2 }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="ml-auto"
+        >
           <ExternalLink className="text-foreground-600 h-3 w-3" />
         </motion.div>
       )}
@@ -82,11 +89,11 @@ function SidebarButton({
       type="button"
       onClick={onClick}
       className={`flex w-full items-center gap-2 rounded-xl border border-transparent p-1.5 transition-colors hover:cursor-pointer hover:bg-gray-100 ${
-        isActive ? '!border-[#EEEFF1] bg-white' : ''
+        isActive ? "!border-[#EEEFF1] bg-white" : ""
       }`}
     >
       <div className="flex w-full items-center gap-2">
-        {content}{' '}
+        {content}{" "}
         {beta && (
           <Badge color="gray" size="sm">
             BETA
@@ -99,28 +106,28 @@ function SidebarButton({
 
 const useCases = [
   {
-    id: 'popular',
+    id: "popular",
     icon: <LayoutGrid className="h-3 w-3 text-gray-700" />,
-    label: 'Popular',
-    bgColor: 'bg-blue-50',
+    label: "Popular",
+    bgColor: "bg-blue-50",
   },
   {
-    id: 'billing',
+    id: "billing",
     icon: <Calendar className="h-3 w-3 text-gray-700" />,
-    label: 'Billing',
-    bgColor: 'bg-blue-50',
+    label: "Billing",
+    bgColor: "bg-blue-50",
   },
   {
-    id: 'authentication',
+    id: "authentication",
     icon: <KeyRound className="h-3 w-3 text-gray-700" />,
-    label: 'Authentication',
-    bgColor: 'bg-green-50',
+    label: "Authentication",
+    bgColor: "bg-green-50",
   },
   {
-    id: 'operational',
+    id: "operational",
     icon: <Users className="h-3 w-3 text-gray-700" />,
-    label: 'Operational',
-    bgColor: 'bg-purple-50',
+    label: "Operational",
+    bgColor: "bg-purple-50",
   },
 ] as const;
 
@@ -134,26 +141,33 @@ export function WorkflowSidebar({
   const navigate = useNavigate();
   const { environmentSlug } = useParams();
   const track = useTelemetry();
-  const isAiTemplateStoreEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_AI_TEMPLATE_STORE_ENABLED);
+  const isAiTemplateStoreEnabled = useFeatureFlag(
+    FeatureFlagsKeysEnum.IS_AI_TEMPLATE_STORE_ENABLED,
+  );
 
   const handleCreateWorkflow = () => {
     track(TelemetryEvent.CREATE_WORKFLOW_CLICK);
-    navigate(buildRoute(ROUTES.WORKFLOWS_CREATE, { environmentSlug: environmentSlug || '' }));
+    navigate(
+      buildRoute(ROUTES.WORKFLOWS_CREATE, {
+        environmentSlug: environmentSlug || "",
+      }),
+    );
   };
 
   const createOptions = [
     {
       icon: <FileText className="h-3 w-3 text-gray-700" />,
-      label: 'Blank workflow',
-      bgColor: 'bg-green-50',
+      label: "Blank workflow",
+      bgColor: "bg-green-50",
       onClick: handleCreateWorkflow,
     },
     {
       icon: <Code2 className="h-3 w-3 text-gray-700" />,
-      label: 'Code-based workflow',
+      label: "Code-based workflow",
       hasExternalLink: true,
-      bgColor: 'bg-blue-50',
-      onClick: () => window.open('https://docs.novu.co/framework/overview', '_blank'),
+      bgColor: "bg-blue-50",
+      onClick: () =>
+        window.open("https://docs.novu.co/framework/overview", "_blank"),
     },
   ];
 
@@ -204,7 +218,9 @@ export function WorkflowSidebar({
               icon={item.icon}
               label={item.label}
               onClick={() => onCategorySelect(item.id)}
-              isActive={mode === WorkflowMode.TEMPLATES && selectedCategory === item.id}
+              isActive={
+                mode === WorkflowMode.TEMPLATES && selectedCategory === item.id
+              }
               bgColor={item.bgColor}
             />
           ))}
@@ -218,16 +234,26 @@ export function WorkflowSidebar({
           whileHover="hover"
           whileTap="tap"
           className="border-stroke-soft flex flex-col items-start rounded-xl border bg-white p-3 hover:cursor-pointer"
-          onClick={() => window.open('https://docs.novu.co/workflow/overview', '_blank')}
+          onClick={() =>
+            window.open(
+              "https://docs.novu.co/platform/workflow/overview",
+              "_blank",
+            )
+          }
         >
           <div className="mb-1 flex items-center gap-1.5">
-            <motion.div variants={iconVariants} className="rounded-lg bg-gray-50 p-1.5">
+            <motion.div
+              variants={iconVariants}
+              className="rounded-lg bg-gray-50 p-1.5"
+            >
               <FileCode2 className="h-3 w-3 text-gray-700" />
             </motion.div>
             <span className="text-label-sm text-strong-950">Documentation</span>
           </div>
 
-          <p className="text-paragraph-xs text-neutral-400">Find out more about how to best setup workflows</p>
+          <p className="text-paragraph-xs text-neutral-400">
+            Find out more about how to best setup workflows
+          </p>
         </motion.div>
       </div>
     </div>

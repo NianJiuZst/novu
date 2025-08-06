@@ -1,7 +1,9 @@
 import { PatchWorkflowDto, StepResponseDto, UpdateWorkflowDto, WorkflowResponseDto } from '@novu/shared';
+import { CheckCircleIcon } from 'lucide-react';
 import { createContext, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { RiAlertFill, RiCloseFill } from 'react-icons/ri';
 import { useBlocker, useNavigate, useParams } from 'react-router-dom';
-
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -16,12 +18,10 @@ import { useInvocationQueue } from '@/hooks/use-invocation-queue';
 import { usePatchWorkflow } from '@/hooks/use-patch-workflow';
 import { useUpdateWorkflow } from '@/hooks/use-update-workflow';
 import { createContextHook } from '@/utils/context';
+import { getIdFromSlug, STEP_DIVIDER } from '@/utils/id-utils';
 import { buildRoute, ROUTES } from '@/utils/routes';
-import { getWorkflowIdFromSlug, STEP_DIVIDER } from '@/utils/step';
-import { CheckCircleIcon } from 'lucide-react';
-import { RiAlertFill, RiCloseFill } from 'react-icons/ri';
-import { toast } from 'sonner';
 import { showErrorToast, showSavingToast, showSuccessToast } from './toasts';
+import { WorkflowSchemaProvider } from './workflow-schema-provider';
 
 export type UpdateWorkflowFn = (
   data: UpdateWorkflowDto,
@@ -32,10 +32,12 @@ export type UpdateWorkflowFn = (
 
 export type WorkflowContextType = {
   isPending: boolean;
+  isUpdatePatchPending: boolean;
   workflow?: WorkflowResponseDto;
   step?: StepResponseDto;
   update: UpdateWorkflowFn;
   patch: (data: PatchWorkflowDto) => void;
+  digestStepBeforeCurrent?: StepResponseDto;
 };
 
 export const WorkflowContext = createContext<WorkflowContextType>({} as WorkflowContextType);
@@ -53,10 +55,47 @@ export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
   const getStep = useCallback(() => {
     return workflow?.steps.find(
       (step) =>
-        getWorkflowIdFromSlug({ slug: stepSlug, divider: STEP_DIVIDER }) ===
-        getWorkflowIdFromSlug({ slug: step.slug, divider: STEP_DIVIDER })
+        getIdFromSlug({ slug: stepSlug, divider: STEP_DIVIDER }) ===
+        getIdFromSlug({ slug: step.slug, divider: STEP_DIVIDER })
     );
   }, [workflow, stepSlug]);
+
+  const isStepAfterDigest = useMemo(() => {
+    const step = getStep();
+    if (!step) return false;
+
+    const index = workflow?.steps.findIndex(
+      (current) =>
+        getIdFromSlug({ slug: current.slug, divider: STEP_DIVIDER }) ===
+        getIdFromSlug({ slug: step.slug, divider: STEP_DIVIDER })
+    );
+    /**
+     * < 1 means that the step is the first step in the workflow
+     */
+    if (index === undefined || index < 1) return false;
+
+    const hasDigestStepInBetween = workflow?.steps.slice(0, index).some((s) => s.type === 'digest');
+
+    return Boolean(hasDigestStepInBetween);
+  }, [getStep, workflow?.steps]);
+
+  const digestStepBeforeCurrent = useMemo(() => {
+    if (!workflow || !isStepAfterDigest) return undefined;
+
+    const index = workflow.steps.findIndex(
+      (step) =>
+        getIdFromSlug({ slug: stepSlug, divider: STEP_DIVIDER }) ===
+        getIdFromSlug({ slug: step.slug, divider: STEP_DIVIDER })
+    );
+
+    if (index === -1) return undefined;
+
+    const stepsBeforeCurrent = workflow.steps.slice(0, index);
+
+    const digestStep = stepsBeforeCurrent.reverse().find((step) => step.type === 'digest');
+
+    return digestStep;
+  }, [workflow, isStepAfterDigest, stepSlug]);
 
   const { enqueue, hasPendingItems } = useInvocationQueue();
   const blocker = useBlocker(({ nextLocation }) => {
@@ -165,8 +204,8 @@ export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
   }, [isAllowedToUnblock, blocker]);
 
   const value = useMemo(
-    () => ({ update, patch, isPending, workflow, step: getStep() }),
-    [update, patch, isPending, workflow, getStep]
+    () => ({ update, patch, isPending, workflow, step: getStep(), digestStepBeforeCurrent, isUpdatePatchPending }),
+    [update, patch, isPending, workflow, getStep, digestStepBeforeCurrent, isUpdatePatchPending]
   );
 
   return (
@@ -176,7 +215,9 @@ export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
         isUpdatePatchPending={isUpdatePatchPending}
         onCancel={handleCancelNavigation}
       />
-      <WorkflowContext.Provider value={value}>{children}</WorkflowContext.Provider>
+      <WorkflowContext.Provider value={value}>
+        <WorkflowSchemaProvider>{children}</WorkflowSchemaProvider>
+      </WorkflowContext.Provider>
     </>
   );
 };

@@ -1,15 +1,13 @@
-import { FeatureFlagsKeysEnum } from '@novu/shared';
-import { Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@/components/primitives/popover';
-import { API_HOSTNAME, APP_ID, WEBSOCKET_HOSTNAME } from '@/config';
-import { useEnvironment } from '@/context/environment/hooks';
-import { useTestPage } from '@/hooks/use-test-page';
 import { useUser } from '@clerk/clerk-react';
-import { Bell as BellV2, Inbox as InboxV2, InboxContent as InboxContentV2, useNovu as useNovuV2 } from '@novu/react-v2';
-import { Bell as BellV3, Inbox as InboxV3, InboxContent as InboxContentV3, useNovu as useNovuV3 } from '@novu/react';
+import { Bell, Inbox, InboxContent, useNovu } from '@novu/react';
 import { useEffect, useState } from 'react';
+import { Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@/components/primitives/popover';
+import { API_HOSTNAME, APP_ID, IS_SELF_HOSTED, WEBSOCKET_HOSTNAME } from '@/config';
+import { useAuth } from '@/context/auth/hooks';
+import { useEnvironment } from '@/context/environment/hooks';
+import { useWorkflowEditorPage } from '@/hooks/use-workflow-editor-page';
 import { HeaderButton } from './header-navigation/header-button';
 import { InboxBellFilled } from './icons/inbox-bell-filled';
-import { useFeatureFlag } from '@/hooks/use-feature-flag';
 
 declare global {
   interface Window {
@@ -24,11 +22,9 @@ declare global {
 const InboxInner = () => {
   const [open, setOpen] = useState(false);
   const [jingle, setJingle] = useState(false);
-  const { isTestPage } = useTestPage();
-  const isInboxV3Enabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_INBOX_V3_ENABLED);
+  const { isWorkflowEditorPage } = useWorkflowEditorPage();
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const novu = isInboxV3Enabled ? useNovuV3() : useNovuV2();
+  const novu = useNovu();
   useEffect(() => {
     // Store a timeout to debounce the jingle animation, preventing the bell from
     // becoming jittery when multiple notifications are received in quick succession.
@@ -46,9 +42,6 @@ const InboxInner = () => {
     };
   }, [novu]);
 
-  const Bell = isInboxV3Enabled ? BellV3 : BellV2;
-  const InboxContent = isInboxV3Enabled ? InboxContentV3 : InboxContentV2;
-
   return (
     <Popover onOpenChange={setOpen}>
       <PopoverTrigger tabIndex={-1}>
@@ -58,19 +51,19 @@ const InboxInner = () => {
               label={
                 <>
                   Inbox
-                  {isTestPage && ' (Test)'}
+                  {isWorkflowEditorPage && ' (Test)'}
                   {unreadCount > 0 && ` (${unreadCount})`}
                 </>
               }
               disableTooltip={open}
-              className={isTestPage ? 'bg-test-pattern' : ''}
+              className={isWorkflowEditorPage ? 'bg-test-pattern' : ''}
             >
               <div className="relative flex items-center justify-center">
                 <InboxBellFilled
                   className={`text-foreground-600 size-4 cursor-pointer stroke-[0.5px]`}
                   bellClassName={`origin-top ${jingle ? 'animate-swing' : ''}`}
                   ringerClassName={`origin-top ${jingle ? 'animate-jingle' : ''}`}
-                  codeClassName={isTestPage ? 'block' : 'hidden'}
+                  codeClassName={isWorkflowEditorPage ? 'block' : 'hidden'}
                 />
                 {unreadCount > 0 && (
                   <div className="absolute right-[-4px] top-[-6px] flex h-3 w-3 items-center justify-center rounded-full border-[3px] border-[white] bg-white">
@@ -83,11 +76,7 @@ const InboxInner = () => {
         />
       </PopoverTrigger>
       <PopoverPortal>
-        <PopoverContent
-          side="bottom"
-          align="end"
-          className="h-[500px] w-[350px] overflow-y-auto p-0 [&>div:first-child]:[&>div:first-child]:h-full [&>div:first-child]:h-full"
-        >
+        <PopoverContent side="bottom" align="end" className="h-[550px] w-[350px] overflow-hidden p-0">
           <InboxContent />
         </PopoverContent>
       </PopoverPortal>
@@ -98,10 +87,14 @@ const InboxInner = () => {
 export const InboxButton = () => {
   const { user } = useUser();
   const { currentEnvironment } = useEnvironment();
-  const { isTestPage } = useTestPage();
-  const isInboxV3Enabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_INBOX_V3_ENABLED);
+  const { isWorkflowEditorPage: isTestPage } = useWorkflowEditorPage();
+  const { currentOrganization } = useAuth();
 
-  if (!user || !currentEnvironment) {
+  if (!user?.externalId || !currentEnvironment || !currentOrganization) {
+    return null;
+  }
+
+  if (!isTestPage && IS_SELF_HOSTED) {
     return null;
   }
 
@@ -115,14 +108,19 @@ export const InboxButton = () => {
 
   const localizationTestSuffix = isTestPage ? ' (Test)' : '';
 
-  const Inbox = isInboxV3Enabled ? InboxV3 : InboxV2;
-
   return (
     <Inbox
-      subscriberId={user.externalId ?? ''}
+      subscriberId={isTestPage ? user.externalId : `org_${currentOrganization._id}:user_${user.externalId}`}
       applicationIdentifier={appId}
-      backendUrl={API_HOSTNAME}
-      socketUrl={WEBSOCKET_HOSTNAME}
+      /**
+       * We want to ensure our staging environment is using the production API and WebSocket endpoints.
+       */
+      backendUrl={API_HOSTNAME === 'https://api.novu-staging.co' && !isTestPage ? 'https://api.novu.co' : API_HOSTNAME}
+      socketUrl={
+        WEBSOCKET_HOSTNAME === 'https://socket.novu-staging.co' && !isTestPage
+          ? 'https://ws.novu.co'
+          : WEBSOCKET_HOSTNAME
+      }
       localization={{
         'inbox.filters.labels.default': `Inbox${localizationTestSuffix}`,
         'inbox.filters.labels.unread': `Unread${localizationTestSuffix}`,

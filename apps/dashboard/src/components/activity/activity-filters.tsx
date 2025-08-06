@@ -1,14 +1,22 @@
-import { CalendarIcon } from 'lucide-react';
+import { useOrganization } from '@clerk/clerk-react';
 import { ChannelTypeEnum } from '@novu/shared';
-
+import { CalendarIcon } from 'lucide-react';
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { Badge } from '@/components/primitives/badge';
+import { Tooltip, TooltipContent, TooltipPortal, TooltipTrigger } from '@/components/primitives/tooltip';
+import { useFetchSubscription } from '@/hooks/use-fetch-subscription';
+import { ActivityFiltersData } from '@/types/activity';
+import { buildActivityDateFilters } from '@/utils/activityFilters';
+import { ROUTES } from '@/utils/routes';
+import { cn } from '@/utils/ui';
+import { IS_SELF_HOSTED } from '../../config';
 import { useFetchWorkflows } from '../../hooks/use-fetch-workflows';
 import { Button } from '../primitives/button';
 import { FacetedFormFilter } from '../primitives/form/faceted-filter/facated-form-filter';
-import { CHANNEL_OPTIONS, DATE_RANGE_OPTIONS } from './constants';
-import { ActivityFiltersData } from '@/types/activity';
-import { cn } from '@/utils/ui';
+import { CHANNEL_OPTIONS } from './constants';
 
-type Fields = 'dateRange' | 'workflows' | 'channels' | 'transactionId' | 'subscriberId';
+type Fields = 'dateRange' | 'workflows' | 'channels' | 'transactionId' | 'subscriberId' | 'topicKey';
 
 export type ActivityFilters = {
   filters: ActivityFiltersData;
@@ -17,6 +25,26 @@ export type ActivityFilters = {
   onReset?: () => void;
   hide?: Fields[];
   className?: string;
+};
+
+const UpgradeCtaIcon: React.ComponentType<{ className?: string }> = () => {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Link
+          to={ROUTES.SETTINGS_BILLING + '?utm_source=activity-feed-retention'}
+          className="block flex items-center justify-center transition-all duration-200 hover:scale-105"
+        >
+          <Badge color="purple" size="sm" variant="lighter">
+            Upgrade
+          </Badge>
+        </Link>
+      </TooltipTrigger>
+      <TooltipPortal>
+        <TooltipContent>Upgrade your plan to unlock extended retention periods</TooltipContent>
+      </TooltipPortal>
+    </Tooltip>
+  );
 };
 
 export function ActivityFilters({
@@ -28,9 +56,27 @@ export function ActivityFilters({
   className,
 }: ActivityFilters) {
   const { data: workflowTemplates } = useFetchWorkflows({ limit: 100 });
+  const { organization } = useOrganization();
+  const { subscription } = useFetchSubscription();
+
+  const maxActivityFeedRetentionOptions = useMemo(() => {
+    const missingSubscription = !subscription && !IS_SELF_HOSTED;
+
+    if (!organization || missingSubscription) {
+      return [];
+    }
+
+    return buildActivityDateFilters({
+      organization,
+      apiServiceLevel: subscription?.apiServiceLevel,
+    }).map((option) => ({
+      ...option,
+      icon: option.disabled ? UpgradeCtaIcon : undefined,
+    }));
+  }, [organization, subscription]);
 
   return (
-    <div className={cn('flex items-center gap-2 p-2 py-[11px]', className)}>
+    <div className={cn('flex items-center gap-2 pb-2.5', className)}>
       {!hide.includes('dateRange') && (
         <FacetedFormFilter
           size="small"
@@ -39,7 +85,7 @@ export function ActivityFilters({
           hideSearch
           hideTitle
           title="Time period"
-          options={DATE_RANGE_OPTIONS}
+          options={maxActivityFeedRetentionOptions}
           selected={[filters.dateRange]}
           onSelect={(values) => onFiltersChange({ ...filters, dateRange: values[0] })}
           icon={CalendarIcon}
@@ -80,7 +126,7 @@ export function ActivityFilters({
           title="Transaction ID"
           value={filters.transactionId}
           onChange={(value) => onFiltersChange({ ...filters, transactionId: value })}
-          placeholder="Search by Transaction ID"
+          placeholder="Search by full Transaction ID"
         />
       )}
 
@@ -91,7 +137,18 @@ export function ActivityFilters({
           title="Subscriber ID"
           value={filters.subscriberId}
           onChange={(value) => onFiltersChange({ ...filters, subscriberId: value })}
-          placeholder="Search by Subscriber ID"
+          placeholder="Search by full Subscriber ID"
+        />
+      )}
+
+      {!hide.includes('topicKey') && (
+        <FacetedFormFilter
+          type="text"
+          size="small"
+          title="Topic Key"
+          value={filters.topicKey}
+          onChange={(value) => onFiltersChange({ ...filters, topicKey: value })}
+          placeholder="Search by full Topic Key"
         />
       )}
 

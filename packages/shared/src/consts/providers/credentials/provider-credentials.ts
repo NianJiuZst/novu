@@ -559,7 +559,7 @@ export const fcmConfig: IConfigCredentials[] = [
   {
     key: CredentialsKeyEnum.ServiceAccount,
     displayName: 'Service Account (entire JSON file)',
-    type: 'text',
+    type: 'textarea',
     required: true,
   },
   ...pushConfigBase,
@@ -591,6 +591,16 @@ export const pushWebhookConfig: IConfigCredentials[] = [
     required: true,
   },
   ...pushConfigBase,
+];
+
+export const chatWebhookConfig: IConfigCredentials[] = [
+  {
+    key: CredentialsKeyEnum.SecretKey,
+    displayName: 'Secret Hmac Key',
+    type: 'string',
+    description: 'the secret used to sign webhooks calls',
+    required: false,
+  },
 ];
 
 export const oneSignalConfig: IConfigCredentials[] = [
@@ -641,8 +651,22 @@ export const apnsConfig: IConfigCredentials[] = [
   {
     key: CredentialsKeyEnum.SecretKey,
     displayName: 'Private Key',
-    type: 'text',
+    type: 'textarea',
     required: true,
+    validation: {
+      validate: (value: string) => {
+        try {
+          // Check if it's a valid PEM format
+          if (!value.includes('-----BEGIN PRIVATE KEY-----') || !value.includes('-----END PRIVATE KEY-----')) {
+            return 'Invalid private key format. Must be in PEM format.';
+          }
+
+          return true;
+        } catch (e) {
+          return 'Invalid private key format. Must be in PEM format.';
+        }
+      },
+    },
   },
   {
     key: CredentialsKeyEnum.ApiKey,
@@ -668,7 +692,6 @@ export const apnsConfig: IConfigCredentials[] = [
     type: 'switch',
     required: false,
   },
-
   ...pushConfigBase,
 ];
 
@@ -1133,6 +1156,17 @@ export const eazySmsConfig: IConfigCredentials[] = [
   },
 ];
 
+export const iMediaConfig: IConfigCredentials[] = [
+  {
+    key: CredentialsKeyEnum.Token,
+    displayName: 'API Token',
+    type: 'string',
+    required: true,
+    description: 'Your iMedia API token',
+  },
+  ...smsConfigBase,
+];
+
 export const whatsAppBusinessConfig: IConfigCredentials[] = [
   {
     key: CredentialsKeyEnum.ApiToken,
@@ -1169,6 +1203,22 @@ export const mobishastraConfig: IConfigCredentials[] = [
     displayName: 'Password',
     type: 'string',
     description: ' provided by Mobishastra',
+    required: true,
+  },
+  ...smsConfigBase,
+];
+
+export const afroSmsConfig: IConfigCredentials[] = [
+  {
+    key: CredentialsKeyEnum.ApiKey,
+    displayName: 'API Key',
+    type: 'string',
+    required: true,
+  },
+  {
+    key: CredentialsKeyEnum.SenderName,
+    displayName: 'Sender Name',
+    type: 'string',
     required: true,
   },
   ...smsConfigBase,

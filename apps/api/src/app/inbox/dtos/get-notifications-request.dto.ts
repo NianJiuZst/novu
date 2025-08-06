@@ -1,5 +1,6 @@
-import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 
 import { CursorPaginationRequestDto } from '../../shared/dtos/cursor-pagination-request';
 import { NotificationFilter } from '../utils/types';
@@ -27,4 +28,21 @@ export class GetNotificationsRequestDto
   @IsBoolean()
   @Transform(({ value }) => value === 'true')
   archived?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true')
+  snoozed?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true')
+  seen?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({
+    description: 'Filter by data attributes (JSON string)',
+  })
+  data?: string;
 }

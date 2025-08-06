@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { parseSlugId } from '@novu/application-generic';
 import { IPreferenceChannels } from '@novu/shared';
-import { Type, Transform } from 'class-transformer';
-import { IsMongoId, IsOptional } from 'class-validator';
-import { parseSlugId } from '../../workflows-v2/pipes/parse-slug-id';
+import { Transform, Type } from 'class-transformer';
+import { IsOptional } from 'class-validator';
 
 export class PatchPreferenceChannelsDto implements IPreferenceChannels {
   @ApiProperty({ description: 'Email channel preference' })
@@ -27,11 +27,11 @@ export class PatchSubscriberPreferencesDto {
   channels: PatchPreferenceChannelsDto;
 
   @ApiProperty({
-    description: 'If provided, update workflow specific preferences, otherwise update global preferences',
+    description:
+      'Workflow internal _id, identifier or slug. If provided, update workflow specific preferences, otherwise update global preferences',
     required: false,
   })
   @IsOptional()
   @Transform(({ value }) => parseSlugId(value))
-  @IsMongoId()
   workflowId?: string;
 }

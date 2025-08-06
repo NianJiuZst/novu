@@ -1,19 +1,24 @@
-import { ITenantDefine, IWorkflowStepMetadata, JobStatusEnum, StepTypeEnum, WorkflowPreferences } from '@novu/shared';
+import {
+  ITenantDefine,
+  IWorkflowStepMetadata,
+  JobStatusEnum,
+  StepTypeEnum,
+  TriggerOverrides,
+  WorkflowPreferences,
+} from '@novu/shared';
 import { Types } from 'mongoose';
-
-import { NotificationStepEntity } from '../notification-template';
-import type { EnvironmentId } from '../environment';
-import type { OrganizationId } from '../organization';
 import type { ChangePropsValueType } from '../../types';
+import type { EnvironmentId } from '../environment';
+import { NotificationStepEntity } from '../notification-template';
+import type { OrganizationId } from '../organization';
 
 export { JobStatusEnum };
 
 export class JobEntity {
   _id: string;
   identifier: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any;
-  overrides: Record<string, Record<string, unknown>>;
+  overrides: TriggerOverrides;
   step: NotificationStepEntity;
   tenant?: ITenantDefine;
   transactionId: string;
@@ -28,7 +33,6 @@ export class JobEntity {
   delay?: number;
   _parentId?: string;
   status: JobStatusEnum;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error?: any;
   createdAt: string;
   updatedAt: string;

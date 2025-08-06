@@ -1,5 +1,5 @@
-/* eslint-disable global-require */
-import { DynamicModule, Logger, Module, OnApplicationShutdown, Provider } from '@nestjs/common';
+import { DynamicModule, Logger, Module, OnApplicationShutdown, Provider, Type } from '@nestjs/common';
+import { ForwardReference } from '@nestjs/common/interfaces/modules/forward-reference.interface';
 import {
   BulkCreateExecutionDetails,
   CalculateLimitNovuIntegration,
@@ -25,17 +25,22 @@ import {
   TriggerMulticast,
   WorkflowInMemoryProviderService,
 } from '@novu/application-generic';
-import { CommunityOrganizationRepository, JobRepository, PreferencesRepository } from '@novu/dal';
-
-import { Type } from '@nestjs/common/interfaces/type.interface';
-import { ForwardReference } from '@nestjs/common/interfaces/modules/forward-reference.interface';
+import {
+  CommunityOrganizationRepository,
+  CommunityUserRepository,
+  JobRepository,
+  PreferencesRepository,
+} from '@novu/dal';
 import { JobTopicNameEnum } from '@novu/shared';
+import { ACTIVE_WORKERS, workersToProcess } from '../../config/worker-init.config';
+import { SharedModule } from '../shared/shared.module';
 import {
   Digest,
   ExecuteBridgeJob,
   GetDigestEventsBackoff,
   GetDigestEventsRegular,
   HandleLastFailedJob,
+  ProcessUnsnoozeJob,
   QueueNextJob,
   RunJob,
   SendMessage,
@@ -50,12 +55,9 @@ import {
   UpdateJobStatus,
   WebhookFilterBackoffStrategy,
 } from './usecases';
-
-import { SharedModule } from '../shared/shared.module';
-import { ACTIVE_WORKERS, workersToProcess } from '../../config/worker-init.config';
+import { AddDelayJob, AddJob, MergeOrCreateDigest } from './usecases/add-job';
 import { InboundEmailParse } from './usecases/inbound-email-parse/inbound-email-parse.usecase';
 import { ExecuteStepCustom } from './usecases/send-message/execute-step-custom.usecase';
-import { AddDelayJob, AddJob, MergeOrCreateDigest } from './usecases/add-job';
 import { StoreSubscriberJobs } from './usecases/store-subscriber-jobs';
 import { SubscriberJobBound } from './usecases/subscriber-job-bound/subscriber-job-bound.usecase';
 
@@ -81,7 +83,8 @@ const enterpriseImports = (): Array<Type | DynamicModule | Promise<DynamicModule
 
   return modules;
 };
-const REPOSITORIES = [JobRepository, CommunityOrganizationRepository, PreferencesRepository];
+
+const REPOSITORIES = [JobRepository, CommunityOrganizationRepository, PreferencesRepository, CommunityUserRepository];
 
 const USE_CASES = [
   AddDelayJob,
@@ -122,6 +125,7 @@ const USE_CASES = [
   SetJobAsFailed,
   TriggerEvent,
   UpdateJobStatus,
+  ProcessUnsnoozeJob,
   WebhookFilterBackoffStrategy,
   GetTopicSubscribersUseCase,
   SubscriberJobBound,

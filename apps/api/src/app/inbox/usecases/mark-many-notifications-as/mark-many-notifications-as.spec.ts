@@ -1,18 +1,19 @@
-import sinon from 'sinon';
-import { expect } from 'chai';
-import { ButtonTypeEnum, ChannelCTATypeEnum, WebSocketEventEnum } from '@novu/shared';
-import { ChannelTypeEnum, MessageRepository } from '@novu/dal';
+import { BadRequestException } from '@nestjs/common';
 import {
   buildFeedKey,
   buildMessageCountKey,
   InvalidateCacheService,
+  PinoLogger,
+  TraceLogRepository,
   WebSocketsQueueService,
 } from '@novu/application-generic';
-
+import { ChannelTypeEnum, MessageRepository } from '@novu/dal';
+import { ButtonTypeEnum, ChannelCTATypeEnum, WebSocketEventEnum } from '@novu/shared';
+import { expect } from 'chai';
+import sinon from 'sinon';
 import { GetSubscriber } from '../../../subscribers/usecases/get-subscriber';
 import type { MarkManyNotificationsAsCommand } from './mark-many-notifications-as.command';
 import { MarkManyNotificationsAs } from './mark-many-notifications-as.usecase';
-import { ApiException } from '../../../shared/exceptions/api.exception';
 
 const mockSubscriber: any = { _id: '123', subscriberId: 'test-mockSubscriber' };
 const mockMessage: any = {
@@ -37,18 +38,24 @@ describe('MarkManyNotificationsAs', () => {
   let webSocketsQueueServiceMock: sinon.SinonStubbedInstance<WebSocketsQueueService>;
   let getSubscriberMock: sinon.SinonStubbedInstance<GetSubscriber>;
   let messageRepositoryMock: sinon.SinonStubbedInstance<MessageRepository>;
+  let traceLogRepositoryMock: sinon.SinonStubbedInstance<TraceLogRepository>;
+  let loggerMock: sinon.SinonStubbedInstance<PinoLogger>;
 
   beforeEach(() => {
     invalidateCacheMock = sinon.createStubInstance(InvalidateCacheService);
     webSocketsQueueServiceMock = sinon.createStubInstance(WebSocketsQueueService);
     getSubscriberMock = sinon.createStubInstance(GetSubscriber);
     messageRepositoryMock = sinon.createStubInstance(MessageRepository);
+    traceLogRepositoryMock = sinon.createStubInstance(TraceLogRepository);
+    loggerMock = sinon.createStubInstance(PinoLogger);
 
     markManyNotificationsAs = new MarkManyNotificationsAs(
       invalidateCacheMock as any,
       webSocketsQueueServiceMock as any,
       getSubscriberMock as any,
-      messageRepositoryMock as any
+      messageRepositoryMock as any,
+      traceLogRepositoryMock as any,
+      loggerMock as any
     );
   });
 
@@ -70,7 +77,7 @@ describe('MarkManyNotificationsAs', () => {
     try {
       await markManyNotificationsAs.execute(command);
     } catch (error) {
-      expect(error).to.be.instanceOf(ApiException);
+      expect(error).to.be.instanceOf(BadRequestException);
       expect(error.message).to.equal(`Subscriber with id: ${command.subscriberId} is not found.`);
     }
   });
@@ -97,6 +104,7 @@ describe('MarkManyNotificationsAs', () => {
         ids: command.ids,
         read: command.read,
         archived: command.archived,
+        snoozedUntil: command.snoozedUntil,
       },
     ]);
   });

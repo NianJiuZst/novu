@@ -1,5 +1,5 @@
 import clsx, { ClassValue } from 'clsx';
-import { extendTailwindMerge, type ClassNameValue } from 'tailwind-merge';
+import { type ClassNameValue, extendTailwindMerge } from 'tailwind-merge';
 import type { CSSProperties, Elements, Tab, Variables } from '../types';
 
 const twMerge = extendTailwindMerge({
@@ -136,8 +136,9 @@ export function generateFontSizeRules(props: { id: string; baseFontSize: string 
 
   Object.entries(sizeRatios).forEach(([key, ratio]) => {
     const size = `calc(${baseFontSize} * ${ratio})`;
+    const lineHeight = `calc(${baseFontSize} * ${ratio} * 1.33)`;
 
-    const cssVariableRule = `.${id} { --nv-font-size-${key}: ${size}; }`;
+    const cssVariableRule = `.${id} { --nv-font-size-${key}: ${size}; --nv-line-height-${key}: ${lineHeight}; }`;
     rules.push(cssVariableRule);
   });
 
@@ -162,7 +163,6 @@ export function generateBorderRadiusRules(props: { id: string; baseRadius: strin
   const rules: string[] = [];
 
   Object.entries(radiusRatios).forEach(([key, ratio]) => {
-    // eslint-disable-next-line no-nested-ternary
     const value = key === 'none' ? '0px' : key === 'full' ? '9999px' : `calc(${baseRadius} * ${ratio})`;
 
     const cssVariableRule = `.${id} { --nv-radius-${key}: ${value}; }`;
@@ -184,6 +184,7 @@ export const parseVariables = (variables: Required<Variables>, id: string) => {
     generateDefaultColor({ color: variables.colorCounterForeground, key: 'color-counter-foreground', id }),
     generateDefaultColor({ color: variables.colorShadow, key: 'color-shadow', id }),
     generateDefaultColor({ color: variables.colorRing, key: 'color-ring', id }),
+    generateDefaultColor({ color: variables.colorStripes, key: 'color-stripes', id }),
     ...generateAlphaShadeRulesFromColor({ color: variables.colorBackground, key: 'color-background-alpha', id }),
     ...generateAlphaShadeRulesFromColor({ color: variables.colorForeground, key: 'color-foreground-alpha', id }),
     ...generateSolidShadeRulesFromColor({ color: variables.colorPrimary, key: 'color-primary', id }),
@@ -246,3 +247,5 @@ export const parseElements = (elements: Elements) => {
 export const getTagsFromTab = (tab?: Tab) => {
   return tab?.filter?.tags || tab?.value || [];
 };
+
+export const NOVU_DEFAULT_CSS_ID = 'novu-default-css';

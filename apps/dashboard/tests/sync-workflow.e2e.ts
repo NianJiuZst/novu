@@ -1,24 +1,23 @@
-import { expect } from '@playwright/test';
 import { workflow } from '@novu/framework';
 import { StepTypeEnum } from '@novu/shared';
-
-import { test } from './utils/fixtures';
+import { expect } from '@playwright/test';
 import { InAppStepEditor } from './page-object-models/in-app-step-editor';
-import { WorkflowsPage } from './page-object-models/workflows-page';
-import { WorkflowEditorPage } from './page-object-models/workflow-editor-page';
 import { StepConfigSidebar } from './page-object-models/step-config-sidebar';
 import { TriggerWorkflowPage } from './page-object-models/trigger-workflow-page';
-import { BridgeServer } from './utils/bridge-server';
+import { WorkflowEditorPage } from './page-object-models/workflow-editor-page';
+import { WorkflowsPage } from './page-object-models/workflows-page';
 import { syncBridge } from './utils/api';
+import { test } from './utils/fixtures';
+import { TestBridgeServer } from './utils/test-bridge-server';
 
 const workflowId = 'code-created-workflow';
 const inAppStepId = 'send-in-app';
 const body = 'To join the Novu project, click the link below';
 
-let bridgeServer: BridgeServer;
+let bridgeServer: TestBridgeServer;
 test.beforeEach(async ({ session }) => {
   const secretKey = session.developmentEnvironment.apiKeys[0].key;
-  bridgeServer = new BridgeServer({ secretKey, apiUrl: process.env.API_URL });
+  bridgeServer = new TestBridgeServer({ secretKey, apiUrl: process.env.API_URL });
 
   const newWorkflow = workflow(workflowId, async ({ step }) => {
     await step.inApp(
@@ -131,7 +130,6 @@ test('sync workflow', async ({ page }) => {
   await triggerWorkflowPage.triggerWorkflowBtnClick();
   const activityPanel = triggerWorkflowPage.getActivityPanel();
   await expect(activityPanel).toBeVisible();
-  await expect(activityPanel.locator('span').filter({ hasText: workflowId })).toBeVisible();
 
   // go to the workflows page
   await workflowEditorPage.clickWorkflowsBreadcrumb();

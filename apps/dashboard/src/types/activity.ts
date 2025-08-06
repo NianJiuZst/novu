@@ -7,6 +7,7 @@ export type ActivityFiltersData = {
   workflows: string[];
   transactionId: string;
   subscriberId: string;
+  topicKey: string;
 };
 
 export type ActivityUrlState = {

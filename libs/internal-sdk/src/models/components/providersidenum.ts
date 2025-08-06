@@ -60,6 +60,7 @@ export const ProvidersIdEnum = {
   BrevoSms: "brevo-sms",
   EazySms: "eazy-sms",
   Mobishastra: "mobishastra",
+  AfroMessage: "afro-message",
   Fcm: "fcm",
   Apns: "apns",
   Expo: "expo",
@@ -78,6 +79,7 @@ export const ProvidersIdEnum = {
   Getstream: "getstream",
   RocketChat: "rocket-chat",
   WhatsappBusiness: "whatsapp-business",
+  ChatWebhook: "chat-webhook",
 } as const;
 /**
  * Provider ID of the job

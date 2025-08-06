@@ -1,9 +1,8 @@
-import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
-
-import { cn } from '@/utils/ui';
 import { cva, VariantProps } from 'class-variance-authority';
+import * as React from 'react';
+import { cn } from '@/utils/ui';
 
 const Dialog = DialogPrimitive.Root;
 
@@ -38,7 +37,6 @@ const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] fixed left-[50%] top-[50%] z-50 grid w-auto min-w-[320px] translate-x-[-50%] translate-y-[-50%] gap-5 border p-5 shadow duration-200 sm:rounded-lg',
-
         className
       )}
       {...props}

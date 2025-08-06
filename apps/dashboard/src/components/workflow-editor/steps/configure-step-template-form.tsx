@@ -1,9 +1,7 @@
 import { type StepResponseDto, StepTypeEnum, StepUpdateDto, type WorkflowResponseDto } from '@novu/shared';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-
 import { Form, FormRoot } from '@/components/primitives/form/form';
-import { getStepDefaultValues } from '@/components/workflow-editor/step-default-values';
 import { flattenIssues, updateStepInWorkflow } from '@/components/workflow-editor/step-utils';
 import { ChatTabs } from '@/components/workflow-editor/steps/chat/chat-tabs';
 import { CommonCustomControlValues } from '@/components/workflow-editor/steps/common/common-custom-control-values';
@@ -15,6 +13,7 @@ import { SmsTabs } from '@/components/workflow-editor/steps/sms/sms-tabs';
 import { UpdateWorkflowFn } from '@/components/workflow-editor/workflow-provider';
 import { useDataRef } from '@/hooks/use-data-ref';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
+import { getControlsDefaultValues } from '@/utils/default-values';
 
 const STEP_TYPE_TO_TEMPLATE_FORM: Record<StepTypeEnum, (args: StepEditorProps) => React.JSX.Element | null> = {
   [StepTypeEnum.EMAIL]: EmailTabs,
@@ -39,22 +38,25 @@ type ConfigureStepTemplateFormProps = StepEditorProps & {
 
 export const ConfigureStepTemplateForm = (props: ConfigureStepTemplateFormProps) => {
   const { workflow, step, update } = props;
-
-  const defaultValues = useMemo(() => getStepDefaultValues(step), [step]);
+  const defaultValues = useMemo(() => getControlsDefaultValues(step), [step]);
 
   const form = useForm({
     defaultValues,
+    values: step.controls.values,
     shouldFocusError: false,
+    resetOptions: {
+      keepDirtyValues: true,
+    },
   });
 
   const { onBlur, saveForm } = useFormAutosave({
     previousData: defaultValues,
     form,
-    save: (data) => {
+    save: (data, { onSuccess }) => {
       const updateStepData: Partial<StepUpdateDto> = {
         controlValues: data,
       };
-      update(updateStepInWorkflow(workflow, step.stepId, updateStepData));
+      update(updateStepInWorkflow(workflow, step.stepId, updateStepData), { onSuccess });
     },
   });
 
@@ -62,7 +64,6 @@ export const ConfigureStepTemplateForm = (props: ConfigureStepTemplateFormProps)
   const saveFormRef = useDataRef(saveForm);
   useEffect(() => {
     return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       saveFormRef.current();
     };
   }, [saveFormRef]);
@@ -78,10 +79,12 @@ export const ConfigureStepTemplateForm = (props: ConfigureStepTemplateFormProps)
       }
     });
 
-    // Set new errors from stepIssues
-    Object.entries(stepIssues).forEach(([key, value]) => {
-      form.setError(key as string, { message: value });
-    });
+    // @ts-expect-error - isNew doesn't exist on StepResponseDto and it's too much work to override the @novu/shared types now. See useUpdateWorkflow.ts for more details
+    if (!step.isNew) {
+      Object.entries(stepIssues).forEach(([key, value]) => {
+        form.setError(key as string, { message: value });
+      });
+    }
   }, [form, step]);
 
   useEffect(() => {

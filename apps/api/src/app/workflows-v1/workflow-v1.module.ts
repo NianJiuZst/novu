@@ -3,14 +3,21 @@ import { AuthModule } from '../auth/auth.module';
 import { ChangeModule } from '../change/change.module';
 import { IntegrationModule } from '../integrations/integrations.module';
 import { MessageTemplateModule } from '../message-template/message-template.module';
+import { PreferencesModule } from '../preferences';
 import { SharedModule } from '../shared/shared.module';
+import { WebhooksModule } from '../webhooks/webhooks.module';
 import { NotificationTemplateController } from './notification-template.controller';
 import { USE_CASES } from './usecases';
 import { WorkflowControllerV1 } from './workflow-v1.controller';
-import { PreferencesModule } from '../preferences';
+
+const MODULES = [SharedModule, MessageTemplateModule, ChangeModule, AuthModule, IntegrationModule, PreferencesModule];
+
+if (process.env.NOVU_ENTERPRISE === 'true') {
+  MODULES.push(WebhooksModule);
+}
 
 @Module({
-  imports: [SharedModule, MessageTemplateModule, ChangeModule, AuthModule, IntegrationModule, PreferencesModule],
+  imports: MODULES,
   controllers: [NotificationTemplateController, WorkflowControllerV1],
   providers: [...USE_CASES],
   exports: [...USE_CASES],

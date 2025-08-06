@@ -1,5 +1,4 @@
-import { expect } from 'chai';
-import { UserSession } from '@novu/testing';
+import { Novu } from '@novu/api';
 import { MessageRepository, NotificationTemplateEntity, SubscriberEntity, SubscriberRepository } from '@novu/dal';
 import {
   ActorTypeEnum,
@@ -9,9 +8,10 @@ import {
   SystemAvatarIconEnum,
   TemplateVariableTypeEnum,
 } from '@novu/shared';
-import { Novu } from '@novu/api';
-import { mapToDto } from '../utils/notification-mapper';
+import { UserSession } from '@novu/testing';
+import { expect } from 'chai';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
+import { mapToDto } from '../utils/notification-mapper';
 
 describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => {
   let session: UserSession;
@@ -61,6 +61,7 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     tags,
     read,
     archived,
+    snoozed,
   }: {
     limit?: number;
     after?: string;
@@ -68,6 +69,7 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     tags?: string[];
     read?: boolean;
     archived?: boolean;
+    snoozed?: boolean;
   } = {}) => {
     let query = `limit=${limit}`;
     if (after) {
@@ -84,6 +86,9 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     }
     if (typeof archived !== 'undefined') {
       query += `&archived=${archived}`;
+    }
+    if (typeof snoozed !== 'undefined') {
+      query += `&snoozed=${snoozed}`;
     }
 
     return await session.testAgent
@@ -119,21 +124,21 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     return newObj;
   };
 
-  it('should validate that the offset is greater or equals to zero', async function () {
+  it('should validate that the offset is greater or equals to zero', async () => {
     const { body, status } = await getNotifications({ limit: 1, offset: -1 });
 
-    expect(status).to.equal(400);
-    expect(body.message[0]).to.equal('offset must not be less than 0');
+    expect(status).to.equal(422);
+    expect(body.errors.general.messages[0]).to.equal('offset must not be less than 0');
   });
 
-  it('should validate the after to mongo id', async function () {
+  it('should validate the after to mongo id', async () => {
     const { body, status } = await getNotifications({ limit: 1, after: 'after' });
 
-    expect(status).to.equal(400);
-    expect(body.message[0]).to.equal('The after cursor must be a valid MongoDB ObjectId');
+    expect(status).to.equal(422);
+    expect(body.errors.general.messages[0]).to.equal('The after cursor must be a valid MongoDB ObjectId');
   });
 
-  it('should throw exception when filtering for unread and archived notifications', async function () {
+  it('should throw exception when filtering for unread and archived notifications', async () => {
     await triggerEvent(template);
 
     const { body, status } = await getNotifications({ limit: 1, read: false, archived: true });
@@ -142,7 +147,7 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     expect(body.message).to.equal('Filtering for unread and archived notifications is not supported.');
   });
 
-  it('should include fields from message entity', async function () {
+  it('should include fields from message entity', async () => {
     await triggerEvent(template);
 
     const { data: messages } = await messageRepository.paginate(
@@ -167,7 +172,7 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     expect(body.data[0]).to.deep.equal(removeUndefinedDeep(mapToDto(messageEntity)));
   });
 
-  it('should paginate notifications by offset', async function () {
+  it('should paginate notifications by offset', async () => {
     const limit = 2;
     await triggerEvent(template, 4);
 
@@ -192,7 +197,7 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     expect(nextPageBody.hasMore).to.be.false;
   });
 
-  it('should paginate notifications with after as id', async function () {
+  it('should paginate notifications with after as id', async () => {
     const limit = 2;
     await triggerEvent(template, 4);
 
@@ -217,7 +222,7 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     expect(nextPageBody.hasMore).to.be.false;
   });
 
-  it('should filter notifications by tags', async function () {
+  it('should filter notifications by tags', async () => {
     const tags = ['newsletter'];
     const templateWithTags = await session.createTemplate({
       noFeedId: true,
@@ -248,7 +253,7 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     expect(body.hasMore).to.be.false;
   });
 
-  it('should filter by read', async function () {
+  it('should filter by read', async () => {
     await triggerEvent(template, 4);
     await messageRepository.update(
       {
@@ -272,7 +277,7 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     expect(body.data.every((message) => message.isRead)).to.be.true;
   });
 
-  it('should filter by archived', async function () {
+  it('should filter by archived', async () => {
     await triggerEvent(template, 4);
     await messageRepository.update(
       {
@@ -296,7 +301,7 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     expect(body.data.every((message) => message.isArchived)).to.be.true;
   });
 
-  it('should filter by archived with pagination', async function () {
+  it('should filter by archived with pagination', async () => {
     await triggerEvent(template, 4);
     await messageRepository.update(
       {
@@ -333,5 +338,29 @@ describe('Get Notifications - /inbox/notifications (GET) #novu-v2', async () => 
     );
     expect(secondPageBody.hasMore).to.be.false;
     expect(secondPageBody.data.every((message) => message.isArchived)).to.be.true;
+  });
+
+  it('should filter by snoozed', async () => {
+    await triggerEvent(template, 4);
+    await messageRepository.update(
+      {
+        _environmentId: session.environment._id,
+        _subscriberId: subscriber?._id ?? '',
+        channel: ChannelTypeEnum.IN_APP,
+      },
+      { $set: { snoozedUntil: new Date() } }
+    );
+
+    const limit = 4;
+    const { body, status } = await getNotifications({ limit, snoozed: true });
+
+    expect(status).to.equal(200);
+    expect(body.data).to.be.ok;
+    expect(body.data.length).to.eq(limit);
+    expect(new Date(body.data[0].createdAt).getTime()).to.be.greaterThanOrEqual(
+      new Date(body.data[1].createdAt).getTime()
+    );
+    expect(body.hasMore).to.be.false;
+    expect(body.data.every((message) => message.isSnoozed)).to.be.true;
   });
 });
