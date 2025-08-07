@@ -119,7 +119,7 @@ export class JsonSchemaMock {
     ) {
       return 'John Doe';
     }
-    if (JsonSchemaMock.matchesPattern(lowerKey, ['title', 'jobtitle', 'job_title', 'position', 'role'])) {
+    if (JsonSchemaMock.matchesPattern(lowerKey, ['jobtitle', 'job_title', 'position', 'role'])) {
       return 'Software Engineer';
     }
 
