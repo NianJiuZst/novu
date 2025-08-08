@@ -1,6 +1,6 @@
-import { DirectionEnum, ListWorkflowResponse } from '@novu/shared';
+import { ListWorkflowResponse } from '@novu/shared';
 import { RiMore2Fill } from 'react-icons/ri';
-import { createSearchParams, useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { DefaultPagination } from '@/components/default-pagination';
 import { Skeleton } from '@/components/primitives/skeleton';
 import {
@@ -28,6 +28,7 @@ interface WorkflowListProps {
   orderDirection?: TableHeadSortDirection;
   hasActiveFilters?: boolean;
   onClearFilters?: () => void;
+  toggleSort?: (column: SortableColumn) => void;
 }
 
 interface WorkflowListSkeletonProps {
@@ -76,30 +77,20 @@ export function WorkflowList({
   orderDirection,
   hasActiveFilters,
   onClearFilters,
+  toggleSort,
 }: WorkflowListProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
 
   const hrefFromOffset = (offset: number) => {
-    return `${location.pathname}?${createSearchParams({
-      ...searchParams,
-      offset: offset.toString(),
-    })}`;
+    // Get current search params and update offset
+    const currentParams = new URLSearchParams(location.search);
+    currentParams.set('offset', offset.toString());
+    return `${location.pathname}?${currentParams.toString()}`;
   };
 
-  const offset = parseInt(searchParams.get('offset') || '0');
-
-  const toggleSort = (column: SortableColumn) => {
-    const newDirection =
-      column === orderBy
-        ? orderDirection === DirectionEnum.DESC
-          ? DirectionEnum.ASC
-          : DirectionEnum.DESC
-        : DirectionEnum.DESC;
-    searchParams.set('orderDirection', newDirection);
-    searchParams.set('orderBy', column);
-    setSearchParams(searchParams);
-  };
+  // Extract offset from current URL for pagination display
+  const currentParams = new URLSearchParams(location.search);
+  const offset = parseInt(currentParams.get('offset') || '0');
 
   if (isError) return <ServerErrorPage />;
 
@@ -118,7 +109,7 @@ export function WorkflowList({
             <TableHead
               sortable
               sortDirection={orderBy === 'name' ? orderDirection : false}
-              onSort={() => toggleSort('name')}
+              onSort={() => toggleSort?.('name')}
             >
               Workflows
             </TableHead>
@@ -128,14 +119,14 @@ export function WorkflowList({
             <TableHead
               sortable
               sortDirection={orderBy === 'lastTriggeredAt' ? orderDirection : false}
-              onSort={() => toggleSort('lastTriggeredAt')}
+              onSort={() => toggleSort?.('lastTriggeredAt')}
             >
               Last triggered
             </TableHead>
             <TableHead
               sortable
               sortDirection={orderBy === 'updatedAt' ? orderDirection : false}
-              onSort={() => toggleSort('updatedAt')}
+              onSort={() => toggleSort?.('updatedAt')}
             >
               Last updated
             </TableHead>

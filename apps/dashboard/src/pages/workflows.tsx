@@ -1,4 +1,4 @@
-import { DirectionEnum, EnvironmentTypeEnum, PermissionsEnum, StepTypeEnum, WorkflowStatusEnum } from '@novu/shared';
+import { EnvironmentTypeEnum, PermissionsEnum, StepTypeEnum, WorkflowStatusEnum } from '@novu/shared';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -9,7 +9,7 @@ import {
   RiLoader4Line,
   RiRouteFill,
 } from 'react-icons/ri';
-import { Outlet, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { PageMeta } from '@/components/page-meta';
 import { Button } from '@/components/primitives/button';
@@ -27,76 +27,38 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives
 import { getTemplates, WorkflowTemplate } from '@/components/template-store/templates';
 import { WorkflowCard } from '@/components/template-store/workflow-card';
 import { WorkflowTemplateModal } from '@/components/template-store/workflow-template-modal';
-import { SortableColumn, WorkflowList } from '@/components/workflow-list';
+import { WorkflowList } from '@/components/workflow-list';
 import { useEnvironment } from '@/context/environment/hooks';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useFetchWorkflows } from '@/hooks/use-fetch-workflows';
 import { useHasPermission } from '@/hooks/use-has-permission';
 import { useTags } from '@/hooks/use-tags';
 import { useTelemetry } from '@/hooks/use-telemetry';
+import { useWorkflowsUrlState } from '@/hooks/use-workflows-url-state';
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { TelemetryEvent } from '@/utils/telemetry';
-
-interface WorkflowFilters {
-  query: string;
-  tags: string[];
-  status: string[];
-}
 
 export const WorkflowsPage = () => {
   const { environmentSlug } = useParams();
   const track = useTelemetry();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams({
-    orderDirection: DirectionEnum.DESC,
-    orderBy: 'createdAt',
-    query: '',
-  });
-  const form = useForm<WorkflowFilters>({
+
+  const { filterValues, updateQuery, updateTags, updateStatus, resetFilters, toggleSort, hasActiveFilters } =
+    useWorkflowsUrlState();
+
+  const form = useForm<{
+    query: string;
+    tags: string[];
+    status: string[];
+  }>({
     defaultValues: {
-      query: searchParams.get('query') || '',
-      tags: searchParams.getAll('tags') || [],
-      status: searchParams.getAll('status') || [],
+      query: filterValues.query,
+      tags: filterValues.tags,
+      status: filterValues.status,
     },
   });
 
-  useEffect(() => {
-    if (!searchParams.has('query') && form.getValues('query')) {
-      form.setValue('query', '');
-    }
-  }, []);
-
-  const updateSearchParam = (value: string) => {
-    if (value) {
-      searchParams.set('query', value);
-    } else {
-      searchParams.delete('query');
-    }
-
-    setSearchParams(searchParams);
-  };
-
-  const updateTagsParam = (tags: string[]) => {
-    searchParams.delete('tags');
-    tags.forEach((tag) => searchParams.append('tags', tag));
-    setSearchParams(searchParams);
-  };
-
-  const updateStatusParam = (status: string[]) => {
-    searchParams.delete('status');
-    status.forEach((s) => searchParams.append('status', s));
-    setSearchParams(searchParams);
-  };
-
-  const debouncedSearch = useDebounce((value: string) => updateSearchParam(value), 500);
-
-  const clearFilters = () => {
-    form.reset({ query: '', tags: [], status: [] });
-    searchParams.delete('query');
-    searchParams.delete('tags');
-    searchParams.delete('status');
-    setSearchParams(searchParams);
-  };
+  const debouncedSearch = useDebounce((value: string) => updateQuery(value), 500);
 
   useEffect(() => {
     const subscription = form.watch((value) => {
@@ -105,11 +67,11 @@ export const WorkflowsPage = () => {
       }
 
       if (value.tags !== undefined) {
-        updateTagsParam(value.tags as string[]);
+        updateTags(value.tags as string[]);
       }
 
       if (value.status !== undefined) {
-        updateStatusParam(value.status as string[]);
+        updateStatus(value.status as string[]);
       }
     });
 
@@ -117,12 +79,15 @@ export const WorkflowsPage = () => {
       subscription.unsubscribe();
       debouncedSearch.cancel();
     };
-  }, [form, debouncedSearch]);
+  }, [form, debouncedSearch, updateTags, updateStatus]);
+
+  const handleClearFilters = () => {
+    form.reset({ query: '', tags: [], status: [] });
+    resetFilters();
+  };
+
   const templates = getTemplates();
   const popularTemplates = templates.filter((template) => template.isPopular).slice(0, 4);
-
-  const offset = parseInt(searchParams.get('offset') || '0');
-  const limit = parseInt(searchParams.get('limit') || '12');
 
   const {
     data: workflowsData,
@@ -130,22 +95,17 @@ export const WorkflowsPage = () => {
     isFetching,
     isError,
   } = useFetchWorkflows({
-    limit,
-    offset,
-    orderBy: searchParams.get('orderBy') as SortableColumn,
-    orderDirection: searchParams.get('orderDirection') as DirectionEnum,
-    query: searchParams.get('query') || '',
-    tags: searchParams.getAll('tags'),
-    status: searchParams.getAll('status'),
+    limit: filterValues.limit,
+    offset: filterValues.offset,
+    orderBy: filterValues.orderBy,
+    orderDirection: filterValues.orderDirection,
+    query: filterValues.query,
+    tags: filterValues.tags,
+    status: filterValues.status,
   });
 
   const { currentEnvironment } = useEnvironment();
   const { tags } = useTags();
-
-  const hasActiveFilters =
-    (searchParams.get('query') ? searchParams.get('query')!.trim() !== '' : false) ||
-    searchParams.getAll('tags').length > 0 ||
-    searchParams.getAll('status').length > 0;
 
   const isProdEnv = currentEnvironment?.name === 'Production';
 
@@ -207,7 +167,7 @@ export const WorkflowsPage = () => {
 
               {hasActiveFilters && (
                 <div className="flex items-center gap-1">
-                  <Button variant="secondary" mode="ghost" size="2xs" onClick={clearFilters}>
+                  <Button variant="secondary" mode="ghost" size="2xs" onClick={handleClearFilters}>
                     Reset
                   </Button>
                   {isFetching && !isPending && <RiLoader4Line className="h-3 w-3 animate-spin text-neutral-400" />}
@@ -263,14 +223,15 @@ export const WorkflowsPage = () => {
           )}
           {shouldShowStartWithTemplatesSection && <div className="text-label-xs text-text-soft">Your Workflows</div>}
           <WorkflowList
-            hasActiveFilters={!!hasActiveFilters}
-            onClearFilters={clearFilters}
-            orderBy={searchParams.get('orderBy') as SortableColumn}
-            orderDirection={searchParams.get('orderDirection') as DirectionEnum}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={handleClearFilters}
+            orderBy={filterValues.orderBy}
+            orderDirection={filterValues.orderDirection}
             data={workflowsData}
             isLoading={isPending}
             isError={isError}
-            limit={limit}
+            limit={filterValues.limit}
+            toggleSort={toggleSort}
           />
         </div>
         <Outlet />
