@@ -10,10 +10,16 @@ import {
   WebSocketsQueueServiceHealthIndicator,
   WorkflowQueueServiceHealthIndicator,
 } from '../health';
-import { ReadinessService, SocketWorkerService, WorkflowInMemoryProviderService } from '../services';
+import {
+  FeatureFlagsService,
+  ReadinessService,
+  SocketWorkerService,
+  WorkflowInMemoryProviderService,
+} from '../services';
 import {
   ActiveJobsMetricQueueService,
   InboundParseQueueService,
+  QueueProviderFactory,
   StandardQueueService,
   SubscriberProcessQueueService,
   WebSocketsQueueService,
@@ -32,7 +38,15 @@ const memoryQueueService = {
   },
 };
 
-const INTERNAL_MODULE_PROVIDERS = [memoryQueueService, featureFlagsService];
+const queueProviderFactory = {
+  provide: QueueProviderFactory,
+  useFactory: (featureFlagsService: any, workflowInMemoryProviderService: WorkflowInMemoryProviderService) => {
+    return new QueueProviderFactory(featureFlagsService, workflowInMemoryProviderService);
+  },
+  inject: [FeatureFlagsService, WorkflowInMemoryProviderService],
+};
+
+const INTERNAL_MODULE_PROVIDERS = [memoryQueueService, featureFlagsService, queueProviderFactory];
 const BASE_PROVIDERS: Provider[] = [ReadinessService];
 
 @Module({
@@ -113,7 +127,7 @@ export class QueuesModule implements OnApplicationShutdown {
     return {
       module: QueuesModule,
       providers: [...DYNAMIC_PROVIDERS, ...INTERNAL_MODULE_PROVIDERS],
-      exports: [...DYNAMIC_PROVIDERS],
+      exports: [...DYNAMIC_PROVIDERS, ...INTERNAL_MODULE_PROVIDERS],
     };
   }
 

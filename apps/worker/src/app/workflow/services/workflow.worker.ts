@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import {
   BullMqService,
   getWorkflowWorkerOptions,
   IWorkflowDataDto,
   PinoLogger,
+  QueueProviderFactory,
   Store,
   storage,
   TriggerEvent,
@@ -23,11 +24,26 @@ export class WorkflowWorker extends WorkflowWorkerService {
     private triggerEventUsecase: TriggerEvent,
     public workflowInMemoryProviderService: WorkflowInMemoryProviderService,
     private organizationRepository: CommunityOrganizationRepository,
-    private logger: PinoLogger
+    private logger: PinoLogger,
+    @Optional() public queueProviderFactory?: QueueProviderFactory
   ) {
-    super(new BullMqService(workflowInMemoryProviderService));
+    super(new BullMqService(workflowInMemoryProviderService), queueProviderFactory, workflowInMemoryProviderService);
     this.logger.setContext(this.constructor.name);
-    this.initWorker(this.getWorkerProcessor(), this.getWorkerOptions());
+    // Wrap the old processor to match the new QueueProcessor signature
+    const wrappedProcessor = async (job: any): Promise<void> => {
+      const oldProcessor = this.getWorkerProcessor();
+      if (typeof oldProcessor === 'function') {
+        // Cast the processor to the expected function signature
+        const processor = oldProcessor as (params: { data: any }) => Promise<any>;
+        await processor({ data: job });
+      }
+    };
+
+    this.initWorker(wrappedProcessor, this.getWorkerOptions()).then(() => {
+      // Worker initialized successfully
+    }).catch((error) => {
+      this.logger.error('Failed to initialize workflow worker:', error);
+    });
   }
 
   private getWorkerOptions(): WorkerOptions {

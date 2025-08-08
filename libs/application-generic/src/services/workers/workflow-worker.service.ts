@@ -1,11 +1,26 @@
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { JobTopicNameEnum } from '@novu/shared';
 import { BullMqService } from '../bull-mq';
-import { WorkerBaseService } from './worker-base.service';
+import { WorkflowInMemoryProviderService } from '../in-memory-provider';
+import { QueueProviderFactory } from '../queues/queue-provider-factory.service';
+import { EnhancedWorkerBaseService } from './enhanced-worker-base.service';
 
 const LOG_CONTEXT = 'WorkflowWorkerService';
 
-export class WorkflowWorkerService extends WorkerBaseService {
-  constructor(public bullMqService: BullMqService) {
-    super(JobTopicNameEnum.WORKFLOW, bullMqService);
+@Injectable()
+export class WorkflowWorkerService extends EnhancedWorkerBaseService {
+  constructor(
+    public bullMqService: BullMqService,
+    @Optional() queueProviderFactory?: QueueProviderFactory,
+    @Optional() workflowInMemoryProviderService?: WorkflowInMemoryProviderService
+  ) {
+    super(
+      JobTopicNameEnum.WORKFLOW,
+      bullMqService,
+      queueProviderFactory,
+      workflowInMemoryProviderService
+    );
+
+    Logger.log('WorkflowWorkerService initialized with enhanced queue support', LOG_CONTEXT);
   }
 }

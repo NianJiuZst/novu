@@ -1,10 +1,11 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import {
   BullMqService,
   getStandardWorkerOptions,
   IStandardDataDto,
   Job,
   PinoLogger,
+  QueueProviderFactory,
   StandardWorkerService,
   Store,
   storage,
@@ -38,19 +39,38 @@ export class StandardWorker extends StandardWorkerService {
     @Inject(forwardRef(() => WorkflowInMemoryProviderService))
     public workflowInMemoryProviderService: WorkflowInMemoryProviderService,
     private organizationRepository: CommunityOrganizationRepository,
-    private jobRepository: JobRepository
+    private jobRepository: JobRepository,
+    @Optional() public queueProviderFactory?: QueueProviderFactory
   ) {
-    super(new BullMqService(workflowInMemoryProviderService));
+    super(new BullMqService(workflowInMemoryProviderService), queueProviderFactory, workflowInMemoryProviderService);
 
-    this.initWorker(this.getWorkerProcessor(), this.getWorkerOptions());
+    // Wrap the old processor to match the new QueueProcessor signature
+    const wrappedProcessor = async (job: any): Promise<void> => {
+      const oldProcessor = this.getWorkerProcessor();
+      await oldProcessor({ data: job });
+    };
 
-    this.worker.on('failed', async (job: Job<IStandardDataDto, void, string>, error: Error): Promise<void> => {
-      await this.jobHasFailed(job, error);
-    });
+    this.initWorker(wrappedProcessor, this.getWorkerOptions())
+      .then(() => {
+        this.setupEventListeners();
+      })
+      .catch((error) => {
+        console.error('Failed to initialize worker:', error);
+      });
+  }
 
-    this.worker.on('completed', async (job: Job<IStandardDataDto, void, string>): Promise<void> => {
-      await this.jobHasCompleted(job);
-    });
+  private setupEventListeners(): void {
+    if (this.worker?.on) {
+      this.worker.on('failed', async (job: Job<IStandardDataDto, void, string>, error: Error): Promise<void> => {
+        await this.jobHasFailed(job, error);
+      });
+
+      this.worker.on('completed', async (job: Job<IStandardDataDto, void, string>): Promise<void> => {
+        await this.jobHasCompleted(job);
+      });
+    } else {
+      console.warn('Worker not available - skipping event listeners setup');
+    }
   }
 
   private getWorkerOptions(): WorkerOptions {

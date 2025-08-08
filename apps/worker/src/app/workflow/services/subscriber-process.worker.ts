@@ -1,9 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import {
   BullMqService,
   getSubscriberProcessWorkerOptions,
   IProcessSubscriberDataDto,
   PinoLogger,
+  QueueProviderFactory,
   Store,
   SubscriberProcessWorkerService,
   storage,
@@ -23,11 +24,22 @@ export class SubscriberProcessWorker extends SubscriberProcessWorkerService {
   constructor(
     private subscriberJobBoundUsecase: SubscriberJobBound,
     public workflowInMemoryProviderService: WorkflowInMemoryProviderService,
-    private organizationRepository: CommunityOrganizationRepository
+    private organizationRepository: CommunityOrganizationRepository,
+    @Optional() public queueProviderFactory?: QueueProviderFactory
   ) {
-    super(new BullMqService(workflowInMemoryProviderService));
+    super(new BullMqService(workflowInMemoryProviderService), queueProviderFactory, workflowInMemoryProviderService);
 
-    this.initWorker(this.getWorkerProcessor(), this.getWorkerOpts());
+    // Wrap the old processor to match the new QueueProcessor signature
+    const wrappedProcessor = async (job: any): Promise<void> => {
+      const oldProcessor = this.getWorkerProcessor();
+      await oldProcessor({ data: job });
+    };
+
+    this.initWorker(wrappedProcessor, this.getWorkerOpts()).then(() => {
+      // Worker initialized successfully
+    }).catch((error) => {
+      console.error('Failed to initialize subscriber process worker:', error);
+    });
   }
 
   public getWorkerProcessor() {

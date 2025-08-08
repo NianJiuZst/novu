@@ -1,10 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import {
   BullMqService,
   getInboundParseMailWorkerOptions,
   IInboundParseDataDto,
   IInboundParseJobDto,
-  WorkerBaseService,
+  InboundParseWorkerService,
+  QueueProviderFactory,
   WorkerOptions,
   WorkflowInMemoryProviderService,
 } from '@novu/application-generic';
@@ -15,14 +16,25 @@ import { InboundEmailParse } from '../usecases/inbound-email-parse/inbound-email
 const LOG_CONTEXT = 'InboundParseQueueService';
 
 @Injectable()
-export class InboundParseWorker extends WorkerBaseService {
+export class InboundParseWorker extends InboundParseWorkerService {
   constructor(
     private inboundEmailParseUsecase: InboundEmailParse,
-    public workflowInMemoryProviderService: WorkflowInMemoryProviderService
+    public workflowInMemoryProviderService: WorkflowInMemoryProviderService,
+    @Optional() public queueProviderFactory?: QueueProviderFactory
   ) {
-    super(JobTopicNameEnum.INBOUND_PARSE_MAIL, new BullMqService(workflowInMemoryProviderService));
+    super(new BullMqService(workflowInMemoryProviderService), queueProviderFactory, workflowInMemoryProviderService);
 
-    this.createWorker(this.getWorkerProcessor(), this.getWorkerOptions());
+    // Wrap the old processor to match the new QueueProcessor signature
+    const wrappedProcessor = async (job: any): Promise<void> => {
+      const oldProcessor = this.getWorkerProcessor();
+      await oldProcessor({ data: job });
+    };
+
+    this.initWorker(wrappedProcessor, this.getWorkerOptions()).then(() => {
+      // Worker initialized successfully
+    }).catch((error) => {
+      console.error('Failed to initialize inbound parse worker:', error);
+    });
   }
 
   private getWorkerOptions(): WorkerOptions {

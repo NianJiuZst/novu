@@ -5,6 +5,7 @@ import { BullMqService } from '../bull-mq';
 import { WorkflowInMemoryProviderService } from '../in-memory-provider';
 import { SocketWorkerService } from '../socket-worker';
 import { QueueBaseService } from './queue-base.service';
+import { QueueProviderFactory } from './queue-provider-factory.service';
 
 const LOG_CONTEXT = 'WebSocketsQueueService';
 
@@ -12,9 +13,10 @@ const LOG_CONTEXT = 'WebSocketsQueueService';
 export class WebSocketsQueueService extends QueueBaseService {
   constructor(
     public workflowInMemoryProviderService: WorkflowInMemoryProviderService,
-    private socketWorkerService: SocketWorkerService
+    private socketWorkerService: SocketWorkerService,
+    private queueProviderFactory?: QueueProviderFactory
   ) {
-    super(JobTopicNameEnum.WEB_SOCKETS, new BullMqService(workflowInMemoryProviderService));
+    super(JobTopicNameEnum.WEB_SOCKETS, new BullMqService(workflowInMemoryProviderService), queueProviderFactory);
 
     Logger.log(`Creating queue ${this.topic}`, LOG_CONTEXT);
 

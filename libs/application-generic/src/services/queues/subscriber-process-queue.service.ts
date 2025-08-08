@@ -4,15 +4,21 @@ import { IProcessSubscriberBulkJobDto, IProcessSubscriberJobDto } from '../../dt
 import { BullMqService } from '../bull-mq';
 import { WorkflowInMemoryProviderService } from '../in-memory-provider';
 import { QueueBaseService } from './queue-base.service';
+import { QueueProviderFactory } from './queue-provider-factory.service';
 
 @Injectable()
 export class SubscriberProcessQueueService extends QueueBaseService {
   private readonly LOG_CONTEXT = 'SubscriberProcessQueueService';
   constructor(
     @Inject(forwardRef(() => WorkflowInMemoryProviderService))
-    public workflowInMemoryProviderService: WorkflowInMemoryProviderService
+    public workflowInMemoryProviderService: WorkflowInMemoryProviderService,
+    private queueProviderFactory?: QueueProviderFactory
   ) {
-    super(JobTopicNameEnum.PROCESS_SUBSCRIBER, new BullMqService(workflowInMemoryProviderService));
+    super(
+      JobTopicNameEnum.PROCESS_SUBSCRIBER,
+      new BullMqService(workflowInMemoryProviderService),
+      queueProviderFactory
+    );
 
     Logger.log(`Creating queue ${this.topic}`, this.LOG_CONTEXT);
 

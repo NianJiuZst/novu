@@ -4,13 +4,17 @@ import { IWorkflowBulkJobDto, IWorkflowJobDto } from '../../dtos';
 import { BullMqService } from '../bull-mq';
 import { WorkflowInMemoryProviderService } from '../in-memory-provider';
 import { QueueBaseService } from './queue-base.service';
+import { QueueProviderFactory } from './queue-provider-factory.service';
 
 const LOG_CONTEXT = 'WorkflowQueueService';
 
 @Injectable()
 export class WorkflowQueueService extends QueueBaseService {
-  constructor(public workflowInMemoryProviderService: WorkflowInMemoryProviderService) {
-    super(JobTopicNameEnum.WORKFLOW, new BullMqService(workflowInMemoryProviderService));
+  constructor(
+    public workflowInMemoryProviderService: WorkflowInMemoryProviderService,
+    private queueProviderFactory?: QueueProviderFactory
+  ) {
+    super(JobTopicNameEnum.WORKFLOW, new BullMqService(workflowInMemoryProviderService), queueProviderFactory);
 
     Logger.log(`Creating queue ${this.topic}`, LOG_CONTEXT);
 

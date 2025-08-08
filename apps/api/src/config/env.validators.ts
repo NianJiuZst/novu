@@ -43,6 +43,19 @@ export const envValidators = {
   NOVU_REGION: str({ default: 'local' }),
   NOVU_SECRET_KEY: str({ default: '' }),
   INTERNAL_SERVICES_API_KEY: str({ default: undefined }),
+  // Queue configuration
+  QUEUE_PROVIDER: str({ choices: ['bullmq', 'sqs'], default: 'bullmq' }),
+  AWS_SQS_REGION: str({ default: 'us-east-1' }),
+  AWS_SQS_ACCESS_KEY_ID: str({ default: '' }),
+  AWS_SQS_SECRET_ACCESS_KEY: str({ default: '' }),
+  AWS_SQS_QUEUE_URL_PREFIX: str({ default: '' }),
+  AWS_SQS_DLQ_URL_PREFIX: str({ default: '' }),
+  AWS_SQS_MAX_RECEIVE_COUNT: num({ default: 3 }),
+  AWS_SQS_VISIBILITY_TIMEOUT: num({ default: 30 }),
+  AWS_SQS_MESSAGE_RETENTION_PERIOD: num({ default: 345600 }),
+  SQS_BATCH_SIZE: num({ default: 10 }),
+  SQS_POLLING_WAIT_TIME: num({ default: 20 }),
+  ENABLE_DUAL_QUEUE_PROCESSING: bool({ default: false }),
   // Novu Cloud third party services
   ...(processEnv.IS_SELF_HOSTED !== 'true' &&
     processEnv.NOVU_ENTERPRISE === 'true' && {
