@@ -1,5 +1,5 @@
 import { DirectionEnum } from '@novu/shared';
-import { createSearchParamsCache, parseAsArrayOf, parseAsInteger, parseAsString, parseAsStringEnum } from 'nuqs';
+import { parseAsArrayOf, parseAsInteger, parseAsString, parseAsStringEnum, useQueryStates } from 'nuqs';
 import { useCallback } from 'react';
 import { SortableColumn } from '@/components/workflow-list';
 
@@ -24,20 +24,18 @@ export interface WorkflowsUrlState {
   hasActiveFilters: boolean;
 }
 
-const searchParamsCache = createSearchParamsCache({
-  query: parseAsString.withDefault(''),
-  tags: parseAsArrayOf(parseAsString).withDefault([]),
-  status: parseAsArrayOf(parseAsString).withDefault([]),
-  orderBy: parseAsStringEnum<SortableColumn>(['name', 'updatedAt', 'lastTriggeredAt']).withDefault('updatedAt'),
-  orderDirection: parseAsStringEnum<DirectionEnum>([DirectionEnum.ASC, DirectionEnum.DESC]).withDefault(
-    DirectionEnum.DESC
-  ),
-  offset: parseAsInteger.withDefault(0),
-  limit: parseAsInteger.withDefault(12),
-});
-
 export function useWorkflowsUrlState(): WorkflowsUrlState {
-  const { query, tags, status, orderBy, orderDirection, offset, limit } = searchParamsCache.all();
+  const [{ query, tags, status, orderBy, orderDirection, offset, limit }, setSearchParams] = useQueryStates({
+    query: parseAsString.withDefault(''),
+    tags: parseAsArrayOf(parseAsString).withDefault([]),
+    status: parseAsArrayOf(parseAsString).withDefault([]),
+    orderBy: parseAsStringEnum<SortableColumn>(['name', 'updatedAt', 'lastTriggeredAt']).withDefault('updatedAt'),
+    orderDirection: parseAsStringEnum<DirectionEnum>([DirectionEnum.ASC, DirectionEnum.DESC]).withDefault(
+      DirectionEnum.DESC
+    ),
+    offset: parseAsInteger.withDefault(0),
+    limit: parseAsInteger.withDefault(12),
+  });
 
   const filterValues: WorkflowFilters = {
     query,
@@ -49,29 +47,36 @@ export function useWorkflowsUrlState(): WorkflowsUrlState {
     limit,
   };
 
-  const updateQuery = useCallback((newQuery: string) => {
-    searchParamsCache.set('query', newQuery || null);
-    searchParamsCache.set('offset', 0);
-  }, []);
+  const updateQuery = useCallback(
+    (newQuery: string) => {
+      setSearchParams({ query: newQuery || null, offset: 0 });
+    },
+    [setSearchParams]
+  );
 
-  const updateTags = useCallback((newTags: string[]) => {
-    searchParamsCache.set('tags', newTags.length > 0 ? newTags : null);
-    searchParamsCache.set('offset', 0);
-  }, []);
+  const updateTags = useCallback(
+    (newTags: string[]) => {
+      setSearchParams({ tags: newTags.length > 0 ? newTags : null, offset: 0 });
+    },
+    [setSearchParams]
+  );
 
-  const updateStatus = useCallback((newStatus: string[]) => {
-    searchParamsCache.set('status', newStatus.length > 0 ? newStatus : null);
-    searchParamsCache.set('offset', 0);
-  }, []);
+  const updateStatus = useCallback(
+    (newStatus: string[]) => {
+      setSearchParams({ status: newStatus.length > 0 ? newStatus : null, offset: 0 });
+    },
+    [setSearchParams]
+  );
 
   const updatePagination = useCallback(
     (newOffset: number, newLimit?: number) => {
-      searchParamsCache.set('offset', newOffset);
+      const updates: { offset: number; limit?: number } = { offset: newOffset };
       if (newLimit && newLimit !== limit) {
-        searchParamsCache.set('limit', newLimit);
+        updates.limit = newLimit;
       }
+      setSearchParams(updates);
     },
-    [limit]
+    [setSearchParams, limit]
   );
 
   const toggleSort = useCallback(
@@ -83,19 +88,14 @@ export function useWorkflowsUrlState(): WorkflowsUrlState {
             : DirectionEnum.DESC
           : DirectionEnum.DESC;
 
-      searchParamsCache.set('orderBy', column);
-      searchParamsCache.set('orderDirection', newDirection);
-      searchParamsCache.set('offset', 0);
+      setSearchParams({ orderBy: column, orderDirection: newDirection, offset: 0 });
     },
-    [orderBy, orderDirection]
+    [setSearchParams, orderBy, orderDirection]
   );
 
   const resetFilters = useCallback(() => {
-    searchParamsCache.set('query', null);
-    searchParamsCache.set('tags', null);
-    searchParamsCache.set('status', null);
-    searchParamsCache.set('offset', 0);
-  }, []);
+    setSearchParams({ query: null, tags: null, status: null, offset: 0 });
+  }, [setSearchParams]);
 
   const hasActiveFilters = query.trim() !== '' || tags.length > 0 || status.length > 0;
 

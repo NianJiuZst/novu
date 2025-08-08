@@ -1,5 +1,6 @@
 import { ErrorBoundary, withProfiler } from '@sentry/react';
 import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NuqsAdapter } from 'nuqs/adapters/react-router';
 import { HelmetProvider } from 'react-helmet-async';
 import { Outlet } from 'react-router-dom';
 import { ToastIcon } from '@/components/primitives/sonner';
@@ -67,7 +68,9 @@ const RootRouteInternal = () => {
                 <HelmetProvider>
                   <TooltipProvider delayDuration={100}>
                     <EscapeKeyManagerProvider>
-                      <Outlet />
+                      <NuqsAdapter>
+                        <Outlet />
+                      </NuqsAdapter>
                     </EscapeKeyManagerProvider>
                   </TooltipProvider>
                 </HelmetProvider>
