@@ -181,32 +181,32 @@ export class SendMessage {
       );
     }
 
-    const sendMessageChannelCommand = SendMessageChannelCommand.create({
+    const sendMessageChannelCommand = {
       ...command,
-      step: stepTemplateResult || command.job.step,
+      step: stepTemplateResult,
       compileContext: payload,
       bridgeData: bridgeResponse,
       severity: command.severity,
-    });
+    };
 
     switch (stepType) {
       case StepTypeEnum.TRIGGER: {
         return { status: 'success' };
       }
       case StepTypeEnum.SMS: {
-        return await this.sendMessageSms.execute(sendMessageChannelCommand);
+        return await this.sendMessageSms.execute(SendMessageChannelCommand.create(sendMessageChannelCommand));
       }
       case StepTypeEnum.IN_APP: {
-        return await this.sendMessageInApp.execute(sendMessageChannelCommand);
+        return await this.sendMessageInApp.execute(SendMessageChannelCommand.create(sendMessageChannelCommand));
       }
       case StepTypeEnum.EMAIL: {
-        return await this.sendMessageEmail.execute(sendMessageChannelCommand);
+        return await this.sendMessageEmail.execute(SendMessageChannelCommand.create(sendMessageChannelCommand));
       }
       case StepTypeEnum.CHAT: {
-        return await this.sendMessageChat.execute(sendMessageChannelCommand);
+        return await this.sendMessageChat.execute(SendMessageChannelCommand.create(sendMessageChannelCommand));
       }
       case StepTypeEnum.PUSH: {
-        return await this.sendMessagePush.execute(sendMessageChannelCommand);
+        return await this.sendMessagePush.execute(SendMessageChannelCommand.create(sendMessageChannelCommand));
       }
       case StepTypeEnum.DIGEST: {
         return await this.digest.execute(command);
@@ -215,7 +215,7 @@ export class SendMessage {
         return await this.sendMessageDelay.execute(command);
       }
       case StepTypeEnum.CUSTOM: {
-        return await this.executeStepCustom.execute(sendMessageChannelCommand);
+        return await this.executeStepCustom.execute(SendMessageChannelCommand.create(sendMessageChannelCommand));
       }
       default: {
         throw new Error(`Unsupported step type: ${stepType}`);
