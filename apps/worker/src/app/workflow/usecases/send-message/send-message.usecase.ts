@@ -183,7 +183,7 @@ export class SendMessage {
 
     const sendMessageChannelCommand = SendMessageChannelCommand.create({
       ...command,
-      step: stepTemplateResult,
+      step: stepTemplateResult || command.job.step,
       compileContext: payload,
       bridgeData: bridgeResponse,
       severity: command.severity,
