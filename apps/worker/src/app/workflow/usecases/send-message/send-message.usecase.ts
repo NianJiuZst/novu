@@ -96,23 +96,26 @@ export class SendMessage {
     }
 
     const stepId = command.step.stepId || command.step.uuid || command.step._id;
-    if (!stepId) {
+    if (!stepId && command.step.template?.type !== StepTypeEnum.TRIGGER) {
       throw new PlatformException('Step ID is required');
     }
 
-    const stepTemplateResult = await this.stepTemplateFetcher.fetchStepTemplate({
-      workflowId: command._templateId,
-      stepId,
-      environmentId: command.environmentId,
-    });
+    let stepTemplateResult;
+    if (command.step.template?.type !== StepTypeEnum.TRIGGER) {
+      stepTemplateResult = await this.stepTemplateFetcher.fetchStepTemplate({
+        workflowId: command._templateId,
+        stepId: stepId || '',
+        environmentId: command.environmentId,
+      });
 
-    if (!stepTemplateResult) {
-      throw new PlatformException(
-        `Template not found for step ${command.step.stepId || command.step.uuid || command.step._id}`
-      );
+      if (!stepTemplateResult) {
+        throw new PlatformException(
+          `Template not found for step ${command.step.stepId || command.step.uuid || command.step._id}`
+        );
+      }
     }
 
-    const stepType = stepTemplateResult.template.type;
+    const stepType = command.step.template?.type;
 
     let bridgeResponse: ExecuteOutput | null = null;
     if (isChannelStep(stepType)) {
@@ -182,7 +185,7 @@ export class SendMessage {
     // Update the step to include the fetched template
     const stepWithTemplate = {
       ...command.step,
-      template: stepTemplateResult.template,
+      template: stepTemplateResult?.template,
     };
 
     const sendMessageChannelCommand = SendMessageChannelCommand.create({
