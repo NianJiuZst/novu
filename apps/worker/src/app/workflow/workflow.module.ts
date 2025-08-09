@@ -34,6 +34,7 @@ import {
 import { JobTopicNameEnum } from '@novu/shared';
 import { ACTIVE_WORKERS, workersToProcess } from '../../config/worker-init.config';
 import { SharedModule } from '../shared/shared.module';
+import { StepTemplateFetcher } from './services/step-template-fetcher.service';
 import {
   Digest,
   ExecuteBridgeJob,
@@ -135,6 +136,7 @@ const USE_CASES = [
   InboundEmailParse,
   ExecuteBridgeJob,
   GetPreferences,
+  StepTemplateFetcher,
 ];
 
 const PROVIDERS: Provider[] = [];

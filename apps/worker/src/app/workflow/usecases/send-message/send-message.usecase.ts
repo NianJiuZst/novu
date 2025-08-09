@@ -37,6 +37,7 @@ import {
   ResourceTypeEnum,
   StepTypeEnum,
 } from '@novu/shared';
+import { StepTemplateFetcher } from '../../services/step-template-fetcher.service';
 import { ExecuteBridgeJob } from '../execute-bridge-job';
 import { Digest } from './digest';
 import { ExecuteStepCustom } from './execute-step-custom.usecase';
@@ -69,7 +70,8 @@ export class SendMessage {
     private tenantRepository: TenantRepository,
     private analyticsService: AnalyticsService,
     private normalizeVariablesUsecase: NormalizeVariables,
-    private executeBridgeJob: ExecuteBridgeJob
+    private executeBridgeJob: ExecuteBridgeJob,
+    private stepTemplateFetcher: StepTemplateFetcher
   ) {}
 
   @InstrumentUsecase()
@@ -88,7 +90,29 @@ export class SendMessage {
       })
     );
 
-    const stepType = command.step?.template?.type;
+    // Fetch step template from database instead of using job.step.template
+    if (!command._templateId) {
+      throw new PlatformException('Template ID is required');
+    }
+
+    const stepId = command.step.stepId || command.step.uuid || command.step._id;
+    if (!stepId) {
+      throw new PlatformException('Step ID is required');
+    }
+
+    const stepTemplateResult = await this.stepTemplateFetcher.fetchStepTemplate({
+      workflowId: command._templateId,
+      stepId,
+      environmentId: command.environmentId,
+    });
+
+    if (!stepTemplateResult) {
+      throw new PlatformException(
+        `Template not found for step ${command.step.stepId || command.step.uuid || command.step._id}`
+      );
+    }
+
+    const stepType = stepTemplateResult.template.type;
 
     let bridgeResponse: ExecuteOutput | null = null;
     if (isChannelStep(stepType)) {
@@ -155,8 +179,15 @@ export class SendMessage {
       );
     }
 
+    // Update the step to include the fetched template
+    const stepWithTemplate = {
+      ...command.step,
+      template: stepTemplateResult.template,
+    };
+
     const sendMessageChannelCommand = SendMessageChannelCommand.create({
       ...command,
+      step: stepWithTemplate,
       compileContext: payload,
       bridgeData: bridgeResponse,
       severity: command.severity,

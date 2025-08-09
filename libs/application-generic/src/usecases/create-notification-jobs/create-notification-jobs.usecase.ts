@@ -195,10 +195,16 @@ export class CreateNotificationJobs {
   }
 
   private buildStepForJob(step, command: CreateNotificationJobsCommand) {
-    return {
+    const stepForJob = {
       ...step,
       ...(command.bridgeUrl ? { bridgeUrl: command.bridgeUrl } : {}),
     };
+
+    // Remove all template properties from the step except for the type
+    const { template } = stepForJob;
+    stepForJob.template = { type: template.type };
+
+    return stepForJob;
   }
 
   private createATriggerJobIfMissing(

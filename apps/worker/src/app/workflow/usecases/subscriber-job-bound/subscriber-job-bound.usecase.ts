@@ -13,7 +13,12 @@ import {
   PinoLogger,
   TraceLogRepository,
 } from '@novu/application-generic';
-import { IntegrationRepository, NotificationTemplateEntity, NotificationTemplateRepository } from '@novu/dal';
+import {
+  IntegrationRepository,
+  MessageTemplateRepository,
+  NotificationTemplateEntity,
+  NotificationTemplateRepository,
+} from '@novu/dal';
 import {
   buildWorkflowPreferences,
   ChannelTypeEnum,
@@ -35,6 +40,7 @@ export class SubscriberJobBound {
     private createNotificationJobs: CreateNotificationJobs,
     private createOrUpdateSubscriberUsecase: CreateOrUpdateSubscriberUseCase,
     private integrationRepository: IntegrationRepository,
+    private messageTemplateRepository: MessageTemplateRepository,
     private notificationTemplateRepository: NotificationTemplateRepository,
     private logger: PinoLogger,
     private analyticsService: AnalyticsService,
@@ -95,7 +101,6 @@ export class SubscriberJobBound {
       transactionId: command.transactionId,
       _template: template._id,
       _organization: command.organizationId,
-      channels: template?.steps.map((step) => step.template?.type),
       source: command.payload.__source || 'api',
       subscriberSource: _subscriberSource || null,
       requestCategory: requestCategory || null,
