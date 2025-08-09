@@ -124,6 +124,7 @@ export class InboxController {
         snoozed: query.snoozed,
         seen: query.seen,
         data: query.data,
+        severity: query.severity,
       })
     );
   }
@@ -159,6 +160,7 @@ export class InboxController {
         subscriberId: subscriberSession.subscriberId,
         environmentId: subscriberSession._environmentId,
         tags: query.tags,
+        severity: query.severity,
       })
     );
   }
