@@ -30,13 +30,7 @@ export class StepTemplateFetcher {
     const { workflowId, stepId, environmentId } = params;
 
     try {
-      const workflow = await this.notificationTemplateRepository.findOne(
-        {
-          _id: workflowId,
-          _environmentId: environmentId,
-        },
-        'steps'
-      );
+      const workflow = await this.notificationTemplateRepository.findById(workflowId, environmentId);
 
       if (!workflow) {
         this.logger.warn(`Workflow not found: ${workflowId}`);
@@ -68,32 +62,6 @@ export class StepTemplateFetcher {
       };
     } catch (error) {
       this.logger.error(`Error fetching step template for workflow ${workflowId}, step ${stepId}:`, error);
-
-      return null;
-    }
-  }
-
-  async fetchStepTemplateByMessageTemplateId(params: {
-    messageTemplateId: string;
-    environmentId: string;
-  }): Promise<MessageTemplateEntity | null> {
-    const { messageTemplateId, environmentId } = params;
-
-    try {
-      const template = await this.messageTemplateRepository.findOne({
-        _id: messageTemplateId,
-        _environmentId: environmentId,
-      });
-
-      if (!template) {
-        this.logger.warn(`Template not found: ${messageTemplateId}`);
-
-        return null;
-      }
-
-      return template;
-    } catch (error) {
-      this.logger.error(`Error fetching template ${messageTemplateId}:`, error);
 
       return null;
     }
