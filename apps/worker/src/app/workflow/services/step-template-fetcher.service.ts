@@ -101,13 +101,13 @@ export class StepTemplateFetcher {
 
   private findStepByStepId(steps: NotificationStepEntity[], stepId: string): NotificationStepEntity | null {
     for (const step of steps) {
-      if (step.stepId === stepId || step.uuid === stepId || step._id === stepId) {
+      if (step._id?.toString() === String(stepId)) {
         return step;
       }
 
       if (step.variants) {
         for (const variant of step.variants) {
-          if (variant.stepId === stepId || variant.uuid === stepId || variant._id === stepId) {
+          if (variant._id === stepId) {
             return variant;
           }
         }

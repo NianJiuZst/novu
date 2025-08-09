@@ -90,18 +90,19 @@ export class SendMessage {
       })
     );
 
-    // Fetch step template from database instead of using job.step.template
     if (!command._templateId) {
       throw new PlatformException('Template ID is required');
     }
 
-    const stepId = command.step.stepId || command.step.uuid || command.step._id;
-    if (!stepId && command.step.template?.type !== StepTypeEnum.TRIGGER) {
-      throw new PlatformException('Step ID is required');
-    }
+    const stepId = command.step._id;
+    const stepType = command.step.template?.type;
 
     let stepTemplateResult;
     if (command.step.template?.type !== StepTypeEnum.TRIGGER) {
+      if (!stepId) {
+        throw new PlatformException('Step ID is required');
+      }
+
       stepTemplateResult = await this.stepTemplateFetcher.fetchStepTemplate({
         workflowId: command._templateId,
         stepId: stepId || '',
@@ -114,8 +115,6 @@ export class SendMessage {
         );
       }
     }
-
-    const stepType = command.step.template?.type;
 
     let bridgeResponse: ExecuteOutput | null = null;
     if (isChannelStep(stepType)) {
