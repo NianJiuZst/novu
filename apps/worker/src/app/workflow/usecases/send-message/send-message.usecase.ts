@@ -181,15 +181,9 @@ export class SendMessage {
       );
     }
 
-    // Update the step to include the fetched template
-    const stepWithTemplate = {
-      ...command.step,
-      template: stepTemplateResult?.template,
-    };
-
     const sendMessageChannelCommand = SendMessageChannelCommand.create({
       ...command,
-      step: stepWithTemplate,
+      step: stepTemplateResult,
       compileContext: payload,
       bridgeData: bridgeResponse,
       severity: command.severity,
