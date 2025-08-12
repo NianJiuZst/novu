@@ -47,6 +47,7 @@ const mapToNotification = ({
   tags,
   data,
   workflow,
+  transactionId,
 }: TODO): InboxNotification => {
   const to: Subscriber = {
     id: subscriber?._id,
@@ -67,6 +68,7 @@ const mapToNotification = ({
 
   return {
     id: _id,
+    transactionId,
     subject,
     body: content as string,
     to,
