@@ -1,7 +1,7 @@
 import { ISmsOptions } from '@novu/stateless';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { ISmsmodeApiResponse, SmsmodeSmsProvider } from './smsmode.provider';
 import { axiosSpy } from '../../../utils/test/spy-axios';
+import { ISmsmodeApiResponse, SmsmodeSmsProvider } from './smsmode.provider';
 
 test('should trigger smsmode library correctly', async () => {});
 
