@@ -38,7 +38,7 @@ export function GettingStartedMenuItem() {
     });
   };
 
-  if (user?.unsafeMetadata?.hideGettingStarted) {
+  if (user?.unsafeMetadata?.hideGettingStarted || allStepsCompleted) {
     return null;
   }
 
