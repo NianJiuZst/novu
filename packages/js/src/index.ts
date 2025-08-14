@@ -14,12 +14,14 @@ export {
   Preference,
   PreferenceLevel,
   PreferencesResponse,
-  SeverityLevelEnum as SeverityLevel,
+  SeverityLevelEnum,
   StandardNovuOptions,
   Subscriber,
+  UnreadCount,
   WebSocketEvent,
 } from './types';
 export {
+  areSeveritiesEqual,
   areTagsEqual,
   checkNotificationDataFilter,
   checkNotificationMatchesFilter,
