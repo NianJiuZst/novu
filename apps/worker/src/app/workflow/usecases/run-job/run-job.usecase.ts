@@ -100,6 +100,10 @@ export class RunJob {
         throw new PlatformException(`Notification with id ${job._notificationId} not found`);
       }
 
+      if (!job.step || !job.step._id || !job.step.template?.type) {
+        throw new PlatformException(`Step with id ${job.stepId} not found`);
+      }
+
       if (this.isUnsnoozeJob(job)) {
         await this.processUnsnoozeJob.execute(
           ProcessUnsnoozeJobCommand.create({
@@ -117,7 +121,8 @@ export class RunJob {
           identifier: job.identifier,
           payload: job.payload ?? {},
           overrides: job.overrides ?? {},
-          step: job.step,
+          stepId: job.step._id,
+          stepType: job.step.template?.type,
           transactionId: job.transactionId,
           notificationId: job._notificationId,
           _templateId: job._templateId,

@@ -1,6 +1,6 @@
 import { EnvironmentWithUserCommand } from '@novu/application-generic';
 import type { JobEntity, NotificationStepEntity } from '@novu/dal';
-import type { SeverityLevelEnum, TriggerOverrides, WorkflowPreferences } from '@novu/shared';
+import type { SeverityLevelEnum, StepTypeEnum, TriggerOverrides, WorkflowPreferences } from '@novu/shared';
 import { IsDefined, IsOptional, IsString } from 'class-validator';
 
 export class SendMessageCommand extends EnvironmentWithUserCommand {
@@ -15,7 +15,11 @@ export class SendMessageCommand extends EnvironmentWithUserCommand {
   overrides: TriggerOverrides;
 
   @IsDefined()
-  step: NotificationStepEntity;
+  stepId: string;
+
+  @IsDefined()
+  @IsString()
+  stepType: StepTypeEnum;
 
   @IsString()
   @IsDefined()

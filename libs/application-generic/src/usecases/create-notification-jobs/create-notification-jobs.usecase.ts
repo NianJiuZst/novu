@@ -196,13 +196,13 @@ export class CreateNotificationJobs {
 
   private buildStepForJob(step, command: CreateNotificationJobsCommand) {
     const stepForJob = {
-      ...step,
+      _id: step._id,
+      template: {
+        _id: step.template._id,
+        type: step.template.type,
+      },
       ...(command.bridgeUrl ? { bridgeUrl: command.bridgeUrl } : {}),
     };
-
-    // Remove all template properties from the step except for the type
-    const { template } = stepForJob;
-    stepForJob.template = { type: template.type };
 
     return stepForJob;
   }
