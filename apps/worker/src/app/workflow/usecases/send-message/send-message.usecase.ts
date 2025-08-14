@@ -81,25 +81,12 @@ export class SendMessage {
   @InstrumentUsecase()
   public async execute(command: SendMessageCommand): Promise<SendMessageResult> {
     const payload = await this.buildCompileContext(command);
-
-    const variables = await this.normalizeVariablesUsecase.execute(
-      NormalizeVariablesCommand.create({
-        filters: command.job.step.filters || [],
-        environmentId: command.environmentId,
-        organizationId: command.organizationId,
-        userId: command.userId,
-        step: command.step,
-        job: command.job,
-        variables: payload,
-      })
-    );
-
     if (!command._templateId) {
       throw new PlatformException('Template ID is required');
     }
 
-    const stepId = command.step._id;
-    const stepType = command.step.template?.type;
+    const stepId = command.stepId;
+    const stepType = command.stepType;
 
     let stepTemplateResult;
     if (stepType !== StepTypeEnum.TRIGGER) {
@@ -114,11 +101,21 @@ export class SendMessage {
       });
 
       if (!stepTemplateResult) {
-        throw new PlatformException(
-          `Template not found for step ${command.step.stepId || command.step.uuid || command.step._id}`
-        );
+        throw new PlatformException(`Template not found for step ${command.stepId}`);
       }
     }
+
+    const variables = await this.normalizeVariablesUsecase.execute(
+      NormalizeVariablesCommand.create({
+        filters: command.job.step.filters || [],
+        environmentId: command.environmentId,
+        organizationId: command.organizationId,
+        userId: command.userId,
+        step: stepTemplateResult,
+        job: command.job,
+        variables: payload,
+      })
+    );
 
     let bridgeResponse: ExecuteOutput | null = null;
     if (isChannelStep(stepType)) {
@@ -144,7 +141,12 @@ export class SendMessage {
       return { status: 'skipped', reason: DetailEnum.SKIPPED_BRIDGE_EXECUTION };
     }
 
-    const { stepCondition, channelPreference } = await this.evaluateFilters(isBridgeSkipped, command, variables);
+    const { stepCondition, channelPreference } = await this.evaluateFilters(
+      isBridgeSkipped,
+      command,
+      variables,
+      stepTemplateResult
+    );
     if (!command.payload?.$on_boarding_trigger) {
       this.sendProcessStepEvent(
         command,
@@ -262,7 +264,8 @@ export class SendMessage {
   private async evaluateFilters(
     bridgeSkip: boolean | undefined,
     command: SendMessageCommand,
-    variables: IFilterVariables
+    variables: IFilterVariables,
+    stepTemplateResult: NotificationStepEntity
   ): Promise<{
     stepCondition: IConditionsFilterResponse;
     channelPreference: { result: boolean; reason?: DetailEnum };
@@ -275,21 +278,25 @@ export class SendMessage {
     }
 
     const [stepCondition, channelPreference] = await Promise.all([
-      this.evaluateStepCondition(command, variables),
+      this.evaluateStepCondition(command, variables, stepTemplateResult),
       this.evaluateChannelPreference(command),
     ]);
 
     return { stepCondition, channelPreference };
   }
 
-  private async evaluateStepCondition(command: SendMessageCommand, variables: IFilterVariables) {
+  private async evaluateStepCondition(
+    command: SendMessageCommand,
+    variables: IFilterVariables,
+    step: NotificationStepEntity
+  ) {
     const stepCondition = await this.conditionsFilter.filter(
       ConditionsFilterCommand.create({
         filters: command.job.step.filters || [],
         environmentId: command.environmentId,
         organizationId: command.organizationId,
         userId: command.userId,
-        step: command.step,
+        step,
         job: command.job,
         variables,
       })
