@@ -8,6 +8,7 @@ import {
   CreateExecutionDetails,
   CreateExecutionDetailsCommand,
   DetailEnum,
+  FeatureFlagsService,
   GetPreferences,
   GetSubscriberTemplatePreference,
   GetSubscriberTemplatePreferenceCommand,
@@ -17,10 +18,12 @@ import {
   InstrumentUsecase,
   NormalizeVariables,
   NormalizeVariablesCommand,
+  PinoLogger,
   PlatformException,
 } from '@novu/application-generic';
 import {
   JobEntity,
+  NotificationStepEntity,
   NotificationTemplateRepository,
   SubscriberRepository,
   TenantEntity,
@@ -31,13 +34,13 @@ import {
   DigestTypeEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
+  FeatureFlagsKeysEnum,
   IDigestRegularMetadata,
   IPreferenceChannels,
   PreferencesTypeEnum,
   ResourceTypeEnum,
   StepTypeEnum,
 } from '@novu/shared';
-import { StepTemplateFetcher } from '../../services/step-template-fetcher.service';
 import { ExecuteBridgeJob } from '../execute-bridge-job';
 import { Digest } from './digest';
 import { ExecuteStepCustom } from './execute-step-custom.usecase';
@@ -71,7 +74,8 @@ export class SendMessage {
     private analyticsService: AnalyticsService,
     private normalizeVariablesUsecase: NormalizeVariables,
     private executeBridgeJob: ExecuteBridgeJob,
-    private stepTemplateFetcher: StepTemplateFetcher
+    private featureFlagsService: FeatureFlagsService,
+    private logger: PinoLogger
   ) {}
 
   @InstrumentUsecase()
@@ -98,14 +102,14 @@ export class SendMessage {
     const stepType = command.step.template?.type;
 
     let stepTemplateResult;
-    if (command.step.template?.type !== StepTypeEnum.TRIGGER) {
+    if (stepType !== StepTypeEnum.TRIGGER) {
       if (!stepId) {
         throw new PlatformException('Step ID is required');
       }
 
-      stepTemplateResult = await this.stepTemplateFetcher.fetchStepTemplate({
+      stepTemplateResult = await this.fetchStepTemplate({
         workflowId: command._templateId,
-        stepId: stepId || '',
+        stepId,
         environmentId: command.environmentId,
       });
 
@@ -181,12 +185,44 @@ export class SendMessage {
       );
     }
 
+    const isNotificationSeverityEnabled = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.IS_NOTIFICATION_SEVERITY_ENABLED,
+      defaultValue: false,
+      organization: { _id: command.organizationId },
+    });
+
+    let severity = command.severity;
+    const { overrides } = command;
+    if (
+      isNotificationSeverityEnabled &&
+      stepType !== StepTypeEnum.TRIGGER &&
+      overrides?.severity &&
+      overrides.severity !== severity
+    ) {
+      severity = overrides.severity;
+
+      await this.createExecutionDetails.execute(
+        CreateExecutionDetailsCommand.create({
+          ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
+          detail: DetailEnum.MESSAGE_SEVERITY_OVERRIDDEN,
+          source: ExecutionDetailsSourceEnum.INTERNAL,
+          status: ExecutionDetailsStatusEnum.PENDING,
+          isTest: false,
+          isRetry: false,
+          raw: JSON.stringify({
+            from: `${command.severity}`,
+            to: `${severity}`,
+          }),
+        })
+      );
+    }
+
     const sendMessageChannelCommand = {
       ...command,
       step: stepTemplateResult,
       compileContext: payload,
       bridgeData: bridgeResponse,
-      severity: command.severity,
+      severity,
     };
 
     switch (stepType) {
@@ -542,6 +578,48 @@ export class SendMessage {
     }
 
     return tenant;
+  }
+
+  async fetchStepTemplate(params: {
+    workflowId: string;
+    stepId: string;
+    environmentId: string;
+  }): Promise<NotificationStepEntity | null> {
+    const { workflowId, stepId, environmentId } = params;
+    const workflow = await this.notificationTemplateRepository.findById(workflowId, environmentId);
+
+    if (!workflow) {
+      this.logger.warn(`Workflow not found: ${workflowId}`);
+
+      return null;
+    }
+
+    const step = this.findStepByStepId(workflow.steps, stepId);
+    if (!step) {
+      this.logger.warn(`Step not found: ${stepId} in workflow ${workflowId}`);
+
+      return null;
+    }
+
+    return step;
+  }
+
+  private findStepByStepId(steps: NotificationStepEntity[], stepId: string): NotificationStepEntity | null {
+    for (const step of steps) {
+      if (step._id?.toString() === String(stepId)) {
+        return step;
+      }
+
+      if (step.variants) {
+        for (const variant of step.variants) {
+          if (variant._id === stepId) {
+            return variant;
+          }
+        }
+      }
+    }
+
+    return null;
   }
 }
 
