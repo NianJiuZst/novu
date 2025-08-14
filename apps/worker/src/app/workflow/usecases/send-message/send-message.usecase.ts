@@ -88,7 +88,7 @@ export class SendMessage {
     const stepId = command.stepId;
     const stepType = command.stepType;
 
-    let stepTemplateResult;
+    let stepTemplateResult: NotificationStepEntity | null;
     if (stepType !== StepTypeEnum.TRIGGER) {
       if (!stepId) {
         throw new PlatformException('Step ID is required');
@@ -103,11 +103,13 @@ export class SendMessage {
       if (!stepTemplateResult) {
         throw new PlatformException(`Template not found for step ${command.stepId}`);
       }
+    } else {
+      stepTemplateResult = command.job.step as NotificationStepEntity;
     }
 
     const variables = await this.normalizeVariablesUsecase.execute(
       NormalizeVariablesCommand.create({
-        filters: command.job.step.filters || [],
+        filters: stepTemplateResult?.filters || [],
         environmentId: command.environmentId,
         organizationId: command.organizationId,
         userId: command.userId,
@@ -147,6 +149,7 @@ export class SendMessage {
       variables,
       stepTemplateResult
     );
+
     if (!command.payload?.$on_boarding_trigger) {
       this.sendProcessStepEvent(
         command,
@@ -292,7 +295,7 @@ export class SendMessage {
   ) {
     const stepCondition = await this.conditionsFilter.filter(
       ConditionsFilterCommand.create({
-        filters: command.job.step.filters || [],
+        filters: step.filters || [],
         environmentId: command.environmentId,
         organizationId: command.organizationId,
         userId: command.userId,

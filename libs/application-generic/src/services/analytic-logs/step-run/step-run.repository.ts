@@ -399,7 +399,7 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
 
       // Core step run identification
       step_run_id: job._id,
-      step_id: job.step._id || job.step.stepId || job._id,
+      step_id: job.step._id || job._id,
       workflow_run_id: job._notificationId,
 
       // Context

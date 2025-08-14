@@ -101,7 +101,7 @@ export class RunJob {
       }
 
       if (!job.step || !job.step._id || !job.step.template?.type) {
-        throw new PlatformException(`Step with id ${job.stepId} not found`);
+        throw new PlatformException(`Step with id ${job.step._id} not found`);
       }
 
       if (this.isUnsnoozeJob(job)) {

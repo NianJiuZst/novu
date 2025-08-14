@@ -9,7 +9,6 @@ import {
 import { Types } from 'mongoose';
 import type { ChangePropsValueType } from '../../types';
 import type { EnvironmentId } from '../environment';
-import { NotificationStepEntity } from '../notification-template';
 import type { OrganizationId } from '../organization';
 
 export { JobStatusEnum };
@@ -19,7 +18,14 @@ export class JobEntity {
   identifier: string;
   payload: any;
   overrides: TriggerOverrides;
-  step: NotificationStepEntity;
+  step: {
+    bridgeUrl?: string;
+    _id: string;
+    template: {
+      _id: string;
+      type: StepTypeEnum;
+    };
+  };
   tenant?: ITenantDefine;
   transactionId: string;
   _notificationId: string;
