@@ -1,9 +1,7 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { WorkflowResponseDto } from '@novu/shared';
 import { getWorkflow, getWorkflows } from '@/api/workflows';
 import { useEnvironment } from '../context/environment/hooks';
-
 import { QueryKeys } from '@/utils/query-keys';
 import { ONBOARDING_DEMO_WORKFLOW_ID } from '../config';
 
@@ -26,10 +24,9 @@ export function useFirstTriggerDetection({
   const [visitTimestamp, setVisitTimestamp] = useState<string | null>(null);
   const [workflowSlug, setWorkflowSlug] = useState<string | null>(null);
   const { currentEnvironment } = useEnvironment();
-  const initialLastTriggeredAtRef = useRef<string | null | undefined>(undefined);
 
   // First, fetch workflows to find the demo workflow slug
-  const { data: workflowsData, isPending: isWorkflowsPending, error: workflowsError } = useQuery({
+  const { data: workflowsData } = useQuery({
     queryKey: [QueryKeys.fetchWorkflows, currentEnvironment?._id, ONBOARDING_DEMO_WORKFLOW_ID],
     queryFn: () => {
       return getWorkflows({ 
@@ -73,9 +70,7 @@ export function useFirstTriggerDetection({
     staleTime: 0,
   });
 
-
-
-  // Initialize visit timestamp and baseline lastTriggeredAt when first loaded
+  // Initialize visit timestamp when first loaded
   useEffect(() => {
     if (!enabled || !currentEnvironment || isPending) return;
 
@@ -92,11 +87,6 @@ export function useFirstTriggerDetection({
       const timestamp = new Date().toISOString();
       setVisitTimestamp(timestamp);
     }
-
-    // Set initial lastTriggeredAt on first load
-    if (initialLastTriggeredAtRef.current === undefined) {
-      initialLastTriggeredAtRef.current = workflow.lastTriggeredAt || null;
-    }
   }, [enabled, currentEnvironment, workflow, isPending, error, visitTimestamp]);
 
   // Start waiting for trigger
@@ -106,11 +96,6 @@ export function useFirstTriggerDetection({
     }
     setIsWaitingForTrigger(true);
   }, [hasDetectedFirstTrigger]);
-
-  // Stop waiting for trigger
-  const stopWaiting = useCallback(() => {
-    setIsWaitingForTrigger(false);
-  }, []);
 
   // Detect when lastTriggeredAt changes (first trigger after visit)
   useEffect(() => {
@@ -139,54 +124,13 @@ export function useFirstTriggerDetection({
     setIsWaitingForTrigger(false);
     setVisitTimestamp(null);
     setWorkflowSlug(null);
-    initialLastTriggeredAtRef.current = undefined;
   }, []);
-
-  // Reset workflow lastTriggeredAt field (for testing)
-  const resetWorkflowTrigger = useCallback(async () => {
-    if (!workflow || !currentEnvironment) return;
-    
-    try {
-      const response = await fetch(`http://localhost:3000/v1/workflows/${workflow._id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `ApiKey ${currentEnvironment.apiKeys?.[0]?.key}`,
-          'Content-Type': 'application/json',
-          'Novu-Environment-Id': currentEnvironment._id,
-        },
-        body: JSON.stringify({
-          name: workflow.name,
-          description: workflow.description,
-          active: workflow.active,
-          triggers: [
-            {
-              type: 'event',
-              identifier: workflow.workflowId,
-              variables: []
-            }
-          ],
-          lastTriggeredAt: null // Reset this field
-        })
-      });
-      
-      if (response.ok) {
-        // Reset local state
-        resetDetection();
-        // Force refetch
-        window.location.reload();
-      }
-    } catch (error) {
-      // Silent error handling
-    }
-  }, [workflow, currentEnvironment, resetDetection]);
 
   return {
     hasDetectedFirstTrigger,
     isWaitingForTrigger,
     startWaiting,
-    stopWaiting,
     resetDetection,
-    resetWorkflowTrigger, // Add the reset function
     isLoading: isPending,
     workflow,
     workflowSlug,

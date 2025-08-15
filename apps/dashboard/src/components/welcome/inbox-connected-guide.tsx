@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
 import { useFetchApiKeys } from '@/hooks/use-fetch-api-keys';
-import { useTriggerWorkflow } from '@/hooks/use-trigger-workflow';
 import { useFirstTriggerDetection } from '@/hooks/use-first-trigger-detection';
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { ONBOARDING_DEMO_WORKFLOW_ID } from '../../config';
@@ -240,7 +239,6 @@ function showStatusToast(variant: 'success' | 'error', message: string) {
 export function InboxConnectedGuide({ subscriberId, environment }: InboxConnectedGuideProps) {
   const navigate = useNavigate();
   const telemetry = useTelemetry();
-  const { triggerWorkflow, isPending } = useTriggerWorkflow(environment);
   useInitDemoWorkflow(environment);
   const apiKeysQuery = useFetchApiKeys();
   const apiKeys = apiKeysQuery.data?.data ?? [];
@@ -260,8 +258,6 @@ export function InboxConnectedGuide({ subscriberId, environment }: InboxConnecte
     },
   });
 
-
-
   // Auto-start waiting when component mounts and API key is available
   useEffect(() => {
     if (hasValidApiKey && !hasDetectedFirstTrigger && !isWaitingForTrigger) {
@@ -275,8 +271,6 @@ export function InboxConnectedGuide({ subscriberId, environment }: InboxConnecte
       };
     }
   }, [hasValidApiKey, hasDetectedFirstTrigger, isWaitingForTrigger, workflowSlug, startWaiting]);
-
-
 
   function handleCompleteOnboarding() {
     telemetry(TelemetryEvent.INBOX_ONBOARDING_COMPLETED);
@@ -302,7 +296,7 @@ export function InboxConnectedGuide({ subscriberId, environment }: InboxConnecte
                     <span className="text-success text-sm font-medium">In-App Channel Integration Activated</span>
                   </div>
                   <p className="text-foreground-400 text-xs">
-                    You've initilized your Inbox. The last step is to make an API call to confirm everything is working.
+                    You've initialized your Inbox. The last step is to make an API call to confirm everything is working.
                   </p>
                 </div>
               </div>
