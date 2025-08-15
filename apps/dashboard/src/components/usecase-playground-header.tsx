@@ -79,7 +79,7 @@ export function UsecasePlaygroundHeader({
               onClick={handleSkip}
               className="text-foreground-600 h-4 !text-xs !font-medium !leading-4"
             >
-              Skip, I'll explore myself
+              Skip to the Dashboard
             </LinkButton>
 
             <div className="h-0.5 w-0.5 rounded-full bg-black/30" />
@@ -91,7 +91,7 @@ export function UsecasePlaygroundHeader({
         </div>
       ) : (
         <div className="flex items-center gap-4">
-          {showStepper && <Stepper currentStep={currentStep} totalSteps={totalSteps} />}
+          {showStepper ? <Stepper currentStep={currentStep} totalSteps={totalSteps} /> : null}
         </div>
       )}
     </div>

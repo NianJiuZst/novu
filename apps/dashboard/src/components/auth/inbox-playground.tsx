@@ -1,10 +1,11 @@
 import { useOrganization } from '@clerk/clerk-react';
 import { useState } from 'react';
-import { RiFileCopyLine } from 'react-icons/ri';
+import { RiArrowRightSLine } from 'react-icons/ri';
+
 import { useNavigate } from 'react-router-dom';
 import { Notification5Fill } from '@/components/icons';
 import { useEnvironment } from '@/context/environment/hooks';
-import { useFetchApiKeys } from '@/hooks/use-fetch-api-keys';
+
 import { useInitDemoWorkflow } from '@/hooks/use-init-demo-workflow';
 import { useTriggerWorkflow } from '@/hooks/use-trigger-workflow';
 import { API_HOSTNAME, ONBOARDING_DEMO_WORKFLOW_ID } from '../../config';
@@ -19,27 +20,12 @@ import { InboxPreviewContent } from './inbox-preview-content';
 
 const PLAYGROUND_CONFIG = {
   title: 'The <Inbox/> your app deserves',
-  description: "This is what your users will see. Try sending a message. We've prefilled it for you.",
+  description: 'Try sending a notification',
   currentStep: 2,
   totalSteps: 4,
 } as const;
 
-export function generateCurlCommand(userId: string, apiKey: string): string {
-  if (!apiKey) {
-    throw new Error('API key not found');
-  }
 
-  return `curl -X POST ${API_HOSTNAME}/api/v1/events/trigger \\
-     -H "Content-Type: application/json" \\
-     -H "Authorization: Bearer ${apiKey}" \\
-     -d '{
-       "name": "${ONBOARDING_DEMO_WORKFLOW_ID}",
-       "to": {
-         "subscriberId": ${JSON.stringify(userId)}
-       },
-       "payload": {}
-     }'`;
-}
 
 function showCustomToast(message: string, variant: 'success' | 'error') {
   showToast({
@@ -63,7 +49,7 @@ export function InboxPlayground({ appId, subscriberId }: { appId: string; subscr
   const { organization } = useOrganization();
   const { currentEnvironment: environment } = useEnvironment();
   const { triggerWorkflow, isPending } = useTriggerWorkflow();
-  const apiKeysQuery = useFetchApiKeys();
+
   const [hasNotificationBeenSent, setHasNotificationBeenSent] = useState(false);
   const navigate = useNavigate();
   const telemetry = useTelemetry();
@@ -85,7 +71,9 @@ export function InboxPlayground({ appId, subscriberId }: { appId: string; subscr
       await triggerWorkflow({
         name: ONBOARDING_DEMO_WORKFLOW_ID,
         to: subscriberId,
-        payload: {},
+        payload: {
+          triggerSource: 'inbox-onboarding',
+        },
       });
 
       telemetry(TelemetryEvent.INBOX_NOTIFICATION_SENT);
@@ -97,24 +85,10 @@ export function InboxPlayground({ appId, subscriberId }: { appId: string; subscr
     }
   };
 
-  const handleCopyCurlCommand = async () => {
-    try {
-      if (!subscriberId) {
-        throw new Error('User ID not found. Please refresh the page.');
-      }
 
-      const apiKeys = apiKeysQuery?.data?.data ?? [];
-      const apiKey = apiKeys[0]?.key ?? '';
-      const curlCommand = generateCurlCommand(subscriberId, apiKey);
-      await navigator.clipboard.writeText(curlCommand);
-      showCustomToast('cURL command copied to clipboard!', 'success');
-    } catch (error) {
-      showCustomToast('Failed to copy cURL command', 'error');
-    }
-  };
 
   const handleImplementClick = () => {
-    telemetry(TelemetryEvent.INBOX_IMPLEMENTATION_CLICKED, {});
+    telemetry(TelemetryEvent.INBOX_NEXT_STEP_CLICKED, {});
     const queryParams = new URLSearchParams({}).toString();
     navigate(`${ROUTES.INBOX_EMBED}?${queryParams}`);
   };
@@ -164,18 +138,6 @@ export function InboxPlayground({ appId, subscriberId }: { appId: string; subscr
       {/* Action Buttons - Show with optimized interaction states */}
       <div className="bg-muted">
         <div className="flex justify-center gap-2 p-3">
-          <Button
-            variant="secondary"
-            size="xs"
-            trailingIcon={hasNotificationBeenSent ? Notification5Fill : RiFileCopyLine}
-            onClick={hasNotificationBeenSent ? handleSendNotification : handleCopyCurlCommand}
-            mode="outline"
-            className="px-2"
-            isLoading={hasNotificationBeenSent && isPending}
-            disabled={hasNotificationBeenSent && isPending}
-          >
-            {hasNotificationBeenSent ? 'Send again' : 'Copy cURL'}
-          </Button>
           {!hasNotificationBeenSent ? (
             <Button
               variant="secondary"
@@ -193,6 +155,7 @@ export function InboxPlayground({ appId, subscriberId }: { appId: string; subscr
               onClick={handleImplementClick}
               disabled={!appId}
               size="xs"
+              trailingIcon={RiArrowRightSLine}
               className="px-2.5 text-white disabled:opacity-50"
               style={{
                 background:
@@ -205,7 +168,7 @@ export function InboxPlayground({ appId, subscriberId }: { appId: string; subscr
                 fontFeatureSettings: '"cv09" on, "ss11" on, "calt" off, "liga" off',
               }}
             >
-              Implement &lt;Inbox /&gt;
+              Next Step
             </Button>
           )}
         </div>
