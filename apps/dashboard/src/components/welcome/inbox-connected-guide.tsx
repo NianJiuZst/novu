@@ -273,7 +273,7 @@ export function InboxConnectedGuide({ subscriberId, environment }: InboxConnecte
   }, [hasValidApiKey, hasDetectedFirstTrigger, isWaitingForTrigger, workflowSlug, startWaiting]);
 
   function handleCompleteOnboarding() {
-    telemetry(TelemetryEvent.INBOX_ONBOARDING_COMPLETED);
+    telemetry(TelemetryEvent.ONBOARDING_COMPLETED);
     navigate(ROUTES.WELCOME);
   }
 
