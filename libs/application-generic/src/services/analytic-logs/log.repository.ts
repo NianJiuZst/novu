@@ -1,10 +1,11 @@
 import { FeatureFlagsKeysEnum } from '@novu/shared';
-import { ClickhouseSchema, InferClickhouseSchemaType } from 'clickhouse-schema';
 import { addDays } from 'date-fns';
 import { PinoLogger } from 'nestjs-pino';
+import { z } from 'zod';
 import { generateObjectId } from '../../utils/generate-id';
 import { FeatureFlagsService } from '../feature-flags/feature-flags.service';
 import { ClickHouseService, InsertOptions } from './clickhouse.service';
+import { InferClickHouseSchema, NativeClickHouseSchema, parseClickHouseType } from './clickhouse-native';
 
 // Define operators as const assertion to maintain literal types
 const CLICKHOUSE_OPERATORS = [
@@ -70,9 +71,9 @@ export interface UnsafeWhere<T> {
 
 export type Where<T> = EnforcedWhere<T> | UnsafeWhere<T>;
 
-export type SchemaKeys<T extends ClickhouseSchema<any>> = keyof InferClickhouseSchemaType<T>;
+export type SchemaKeys<T extends NativeClickHouseSchema<z.ZodRawShape>> = keyof InferClickHouseSchema<T>;
 
-export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnhancedType> {
+export abstract class LogRepository<TSchema extends NativeClickHouseSchema<z.ZodRawShape>, TEnhancedType> {
   readonly table: string;
   readonly identifierPrefix: string;
 
@@ -83,6 +84,7 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
     protected readonly schemaOrderBy: SchemaKeys<TSchema>[],
     protected readonly featureFlagsService: FeatureFlagsService
   ) {
+    this.table = this.schema.tableName;
     this.initialize();
   }
 
@@ -91,7 +93,7 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
       return;
     }
 
-    const query = this.schema.GetCreateTableQuery();
+    const query = this.schema.getCreateTableQuery();
 
     try {
       await this.clickhouseService.exec({ query });
@@ -102,7 +104,14 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
   }
 
   private getColumnType(column: string): string {
-    return this.schema.schema[column]?.type?.toString() || 'String';
+    // Get column type from Zod schema description
+    const shape = this.schema.schema.shape;
+    const zodField = shape[column] as z.ZodTypeAny;
+
+    if (!zodField) return 'String';
+
+    const metadata = parseClickHouseType(zodField.description);
+    return metadata?.clickhouseType || 'String';
   }
 
   private validateColumnName(columnName: SchemaKeys<TSchema>): void {
@@ -114,7 +123,8 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
       throw new Error(`Invalid column name format: ${columnName}`);
     }
 
-    if (!this.schema.schema[columnName]) {
+    const shape = this.schema.schema.shape;
+    if (!shape[columnName]) {
       throw new Error(`Column '${columnName}' does not exist in schema`);
     }
   }
@@ -155,8 +165,8 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
     params: Record<string, unknown>;
   } {
     // Cast enhanced type to raw schema type only at this lowest level
-    const rawWhere = where as unknown as Where<InferClickhouseSchemaType<TSchema>>;
-    let allConditions: WhereCondition<InferClickhouseSchemaType<TSchema>>[] = [];
+    const rawWhere = where as unknown as Where<InferClickHouseSchema<TSchema>>;
+    let allConditions: WhereCondition<InferClickHouseSchema<TSchema>>[] = [];
 
     if ('__unsafe' in rawWhere) {
       // Unsafe mode - log for monitoring but allow
@@ -174,26 +184,26 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
     return this.buildWhereClauseFromConditions(allConditions);
   }
 
-  private buildEnforcedConditions(enforced: EnforcedContext): WhereCondition<InferClickhouseSchemaType<TSchema>>[] {
-    const condition = {
-      field: 'environment_id' as keyof InferClickhouseSchemaType<TSchema>,
+  private buildEnforcedConditions(enforced: EnforcedContext): WhereCondition<InferClickHouseSchema<TSchema>>[] {
+    const condition: FieldCondition<InferClickHouseSchema<TSchema>> = {
+      field: 'environment_id' as keyof InferClickHouseSchema<TSchema>,
       operator: '=' as const,
-      value: enforced.environmentId,
+      value: enforced.environmentId as InferClickHouseSchema<TSchema>['environment_id'],
     };
 
-    const conditions: WhereCondition<InferClickhouseSchemaType<TSchema>>[] = [condition];
+    const conditions: WhereCondition<InferClickHouseSchema<TSchema>>[] = [condition];
 
     return conditions;
   }
 
-  private buildWhereClauseFromConditions(conditions: WhereCondition<InferClickhouseSchemaType<TSchema>>[]): {
+  private buildWhereClauseFromConditions(conditions: WhereCondition<InferClickHouseSchema<TSchema>>[]): {
     clause: string;
     params: Record<string, unknown>;
   } {
     const params: Record<string, unknown> = {};
     let paramIndex = 0;
 
-    const buildSingleCondition = (condition: WhereCondition<InferClickhouseSchemaType<TSchema>>): string => {
+    const buildSingleCondition = (condition: WhereCondition<InferClickHouseSchema<TSchema>>): string => {
       // Handle OR conditions
       if ('$or' in condition) {
         if (!Array.isArray(condition.$or)) {
@@ -261,7 +271,7 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
     },
     options: InsertOptions
   ): Promise<void> {
-    const ids = data.map((item) => `${this.identifierPrefix}${generateObjectId()}`);
+    const ids = data.map(() => `${this.identifierPrefix}${generateObjectId()}`);
     const expirationDate = await this.getExpirationDate(context);
     const expiresAt = LogRepository.formatDateTime64(expirationDate);
 

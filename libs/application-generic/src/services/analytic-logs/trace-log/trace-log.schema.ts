@@ -1,65 +1,59 @@
-import {
-  CHDateTime64,
-  CHLowCardinality,
-  CHNullable,
-  CHString,
-  ClickhouseSchema,
-  InferClickhouseSchemaType,
-} from 'clickhouse-schema';
+import { z } from 'zod';
 import { Prettify } from '../../../utils/prettify.type';
+import { ClickHouseTypes as CH, createClickHouseSchema, InferClickHouseSchema } from '../clickhouse-native';
 
 export const TABLE_NAME = 'traces';
 
-const schemaDefinition = {
-  id: { type: CHString() },
-  created_at: { type: CHDateTime64(3, 'UTC') },
+const traceLogZodSchema = z.object({
+  id: z.string().describe(CH.String()),
+  created_at: z.date().describe(CH.DateTime64(3, 'UTC')),
 
   // Context
-  organization_id: { type: CHString() },
-  environment_id: { type: CHString() },
-  user_id: { type: CHNullable(CHString()) },
-  external_subscriber_id: { type: CHNullable(CHString()) },
-  subscriber_id: { type: CHNullable(CHString()) },
+  organization_id: z.string().describe(CH.String()),
+  environment_id: z.string().describe(CH.String()),
+  user_id: z.string().nullable().describe(CH.Nullable(CH.String())),
+  external_subscriber_id: z.string().nullable().describe(CH.Nullable(CH.String())),
+  subscriber_id: z.string().nullable().describe(CH.Nullable(CH.String())),
 
   // Trace metadata
-  event_type: { type: CHLowCardinality(CHString()) }, // e.g., "message:seen", "step_run:start", "step_run:end"
-  title: { type: CHString() }, // Human readable message
-  message: { type: CHNullable(CHString()) },
-  raw_data: { type: CHNullable(CHString()) },
+  event_type: z.string().describe(CH.LowCardinality(CH.String())), // e.g., "message:seen", "step_run:start", "step_run:end"
+  title: z.string().describe(CH.String()), // Human readable message
+  message: z.string().nullable().describe(CH.Nullable(CH.String())),
+  raw_data: z.string().nullable().describe(CH.Nullable(CH.String())),
 
-  status: { type: CHLowCardinality(CHString()) },
+  status: z.string().describe(CH.LowCardinality(CH.String())),
 
   // Correlation, Hierarchy context
-  entity_type: { type: CHLowCardinality(CHString()) }, // request, workflow_run, step_run
-  entity_id: { type: CHString() }, // ID of the related entity
+  entity_type: z.string().describe(CH.LowCardinality(CH.String())), // request, workflow_run, step_run
+  entity_id: z.string().describe(CH.String()), // ID of the related entity
 
   // Data retention
-  expires_at: { type: CHDateTime64(3, 'UTC') },
+  expires_at: z.date().describe(CH.DateTime64(3, 'UTC')),
 
   // Step run metadata
-  step_run_type: { type: CHString('') }, // default value is empty string
+  step_run_type: z.string().default('').describe(CH.String('')), // default value is empty string
 
   // Workflow run metadata
-  workflow_run_identifier: { type: CHString('') }, // default value is empty string
-};
+  workflow_run_identifier: z.string().default('').describe(CH.String('')), // default value is empty string
+});
 
-export const ORDER_BY: (keyof typeof schemaDefinition)[] = [
+export const ORDER_BY: (keyof z.infer<typeof traceLogZodSchema>)[] = [
   'entity_type',
   'organization_id',
   'entity_id',
   'created_at',
 ];
 
-export const TTL: keyof typeof schemaDefinition = 'expires_at';
+export const TTL: keyof z.infer<typeof traceLogZodSchema> = 'expires_at';
 
 const clickhouseSchemaOptions = {
   table_name: TABLE_NAME,
   engine: 'MergeTree',
-  order_by: `(${ORDER_BY.join(', ')})` as any,
+  order_by: `(${ORDER_BY.join(', ')})`,
   additional_options: ['PARTITION BY toYYYYMM(created_at)', `TTL toDateTime(${TTL})`],
 };
 
-export const traceLogSchema = new ClickhouseSchema(schemaDefinition, clickhouseSchemaOptions);
+export const traceLogSchema = createClickHouseSchema(traceLogZodSchema, clickhouseSchemaOptions);
 
 export type EventType =
   | 'message_seen'
@@ -152,7 +146,7 @@ export type TraceStatus = 'success' | 'error' | 'warning' | 'pending';
 
 export type StepType = 'in_app' | 'email' | 'sms' | 'chat' | 'push' | 'digest' | 'delay';
 
-type NativeTrace = InferClickhouseSchemaType<typeof traceLogSchema>;
+type NativeTrace = InferClickHouseSchema<typeof traceLogSchema>;
 
 export type TraceLogComplex = Omit<NativeTrace, 'event_type' | 'entity_type' | 'status' | 'step_run_type'> & {
   event_type: EventType;

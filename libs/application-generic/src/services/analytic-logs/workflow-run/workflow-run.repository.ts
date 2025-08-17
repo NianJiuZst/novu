@@ -6,10 +6,10 @@ import {
   NotificationTemplateRepository,
 } from '@novu/dal';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
-import { InferClickhouseSchemaType } from 'clickhouse-schema';
 import { PinoLogger } from 'nestjs-pino';
 import { FeatureFlagsService } from '../../feature-flags/feature-flags.service';
 import { ClickHouseService, InsertOptions } from '../clickhouse.service';
+import { InferClickHouseSchema } from '../clickhouse-native';
 import { LogRepository, SchemaKeys, Where } from '../log.repository';
 import { getInsertOptions } from '../shared';
 import { ORDER_BY, TABLE_NAME, WorkflowRun, WorkflowRunStatusEnum, workflowRunSchema } from './workflow-run.schema';
@@ -23,7 +23,7 @@ interface IWorkflowRunOptions {
 }
 
 // Type for selected columns from the workflow run schema
-type WorkflowRunColumns = keyof InferClickhouseSchemaType<typeof workflowRunSchema>;
+type WorkflowRunColumns = keyof InferClickHouseSchema<typeof workflowRunSchema>;
 
 // Utility type to create partial WorkflowRun based on selected columns
 type SelectedWorkflowRun<T extends readonly WorkflowRunColumns[]> = Pick<WorkflowRun, T[number]>;

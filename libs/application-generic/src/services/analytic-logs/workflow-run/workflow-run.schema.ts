@@ -1,68 +1,62 @@
-import {
-  CHDateTime64,
-  CHLowCardinality,
-  CHNullable,
-  CHString,
-  ClickhouseSchema,
-  InferClickhouseSchemaType,
-} from 'clickhouse-schema';
+import { z } from 'zod';
 import { Prettify } from '../../../utils/prettify.type';
+import { ClickHouseTypes as CH, createClickHouseSchema, InferClickHouseSchema } from '../clickhouse-native';
 
 export const TABLE_NAME = 'workflow_runs';
 
-const schemaDefinition = {
-  id: { type: CHString() },
-  created_at: { type: CHDateTime64(3, 'UTC') },
-  updated_at: { type: CHDateTime64(3, 'UTC') },
+const workflowRunZodSchema = z.object({
+  id: z.string().describe(CH.String()),
+  created_at: z.date().describe(CH.DateTime64(3, 'UTC')),
+  updated_at: z.date().describe(CH.DateTime64(3, 'UTC')),
 
   // Core workflow run identification
-  workflow_run_id: { type: CHString() }, // Maps to NotificationEntity._id
-  workflow_id: { type: CHString() }, // Maps to NotificationTemplateEntity._id
-  workflow_name: { type: CHString() }, // Maps to NotificationTemplateEntity.name
+  workflow_run_id: z.string().describe(CH.String()), // Maps to NotificationEntity._id
+  workflow_id: z.string().describe(CH.String()), // Maps to NotificationTemplateEntity._id
+  workflow_name: z.string().describe(CH.String()), // Maps to NotificationTemplateEntity.name
 
   // Context
-  organization_id: { type: CHString() },
-  environment_id: { type: CHString() },
-  user_id: { type: CHNullable(CHString()) },
-  subscriber_id: { type: CHString() },
-  external_subscriber_id: { type: CHNullable(CHString()) },
+  organization_id: z.string().describe(CH.String()),
+  environment_id: z.string().describe(CH.String()),
+  user_id: z.string().nullable().describe(CH.Nullable(CH.String())),
+  subscriber_id: z.string().describe(CH.String()),
+  external_subscriber_id: z.string().nullable().describe(CH.Nullable(CH.String())),
 
   // Execution metadata
-  status: { type: CHLowCardinality(CHString()) }, // pending, running, completed, failed, cancelled
-  trigger_identifier: { type: CHString() }, // The event identifier that triggered the workflow
+  status: z.string().describe(CH.LowCardinality(CH.String())), // pending, running, completed, failed, cancelled
+  trigger_identifier: z.string().describe(CH.String()), // The event identifier that triggered the workflow
 
   // Correlation and grouping
-  transaction_id: { type: CHString() },
-  channels: { type: CHString() }, // JSON array of channels: ["email", "sms", "push"]
+  transaction_id: z.string().describe(CH.String()),
+  channels: z.string().describe(CH.String()), // JSON array of channels: ["email", "sms", "push"]
 
   // Subscriber context
-  subscriber_to: { type: CHNullable(CHString()) }, // JSON representation of the 'to' field
-  payload: { type: CHNullable(CHString()) }, // JSON representation of the payload
-  control_values: { type: CHNullable(CHString()) }, // JSON representation of controls
+  subscriber_to: z.string().nullable().describe(CH.Nullable(CH.String())), // JSON representation of the 'to' field
+  payload: z.string().nullable().describe(CH.Nullable(CH.String())), // JSON representation of the payload
+  control_values: z.string().nullable().describe(CH.Nullable(CH.String())), // JSON representation of controls
 
   // Topic information
-  topics: { type: CHNullable(CHString()) }, // JSON array of topics
+  topics: z.string().nullable().describe(CH.Nullable(CH.String())), // JSON array of topics
 
   // Digest information
-  is_digest: { type: CHLowCardinality(CHString()) }, // 'true' or 'false'
-  digested_workflow_run_id: { type: CHNullable(CHString()) }, // Reference to parent digest if this is a digested notification
+  is_digest: z.string().describe(CH.LowCardinality(CH.String())), // 'true' or 'false'
+  digested_workflow_run_id: z.string().nullable().describe(CH.Nullable(CH.String())), // Reference to parent digest if this is a digested notification
 
   // Data retention
-  expires_at: { type: CHDateTime64(3, 'UTC') },
-};
+  expires_at: z.date().describe(CH.DateTime64(3, 'UTC')),
+});
 
-export const ORDER_BY: (keyof typeof schemaDefinition)[] = ['organization_id', 'workflow_run_id'];
+export const ORDER_BY: (keyof z.infer<typeof workflowRunZodSchema>)[] = ['organization_id', 'workflow_run_id'];
 
-export const TTL: keyof typeof schemaDefinition = 'expires_at';
+export const TTL: keyof z.infer<typeof workflowRunZodSchema> = 'expires_at';
 
 const clickhouseSchemaOptions = {
   table_name: TABLE_NAME,
   engine: 'ReplacingMergeTree(updated_at)',
-  order_by: `(${ORDER_BY.join(', ')})` as any,
+  order_by: `(${ORDER_BY.join(', ')})`,
   additional_options: ['PARTITION BY toYYYYMM(created_at)', `TTL toDateTime(${TTL})`],
 };
 
-export const workflowRunSchema = new ClickhouseSchema(schemaDefinition, clickhouseSchemaOptions);
+export const workflowRunSchema = createClickHouseSchema(workflowRunZodSchema, clickhouseSchemaOptions);
 
 export enum WorkflowRunStatusEnum {
   PENDING = 'pending',
@@ -70,7 +64,7 @@ export enum WorkflowRunStatusEnum {
   ERROR = 'error',
 }
 
-type NativeWorkflowRun = InferClickhouseSchemaType<typeof workflowRunSchema>;
+type NativeWorkflowRun = InferClickHouseSchema<typeof workflowRunSchema>;
 
 export type WorkflowRun = Prettify<
   Omit<NativeWorkflowRun, 'status'> & {
