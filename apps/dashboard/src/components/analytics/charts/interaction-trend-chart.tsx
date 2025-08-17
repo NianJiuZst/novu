@@ -144,13 +144,16 @@ export function InteractionTrendChart({ data, isLoading, error }: InteractionTre
                   );
 
                   // Prefer solid entries if available, otherwise use dotted
-                  const filteredPayload = (solidEntries.length > 0 ? solidEntries : dottedEntries).map((entry) => ({
-                    ...entry,
-                    // Clean up the name for display
-                    name:
-                      entry.name?.replace('Solid', '').replace('Dotted', '').replace(' (Current)', '') ||
-                      entry.dataKey?.toString().replace('Solid', '').replace('Dotted', ''),
-                  }));
+                  const filteredPayload = (solidEntries.length > 0 ? solidEntries : dottedEntries)
+                    .filter((entry) => entry.dataKey != null)
+                    .map((entry) => ({
+                      ...entry,
+                      dataKey: entry.dataKey as string,
+                      name: (typeof entry.name === 'string' ? entry.name : entry.dataKey?.toString() || '')
+                        .replace('Solid', '')
+                        .replace('Dotted', '')
+                        .replace(' (Current)', ''),
+                    }));
 
                   return <NovuTooltip active={active} payload={filteredPayload} label={label} showTotal={false} />;
                 }}
