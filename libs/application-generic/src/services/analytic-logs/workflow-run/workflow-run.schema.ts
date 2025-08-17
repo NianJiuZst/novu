@@ -4,6 +4,13 @@ import { ClickHouseTypes as CH, createClickHouseSchema, InferClickHouseSchema } 
 
 export const TABLE_NAME = 'workflow_runs';
 
+// Enum for backwards compatibility (mapped to Zod types)
+export enum WorkflowRunStatusEnum {
+  PENDING = 'pending',
+  SUCCESS = 'success',
+  ERROR = 'error',
+}
+
 const workflowRunZodSchema = z.object({
   id: z.string().describe(CH.String()),
   created_at: z.date().describe(CH.DateTime64(3, 'UTC')),
@@ -22,7 +29,7 @@ const workflowRunZodSchema = z.object({
   external_subscriber_id: z.string().nullable().describe(CH.Nullable(CH.String())),
 
   // Execution metadata
-  status: z.enum(['pending', 'completed', 'error']).describe(CH.LowCardinality(CH.String())),
+  status: z.nativeEnum(WorkflowRunStatusEnum).describe(CH.LowCardinality(CH.String())),
   trigger_identifier: z.string().describe(CH.String()), // The event identifier that triggered the workflow
 
   // Correlation and grouping
@@ -61,13 +68,6 @@ export const workflowRunSchema = createClickHouseSchema(workflowRunZodSchema, cl
 // Derive types from Zod schema
 export type WorkflowRunStatus = z.infer<typeof workflowRunZodSchema>['status'];
 export type WorkflowRunDigestFlag = z.infer<typeof workflowRunZodSchema>['is_digest'];
-
-// Enum for backwards compatibility (mapped to Zod types)
-export enum WorkflowRunStatusEnum {
-  PENDING = 'pending',
-  SUCCESS = 'success',
-  ERROR = 'error',
-}
 
 // Native WorkflowRun type derived from schema
 export type WorkflowRun = Prettify<InferClickHouseSchema<typeof workflowRunSchema>>;

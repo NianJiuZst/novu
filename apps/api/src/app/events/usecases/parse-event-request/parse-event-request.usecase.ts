@@ -299,6 +299,9 @@ export class ParseEventRequest {
       );
       return;
     }
+    if (!eventType) {
+      return;
+    }
 
     try {
       const traceData: Omit<Trace, 'id' | 'expires_at'> = {

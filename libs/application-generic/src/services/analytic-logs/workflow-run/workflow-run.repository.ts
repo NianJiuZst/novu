@@ -423,7 +423,7 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
       external_subscriber_id: options.externalSubscriberId || null,
 
       // Execution metadata
-      status: options.status || 'pending',
+      status: options.status || WorkflowRunStatusEnum.PENDING,
       trigger_identifier: this.getTriggerIdentifier(workflow),
 
       // Correlation and grouping

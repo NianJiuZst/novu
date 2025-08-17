@@ -137,7 +137,7 @@ export class MarkManyNotificationsAs {
       return;
     }
 
-    const allTraceData: Omit<Trace, 'id' | 'expires_at'>[] = [];
+    const allTraceData: (Omit<Trace, 'id' | 'expires_at'> | null)[] = [];
 
     for (const message of messages) {
       if (!message._jobId) continue;
@@ -181,7 +181,7 @@ export class MarkManyNotificationsAs {
 
     if (allTraceData.length > 0) {
       try {
-        await this.traceLogRepository.createStepRun(allTraceData);
+        await this.traceLogRepository.createStepRun(allTraceData.filter((trace) => trace !== null));
       } catch (error) {
         this.logger.warn({ err: error }, `Failed to create engagement traces for ${allTraceData.length} messages`);
       }
@@ -201,7 +201,11 @@ function createTraceLog({
   eventType: EventType;
   subscriberId: string;
   _subscriberId: string;
-}): Omit<Trace, 'id' | 'expires_at'> {
+}): Omit<Trace, 'id' | 'expires_at'> | null {
+  if (!eventType) {
+    return null;
+  }
+
   return {
     created_at: LogRepository.formatDateTime64(new Date()),
     organization_id: message._organizationId,
@@ -211,12 +215,12 @@ function createTraceLog({
     external_subscriber_id: subscriberId,
     event_type: eventType,
     title: mapEventTypeToTitle(eventType),
-    message: `Message ${eventType.replace('message_', '')} for subscriber ${message._subscriberId}`,
+    message: `Message ${eventType?.replace('message_', '')} for subscriber ${message._subscriberId}`,
     raw_data: null,
     status: 'success',
     entity_type: 'step_run',
     entity_id: message._jobId,
-    step_run_type: message.channel as StepType,
+    step_run_type: (message.channel as StepType) || '',
     workflow_run_identifier: message.templateIdentifier,
   };
 }

@@ -297,7 +297,7 @@ export class SubscriberJobBound {
     message?: string,
     rawData?: any
   ): Promise<void> {
-    if (!command.requestId) {
+    if (!command.requestId || !eventType) {
       return;
     }
 
