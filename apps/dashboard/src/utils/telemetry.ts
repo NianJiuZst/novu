@@ -77,4 +77,8 @@ export enum TelemetryEvent {
   REQUEST_LOG_ENTRY_CLICKED = 'Request log entry clicked',
   COMMAND_PALETTE_OPENED = 'Command palette opened',
   COMMAND_PALETTE_COMMAND_SELECTED = 'Command palette command selected',
+  HELP_SIDEBAR_OPENED = 'Help sidebar opened - [Help]',
+  HELP_SIDEBAR_CLOSED = 'Help sidebar closed - [Help]',
+  HELP_SIDEBAR_SEARCH = 'Help sidebar search - [Help]',
+  HELP_SIDEBAR_SUGGESTION_CLICKED = 'Help sidebar suggestion clicked - [Help]',
 }

@@ -1,20 +1,20 @@
 import { RiQuestionFill } from 'react-icons/ri';
-import { useBootIntercom } from '@/hooks/use-boot-intercom';
-import { usePlainChat } from '@/hooks/use-plain-chat';
-import { IS_SELF_HOSTED } from '../../config';
-import { openInNewTab } from '../../utils/url';
+import { useHelpSidebar } from '@/components/help-sidebar';
+import { useTelemetry } from '@/hooks/use-telemetry';
+import { TelemetryEvent } from '@/utils/telemetry';
 import { HeaderButton } from './header-button';
 
 export const CustomerSupportButton = () => {
-  const { showPlainLiveChat } = usePlainChat();
-  useBootIntercom();
+  const { openHelpSidebar } = useHelpSidebar();
+  const track = useTelemetry();
 
   function handleClick() {
-    if (IS_SELF_HOSTED) {
-      openInNewTab('https://go.novu.co/hosted-upgrade?utm_campaign=help-icon');
-    } else {
-      showPlainLiveChat();
-    }
+    track(TelemetryEvent.HELP_SIDEBAR_OPENED, {
+      trigger: 'header_button',
+      source: 'customer_support_button',
+    });
+
+    openHelpSidebar();
   }
 
   return (
