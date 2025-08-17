@@ -9,6 +9,8 @@ import {
   type ProviderVolumeDataPoint,
   ReportTypeEnum,
   type TotalInteractionsDataPoint,
+  type WorkflowRunsCountDataPoint,
+  type WorkflowRunsMetricDataPoint,
   type WorkflowRunsTrendDataPoint,
   type WorkflowVolumeDataPoint,
 } from '../api/activity';
@@ -105,6 +107,15 @@ export function generateMockAnalyticsData(): GetChartsResponse {
     previousPeriod: randomBetween(4000, 10000),
   };
 
+  const workflowRunsMetricData: WorkflowRunsMetricDataPoint = {
+    currentPeriod: randomBetween(500, 1500),
+    previousPeriod: randomBetween(400, 1200),
+  };
+
+  const workflowRunsCountData: WorkflowRunsCountDataPoint = {
+    count: randomBetween(800, 2000),
+  };
+
   return {
     data: {
       [ReportTypeEnum.DELIVERY_TREND]: deliveryTrendData,
@@ -117,6 +128,8 @@ export function generateMockAnalyticsData(): GetChartsResponse {
       [ReportTypeEnum.ACTIVE_SUBSCRIBERS]: activeSubscribersData,
       [ReportTypeEnum.AVG_MESSAGES_PER_SUBSCRIBER]: avgMessagesPerSubscriberData,
       [ReportTypeEnum.TOTAL_INTERACTIONS]: totalInteractionsData,
+      [ReportTypeEnum.WORKFLOW_RUNS_METRIC]: workflowRunsMetricData,
+      [ReportTypeEnum.WORKFLOW_RUNS_COUNT]: workflowRunsCountData,
     },
   };
 }
