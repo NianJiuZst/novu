@@ -423,7 +423,7 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
       external_subscriber_id: options.externalSubscriberId || null,
 
       // Execution metadata
-      status: options.status || 'pending',
+      status: options.status || WorkflowRunStatusEnum.PENDING,
       trigger_identifier: this.getTriggerIdentifier(workflow),
 
       // Correlation and grouping
@@ -439,7 +439,7 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
       topics: notification.topics ? JSON.stringify(notification.topics) : null,
 
       // Digest information
-      is_digest: !!notification._digestedNotificationId,
+      is_digest: notification._digestedNotificationId ? 'true' : 'false',
       digested_workflow_run_id: notification._digestedNotificationId || null,
     };
   }

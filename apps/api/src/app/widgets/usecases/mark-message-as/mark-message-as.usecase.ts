@@ -126,6 +126,10 @@ export class MarkMessageAs {
     eventType: EventType,
     userId: string
   ): Omit<Trace, 'id' | 'expires_at'>[] {
+    if (!eventType) {
+      return [];
+    }
+
     const traceDataArray: Omit<Trace, 'id' | 'expires_at'>[] = [];
 
     for (const message of messages) {
@@ -138,13 +142,13 @@ export class MarkMessageAs {
           subscriber_id: message._subscriberId,
           event_type: eventType,
           title: mapEventTypeToTitle(eventType),
-          message: `Message ${eventType.replace('message_', '')} for subscriber ${message._subscriberId}`,
+          message: `Message ${eventType?.replace('message_', '')} for subscriber ${message._subscriberId}`,
           raw_data: null,
           status: 'success',
           entity_type: 'step_run',
           entity_id: message._jobId,
           external_subscriber_id: message._subscriberId,
-          step_run_type: message.channel as StepType,
+          step_run_type: (message.channel as StepType) || '',
           workflow_run_identifier: message.templateIdentifier,
         });
       }

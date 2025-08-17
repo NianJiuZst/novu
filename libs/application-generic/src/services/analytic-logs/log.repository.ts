@@ -99,7 +99,7 @@ export abstract class LogRepository<TSchema extends NativeClickHouseSchema<z.Zod
       await this.clickhouseService.exec({ query });
       console.log('Table created', this.table);
     } catch (error) {
-      this.logger.error('Failed to create ClickHouse table', error);
+      this.logger.error({ err: error }, 'Failed to create ClickHouse table');
     }
   }
 

@@ -260,7 +260,7 @@ export class MarkNotificationsAsSeen {
       status: 'success',
       entity_type: 'step_run',
       entity_id: message._jobId,
-      step_run_type: message.channel as StepType,
+      step_run_type: (message.channel as StepType) || '',
       workflow_run_identifier: message.templateIdentifier,
     };
   }
