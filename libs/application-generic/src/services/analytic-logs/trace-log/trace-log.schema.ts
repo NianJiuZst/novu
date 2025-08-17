@@ -16,15 +16,15 @@ const traceLogZodSchema = z.object({
   subscriber_id: z.string().nullable().describe(CH.Nullable(CH.String())),
 
   // Trace metadata
-  event_type: z.string().describe(CH.LowCardinality(CH.String())), // e.g., "message:seen", "step_run:start", "step_run:end"
+  event_type: z.string().describe(CH.LowCardinality(CH.String())), // Complex enum with many values - keeping as string for now
   title: z.string().describe(CH.String()), // Human readable message
   message: z.string().nullable().describe(CH.Nullable(CH.String())),
   raw_data: z.string().nullable().describe(CH.Nullable(CH.String())),
 
-  status: z.string().describe(CH.LowCardinality(CH.String())),
+  status: z.enum(['success', 'error', 'warning', 'pending']).describe(CH.LowCardinality(CH.String())),
 
   // Correlation, Hierarchy context
-  entity_type: z.string().describe(CH.LowCardinality(CH.String())), // request, workflow_run, step_run
+  entity_type: z.enum(['request', 'step_run']).describe(CH.LowCardinality(CH.String())),
   entity_id: z.string().describe(CH.String()), // ID of the related entity
 
   // Data retention
@@ -140,18 +140,16 @@ export type EventType =
   | 'workflow_actor_processing_completed'
   | 'workflow_execution_failed';
 
-export type EntityType = 'request' | 'step_run';
-
-export type TraceStatus = 'success' | 'error' | 'warning' | 'pending';
-
+// Derive types from Zod schema
+export type EntityType = z.infer<typeof traceLogZodSchema>['entity_type'];
+export type TraceStatus = z.infer<typeof traceLogZodSchema>['status'];
 export type StepType = 'in_app' | 'email' | 'sms' | 'chat' | 'push' | 'digest' | 'delay';
 
+// Native trace type with enhanced event_type typing
 type NativeTrace = InferClickHouseSchema<typeof traceLogSchema>;
 
-export type TraceLogComplex = Omit<NativeTrace, 'event_type' | 'entity_type' | 'status' | 'step_run_type'> & {
+export type TraceLogComplex = Omit<NativeTrace, 'event_type' | 'step_run_type'> & {
   event_type: EventType;
-  entity_type: EntityType;
-  status: TraceStatus;
   step_run_type?: StepType;
 };
 

@@ -11,5 +11,6 @@ export {
   NativeClickHouseSchema as ClickhouseSchema,
 } from './schema';
 export * from './types';
-
 export { ClickHouseTypes as CH } from './types';
+// Essential helpers for ClickHouse integration
+export { ClickHouseTransforms, createEnumMapper } from './zod-helpers';

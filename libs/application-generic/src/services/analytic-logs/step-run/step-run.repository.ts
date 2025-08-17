@@ -6,7 +6,7 @@ import { FeatureFlagsService } from '../../feature-flags/feature-flags.service';
 import { ClickHouseService, InsertOptions } from '../clickhouse.service';
 import { LogRepository, SchemaKeys } from '../log.repository';
 import { getInsertOptions } from '../shared';
-import { ORDER_BY, StepRun, StepType, stepRunSchema, TABLE_NAME } from './step-run.schema';
+import { ORDER_BY, StepRun, StepType, stepRunSchema, stepTypeEnumMapper, TABLE_NAME } from './step-run.schema';
 
 type StepRunInsertData = Omit<StepRun, 'id' | 'expires_at'>;
 
@@ -39,27 +39,13 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
   }
 
   private mapStepTypeEnumToStepType(stepType: StepTypeEnum | undefined): StepType | null {
-    switch (stepType) {
-      case StepTypeEnum.EMAIL:
-        return 'email';
-      case StepTypeEnum.SMS:
-        return 'sms';
-      case StepTypeEnum.IN_APP:
-        return 'in_app';
-      case StepTypeEnum.PUSH:
-        return 'push';
-      case StepTypeEnum.CHAT:
-        return 'chat';
-      case StepTypeEnum.DIGEST:
-        return 'digest';
-      case StepTypeEnum.TRIGGER:
-        return 'trigger';
-      case StepTypeEnum.DELAY:
-        return 'delay';
-      case StepTypeEnum.CUSTOM:
-        return 'custom';
-      default:
-        return null;
+    if (!stepType) return null;
+
+    try {
+      return stepTypeEnumMapper.parse(stepType);
+    } catch {
+      // If parsing fails, return null (backwards compatibility)
+      return null;
     }
   }
 
@@ -394,8 +380,8 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
     const stepType = this.mapStepTypeEnumToStepType(job.type || job.step.template?.type);
 
     return {
-      created_at: LogRepository.formatDateTime64(createdAt),
-      updated_at: LogRepository.formatDateTime64(now),
+      created_at: createdAt,
+      updated_at: now,
 
       // Core step run identification
       step_run_id: job._id,

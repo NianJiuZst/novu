@@ -22,10 +22,8 @@ interface IWorkflowRunOptions {
   externalSubscriberId?: string;
 }
 
-// Type for selected columns from the workflow run schema
+// Types for column selection (keeping existing functionality)
 type WorkflowRunColumns = keyof InferClickHouseSchema<typeof workflowRunSchema>;
-
-// Utility type to create partial WorkflowRun based on selected columns
 type SelectedWorkflowRun<T extends readonly WorkflowRunColumns[]> = Pick<WorkflowRun, T[number]>;
 
 const WORKFLOW_RUN_INSERT_OPTIONS: InsertOptions = getInsertOptions(
@@ -409,8 +407,8 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
     const createdAt = new Date(now);
 
     return {
-      created_at: LogRepository.formatDateTime64(createdAt),
-      updated_at: LogRepository.formatDateTime64(now),
+      created_at: createdAt,
+      updated_at: now,
 
       // Core workflow run identification
       workflow_run_id: notification._id,
@@ -425,7 +423,7 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
       external_subscriber_id: options.externalSubscriberId || null,
 
       // Execution metadata
-      status: options.status || ('pending' as WorkflowRunStatusEnum),
+      status: options.status || 'pending',
       trigger_identifier: this.getTriggerIdentifier(workflow),
 
       // Correlation and grouping
@@ -441,7 +439,7 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
       topics: notification.topics ? JSON.stringify(notification.topics) : null,
 
       // Digest information
-      is_digest: notification._digestedNotificationId ? 'true' : 'false',
+      is_digest: !!notification._digestedNotificationId,
       digested_workflow_run_id: notification._digestedNotificationId || null,
     };
   }

@@ -22,7 +22,7 @@ const workflowRunZodSchema = z.object({
   external_subscriber_id: z.string().nullable().describe(CH.Nullable(CH.String())),
 
   // Execution metadata
-  status: z.string().describe(CH.LowCardinality(CH.String())), // pending, running, completed, failed, cancelled
+  status: z.enum(['pending', 'completed', 'error']).describe(CH.LowCardinality(CH.String())),
   trigger_identifier: z.string().describe(CH.String()), // The event identifier that triggered the workflow
 
   // Correlation and grouping
@@ -38,7 +38,7 @@ const workflowRunZodSchema = z.object({
   topics: z.string().nullable().describe(CH.Nullable(CH.String())), // JSON array of topics
 
   // Digest information
-  is_digest: z.string().describe(CH.LowCardinality(CH.String())), // 'true' or 'false'
+  is_digest: z.boolean().describe(CH.String()), // Boolean stored as 'true'/'false' strings in ClickHouse
   digested_workflow_run_id: z.string().nullable().describe(CH.Nullable(CH.String())), // Reference to parent digest if this is a digested notification
 
   // Data retention
@@ -58,16 +58,16 @@ const clickhouseSchemaOptions = {
 
 export const workflowRunSchema = createClickHouseSchema(workflowRunZodSchema, clickhouseSchemaOptions);
 
+// Derive types from Zod schema
+export type WorkflowRunStatus = z.infer<typeof workflowRunZodSchema>['status'];
+export type WorkflowRunDigestFlag = z.infer<typeof workflowRunZodSchema>['is_digest'];
+
+// Enum for backwards compatibility (mapped to Zod types)
 export enum WorkflowRunStatusEnum {
   PENDING = 'pending',
   SUCCESS = 'success',
   ERROR = 'error',
 }
 
-type NativeWorkflowRun = InferClickHouseSchema<typeof workflowRunSchema>;
-
-export type WorkflowRun = Prettify<
-  Omit<NativeWorkflowRun, 'status'> & {
-    status: WorkflowRunStatusEnum;
-  }
->;
+// Native WorkflowRun type derived from schema
+export type WorkflowRun = Prettify<InferClickHouseSchema<typeof workflowRunSchema>>;

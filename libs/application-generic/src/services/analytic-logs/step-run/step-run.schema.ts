@@ -1,6 +1,12 @@
+import { StepTypeEnum } from '@novu/shared';
 import { z } from 'zod';
 import { Prettify } from '../../../utils/prettify.type';
-import { ClickHouseTypes as CH, createClickHouseSchema, InferClickHouseSchema } from '../clickhouse-native';
+import {
+  ClickHouseTypes as CH,
+  createClickHouseSchema,
+  createEnumMapper,
+  InferClickHouseSchema,
+} from '../clickhouse-native';
 
 export const TABLE_NAME = 'step_runs';
 
@@ -23,12 +29,16 @@ const stepRunZodSchema = z.object({
   message_id: z.string().nullable().describe(CH.Nullable(CH.String())), // Links to MessageEntity
 
   // Step metadata
-  step_type: z.string().describe(CH.LowCardinality(CH.String())), // email, sms, in_app, push, etc.
+  step_type: z
+    .enum(['email', 'sms', 'in_app', 'push', 'chat', 'digest', 'trigger', 'delay', 'custom'])
+    .describe(CH.LowCardinality(CH.String())),
   step_name: z.string().nullable().describe(CH.Nullable(CH.String())), // todo remove this parameter because we do not have step name at this stage.
   provider_id: z.string().nullable().describe(CH.Nullable(CH.String())),
 
   // Execution details
-  status: z.string().describe(CH.LowCardinality(CH.String())), // pending, queued, running, completed, failed, skipped, cancelled
+  status: z
+    .enum(['pending', 'queued', 'running', 'delayed', 'completed', 'failed', 'canceled', 'merged', 'skipped'])
+    .describe(CH.LowCardinality(CH.String())),
 
   // Error handling
   error_code: z.string().nullable().describe(CH.Nullable(CH.String())),
@@ -54,17 +64,29 @@ const clickhouseSchemaOptions = {
 
 export const stepRunSchema = createClickHouseSchema(stepRunZodSchema, clickhouseSchemaOptions);
 
-export type StepType = 'email' | 'sms' | 'in_app' | 'push' | 'chat' | 'digest' | 'trigger' | 'delay' | 'custom';
+// Derive types from Zod schema instead of manual definitions
+export type StepType = z.infer<typeof stepRunZodSchema>['step_type'];
+export type StepRunStatus = z.infer<typeof stepRunZodSchema>['status'];
 
+// Split status types for convenience
 export type StepRunNonFinalStatus = 'pending' | 'queued' | 'running' | 'delayed';
 export type StepRunFinalStatus = 'completed' | 'failed' | 'canceled' | 'merged' | 'skipped';
-export type StepRunStatus = StepRunNonFinalStatus | StepRunFinalStatus;
 
-type NativeStepRun = InferClickHouseSchema<typeof stepRunSchema>;
+// Native StepRun type derived from schema
+export type StepRun = Prettify<InferClickHouseSchema<typeof stepRunSchema>>;
 
-type StepRunComplex = Omit<NativeStepRun, 'status' | 'step_type'> & {
-  status: StepRunStatus;
-  step_type: StepType;
-};
-
-export type StepRun = Prettify<StepRunComplex>;
+// Enum mapper for converting StepTypeEnum to StepType
+export const stepTypeEnumMapper = createEnumMapper<StepTypeEnum, StepType>(
+  {
+    [StepTypeEnum.EMAIL]: 'email',
+    [StepTypeEnum.SMS]: 'sms',
+    [StepTypeEnum.IN_APP]: 'in_app',
+    [StepTypeEnum.PUSH]: 'push',
+    [StepTypeEnum.CHAT]: 'chat',
+    [StepTypeEnum.DIGEST]: 'digest',
+    [StepTypeEnum.TRIGGER]: 'trigger',
+    [StepTypeEnum.DELAY]: 'delay',
+    [StepTypeEnum.CUSTOM]: 'custom',
+  },
+  'custom'
+);

@@ -164,7 +164,8 @@ export abstract class LogRepository<TSchema extends NativeClickHouseSchema<z.Zod
     clause: string;
     params: Record<string, unknown>;
   } {
-    // Cast enhanced type to raw schema type only at this lowest level
+    // Type assertion needed for generic compatibility - this is safe because TEnhancedType
+    // should always be compatible with the raw schema type in practice
     const rawWhere = where as unknown as Where<InferClickHouseSchema<TSchema>>;
     let allConditions: WhereCondition<InferClickHouseSchema<TSchema>>[] = [];
 
@@ -185,10 +186,11 @@ export abstract class LogRepository<TSchema extends NativeClickHouseSchema<z.Zod
   }
 
   private buildEnforcedConditions(enforced: EnforcedContext): WhereCondition<InferClickHouseSchema<TSchema>>[] {
+    // Create type-safe condition for environment enforcement
     const condition: FieldCondition<InferClickHouseSchema<TSchema>> = {
       field: 'environment_id' as keyof InferClickHouseSchema<TSchema>,
       operator: '=' as const,
-      value: enforced.environmentId as InferClickHouseSchema<TSchema>['environment_id'],
+      value: enforced.environmentId as InferClickHouseSchema<TSchema>['environment_id'], // Safe: all schemas have environment_id
     };
 
     const conditions: WhereCondition<InferClickHouseSchema<TSchema>>[] = [condition];
