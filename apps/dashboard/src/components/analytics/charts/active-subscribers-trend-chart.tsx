@@ -5,6 +5,7 @@ import { type ActiveSubscribersTrendDataPoint } from '../../../api/activity';
 import { ChartConfig, ChartContainer, ChartTooltip, NovuTooltip } from '../../primitives/chart';
 import { Skeleton } from '../../primitives/skeleton';
 import { ANALYTICS_TOOLTIPS } from '../constants/analytics-tooltips';
+import { findMostRecentDateIndex, isCurrentDate } from '../utils/chart-date-utils';
 import { createDateBasedHasDataChecker } from '../utils/chart-validation';
 import { generateDummyActiveSubscribersData } from './chart-dummy-data';
 import { type ActiveSubscribersChartData } from './chart-types';
@@ -48,6 +49,7 @@ export function ActiveSubscribersTrendChart({ data, isLoading, error }: ActiveSu
       }),
       count: dataPoint.count,
       timestamp: dataPoint.timestamp,
+      isCurrentDate: isCurrentDate(dataPoint.timestamp),
     }));
   }, [data]);
 
@@ -58,35 +60,93 @@ export function ActiveSubscribersTrendChart({ data, isLoading, error }: ActiveSu
     []
   );
 
-  const renderChart = useCallback((data: ActiveSubscribersChartData[], includeTooltip = true) => {
-    return (
-      <ChartContainer config={chartConfig} className="h-[160px] w-full">
-        <LineChart accessibilityLayer data={data}>
-          <XAxis
-            dataKey="date"
-            axisLine={{ stroke: '#e5e7eb', strokeDasharray: '3 3', strokeWidth: 1 }}
-            tickLine={false}
-            tick={{ fontSize: 10, fill: '#99a0ae', textAnchor: 'middle' }}
-            tickFormatter={(value, index) => {
-              if (index % 4 === 0) return value;
+  const renderChart = useCallback(
+    (data: (ActiveSubscribersChartData & { isCurrentDate?: boolean })[], includeTooltip = true) => {
+      // Always treat the last data point as the "current/incomplete" date
+      const lastIndex = data.length - 1;
 
-              return '';
-            }}
-            domain={['dataMin', 'dataMax']}
-          />
-          {includeTooltip && <ChartTooltip cursor={false} content={<NovuTooltip showTotal={false} />} />}
-          <Line
-            dataKey="count"
-            name="Active subscribers"
-            stroke="#6366f1"
-            strokeWidth={2}
-            dot={false}
-            type="monotone"
-          />
-        </LineChart>
-      </ChartContainer>
-    );
-  }, []);
+      // Transform data to add styling info for the last day
+      const transformedData = data.map((item, index) => ({
+        ...item,
+        // For the last day, create separate data keys for dotted lines
+        countSolid: index < lastIndex ? item.count : null,
+        // Include previous day for continuity + last day for dotted
+        countDotted: index >= lastIndex - 1 ? item.count : null,
+        // Keep original values for tooltip
+        count: item.count,
+      }));
+
+      return (
+        <ChartContainer config={chartConfig} className="h-[160px] w-full">
+          <LineChart accessibilityLayer data={transformedData}>
+            <XAxis
+              dataKey="date"
+              axisLine={{ stroke: '#e5e7eb', strokeDasharray: '3 3', strokeWidth: 1 }}
+              tickLine={false}
+              tick={{ fontSize: 10, fill: '#99a0ae', textAnchor: 'middle' }}
+              tickFormatter={(value, index) => {
+                if (index % 4 === 0) return value;
+
+                return '';
+              }}
+              domain={['dataMin', 'dataMax']}
+            />
+            {includeTooltip && (
+              <ChartTooltip
+                cursor={false}
+                content={({ active, payload, label }) => {
+                  if (!active || !payload || !payload.length) return null;
+
+                  // Show either solid OR dotted data, but not both
+                  const solidEntries = payload.filter((entry) => entry.dataKey === 'countSolid' && entry.value != null);
+
+                  const dottedEntries = payload.filter(
+                    (entry) => entry.dataKey === 'countDotted' && entry.value != null
+                  );
+
+                  // Prefer solid entries if available, otherwise use dotted
+                  const filteredPayload = (solidEntries.length > 0 ? solidEntries : dottedEntries).map((entry) => ({
+                    ...entry,
+                    // Clean up the name for display
+                    name:
+                      entry.name?.replace('Solid', '').replace('Dotted', '').replace(' (Current)', '') ||
+                      'Active subscribers',
+                  }));
+
+                  return <NovuTooltip active={active} payload={filteredPayload} label={label} showTotal={false} />;
+                }}
+              />
+            )}
+
+            {/* Solid line for complete data */}
+            <Line
+              dataKey="countSolid"
+              name="Active subscribers"
+              stroke="#6366f1"
+              strokeWidth={2}
+              dot={false}
+              type="monotone"
+              connectNulls={false}
+            />
+
+            {/* Dotted line for incomplete (last day) data */}
+            <Line
+              dataKey="countDotted"
+              name="Active subscribers (Current)"
+              stroke="#6366f1"
+              strokeWidth={2}
+              dot={false}
+              type="monotone"
+              strokeDasharray="4 4"
+              strokeOpacity={0.7}
+              connectNulls={false}
+            />
+          </LineChart>
+        </ChartContainer>
+      );
+    },
+    []
+  );
 
   const renderEmptyState = useCallback(
     (dummyData: ActiveSubscribersChartData[]) => {

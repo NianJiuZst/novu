@@ -5,6 +5,7 @@ import { type InteractionTrendDataPoint } from '../../../api/activity';
 import { ChartConfig, ChartContainer, ChartTooltip, NovuTooltip } from '../../primitives/chart';
 import { Skeleton } from '../../primitives/skeleton';
 import { ANALYTICS_TOOLTIPS } from '../constants/analytics-tooltips';
+import { findMostRecentDateIndex, isCurrentDate } from '../utils/chart-date-utils';
 import { createDateBasedHasDataChecker } from '../utils/chart-validation';
 import { generateDummyInteractionData } from './chart-dummy-data';
 import { type InteractionChartData } from './chart-types';
@@ -63,6 +64,7 @@ export function InteractionTrendChart({ data, isLoading, error }: InteractionTre
       messageSnoozed: dataPoint.messageSnoozed,
       messageArchived: dataPoint.messageArchived,
       timestamp: dataPoint.timestamp,
+      isCurrentDate: isCurrentDate(dataPoint.timestamp),
     }));
   }, [data]);
 
@@ -78,37 +80,172 @@ export function InteractionTrendChart({ data, isLoading, error }: InteractionTre
     []
   );
 
-  const renderChart = useCallback((data: InteractionChartData[], includeTooltip = true) => {
-    const firstDate = data[1]?.date || '';
-    const lastDate = data[data.length - 1]?.date || '';
+  const renderChart = useCallback(
+    (data: (InteractionChartData & { isCurrentDate?: boolean })[], includeTooltip = true) => {
+      const firstDate = data[1]?.date || '';
+      const lastDate = data[data.length - 1]?.date || '';
 
-    return (
-      <ChartContainer config={chartConfig} className="h-[160px] w-full">
-        <LineChart accessibilityLayer data={data}>
-          <XAxis
-            dataKey="date"
-            axisLine={{ stroke: '#e5e7eb', strokeDasharray: '3 3', strokeWidth: 1 }}
-            tickLine={false}
-            tick={{ fontSize: 10, fill: '#99a0ae', textAnchor: 'middle' }}
-            ticks={[firstDate, lastDate]}
-            domain={['dataMin', 'dataMax']}
-          />
-          {includeTooltip && <ChartTooltip cursor={false} content={<NovuTooltip showTotal={false} />} />}
-          <Line dataKey="messageSeen" name="Seen" stroke="#60a5fa" strokeWidth={2} dot={false} type="monotone" />
-          <Line dataKey="messageRead" name="Read" stroke="#34d399" strokeWidth={2} dot={false} type="monotone" />
-          <Line dataKey="messageSnoozed" name="Snoozed" stroke="#a78bfa" strokeWidth={2} dot={false} type="monotone" />
-          <Line
-            dataKey="messageArchived"
-            name="Archived"
-            stroke="#f97316"
-            strokeWidth={2}
-            dot={false}
-            type="monotone"
-          />
-        </LineChart>
-      </ChartContainer>
-    );
-  }, []);
+      // Always treat the last data point as the "current/incomplete" date
+      const lastIndex = data.length - 1;
+
+      // Transform data to add styling info for the last day
+      const transformedData = data.map((item, index) => ({
+        ...item,
+        // For the last day, create separate data keys for dotted lines
+        messageSeenSolid: index < lastIndex ? item.messageSeen : null,
+        messageReadSolid: index < lastIndex ? item.messageRead : null,
+        messageSnoozedSolid: index < lastIndex ? item.messageSnoozed : null,
+        messageArchivedSolid: index < lastIndex ? item.messageArchived : null,
+        // Include previous day for continuity + last day for dotted
+        messageSeenDotted: index >= lastIndex - 1 ? item.messageSeen : null,
+        messageReadDotted: index >= lastIndex - 1 ? item.messageRead : null,
+        messageSnoozedDotted: index >= lastIndex - 1 ? item.messageSnoozed : null,
+        messageArchivedDotted: index >= lastIndex - 1 ? item.messageArchived : null,
+        // Keep original values for tooltip
+        messageSeen: item.messageSeen,
+        messageRead: item.messageRead,
+        messageSnoozed: item.messageSnoozed,
+        messageArchived: item.messageArchived,
+      }));
+
+      return (
+        <ChartContainer config={chartConfig} className="h-[160px] w-full">
+          <LineChart accessibilityLayer data={transformedData}>
+            <XAxis
+              dataKey="date"
+              axisLine={{ stroke: '#e5e7eb', strokeDasharray: '3 3', strokeWidth: 1 }}
+              tickLine={false}
+              tick={{ fontSize: 10, fill: '#99a0ae', textAnchor: 'middle' }}
+              ticks={[firstDate, lastDate]}
+              domain={['dataMin', 'dataMax']}
+            />
+            {includeTooltip && (
+              <ChartTooltip
+                cursor={false}
+                content={({ active, payload, label }) => {
+                  if (!active || !payload || !payload.length) return null;
+
+                  // Show either solid OR dotted data, but not both
+                  const solidEntries = payload.filter(
+                    (entry) =>
+                      ['messageSeenSolid', 'messageReadSolid', 'messageSnoozedSolid', 'messageArchivedSolid'].includes(
+                        entry.dataKey as string
+                      ) && entry.value != null
+                  );
+
+                  const dottedEntries = payload.filter(
+                    (entry) =>
+                      [
+                        'messageSeenDotted',
+                        'messageReadDotted',
+                        'messageSnoozedDotted',
+                        'messageArchivedDotted',
+                      ].includes(entry.dataKey as string) && entry.value != null
+                  );
+
+                  // Prefer solid entries if available, otherwise use dotted
+                  const filteredPayload = (solidEntries.length > 0 ? solidEntries : dottedEntries).map((entry) => ({
+                    ...entry,
+                    // Clean up the name for display
+                    name:
+                      entry.name?.replace('Solid', '').replace('Dotted', '').replace(' (Current)', '') ||
+                      entry.dataKey?.toString().replace('Solid', '').replace('Dotted', ''),
+                  }));
+
+                  return <NovuTooltip active={active} payload={filteredPayload} label={label} showTotal={false} />;
+                }}
+              />
+            )}
+
+            {/* Solid lines for complete data */}
+            <Line
+              dataKey="messageSeenSolid"
+              name="Seen"
+              stroke="#60a5fa"
+              strokeWidth={2}
+              dot={false}
+              type="monotone"
+              connectNulls={false}
+            />
+            <Line
+              dataKey="messageReadSolid"
+              name="Read"
+              stroke="#34d399"
+              strokeWidth={2}
+              dot={false}
+              type="monotone"
+              connectNulls={false}
+            />
+            <Line
+              dataKey="messageSnoozedSolid"
+              name="Snoozed"
+              stroke="#a78bfa"
+              strokeWidth={2}
+              dot={false}
+              type="monotone"
+              connectNulls={false}
+            />
+            <Line
+              dataKey="messageArchivedSolid"
+              name="Archived"
+              stroke="#f97316"
+              strokeWidth={2}
+              dot={false}
+              type="monotone"
+              connectNulls={false}
+            />
+
+            {/* Dotted lines for incomplete (last day) data */}
+            <Line
+              dataKey="messageSeenDotted"
+              name="Seen (Current)"
+              stroke="#60a5fa"
+              strokeWidth={2}
+              dot={false}
+              type="monotone"
+              strokeDasharray="4 4"
+              strokeOpacity={0.7}
+              connectNulls={false}
+            />
+            <Line
+              dataKey="messageReadDotted"
+              name="Read (Current)"
+              stroke="#34d399"
+              strokeWidth={2}
+              dot={false}
+              type="monotone"
+              strokeDasharray="4 4"
+              strokeOpacity={0.7}
+              connectNulls={false}
+            />
+            <Line
+              dataKey="messageSnoozedDotted"
+              name="Snoozed (Current)"
+              stroke="#a78bfa"
+              strokeWidth={2}
+              dot={false}
+              type="monotone"
+              strokeDasharray="4 4"
+              strokeOpacity={0.7}
+              connectNulls={false}
+            />
+            <Line
+              dataKey="messageArchivedDotted"
+              name="Archived (Current)"
+              stroke="#f97316"
+              strokeWidth={2}
+              dot={false}
+              type="monotone"
+              strokeDasharray="4 4"
+              strokeOpacity={0.7}
+              connectNulls={false}
+            />
+          </LineChart>
+        </ChartContainer>
+      );
+    },
+    []
+  );
 
   const renderEmptyState = useCallback(
     (dummyData: InteractionChartData[]) => {
