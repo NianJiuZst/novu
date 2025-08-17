@@ -360,6 +360,67 @@ export async function getWorkflowRun(workflowRunId: string, environment: IEnviro
   return mapWorkflowRunToActivity(data.data);
 }
 
+export async function getWorkflowRunsCount({
+  environment,
+  filters,
+  signal,
+}: {
+  environment: IEnvironment;
+  filters?: ActivityFilters;
+  signal?: AbortSignal;
+}): Promise<number> {
+  let createdAtGte: string | undefined;
+  let workflowIds: string[] | undefined;
+  let subscriberIds: string[] | undefined;
+  let transactionIds: string[] | undefined;
+  let channels: string[] | undefined;
+  let topicKey: string | undefined;
+
+  if (filters?.channels?.length) {
+    channels = filters.channels;
+  }
+
+  if (filters?.topicKey) {
+    topicKey = filters.topicKey;
+  }
+
+  if (filters?.workflows?.length) {
+    workflowIds = filters.workflows;
+  }
+
+  if (filters?.subscriberId) {
+    subscriberIds = [filters.subscriberId];
+  }
+
+  if (filters?.transactionId) {
+    // Parse comma-delimited string into array for backend
+    transactionIds = filters.transactionId
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean);
+  }
+
+  if (filters?.dateRange) {
+    const after = new Date(Date.now() - getDateRangeInMs(filters?.dateRange));
+    createdAtGte = after.toISOString();
+  }
+
+  const response = await getCharts({
+    environment,
+    createdAtGte,
+    reportType: [ReportTypeEnum.WORKFLOW_RUNS_COUNT],
+    workflowIds,
+    subscriberIds,
+    transactionIds,
+    channels,
+    topicKey,
+    signal,
+  });
+
+  const countData = response.data[ReportTypeEnum.WORKFLOW_RUNS_COUNT] as WorkflowRunsCountDataPoint;
+  return countData?.count ?? 0;
+}
+
 // Charts API types and functions
 export enum ReportTypeEnum {
   DELIVERY_TREND = 'delivery-trend',
@@ -373,6 +434,7 @@ export enum ReportTypeEnum {
   TOTAL_INTERACTIONS = 'total-interactions',
   WORKFLOW_RUNS_TREND = 'workflow-runs-trend',
   ACTIVE_SUBSCRIBERS_TREND = 'active-subscribers-trend',
+  WORKFLOW_RUNS_COUNT = 'workflow-runs-count',
 }
 
 export type ChartDataPoint = {
@@ -439,10 +501,20 @@ export type ActiveSubscribersTrendDataPoint = {
   count: number;
 };
 
+export type WorkflowRunsCountDataPoint = {
+  count: number;
+};
+
 export type GetChartsRequest = {
   createdAtGte?: string;
   createdAtLte?: string;
   reportType: ReportTypeEnum[];
+  workflowIds?: string[];
+  subscriberIds?: string[];
+  transactionIds?: string[];
+  statuses?: string[];
+  channels?: string[];
+  topicKey?: string;
 };
 
 export type GetChartsResponse = {
@@ -459,6 +531,7 @@ export type GetChartsResponse = {
     | TotalInteractionsDataPoint
     | WorkflowRunsTrendDataPoint[]
     | ActiveSubscribersTrendDataPoint[]
+    | WorkflowRunsCountDataPoint
   >;
 };
 
@@ -467,12 +540,24 @@ export async function getCharts({
   createdAtGte,
   createdAtLte,
   reportType,
+  workflowIds,
+  subscriberIds,
+  transactionIds,
+  statuses,
+  channels,
+  topicKey,
   signal,
 }: {
   environment: IEnvironment;
   createdAtGte?: string;
   createdAtLte?: string;
   reportType: ReportTypeEnum[];
+  workflowIds?: string[];
+  subscriberIds?: string[];
+  transactionIds?: string[];
+  statuses?: string[];
+  channels?: string[];
+  topicKey?: string;
   signal?: AbortSignal;
 }): Promise<GetChartsResponse> {
   const searchParams = new URLSearchParams();
@@ -487,6 +572,40 @@ export async function getCharts({
 
   for (const type of reportType) {
     searchParams.append('reportType[]', type);
+  }
+
+  if (workflowIds?.length) {
+    for (const id of workflowIds) {
+      searchParams.append('workflowIds[]', id);
+    }
+  }
+
+  if (subscriberIds?.length) {
+    for (const id of subscriberIds) {
+      searchParams.append('subscriberIds[]', id);
+    }
+  }
+
+  if (transactionIds?.length) {
+    for (const id of transactionIds) {
+      searchParams.append('transactionIds[]', id);
+    }
+  }
+
+  if (statuses?.length) {
+    for (const status of statuses) {
+      searchParams.append('statuses[]', status);
+    }
+  }
+
+  if (channels?.length) {
+    for (const channel of channels) {
+      searchParams.append('channels[]', channel);
+    }
+  }
+
+  if (topicKey) {
+    searchParams.append('topicKey', topicKey);
   }
 
   return get<GetChartsResponse>(`/activity/charts?${searchParams.toString()}`, {

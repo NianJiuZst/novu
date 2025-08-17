@@ -1,5 +1,4 @@
 import { ClassSerializerInterceptor, Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ExternalApiAccessible, RequirePermissions, UserSession } from '@novu/application-generic';
 import { PermissionsEnum, UserSessionData } from '@novu/shared';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
@@ -30,8 +29,8 @@ export class ActivityController {
     private getRequestsUsecase: GetRequests,
     private getWorkflowRunsUsecase: GetWorkflowRuns,
     private getWorkflowRunUsecase: GetWorkflowRun,
-    private getChartsUsecase: GetCharts,
-    private getRequestUsecase: GetRequest
+    private getRequestUsecase: GetRequest,
+    private getChartsUsecase: GetCharts
   ) {}
 
   @Get('requests')
