@@ -2,10 +2,13 @@ import { useCallback, useMemo } from 'react';
 import { Line, LineChart, XAxis } from 'recharts';
 import { type WorkflowRunsTrendDataPoint } from '../../../api/activity';
 
-import { ChartConfig, ChartContainer, ChartTooltip, NovuTooltip } from '../../primitives/chart';
-import { Skeleton } from '../../primitives/skeleton';
+import { ChartConfig, ChartContainer, ChartTooltip } from '../../primitives/chart';
+import { ChartSkeleton } from '../components/chart-skeleton-factory';
+import { UniversalChartTooltip } from '../components/universal-chart-tooltip';
 import { ANALYTICS_TOOLTIPS } from '../constants/analytics-tooltips';
-import { findMostRecentDateIndex, isCurrentDate } from '../utils/chart-date-utils';
+import { useTransformedChartData } from '../hooks/use-chart-data';
+import { COLOR_PALETTES, createLineProps, createStandardXAxisProps } from '../utils/chart-config-factory';
+import { addDateMetadata, createSolidDottedTransformer } from '../utils/chart-data-transformers';
 import { createDateBasedHasDataChecker } from '../utils/chart-validation';
 import { generateDummyWorkflowRunsData } from './chart-dummy-data';
 import { type WorkflowRunsChartData } from './chart-types';
@@ -13,49 +16,18 @@ import { ChartWrapper } from './chart-wrapper';
 
 const chartConfig = {
   success: {
-    label: 'Success',
-    color: '#34d399',
+    label: 'Completed',
+    color: COLOR_PALETTES.workflow.success,
   },
   pending: {
     label: 'Pending',
-    color: '#facc15',
+    color: COLOR_PALETTES.workflow.pending,
   },
   error: {
     label: 'Error',
-    color: '#ef4444',
+    color: COLOR_PALETTES.workflow.error,
   },
 } satisfies ChartConfig;
-
-function WorkflowRunsTrendChartSkeleton() {
-  return (
-    <div className="h-[160px] w-full relative px-4">
-      <div className="absolute inset-0 flex items-end justify-between px-2">
-        {Array.from({ length: 35 }).map((_, i) => {
-          const baseHeight = 40;
-          const successHeight = baseHeight + Math.sin(i * 0.3) * 30 + Math.random() * 20;
-
-          return (
-            <div key={i} className="flex flex-col items-center flex-1 relative">
-              <div className="relative w-full flex justify-center">
-                <Skeleton
-                  className="rounded-sm"
-                  style={{
-                    height: `${Math.max(successHeight, 20)}px`,
-                    width: '15px',
-                  }}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="absolute bottom-6 left-4 right-4 h-px">
-        <Skeleton className="h-full w-full" />
-      </div>
-    </div>
-  );
-}
 
 type WorkflowRunsTrendChartProps = {
   data?: WorkflowRunsTrendDataPoint[];
@@ -64,19 +36,18 @@ type WorkflowRunsTrendChartProps = {
 };
 
 export function WorkflowRunsTrendChart({ data, isLoading, error }: WorkflowRunsTrendChartProps) {
-  const chartData = useMemo(() => {
-    return data?.map((dataPoint) => ({
-      date: new Date(dataPoint.timestamp).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      }),
-      success: dataPoint.success,
-      pending: dataPoint.pending,
-      error: dataPoint.error,
-      timestamp: dataPoint.timestamp,
-      isCurrentDate: isCurrentDate(dataPoint.timestamp),
-    }));
-  }, [data]);
+  const chartData = useTransformedChartData(data, (dataPoint) => ({
+    ...addDateMetadata([dataPoint])[0],
+    success: dataPoint.success,
+    pending: dataPoint.pending,
+    error: dataPoint.error,
+  }));
+
+  const transformedData = useMemo(() => {
+    if (!chartData) return [];
+    const transformer = createSolidDottedTransformer(['success', 'pending', 'error']);
+    return transformer(chartData);
+  }, [chartData]);
 
   const hasDataChecker = useCallback(
     createDateBasedHasDataChecker<WorkflowRunsChartData>((dataPoint: WorkflowRunsChartData) => {
@@ -86,146 +57,53 @@ export function WorkflowRunsTrendChart({ data, isLoading, error }: WorkflowRunsT
   );
 
   const renderChart = useCallback(
-    (data: (WorkflowRunsChartData & { isCurrentDate?: boolean })[], includeTooltip = true) => {
-      // Always treat the last data point as the "current/incomplete" date
-      const lastIndex = data.length - 1;
-
-      // Transform data to add styling info for the last day
-      const transformedData = data.map((item, index) => ({
-        ...item,
-        // For the last day, create separate data keys for dotted lines
-        successSolid: index < lastIndex ? item.success : null,
-        pendingSolid: index < lastIndex ? item.pending : null,
-        errorSolid: index < lastIndex ? item.error : null,
-        // Include previous day for continuity + last day for dotted
-        successDotted: index >= lastIndex - 1 ? item.success : null,
-        pendingDotted: index >= lastIndex - 1 ? item.pending : null,
-        errorDotted: index >= lastIndex - 1 ? item.error : null,
-        // Keep original values for tooltip (will be used by custom tooltip)
-        success: item.success,
-        pending: item.pending,
-        error: item.error,
-      }));
+    (data: WorkflowRunsChartData[], includeTooltip = true) => {
+      const workflowKeys = [
+        { key: 'success', label: 'Completed', color: COLOR_PALETTES.workflow.success },
+        { key: 'pending', label: 'Pending', color: COLOR_PALETTES.workflow.pending },
+        { key: 'error', label: 'Error', color: COLOR_PALETTES.workflow.error },
+      ];
 
       return (
         <ChartContainer config={chartConfig} className="h-[160px] w-full">
           <LineChart accessibilityLayer data={transformedData}>
             <XAxis
-              dataKey="date"
-              axisLine={{ stroke: '#e5e7eb', strokeDasharray: '3 3', strokeWidth: 1 }}
-              tickLine={false}
-              tick={{ fontSize: 10, fill: '#99a0ae', textAnchor: 'middle' }}
-              tickFormatter={(value, index) => {
-                if (index % 2 === 0) return value;
-
-                return '';
-              }}
-              domain={['dataMin', 'dataMax']}
+              {...createStandardXAxisProps(data, {
+                tickFormatter: (value, index) => (index % 2 === 0 ? value : ''),
+              })}
             />
             {includeTooltip && (
               <ChartTooltip
                 cursor={false}
-                content={({ active, payload, label }) => {
-                  if (!active || !payload || !payload.length) return null;
-
-                  // Show either solid OR dotted data, but not both
-                  const solidEntries = payload.filter(
-                    (entry) =>
-                      ['successSolid', 'pendingSolid', 'errorSolid'].includes(entry.dataKey as string) &&
-                      entry.value != null
-                  );
-
-                  const dottedEntries = payload.filter(
-                    (entry) =>
-                      ['successDotted', 'pendingDotted', 'errorDotted'].includes(entry.dataKey as string) &&
-                      entry.value != null
-                  );
-
-                  // Prefer solid entries if available, otherwise use dotted
-                  const filteredPayload = (solidEntries.length > 0 ? solidEntries : dottedEntries)
-                    .filter((entry) => entry.dataKey != null)
-                    .map((entry) => ({
-                      ...entry,
-                      dataKey: entry.dataKey as string,
-                      name: (typeof entry.name === 'string' ? entry.name : entry.dataKey?.toString() || '')
-                        .replace('Solid', '')
-                        .replace('Dotted', '')
-                        .replace(' (Current)', ''),
-                    }));
-
-                  return <NovuTooltip active={active} payload={filteredPayload} label={label} showTotal={false} />;
-                }}
+                content={
+                  <UniversalChartTooltip
+                    dataKeyPatterns={{
+                      solid: ['successSolid', 'pendingSolid', 'errorSolid'],
+                      dotted: ['successDotted', 'pendingDotted', 'errorDotted'],
+                    }}
+                    showTotal={false}
+                  />
+                }
               />
             )}
 
             {/* Solid lines for complete data */}
-            <Line
-              dataKey="successSolid"
-              name="Completed"
-              stroke="#34d399"
-              strokeWidth={2}
-              dot={false}
-              type="monotone"
-              connectNulls={false}
-            />
-            <Line
-              dataKey="pendingSolid"
-              name="Pending"
-              stroke="#facc15"
-              strokeWidth={2}
-              dot={false}
-              type="monotone"
-              connectNulls={false}
-            />
-            <Line
-              dataKey="errorSolid"
-              name="Error"
-              stroke="#ef4444"
-              strokeWidth={2}
-              dot={false}
-              type="monotone"
-              connectNulls={false}
-            />
+            {workflowKeys.map(({ key, label, color }) => (
+              <Line key={`${key}-solid`} {...createLineProps(`${key}Solid`, label, color)} />
+            ))}
 
             {/* Dotted lines for incomplete (last day) data */}
-            <Line
-              dataKey="successDotted"
-              name="Completed (Current)"
-              stroke="#34d399"
-              strokeWidth={2}
-              dot={false}
-              type="monotone"
-              strokeDasharray="4 4"
-              strokeOpacity={0.7}
-              connectNulls={false}
-            />
-            <Line
-              dataKey="pendingDotted"
-              name="Pending (Current)"
-              stroke="#facc15"
-              strokeWidth={2}
-              dot={false}
-              type="monotone"
-              strokeDasharray="4 4"
-              strokeOpacity={0.7}
-              connectNulls={false}
-            />
-            <Line
-              dataKey="errorDotted"
-              name="Error (Current)"
-              stroke="#ef4444"
-              strokeWidth={2}
-              dot={false}
-              type="monotone"
-              strokeDasharray="4 4"
-              strokeOpacity={0.7}
-              connectNulls={false}
-            />
+            {workflowKeys.map(({ key, label, color }) => (
+              <Line
+                key={`${key}-dotted`}
+                {...createLineProps(`${key}Dotted`, `${label} (Current)`, color, { isDotted: true })}
+              />
+            ))}
           </LineChart>
         </ChartContainer>
       );
     },
-    []
+    [transformedData]
   );
 
   const renderEmptyState = useCallback(
@@ -242,7 +120,7 @@ export function WorkflowRunsTrendChart({ data, isLoading, error }: WorkflowRunsT
       isLoading={isLoading}
       error={error}
       hasDataChecker={hasDataChecker}
-      loadingSkeleton={<WorkflowRunsTrendChartSkeleton />}
+      loadingSkeleton={<ChartSkeleton type="line" itemCount={35} height={160} />}
       dummyDataGenerator={generateDummyWorkflowRunsData}
       emptyStateRenderer={renderEmptyState}
       infoTooltip={ANALYTICS_TOOLTIPS.WORKFLOW_RUNS_TREND}
