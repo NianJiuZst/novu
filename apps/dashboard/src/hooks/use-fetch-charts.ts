@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { type GetChartsResponse, getCharts, ReportTypeEnum } from '@/api/activity';
 import { useEnvironment } from '@/context/environment/hooks';
+import { generateMockAnalyticsData } from '@/utils/analytics-mock-data';
 import { QueryKeys } from '@/utils/query-keys';
 
 type UseFetchChartsParams = {
@@ -17,6 +18,7 @@ type UseFetchChartsParams = {
   refetchInterval?: number | false;
   refetchOnWindowFocus?: boolean;
   staleTime?: number;
+  useMockData?: boolean;
 };
 
 export function useFetchCharts({
@@ -33,6 +35,7 @@ export function useFetchCharts({
   refetchInterval = false,
   refetchOnWindowFocus = false,
   staleTime = 5 * 60 * 1000, // 5 minutes
+  useMockData = false,
 }: UseFetchChartsParams = {}) {
   const { currentEnvironment } = useEnvironment();
 
@@ -50,9 +53,14 @@ export function useFetchCharts({
         statuses,
         channels,
         topicKey,
+        useMockData,
       },
     ],
     queryFn: ({ signal }) => {
+      if (useMockData) {
+        return Promise.resolve(generateMockAnalyticsData());
+      }
+
       if (!currentEnvironment) {
         throw new Error('Environment is required');
       }
@@ -74,7 +82,7 @@ export function useFetchCharts({
     staleTime,
     refetchOnWindowFocus,
     refetchInterval,
-    enabled: enabled && !!currentEnvironment?._id,
+    enabled: enabled && (useMockData || !!currentEnvironment?._id),
   });
 
   return {
