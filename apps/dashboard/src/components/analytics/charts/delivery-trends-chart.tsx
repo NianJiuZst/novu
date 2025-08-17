@@ -54,39 +54,48 @@ type DeliveryTooltipProps = {
 function DeliveryTooltip(props: DeliveryTooltipProps) {
   const data = props.payload?.[0]?.payload;
 
+  // Get values from either complete or incomplete data (whichever is available)
+  const getChannelValue = (channel: string) => {
+    const completeValue = data?.[`${channel}Complete` as keyof typeof data] as number;
+    const incompleteValue = data?.[`${channel}Incomplete` as keyof typeof data] as number;
+    const originalValue = data?.[channel as keyof typeof data] as number;
+
+    return completeValue || incompleteValue || originalValue || 0;
+  };
+
   const channels = [
     {
       key: 'email',
       label: 'Email',
-      value: data?.email || 0,
+      value: getChannelValue('email'),
       color: '#8b5cf6',
       icon: STEP_TYPE_TO_ICON[StepTypeEnum.EMAIL],
     },
     {
       key: 'push',
       label: 'Push',
-      value: data?.push || 0,
+      value: getChannelValue('push'),
       color: '#06b6d4',
       icon: STEP_TYPE_TO_ICON[StepTypeEnum.PUSH],
     },
     {
       key: 'chat',
       label: 'Chat',
-      value: data?.chat || 0,
+      value: getChannelValue('chat'),
       color: '#10b981',
       icon: STEP_TYPE_TO_ICON[StepTypeEnum.CHAT],
     },
     {
       key: 'sms',
       label: 'SMS',
-      value: data?.sms || 0,
+      value: getChannelValue('sms'),
       color: '#facc15',
       icon: STEP_TYPE_TO_ICON[StepTypeEnum.SMS],
     },
     {
       key: 'inApp',
       label: 'In-app (Inbox)',
-      value: data?.inApp || 0,
+      value: getChannelValue('inApp'),
       color: '#f97316',
       icon: STEP_TYPE_TO_ICON[StepTypeEnum.IN_APP],
     },
@@ -159,10 +168,28 @@ export function DeliveryTrendsChart({ data, isLoading }: DeliveryTrendsChartProp
   const renderChart = useCallback((data: DeliveryChartData[], includeTooltip = true) => {
     const firstDate = data[1]?.date || '';
     const lastDate = data[data.length - 1]?.date || '';
+    const lastIndex = data.length - 1;
+
+    // Transform data to add styling info for the last day (incomplete data)
+    const transformedData = data.map((item, index) => ({
+      ...item,
+      // For complete data (all days except last)
+      emailComplete: index < lastIndex ? item.email : null,
+      pushComplete: index < lastIndex ? item.push : null,
+      smsComplete: index < lastIndex ? item.sms : null,
+      inAppComplete: index < lastIndex ? item.inApp : null,
+      chatComplete: index < lastIndex ? item.chat : null,
+      // For incomplete data (last day only)
+      emailIncomplete: index === lastIndex ? item.email : null,
+      pushIncomplete: index === lastIndex ? item.push : null,
+      smsIncomplete: index === lastIndex ? item.sms : null,
+      inAppIncomplete: index === lastIndex ? item.inApp : null,
+      chatIncomplete: index === lastIndex ? item.chat : null,
+    }));
 
     return (
       <ChartContainer config={chartConfig} className="h-[160px] w-full">
-        <BarChart accessibilityLayer data={data} barCategoryGap={5}>
+        <BarChart accessibilityLayer data={transformedData} barCategoryGap={5}>
           <XAxis
             dataKey="date"
             tickLine={false}
@@ -172,8 +199,10 @@ export function DeliveryTrendsChart({ data, isLoading }: DeliveryTrendsChartProp
             ticks={[firstDate, lastDate]}
           />
           {includeTooltip && <ChartTooltip cursor={false} content={<DeliveryTooltip />} />}
+
+          {/* Complete data bars (solid) */}
           <Bar
-            dataKey="email"
+            dataKey="emailComplete"
             stackId="a"
             barSize={20}
             fill="#8b5cf6"
@@ -181,13 +210,90 @@ export function DeliveryTrendsChart({ data, isLoading }: DeliveryTrendsChartProp
             stroke="#ffffff"
             strokeWidth={2}
           />
-          <Bar dataKey="push" stackId="a" barSize={20} fill="#06b6d4" radius={3} stroke="#ffffff" strokeWidth={2} />
-          <Bar dataKey="sms" stackId="a" barSize={20} fill="#facc15" radius={3} stroke="#ffffff" strokeWidth={2} />
           <Bar
-            dataKey="inApp"
+            dataKey="pushComplete"
+            stackId="a"
+            barSize={20}
+            fill="#06b6d4"
+            radius={3}
+            stroke="#ffffff"
+            strokeWidth={2}
+          />
+          <Bar
+            dataKey="chatComplete"
+            stackId="a"
+            barSize={20}
+            fill="#10b981"
+            radius={3}
+            stroke="#ffffff"
+            strokeWidth={2}
+          />
+          <Bar
+            dataKey="smsComplete"
+            stackId="a"
+            barSize={20}
+            fill="#facc15"
+            radius={3}
+            stroke="#ffffff"
+            strokeWidth={2}
+          />
+          <Bar
+            dataKey="inAppComplete"
             stackId="a"
             barSize={20}
             fill="#f97316"
+            radius={[6, 6, 3, 3]}
+            stroke="#ffffff"
+            strokeWidth={2}
+          />
+
+          {/* Incomplete data bars (reduced opacity) */}
+          <Bar
+            dataKey="emailIncomplete"
+            stackId="a"
+            barSize={20}
+            fill="#8b5cf6"
+            fillOpacity={0.5}
+            radius={[3, 3, 6, 6]}
+            stroke="#ffffff"
+            strokeWidth={2}
+          />
+          <Bar
+            dataKey="pushIncomplete"
+            stackId="a"
+            barSize={20}
+            fill="#06b6d4"
+            fillOpacity={0.5}
+            radius={3}
+            stroke="#ffffff"
+            strokeWidth={2}
+          />
+          <Bar
+            dataKey="chatIncomplete"
+            stackId="a"
+            barSize={20}
+            fill="#10b981"
+            fillOpacity={0.5}
+            radius={3}
+            stroke="#ffffff"
+            strokeWidth={2}
+          />
+          <Bar
+            dataKey="smsIncomplete"
+            stackId="a"
+            barSize={20}
+            fill="#facc15"
+            fillOpacity={0.5}
+            radius={3}
+            stroke="#ffffff"
+            strokeWidth={2}
+          />
+          <Bar
+            dataKey="inAppIncomplete"
+            stackId="a"
+            barSize={20}
+            fill="#f97316"
+            fillOpacity={0.5}
             radius={[6, 6, 3, 3]}
             stroke="#ffffff"
             strokeWidth={2}
