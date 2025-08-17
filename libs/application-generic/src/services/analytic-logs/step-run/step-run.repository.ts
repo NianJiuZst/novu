@@ -380,8 +380,8 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
     const stepType = this.mapStepTypeEnumToStepType(job.type || job.step.template?.type);
 
     return {
-      created_at: createdAt,
-      updated_at: now,
+      created_at: LogRepository.formatDateTime64(createdAt),
+      updated_at: LogRepository.formatDateTime64(now),
 
       // Core step run identification
       step_run_id: job._id,

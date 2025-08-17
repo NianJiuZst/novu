@@ -407,8 +407,8 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
     const createdAt = new Date(now);
 
     return {
-      created_at: createdAt,
-      updated_at: now,
+      created_at: LogRepository.formatDateTime64(createdAt),
+      updated_at: LogRepository.formatDateTime64(now),
 
       // Core workflow run identification
       workflow_run_id: notification._id,

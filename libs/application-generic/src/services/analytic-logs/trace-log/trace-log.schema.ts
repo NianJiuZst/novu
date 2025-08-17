@@ -100,7 +100,7 @@ const traceLogZodSchema = z.object({
   subscriber_id: z.string().nullable().describe(CH.Nullable(CH.String())),
 
   // Trace metadata
-  event_type: z.enum(EVENT_TYPE_VALUES).describe(CH.LowCardinality(CH.String())),
+  event_type: z.string().describe(CH.LowCardinality(CH.String())),
   title: z.string().describe(CH.String()), // Human readable message
   message: z.string().nullable().describe(CH.Nullable(CH.String())),
   raw_data: z.string().nullable().describe(CH.Nullable(CH.String())),
@@ -108,7 +108,7 @@ const traceLogZodSchema = z.object({
   status: z.enum(['success', 'error', 'warning', 'pending']).describe(CH.LowCardinality(CH.String())),
 
   // Correlation, Hierarchy context
-  entity_type: z.enum(['request', 'step_run']).describe(CH.LowCardinality(CH.String())),
+  entity_type: z.string().describe(CH.LowCardinality(CH.String())),
   entity_id: z.string().describe(CH.String()), // ID of the related entity
 
   // Data retention
@@ -116,7 +116,8 @@ const traceLogZodSchema = z.object({
 
   // Step run metadata
   step_run_type: z
-    .enum(['in_app', 'email', 'sms', 'chat', 'push', 'digest', 'delay', ''])
+    .string()
+    .default('')
     .optional()
     .describe(CH.LowCardinality(CH.String(''))),
 
