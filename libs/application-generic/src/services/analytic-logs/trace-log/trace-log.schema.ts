@@ -116,7 +116,7 @@ const traceLogZodSchema = z.object({
 
   // Step run metadata
   step_run_type: z
-    .string()
+    .enum(['in_app', 'email', 'sms', 'chat', 'push', 'digest', 'delay', ''])
     .default('')
     .optional()
     .describe(CH.LowCardinality(CH.String(''))),
@@ -144,7 +144,8 @@ const clickhouseSchemaOptions = {
 export const traceLogSchema = createClickHouseSchema(traceLogZodSchema, clickhouseSchemaOptions);
 
 // Derive types from Zod schema instead of manual definitions
-export type EventType = z.infer<typeof traceLogZodSchema>['event_type'];
+// export type EventType = z.infer<typeof traceLogZodSchema>['event_type'];
+export type EventType = (typeof EVENT_TYPE_VALUES)[number];
 export type EntityType = z.infer<typeof traceLogZodSchema>['entity_type'];
 export type TraceStatus = z.infer<typeof traceLogZodSchema>['status'];
 export type StepType = z.infer<typeof traceLogZodSchema>['step_run_type'];
