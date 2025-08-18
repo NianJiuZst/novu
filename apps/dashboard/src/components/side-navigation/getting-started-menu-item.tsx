@@ -1,6 +1,6 @@
 import { useUser } from '@clerk/clerk-react';
 import { motion } from 'motion/react';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { RiCloseFill, RiQuestionLine, RiSparkling2Fill } from 'react-icons/ri';
 import { useEnvironment } from '@/context/environment/hooks';
 import { useTelemetry } from '@/hooks/use-telemetry';
@@ -22,28 +22,12 @@ export function HomeMenuItem() {
 
   const allStepsCompleted = completedSteps === totalSteps;
 
-  // Track when the menu is automatically hidden due to completion
-  useEffect(() => {
-    if (allStepsCompleted && !hasTrackedAutoHide.current && !user?.unsafeMetadata?.hideGettingStarted) {
-      hasTrackedAutoHide.current = true;
-      track(TelemetryEvent.WELCOME_MENU_HIDDEN, {
-        completedSteps: steps.filter((step) => step.status === 'completed').map((step) => step.id),
-        totalSteps,
-        allStepsCompleted: true,
-        autoHidden: true,
-      });
-    }
-  }, [allStepsCompleted, steps, totalSteps, track, user?.unsafeMetadata?.hideGettingStarted]);
-
-  const handleClose = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
+  const hideGettingStarted = useCallback(async (autoHidden: boolean) => {
     track(TelemetryEvent.WELCOME_MENU_HIDDEN, {
       completedSteps: steps.filter((step) => step.status === 'completed').map((step) => step.id),
       totalSteps,
       allStepsCompleted,
-      autoHidden: false,
+      autoHidden,
     });
 
     await user?.update({
@@ -52,9 +36,23 @@ export function HomeMenuItem() {
         hideGettingStarted: true,
       },
     });
+  }, [track, steps, totalSteps, allStepsCompleted, user]);
+
+  // Auto-hide when all steps are completed
+  useEffect(() => {
+    if (allStepsCompleted && !hasTrackedAutoHide.current && !user?.unsafeMetadata?.hideGettingStarted) {
+      hasTrackedAutoHide.current = true;
+      hideGettingStarted(true);
+    }
+  }, [allStepsCompleted, user?.unsafeMetadata?.hideGettingStarted, hideGettingStarted]);
+
+  const handleClose = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await hideGettingStarted(false);
   };
 
-  if (user?.unsafeMetadata?.hideGettingStarted || allStepsCompleted) {
+  if (user?.unsafeMetadata?.hideGettingStarted) {
     return null;
   }
 
