@@ -14,17 +14,13 @@ import { ToastIcon } from '../primitives/sonner';
 import { showToast } from '../primitives/sonner-helpers';
 import { TelemetryEvent } from '@/utils/telemetry';
 import {
-  createNodeJsSnippet,
   createCurlSnippet,
-  createPhpSnippet,
-  createGoSnippet,
-  createPythonSnippet,
   type CodeSnippet,
 } from '@/utils/code-snippets';
-import { CodeBlock, type Language } from '../primitives/code-block';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../primitives/tabs';
-import { TimelineContainer, TimelineStep } from '../primitives/timeline';
-import { InlineToast } from '../primitives/inline-toast';
+import { CodeBlock } from '../primitives/code-block';
+
+
+
 
 
 type InboxConnectedGuideProps = {
@@ -32,9 +28,7 @@ type InboxConnectedGuideProps = {
   environment: IEnvironment;
 };
 
-type CodeLanguage = 'curl' | 'nodejs' | 'php' | 'go' | 'python';
-
-function generateCodeSnippet(language: CodeLanguage, userId: string, apiKey: string): string {
+function generateCurlSnippet(userId: string, apiKey: string): string {
   if (!apiKey) {
     throw new Error('API key not found');
   }
@@ -46,175 +40,22 @@ function generateCodeSnippet(language: CodeLanguage, userId: string, apiKey: str
     secretKey: apiKey,
   };
 
-  switch (language) {
-    case 'curl':
-      return createCurlSnippet(snippetProps);
-    case 'nodejs':
-      return createNodeJsSnippet(snippetProps);
-    case 'php':
-      return createPhpSnippet(snippetProps);
-    case 'go':
-      return createGoSnippet(snippetProps);
-    case 'python':
-      return createPythonSnippet(snippetProps);
-    default:
-      return '';
-  }
+  return createCurlSnippet(snippetProps);
 }
 
-interface InstructionStepProps {
-  index: number;
-  title: string;
-  children?: React.ReactNode;
-  code?: string;
-  codeTitle?: string;
-  codeLanguage?: Language;
-}
 
-function InstructionStep({
-  index,
-  title,
-  children,
-  code,
-  codeTitle,
-  codeLanguage = 'shell',
-}: InstructionStepProps) {
-  return (
-    <TimelineStep index={index} title={title} description={children as string}>
-      {code && (
-        <div className="mt-3">
-          <CodeBlock code={code} language={codeLanguage} title={codeTitle} />
-        </div>
-      )}
-    </TimelineStep>
-  );
-}
 
-function TriggerStepContent() {
-  return (
-    <>
-      <div className="text-foreground-400 mb-3 text-xs">
-        A trigger is the starting point of every workflow — an action or event that kicks it off. To initiate this, you
-        call the Novu API using workflow_id.
-      </div>
-    </>
-  );
-}
+
 
 function WorkflowIntegrationSteps({ userId, apiKey }: { userId: string; apiKey: string }) {
-
   return (
-    <Tabs defaultValue="nodejs" className="w-full">
-      <TabsList className="w-full !border-t-0" variant="regular">
-        <TabsTrigger value="nodejs" variant="regular" size="xl">
-          NodeJS
-        </TabsTrigger>
-        <TabsTrigger value="shell" variant="regular" size="xl">
-          cURL
-        </TabsTrigger>
-        <TabsTrigger value="php" variant="regular" size="xl">
-          PHP
-        </TabsTrigger>
-        <TabsTrigger value="go" variant="regular" size="xl">
-          Golang
-        </TabsTrigger>
-        <TabsTrigger value="python" variant="regular" size="xl">
-          Python
-        </TabsTrigger>
-      </TabsList>
-
-      <TabsContent value="nodejs" className="mt-5">
-        <TimelineContainer>
-          <InstructionStep
-            index={0}
-            title="Install @novu/api"
-            code="npm install @novu/api"
-            codeTitle="Terminal"
-          >
-            The npm package to use with novu and node.js.
-          </InstructionStep>
-
-          <InstructionStep
-            index={1}
-            title="Add trigger code to your application"
-            code={generateCodeSnippet('nodejs', userId, apiKey)}
-            codeLanguage="typescript"
-            codeTitle="index.ts"
-          >
-            <TriggerStepContent />
-          </InstructionStep>
-        </TimelineContainer>
-      </TabsContent>
-
-      <TabsContent value="shell" className="mt-5">
-        <TimelineContainer>
-          <InstructionStep
-            index={0}
-            title="Trigger from your terminal"
-            code={generateCodeSnippet('curl', userId, apiKey)}
-            codeLanguage="shell"
-          >
-            <TriggerStepContent />
-          </InstructionStep>
-        </TimelineContainer>
-      </TabsContent>
-
-      <TabsContent value="php" className="mt-5">
-        <TimelineContainer>
-          <InstructionStep
-            index={0}
-            title="Install"
-            code='composer require "novuhq/novu"'
-            codeTitle="Terminal"
-          />
-
-          <InstructionStep
-            index={1}
-            title="Add trigger code to your application"
-            code={generateCodeSnippet('php', userId, apiKey)}
-            codeTitle="index.php"
-            codeLanguage="php"
-          >
-            <TriggerStepContent />
-          </InstructionStep>
-        </TimelineContainer>
-      </TabsContent>
-
-      <TabsContent value="python" className="mt-5">
-        <TimelineContainer>
-          <InstructionStep index={0} title="Install" code="pip install novu" codeTitle="Terminal" />
-
-          <InstructionStep
-            index={1}
-            title="Add trigger code to your application"
-            code={generateCodeSnippet('python', userId, apiKey)}
-            codeLanguage="python"
-          >
-            <TriggerStepContent />
-          </InstructionStep>
-        </TimelineContainer>
-      </TabsContent>
-
-      <TabsContent value="go" className="mt-5">
-        <TimelineContainer>
-          <InstructionStep
-            index={0}
-            title="Install"
-            code="go get github.com/novuhq/novu-go"
-            codeTitle="Terminal"
-          />
-
-          <InstructionStep
-            index={1}
-            title="Add trigger code to your application"
-            code={generateCodeSnippet('go', userId, apiKey)}
-            codeLanguage="go"
-          >
-            <TriggerStepContent />
-          </InstructionStep>
-        </TimelineContainer>
-      </TabsContent>
-    </Tabs>
+    <div className="mt-5 w-full min-w-0">
+      <CodeBlock 
+        code={generateCurlSnippet(userId, apiKey)} 
+        language="shell"
+        title="Terminal"
+      />
+    </div>
   );
 }
 
@@ -283,7 +124,7 @@ export function InboxConnectedGuide({ subscriberId, environment }: InboxConnecte
         {/* Combined section with left content and right code snippets */}
         <div className="relative p-8 pb-12 pt-16">
           <div className="absolute left-1 top-0 bottom-0 w-px bg-[#eeeef0]"></div>
-          <div className="relative mt-8 flex gap-8 first:mt-0">
+          <div className="relative mt-8 flex gap-8 first:mt-0 min-w-0">
             {/* Left side - both status sections stacked */}
             <div className="flex w-[350px] flex-col gap-8">
               {/* First section - Inbox connected */}
@@ -347,7 +188,7 @@ export function InboxConnectedGuide({ subscriberId, environment }: InboxConnecte
             </div>
 
             {/* Right side - code snippets spanning full height */}
-            <div className="flex w-[520px] flex-col gap-6 -mt-4">
+            <div className="flex w-[480px] flex-col gap-6 -mt-4">
               {apiKeysQuery.isLoading ? (
                 <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-8">
                   <div className="flex items-center justify-center gap-3 text-gray-600">
