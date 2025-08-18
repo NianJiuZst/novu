@@ -1,5 +1,6 @@
 import { useUser } from '@clerk/clerk-react';
 import { motion } from 'motion/react';
+import { useEffect, useRef } from 'react';
 import { RiCloseFill, RiQuestionLine, RiSparkling2Fill } from 'react-icons/ri';
 import { useEnvironment } from '@/context/environment/hooks';
 import { useTelemetry } from '@/hooks/use-telemetry';
@@ -17,8 +18,22 @@ export function HomeMenuItem() {
   const { currentEnvironment } = useEnvironment();
   const { user } = useUser();
   const track = useTelemetry();
+  const hasTrackedAutoHide = useRef(false);
 
   const allStepsCompleted = completedSteps === totalSteps;
+
+  // Track when the menu is automatically hidden due to completion
+  useEffect(() => {
+    if (allStepsCompleted && !hasTrackedAutoHide.current && !user?.unsafeMetadata?.hideGettingStarted) {
+      hasTrackedAutoHide.current = true;
+      track(TelemetryEvent.WELCOME_MENU_HIDDEN, {
+        completedSteps: steps.filter((step) => step.status === 'completed').map((step) => step.id),
+        totalSteps,
+        allStepsCompleted: true,
+        autoHidden: true,
+      });
+    }
+  }, [allStepsCompleted, steps, totalSteps, track, user?.unsafeMetadata?.hideGettingStarted]);
 
   const handleClose = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -28,6 +43,7 @@ export function HomeMenuItem() {
       completedSteps: steps.filter((step) => step.status === 'completed').map((step) => step.id),
       totalSteps,
       allStepsCompleted,
+      autoHidden: false,
     });
 
     await user?.update({
@@ -38,7 +54,7 @@ export function HomeMenuItem() {
     });
   };
 
-  if (user?.unsafeMetadata?.hideGettingStarted) {
+  if (user?.unsafeMetadata?.hideGettingStarted || allStepsCompleted) {
     return null;
   }
 
