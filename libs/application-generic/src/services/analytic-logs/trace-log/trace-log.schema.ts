@@ -105,7 +105,7 @@ const traceLogZodSchema = z.object({
   message: z.string().nullable().describe(CH.Nullable(CH.String())),
   raw_data: z.string().nullable().describe(CH.Nullable(CH.String())),
 
-  status: z.enum(['success', 'error', 'warning', 'pending']).describe(CH.LowCardinality(CH.String())),
+  status: z.string().describe(CH.LowCardinality(CH.String())),
 
   // Correlation, Hierarchy context
   entity_type: z.string().describe(CH.LowCardinality(CH.String())),
