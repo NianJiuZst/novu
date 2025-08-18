@@ -116,7 +116,7 @@ const traceLogZodSchema = z.object({
 
   // Step run metadata
   step_run_type: z
-    .enum(['in_app', 'email', 'sms', 'chat', 'push', 'digest', 'delay', ''])
+    .string()
     .default('')
     .optional()
     .describe(CH.LowCardinality(CH.String(''))),
