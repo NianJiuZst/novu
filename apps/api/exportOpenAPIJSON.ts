@@ -1,4 +1,4 @@
-import { writeFileSync } from 'node:fs';
+import { writeFileSync } from 'fs';
 import { bootstrap } from './src/bootstrap'; // Adjust the path according to your project structure
 
 async function exportOpenAPIJSON() {

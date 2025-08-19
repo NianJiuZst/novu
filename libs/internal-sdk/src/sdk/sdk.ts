@@ -3,6 +3,7 @@
  */
 
 import { cancel } from "../funcs/cancel.js";
+import { retrieve } from "../funcs/retrieve.js";
 import { trigger } from "../funcs/trigger.js";
 import { triggerBroadcast } from "../funcs/triggerBroadcast.js";
 import { triggerBulk } from "../funcs/triggerBulk.js";
@@ -10,7 +11,6 @@ import { ClientSDK, RequestOptions } from "../lib/sdks.js";
 import * as components from "../models/components/index.js";
 import * as operations from "../models/operations/index.js";
 import { unwrapAsync } from "../types/fp.js";
-import { Activity } from "./activity.js";
 import { Environments } from "./environments.js";
 import { Integrations } from "./integrations.js";
 import { Layouts } from "./layouts.js";
@@ -44,11 +44,6 @@ export class Novu extends ClientSDK {
   private _workflows?: Workflows;
   get workflows(): Workflows {
     return (this._workflows ??= new Workflows(this._options));
-  }
-
-  private _activity?: Activity;
-  get activity(): Activity {
-    return (this._activity ??= new Activity(this._options));
   }
 
   private _integrations?: Integrations;
@@ -145,6 +140,25 @@ export class Novu extends ClientSDK {
       this,
       bulkTriggerEventDto,
       idempotencyKey,
+      options,
+    ));
+  }
+
+  /**
+   * List all messages
+   *
+   * @remarks
+   * List all messages for the current environment.
+   *     This API supports filtering by **channel**, **subscriberId**, and **transactionId**.
+   *     This API returns a paginated list of messages.
+   */
+  async retrieve(
+    request: operations.LogsControllerGetLogsRequest,
+    options?: RequestOptions,
+  ): Promise<operations.LogsControllerGetLogsResponseBody> {
+    return unwrapAsync(retrieve(
+      this,
+      request,
       options,
     ));
   }

@@ -57,5 +57,4 @@ typescript:
   packageName: '@novu/api'
   responseFormat: flat
   templateVersion: v2
-  usageSDKInitImports: []
   useIndexModules: true

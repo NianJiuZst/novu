@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { FeatureFlagsService, PinoLogger, TraceLogRepository } from '@novu/application-generic';
 import { CommunityOrganizationRepository, NotificationRepository, SubscriberRepository } from '@novu/dal';
 import { ApiServiceLevelEnum } from '@novu/shared';
 import { expect } from 'chai';
@@ -24,29 +23,6 @@ describe('GetActivityFeed - validateRetentionLimitForTier', () => {
           provide: CommunityOrganizationRepository,
           useValue: {
             findById: () => {},
-          },
-        },
-        {
-          provide: TraceLogRepository,
-          useValue: {
-            createStepRun: () => {},
-          },
-        },
-        {
-          provide: FeatureFlagsService,
-          useValue: {
-            getFlag: () => Promise.resolve({ value: false }),
-          },
-        },
-        {
-          provide: PinoLogger,
-          useValue: {
-            info: () => {},
-            error: () => {},
-            warn: () => {},
-            debug: () => {},
-            trace: () => {},
-            setContext: () => {},
           },
         },
       ],

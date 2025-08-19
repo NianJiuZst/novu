@@ -154,18 +154,14 @@ function getStatusMessage(job: IActivityJob): string | React.ReactNode {
       }
 
       return '';
-    case StepTypeEnum.DELAY: {
-      const { unit, amount } = (job.digest || {}) as IDelayRegularMetadata;
-
+    case StepTypeEnum.DELAY:
       if (job.status === JobStatusEnum.COMPLETED) {
-        if (unit && amount) {
-          return `Delayed for ${amount} ${unit}`;
-        }
-
         return 'Delay completed';
       }
 
       if (job.status === JobStatusEnum.DELAYED) {
+        // TODO: Ensure that the API populates the delay unit and amount for all occasions
+        const { unit, amount } = (job.digest || {}) as IDelayRegularMetadata;
         let msg = 'Waiting';
 
         if (unit && amount) {
@@ -176,7 +172,7 @@ function getStatusMessage(job: IActivityJob): string | React.ReactNode {
       }
 
       return '';
-    }
+
     default:
       if (job.status === JobStatusEnum.COMPLETED) {
         return 'Message sent successfully';

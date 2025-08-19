@@ -30,35 +30,26 @@ export const usePullActivity = (activityId?: string | null) => {
 
     // Only stop refetching if we have an activity and it's not pending
     const newShouldRefetch = isPending || !activity?.jobs?.length;
+    setShouldRefetch(newShouldRefetch);
 
-    if (newShouldRefetch) {
-      /**
-       * Due to async inserts on the activity list, we want to provide 5 more seconds to refetch the activity
-       * For any non-inserted traces.
-       */
-      setTimeout(() => {
-        setShouldRefetch(newShouldRefetch);
+    // invalidate that single activity in the activities list cache
+    queryClient.setQueriesData(
+      { queryKey: [QueryKeys.fetchActivities, currentEnvironment?._id] },
+      (activityResponse: ActivityResponse | undefined) => {
+        if (!activityResponse) return activityResponse;
 
-        // invalidate that single activity in the activities list cache
-        queryClient.setQueriesData(
-          { queryKey: [QueryKeys.fetchActivities, currentEnvironment?._id] },
-          (activityResponse: ActivityResponse | undefined) => {
-            if (!activityResponse) return activityResponse;
+        return {
+          ...activityResponse,
+          data: activityResponse.data.map((el) => {
+            if (el._id === activity._id) {
+              return { ...activity };
+            }
 
-            return {
-              ...activityResponse,
-              data: activityResponse.data.map((el) => {
-                if (el._id === activity._id) {
-                  return { ...activity };
-                }
-
-                return el;
-              }),
-            };
-          }
-        );
-      }, 5000);
-    }
+            return el;
+          }),
+        };
+      }
+    );
   }, [activity, queryClient, currentEnvironment, activityId]);
 
   return {

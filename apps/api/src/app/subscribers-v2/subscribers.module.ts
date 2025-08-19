@@ -27,7 +27,6 @@ import {
   WorkflowOverrideRepository,
 } from '@novu/dal';
 
-import { InboxModule } from '../inbox/inbox.module';
 import { UpdatePreferences } from '../inbox/usecases/update-preferences/update-preferences.usecase';
 import { OutboundWebhooksModule } from '../outbound-webhooks/outbound-webhooks.module';
 import { GetSubscriberGlobalPreference } from '../subscribers/usecases/get-subscriber-global-preference';
@@ -79,7 +78,7 @@ const DAL_MODELS = [
 ];
 
 @Module({
-  imports: [TopicsV2Module, InboxModule, OutboundWebhooksModule.forRoot()],
+  imports: [TopicsV2Module, OutboundWebhooksModule.forRoot()],
   controllers: [SubscribersController],
   providers: [
     ...USE_CASES,

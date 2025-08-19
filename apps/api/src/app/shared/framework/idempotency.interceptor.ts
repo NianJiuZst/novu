@@ -161,7 +161,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
   }
 
   private setHeaders(response: any, headers: Record<string, string>) {
-    Object.keys(headers).forEach((key) => {
+    Object.keys(headers).map((key) => {
       if (headers[key]) {
         response.set(key, headers[key]);
       }

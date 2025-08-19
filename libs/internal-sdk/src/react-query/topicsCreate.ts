@@ -19,7 +19,6 @@ import { MutationHookOptions } from "./_types.js";
 
 export type TopicsCreateMutationVariables = {
   createUpdateTopicRequestDto: components.CreateUpdateTopicRequestDto;
-  failIfExists?: boolean | undefined;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
 };
@@ -31,7 +30,7 @@ export type TopicsCreateMutationData =
  * Create a topic
  *
  * @remarks
- * Creates a new topic if it does not exist, or updates an existing topic if it already exists. Use ?failIfExists=true to prevent updates.
+ * Creates a new topic if it does not exist, or updates an existing topic if it already exists
  */
 export function useTopicsCreateMutation(
   options?: MutationHookOptions<
@@ -68,7 +67,6 @@ export function buildTopicsCreateMutation(
     mutationKey: mutationKeyTopicsCreate(),
     mutationFn: function topicsCreateMutationFn({
       createUpdateTopicRequestDto,
-      failIfExists,
       idempotencyKey,
       options,
     }): Promise<TopicsCreateMutationData> {
@@ -87,7 +85,6 @@ export function buildTopicsCreateMutation(
       return unwrapAsync(topicsCreate(
         client$,
         createUpdateTopicRequestDto,
-        failIfExists,
         idempotencyKey,
         mergedOptions,
       ));

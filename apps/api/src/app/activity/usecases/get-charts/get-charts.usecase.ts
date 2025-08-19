@@ -12,7 +12,6 @@ import {
   MessagesDeliveredDataPointDto,
   ProviderVolumeDataPointDto,
   TotalInteractionsDataPointDto,
-  WorkflowRunsCountDataPointDto,
   WorkflowRunsMetricDataPointDto,
   WorkflowRunsTrendDataPointDto,
   WorkflowVolumeDataPointDto,
@@ -31,7 +30,6 @@ import { BuildMessagesDeliveredChart, BuildMessagesDeliveredChartCommand } from 
 import { BuildProviderByVolumeChart, BuildProviderByVolumeChartCommand } from '../build-provider-by-volume-chart';
 import { BuildTotalInteractionsChart, BuildTotalInteractionsChartCommand } from '../build-total-interactions-chart';
 import { BuildWorkflowByVolumeChart, BuildWorkflowByVolumeChartCommand } from '../build-workflow-by-volume-chart';
-import { BuildWorkflowRunsCountChart, BuildWorkflowRunsCountChartCommand } from '../build-workflow-runs-count-chart';
 import { BuildWorkflowRunsMetricChart, BuildWorkflowRunsMetricChartCommand } from '../build-workflow-runs-metric-chart';
 import { BuildWorkflowRunsTrendChart, BuildWorkflowRunsTrendChartCommand } from '../build-workflow-runs-trend-chart';
 import { GetChartsCommand } from './get-charts.command';
@@ -47,7 +45,6 @@ export class GetCharts {
     private buildActiveSubscribersChart: BuildActiveSubscribersChart,
     private buildActiveSubscribersTrendChart: BuildActiveSubscribersTrendChart,
     private buildAvgMessagesPerSubscriberChart: BuildAvgMessagesPerSubscriberChart,
-    private buildWorkflowRunsCountChart: BuildWorkflowRunsCountChart,
     private buildWorkflowRunsMetricChart: BuildWorkflowRunsMetricChart,
     private buildTotalInteractionsChart: BuildTotalInteractionsChart,
     private buildWorkflowRunsTrendChart: BuildWorkflowRunsTrendChart,
@@ -58,19 +55,7 @@ export class GetCharts {
   }
 
   async execute(command: GetChartsCommand): Promise<GetChartsResponseDto> {
-    const {
-      createdAtGte,
-      createdAtLte,
-      reportType,
-      environmentId,
-      organizationId,
-      workflowIds,
-      subscriberIds,
-      transactionIds,
-      statuses,
-      channels,
-      topicKey,
-    } = command;
+    const { createdAtGte, createdAtLte, reportType, environmentId, organizationId } = command;
 
     const validatedDates = await this.validateRetentionLimitForTier(organizationId, createdAtGte, createdAtLte);
 
@@ -85,7 +70,6 @@ export class GetCharts {
       | MessagesDeliveredDataPointDto
       | ActiveSubscribersDataPointDto
       | AvgMessagesPerSubscriberDataPointDto
-      | WorkflowRunsCountDataPointDto
       | WorkflowRunsMetricDataPointDto
       | TotalInteractionsDataPointDto
       | WorkflowRunsTrendDataPointDto[]
@@ -99,7 +83,6 @@ export class GetCharts {
       | MessagesDeliveredDataPointDto
       | ActiveSubscribersDataPointDto
       | AvgMessagesPerSubscriberDataPointDto
-      | WorkflowRunsCountDataPointDto
       | WorkflowRunsMetricDataPointDto
       | TotalInteractionsDataPointDto
       | WorkflowRunsTrendDataPointDto[]
@@ -233,23 +216,6 @@ export class GetCharts {
           })
         ),
       });
-    }
-
-    if (reportType.includes(ReportTypeEnum.WORKFLOW_RUNS_COUNT)) {
-      data[ReportTypeEnum.WORKFLOW_RUNS_COUNT] = await this.buildWorkflowRunsCountChart.execute(
-        Object.assign(new BuildWorkflowRunsCountChartCommand(), {
-          environmentId,
-          organizationId,
-          startDate,
-          endDate,
-          workflowIds,
-          subscriberIds,
-          transactionIds,
-          statuses,
-          channels,
-          topicKey,
-        })
-      );
     }
 
     if (reportType.includes(ReportTypeEnum.TOTAL_INTERACTIONS)) {

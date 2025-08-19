@@ -19,16 +19,11 @@ export interface ActivityResponse {
   previous?: string | null;
 }
 
-export interface StepRunDto {
+export interface WorkflowRunStepsDetailsDto {
+  id: string;
   stepRunId: string;
-  stepId: string;
   stepType: string;
-  providerId?: string;
-  status: StepRunStatus;
-  createdAt: Date;
-  updatedAt: Date;
-  executionDetails: any[];
-  digest?: any;
+  status: 'pending' | 'queued' | 'running' | 'completed' | 'failed' | 'delayed' | 'canceled' | 'merged' | 'skipped';
 }
 
 export interface GetWorkflowRunsDto {
@@ -45,27 +40,8 @@ export interface GetWorkflowRunsDto {
   transactionId: string;
   createdAt: string;
   updatedAt: string;
-  steps: StepRunDto[];
-  payload: Record<string, unknown>;
+  steps: WorkflowRunStepsDetailsDto[];
 }
-
-export type GetWorkflowRunResponse = {
-  id: string;
-  workflowRunId: string;
-  workflowId: string;
-  workflowName: string;
-  organizationId: string;
-  environmentId: string;
-  internalSubscriberId: string;
-  subscriberId?: string;
-  status: 'success' | 'error' | 'pending' | 'skipped' | 'canceled' | 'merged';
-  triggerIdentifier: string;
-  transactionId: string;
-  createdAt: string;
-  updatedAt: string;
-  payload: Record<string, unknown>;
-  steps: StepRunDto[];
-};
 
 export interface GetWorkflowRunsResponseDto {
   data: GetWorkflowRunsDto[];
@@ -73,8 +49,35 @@ export interface GetWorkflowRunsResponseDto {
   previous: string | null;
 }
 
-function mapWorkflowRunToActivity(
-  workflowRun: GetWorkflowRunResponse,
+// Common workflow run properties interface
+interface BaseWorkflowRun {
+  id: string;
+  workflowId: string;
+  workflowName: string;
+  organizationId: string;
+  environmentId: string;
+  internalSubscriberId: string;
+  subscriberId?: string;
+  triggerIdentifier: string;
+  transactionId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Step mapping configuration
+interface StepMappingConfig {
+  stepId: string;
+  stepRunId: string;
+  stepType: string;
+  status: StepRunStatus;
+  executionDetails?: any[];
+  providerId?: string;
+}
+
+// Base mapping function for workflow runs to activities
+function mapWorkflowRunToActivityBase(
+  workflowRun: BaseWorkflowRun,
+  steps: StepMappingConfig[],
   payload: Record<string, unknown> = {}
 ): IActivity {
   return {
@@ -112,16 +115,16 @@ function mapWorkflowRunToActivity(
           lastName: '',
         }
       : undefined,
-    jobs: workflowRun.steps.map((step: StepRunDto) => ({
+    jobs: steps.map((step) => ({
       _id: step.stepRunId,
       identifier: step.stepRunId,
       subscriberId: workflowRun.subscriberId || workflowRun.internalSubscriberId,
       _subscriberId: workflowRun.internalSubscriberId,
       type: step.stepType as any,
-      digest: step.digest,
+      digest: undefined,
       executionDetails: step.executionDetails || [],
       step: {
-        _id: step.stepRunId,
+        _id: step.stepId,
         active: true,
         shouldStopOnFail: false,
         template: {
@@ -151,12 +154,12 @@ function mapWorkflowRunToActivity(
       _organizationId: workflowRun.organizationId,
       _environmentId: workflowRun.environmentId,
       _userId: '',
-      // delay: step.delay,
+      delay: undefined,
       _notificationId: workflowRun.id,
-      status: step.status === 'queued' ? 'pending' : (step.status as any),
+      status: step.status as any,
       _templateId: workflowRun.workflowId,
       payload,
-      providerId: undefined,
+      providerId: step.providerId,
       overrides: {},
       transactionId: workflowRun.transactionId,
       createdAt: workflowRun.createdAt,
@@ -167,11 +170,20 @@ function mapWorkflowRunToActivity(
 
 // Mapping function to convert workflow runs to activities (legacy format)
 function mapWorkflowRunsToActivity(workflowRun: GetWorkflowRunsDto): IActivity {
+  const steps: StepMappingConfig[] = workflowRun.steps.map((step) => ({
+    stepId: step.stepRunId, // Legacy uses stepRunId for step._id
+    stepRunId: step.stepRunId,
+    stepType: step.stepType,
+    status: step.status,
+    executionDetails: [], // Not available in legacy
+    providerId: undefined, // Not available in legacy
+  }));
+
   // Override the job _id to use the legacy step.id field
-  const activity = mapWorkflowRunToActivity(workflowRun, workflowRun.payload);
+  const activity = mapWorkflowRunToActivityBase(workflowRun, steps, {});
   activity.jobs = activity.jobs.map((job, index) => ({
     ...job,
-    _id: workflowRun.steps[index].stepId,
+    _id: workflowRun.steps[index].id, // Use the original step.id for legacy compatibility
   }));
 
   return activity;
@@ -257,6 +269,35 @@ export type StepRunStatus =
   | 'merged'
   | 'skipped';
 
+export interface StepRunDto {
+  stepRunId: string;
+  stepId: string;
+  stepType: string;
+  providerId?: string;
+  status: StepRunStatus;
+  createdAt: Date;
+  updatedAt: Date;
+  executionDetails: any[];
+}
+
+export type GetWorkflowRunResponse = {
+  id: string;
+  workflowRunId: string;
+  workflowId: string;
+  workflowName: string;
+  organizationId: string;
+  environmentId: string;
+  internalSubscriberId: string;
+  subscriberId?: string;
+  status: 'success' | 'error' | 'pending' | 'skipped' | 'canceled' | 'merged';
+  triggerIdentifier: string;
+  transactionId: string;
+  createdAt: string;
+  updatedAt: string;
+  payload: Record<string, unknown>;
+  steps: StepRunDto[];
+};
+
 export type GetWorkflowRunResponseDto = {
   data: GetWorkflowRunResponse;
 };
@@ -333,6 +374,7 @@ export async function getWorkflowRunsList({
     signal,
   });
 
+  // Map the new format to the old format for backward compatibility
   const mappedData = response.data.map(mapWorkflowRunsToActivity);
 
   return {
@@ -342,6 +384,19 @@ export async function getWorkflowRunsList({
     next: response.next,
     previous: response.previous,
   };
+}
+
+function mapWorkflowRunToActivity(workflowRun: GetWorkflowRunResponse): IActivity {
+  const steps: StepMappingConfig[] = workflowRun.steps.map((step) => ({
+    stepId: step.stepId,
+    stepRunId: step.stepRunId,
+    stepType: step.stepType,
+    status: step.status,
+    executionDetails: step.executionDetails,
+    providerId: step.providerId,
+  }));
+
+  return mapWorkflowRunToActivityBase(workflowRun, steps, workflowRun.payload);
 }
 
 export async function getNotification(notificationId: string, environment: IEnvironment): Promise<IActivity> {
@@ -360,67 +415,6 @@ export async function getWorkflowRun(workflowRunId: string, environment: IEnviro
   return mapWorkflowRunToActivity(data.data);
 }
 
-export async function getWorkflowRunsCount({
-  environment,
-  filters,
-  signal,
-}: {
-  environment: IEnvironment;
-  filters?: ActivityFilters;
-  signal?: AbortSignal;
-}): Promise<number> {
-  let createdAtGte: string | undefined;
-  let workflowIds: string[] | undefined;
-  let subscriberIds: string[] | undefined;
-  let transactionIds: string[] | undefined;
-  let channels: string[] | undefined;
-  let topicKey: string | undefined;
-
-  if (filters?.channels?.length) {
-    channels = filters.channels;
-  }
-
-  if (filters?.topicKey) {
-    topicKey = filters.topicKey;
-  }
-
-  if (filters?.workflows?.length) {
-    workflowIds = filters.workflows;
-  }
-
-  if (filters?.subscriberId) {
-    subscriberIds = [filters.subscriberId];
-  }
-
-  if (filters?.transactionId) {
-    // Parse comma-delimited string into array for backend
-    transactionIds = filters.transactionId
-      .split(',')
-      .map((id) => id.trim())
-      .filter(Boolean);
-  }
-
-  if (filters?.dateRange) {
-    const after = new Date(Date.now() - getDateRangeInMs(filters?.dateRange));
-    createdAtGte = after.toISOString();
-  }
-
-  const response = await getCharts({
-    environment,
-    createdAtGte,
-    reportType: [ReportTypeEnum.WORKFLOW_RUNS_COUNT],
-    workflowIds,
-    subscriberIds,
-    transactionIds,
-    channels,
-    topicKey,
-    signal,
-  });
-
-  const countData = response.data[ReportTypeEnum.WORKFLOW_RUNS_COUNT] as WorkflowRunsCountDataPoint;
-  return countData?.count ?? 0;
-}
-
 // Charts API types and functions
 export enum ReportTypeEnum {
   DELIVERY_TREND = 'delivery-trend',
@@ -434,7 +428,6 @@ export enum ReportTypeEnum {
   TOTAL_INTERACTIONS = 'total-interactions',
   WORKFLOW_RUNS_TREND = 'workflow-runs-trend',
   ACTIVE_SUBSCRIBERS_TREND = 'active-subscribers-trend',
-  WORKFLOW_RUNS_COUNT = 'workflow-runs-count',
 }
 
 export type ChartDataPoint = {
@@ -501,20 +494,10 @@ export type ActiveSubscribersTrendDataPoint = {
   count: number;
 };
 
-export type WorkflowRunsCountDataPoint = {
-  count: number;
-};
-
 export type GetChartsRequest = {
   createdAtGte?: string;
   createdAtLte?: string;
   reportType: ReportTypeEnum[];
-  workflowIds?: string[];
-  subscriberIds?: string[];
-  transactionIds?: string[];
-  statuses?: string[];
-  channels?: string[];
-  topicKey?: string;
 };
 
 export type GetChartsResponse = {
@@ -531,7 +514,6 @@ export type GetChartsResponse = {
     | TotalInteractionsDataPoint
     | WorkflowRunsTrendDataPoint[]
     | ActiveSubscribersTrendDataPoint[]
-    | WorkflowRunsCountDataPoint
   >;
 };
 
@@ -540,24 +522,12 @@ export async function getCharts({
   createdAtGte,
   createdAtLte,
   reportType,
-  workflowIds,
-  subscriberIds,
-  transactionIds,
-  statuses,
-  channels,
-  topicKey,
   signal,
 }: {
   environment: IEnvironment;
   createdAtGte?: string;
   createdAtLte?: string;
   reportType: ReportTypeEnum[];
-  workflowIds?: string[];
-  subscriberIds?: string[];
-  transactionIds?: string[];
-  statuses?: string[];
-  channels?: string[];
-  topicKey?: string;
   signal?: AbortSignal;
 }): Promise<GetChartsResponse> {
   const searchParams = new URLSearchParams();
@@ -572,40 +542,6 @@ export async function getCharts({
 
   for (const type of reportType) {
     searchParams.append('reportType[]', type);
-  }
-
-  if (workflowIds?.length) {
-    for (const id of workflowIds) {
-      searchParams.append('workflowIds[]', id);
-    }
-  }
-
-  if (subscriberIds?.length) {
-    for (const id of subscriberIds) {
-      searchParams.append('subscriberIds[]', id);
-    }
-  }
-
-  if (transactionIds?.length) {
-    for (const id of transactionIds) {
-      searchParams.append('transactionIds[]', id);
-    }
-  }
-
-  if (statuses?.length) {
-    for (const status of statuses) {
-      searchParams.append('statuses[]', status);
-    }
-  }
-
-  if (channels?.length) {
-    for (const channel of channels) {
-      searchParams.append('channels[]', channel);
-    }
-  }
-
-  if (topicKey) {
-    searchParams.append('topicKey', topicKey);
   }
 
   return get<GetChartsResponse>(`/activity/charts?${searchParams.toString()}`, {

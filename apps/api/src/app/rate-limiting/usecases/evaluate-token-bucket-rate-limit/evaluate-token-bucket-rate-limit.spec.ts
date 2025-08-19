@@ -490,9 +490,7 @@ describe('EvaluateTokenBucketRateLimit', () => {
             };
           }
         )
-        .forEach((testCase) => {
-          testCase();
-        });
+        .forEach((testCase) => testCase());
     });
   });
 });

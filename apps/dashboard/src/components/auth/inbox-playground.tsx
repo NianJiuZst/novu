@@ -26,18 +26,6 @@ const PLAYGROUND_CONFIG = {
 } as const;
 
 
-return `curl -X POST ${API_HOSTNAME}/v1/events/trigger \\
-     -H "Content-Type: application/json" \\
-     -H "Authorization: Bearer ${apiKey}" \\
-     -d '{
-       "name": "${ONBOARDING_DEMO_WORKFLOW_ID}",
-       "to": {
-         "subscriberId": ${JSON.stringify(userId)}
-       },
-       "payload": {}
-     }'`;
-}
-
 
 function showCustomToast(message: string, variant: 'success' | 'error') {
   showToast({

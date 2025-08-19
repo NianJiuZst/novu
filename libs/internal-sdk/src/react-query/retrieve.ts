@@ -13,10 +13,9 @@ import {
   UseSuspenseQueryResult,
 } from "@tanstack/react-query";
 import { NovuCore } from "../core.js";
-import { activityRequestsList } from "../funcs/activityRequestsList.js";
+import { retrieve } from "../funcs/retrieve.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
-import * as components from "../models/components/index.js";
 import * as operations from "../models/operations/index.js";
 import { unwrapAsync } from "../types/fp.js";
 import { useNovuContext } from "./_context.js";
@@ -26,21 +25,15 @@ import {
   TupleToPrefixes,
 } from "./_types.js";
 
-export type ActivityRequestsListQueryData = components.GetRequestsResponseDto;
+export type RetrieveQueryData = operations.LogsControllerGetLogsResponseBody;
 
-/**
- * List activity requests
- *
- * @remarks
- * Retrieve a list of activity requests with optional filtering and pagination.
- */
-export function useActivityRequestsList(
-  request: operations.ActivityControllerGetLogsRequest,
-  options?: QueryHookOptions<ActivityRequestsListQueryData>,
-): UseQueryResult<ActivityRequestsListQueryData, Error> {
+export function useRetrieve(
+  request: operations.LogsControllerGetLogsRequest,
+  options?: QueryHookOptions<RetrieveQueryData>,
+): UseQueryResult<RetrieveQueryData, Error> {
   const client = useNovuContext();
   return useQuery({
-    ...buildActivityRequestsListQuery(
+    ...buildRetrieveQuery(
       client,
       request,
       options,
@@ -49,19 +42,13 @@ export function useActivityRequestsList(
   });
 }
 
-/**
- * List activity requests
- *
- * @remarks
- * Retrieve a list of activity requests with optional filtering and pagination.
- */
-export function useActivityRequestsListSuspense(
-  request: operations.ActivityControllerGetLogsRequest,
-  options?: SuspenseQueryHookOptions<ActivityRequestsListQueryData>,
-): UseSuspenseQueryResult<ActivityRequestsListQueryData, Error> {
+export function useRetrieveSuspense(
+  request: operations.LogsControllerGetLogsRequest,
+  options?: SuspenseQueryHookOptions<RetrieveQueryData>,
+): UseSuspenseQueryResult<RetrieveQueryData, Error> {
   const client = useNovuContext();
   return useSuspenseQuery({
-    ...buildActivityRequestsListQuery(
+    ...buildRetrieveQuery(
       client,
       request,
       options,
@@ -70,20 +57,20 @@ export function useActivityRequestsListSuspense(
   });
 }
 
-export function prefetchActivityRequestsList(
+export function prefetchRetrieve(
   queryClient: QueryClient,
   client$: NovuCore,
-  request: operations.ActivityControllerGetLogsRequest,
+  request: operations.LogsControllerGetLogsRequest,
 ): Promise<void> {
   return queryClient.prefetchQuery({
-    ...buildActivityRequestsListQuery(
+    ...buildRetrieveQuery(
       client$,
       request,
     ),
   });
 }
 
-export function setActivityRequestsListData(
+export function setRetrieveData(
   client: QueryClient,
   queryKeyBase: [
     parameters: {
@@ -97,14 +84,14 @@ export function setActivityRequestsListData(
       idempotencyKey?: string | undefined;
     },
   ],
-  data: ActivityRequestsListQueryData,
-): ActivityRequestsListQueryData | undefined {
-  const key = queryKeyActivityRequestsList(...queryKeyBase);
+  data: RetrieveQueryData,
+): RetrieveQueryData | undefined {
+  const key = queryKeyRetrieve(...queryKeyBase);
 
-  return client.setQueryData<ActivityRequestsListQueryData>(key, data);
+  return client.setQueryData<RetrieveQueryData>(key, data);
 }
 
-export function invalidateActivityRequestsList(
+export function invalidateRetrieve(
   client: QueryClient,
   queryKeyBase: TupleToPrefixes<
     [parameters: {
@@ -122,32 +109,30 @@ export function invalidateActivityRequestsList(
 ): Promise<void> {
   return client.invalidateQueries({
     ...filters,
-    queryKey: ["@novu/api", "Requests", "list", ...queryKeyBase],
+    queryKey: ["@novu/api", "retrieve", ...queryKeyBase],
   });
 }
 
-export function invalidateAllActivityRequestsList(
+export function invalidateAllRetrieve(
   client: QueryClient,
   filters?: Omit<InvalidateQueryFilters, "queryKey" | "predicate" | "exact">,
 ): Promise<void> {
   return client.invalidateQueries({
     ...filters,
-    queryKey: ["@novu/api", "Requests", "list"],
+    queryKey: ["@novu/api", "retrieve"],
   });
 }
 
-export function buildActivityRequestsListQuery(
+export function buildRetrieveQuery(
   client$: NovuCore,
-  request: operations.ActivityControllerGetLogsRequest,
+  request: operations.LogsControllerGetLogsRequest,
   options?: RequestOptions,
 ): {
   queryKey: QueryKey;
-  queryFn: (
-    context: QueryFunctionContext,
-  ) => Promise<ActivityRequestsListQueryData>;
+  queryFn: (context: QueryFunctionContext) => Promise<RetrieveQueryData>;
 } {
   return {
-    queryKey: queryKeyActivityRequestsList({
+    queryKey: queryKeyRetrieve({
       page: request.page,
       limit: request.limit,
       statusCodes: request.statusCodes,
@@ -157,16 +142,14 @@ export function buildActivityRequestsListQuery(
       createdGte: request.createdGte,
       idempotencyKey: request.idempotencyKey,
     }),
-    queryFn: async function activityRequestsListQueryFn(
-      ctx,
-    ): Promise<ActivityRequestsListQueryData> {
+    queryFn: async function retrieveQueryFn(ctx): Promise<RetrieveQueryData> {
       const sig = combineSignals(ctx.signal, options?.fetchOptions?.signal);
       const mergedOptions = {
         ...options,
         fetchOptions: { ...options?.fetchOptions, signal: sig },
       };
 
-      return unwrapAsync(activityRequestsList(
+      return unwrapAsync(retrieve(
         client$,
         request,
         mergedOptions,
@@ -175,7 +158,7 @@ export function buildActivityRequestsListQuery(
   };
 }
 
-export function queryKeyActivityRequestsList(
+export function queryKeyRetrieve(
   parameters: {
     page?: number | undefined;
     limit?: number | undefined;
@@ -187,5 +170,5 @@ export function queryKeyActivityRequestsList(
     idempotencyKey?: string | undefined;
   },
 ): QueryKey {
-  return ["@novu/api", "Requests", "list", parameters];
+  return ["@novu/api", "retrieve", parameters];
 }
