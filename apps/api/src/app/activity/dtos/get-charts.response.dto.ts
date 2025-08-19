@@ -148,12 +148,6 @@ export class ActiveSubscribersTrendDataPointDto {
   count: number;
 }
 
-export class WorkflowRunsCountDataPointDto {
-  @ApiProperty({ description: 'Workflow runs count' })
-  @IsNumber()
-  count: number;
-}
-
 export class GetChartsResponseDto {
   @ApiProperty({ description: 'Chart sections' })
   @ValidateNested()
@@ -170,6 +164,5 @@ export class GetChartsResponseDto {
     | TotalInteractionsDataPointDto
     | WorkflowRunsTrendDataPointDto[]
     | ActiveSubscribersTrendDataPointDto[]
-    | WorkflowRunsCountDataPointDto
   >;
 }

@@ -44,15 +44,7 @@ export type InboxNotification = {
   tags?: string[];
   data?: Record<string, unknown>;
   redirect?: Redirect;
-  workflow?: {
-    id: string;
-    identifier: string;
-    name: string;
-    critical: boolean;
-    tags?: string[];
-    data?: CustomDataType;
-    severity: SeverityLevelEnum;
-  };
+  workflow?: Workflow;
   severity: SeverityLevelEnum;
 };
 
@@ -66,17 +58,19 @@ export type NotificationFilter = {
   severity?: SeverityLevelEnum | SeverityLevelEnum[];
 };
 
+export type Workflow = {
+  id: string;
+  identifier: string;
+  name: string;
+  critical: boolean;
+  tags?: string[];
+  data?: CustomDataType;
+  severity: SeverityLevelEnum;
+};
+
 export type InboxPreference = {
   level: PreferenceLevelEnum;
   enabled: boolean;
   channels: IPreferenceChannels;
-  workflow?: {
-    id: string;
-    identifier: string;
-    name: string;
-    critical: boolean;
-    tags?: string[];
-    data?: CustomDataType;
-    severity: SeverityLevelEnum;
-  };
+  workflow?: Workflow;
 };

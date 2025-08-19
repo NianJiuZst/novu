@@ -148,45 +148,43 @@ export class GetSubscriberPreference {
         setImmediate(() => resolve());
       });
 
-      const chunkResults = chunk
-        .map((workflow) => {
-          const preferences = workflowPreferenceSets[workflow._id];
+      const chunkResults = chunk.map((workflow) => {
+        const preferences = workflowPreferenceSets[workflow._id];
 
-          if (!preferences) {
-            return null;
-          }
+        if (!preferences) {
+          return;
+        }
 
-          const merged = this.mergePreferences(preferences, subscriberGlobalPreference);
+        const merged = this.mergePreferences(preferences, subscriberGlobalPreference);
 
-          const includedChannels = this.getChannels(workflow, includeInactiveChannels);
+        const includedChannels = this.getChannels(workflow, includeInactiveChannels);
 
-          const initialChannels = filteredPreference(
-            {
-              email: true,
-              sms: true,
-              in_app: true,
-              chat: true,
-              push: true,
-            },
-            includedChannels
-          );
+        const initialChannels = filteredPreference(
+          {
+            email: true,
+            sms: true,
+            in_app: true,
+            chat: true,
+            push: true,
+          },
+          includedChannels
+        );
 
-          const { channels, overrides } = this.calculateChannelsAndOverrides(merged, initialChannels);
+        const { channels, overrides } = this.calculateChannelsAndOverrides(merged, initialChannels);
 
-          return {
-            preference: {
-              channels,
-              enabled: true,
-              overrides,
-            },
-            template: mapTemplateConfiguration({
-              ...workflow,
-              critical: merged.preferences.all.readOnly,
-            }),
-            type: PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
-          };
-        })
-        .filter(Boolean);
+        return {
+          preference: {
+            channels,
+            enabled: true,
+            overrides,
+          },
+          template: mapTemplateConfiguration({
+            ...workflow,
+            critical: merged.preferences.all.readOnly,
+          }),
+          type: PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
+        };
+      });
 
       results.push(...chunkResults);
     }

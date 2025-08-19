@@ -342,15 +342,13 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
     return { data: result.data[0], rows: result.rows };
   }
 
-  async count(options: { where: Where<TEnhancedType>; useFinal?: boolean }): Promise<number> {
-    const { where, useFinal = false } = options;
-    const finalModifier = useFinal ? ' FINAL' : '';
-
+  async count(options: { where: Where<TEnhancedType> }): Promise<number> {
+    const { where } = options;
     const { clause, params } = this.buildWhereClause(where);
 
     const query = `
       SELECT toInt64(count()) as total
-      FROM ${this.table}${finalModifier}
+      FROM ${this.table}
       ${clause}
     `;
 
