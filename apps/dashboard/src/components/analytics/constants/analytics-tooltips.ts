@@ -3,7 +3,7 @@ export const ANALYTICS_TOOLTIPS = {
     'Shows the total number of messages generated across all channels (Email, SMS, Push, In-App) during the selected time period.',
 
   ACTIVE_SUBSCRIBERS:
-    'Displays the count of unique subscribers who have received at least one message during the selected time period.',
+    'Active subscriber is a subscriber who received at least one notification in the selected time period.',
 
   INTERACTIONS:
     'Shows total user interactions with messages:\n\n• Message seen\n• Message read\n• Message snoozed\n• Message archived\n\nTracks engagement across in-app notifications with more channels coming soon.',
