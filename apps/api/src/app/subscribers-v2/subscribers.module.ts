@@ -27,7 +27,7 @@ import {
   TopicSubscribersRepository,
   WorkflowOverrideRepository,
 } from '@novu/dal';
-
+import { ChannelEndpointsModule } from '../channel-endpoints/channel-endpoints.module';
 import { UpdatePreferences } from '../inbox/usecases/update-preferences/update-preferences.usecase';
 import { OutboundWebhooksModule } from '../outbound-webhooks/outbound-webhooks.module';
 import { GetSubscriberGlobalPreference } from '../subscribers/usecases/get-subscriber-global-preference';
@@ -38,14 +38,12 @@ import { ChatOauthCallback } from './usecases/chat-oauth-callback/chat-oauth-cal
 import { SlackOauthCallback } from './usecases/chat-oauth-callback/slack-oauth-callback/slack-oauth-callback.usecase';
 import { GenerateChatOauthUrl } from './usecases/generate-chat-oath-url/generate-chat-oauth-url.usecase';
 import { GenerateSlackOauthUrl } from './usecases/generate-chat-oath-url/generate-slack-oath-url/generate-slack-oauth-url.usecase';
-import { GetChannelEndpoints } from './usecases/get-channel-endpoints/get-channel-endpoints.usecase';
 import { GetSubscriber } from './usecases/get-subscriber/get-subscriber.usecase';
 import { GetSubscriberPreferences } from './usecases/get-subscriber-preferences/get-subscriber-preferences.usecase';
 import { ListSubscribersUseCase } from './usecases/list-subscribers/list-subscribers.usecase';
 import { PatchSubscriber } from './usecases/patch-subscriber/patch-subscriber.usecase';
 import { RemoveSubscriber } from './usecases/remove-subscriber/remove-subscriber.usecase';
 import { UpdateSubscriberPreferences } from './usecases/update-subscriber-preferences/update-subscriber-preferences.usecase';
-import { UpsertChannelEndpoint } from './usecases/upsert-channel-endpoint/upsert-channel-endpoint.usecase';
 
 const USE_CASES = [
   ListSubscribersUseCase,
@@ -75,8 +73,6 @@ const USE_CASES = [
   SlackOauthCallback,
   GenerateSlackOauthUrl,
   GenerateChatOauthUrl,
-  GetChannelEndpoints,
-  UpsertChannelEndpoint,
 ];
 
 const DAL_MODELS = [
@@ -92,7 +88,7 @@ const DAL_MODELS = [
 ];
 
 @Module({
-  imports: [TopicsV2Module, OutboundWebhooksModule.forRoot()],
+  imports: [TopicsV2Module, OutboundWebhooksModule.forRoot(), ChannelEndpointsModule],
   controllers: [SubscribersController],
   providers: [
     ...USE_CASES,

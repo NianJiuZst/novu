@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ChannelEndpointRouting } from '@novu/shared';
+import { ChannelEndpointRouting, ChannelTypeEnum, ProvidersIdEnum, ProvidersIdEnumConst } from '@novu/shared';
 
 export class GetChannelEndpointResponseDto {
   @ApiProperty({
@@ -10,15 +10,15 @@ export class GetChannelEndpointResponseDto {
 
   @ApiProperty({
     description: 'The channel type (email, sms, push, chat, etc.).',
-    type: String,
+    enum: ChannelTypeEnum,
   })
-  channel: string;
+  channel: ChannelTypeEnum | 'missing integration';
 
   @ApiProperty({
     description: 'The provider identifier (e.g., sendgrid, twilio, slack, etc.).',
-    type: String,
+    enum: Object.values(ProvidersIdEnumConst),
   })
-  provider: string;
+  provider: ProvidersIdEnum | 'missing integration';
 
   @ApiProperty({
     description: 'The endpoint address/destination (e.g., email address, phone number, webhook URL).',

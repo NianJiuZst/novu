@@ -1,22 +1,6 @@
-import {
-  ChannelTypeEnum,
-  ChatProviderIdEnum,
-  EmailProviderIdEnum,
-  InAppProviderIdEnum,
-  ProvidersIdEnum,
-  PushProviderIdEnum,
-  SmsProviderIdEnum,
-} from '@novu/shared';
+import { ChannelTypeEnum, ProvidersIdEnum, ProvidersIdEnumConst } from '@novu/shared';
 import { IsDefined, IsEnum, IsOptional, IsString } from 'class-validator';
 import { EnvironmentCommand } from '../../../shared/commands/project.command';
-
-const ALL_PROVIDERS = [
-  ...Object.values(EmailProviderIdEnum),
-  ...Object.values(SmsProviderIdEnum),
-  ...Object.values(ChatProviderIdEnum),
-  ...Object.values(PushProviderIdEnum),
-  ...Object.values(InAppProviderIdEnum),
-];
 
 export class GetChannelEndpointsCommand extends EnvironmentCommand {
   @IsString()
@@ -27,7 +11,7 @@ export class GetChannelEndpointsCommand extends EnvironmentCommand {
   @IsOptional()
   channel?: ChannelTypeEnum;
 
-  @IsEnum(ALL_PROVIDERS)
+  @IsEnum(ProvidersIdEnumConst)
   @IsOptional()
   provider?: ProvidersIdEnum;
 

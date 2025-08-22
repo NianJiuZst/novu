@@ -12,6 +12,7 @@ import {
   SubscriberEntity,
   SubscriberRepository,
 } from '@novu/dal';
+import { ProvidersIdEnum } from '@novu/shared';
 import { GetChannelEndpointResponseDto } from '../../dtos/get-channel-endpoint-response.dto';
 import { UpsertChannelEndpointCommand } from './upsert-channel-endpoint.command';
 
@@ -87,7 +88,7 @@ export class UpsertChannelEndpoint {
     return {
       identifier: channelEndpoint.identifier,
       channel: integration.channel,
-      provider: integration.providerId,
+      provider: integration.providerId as ProvidersIdEnum,
       endpoint: channelEndpoint.endpoint,
       routing: channelEndpoint.routing,
       createdAt: channelEndpoint.createdAt,

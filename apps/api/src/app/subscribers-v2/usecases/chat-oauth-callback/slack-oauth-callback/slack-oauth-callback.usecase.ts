@@ -3,12 +3,12 @@ import { decryptCredentials } from '@novu/application-generic';
 import { ChannelTypeEnum, EnvironmentRepository, IntegrationEntity, IntegrationRepository } from '@novu/dal';
 import { ChatProviderIdEnum } from '@novu/shared';
 import axios from 'axios';
+import { UpsertChannelEndpointCommand } from '../../../../channel-endpoints/usecases/upsert-channel-endpoint/upsert-channel-endpoint.command';
+import { UpsertChannelEndpoint } from '../../../../channel-endpoints/usecases/upsert-channel-endpoint/upsert-channel-endpoint.usecase';
 import {
   GenerateSlackOauthUrl,
   StateData,
 } from '../../generate-chat-oath-url/generate-slack-oath-url/generate-slack-oauth-url.usecase';
-import { UpsertChannelEndpointCommand } from '../../upsert-channel-endpoint/upsert-channel-endpoint.command';
-import { UpsertChannelEndpoint } from '../../upsert-channel-endpoint/upsert-channel-endpoint.usecase';
 import { ChatOauthCallbackResult, ResponseTypeEnum } from '../chat-oauth-callback.response';
 import { SlackOauthCallbackCommand } from './slack-oauth-callback.command';
 

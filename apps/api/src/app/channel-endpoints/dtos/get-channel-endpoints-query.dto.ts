@@ -1,23 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  ChannelTypeEnum,
-  ChatProviderIdEnum,
-  EmailProviderIdEnum,
-  InAppProviderIdEnum,
-  ProvidersIdEnum,
-  PushProviderIdEnum,
-  SmsProviderIdEnum,
-} from '@novu/shared';
+import { ChannelTypeEnum, ProvidersIdEnum, ProvidersIdEnumConst } from '@novu/shared';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-
-// Create array of all provider values for validation and documentation
-const ALL_PROVIDERS = [
-  ...Object.values(EmailProviderIdEnum),
-  ...Object.values(SmsProviderIdEnum),
-  ...Object.values(ChatProviderIdEnum),
-  ...Object.values(PushProviderIdEnum),
-  ...Object.values(InAppProviderIdEnum),
-];
 
 export class GetChannelEndpointsQueryDto {
   @ApiProperty({
@@ -31,10 +14,10 @@ export class GetChannelEndpointsQueryDto {
 
   @ApiProperty({
     description: 'Provider identifier to filter results.',
-    enum: ALL_PROVIDERS,
+    enum: Object.values(ProvidersIdEnumConst),
     required: false,
   })
-  @IsEnum(ALL_PROVIDERS)
+  @IsEnum(Object.values(ProvidersIdEnumConst))
   @IsOptional()
   provider?: ProvidersIdEnum;
 

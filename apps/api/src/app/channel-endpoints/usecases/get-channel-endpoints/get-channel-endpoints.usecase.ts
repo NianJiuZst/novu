@@ -1,17 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InstrumentUsecase } from '@novu/application-generic';
-import { ChannelEndpointEntity, ChannelEndpointRepository, IntegrationEntity, IntegrationRepository } from '@novu/dal';
+import {
+  ChannelEndpointEntity,
+  ChannelEndpointRepository,
+  IntegrationEntity,
+  IntegrationRepository,
+  SubscriberRepository,
+} from '@novu/dal';
+import { ProvidersIdEnum } from '@novu/shared';
 import { SubscriberResponseDto } from '../../../subscribers/dtos';
 import { GetChannelEndpointResponseDto } from '../../dtos/get-channel-endpoint-response.dto';
-import { GetSubscriberCommand } from '../get-subscriber/get-subscriber.command';
-import { GetSubscriber } from '../get-subscriber/get-subscriber.usecase';
 import { GetChannelEndpointsCommand } from './get-channel-endpoints.command';
 
 @Injectable()
 export class GetChannelEndpoints {
   constructor(
     private readonly channelEndpointRepository: ChannelEndpointRepository,
-    private readonly getSubscriber: GetSubscriber,
+    private readonly subscriberRepository: SubscriberRepository,
     private readonly integrationRepository: IntegrationRepository
   ) {}
 
@@ -31,13 +36,17 @@ export class GetChannelEndpoints {
   }
 
   private async validateSubscriberExists(command: GetChannelEndpointsCommand): Promise<SubscriberResponseDto> {
-    return await this.getSubscriber.execute(
-      GetSubscriberCommand.create({
-        environmentId: command.environmentId,
-        organizationId: command.organizationId,
-        subscriberId: command.subscriberId,
-      })
-    );
+    const subscriber = await this.subscriberRepository.findOne({
+      subscriberId: command.subscriberId,
+      _organizationId: command.organizationId,
+      _environmentId: command.environmentId,
+    });
+
+    if (!subscriber) {
+      throw new NotFoundException(`Subscriber with id '${command.subscriberId}' not found`);
+    }
+
+    return subscriber;
   }
 
   private async fetchChannelEndpoints(
@@ -127,8 +136,9 @@ export class GetChannelEndpoints {
   ): GetChannelEndpointResponseDto {
     return {
       identifier: endpoint.identifier,
-      channel: integration?.channel || 'missing integration',
-      provider: integration?.providerId || 'missing integration',
+      channel: integration?.channel ?? 'missing integration',
+      provider: (integration?.providerId as ProvidersIdEnum) ?? 'missing integration',
+      // should I return integrationIdentifier here?
       endpoint: endpoint.endpoint,
       routing: endpoint.routing,
       createdAt: endpoint.createdAt,

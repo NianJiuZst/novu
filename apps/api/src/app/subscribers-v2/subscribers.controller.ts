@@ -39,22 +39,17 @@ import { ListSubscriberSubscriptionsCommand } from '../topics-v2/usecases/list-s
 import { ListSubscriberSubscriptionsUseCase } from '../topics-v2/usecases/list-subscriber-subscriptions/list-subscriber-subscriptions.usecase';
 import { CreateSubscriberRequestDto } from './dtos/create-subscriber.dto';
 import { GenerateChatOauthUrlRequestDto } from './dtos/generate-chat-oauth-url.dto';
-import { GetChannelEndpointResponseDto } from './dtos/get-channel-endpoint-response.dto';
-import { GetChannelEndpointsQueryDto } from './dtos/get-channel-endpoints-query.dto';
 import { GetSubscriberPreferencesDto } from './dtos/get-subscriber-preferences.dto';
 import { ListSubscribersQueryDto } from './dtos/list-subscribers-query.dto';
 import { ListSubscribersResponseDto } from './dtos/list-subscribers-response.dto';
 import { PatchSubscriberRequestDto } from './dtos/patch-subscriber.dto';
 import { PatchSubscriberPreferencesDto } from './dtos/patch-subscriber-preferences.dto';
 import { RemoveSubscriberResponseDto } from './dtos/remove-subscriber.dto';
-import { UpsertChannelEndpointRequestDto } from './dtos/upsert-channel-endpoint-request.dto';
 import { ChatOauthCallbackCommand } from './usecases/chat-oauth-callback/chat-oauth-callback.command';
 import { ResponseTypeEnum } from './usecases/chat-oauth-callback/chat-oauth-callback.response';
 import { ChatOauthCallback } from './usecases/chat-oauth-callback/chat-oauth-callback.usecase';
 import { GenerateChatOauthUrlCommand } from './usecases/generate-chat-oath-url/generate-chat-oauth-url.command';
 import { GenerateChatOauthUrl } from './usecases/generate-chat-oath-url/generate-chat-oauth-url.usecase';
-import { GetChannelEndpointsCommand } from './usecases/get-channel-endpoints/get-channel-endpoints.command';
-import { GetChannelEndpoints } from './usecases/get-channel-endpoints/get-channel-endpoints.usecase';
 import { GetSubscriberCommand } from './usecases/get-subscriber/get-subscriber.command';
 import { GetSubscriber } from './usecases/get-subscriber/get-subscriber.usecase';
 import { GetSubscriberPreferencesCommand } from './usecases/get-subscriber-preferences/get-subscriber-preferences.command';
@@ -68,8 +63,6 @@ import { RemoveSubscriberCommand } from './usecases/remove-subscriber/remove-sub
 import { RemoveSubscriber } from './usecases/remove-subscriber/remove-subscriber.usecase';
 import { UpdateSubscriberPreferencesCommand } from './usecases/update-subscriber-preferences/update-subscriber-preferences.command';
 import { UpdateSubscriberPreferences } from './usecases/update-subscriber-preferences/update-subscriber-preferences.usecase';
-import { UpsertChannelEndpointCommand } from './usecases/upsert-channel-endpoint/upsert-channel-endpoint.command';
-import { UpsertChannelEndpoint } from './usecases/upsert-channel-endpoint/upsert-channel-endpoint.usecase';
 
 @ThrottlerCategory(ApiRateLimitCategoryEnum.CONFIGURATION)
 @Controller({ path: '/subscribers', version: '2' })
@@ -87,8 +80,6 @@ export class SubscribersController {
     private updateSubscriberPreferencesUsecase: UpdateSubscriberPreferences,
     private createOrUpdateSubscriberUsecase: CreateOrUpdateSubscriberUseCase,
     private listSubscriberSubscriptionsUsecase: ListSubscriberSubscriptionsUseCase,
-    private getChannelEndpointsUsecase: GetChannelEndpoints,
-    private upsertChannelEndpointUsecase: UpsertChannelEndpoint,
     private chatOauthCallbackUsecase: ChatOauthCallback,
     private generateChatOauthUrlUsecase: GenerateChatOauthUrl
   ) {}
@@ -328,64 +319,6 @@ export class SubscribersController {
         orderDirection: query.orderDirection === DirectionEnum.ASC ? 1 : -1,
         orderBy: query.orderBy || '_id',
         includeCursor: query.includeCursor,
-      })
-    );
-  }
-
-  @Get('/:subscriberId/channel-endpoints')
-  @ApiExcludeEndpoint()
-  @ApiOperation({
-    summary: 'Retrieve subscriber channel endpoints',
-    description: `Retrieve all channel endpoints for a subscriber by its unique key identifier **subscriberId**.`,
-  })
-  @ApiParam({ name: 'subscriberId', description: 'The identifier of the subscriber', type: String })
-  @ApiResponse(GetChannelEndpointResponseDto, 200, true)
-  @RequirePermissions(PermissionsEnum.SUBSCRIBER_READ)
-  @RequireAuthentication()
-  async getChannelEndpoints(
-    @UserSession() user: UserSessionData,
-    @Param('subscriberId') subscriberId: string,
-    @Query() query: GetChannelEndpointsQueryDto
-  ): Promise<GetChannelEndpointResponseDto[]> {
-    return await this.getChannelEndpointsUsecase.execute(
-      GetChannelEndpointsCommand.create({
-        environmentId: user.environmentId,
-        organizationId: user.organizationId,
-        subscriberId,
-        channel: query.channel,
-        provider: query.provider,
-        endpoint: query.endpoint,
-      })
-    );
-  }
-
-  @Post('/:subscriberId/channel-endpoints')
-  @ApiExcludeEndpoint()
-  @ApiOperation({
-    summary: 'Create or update subscriber channel endpoint',
-    description: `Create or update a channel endpoint for a subscriber.`,
-  })
-  @ApiParam({ name: 'subscriberId', description: 'The identifier of the subscriber', type: String })
-  @ApiResponse(GetChannelEndpointResponseDto, 201)
-  @ApiResponse(GetChannelEndpointResponseDto, 200, false, false, {
-    description: 'Channel endpoint updated successfully',
-  })
-  @RequirePermissions(PermissionsEnum.SUBSCRIBER_WRITE)
-  @RequireAuthentication()
-  async upsertChannelEndpoint(
-    @UserSession() user: UserSessionData,
-    @Param('subscriberId') subscriberId: string,
-    @Body() body: UpsertChannelEndpointRequestDto
-  ): Promise<GetChannelEndpointResponseDto> {
-    return await this.upsertChannelEndpointUsecase.execute(
-      UpsertChannelEndpointCommand.create({
-        environmentId: user.environmentId,
-        organizationId: user.organizationId,
-        subscriberId,
-        identifier: body.identifier,
-        integrationIdentifier: body.integrationIdentifier,
-        endpoint: body.endpoint,
-        routing: body.routing,
       })
     );
   }
