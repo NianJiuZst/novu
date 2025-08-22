@@ -5,14 +5,15 @@ import {
   Delete,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   Post,
   Query,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiExcludeController, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { RequirePermissions } from '@novu/application-generic';
-import { ApiRateLimitCategoryEnum, PermissionsEnum, UserSessionData } from '@novu/shared';
+import { FeatureFlagsService, RequirePermissions } from '@novu/application-generic';
+import { ApiRateLimitCategoryEnum, FeatureFlagsKeysEnum, PermissionsEnum, UserSessionData } from '@novu/shared';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
 import { ThrottlerCategory } from '../rate-limiting/guards/throttler.decorator';
 import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
@@ -46,8 +47,21 @@ export class ChannelEndpointsController {
     private readonly getChannelEndpointsUsecase: GetChannelEndpoints,
     private readonly getChannelEndpointUsecase: GetChannelEndpoint,
     private readonly upsertChannelEndpointUsecase: UpsertChannelEndpoint,
-    private readonly deleteChannelEndpointUsecase: DeleteChannelEndpoint
+    private readonly deleteChannelEndpointUsecase: DeleteChannelEndpoint,
+    private readonly featureFlagsService: FeatureFlagsService
   ) {}
+
+  private async checkFeatureEnabled(user: UserSessionData) {
+    const isEnabled = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.IS_SLACK_TEAMS_ENABLED,
+      defaultValue: false,
+      organization: { _id: user.organizationId },
+    });
+
+    if (!isEnabled) {
+      throw new NotFoundException('Feature not enabled');
+    }
+  }
 
   @Get('/:subscriberId/channel-endpoints')
   @ApiOperation({
@@ -63,6 +77,8 @@ export class ChannelEndpointsController {
     @Param('subscriberId') subscriberId: string,
     @Query() query: GetChannelEndpointsQueryDto
   ): Promise<GetChannelEndpointResponseDto[]> {
+    await this.checkFeatureEnabled(user);
+
     return await this.getChannelEndpointsUsecase.execute(
       GetChannelEndpointsCommand.create({
         environmentId: user.environmentId,
@@ -90,6 +106,8 @@ export class ChannelEndpointsController {
     @Param('subscriberId') subscriberId: string,
     @Param('identifier') identifier: string
   ): Promise<GetChannelEndpointResponseDto> {
+    await this.checkFeatureEnabled(user);
+
     return await this.getChannelEndpointUsecase.execute(
       GetChannelEndpointCommand.create({
         environmentId: user.environmentId,
@@ -117,6 +135,8 @@ export class ChannelEndpointsController {
     @Param('subscriberId') subscriberId: string,
     @Body() body: UpsertChannelEndpointRequestDto
   ): Promise<GetChannelEndpointResponseDto> {
+    await this.checkFeatureEnabled(user);
+
     return await this.upsertChannelEndpointUsecase.execute(
       UpsertChannelEndpointCommand.create({
         environmentId: user.environmentId,
@@ -145,6 +165,8 @@ export class ChannelEndpointsController {
     @Param('subscriberId') subscriberId: string,
     @Param('identifier') identifier: string
   ): Promise<void> {
+    await this.checkFeatureEnabled(user);
+
     await this.deleteChannelEndpointUsecase.execute(
       DeleteChannelEndpointCommand.create({
         environmentId: user.environmentId,

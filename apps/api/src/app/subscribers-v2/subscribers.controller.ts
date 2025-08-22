@@ -5,6 +5,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -17,12 +18,14 @@ import {
   CreateOrUpdateSubscriberCommand,
   CreateOrUpdateSubscriberUseCase,
   ExternalApiAccessible,
+  FeatureFlagsService,
   RequirePermissions,
   UserSession,
 } from '@novu/application-generic';
 import {
   ApiRateLimitCategoryEnum,
   DirectionEnum,
+  FeatureFlagsKeysEnum,
   PermissionsEnum,
   SubscriberCustomData,
   UserSessionData,
@@ -81,7 +84,8 @@ export class SubscribersController {
     private createOrUpdateSubscriberUsecase: CreateOrUpdateSubscriberUseCase,
     private listSubscriberSubscriptionsUsecase: ListSubscriberSubscriptionsUseCase,
     private chatOauthCallbackUsecase: ChatOauthCallback,
-    private generateChatOauthUrlUsecase: GenerateChatOauthUrl
+    private generateChatOauthUrlUsecase: GenerateChatOauthUrl,
+    private featureFlagsService: FeatureFlagsService
   ) {}
 
   @Get('')
@@ -337,6 +341,8 @@ export class SubscribersController {
     @UserSession() user: UserSessionData,
     @Body() body: GenerateChatOauthUrlRequestDto
   ): Promise<string> {
+    await this.checkFeatureEnabled(user);
+
     return await this.generateChatOauthUrlUsecase.execute(
       GenerateChatOauthUrlCommand.create({
         environmentId: user.environmentId,
@@ -386,5 +392,17 @@ export class SubscribersController {
     }
 
     res.redirect(result.result);
+  }
+
+  private async checkFeatureEnabled(user: UserSessionData) {
+    const isEnabled = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.IS_SLACK_TEAMS_ENABLED,
+      defaultValue: false,
+      organization: { _id: user.organizationId },
+    });
+
+    if (!isEnabled) {
+      throw new NotFoundException('Feature not enabled');
+    }
   }
 }
