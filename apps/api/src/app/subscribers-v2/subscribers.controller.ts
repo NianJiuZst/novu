@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -8,9 +9,10 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiExcludeEndpoint, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   CreateOrUpdateSubscriberCommand,
   CreateOrUpdateSubscriberUseCase,
@@ -25,6 +27,7 @@ import {
   SubscriberCustomData,
   UserSessionData,
 } from '@novu/shared';
+import { Response } from 'express';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
 import { ThrottlerCategory } from '../rate-limiting/guards/throttler.decorator';
 import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
@@ -35,12 +38,23 @@ import { ListTopicSubscriptionsResponseDto } from '../topics-v2/dtos/list-topic-
 import { ListSubscriberSubscriptionsCommand } from '../topics-v2/usecases/list-subscriber-subscriptions/list-subscriber-subscriptions.command';
 import { ListSubscriberSubscriptionsUseCase } from '../topics-v2/usecases/list-subscriber-subscriptions/list-subscriber-subscriptions.usecase';
 import { CreateSubscriberRequestDto } from './dtos/create-subscriber.dto';
+import { GenerateChatOauthUrlRequestDto } from './dtos/generate-chat-oauth-url.dto';
+import { GetChannelEndpointResponseDto } from './dtos/get-channel-endpoint-response.dto';
+import { GetChannelEndpointsQueryDto } from './dtos/get-channel-endpoints-query.dto';
 import { GetSubscriberPreferencesDto } from './dtos/get-subscriber-preferences.dto';
 import { ListSubscribersQueryDto } from './dtos/list-subscribers-query.dto';
 import { ListSubscribersResponseDto } from './dtos/list-subscribers-response.dto';
 import { PatchSubscriberRequestDto } from './dtos/patch-subscriber.dto';
 import { PatchSubscriberPreferencesDto } from './dtos/patch-subscriber-preferences.dto';
 import { RemoveSubscriberResponseDto } from './dtos/remove-subscriber.dto';
+import { UpsertChannelEndpointRequestDto } from './dtos/upsert-channel-endpoint-request.dto';
+import { ChatOauthCallbackCommand } from './usecases/chat-oauth-callback/chat-oauth-callback.command';
+import { ResponseTypeEnum } from './usecases/chat-oauth-callback/chat-oauth-callback.response';
+import { ChatOauthCallback } from './usecases/chat-oauth-callback/chat-oauth-callback.usecase';
+import { GenerateChatOauthUrlCommand } from './usecases/generate-chat-oath-url/generate-chat-oauth-url.command';
+import { GenerateChatOauthUrl } from './usecases/generate-chat-oath-url/generate-chat-oauth-url.usecase';
+import { GetChannelEndpointsCommand } from './usecases/get-channel-endpoints/get-channel-endpoints.command';
+import { GetChannelEndpoints } from './usecases/get-channel-endpoints/get-channel-endpoints.usecase';
 import { GetSubscriberCommand } from './usecases/get-subscriber/get-subscriber.command';
 import { GetSubscriber } from './usecases/get-subscriber/get-subscriber.usecase';
 import { GetSubscriberPreferencesCommand } from './usecases/get-subscriber-preferences/get-subscriber-preferences.command';
@@ -54,11 +68,12 @@ import { RemoveSubscriberCommand } from './usecases/remove-subscriber/remove-sub
 import { RemoveSubscriber } from './usecases/remove-subscriber/remove-subscriber.usecase';
 import { UpdateSubscriberPreferencesCommand } from './usecases/update-subscriber-preferences/update-subscriber-preferences.command';
 import { UpdateSubscriberPreferences } from './usecases/update-subscriber-preferences/update-subscriber-preferences.usecase';
+import { UpsertChannelEndpointCommand } from './usecases/upsert-channel-endpoint/upsert-channel-endpoint.command';
+import { UpsertChannelEndpoint } from './usecases/upsert-channel-endpoint/upsert-channel-endpoint.usecase';
 
 @ThrottlerCategory(ApiRateLimitCategoryEnum.CONFIGURATION)
 @Controller({ path: '/subscribers', version: '2' })
 @UseInterceptors(ClassSerializerInterceptor)
-@RequireAuthentication()
 @ApiTags('Subscribers')
 @SdkGroupName('Subscribers')
 @ApiCommonResponses()
@@ -71,7 +86,11 @@ export class SubscribersController {
     private getSubscriberPreferencesUsecase: GetSubscriberPreferences,
     private updateSubscriberPreferencesUsecase: UpdateSubscriberPreferences,
     private createOrUpdateSubscriberUsecase: CreateOrUpdateSubscriberUseCase,
-    private listSubscriberSubscriptionsUsecase: ListSubscriberSubscriptionsUseCase
+    private listSubscriberSubscriptionsUsecase: ListSubscriberSubscriptionsUseCase,
+    private getChannelEndpointsUsecase: GetChannelEndpoints,
+    private upsertChannelEndpointUsecase: UpsertChannelEndpoint,
+    private chatOauthCallbackUsecase: ChatOauthCallback,
+    private generateChatOauthUrlUsecase: GenerateChatOauthUrl
   ) {}
 
   @Get('')
@@ -84,6 +103,7 @@ export class SubscribersController {
   })
   @ApiResponse(ListSubscribersResponseDto)
   @RequirePermissions(PermissionsEnum.SUBSCRIBER_READ)
+  @RequireAuthentication()
   async searchSubscribers(
     @UserSession() user: UserSessionData,
     @Query() query: ListSubscribersQueryDto
@@ -115,6 +135,7 @@ export class SubscribersController {
   @ApiResponse(SubscriberResponseDto)
   @SdkMethodName('retrieve')
   @RequirePermissions(PermissionsEnum.SUBSCRIBER_READ)
+  @RequireAuthentication()
   async getSubscriber(
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string
@@ -141,6 +162,7 @@ export class SubscribersController {
   })
   @SdkMethodName('create')
   @RequirePermissions(PermissionsEnum.SUBSCRIBER_WRITE)
+  @RequireAuthentication()
   async createSubscriber(
     @UserSession() user: UserSessionData,
     @Body() body: CreateSubscriberRequestDto,
@@ -181,6 +203,7 @@ export class SubscribersController {
   @ApiResponse(SubscriberResponseDto)
   @SdkMethodName('patch')
   @RequirePermissions(PermissionsEnum.SUBSCRIBER_WRITE)
+  @RequireAuthentication()
   async patchSubscriber(
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string,
@@ -207,6 +230,7 @@ export class SubscribersController {
   })
   @SdkMethodName('delete')
   @RequirePermissions(PermissionsEnum.SUBSCRIBER_WRITE)
+  @RequireAuthentication()
   async removeSubscriber(
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string
@@ -231,6 +255,7 @@ export class SubscribersController {
   @SdkGroupName('Subscribers.Preferences')
   @SdkMethodName('list')
   @RequirePermissions(PermissionsEnum.SUBSCRIBER_READ)
+  @RequireAuthentication()
   async getSubscriberPreferences(
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string
@@ -256,6 +281,7 @@ export class SubscribersController {
   @SdkGroupName('Subscribers.Preferences')
   @SdkMethodName('update')
   @RequirePermissions(PermissionsEnum.SUBSCRIBER_WRITE)
+  @RequireAuthentication()
   async updateSubscriberPreferences(
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string,
@@ -284,6 +310,7 @@ export class SubscribersController {
   @SdkGroupName('Subscribers.Topics')
   @SdkMethodName('list')
   @RequirePermissions(PermissionsEnum.SUBSCRIBER_READ)
+  @RequireAuthentication()
   async listSubscriberTopics(
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string,
@@ -303,5 +330,128 @@ export class SubscribersController {
         includeCursor: query.includeCursor,
       })
     );
+  }
+
+  @Get('/:subscriberId/channel-endpoints')
+  @ApiExcludeEndpoint()
+  @ApiOperation({
+    summary: 'Retrieve subscriber channel endpoints',
+    description: `Retrieve all channel endpoints for a subscriber by its unique key identifier **subscriberId**.`,
+  })
+  @ApiParam({ name: 'subscriberId', description: 'The identifier of the subscriber', type: String })
+  @ApiResponse(GetChannelEndpointResponseDto, 200, true)
+  @RequirePermissions(PermissionsEnum.SUBSCRIBER_READ)
+  @RequireAuthentication()
+  async getChannelEndpoints(
+    @UserSession() user: UserSessionData,
+    @Param('subscriberId') subscriberId: string,
+    @Query() query: GetChannelEndpointsQueryDto
+  ): Promise<GetChannelEndpointResponseDto[]> {
+    return await this.getChannelEndpointsUsecase.execute(
+      GetChannelEndpointsCommand.create({
+        environmentId: user.environmentId,
+        organizationId: user.organizationId,
+        subscriberId,
+        channel: query.channel,
+        provider: query.provider,
+        endpoint: query.endpoint,
+      })
+    );
+  }
+
+  @Post('/:subscriberId/channel-endpoints')
+  @ApiExcludeEndpoint()
+  @ApiOperation({
+    summary: 'Create or update subscriber channel endpoint',
+    description: `Create or update a channel endpoint for a subscriber.`,
+  })
+  @ApiParam({ name: 'subscriberId', description: 'The identifier of the subscriber', type: String })
+  @ApiResponse(GetChannelEndpointResponseDto, 201)
+  @ApiResponse(GetChannelEndpointResponseDto, 200, false, false, {
+    description: 'Channel endpoint updated successfully',
+  })
+  @RequirePermissions(PermissionsEnum.SUBSCRIBER_WRITE)
+  @RequireAuthentication()
+  async upsertChannelEndpoint(
+    @UserSession() user: UserSessionData,
+    @Param('subscriberId') subscriberId: string,
+    @Body() body: UpsertChannelEndpointRequestDto
+  ): Promise<GetChannelEndpointResponseDto> {
+    return await this.upsertChannelEndpointUsecase.execute(
+      UpsertChannelEndpointCommand.create({
+        environmentId: user.environmentId,
+        organizationId: user.organizationId,
+        subscriberId,
+        identifier: body.identifier,
+        integrationIdentifier: body.integrationIdentifier,
+        endpoint: body.endpoint,
+        routing: body.routing,
+      })
+    );
+  }
+
+  @Post('/chat/oauth')
+  @ApiOperation({
+    summary: 'Generate chat OAuth URL',
+    description: `Generate an OAuth URL for chat integrations like Slack. 
+    The subscriber will use this URL to authorize the chat integration.`,
+  })
+  @ApiResponse(String)
+  @ApiExcludeEndpoint()
+  @RequirePermissions(PermissionsEnum.SUBSCRIBER_WRITE)
+  @RequireAuthentication()
+  async getChatOAuthUrl(
+    @UserSession() user: UserSessionData,
+    @Body() body: GenerateChatOauthUrlRequestDto
+  ): Promise<string> {
+    return await this.generateChatOauthUrlUsecase.execute(
+      GenerateChatOauthUrlCommand.create({
+        environmentId: user.environmentId,
+        organizationId: user.organizationId,
+        subscriberId: body.subscriberId,
+        integrationIdentifier: body.integrationIdentifier,
+        providerId: body.providerId,
+      })
+    );
+  }
+
+  @Get('/chat/oauth/callback')
+  @ApiOperation({
+    summary: 'Handle chat OAuth callback',
+    description: `Generic OAuth callback handler for all chat integrations (Slack, Teams, Discord, etc.). 
+    This endpoint processes the authorization code and stores the connection for any supported chat provider.`,
+  })
+  @ApiExcludeEndpoint()
+  async handleChatOAuthCallback(
+    @Res() res: Response,
+    @Query('code') providerCode: string,
+    @Query('state') state: string,
+    @Query('error') error?: string,
+    @Query('error_description') errorDescription?: string
+  ): Promise<void> {
+    if (error) {
+      throw new BadRequestException(`OAuth error: ${error}${errorDescription ? ` - ${errorDescription}` : ''}`);
+    }
+
+    if (!providerCode || !state) {
+      throw new BadRequestException('Missing required OAuth parameters: code and state');
+    }
+
+    const result = await this.chatOauthCallbackUsecase.execute(
+      ChatOauthCallbackCommand.create({
+        providerCode,
+        state,
+      })
+    );
+
+    if (result.type === ResponseTypeEnum.HTML) {
+      res.setHeader('Content-Type', 'text/html');
+      res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'");
+      res.send(result.result);
+
+      return;
+    }
+
+    res.redirect(result.result);
   }
 }
