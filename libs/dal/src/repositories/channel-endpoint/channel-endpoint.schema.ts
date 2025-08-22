@@ -39,6 +39,7 @@ const channelEndpointSchema = new Schema<ChannelEndpointDBModel>(
     identifier: {
       type: Schema.Types.String,
       unique: true,
+      required: true,
     },
     _organizationId: {
       type: Schema.Types.ObjectId,
@@ -53,7 +54,6 @@ const channelEndpointSchema = new Schema<ChannelEndpointDBModel>(
       ref: 'Integration',
     },
     subscriberId: Schema.Types.String,
-    topicKey: Schema.Types.String,
     endpoint: Schema.Types.String,
     routing: {
       type: routingSchema,

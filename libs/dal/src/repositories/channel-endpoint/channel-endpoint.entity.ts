@@ -16,8 +16,6 @@ export class ChannelEndpointEntity {
 
   subscriberId: ExternalSubscriberId;
 
-  topicKey: string;
-
   endpoint: string;
 
   routing: ChannelEndpointRouting;
