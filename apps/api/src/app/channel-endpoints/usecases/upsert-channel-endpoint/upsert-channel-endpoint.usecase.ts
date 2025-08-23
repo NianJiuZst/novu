@@ -89,6 +89,7 @@ export class UpsertChannelEndpoint {
       identifier: channelEndpoint.identifier,
       channel: integration.channel,
       provider: integration.providerId as ProvidersIdEnum,
+      integrationIdentifier: integration.identifier,
       endpoint: channelEndpoint.endpoint,
       routing: channelEndpoint.routing,
       createdAt: channelEndpoint.createdAt,

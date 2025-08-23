@@ -21,6 +21,13 @@ export class GetChannelEndpointResponseDto {
   provider: ProvidersIdEnum | 'missing integration';
 
   @ApiProperty({
+    description: 'The identifier of the integration to use for this channel endpoint.',
+    type: String,
+    example: 'slack-prod',
+  })
+  integrationIdentifier: string;
+
+  @ApiProperty({
     description: 'The endpoint address/destination (e.g., email address, phone number, webhook URL).',
     type: String,
   })

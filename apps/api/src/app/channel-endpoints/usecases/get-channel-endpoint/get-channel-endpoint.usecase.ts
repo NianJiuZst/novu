@@ -35,10 +35,6 @@ export class GetChannelEndpoint {
       _environmentId: command.environmentId,
     });
 
-    if (!integration) {
-      throw new NotFoundException(`Integration for channel endpoint '${command.identifier}' not found`);
-    }
-
     return this.mapChannelEndpointToDto(channelEndpoint, integration);
   }
 
@@ -67,13 +63,13 @@ export class GetChannelEndpoint {
 
   private mapChannelEndpointToDto(
     endpoint: ChannelEndpointEntity,
-    integration: IntegrationEntity
+    integration?: IntegrationEntity
   ): GetChannelEndpointResponseDto {
     return {
       identifier: endpoint.identifier,
-      channel: integration.channel,
-      provider: integration.providerId as ProvidersIdEnum,
-      // should I return integrationIdentifier here?
+      channel: integration?.channel ?? 'missing integration',
+      provider: (integration?.providerId as ProvidersIdEnum) ?? 'missing integration',
+      integrationIdentifier: integration?.identifier ?? 'missing integration',
       endpoint: endpoint.endpoint,
       routing: endpoint.routing,
       createdAt: endpoint.createdAt,

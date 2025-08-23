@@ -138,7 +138,7 @@ export class GetChannelEndpoints {
       identifier: endpoint.identifier,
       channel: integration?.channel ?? 'missing integration',
       provider: (integration?.providerId as ProvidersIdEnum) ?? 'missing integration',
-      // should I return integrationIdentifier here?
+      integrationIdentifier: integration?.identifier ?? 'missing integration',
       endpoint: endpoint.endpoint,
       routing: endpoint.routing,
       createdAt: endpoint.createdAt,
