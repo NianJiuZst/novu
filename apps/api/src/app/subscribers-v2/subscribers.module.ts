@@ -28,6 +28,7 @@ import {
   WorkflowOverrideRepository,
 } from '@novu/dal';
 import { ChannelEndpointsModule } from '../channel-endpoints/channel-endpoints.module';
+import { InboxModule } from '../inbox/inbox.module';
 import { UpdatePreferences } from '../inbox/usecases/update-preferences/update-preferences.usecase';
 import { OutboundWebhooksModule } from '../outbound-webhooks/outbound-webhooks.module';
 import { GetSubscriberGlobalPreference } from '../subscribers/usecases/get-subscriber-global-preference';
@@ -47,15 +48,11 @@ import { UpdateSubscriberPreferences } from './usecases/update-subscriber-prefer
 
 const USE_CASES = [
   ListSubscribersUseCase,
-  CreateOrUpdateSubscriberUseCase,
   UpdateSubscriber,
   UpdateSubscriberChannel,
   IntegrationRepository,
-  CacheInMemoryProviderService,
   CreateOrUpdateSubscriberUseCase,
   UpdateSubscriber,
-  UpdateSubscriberChannel,
-  IntegrationRepository,
   CacheInMemoryProviderService,
   GetSubscriber,
   PatchSubscriber,
@@ -88,7 +85,7 @@ const DAL_MODELS = [
 ];
 
 @Module({
-  imports: [TopicsV2Module, OutboundWebhooksModule.forRoot(), ChannelEndpointsModule],
+  imports: [TopicsV2Module, InboxModule, OutboundWebhooksModule.forRoot(), ChannelEndpointsModule],
   controllers: [SubscribersController],
   providers: [
     ...USE_CASES,
