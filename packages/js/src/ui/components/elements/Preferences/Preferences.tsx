@@ -108,11 +108,13 @@ export const Preferences = () => {
         'nt-px-3 nt-py-4 nt-flex nt-flex-col nt-gap-1 nt-overflow-y-auto nt-h-full nt-pr-0 [scrollbar-gutter:stable]'
       )}
     >
-      <PreferencesRow
-        iconKey="cogs"
-        preference={allPreferences().globalPreference}
-        onChange={() => updatePreference(allPreferences().globalPreference)}
-      />
+      <div class={style('globalWorkflowContainer')}>
+        <PreferencesRow
+          iconKey="cogs"
+          preference={allPreferences().globalPreference}
+          onChange={() => updatePreference(allPreferences().globalPreference)}
+        />
+      </div>
       <Show
         when={groupedPreferences().length > 0}
         fallback={

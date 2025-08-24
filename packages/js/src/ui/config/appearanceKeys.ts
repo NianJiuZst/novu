@@ -184,6 +184,7 @@ export const appearanceKeys = [
 
   // workflow
   'workflowContainer',
+  'globalWorkflowContainer',
   'workflowLabel',
   'workflowLabelHeader',
   'workflowLabelHeaderContainer',
