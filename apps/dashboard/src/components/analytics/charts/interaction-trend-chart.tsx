@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { Line, LineChart, XAxis } from 'recharts';
+import { Line, LineChart, XAxis, YAxis } from 'recharts';
 import { type InteractionTrendDataPoint } from '../../../api/activity';
 
 import { ChartConfig, ChartContainer, ChartTooltip, NovuTooltip } from '../../primitives/chart';
@@ -92,6 +92,16 @@ export function InteractionTrendChart({ data, isLoading, error }: InteractionTre
             tick={{ fontSize: 10, fill: '#99a0ae', textAnchor: 'middle' }}
             ticks={[firstDate, lastDate]}
             domain={['dataMin', 'dataMax']}
+          />
+          <YAxis
+            tickLine={false}
+            axisLine={false}
+            tick={{ fontSize: 10, fill: '#99a0ae' }}
+            width={40}
+            tickFormatter={(value) => {
+              if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
+              return value.toString();
+            }}
           />
           {includeTooltip && <ChartTooltip cursor={false} content={<NovuTooltip showTotal={false} />} />}
           <Line dataKey="messageSeen" name="Seen" stroke="#60a5fa" strokeWidth={2} dot={false} type="monotone" />

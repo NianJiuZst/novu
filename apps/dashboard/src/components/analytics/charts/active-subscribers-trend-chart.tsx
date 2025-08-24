@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { Line, LineChart, XAxis } from 'recharts';
+import { Line, LineChart, XAxis, YAxis } from 'recharts';
 import { type ActiveSubscribersTrendDataPoint } from '../../../api/activity';
 
 import { ChartConfig, ChartContainer, ChartTooltip, NovuTooltip } from '../../primitives/chart';
@@ -73,6 +73,16 @@ export function ActiveSubscribersTrendChart({ data, isLoading, error }: ActiveSu
               return '';
             }}
             domain={['dataMin', 'dataMax']}
+          />
+          <YAxis
+            tickLine={false}
+            axisLine={false}
+            tick={{ fontSize: 10, fill: '#99a0ae' }}
+            width={40}
+            tickFormatter={(value) => {
+              if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
+              return value.toString();
+            }}
           />
           {includeTooltip && <ChartTooltip cursor={false} content={<NovuTooltip showTotal={false} />} />}
           <Line

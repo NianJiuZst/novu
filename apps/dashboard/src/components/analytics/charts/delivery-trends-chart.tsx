@@ -1,6 +1,6 @@
 import { StepTypeEnum } from '@novu/shared';
 import { useCallback, useMemo } from 'react';
-import { Bar, BarChart, XAxis } from 'recharts';
+import { Bar, BarChart, XAxis, YAxis } from 'recharts';
 import { type ChartDataPoint } from '../../../api/activity';
 import { STEP_TYPE_TO_ICON } from '../../icons/utils';
 
@@ -174,6 +174,16 @@ export function DeliveryTrendsChart({ data, isLoading }: DeliveryTrendsChartProp
             axisLine={false}
             tick={{ fontSize: 10, fill: '#99a0ae' }}
             ticks={[firstDate, lastDate]}
+          />
+          <YAxis
+            tickLine={false}
+            axisLine={false}
+            tick={{ fontSize: 10, fill: '#99a0ae' }}
+            width={40}
+            tickFormatter={(value) => {
+              if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
+              return value.toString();
+            }}
           />
           {includeTooltip && <ChartTooltip cursor={false} content={<DeliveryTooltip />} />}
           <Bar
