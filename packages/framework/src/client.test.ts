@@ -1004,7 +1004,9 @@ describe('Novu Client', () => {
       const emailExecutionResult = await client.executeWorkflow(event);
 
       expect(emailExecutionResult.outputs).toEqual({
-        body: `{\\n  'text': 'cat'\\n}`,
+        body: `{
+  'text': 'cat'
+}`,
         subject: 'Hello',
       });
     });
