@@ -15,7 +15,16 @@ export function defaultOutputEscape(output: unknown): string {
   }
   // For strings that might contain newlines, ensure proper escaping
   else if (typeof output === 'string' && output.includes('\n')) {
-    return output.replace(/\n/g, '\\n');
+    return output
+      .replace(/\\/g, '\\\\') // Escape backslashes first
+      .replace(/"/g, '\\"') // Escape quotes
+      .replace(/\n/g, '\\n'); // Escape newlines
+  }
+  // For strings that might contain quotes but no newlines
+  else if (typeof output === 'string') {
+    return output
+      .replace(/\\/g, '\\\\') // Escape backslashes first
+      .replace(/"/g, '\\"'); // Escape quotes
   } else {
     return output === undefined || output === null ? '' : String(output as unknown);
   }
