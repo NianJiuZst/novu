@@ -6,7 +6,7 @@ import {
   MessagesStatusEnum,
   SeverityLevelEnum,
 } from '@novu/shared';
-import { FilterQuery, Types } from 'mongoose';
+import { FilterQuery, PipelineStage, Types } from 'mongoose';
 
 import { DalException } from '../../shared';
 import { EnforceEnvId } from '../../types/enforce';
@@ -380,13 +380,43 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
   ): Promise<{ severity: SeverityLevelEnum; count: number }[]> {
     const severityLevels = Object.values(SeverityLevelEnum);
 
-    const promises = severityLevels.map((severity) =>
-      this.getCount(environmentId, subscriberId, channel, { ...query, severity: [severity] }, options)
-    );
+    // Get the base filter query without severity filter
+    const baseQuery = await this.getFilterQueryForMessage(environmentId, subscriberId, channel, query);
 
-    const results = await Promise.all(promises);
+    // Use aggregation to count by severity in a single query
+    const aggregationPipeline: PipelineStage[] = [
+      { $match: baseQuery },
+      {
+        $group: {
+          _id: '$severity',
+          count: { $sum: 1 },
+        },
+      },
+    ];
 
-    return results.map((result, index) => ({ severity: severityLevels[index], count: result }));
+    // Apply skip and limit if provided
+    if (options.skip) {
+      aggregationPipeline.push({ $skip: options.skip });
+    }
+    if (options.limit) {
+      aggregationPipeline.push({ $limit: options.limit });
+    }
+
+    const results = await this.MongooseModel.aggregate(aggregationPipeline);
+
+    // Create a map for fast lookup
+    const severityCountMap = new Map<SeverityLevelEnum, number>();
+    for (const result of results) {
+      if (result._id && severityLevels.includes(result._id)) {
+        severityCountMap.set(result._id, result.count);
+      }
+    }
+
+    // Ensure all severity levels are represented, even if count is 0
+    return severityLevels.map((severity) => ({
+      severity,
+      count: severityCountMap.get(severity) || 0,
+    }));
   }
 
   private getReadSeenUpdateQuery(

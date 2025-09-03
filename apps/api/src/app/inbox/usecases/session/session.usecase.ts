@@ -52,8 +52,6 @@ import { EnvironmentResponseDto } from '../../../environments-v1/dtos/environmen
 import { GenerateUniqueApiKey } from '../../../environments-v1/usecases/generate-unique-api-key/generate-unique-api-key.usecase';
 import { CreateNovuIntegrationsCommand } from '../../../integrations/usecases/create-novu-integrations/create-novu-integrations.command';
 import { CreateNovuIntegrations } from '../../../integrations/usecases/create-novu-integrations/create-novu-integrations.usecase';
-import { GetOrganizationSettingsCommand } from '../../../organization/usecases/get-organization-settings/get-organization-settings.command';
-import { GetOrganizationSettings } from '../../../organization/usecases/get-organization-settings/get-organization-settings.usecase';
 import { isHmacValid } from '../../../shared/helpers/is-valid-hmac';
 import { SubscriberDto, SubscriberSessionRequestDto } from '../../dtos/subscriber-session-request.dto';
 import { SubscriberSessionResponseDto } from '../../dtos/subscriber-session-response.dto';
@@ -89,7 +87,6 @@ export class Session {
     private messageRepository: MessageRepository,
     private preferencesRepository: PreferencesRepository,
     private upsertControlValuesUseCase: UpsertControlValuesUseCase,
-    private getOrganizationSettingsUsecase: GetOrganizationSettings,
     private logger: PinoLogger,
     private featureFlagsService: FeatureFlagsService
   ) {
@@ -202,18 +199,14 @@ export class Session {
     }
 
     const token = await this.authService.getSubscriberWidgetToken(subscriberEntity);
-    const organization = await this.organizationRepository.findById(environment._organizationId);
+    const organization = await this.organizationRepository.findById(
+      environment._organizationId,
+      '_id removeNovuBranding apiServiceLevel'
+    );
 
     if (!organization) {
       throw new NotFoundException('Organization not found');
     }
-
-    const { removeNovuBranding } = await this.getOrganizationSettingsUsecase.execute(
-      GetOrganizationSettingsCommand.create({
-        organizationId: environment._organizationId,
-        organization,
-      })
-    );
 
     const maxSnoozeDurationHours = await this.getMaxSnoozeDurationHours(organization?.apiServiceLevel);
 
@@ -247,7 +240,7 @@ export class Session {
       token,
       totalUnreadCount,
       unreadCount,
-      removeNovuBranding,
+      removeNovuBranding: organization.removeNovuBranding,
       maxSnoozeDurationHours,
       isDevelopmentMode: environment.name.toLowerCase() !== 'production',
     };
