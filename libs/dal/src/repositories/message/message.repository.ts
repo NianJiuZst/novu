@@ -384,11 +384,14 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     const baseQuery = await this.getFilterQueryForMessage(environmentId, subscriberId, channel, query);
 
     // Use aggregation to count by severity in a single query
+    // Treat null/missing severity as NONE
     const aggregationPipeline: PipelineStage[] = [
       { $match: baseQuery },
       {
         $group: {
-          _id: '$severity',
+          _id: {
+            $ifNull: ['$severity', SeverityLevelEnum.NONE],
+          },
           count: { $sum: 1 },
         },
       },
