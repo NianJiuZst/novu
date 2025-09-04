@@ -14,8 +14,8 @@ export default function NotificationInbox({ subscriberId }: { subscriberId: stri
       subscriberId={subscriberId}
 
       // Backend configuration (for EU region use https://eu.api.novu.co and https://eu.ws.novu.co)
-      backendUrl=""
-      socketUrl=""
+      backendUrl=process.env.NOVU_BACKEND_URL
+      socketUrl=process.env.NOVU_SOCKET_URL
 
       // Appearance configuration
       appearance={{
@@ -93,6 +93,7 @@ Potential common places where the inbox could be integrated in the UI:
 - **Subscriber ID Management**: Extract subscriber IDs using authentication hooks for seamless integration.
 - **Environment Variables**: Verify the presence of .env.local or .env files with correct configurations to support the application environment.
 - **TypeScript Compliance**: Adhere to Novu Inbox props and follow TypeScript best practices to ensure type safety and maintainable code.
+- **Backend and Socket URL**: Use the backend and socket URL from the environment variables. And ONLY if you have an indication that the user is located in the EU region.
 
 ### Never Do:
 - **External Files**: Use external appearance objects or separate files to manage styling and design elements.
@@ -102,6 +103,7 @@ Potential common places where the inbox could be integrated in the UI:
 - **Border-Radius and Style Preferences**: Do not assume style preferences, such as border-radius, without verifying compatibility with the host application.
 - **Focus on Code**: Limit contributions strictly to code-related tasks. Avoid creating instruction manuals, documentation, guides, or any materials unrelated to the primary objective.
 - **Code Comments**: Do not include comments in the code unless explicitly required for functionality or clarity.
+- **Inbox Properties**: do not add any empty properties or keys that are empty.
 
 ## Implementation Checklist
 
