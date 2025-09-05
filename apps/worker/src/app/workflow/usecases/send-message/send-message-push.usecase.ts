@@ -498,6 +498,12 @@ export class SendMessagePush extends SendMessageBase {
 
       return { success: true, error: undefined };
     } catch (e) {
+      Logger.log(
+        { jobId: command.jobId, error: e, code: e.code },
+        `Error sending push notification for jobId ${command.jobId} ${e.message || e.toString()}`,
+        LOG_CONTEXT
+      );
+
       await this.sendErrorStatus(
         message,
         'error',
