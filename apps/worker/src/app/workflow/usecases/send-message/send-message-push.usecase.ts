@@ -510,7 +510,7 @@ export class SendMessagePush extends SendMessageBase {
       return { success: true, error: undefined };
     } catch (e) {
       Logger.log(
-        { jobId: command.jobId, error: e, code: e?.code, message: e?.message },
+        { jobId: command.jobId, error: JSON.stringify(e), code: e?.code, message: e?.message, details: e?.details },
         `Error sending push notification for jobId ${command.jobId} ${e.message || e.toString()}`,
         LOG_CONTEXT
       );
