@@ -16,7 +16,7 @@ export const CHANNEL_ADDRESS_SCHEMAS = {
     validate: (addr: Record<string, unknown>) => typeof addr.userId === 'string' && Object.keys(addr).length === 1,
   },
   [ADDRESS_TYPES.WEBHOOK]: {
-    description: 'Webhook Address',
+    description: 'Webhook Address (with optional channel)',
     properties: { url: { type: 'string' as const }, channel: { type: 'string' as const } },
     required: ['url'],
     validate: (addr: Record<string, unknown>) => typeof addr.url === 'string' && Object.keys(addr).length === 1,
