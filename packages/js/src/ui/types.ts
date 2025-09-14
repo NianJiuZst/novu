@@ -131,7 +131,8 @@ export type AppearanceCallback = {
   scheduleContainer: (context: { schedule?: Schedule }) => string;
   scheduleHeader: (context: { schedule?: Schedule }) => string;
   scheduleLabelContainer: (context: { schedule?: Schedule }) => string;
-  scheduleLabelIcon: (context: { schedule?: Schedule }) => string;
+  scheduleLabelScheduleIcon: (context: { schedule?: Schedule }) => string;
+  scheduleLabelInfoIcon: (context: { schedule?: Schedule }) => string;
   scheduleLabel: (context: { schedule?: Schedule }) => string;
   scheduleActionsContainer: (context: { schedule?: Schedule }) => string;
   scheduleActionsContainerRight: (context: { schedule?: Schedule }) => string;
@@ -265,6 +266,7 @@ export type BaseNovuProviderProps = {
   tabs?: Array<Tab>;
   preferencesFilter?: PreferencesFilter;
   preferenceGroups?: PreferenceGroups;
+  preferenceSort?: PreferenceSort;
   routerPush?: RouterPush;
   novu?: Novu;
 };
@@ -284,6 +286,8 @@ export enum NotificationStatus {
 export type PreferencesFilter = Pick<NotificationFilter, 'tags' | 'severity'> & {
   criticality?: WorkflowCriticalityEnum;
 };
+
+export type PreferenceSort = (a: Preference, b: Preference) => number;
 
 type PreferenceFilterFunction = (args: { preferences: Preference[] }) => Preference[];
 
