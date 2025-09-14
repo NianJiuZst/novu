@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Instrument, InstrumentUsecase } from '@novu/application-generic';
-import { merge } from 'es-toolkit';
+import _ from 'lodash';
 import { JsonSchemaMock } from '../../../workflows-v2/util/json-schema-mock';
 import { collectKeys, keysToObject } from '../../../workflows-v2/util/utils';
 import { JSONSchemaDto } from '../../dtos/json-schema.dto';
@@ -143,7 +143,7 @@ export class CreateVariablesObject {
       }
     }, {});
 
-    return merge(obj, val);
+    return _.merge(obj, val);
   }
 
   /**
