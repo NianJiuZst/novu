@@ -30,20 +30,11 @@ export const EMPTY_LAYOUT = {
   ],
 };
 
-interface LayoutUrlConfig {
-  companyUrl?: string;
-  linkedInUrl?: string;
-  youtubeUrl?: string;
-  twitterUrl?: string;
-}
-
-export const createDefaultLayout = (_organizationName: string, urlConfig: LayoutUrlConfig = {}) => {
-  const {
-    companyUrl = 'https://novu.co/',
-    linkedInUrl = 'https://www.linkedin.com/company/novuco/',
-    youtubeUrl = 'https://www.youtube.com/@novuhq',
-    twitterUrl = 'https://x.com/novuhq',
-  } = urlConfig;
+export const createDefaultLayout = (_organizationName: string) => {
+  const companyUrl = 'https://novu.co/';
+  const linkedInUrl = 'https://www.linkedin.com/company/novuco/';
+  const youtubeUrl = 'https://www.youtube.com/@novuhq';
+  const twitterUrl = 'https://x.com/novuhq';
 
   return {
     type: 'doc',
