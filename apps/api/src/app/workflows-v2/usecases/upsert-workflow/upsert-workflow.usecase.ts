@@ -215,7 +215,7 @@ export class UpsertWorkflowUseCase {
 
     // Build optimistic step information for sync scenarios
     const optimisticSteps = command.workflowDto.steps.map((step) => ({
-      stepId: step.stepId || this.generateUniqueStepId(step, command.workflowDto.steps),
+      stepId: step.stepId || this.generateUniqueStepIdFromStepCommands(step, command.workflowDto.steps),
       type: step.type,
     }));
 
@@ -252,7 +252,7 @@ export class UpsertWorkflowUseCase {
         stepId:
           updateStepId ||
           syncToEnvironmentCreateStepId ||
-          this.generateUniqueStepId(step, existingWorkflow ? existingWorkflow.steps : command.workflowDto.steps),
+          this.generateUniqueStepId(step, existingWorkflow ? existingWorkflow.steps : steps),
         name: step.name,
         issues,
       };
@@ -288,6 +288,42 @@ export class UpsertWorkflowUseCase {
     }, []);
 
     const isStepIdUnique = (stepId: string) => !previousStepIds.includes(stepId);
+
+    while (attempts < maxAttempts) {
+      if (isStepIdUnique(finalStepId)) {
+        break;
+      }
+
+      finalStepId = `${slug}-${shortId()}`;
+      attempts += 1;
+    }
+
+    if (attempts === maxAttempts && !isStepIdUnique(finalStepId)) {
+      throw new BadRequestException({
+        message: 'Failed to generate unique stepId',
+        stepId: finalStepId,
+      });
+    }
+
+    return finalStepId;
+  }
+
+  @Instrument()
+  private generateUniqueStepIdFromStepCommands(step: UpsertStepDataCommand, allSteps: UpsertStepDataCommand[]): string {
+    const slug = slugify(step.name);
+
+    let finalStepId = slug;
+    let attempts = 0;
+    const maxAttempts = 5;
+
+    const existingStepIds = allSteps.reduce<string[]>((acc, s) => {
+      if (s.stepId && s !== step) {
+        acc.push(s.stepId);
+      }
+      return acc;
+    }, []);
+
+    const isStepIdUnique = (stepId: string) => !existingStepIds.includes(stepId);
 
     while (attempts < maxAttempts) {
       if (isStepIdUnique(finalStepId)) {
