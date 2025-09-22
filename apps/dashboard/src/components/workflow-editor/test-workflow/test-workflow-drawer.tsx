@@ -103,6 +103,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
   useEffect(() => {
     if (!isOpen) {
       setHasInitializedSubscriber(false);
+      setHasManualSubscriberChanges(false);
     }
   }, [isOpen]);
 
@@ -136,6 +137,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
       if (persistedSubscriber) {
         // Try to use the persisted subscriber
         setSubscriberData(persistedSubscriber);
+        setHasManualSubscriberChanges(true); // Mark as manually changed since it's persisted
       } else {
         // No persisted subscriber, use current user
         const fallbackData = {
@@ -145,6 +147,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
           email: currentUser.email ?? undefined,
         };
         setSubscriberData(fallbackData);
+        setHasManualSubscriberChanges(false); // No manual changes for default user
       }
 
       setHasInitializedSubscriber(true);
@@ -159,21 +162,26 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
     loadPersistedSubscriber,
   ]);
 
+  // Track if subscriber data has been manually modified
+  const [hasManualSubscriberChanges, setHasManualSubscriberChanges] = useState(false);
+
   // Handle fetched subscriber data and error cases
   useEffect(() => {
     if (fetchedSubscriberData && subscriberData?.subscriberId === fetchedSubscriberData.subscriberId) {
-      // Update with fresh data from server
-      setSubscriberData({
-        subscriberId: fetchedSubscriberData.subscriberId,
-        firstName: fetchedSubscriberData.firstName ?? undefined,
-        lastName: fetchedSubscriberData.lastName ?? undefined,
-        email: fetchedSubscriberData.email ?? undefined,
-        phone: fetchedSubscriberData.phone ?? undefined,
-        avatar: fetchedSubscriberData.avatar ?? undefined,
-        locale: fetchedSubscriberData.locale ?? undefined,
-        timezone: fetchedSubscriberData.timezone ?? undefined,
-        data: fetchedSubscriberData.data ?? undefined,
-      });
+      // Only update with fresh data from server if we haven't manually modified the subscriber
+      if (!hasManualSubscriberChanges) {
+        setSubscriberData({
+          subscriberId: fetchedSubscriberData.subscriberId,
+          firstName: fetchedSubscriberData.firstName ?? undefined,
+          lastName: fetchedSubscriberData.lastName ?? undefined,
+          email: fetchedSubscriberData.email ?? undefined,
+          phone: fetchedSubscriberData.phone ?? undefined,
+          avatar: fetchedSubscriberData.avatar ?? undefined,
+          locale: fetchedSubscriberData.locale ?? undefined,
+          timezone: fetchedSubscriberData.timezone ?? undefined,
+          data: fetchedSubscriberData.data ?? undefined,
+        });
+      }
     } else if (
       subscriberFetchError &&
       subscriberData?.subscriberId &&
@@ -182,6 +190,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
     ) {
       // Persisted subscriber doesn't exist, clear it and fallback to current user
       clearPersistedSubscriber();
+      setHasManualSubscriberChanges(false);
 
       const fallbackData = {
         subscriberId: currentUser._id,
@@ -197,6 +206,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
     subscriberData?.subscriberId,
     currentUser,
     clearPersistedSubscriber,
+    hasManualSubscriberChanges,
   ]);
 
   const payload = useMemo(() => {
@@ -230,6 +240,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
   const handleSubscriberSelect = useCallback(
     (subscriber: ISubscriberResponseDto) => {
       setSubscriberData(subscriber);
+      setHasManualSubscriberChanges(true);
       // Persist the selected subscriber for future use
       savePersistedSubscriber(subscriber);
     },
@@ -241,6 +252,8 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
       setIsSubscriberDrawerOpen(open);
 
       if (!open && subscriberData?.subscriberId) {
+        // Mark that we have manual changes since the subscriber drawer might have updated the data
+        setHasManualSubscriberChanges(true);
         refetchSubscriber();
       }
     },
