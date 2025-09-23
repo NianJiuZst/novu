@@ -128,11 +128,19 @@ export const useEditorPreview = ({ workflowSlug, stepSlug, controlValues, payloa
     const shouldUpdateEditor = !hasInitializedRef.current || !areKeysEqual(serverKeys, lastServerKeysRef.current);
 
     if (shouldUpdateEditor) {
-      setEditorValue(stringify(serverPayloadExample));
+      // Only update with server data if we don't have any existing data that might be from persistence
+      // If editorValue is not just '{}', it likely contains persisted or user-modified data
+      const currentData = editorValue.trim();
+      const isEmptyData = currentData === '{}' || currentData === '';
+
+      if (isEmptyData) {
+        setEditorValue(stringify(serverPayloadExample));
+      }
+
       hasInitializedRef.current = true;
       lastServerKeysRef.current = serverKeys;
     }
-  }, [previewData?.previewPayloadExample, parsedEditorPayload]);
+  }, [previewData?.previewPayloadExample, editorValue]);
 
   return {
     editorValue,
