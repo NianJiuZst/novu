@@ -103,7 +103,6 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
   useEffect(() => {
     if (!isOpen) {
       setHasInitializedSubscriber(false);
-      setHasManualSubscriberChanges(false);
     }
   }, [isOpen]);
 
@@ -137,7 +136,6 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
       if (persistedSubscriber) {
         // Try to use the persisted subscriber
         setSubscriberData(persistedSubscriber);
-        setHasManualSubscriberChanges(true); // Mark as manually changed since it's persisted
       } else {
         // No persisted subscriber, use current user
         const fallbackData = {
@@ -147,7 +145,6 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
           email: currentUser.email ?? undefined,
         };
         setSubscriberData(fallbackData);
-        setHasManualSubscriberChanges(false); // No manual changes for default user
       }
 
       setHasInitializedSubscriber(true);
@@ -162,14 +159,16 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
     loadPersistedSubscriber,
   ]);
 
-  // Track if subscriber data has been manually modified
-  const [hasManualSubscriberChanges, setHasManualSubscriberChanges] = useState(false);
-
   // Handle fetched subscriber data and error cases
   useEffect(() => {
     if (fetchedSubscriberData && subscriberData?.subscriberId === fetchedSubscriberData.subscriberId) {
-      // Only update with fresh data from server if we haven't manually modified the subscriber
-      if (!hasManualSubscriberChanges) {
+      // Check if we have persisted data that might contain user modifications
+      const persistedSubscriber = loadPersistedSubscriber();
+
+      // Only update with server data if we don't have persisted data or the persisted subscriber
+      // is the same as what the server returned (meaning no user modifications)
+      if (!persistedSubscriber || persistedSubscriber.subscriberId === currentUser?._id) {
+        // Update with fresh data from server only if no persisted modifications exist
         setSubscriberData({
           subscriberId: fetchedSubscriberData.subscriberId,
           firstName: fetchedSubscriberData.firstName ?? undefined,
@@ -182,6 +181,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
           data: fetchedSubscriberData.data ?? undefined,
         });
       }
+      // If we have persisted data, don't override it with server data
     } else if (
       subscriberFetchError &&
       subscriberData?.subscriberId &&
@@ -190,7 +190,6 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
     ) {
       // Persisted subscriber doesn't exist, clear it and fallback to current user
       clearPersistedSubscriber();
-      setHasManualSubscriberChanges(false);
 
       const fallbackData = {
         subscriberId: currentUser._id,
@@ -206,7 +205,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
     subscriberData?.subscriberId,
     currentUser,
     clearPersistedSubscriber,
-    hasManualSubscriberChanges,
+    loadPersistedSubscriber,
   ]);
 
   const payload = useMemo(() => {
@@ -227,20 +226,20 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
 
   const watchedPayload = watch('payload');
   useEffect(() => {
-    if (!initialPayload && watchedPayload) {
+    if (watchedPayload) {
       try {
         const parsedPayload = JSON.parse(watchedPayload);
+        // Always persist payload changes, regardless of initialPayload
         savePersistedPayload(parsedPayload);
       } catch {
         // Invalid JSON, don't persist
       }
     }
-  }, [watchedPayload, initialPayload, savePersistedPayload]);
+  }, [watchedPayload, savePersistedPayload]);
 
   const handleSubscriberSelect = useCallback(
     (subscriber: ISubscriberResponseDto) => {
       setSubscriberData(subscriber);
-      setHasManualSubscriberChanges(true);
       // Persist the selected subscriber for future use
       savePersistedSubscriber(subscriber);
     },
@@ -252,8 +251,6 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
       setIsSubscriberDrawerOpen(open);
 
       if (!open && subscriberData?.subscriberId) {
-        // Mark that we have manual changes since the subscriber drawer might have updated the data
-        setHasManualSubscriberChanges(true);
         refetchSubscriber();
       }
     },
