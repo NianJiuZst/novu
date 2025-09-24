@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InstrumentUsecase } from '@novu/application-generic';
+import { InstrumentUsecase, shortId } from '@novu/application-generic';
 import { PreferencesEntity, PreferencesRepository } from '@novu/dal';
 import { PreferencesTypeEnum, ResourceOriginEnum, WorkflowCreationSourceEnum } from '@novu/shared';
 import { DuplicateWorkflowDto, StepResponseDto, WorkflowPreferencesDto, WorkflowResponseDto } from '../../dtos';
@@ -70,11 +70,48 @@ export class DuplicateWorkflowUseCase {
   }
 
   private mapStepsToDuplicate(steps: StepResponseDto[]): UpsertStepDataCommand[] {
-    return steps.map((step) => ({
-      name: step.name ?? '',
-      type: step.type,
-      controlValues: step.controls.values ?? null,
-    }));
+    const stepIdCounts = new Map<string, number>();
+    const usedStepIds = new Set<string>();
+
+    return steps.map((step) => {
+      const originalStepId = step.stepId;
+      const count = stepIdCounts.get(originalStepId) || 0;
+      stepIdCounts.set(originalStepId, count + 1);
+
+      let finalStepId = originalStepId;
+
+      // If this is not the first occurrence of this stepId, generate a unique one
+      if (count > 0) {
+        finalStepId = this.generateUniqueStepId(originalStepId, usedStepIds);
+      }
+
+      usedStepIds.add(finalStepId);
+
+      return {
+        name: step.name ?? '',
+        type: step.type,
+        controlValues: step.controls.values ?? null,
+        stepId: finalStepId,
+      };
+    });
+  }
+
+  private generateUniqueStepId(baseStepId: string, usedStepIds: Set<string>): string {
+    let newStepId = baseStepId;
+    let attempts = 0;
+    const maxAttempts = 100;
+
+    while (usedStepIds.has(newStepId) && attempts < maxAttempts) {
+      newStepId = `${baseStepId}-${shortId()}`;
+      attempts++;
+    }
+
+    if (attempts === maxAttempts) {
+      // Fallback: use a completely random suffix
+      newStepId = `${baseStepId}-${shortId()}-${shortId()}`;
+    }
+
+    return newStepId;
   }
 
   private mapPreferences(preferences: PreferencesEntity[]): {
