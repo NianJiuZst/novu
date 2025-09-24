@@ -541,4 +541,11 @@ describe('slugify', () => {
   it('replaces leading and trailing separator chars', () => {
     expect(slugify('! Come on, fhqwhgads !'), 'Come-on-fhqwhgads');
   });
+
+  it('handles uppercase acronyms with digits correctly', () => {
+    expect(slugify('P2P TESTING')).toBe('p2p-testing');
+    expect(slugify('B2B Commerce')).toBe('b2b-commerce');
+    expect(slugify('API3 Testing')).toBe('api3-testing');
+    expect(slugify('A1B2C3 Test')).toBe('a1b2c3-test');
+  });
 });

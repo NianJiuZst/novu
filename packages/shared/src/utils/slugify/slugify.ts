@@ -132,19 +132,35 @@ interface Options {
 }
 
 const decamelize = (string: string) => {
-  return (
-    string
-      // Separate capitalized words.
-      .replace(/([A-Z]{2,})(\d+)/g, '$1 $2')
-      .replace(/([a-z\d]+)([A-Z]{2,})/g, '$1 $2')
-
-      .replace(/([a-z\d])([A-Z])/g, '$1 $2')
-      /*
-       * `[a-rt-z]` matches all lowercase characters except `s`.
-       * This avoids matching plural acronyms like `APIs`.
-       */
-      .replace(/([A-Z]+)([A-Z][a-rt-z\d]+)/g, '$1 $2')
-  );
+  // First, protect alphanumeric acronyms (like P2P, B2B, API3) by temporarily replacing them
+  const acronymMap = new Map<string, string>();
+  let acronymCounter = 0;
+  
+  // Match common alphanumeric acronym patterns like P2P, B2B, API3, A1B2C3
+  string = string.replace(/\b[A-Z]+(?:\d+[A-Z]*)+\b|\b[A-Z]\d+[A-Z]\b|\b(?:[A-Z]\d+)+[A-Z]*\b/g, (match) => {
+    const placeholder = `__ACRONYM_${acronymCounter++}__`;
+    acronymMap.set(placeholder, match);
+    return placeholder;
+  });
+  
+  // Now apply normal decamelization
+  string = string
+    // Separate capitalized words.
+    .replace(/([A-Z]{2,})(\d+)/g, '$1 $2')
+    .replace(/([a-z\d]+)([A-Z]{2,})/g, '$1 $2')
+    .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+    /*
+     * `[a-rt-z]` matches all lowercase characters except `s`.
+     * This avoids matching plural acronyms like `APIs`.
+     */
+    .replace(/([A-Z]+)([A-Z][a-rt-z\d]+)/g, '$1 $2');
+  
+  // Restore the protected acronyms
+  for (const [placeholder, original] of acronymMap) {
+    string = string.replace(placeholder, original);
+  }
+  
+  return string;
 };
 
 const removeMootSeparators = (string: string, separator: string) => {
