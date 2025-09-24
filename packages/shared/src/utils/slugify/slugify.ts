@@ -134,11 +134,12 @@ interface Options {
 const decamelize = (string: string) => {
   return (
     string
-      // Separate capitalized words.
-      .replace(/([A-Z]{2,})(\d+)/g, '$1 $2')
+      // Only separate multi-digit numbers from uppercase letters to preserve single-digit acronyms like P2P
+      .replace(/([A-Z]{2,})(\d{2,})/g, '$1 $2')
       .replace(/([a-z\d]+)([A-Z]{2,})/g, '$1 $2')
 
-      .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+      // Only separate lowercase letters followed by uppercase (not digits followed by uppercase)
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
       /*
        * `[a-rt-z]` matches all lowercase characters except `s`.
        * This avoids matching plural acronyms like `APIs`.

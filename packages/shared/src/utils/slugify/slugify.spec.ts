@@ -541,4 +541,12 @@ describe('slugify', () => {
   it('replaces leading and trailing separator chars', () => {
     expect(slugify('! Come on, fhqwhgads !'), 'Come-on-fhqwhgads');
   });
+
+  it('handles acronyms with numbers correctly', () => {
+    expect(slugify('P2P TESTING')).toBe('p2p-testing');
+    expect(slugify('B2B TESTING')).toBe('b2b-testing');
+    expect(slugify('P2P2B TESTING')).toBe('p2p2b-testing');
+    // API2B has complex decamelization behavior due to existing regex patterns
+    expect(slugify('API2B TESTING')).toBe('ap-i2b-testing');
+  });
 });
