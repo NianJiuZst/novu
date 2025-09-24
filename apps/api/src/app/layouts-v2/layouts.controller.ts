@@ -76,6 +76,7 @@ export class LayoutsController {
   ): Promise<LayoutResponseDto> {
     return this.upsertLayoutUseCase.execute(
       UpsertLayoutCommand.create({
+        preserveLayoutId: true,
         layoutDto: {
           ...createLayoutDto,
           controlValues: {
