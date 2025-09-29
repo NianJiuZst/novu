@@ -249,7 +249,21 @@ export const slugify = (string: string, options?: Options) => {
   string = transliterate(string, { customReplacements: Array.from(customReplacements) });
 
   if (options.decamelize) {
-    string = decamelize(string);
+    if (string.includes(' ')) {
+      // Apply decamelization to individual words, but preserve acronyms
+      string = string
+        .split(' ')
+        .map((word) => {
+          // Don't decamelize pure acronyms (all caps) or short words
+          if (word.length <= 3 && /^[A-Z0-9]+$/.test(word)) {
+            return word;
+          }
+          return decamelize(word);
+        })
+        .join(' ');
+    } else {
+      string = decamelize(string);
+    }
   }
 
   let patternSlug = /[^a-zA-Z\d]+/g;

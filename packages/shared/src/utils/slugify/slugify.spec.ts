@@ -541,4 +541,16 @@ describe('slugify', () => {
   it('replaces leading and trailing separator chars', () => {
     expect(slugify('! Come on, fhqwhgads !'), 'Come-on-fhqwhgads');
   });
+
+  it('should handle strings with spaces by decamelizing individual words while preserving acronyms', () => {
+    expect(slugify('New InApp Step')).toBe('new-in-app-step');
+    expect(slugify('P2P TESTING')).toBe('p2p-testing');
+    expect(slugify('API Step')).toBe('api-step');
+    expect(slugify('B2B Testing')).toBe('b2b-testing');
+  });
+
+  it('should still decamelize camelCase strings without spaces', () => {
+    expect(slugify('newInAppStep')).toBe('new-in-app-step');
+    expect(slugify('p2pTesting')).toBe('p2p-testing');
+  });
 });
