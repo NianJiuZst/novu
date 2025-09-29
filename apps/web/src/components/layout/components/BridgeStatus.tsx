@@ -1,17 +1,21 @@
 import { Badge, Text } from '@mantine/core';
-import { useQuery } from '@tanstack/react-query';
-import { Popover } from '@novu/design-system';
 import { useDisclosure } from '@mantine/hooks';
+import { Popover } from '@novu/design-system';
 import type { HealthCheck } from '@novu/framework/internal';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../../../api/api.client';
-import { useEnvironment } from '../../../hooks';
 import { IS_SELF_HOSTED } from '../../../config';
+import { useEnvironment } from '../../../hooks';
 
 export function BridgeStatus() {
   const [opened, { close, open }] = useDisclosure(false);
+  const failureCountRef = useRef(0);
+  const [refetchInterval, setRefetchInterval] = useState(5000);
 
   const { environment } = useEnvironment();
   const isBridgeEnabled = !!environment?.echo?.url && !IS_SELF_HOSTED;
+
   const { data, error, isInitialLoading } = useQuery<HealthCheck>(
     ['/v1/bridge/status'],
     () => {
@@ -19,10 +23,26 @@ export function BridgeStatus() {
     },
     {
       enabled: isBridgeEnabled,
-      refetchInterval: 5000,
+      refetchInterval,
       refetchOnWindowFocus: true,
     }
   );
+
+  // Update interval based on success/failure state
+  useEffect(() => {
+    const isSuccess = data?.status === 'ok' && !error;
+
+    if (isSuccess) {
+      failureCountRef.current = 0;
+      setRefetchInterval(5000); // Reset to 5 seconds on success
+    } else if (data !== undefined || error) {
+      // Only count as failure if we actually got a response
+      failureCountRef.current += 1;
+      // After 3 failures, use 10 second interval
+      const newInterval = failureCountRef.current >= 3 ? 10000 : 5000;
+      setRefetchInterval(newInterval);
+    }
+  }, [data, error]);
 
   if (IS_SELF_HOSTED) {
     return null;

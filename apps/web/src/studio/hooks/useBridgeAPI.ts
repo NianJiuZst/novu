@@ -1,6 +1,6 @@
 import type { DiscoverWorkflowOutput, Event, HealthCheck } from '@novu/framework/internal';
 import { UseQueryResult, useMutation, useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { api as cloudApi } from '../../api';
 import { buildBridgeHTTPClient, type TriggerParams } from '../../bridgeApi/bridgeApi.client';
 import { useStudioState } from '../StudioStateProvider';
@@ -41,6 +41,8 @@ export const useDiscover = (options?: any) => {
 export const useHealthCheck = (options?: any) => {
   const bridgeAPI = useBridgeAPI();
   const { bridgeURL, isLocalStudio } = useStudioState();
+  const failureCountRef = useRef(0);
+  const [refetchInterval, setRefetchInterval] = useState(BRIDGE_STATUS_REFRESH_INTERVAL_IN_MS);
 
   const res = useQuery<HealthCheck>(
     ['bridge-health-check', bridgeURL],
@@ -55,10 +57,26 @@ export const useHealthCheck = (options?: any) => {
       enabled: !!bridgeURL,
       networkMode: 'always',
       refetchOnWindowFocus: true,
-      refetchInterval: BRIDGE_STATUS_REFRESH_INTERVAL_IN_MS,
+      refetchInterval,
       ...options,
     }
   );
+
+  // Update interval based on success/failure state
+  useEffect(() => {
+    const isSuccess = res.data?.status === 'ok' && !res.error;
+
+    if (isSuccess) {
+      failureCountRef.current = 0;
+      setRefetchInterval(BRIDGE_STATUS_REFRESH_INTERVAL_IN_MS); // Reset to 5 seconds on success
+    } else if (res.data !== undefined || res.error) {
+      // Only count as failure if we actually got a response
+      failureCountRef.current += 1;
+      // After 3 failures, use 10 second interval
+      const newInterval = failureCountRef.current >= 3 ? 10000 : BRIDGE_STATUS_REFRESH_INTERVAL_IN_MS;
+      setRefetchInterval(newInterval);
+    }
+  }, [res.data, res.error]);
 
   return {
     ...res,
