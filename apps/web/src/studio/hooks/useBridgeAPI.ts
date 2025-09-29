@@ -1,6 +1,6 @@
 import type { DiscoverWorkflowOutput, Event, HealthCheck } from '@novu/framework/internal';
 import { UseQueryResult, useMutation, useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { api as cloudApi } from '../../api';
 import { buildBridgeHTTPClient, type TriggerParams } from '../../bridgeApi/bridgeApi.client';
 import { useStudioState } from '../StudioStateProvider';
@@ -41,6 +41,12 @@ export const useDiscover = (options?: any) => {
 export const useHealthCheck = (options?: any) => {
   const bridgeAPI = useBridgeAPI();
   const { bridgeURL, isLocalStudio } = useStudioState();
+  const failureCountRef = useRef(0);
+
+  const getRefetchInterval = useCallback(() => {
+    // After 3 failures, reduce retry time to 10 seconds
+    return failureCountRef.current >= 3 ? 10000 : BRIDGE_STATUS_REFRESH_INTERVAL_IN_MS;
+  }, []);
 
   const res = useQuery<HealthCheck>(
     ['bridge-health-check', bridgeURL],
@@ -55,7 +61,15 @@ export const useHealthCheck = (options?: any) => {
       enabled: !!bridgeURL,
       networkMode: 'always',
       refetchOnWindowFocus: true,
-      refetchInterval: BRIDGE_STATUS_REFRESH_INTERVAL_IN_MS,
+      refetchInterval: getRefetchInterval(),
+      onSuccess: () => {
+        // Reset failure count on successful response
+        failureCountRef.current = 0;
+      },
+      onError: () => {
+        // Increment failure count on error
+        failureCountRef.current += 1;
+      },
       ...options,
     }
   );

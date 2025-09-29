@@ -1,17 +1,25 @@
 import { Badge, Text } from '@mantine/core';
-import { useQuery } from '@tanstack/react-query';
-import { Popover } from '@novu/design-system';
 import { useDisclosure } from '@mantine/hooks';
+import { Popover } from '@novu/design-system';
 import type { HealthCheck } from '@novu/framework/internal';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback, useRef } from 'react';
 import { api } from '../../../api/api.client';
-import { useEnvironment } from '../../../hooks';
 import { IS_SELF_HOSTED } from '../../../config';
+import { useEnvironment } from '../../../hooks';
 
 export function BridgeStatus() {
   const [opened, { close, open }] = useDisclosure(false);
+  const failureCountRef = useRef(0);
 
   const { environment } = useEnvironment();
   const isBridgeEnabled = !!environment?.echo?.url && !IS_SELF_HOSTED;
+
+  const getRefetchInterval = useCallback(() => {
+    // After 3 failures, reduce retry time to 10 seconds
+    return failureCountRef.current >= 3 ? 10000 : 5000;
+  }, []);
+
   const { data, error, isInitialLoading } = useQuery<HealthCheck>(
     ['/v1/bridge/status'],
     () => {
@@ -19,8 +27,16 @@ export function BridgeStatus() {
     },
     {
       enabled: isBridgeEnabled,
-      refetchInterval: 5000,
+      refetchInterval: getRefetchInterval(),
       refetchOnWindowFocus: true,
+      onSuccess: () => {
+        // Reset failure count on successful response
+        failureCountRef.current = 0;
+      },
+      onError: () => {
+        // Increment failure count on error
+        failureCountRef.current += 1;
+      },
     }
   );
 
