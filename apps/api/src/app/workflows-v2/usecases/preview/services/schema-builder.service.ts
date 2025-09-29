@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { FeatureFlagsService } from '@novu/application-generic';
 import { JsonSchemaFormatEnum, JsonSchemaTypeEnum } from '@novu/dal';
-import { ContextPayload } from '@novu/shared';
+import { ContextPayload, FeatureFlagsKeysEnum } from '@novu/shared';
 import { merge } from 'es-toolkit/compat';
 import { JSONSchemaDto } from '../../../../shared/dtos/json-schema.dto';
 import { buildVariablesSchema } from '../../../../shared/utils/create-schema';
@@ -9,6 +10,7 @@ import { PreviewPayloadDto } from '../../../dtos';
 
 @Injectable()
 export class SchemaBuilderService {
+  constructor(private readonly featureFlagsService: FeatureFlagsService) {}
   async buildVariablesSchema(
     variablesObject: Record<string, unknown>,
     variables: JSONSchemaDto
@@ -25,7 +27,8 @@ export class SchemaBuilderService {
 
   async buildPreviewPayloadSchema(
     previewPayloadExample: PreviewPayloadDto,
-    workflowPayloadSchema?: JSONSchemaDto
+    workflowPayloadSchema?: JSONSchemaDto,
+    userContext?: { organizationId: string; environmentId: string; userId: string }
   ): Promise<JSONSchemaDto | null> {
     if (!workflowPayloadSchema) {
       return null;
@@ -37,22 +40,38 @@ export class SchemaBuilderService {
       additionalProperties: false,
     };
 
+    if (!schema.properties) {
+      schema.properties = {};
+    }
+
     if (previewPayloadExample.payload) {
-      schema.properties!.payload = workflowPayloadSchema || {
+      schema.properties.payload = workflowPayloadSchema || {
         type: JsonSchemaTypeEnum.OBJECT,
         additionalProperties: true,
       };
     }
 
-    // Always include context schema
-    schema.properties!.context = previewPayloadExample.context 
-      ? this.buildContextSchema(previewPayloadExample.context)
-      : this.getDefaultContextSchema();
+    // Include context schema only if feature flag is enabled
+    if (userContext) {
+      const isContextEnabled = await this.featureFlagsService.getFlag({
+        key: FeatureFlagsKeysEnum.IS_CONTEXT_ENABLED,
+        organization: { _id: userContext.organizationId },
+        environment: { _id: userContext.environmentId },
+        user: { _id: userContext.userId },
+        defaultValue: false,
+      });
+
+      if (isContextEnabled) {
+        schema.properties.context = previewPayloadExample.context
+          ? this.buildContextSchema(previewPayloadExample.context)
+          : this.getDefaultContextSchema();
+      }
+    }
 
     // Build dynamic subscriber schema based on actual subscriber data
-    schema.properties!.subscriber = this.buildSubscriberSchema(previewPayloadExample.subscriber);
+    schema.properties.subscriber = this.buildSubscriberSchema(previewPayloadExample.subscriber);
 
-    schema.properties!.steps = this.getStepsSchema();
+    schema.properties.steps = this.getStepsSchema();
 
     return schema;
   }

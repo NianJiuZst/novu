@@ -67,7 +67,15 @@ export class PreviewUsecase {
       }
 
       const cleanedPayloadExample = this.payloadProcessor.cleanPreviewExamplePayload(payloadExample);
-      const schema = await this.schemaBuilder.buildPreviewPayloadSchema(payloadExample, context.workflow.payloadSchema);
+      const schema = await this.schemaBuilder.buildPreviewPayloadSchema(
+        payloadExample,
+        context.workflow.payloadSchema,
+        {
+          organizationId: command.user.organizationId,
+          environmentId: command.user.environmentId,
+          userId: command.user._id,
+        }
+      );
 
       try {
         const executeOutput = await this.executePreviewUsecase(
