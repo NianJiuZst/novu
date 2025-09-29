@@ -132,19 +132,22 @@ interface Options {
 }
 
 const decamelize = (string: string) => {
-  return (
-    string
-      // Separate capitalized words.
-      .replace(/([A-Z]{2,})(\d+)/g, '$1 $2')
-      .replace(/([a-z\d]+)([A-Z]{2,})/g, '$1 $2')
-
-      .replace(/([a-z\d])([A-Z])/g, '$1 $2')
-      /*
-       * `[a-rt-z]` matches all lowercase characters except `s`.
-       * This avoids matching plural acronyms like `APIs`.
-       */
-      .replace(/([A-Z]+)([A-Z][a-rt-z\d]+)/g, '$1 $2')
-  );
+  // Split by existing spaces and apply decamelization to each word
+  return string
+    .split(/\s+/)
+    .map((word) =>
+      word
+        // Separate capitalized words.
+        .replace(/([A-Z]{2,})(\d+)/g, '$1 $2')
+        .replace(/([a-z\d]+)([A-Z]{2,})/g, '$1 $2')
+        .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+        /*
+         * `[a-rt-z]` matches all lowercase characters except `s`.
+         * This avoids matching plural acronyms like `APIs`.
+         */
+        .replace(/([A-Z]+)([A-Z][a-rt-z\d]+)/g, '$1 $2')
+    )
+    .join(' ');
 };
 
 const removeMootSeparators = (string: string, separator: string) => {

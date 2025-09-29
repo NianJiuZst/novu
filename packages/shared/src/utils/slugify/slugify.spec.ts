@@ -541,4 +541,9 @@ describe('slugify', () => {
   it('replaces leading and trailing separator chars', () => {
     expect(slugify('! Come on, fhqwhgads !'), 'Come-on-fhqwhgads');
   });
+
+  it('should handle InApp correctly', () => {
+    expect(slugify('New InApp Step'), 'new-in-app-step');
+    expect(slugify('InApp Notification'), 'in-app-notification');
+  });
 });
