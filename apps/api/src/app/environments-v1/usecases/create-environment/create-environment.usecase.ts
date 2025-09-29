@@ -1,6 +1,11 @@
 import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { encryptApiKey, FeatureFlagsService } from '@novu/application-generic';
-import { EnvironmentEntity, EnvironmentRepository, NotificationGroupRepository } from '@novu/dal';
+import {
+  EnvironmentEntity,
+  EnvironmentRepository,
+  NotificationGroupRepository,
+  OrganizationRepository,
+} from '@novu/dal';
 import { EnvironmentEnum, EnvironmentTypeEnum, FeatureFlagsKeysEnum, PROTECTED_ENVIRONMENTS } from '@novu/shared';
 import { createHash } from 'crypto';
 import { nanoid } from 'nanoid';
@@ -19,7 +24,8 @@ export class CreateEnvironment {
     private generateUniqueApiKey: GenerateUniqueApiKey,
     private createDefaultLayoutUsecase: CreateDefaultLayout,
     private createNovuIntegrationsUsecase: CreateNovuIntegrations,
-    private featureFlagsService: FeatureFlagsService
+    private featureFlagsService: FeatureFlagsService,
+    private organizationRepository: OrganizationRepository
   ) {}
 
   async execute(command: CreateEnvironmentCommand): Promise<EnvironmentResponseDto> {
@@ -30,8 +36,20 @@ export class CreateEnvironment {
     const environmentCount = await this.environmentRepository.count({
       _organizationId: command.organizationId,
     });
-    if (environmentCount >= 10) {
-      throw new BadRequestException('Organization cannot have more than 10 environments');
+
+    const organization = await this.organizationRepository.findById(command.organizationId);
+    if (!organization) {
+      throw new BadRequestException('Organization not found');
+    }
+
+    const maxEnvironmentCount = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.MAX_ENVIRONMENT_COUNT,
+      organization,
+      defaultValue: 10,
+    });
+
+    if (environmentCount >= maxEnvironmentCount) {
+      throw new BadRequestException(`Organization cannot have more than ${maxEnvironmentCount} environments`);
     }
     const normalizedName = command.name.trim();
 
