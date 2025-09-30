@@ -59,7 +59,7 @@ export function EditableJsonViewer({
   }, [schema]);
 
   const validateData = useMemo(
-    () => (data: unknown) => {
+    () => (data: any) => {
       if (!ajvValidator) {
         setValidationErrors([]);
         return true;
@@ -150,7 +150,7 @@ export function EditableJsonViewer({
       return [];
     }
 
-    return [
+    const components: CustomNodeDefinition<Record<string, any>, Record<string, any>>[] = [
       {
         condition: ({ value }) => typeof value === 'string',
         element: SingleClickEditableValue,
@@ -172,7 +172,9 @@ export function EditableJsonViewer({
         showOnEdit: false,
         customNodeProps: { type: 'boolean' },
       },
-    ] as CustomNodeDefinition<Record<string, unknown>, Record<string, unknown>>[];
+    ];
+
+    return components;
   }, [isReadOnly]);
 
   return (
