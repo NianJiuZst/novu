@@ -2,7 +2,7 @@ import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { CustomNodeDefinition, JsonEditor, UpdateFunctionProps } from 'json-edit-react';
 import JSON5 from 'json5';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { InlineToast } from '@/components/primitives/inline-toast';
 import { cn } from '@/utils/ui';
 import { CUSTOM_THEME } from './constants';
@@ -36,6 +36,8 @@ export function EditableJsonViewer({
 }: EditableJsonViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [editorKey, setEditorKey] = useState(0);
+  const timeoutRef = useRef<NodeJS.Timeout>();
 
   const ajvValidator = useMemo(() => {
     if (!schema) return null;
@@ -109,13 +111,51 @@ export function EditableJsonViewer({
 
   useHideRootNode(containerRef, value);
 
+  // Debounced function to reset editor state
+  const resetEditorState = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      setEditorKey((prev) => prev + 1);
+    }, 50);
+  }, []);
+
+  // Click-outside handler that forces reset
+  const handleClickOutside = useCallback(
+    (event: MouseEvent) => {
+      const container = containerRef.current;
+      if (!container || container.contains(event.target as Node)) {
+        return;
+      }
+
+      resetEditorState();
+    },
+    [resetEditorState]
+  );
+
+  useEffect(() => {
+    if (isReadOnly) return;
+
+    const options = { passive: true };
+    document.addEventListener('mousedown', handleClickOutside, options);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [handleClickOutside, isReadOnly]);
+
   const customNodeDefinitions = useMemo(() => {
     // Don't show custom editable components in read-only mode
     if (isReadOnly) {
       return [];
     }
 
-    const components: CustomNodeDefinition<Record<string, any>, Record<string, any>>[] = [
+    return [
       {
         condition: ({ value }) => typeof value === 'string',
         element: SingleClickEditableValue,
@@ -137,9 +177,7 @@ export function EditableJsonViewer({
         showOnEdit: false,
         customNodeProps: { type: 'boolean' },
       },
-    ];
-
-    return components;
+    ] as CustomNodeDefinition<Record<string, unknown>, Record<string, unknown>>[];
   }, [isReadOnly]);
 
   return (
@@ -173,6 +211,7 @@ export function EditableJsonViewer({
         </div>
       )}
       <JsonEditor
+        key={editorKey}
         data={value}
         onUpdate={handleUpdate}
         onError={handleError}
