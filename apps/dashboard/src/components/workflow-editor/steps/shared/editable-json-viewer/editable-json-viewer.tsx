@@ -36,8 +36,8 @@ export function EditableJsonViewer({
 }: EditableJsonViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [editorKey, setEditorKey] = useState(0);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const [isEditing, setIsEditing] = useState(false);
+  const [externalTriggers, setExternalTriggers] = useState<{ edit?: { action: 'cancel' } } | undefined>(undefined);
 
   const ajvValidator = useMemo(() => {
     if (!schema) return null;
@@ -59,7 +59,7 @@ export function EditableJsonViewer({
   }, [schema]);
 
   const validateData = useMemo(
-    () => (data: any) => {
+    () => (data: unknown) => {
       if (!ajvValidator) {
         setValidationErrors([]);
         return true;
@@ -111,18 +111,11 @@ export function EditableJsonViewer({
 
   useHideRootNode(containerRef, value);
 
-  // Debounced function to reset editor state
-  const resetEditorState = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      setEditorKey((prev) => prev + 1);
-    }, 50);
+  const handleEditEvent = useCallback((path: unknown) => {
+    setIsEditing(path !== null);
   }, []);
 
-  // Click-outside handler that forces reset
+  // Handle clicks outside the editor to reset state
   const handleClickOutside = useCallback(
     (event: MouseEvent) => {
       const container = containerRef.current;
@@ -130,22 +123,24 @@ export function EditableJsonViewer({
         return;
       }
 
-      resetEditorState();
+      if (isEditing) {
+        setExternalTriggers({ edit: { action: 'cancel' } });
+
+        setTimeout(() => {
+          setExternalTriggers(undefined);
+        }, 10);
+      }
     },
-    [resetEditorState]
+    [isEditing]
   );
 
   useEffect(() => {
     if (isReadOnly) return;
 
-    const options = { passive: true };
-    document.addEventListener('mousedown', handleClickOutside, options);
+    document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
     };
   }, [handleClickOutside, isReadOnly]);
 
@@ -211,10 +206,11 @@ export function EditableJsonViewer({
         </div>
       )}
       <JsonEditor
-        key={editorKey}
         data={value}
         onUpdate={handleUpdate}
         onError={handleError}
+        onEditEvent={handleEditEvent}
+        externalTriggers={externalTriggers}
         theme={CUSTOM_THEME}
         TextEditor={CustomTextEditor}
         customNodeDefinitions={customNodeDefinitions}
