@@ -1,4 +1,4 @@
-import { PermissionsEnum } from '@novu/shared';
+import { FeatureFlagsKeysEnum, PermissionsEnum } from '@novu/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { ComponentProps, useState } from 'react';
 import { RiDeleteBin2Line, RiFileCopyLine, RiMore2Fill, RiPulseFill } from 'react-icons/ri';
@@ -16,6 +16,7 @@ import {
 import { Skeleton } from '@/components/primitives/skeleton';
 import { TableCell, TableRow } from '@/components/primitives/table';
 import { TimeDisplayHoverCard } from '@/components/time-display-hover-card';
+import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { formatDateSimple } from '@/utils/format-date';
 import { Protect } from '@/utils/protect';
 import { QueryKeys } from '@/utils/query-keys';
@@ -48,6 +49,7 @@ export const TopicRow = ({ topic }: TopicRowProps) => {
   const { currentEnvironment } = useEnvironment();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { deleteTopic, isDeleting } = useDeleteTopic();
+  const isHttpLogsPageEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_HTTP_LOGS_PAGE_ENABLED, false);
   const queryClient = useQueryClient();
   const { navigateToEditTopicPage } = useTopicsNavigate();
 
@@ -125,7 +127,7 @@ export const TopicRow = ({ topic }: TopicRowProps) => {
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link
                       to={
-                        buildRoute(ROUTES.ACTIVITY_FEED, {
+                        buildRoute(isHttpLogsPageEnabled ? ROUTES.ACTIVITY_WORKFLOW_RUNS : ROUTES.ACTIVITY_FEED, {
                           environmentSlug: currentEnvironment?.slug ?? '',
                         }) +
                         '?' +

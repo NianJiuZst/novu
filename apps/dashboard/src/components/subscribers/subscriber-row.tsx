@@ -1,4 +1,4 @@
-import { ISubscriberResponseDto, PermissionsEnum } from '@novu/shared';
+import { FeatureFlagsKeysEnum, ISubscriberResponseDto, PermissionsEnum } from '@novu/shared';
 import { ComponentProps, useState } from 'react';
 import { RiDeleteBin2Line, RiFileCopyLine, RiMore2Fill, RiPulseFill } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
@@ -24,6 +24,7 @@ import { TimeDisplayHoverCard } from '@/components/time-display-hover-card';
 import TruncatedText from '@/components/truncated-text';
 import { useEnvironment } from '@/context/environment/hooks';
 import { useDeleteSubscriber } from '@/hooks/use-delete-subscriber';
+import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { formatDateSimple } from '@/utils/format-date';
 import { Protect } from '@/utils/protect';
 import { buildRoute, ROUTES } from '@/utils/routes';
@@ -62,6 +63,7 @@ export const SubscriberRow = ({ subscriber, subscribersCount, firstTwoSubscriber
   const subscriberTitle = getSubscriberTitle(subscriber);
   const { navigateToSubscribersFirstPage, navigateToEditSubscriberPage } = useSubscribersNavigate();
   const { handleNavigationAfterDelete } = useSubscribersUrlState();
+  const isHttpLogsPageEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_HTTP_LOGS_PAGE_ENABLED, false);
 
   const { deleteSubscriber, isPending: isDeleteSubscriberPending } = useDeleteSubscriber({
     onSuccess: () => {
@@ -188,7 +190,7 @@ export const SubscriberRow = ({ subscriber, subscribersCount, firstTwoSubscriber
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link
                       to={
-                        buildRoute(ROUTES.ACTIVITY_FEED, {
+                        buildRoute(isHttpLogsPageEnabled ? ROUTES.ACTIVITY_WORKFLOW_RUNS : ROUTES.ACTIVITY_FEED, {
                           environmentSlug: currentEnvironment?.slug ?? '',
                         }) +
                         '?' +
