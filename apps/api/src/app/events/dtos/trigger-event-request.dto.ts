@@ -47,6 +47,14 @@ export class TopicPayloadDto {
     enumName: 'TriggerRecipientsTypeEnum',
   })
   type: TriggerRecipientsTypeEnum;
+
+  @ApiPropertyOptional({
+    description: 'Optional array of subscriber IDs to exclude from the topic fanout',
+    type: [String],
+    example: ['subscriber-id-1', 'subscriber-id-2'],
+  })
+  @IsOptional()
+  exclude?: string[];
 }
 
 export class StepsOverrides {

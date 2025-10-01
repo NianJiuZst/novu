@@ -234,6 +234,94 @@ describe('Topic Trigger Event #novu-v2', () => {
       }
     });
 
+    it('should exclude specified subscriber from topic using exclude array', async () => {
+      const excludedSubscriber = firstSubscriber;
+      const toWithExclude = [
+        {
+          type: TriggerRecipientsTypeEnum.Topic,
+          topicKey: createdTopicDto.key,
+          exclude: [excludedSubscriber.subscriberId],
+        },
+      ];
+
+      await novuClient.trigger(buildTriggerRequestPayload(template, toWithExclude));
+
+      await session.waitForJobCompletion(template._id);
+
+      const excludedNotifications = await notificationRepository.findBySubscriberId(
+        session.environment._id,
+        excludedSubscriber._id
+      );
+      expect(excludedNotifications.length).to.equal(0);
+
+      const excludedMessages = await messageRepository.findBySubscriberChannel(
+        session.environment._id,
+        excludedSubscriber._id,
+        ChannelTypeEnum.IN_APP
+      );
+      expect(excludedMessages.length).to.equal(0);
+
+      const excludedEmails = await messageRepository.findBySubscriberChannel(
+        session.environment._id,
+        excludedSubscriber._id,
+        ChannelTypeEnum.EMAIL
+      );
+      expect(excludedEmails.length).to.equal(0);
+
+      const secondSubscriberNotifications = await notificationRepository.findBySubscriberId(
+        session.environment._id,
+        secondSubscriber._id
+      );
+      expect(secondSubscriberNotifications.length).to.equal(1);
+
+      const secondSubscriberMessages = await messageRepository.findBySubscriberChannel(
+        session.environment._id,
+        secondSubscriber._id,
+        ChannelTypeEnum.IN_APP
+      );
+      expect(secondSubscriberMessages.length).to.equal(1);
+
+      const secondSubscriberEmails = await messageRepository.findBySubscriberChannel(
+        session.environment._id,
+        secondSubscriber._id,
+        ChannelTypeEnum.EMAIL
+      );
+      expect(secondSubscriberEmails.length).to.equal(1);
+    });
+
+    it('should exclude multiple subscribers from topic using exclude array', async () => {
+      const toWithExclude = [
+        {
+          type: TriggerRecipientsTypeEnum.Topic,
+          topicKey: createdTopicDto.key,
+          exclude: [firstSubscriber.subscriberId, secondSubscriber.subscriberId],
+        },
+      ];
+
+      await novuClient.trigger(buildTriggerRequestPayload(template, toWithExclude));
+
+      await session.waitForJobCompletion(template._id);
+
+      for (const subscriber of subscribers) {
+        const notifications = await notificationRepository.findBySubscriberId(session.environment._id, subscriber._id);
+        expect(notifications.length).to.equal(0);
+
+        const messages = await messageRepository.findBySubscriberChannel(
+          session.environment._id,
+          subscriber._id,
+          ChannelTypeEnum.IN_APP
+        );
+        expect(messages.length).to.equal(0);
+
+        const emails = await messageRepository.findBySubscriberChannel(
+          session.environment._id,
+          subscriber._id,
+          ChannelTypeEnum.EMAIL
+        );
+        expect(emails.length).to.equal(0);
+      }
+    });
+
     it('should trigger SMS notification', async () => {
       template = await session.createTemplate({
         steps: [

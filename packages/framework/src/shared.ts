@@ -83,6 +83,7 @@ export interface IChannelCredentials {
 export interface ITopic {
   type: 'Topic';
   topicKey: string;
+  exclude?: string[] | undefined;
 }
 
 export type TriggerRecipientsPayload = string | ISubscriberPayload | ITopic | ISubscriberPayload[] | ITopic[];

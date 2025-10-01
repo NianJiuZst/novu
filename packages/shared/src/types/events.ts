@@ -61,6 +61,7 @@ export enum TriggerRecipientsTypeEnum {
 export interface ITopic {
   type: TriggerRecipientsTypeEnum.TOPIC;
   topicKey: TopicKey;
+  exclude?: string[] | undefined;
 }
 
 export type TriggerRecipientTopics = ITopic[];
