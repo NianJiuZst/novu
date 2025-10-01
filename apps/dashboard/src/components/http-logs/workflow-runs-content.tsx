@@ -186,7 +186,7 @@ export function WorkflowRunsContent({ log }: WorkflowRunsContentProps) {
               isFetching={isLoading}
             />
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="relative flex-1 overflow-y-auto">
             <div className="min-h-full">
               {isLoading ? (
                 <div className="p-3">
@@ -202,7 +202,7 @@ export function WorkflowRunsContent({ log }: WorkflowRunsContentProps) {
                   ))}
                 </div>
               ) : activities.length === 0 ? (
-                <div className="flex h-48 items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center">
                   <div className="flex flex-col items-center gap-2 text-center">
                     <p className="text-foreground-600 text-sm">No workflow runs found</p>
                     {activities.length === 0 ? (
