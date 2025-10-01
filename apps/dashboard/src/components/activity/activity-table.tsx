@@ -119,7 +119,7 @@ export function ActivityTable({
   }
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <AnimatePresence mode="wait" initial={false}>
         {!isLoading && activities.length === 0 ? (
           <motion.div
