@@ -1,5 +1,5 @@
 import { ContextId, ContextType, createContextKey } from '@novu/shared';
-import { forwardRef, useState } from 'react';
+import React, { forwardRef, useState } from 'react';
 import { RiBuildingLine } from 'react-icons/ri';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/primitives/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/primitives/tabs';
@@ -8,6 +8,7 @@ import { VisuallyHidden } from '@/components/primitives/visually-hidden';
 import TruncatedText from '@/components/truncated-text';
 import { useFormProtection } from '@/hooks/use-form-protection';
 import { cn } from '@/utils/ui';
+import { ContextActivity } from './context-activity';
 import { ContextOverview } from './context-overview';
 
 const tabTriggerClasses =
@@ -54,9 +55,15 @@ function ContextTabs(props: ContextTabsProps) {
           <TabsTrigger value="overview" className={tabTriggerClasses}>
             Overview
           </TabsTrigger>
+          <TabsTrigger value="activity-feed" className={tabTriggerClasses}>
+            Activity Feed
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="h-full w-full overflow-y-auto">
           <ContextOverview type={type} id={id} readOnly={readOnly} />
+        </TabsContent>
+        <TabsContent value="activity-feed" className="h-full w-full overflow-y-auto">
+          <ContextActivity type={type} id={id} />
         </TabsContent>
 
         {ProtectionAlert}
@@ -94,3 +101,29 @@ export const ContextDrawer = forwardRef<HTMLDivElement, ContextDrawerProps>((pro
     </Sheet>
   );
 });
+
+type ContextDrawerButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  contextKey: string;
+  readOnly?: boolean;
+};
+
+export const ContextDrawerButton = (props: ContextDrawerButtonProps) => {
+  const { contextKey, onClick, readOnly = false, ...rest } = props;
+  const [open, setOpen] = useState(false);
+
+  // Parse context key to extract type and id
+  const [type, id] = contextKey.split(':') as [ContextType, ContextId];
+
+  return (
+    <>
+      <button
+        {...rest}
+        onClick={(e) => {
+          setOpen(true);
+          onClick?.(e);
+        }}
+      />
+      <ContextDrawer open={open} onOpenChange={setOpen} type={type} id={id} readOnly={readOnly} />
+    </>
+  );
+};

@@ -1,5 +1,4 @@
-import { useOrganization } from '@clerk/clerk-react';
-import { FeatureFlagsKeysEnum } from '@novu/shared';
+import { ContextId, ContextType, createContextKey, FeatureFlagsKeysEnum } from '@novu/shared';
 import { AnimatePresence } from 'motion/react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -10,42 +9,23 @@ import { SubscriberActivityList } from '@/components/subscribers/subscriber-acti
 import { useEnvironment } from '@/context/environment/hooks';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { useFetchActivities } from '@/hooks/use-fetch-activities';
-import { useFetchSubscription } from '@/hooks/use-fetch-subscription';
 import { ActivityFiltersData } from '@/types/activity';
-import { getMaxAvailableActivityFeedDateRange } from '@/utils/activityFilters';
 import { buildRoute, ROUTES } from '@/utils/routes';
 
-const getInitialFilters = (subscriberId: string, dateRange: string): ActivityFiltersData => ({
-  channels: [],
+const getInitialFilters = (contextKey: string, dateRange?: string): ActivityFiltersData => ({
+  ...defaultActivityFilters,
   dateRange: dateRange || '24h',
-  subscriberId,
-  transactionId: '',
-  workflows: [],
-  topicKey: '',
-  severity: [],
-  contextSearch: '',
+  contextSearch: contextKey,
 });
 
-export const SubscriberActivity = ({ subscriberId }: { subscriberId: string }) => {
-  const { organization } = useOrganization();
+export const ContextActivity = ({ type, id }: { type: ContextType; id: ContextId }) => {
   const { currentEnvironment } = useEnvironment();
-  const { subscription } = useFetchSubscription();
   const isHttpLogsPageEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_HTTP_LOGS_PAGE_ENABLED, false);
+  const contextKey = createContextKey(type, id);
 
-  const maxAvailableActivityFeedDateRange = useMemo(
-    () =>
-      getMaxAvailableActivityFeedDateRange({
-        organization,
-        subscription,
-      }),
-    [organization, subscription]
-  );
-
-  const [filters, setFilters] = useState<ActivityFiltersData>(
-    getInitialFilters(subscriberId, maxAvailableActivityFeedDateRange)
-  );
-
+  const [filters, setFilters] = useState<ActivityFiltersData>(() => getInitialFilters(contextKey));
   const [activityItemId, setActivityItemId] = useState<string>('');
+
   const { activities, isLoading } = useFetchActivities(
     {
       filters,
@@ -58,7 +38,7 @@ export const SubscriberActivity = ({ subscriberId }: { subscriberId: string }) =
   );
 
   const handleClearFilters = () => {
-    setFilters(getInitialFilters(subscriberId, maxAvailableActivityFeedDateRange));
+    setFilters(getInitialFilters(contextKey));
   };
 
   const hasChangesInFilters = useMemo(() => {
@@ -66,14 +46,15 @@ export const SubscriberActivity = ({ subscriberId }: { subscriberId: string }) =
       filters.channels.length > 0 ||
       filters.workflows.length > 0 ||
       filters.transactionId !== defaultActivityFilters.transactionId ||
+      filters.subscriberId !== defaultActivityFilters.subscriberId ||
       filters.topicKey !== defaultActivityFilters.topicKey ||
-      filters.contextSearch !== defaultActivityFilters.contextSearch
+      filters.severity.length > 0
     );
   }, [filters]);
 
   const searchParams = useMemo(() => {
     const params = new URLSearchParams({
-      subscriberId,
+      contextSearch: contextKey,
     });
 
     if (filters.workflows.length > 0) {
@@ -88,6 +69,10 @@ export const SubscriberActivity = ({ subscriberId }: { subscriberId: string }) =
       params.set('transactionId', filters.transactionId);
     }
 
+    if (filters.subscriberId) {
+      params.set('subscriberId', filters.subscriberId);
+    }
+
     if (filters.topicKey) {
       params.set('topicKey', filters.topicKey);
     }
@@ -96,12 +81,8 @@ export const SubscriberActivity = ({ subscriberId }: { subscriberId: string }) =
       params.set('severity', filters.severity.join(','));
     }
 
-    if (filters.contextSearch) {
-      params.set('contextSearch', filters.contextSearch);
-    }
-
     return params;
-  }, [subscriberId, filters]);
+  }, [contextKey, filters]);
 
   const handleActivitySelect = (activityId: string) => {
     setActivityItemId(activityId);
@@ -115,7 +96,7 @@ export const SubscriberActivity = ({ subscriberId }: { subscriberId: string }) =
           showReset={hasChangesInFilters}
           onFiltersChange={setFilters}
           onReset={handleClearFilters}
-          hide={['dateRange', 'subscriberId']}
+          hide={['dateRange', 'contextSearch']}
           className="min-h-max overflow-x-auto py-2 pl-2"
         />
         <SubscriberActivityList
