@@ -66,9 +66,12 @@ jobs:
         run: pnpm run build:packages
 
       - name: Mark packages as latest
-        if: ${{ github.event.inputs.mark_as_latest }}
         run: |
-          export NX_RELEASE_TAG=latest
+          if [ "${{ github.event.inputs.mark_as_latest }}" = "true" ]; then
+            export NX_RELEASE_TAG=latest
+          else
+            echo "Skipping mark as latest"
+          fi
 
       - name: Publish packages to NPM
         env:
