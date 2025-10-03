@@ -4,22 +4,22 @@ on:
   workflow_dispatch:
     inputs:
       packages:
-        description: 'Packages to release (comma-separated)'
+        description: "Packages to release (comma-separated)"
         required: true
         type: string
-        default: '@novu/js,@novu/react,@novu/nextjs,@novu/react-native'
+        default: "@novu/js,@novu/react,@novu/nextjs,@novu/react-native"
       version:
-        description: 'Version to release (e.g., v3.0.0)'
+        description: "Version to release (e.g., v3.0.0)"
         required: true
         type: string
-        default: 'v3.0.0'
+        default: "v3.0.0"
       previous_tag:
-        description: 'Previous tag to generate changelog from (e.g., @novu/js@v3.4.0)'
+        description: "Previous tag to generate changelog from (e.g., @novu/js@v3.4.0)"
         required: true
         type: string
-        default: '@novu/js@v3.4.0'
+        default: "@novu/js@v3.4.0"
       nightly:
-        description: 'Publish as nightly release'
+        description: "Publish as nightly release"
         required: true
         type: boolean
         default: false
@@ -48,9 +48,9 @@ jobs:
       - name: Setup Node Version
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.0'
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "20.19.0"
+          cache: "pnpm"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install Dependencies
         shell: bash
@@ -118,20 +118,20 @@ jobs:
           title: "🚀 Release ${{ github.event.inputs.version }} - ${{ github.event.inputs.packages }}"
           body: |
             ## 🚀 Release ${{ github.event.inputs.version }}
-            
+
             This PR contains the release changes for version **${{ github.event.inputs.version }}**
-            
+
             ### 📦 Packages Released:
             ```
             ${{ github.event.inputs.packages }}
             ```
-            
+
             ### 🔄 Changes:
             - Updated package versions to ${{ github.event.inputs.version }}
             - Generated changelogs from ${{ github.event.inputs.previous_tag }}
             - Built packages for release
-            
+
             **Please review the changes and merge when ready for the release to be tagged and GitHub releases to be created.**
           branch: release-${{ github.event.inputs.version }}
-          base: next
+          base: ${{ github.ref_name }}
           delete-branch: false
