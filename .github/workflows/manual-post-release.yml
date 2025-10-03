@@ -134,10 +134,18 @@ jobs:
             done
             
             # Create the GitHub release
-            gh release create "$tag_name" \
-              --title "$tag_name" \
-              --notes "$release_body" \
-              --target next
-            
+            if [ "${{ github.event.inputs.mark_as_latest }}" = "true" ]; then
+              gh release create "$tag_name" \
+                --title "$tag_name" \
+                --notes "$release_body" \
+                --target next
+            else
+              gh release create "$tag_name" \
+                --title "$tag_name" \
+                --notes "$release_body" \
+                --target next \
+                --latest=false
+            fi
+
             echo "✅ Created GitHub release for $tag_name"
           done 
