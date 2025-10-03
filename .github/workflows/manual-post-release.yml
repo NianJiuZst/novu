@@ -33,11 +33,11 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-          ref: next
+          ref: ${{ github.ref_name }}
 
       - name: Pull latest changes
         run: |
-          git pull origin next
+          git pull origin ${{ github.ref_name }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
