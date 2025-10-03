@@ -18,6 +18,11 @@ on:
         required: true
         type: boolean
         default: false
+      mark_as_latest:
+        description: 'Mark the packages as latest'
+        required: true
+        type: boolean
+        default: true
 
 env:
   NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
@@ -60,11 +65,15 @@ jobs:
       - name: Build packages
         run: pnpm run build:packages
 
+      - name: Mark packages as latest
+        if: ${{ github.event.inputs.mark_as_latest }}
+        run: |
+          export NX_RELEASE_TAG=latest
+
       - name: Publish packages to NPM
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          export NX_RELEASE_TAG=latest
           pnpm nx run-many -t nx-release-publish --projects=${{ github.event.inputs.packages }}
 
       - name: Create and push tags
