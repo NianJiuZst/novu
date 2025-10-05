@@ -37,7 +37,6 @@ export function EditableJsonViewer({
   const containerRef = useRef<HTMLDivElement>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const originalValueRef = useRef(value);
 
   const ajvValidator = useMemo(() => {
     if (!schema) return null;
@@ -111,23 +110,22 @@ export function EditableJsonViewer({
 
   useHideRootNode(containerRef, value);
 
-  // Handle click outside to cancel editing
+  // Handle click outside to cancel editing by simulating Escape key
   const handleClickOutside = useCallback(
     (event: MouseEvent) => {
       if (isEditing && containerRef.current && !containerRef.current.contains(event.target as Node)) {
         const activeElement = document.activeElement;
-        if (activeElement && containerRef.current?.contains(activeElement)) {
-          const escapeEvent = new KeyboardEvent('keydown', {
-            key: 'Escape',
-            code: 'Escape',
-            keyCode: 27,
-            which: 27,
-            bubbles: true,
-            cancelable: true,
-          });
-          activeElement.dispatchEvent(escapeEvent);
+        if (activeElement) {
+          activeElement.dispatchEvent(
+            new KeyboardEvent('keydown', {
+              key: 'Escape',
+              code: 'Escape',
+              keyCode: 27,
+              bubbles: true,
+              cancelable: true,
+            })
+          );
         }
-
         setIsEditing(false);
       }
     },
@@ -145,18 +143,9 @@ export function EditableJsonViewer({
   }, [isEditing, handleClickOutside]);
 
   // Handle edit events from the JsonEditor
-  const handleEditEvent = useCallback(
-    (path: unknown, _isKey: boolean) => {
-      if (path) {
-        // Store the original value when editing starts
-        originalValueRef.current = value;
-        setIsEditing(true);
-      } else {
-        setIsEditing(false);
-      }
-    },
-    [value]
-  );
+  const handleEditEvent = useCallback((path: unknown, _isKey: boolean) => {
+    setIsEditing(!!path);
+  }, []);
 
   const customNodeDefinitions = useMemo(() => {
     // Don't show custom editable components in read-only mode
