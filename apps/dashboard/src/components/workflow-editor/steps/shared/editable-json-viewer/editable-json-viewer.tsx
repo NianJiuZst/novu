@@ -58,7 +58,7 @@ export function EditableJsonViewer({
   }, [schema]);
 
   const validateData = useMemo(
-    () => (data: unknown) => {
+    () => (data: any) => {
       if (!ajvValidator) {
         setValidationErrors([]);
         return true;
@@ -98,7 +98,7 @@ export function EditableJsonViewer({
   );
 
   const handleError = useMemo(
-    (): OnErrorFunction => (errorData) => {
+    () => (errorData: any) => {
       const { error, path } = errorData;
       const pathString = Array.isArray(path) ? path.join('.') : path || '';
       const errorMessage = pathString ? `${pathString}: ${error.message}` : error.message;
@@ -110,7 +110,7 @@ export function EditableJsonViewer({
 
   useHideRootNode(containerRef, value);
 
-  // Handle click outside to cancel editing by simulating Escape key
+  // Handle click outside to cancel editing
   const handleClickOutside = useCallback(
     (event: MouseEvent) => {
       if (isEditing && containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -153,7 +153,7 @@ export function EditableJsonViewer({
       return [];
     }
 
-    const components: CustomNodeDefinition<Record<string, unknown>, Record<string, unknown>>[] = [
+    const components: CustomNodeDefinition<Record<string, any>, Record<string, any>>[] = [
       {
         condition: ({ value }) => typeof value === 'string',
         element: SingleClickEditableValue,
