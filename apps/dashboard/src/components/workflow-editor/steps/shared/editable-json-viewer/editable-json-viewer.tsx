@@ -1,6 +1,6 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { CustomNodeDefinition, JsonEditor, UpdateFunctionProps } from 'json-edit-react';
+import { CustomNodeDefinition, JsonEditor, OnErrorFunction, UpdateFunctionProps } from 'json-edit-react';
 import JSON5 from 'json5';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { InlineToast } from '@/components/primitives/inline-toast';
@@ -37,7 +37,7 @@ export function EditableJsonViewer({
   const containerRef = useRef<HTMLDivElement>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [externalTriggers, setExternalTriggers] = useState<{ edit?: { action: 'cancel' } } | undefined>(undefined);
+  const originalValueRef = useRef(value);
 
   const ajvValidator = useMemo(() => {
     if (!schema) return null;
@@ -59,7 +59,7 @@ export function EditableJsonViewer({
   }, [schema]);
 
   const validateData = useMemo(
-    () => (data: any) => {
+    () => (data: unknown) => {
       if (!ajvValidator) {
         setValidationErrors([]);
         return true;
@@ -99,7 +99,7 @@ export function EditableJsonViewer({
   );
 
   const handleError = useMemo(
-    () => (errorData: any) => {
+    (): OnErrorFunction => (errorData) => {
       const { error, path } = errorData;
       const pathString = Array.isArray(path) ? path.join('.') : path || '';
       const errorMessage = pathString ? `${pathString}: ${error.message}` : error.message;
@@ -111,38 +111,52 @@ export function EditableJsonViewer({
 
   useHideRootNode(containerRef, value);
 
-  const handleEditEvent = useCallback((path: unknown) => {
-    setIsEditing(path !== null);
-  }, []);
-
-  // Handle clicks outside the editor to reset state
+  // Handle click outside to cancel editing
   const handleClickOutside = useCallback(
     (event: MouseEvent) => {
-      const container = containerRef.current;
-      if (!container || container.contains(event.target as Node)) {
-        return;
-      }
+      if (isEditing && containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        const activeElement = document.activeElement;
+        if (activeElement && containerRef.current?.contains(activeElement)) {
+          const escapeEvent = new KeyboardEvent('keydown', {
+            key: 'Escape',
+            code: 'Escape',
+            keyCode: 27,
+            which: 27,
+            bubbles: true,
+            cancelable: true,
+          });
+          activeElement.dispatchEvent(escapeEvent);
+        }
 
-      if (isEditing) {
-        setExternalTriggers({ edit: { action: 'cancel' } });
-
-        setTimeout(() => {
-          setExternalTriggers(undefined);
-        }, 10);
+        setIsEditing(false);
       }
     },
     [isEditing]
   );
 
+  // Add click outside listener
   useEffect(() => {
-    if (isReadOnly) return;
+    if (isEditing) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isEditing, handleClickOutside]);
 
-    document.addEventListener('mousedown', handleClickOutside);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [handleClickOutside, isReadOnly]);
+  // Handle edit events from the JsonEditor
+  const handleEditEvent = useCallback(
+    (path: unknown, _isKey: boolean) => {
+      if (path) {
+        // Store the original value when editing starts
+        originalValueRef.current = value;
+        setIsEditing(true);
+      } else {
+        setIsEditing(false);
+      }
+    },
+    [value]
+  );
 
   const customNodeDefinitions = useMemo(() => {
     // Don't show custom editable components in read-only mode
@@ -150,7 +164,7 @@ export function EditableJsonViewer({
       return [];
     }
 
-    const components: CustomNodeDefinition<Record<string, any>, Record<string, any>>[] = [
+    const components: CustomNodeDefinition<Record<string, unknown>, Record<string, unknown>>[] = [
       {
         condition: ({ value }) => typeof value === 'string',
         element: SingleClickEditableValue,
@@ -212,7 +226,6 @@ export function EditableJsonViewer({
         onUpdate={handleUpdate}
         onError={handleError}
         onEditEvent={handleEditEvent}
-        externalTriggers={externalTriggers}
         theme={CUSTOM_THEME}
         TextEditor={CustomTextEditor}
         customNodeDefinitions={customNodeDefinitions}
