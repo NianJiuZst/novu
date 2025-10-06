@@ -10,6 +10,7 @@ export type ActivityFilters = {
   dateRange?: string;
   topicKey?: string;
   severity?: SeverityLevelEnum[];
+  contextSearch?: string;
 };
 
 export interface ActivityResponse {
@@ -50,6 +51,7 @@ export interface GetWorkflowRunsDto {
   steps: StepRunDto[];
   severity: SeverityLevelEnum;
   critical: boolean;
+  contextKeys?: string[];
 }
 
 export type GetWorkflowRunResponse = GetWorkflowRunsDto & {
@@ -80,6 +82,7 @@ function mapWorkflowRunToActivity(workflowRun: GetWorkflowRunResponse | GetWorkf
     tags: [], // Not available in workflow runs, empty array for compatibility
     createdAt: workflowRun.createdAt,
     updatedAt: workflowRun.updatedAt,
+    contextKeys: workflowRun.contextKeys || [],
     template: {
       _id: workflowRun.workflowId,
       name: workflowRun.workflowName,
@@ -229,6 +232,10 @@ export function getActivityList({
     searchParams.append('topicKey', filters.topicKey);
   }
 
+  if (filters?.contextSearch) {
+    searchParams.append('contextSearch', filters.contextSearch);
+  }
+
   if (filters?.dateRange) {
     const after = new Date(Date.now() - getDateRangeInMs(filters?.dateRange));
     searchParams.append('after', after.toISOString());
@@ -327,6 +334,10 @@ export async function getWorkflowRunsList({
     for (const severity of filters.severity) {
       searchParams.append('severity', severity);
     }
+  }
+
+  if (filters?.contextSearch) {
+    searchParams.append('contextSearch', filters.contextSearch);
   }
 
   const response = await get<GetWorkflowRunsResponseDto>(`/activity/workflow-runs?${searchParams.toString()}`, {

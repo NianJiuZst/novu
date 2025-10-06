@@ -38,6 +38,7 @@ const workflowRunSelectColumns = [
   'delivery_lifecycle_status',
   'severity',
   'critical',
+  'context_keys',
 ] as const;
 type WorkflowRunFetchResult = Pick<WorkflowRun, (typeof workflowRunSelectColumns)[number]>;
 
@@ -160,6 +161,10 @@ export class GetWorkflowRuns {
 
       if (command.topicKey) {
         queryBuilder.whereLike('topics', `%${command.topicKey}%`);
+      }
+
+      if (command.contextSearch) {
+        queryBuilder.whereLike('context_keys', `%${command.contextSearch}%`);
       }
 
       const safeWhere = queryBuilder.build();
@@ -377,10 +382,7 @@ export class GetWorkflowRuns {
     }
   }
 
-  private mapWorkflowRunToDto(
-    workflowRun: WorkflowRunFetchResult,
-    stepRuns: StepRunFetchResult[]
-  ): GetWorkflowRunsDto {
+  private mapWorkflowRunToDto(workflowRun: WorkflowRunFetchResult, stepRuns: StepRunFetchResult[]): GetWorkflowRunsDto {
     return {
       id: workflowRun.workflow_run_id,
       workflowId: workflowRun.workflow_id,
@@ -403,6 +405,7 @@ export class GetWorkflowRuns {
       })),
       severity: workflowRun.severity,
       critical: workflowRun.critical,
+      contextKeys: workflowRun.context_keys ? JSON.parse(workflowRun.context_keys) : [],
     };
   }
 }
