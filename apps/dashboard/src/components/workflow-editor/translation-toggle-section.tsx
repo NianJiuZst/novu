@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { useState } from 'react';
 import { RiArrowRightSLine, RiInformation2Line } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
-import { Tooltip, TooltipContent, TooltipPortal, TooltipProvider, TooltipTrigger } from '@/components/primitives/tooltip';
+import { Tooltip, TooltipContent, TooltipPortal, TooltipTrigger } from '@/components/primitives/tooltip';
 import { TranslationDrawer } from '@/components/translations/translation-drawer/translation-drawer';
 import { TranslationSwitch } from '@/components/translations/translation-switch';
 import { useEnvironment } from '@/context/environment/hooks';
@@ -65,19 +65,17 @@ export function TranslationToggleSection({
               </Badge>
             </span>
 
-            <TooltipProvider delayDuration={100}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <RiInformation2Line className="size-4 text-text-soft cursor-help" />
-                </TooltipTrigger>
-                <TooltipPortal>
-                  <TooltipContent side="left" hideWhenDetached>
-                    When enabled, allows you to create and manage translations for your workflow content across different
-                    languages.
-                  </TooltipContent>
-                </TooltipPortal>
-              </Tooltip>
-            </TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <RiInformation2Line className="size-4 text-text-soft cursor-help" />
+              </TooltipTrigger>
+              <TooltipPortal>
+                <TooltipContent side="left" hideWhenDetached>
+                  When enabled, allows you to create and manage translations for your workflow content across different
+                  languages.
+                </TooltipContent>
+              </TooltipPortal>
+            </Tooltip>
           </div>
           <p className="text-foreground-400 text-2xs mb-1">Set up your target locales first to enable translations</p>
         </div>
@@ -107,19 +105,17 @@ export function TranslationToggleSection({
               BETA
             </Badge>
           </span>
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <RiInformation2Line className="size-4 text-text-soft cursor-help" />
-              </TooltipTrigger>
-              <TooltipPortal>
-                <TooltipContent side="left" hideWhenDetached>
-                  When enabled, allows you to create and manage translations for your workflow content across different
-                  languages.
-                </TooltipContent>
-              </TooltipPortal>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <RiInformation2Line className="size-4 text-text-soft cursor-help" />
+            </TooltipTrigger>
+            <TooltipPortal>
+              <TooltipContent side="left" hideWhenDetached>
+                When enabled, allows you to create and manage translations for your workflow content across different
+                languages.
+              </TooltipContent>
+            </TooltipPortal>
+          </Tooltip>
         </div>
         <TranslationSwitch
           id={`enable-translations-${resourceId}`}

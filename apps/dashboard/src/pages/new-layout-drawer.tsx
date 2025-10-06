@@ -6,6 +6,7 @@ import { ExternalToast } from 'sonner';
 import { CreateLayoutForm } from '@/components/layouts/create-layout-form';
 import { Button } from '@/components/primitives/button';
 import { Separator } from '@/components/primitives/separator';
+import { TooltipProvider } from '@/components/primitives/tooltip';
 import {
   Sheet,
   SheetContent,
@@ -129,58 +130,60 @@ export const NewLayoutDrawer = (props: NewLayoutDrawerProps) => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent ref={unmountRef}>
-        <SheetHeader>
-          <SheetTitle>{title}</SheetTitle>
-          <div>
-            <SheetDescription>
-              Create a reusable email layout template for your notifications.{' '}
-              <ExternalLink href="https://docs.novu.co/platform/workflow/layouts">Learn more</ExternalLink>
-            </SheetDescription>
-          </div>
-        </SheetHeader>
-        <Separator />
-        <SheetMain>
-          {isLoadingTemplate ? (
-            <CreateLayoutFormSkeleton />
-          ) : (
-            <CreateLayoutForm
-              onSubmit={(formData) => {
-                if (mode === 'create') {
-                  createLayout({
-                    layoutId: formData.layoutId,
-                    name: formData.name,
-                    isTranslationEnabled: formData.isTranslationEnabled,
-                    __source: LayoutCreationSourceEnum.DASHBOARD,
-                  });
-                  return;
-                }
+        <TooltipProvider delayDuration={100}>
+          <SheetHeader>
+            <SheetTitle>{title}</SheetTitle>
+            <div>
+              <SheetDescription>
+                Create a reusable email layout template for your notifications.{' '}
+                <ExternalLink href="https://docs.novu.co/platform/workflow/layouts">Learn more</ExternalLink>
+              </SheetDescription>
+            </div>
+          </SheetHeader>
+          <Separator />
+          <SheetMain>
+            {isLoadingTemplate ? (
+              <CreateLayoutFormSkeleton />
+            ) : (
+              <CreateLayoutForm
+                onSubmit={(formData) => {
+                  if (mode === 'create') {
+                    createLayout({
+                      layoutId: formData.layoutId,
+                      name: formData.name,
+                      isTranslationEnabled: formData.isTranslationEnabled,
+                      __source: LayoutCreationSourceEnum.DASHBOARD,
+                    });
+                    return;
+                  }
 
-                duplicateLayout({
-                  data: {
-                    name: formData.name,
-                    isTranslationEnabled: formData.isTranslationEnabled,
-                  },
-                  layoutSlug: layoutId!,
-                });
-              }}
-              template={template}
-            />
-          )}
-        </SheetMain>
-        <Separator />
-        <SheetFooter>
-          <Button
-            isLoading={isDuplicateLayoutPending || isCreateLayoutPending}
-            trailingIcon={RiArrowRightSLine}
-            variant="secondary"
-            mode="gradient"
-            type="submit"
-            form="create-layout"
-            disabled={isDuplicateLayoutPending || isCreateLayoutPending}
-          >
-            {buttonText}
-          </Button>
-        </SheetFooter>
+                  duplicateLayout({
+                    data: {
+                      name: formData.name,
+                      isTranslationEnabled: formData.isTranslationEnabled,
+                    },
+                    layoutSlug: layoutId!,
+                  });
+                }}
+                template={template}
+              />
+            )}
+          </SheetMain>
+          <Separator />
+          <SheetFooter>
+            <Button
+              isLoading={isDuplicateLayoutPending || isCreateLayoutPending}
+              trailingIcon={RiArrowRightSLine}
+              variant="secondary"
+              mode="gradient"
+              type="submit"
+              form="create-layout"
+              disabled={isDuplicateLayoutPending || isCreateLayoutPending}
+            >
+              {buttonText}
+            </Button>
+          </SheetFooter>
+        </TooltipProvider>
       </SheetContent>
     </Sheet>
   );

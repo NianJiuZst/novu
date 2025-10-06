@@ -4,6 +4,7 @@ import { RiArrowRightSLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/primitives/button';
 import { Separator } from '@/components/primitives/separator';
+import { TooltipProvider } from '@/components/primitives/tooltip';
 import {
   Sheet,
   SheetContent,
@@ -69,36 +70,38 @@ export function NewWorkflowDrawer({ mode, workflowId }: NewWorkflowDrawerProps) 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent ref={unmountRef}>
-        <SheetHeader>
-          <SheetTitle>{title}</SheetTitle>
-          <div>
-            <SheetDescription>
-              Define the steps to notify subscribers using channels like in-app, email, and more.{' '}
-              <ExternalLink href="https://docs.novu.co/platform/concepts/workflows">Learn more</ExternalLink>
-            </SheetDescription>
-          </div>
-        </SheetHeader>
-        <Separator />
-        <SheetMain>
-          {isLoadingTemplate ? (
-            <CreateWorkflowFormSkeleton />
-          ) : (
-            <CreateWorkflowForm onSubmit={submit} template={template} />
-          )}
-        </SheetMain>
-        <Separator />
-        <SheetFooter>
-          <Button
-            isLoading={isSubmitting}
-            trailingIcon={RiArrowRightSLine}
-            variant="secondary"
-            mode="gradient"
-            type="submit"
-            form="create-workflow"
-          >
-            {buttonText}
-          </Button>
-        </SheetFooter>
+        <TooltipProvider delayDuration={100}>
+          <SheetHeader>
+            <SheetTitle>{title}</SheetTitle>
+            <div>
+              <SheetDescription>
+                Define the steps to notify subscribers using channels like in-app, email, and more.{' '}
+                <ExternalLink href="https://docs.novu.co/platform/concepts/workflows">Learn more</ExternalLink>
+              </SheetDescription>
+            </div>
+          </SheetHeader>
+          <Separator />
+          <SheetMain>
+            {isLoadingTemplate ? (
+              <CreateWorkflowFormSkeleton />
+            ) : (
+              <CreateWorkflowForm onSubmit={submit} template={template} />
+            )}
+          </SheetMain>
+          <Separator />
+          <SheetFooter>
+            <Button
+              isLoading={isSubmitting}
+              trailingIcon={RiArrowRightSLine}
+              variant="secondary"
+              mode="gradient"
+              type="submit"
+              form="create-workflow"
+            >
+              {buttonText}
+            </Button>
+          </SheetFooter>
+        </TooltipProvider>
       </SheetContent>
     </Sheet>
   );
