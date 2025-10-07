@@ -119,6 +119,7 @@ export const ContextDrawerButton = (props: ContextDrawerButtonProps) => {
       <button
         {...rest}
         onClick={(e) => {
+          e.stopPropagation();
           setOpen(true);
           onClick?.(e);
         }}
