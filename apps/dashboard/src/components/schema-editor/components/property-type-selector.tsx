@@ -38,6 +38,9 @@ export function PropertyTypeSelector({
   const handleTypeChange = useCallback(
     (newSchemaType: JSONSchema7TypeName | 'enum') => {
       const currentDef = (getValues(definitionPath) as JSONSchema7) || {};
+      const wasNullable = Array.isArray(currentDef.type) && currentDef.type.includes('null');
+      
+      const isNullablePath = definitionPath.replace('.definition', '.isNullable');
 
       let newTransformedSchema: JSONSchema7;
 
@@ -55,11 +58,23 @@ export function PropertyTypeSelector({
         newTransformedSchema = ensureBoolean(currentDef);
       } else if (newSchemaType === 'null') {
         newTransformedSchema = ensureNull(currentDef);
+        setValue(isNullablePath, false, { shouldValidate: true });
       } else {
         newTransformedSchema = { ...currentDef, type: newSchemaType as JSONSchema7TypeName };
         delete (newTransformedSchema as any).propertyList;
         delete newTransformedSchema.items;
         delete newTransformedSchema.enum;
+      }
+
+      if (wasNullable && newSchemaType !== 'null' && newTransformedSchema.type) {
+        if (Array.isArray(newTransformedSchema.type)) {
+          if (!newTransformedSchema.type.includes('null')) {
+            newTransformedSchema.type = [...newTransformedSchema.type, 'null'] as any;
+          }
+        } else {
+          newTransformedSchema.type = [newTransformedSchema.type, 'null'] as any;
+        }
+        setValue(isNullablePath, true, { shouldValidate: true });
       }
 
       setValue(definitionPath, newTransformedSchema, { shouldValidate: true, shouldDirty: true });

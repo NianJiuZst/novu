@@ -14,16 +14,27 @@ export function convertSchemaToPropertyList(
     const definition = value as JSONSchema7;
     const definitionForListItem: JSONSchema7 = { ...definition };
     let nestedPropertyList: PropertyListItem[] | undefined;
+    let isNullable = false;
+
+    if (Array.isArray(definition.type) && definition.type.includes('null')) {
+      isNullable = true;
+      const nonNullTypes = definition.type.filter((t) => t !== 'null');
+      if (nonNullTypes.length === 1) {
+        definitionForListItem.type = nonNullTypes[0];
+      } else if (nonNullTypes.length > 1) {
+        definitionForListItem.type = nonNullTypes as any;
+      }
+    }
 
     // Handle object types with properties
-    if (definition.type === 'object' && definition.properties) {
+    if ((definitionForListItem.type === 'object' || (Array.isArray(definitionForListItem.type) && definitionForListItem.type.includes('object'))) && definition.properties) {
       nestedPropertyList = convertSchemaToPropertyList(definition.properties, definition.required);
       delete definitionForListItem.properties;
     }
 
     // Handle array types with object items that have properties
-    if (isArrayWithObjectItems(definition)) {
-      const items = definition.items as JSONSchema7;
+    if (isArrayWithObjectItems(definitionForListItem)) {
+      const items = definitionForListItem.items as JSONSchema7;
 
       if (items.type === 'object' && items.properties) {
         const itemsPropertyList = convertSchemaToPropertyList(items.properties, items.required);
@@ -44,6 +55,7 @@ export function convertSchemaToPropertyList(
         ...(nestedPropertyList ? { propertyList: nestedPropertyList } : {}),
       },
       isRequired: requiredArray?.includes(key) || false,
+      isNullable,
     };
   });
 }
@@ -64,7 +76,7 @@ export function convertPropertyListToSchema(propertyList?: PropertyListItem[]): 
       return;
     }
 
-    const currentDefinition = processPropertyDefinition(item.definition);
+    const currentDefinition = processPropertyDefinition(item.definition, item.isNullable);
 
     if (item.isRequired) {
       required.push(item.keyName);
@@ -76,7 +88,7 @@ export function convertPropertyListToSchema(propertyList?: PropertyListItem[]): 
   return { properties, ...(required.length > 0 ? { required } : {}) };
 }
 
-function processPropertyDefinition(definition: JSONSchema7): JSONSchema7 {
+function processPropertyDefinition(definition: JSONSchema7, isNullable?: boolean): JSONSchema7 {
   const currentDefinition = { ...definition };
   const definitionAsObjectWithList = currentDefinition as JSONSchema7 & { propertyList?: PropertyListItem[] };
 
@@ -98,6 +110,17 @@ function processPropertyDefinition(definition: JSONSchema7): JSONSchema7 {
   }
 
   delete (currentDefinition as any).propertyList;
+  delete (currentDefinition as any).isNullable;
+
+  if (isNullable && currentDefinition.type && currentDefinition.type !== 'null') {
+    if (Array.isArray(currentDefinition.type)) {
+      if (!currentDefinition.type.includes('null')) {
+        currentDefinition.type = [...currentDefinition.type, 'null'] as any;
+      }
+    } else {
+      currentDefinition.type = [currentDefinition.type, 'null'] as any;
+    }
+  }
 
   return currentDefinition;
 }

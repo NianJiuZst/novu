@@ -115,6 +115,58 @@ export const SchemaPropertyRow = memo<SchemaPropertyRowProps>(function SchemaPro
               );
             }}
           />
+          <Controller
+            name={paths.isNullable}
+            control={control}
+            render={({ field }) => {
+              const handleNullableChange = (checked: boolean) => {
+                field.onChange(checked);
+                
+                const currentDef = getValues(paths.definition as any);
+                if (currentDef && currentDef.type && currentDef.type !== 'null') {
+                  if (checked) {
+                    if (Array.isArray(currentDef.type)) {
+                      if (!currentDef.type.includes('null')) {
+                        setValue(paths.definition as any, {
+                          ...currentDef,
+                          type: [...currentDef.type, 'null'],
+                        });
+                      }
+                    } else {
+                      setValue(paths.definition as any, {
+                        ...currentDef,
+                        type: [currentDef.type, 'null'],
+                      });
+                    }
+                  } else {
+                    if (Array.isArray(currentDef.type)) {
+                      const nonNullTypes = currentDef.type.filter((t) => t !== 'null');
+                      setValue(paths.definition as any, {
+                        ...currentDef,
+                        type: nonNullTypes.length === 1 ? nonNullTypes[0] : nonNullTypes,
+                      });
+                    }
+                  }
+                }
+              };
+
+              return (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <Checkbox
+                        id={`${pathPrefix}-isNullable-checkbox`}
+                        checked={!!field.value}
+                        onCheckedChange={handleNullableChange}
+                        disabled={isKeyNameEmpty || readOnly || currentType === 'null'}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>Nullable (accepts null)</TooltipContent>
+                </Tooltip>
+              );
+            }}
+          />
         </div>
 
         <PropertyActions

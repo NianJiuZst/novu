@@ -12,10 +12,20 @@ const baseJsonSchema: z.ZodType<any> = z
         z.literal('array'),
         z.literal('boolean'),
         z.literal('null'),
+        z.array(z.union([
+          z.literal('string'),
+          z.literal('number'),
+          z.literal('integer'),
+          z.literal('object'),
+          z.literal('array'),
+          z.literal('boolean'),
+          z.literal('null'),
+        ])),
       ])
       .optional(),
     title: z.string().optional(),
     description: z.string().optional(),
+    isNullable: z.boolean().optional(),
     // String specific
     minLength: z.number().int().nonnegative().optional(),
     maxLength: z.number().int().nonnegative().optional(),
@@ -68,8 +78,9 @@ const PropertyListItemSchema = z.object({
           'Name must start with a letter or underscore, and contain only letters, numbers, underscores, or hyphens.',
       }
     ),
-  definition: baseJsonSchema, // The schema definition for this property's value
+  definition: baseJsonSchema,
   isRequired: z.boolean().optional(),
+  isNullable: z.boolean().optional(),
 });
 export type PropertyListItem = z.infer<typeof PropertyListItemSchema>;
 

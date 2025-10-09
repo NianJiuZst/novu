@@ -19,6 +19,12 @@ export function useSchemaPropertyType(definition?: JSONSchema7): JSONSchema7Type
       return 'enum';
     }
 
+    // If type is an array (nullable type), extract the non-null type for display
+    if (Array.isArray(definition.type)) {
+      const nonNullTypes = definition.type.filter((t) => t !== 'null');
+      return nonNullTypes.length > 0 ? (nonNullTypes[0] as JSONSchema7TypeName) : undefined;
+    }
+
     // Otherwise, return the type specified in the definition's 'type' field.
     // This hook doesn't fallback to 'object' or 'array' based on presence of 'properties' or 'items',
     // as those structural checks are usually done by the component that needs to render children.
