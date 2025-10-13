@@ -152,6 +152,7 @@ export class SocketWorkerService {
           { read: false },
           { limit: 101 },
           undefined,
+          undefined,
           'primary'
         ),
         this.messageRepository.getCountBySeverity(
