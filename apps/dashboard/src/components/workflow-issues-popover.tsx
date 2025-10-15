@@ -6,7 +6,7 @@ import { Separator } from '@/components/primitives/separator';
 import TruncatedText from '@/components/truncated-text';
 import { countIssues, getAllStepIssues } from '@/components/workflow-editor/step-utils';
 
-type StepIssue = Parameters<typeof countIssues>[0];
+type StepIssue = NonNullable<Parameters<typeof countIssues>[0]>;
 
 type StepListItem = {
   slug: string;
