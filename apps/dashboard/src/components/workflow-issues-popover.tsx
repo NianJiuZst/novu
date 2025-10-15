@@ -1,3 +1,4 @@
+import type { RuntimeIssue } from '@novu/shared';
 import { PropsWithChildren, useState } from 'react';
 import { RiErrorWarningFill } from 'react-icons/ri';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/primitives/popover';
@@ -5,17 +6,7 @@ import { Separator } from '@/components/primitives/separator';
 import TruncatedText from '@/components/truncated-text';
 import { countIssues, getAllStepIssues } from '@/components/workflow-editor/step-utils';
 
-// Local type definition for step issues until the shared types are updated
-type RuntimeIssue = {
-  message: string;
-  variableName?: string;
-  issueType: string;
-};
-
-type StepIssue = {
-  controls?: Record<string, RuntimeIssue[]>;
-  integration?: Record<string, RuntimeIssue[]>;
-};
+type StepIssue = Parameters<typeof countIssues>[0];
 
 type StepListItem = {
   slug: string;
@@ -31,13 +22,13 @@ type WorkflowIssuesPopoverProps = PropsWithChildren<{
 export const WorkflowIssuesPopover = ({ children, steps, className }: WorkflowIssuesPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
-  const stepsWithIssues = steps.filter((step) => step.issues && countIssues(step.issues as any) > 0);
+  const stepsWithIssues = steps.filter((step) => countIssues(step.issues) > 0);
 
   if (stepsWithIssues.length === 0) {
     return <>{children}</>;
   }
 
-  const totalIssues = stepsWithIssues.reduce((acc, step) => acc + countIssues(step.issues as any), 0);
+  const totalIssues = stepsWithIssues.reduce((acc, step) => acc + countIssues(step.issues), 0);
 
   const handleMouseEnter = () => {
     if (hoverTimeout) {
@@ -95,7 +86,7 @@ type StepIssueItemProps = {
 };
 
 const StepIssueItem = ({ step }: StepIssueItemProps) => {
-  const allIssues = getAllStepIssues(step.issues as any);
+  const allIssues: RuntimeIssue[] = getAllStepIssues(step.issues);
 
   return (
     <div className="space-y-1.5">
