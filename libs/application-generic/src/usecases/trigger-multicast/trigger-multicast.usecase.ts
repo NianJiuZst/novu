@@ -85,7 +85,7 @@ export class TriggerMulticast extends TriggerBase {
         const passingSubscriptions = subscriptionsBatch.filter((subscription) => {
           return this.evaluateConditions(
             subscription.conditions as Record<string, unknown>,
-            command.payload as Record<string, unknown>
+            { payload: command.payload } as Record<string, unknown>
           );
         });
 
