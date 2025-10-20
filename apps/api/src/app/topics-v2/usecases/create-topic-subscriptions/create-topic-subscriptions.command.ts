@@ -12,5 +12,5 @@ export class CreateTopicSubscriptionsCommand extends EnvironmentWithUserCommand 
 
   @IsObject()
   @IsOptional()
-  resourceConditions?: Record<string, unknown>;
+  condition?: Record<string, unknown>;
 }

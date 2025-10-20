@@ -112,23 +112,13 @@ export class SubscriptionDto {
 
   @ApiPropertyOptional({
     description:
-      'JSONLogic filter conditions set by developer/API for conditional subscription. Only subscribers matching these conditions will receive notifications.',
+      'JSONLogic filter conditions for conditional subscription. Only notifications matching these conditions will be delivered.',
     type: 'object',
     additionalProperties: true,
   })
   @IsObject()
   @IsOptional()
-  resourceConditions?: Record<string, unknown>;
-
-  @ApiPropertyOptional({
-    description:
-      'JSONLogic filter conditions set by subscriber via Inbox UI for conditional subscription. Only notifications matching these conditions will be delivered.',
-    type: 'object',
-    additionalProperties: true,
-  })
-  @IsObject()
-  @IsOptional()
-  subscriberConditions?: Record<string, unknown>;
+  condition?: Record<string, unknown>;
 
   @ApiProperty({
     description: 'The creation date of the subscription',

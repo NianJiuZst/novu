@@ -34,11 +34,7 @@ const topicSubscribersSchema = new Schema<TopicSubscribersDBModel>(
       required: true,
     },
     externalSubscriberId: Schema.Types.String,
-    resourceConditions: {
-      type: Schema.Types.Mixed,
-      required: false,
-    },
-    subscriberConditions: {
+    condition: {
       type: Schema.Types.Mixed,
       required: false,
     },

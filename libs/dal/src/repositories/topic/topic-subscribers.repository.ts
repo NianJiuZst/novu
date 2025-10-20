@@ -113,8 +113,7 @@ export class TopicSubscribersRepository extends BaseRepository<
   }): AsyncGenerator<
     Array<{
       externalSubscriberId: string;
-      resourceConditions?: Record<string, unknown>;
-      subscriberConditions?: Record<string, unknown>;
+      condition?: Record<string, unknown>;
     }>,
     void,
     unknown
@@ -132,23 +131,20 @@ export class TopicSubscribersRepository extends BaseRepository<
         },
         {
           externalSubscriberId: 1,
-          resourceConditions: 1,
-          subscriberConditions: 1,
+          condition: 1,
         }
       )
       .cursor({ batchSize });
 
     const batch: Array<{
       externalSubscriberId: string;
-      resourceConditions?: Record<string, unknown>;
-      subscriberConditions?: Record<string, unknown>;
+      condition?: Record<string, unknown>;
     }> = [];
 
     for await (const doc of cursor) {
       batch.push({
         externalSubscriberId: doc.externalSubscriberId,
-        resourceConditions: doc.resourceConditions,
-        subscriberConditions: doc.subscriberConditions,
+        condition: doc.condition,
       });
 
       if (batch.length >= batchSize) {

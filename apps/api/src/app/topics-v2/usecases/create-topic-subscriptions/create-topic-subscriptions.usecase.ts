@@ -79,7 +79,7 @@ export class CreateTopicSubscriptionsUsecase {
       };
     }
 
-    const conditionHash = generateConditionHash(command.resourceConditions, undefined);
+    const conditionHash = generateConditionHash(command.condition);
 
     const existingSubscriptionsQuery: {
       _environmentId: string;
@@ -111,7 +111,7 @@ export class CreateTopicSubscriptionsUsecase {
       const topicSubscribersToCreate = this.mapSubscribersToTopic(
         topic,
         subscribersToCreate,
-        command.resourceConditions,
+        command.condition,
         conditionHash
       );
       newSubscriptions = await this.topicSubscribersRepository.addSubscribers(topicSubscribersToCreate);
@@ -142,8 +142,7 @@ export class CreateTopicSubscriptionsUsecase {
               updatedAt: subscriber.updatedAt,
             }
           : null,
-        resourceConditions: subscription.resourceConditions,
-        subscriberConditions: subscription.subscriberConditions,
+        condition: subscription.condition,
         createdAt: subscription.createdAt ?? '',
         updatedAt: subscription.updatedAt ?? '',
       });
@@ -163,7 +162,7 @@ export class CreateTopicSubscriptionsUsecase {
   private mapSubscribersToTopic(
     topic: TopicEntity,
     subscribers: SubscriberEntity[],
-    resourceConditions?: Record<string, unknown>,
+    condition?: Record<string, unknown>,
     conditionHash?: string
   ): CreateTopicSubscribersEntity[] {
     return subscribers.map((subscriber) => ({
@@ -173,7 +172,7 @@ export class CreateTopicSubscriptionsUsecase {
       _topicId: topic._id,
       topicKey: topic.key,
       externalSubscriberId: subscriber.subscriberId,
-      resourceConditions,
+      condition,
       conditionHash,
     }));
   }

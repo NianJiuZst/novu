@@ -85,16 +85,10 @@ export class TriggerMulticast extends TriggerBase {
         totalSubscriptionsEvaluated += subscriptionsBatch.length;
 
         const passingSubscriptions = subscriptionsBatch.filter((subscription) => {
-          const resourcePassed = this.evaluateSubscriptionConditions.evaluateConditions(
-            subscription.resourceConditions as Record<string, unknown>,
+          return this.evaluateSubscriptionConditions.evaluateConditions(
+            subscription.condition as Record<string, unknown>,
             command.payload as Record<string, unknown>
           );
-          const subscriberPassed = this.evaluateSubscriptionConditions.evaluateConditions(
-            subscription.subscriberConditions as Record<string, unknown>,
-            command.payload as Record<string, unknown>
-          );
-
-          return resourcePassed && subscriberPassed;
         });
 
         totalSubscriptionsFiltered += subscriptionsBatch.length - passingSubscriptions.length;

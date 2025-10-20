@@ -41,27 +41,5 @@ export class CreateTopicSubscriptionsRequestDto {
   })
   @IsObject()
   @IsOptional()
-  resourceConditions?: Record<string, unknown>;
-
-  @ApiPropertyOptional({
-    description:
-      'JSONLogic filter conditions set by subscriber for conditional subscription. Only notifications matching these conditions will be delivered.',
-    type: 'object',
-    example: {
-      and: [
-        {
-          '==': [
-            {
-              var: 'subscriber.data.preferences.marketing',
-            },
-            true,
-          ],
-        },
-      ],
-    },
-    additionalProperties: true,
-  })
-  @IsObject()
-  @IsOptional()
-  subscriberConditions?: Record<string, unknown>;
+  condition?: Record<string, unknown>;
 }

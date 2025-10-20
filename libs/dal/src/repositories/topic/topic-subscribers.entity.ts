@@ -18,8 +18,7 @@ export class TopicSubscribersEntity {
   topicKey: TopicKey;
   // TODO: Rename to subscriberId, to align with workflowId and stepId that are also externally provided identifiers by Novu users
   externalSubscriberId: ExternalSubscriberId;
-  resourceConditions?: Record<string, unknown>;
-  subscriberConditions?: Record<string, unknown>;
+  condition?: Record<string, unknown>;
   conditionHash?: string;
 
   createdAt?: string;
