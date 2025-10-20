@@ -15,13 +15,12 @@ import { CacheService, FeatureFlagsService } from '../../services';
 import type { EventType, Trace } from '../../services/analytic-logs';
 import { LogRepository, mapEventTypeToTitle, TraceLogRepository } from '../../services/analytic-logs';
 import { SubscriberProcessQueueService } from '../../services/queues/subscriber-process-queue.service';
+import { EvaluateSubscriptionConditions } from '../evaluate-subscription-conditions';
 import { TriggerBase } from '../trigger-base';
 import { TriggerMulticastCommand } from './trigger-multicast.command';
 
 const QUEUE_CHUNK_SIZE = Number(process.env.MULTICAST_QUEUE_CHUNK_SIZE) || 100;
 const SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE = Number(process.env.SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE) || 100;
-
-const isNotTopic = (recipient: TriggerRecipient): recipient is TriggerRecipientSubscriber => !isTopic(recipient);
 
 const isTopic = (recipient: TriggerRecipient): recipient is ITopic =>
   (recipient as ITopic).type && (recipient as ITopic).type === TriggerRecipientsTypeEnum.TOPIC;
@@ -35,7 +34,8 @@ export class TriggerMulticast extends TriggerBase {
     protected cacheService: CacheService,
     protected featureFlagsService: FeatureFlagsService,
     protected logger: PinoLogger,
-    private traceLogRepository: TraceLogRepository
+    private traceLogRepository: TraceLogRepository,
+    private evaluateSubscriptionConditions: EvaluateSubscriptionConditions
   ) {
     super(subscriberProcessQueueService, cacheService, featureFlagsService, logger, QUEUE_CHUNK_SIZE);
     this.logger.setContext(this.constructor.name);
@@ -66,8 +66,10 @@ export class TriggerMulticast extends TriggerBase {
       const allTopicExcludedSubscribers = Array.from(
         new Set([...Array.from(topicExclusions.values()).flatMap((set) => Array.from(set))])
       );
-      let subscribersList: { subscriberId: string; topics: Pick<TopicEntity, '_id' | 'key'>[] }[] = [];
-      const getTopicDistinctSubscribersGenerator = this.topicSubscribersRepository.getTopicDistinctSubscribers({
+      let totalSubscriptionsEvaluated = 0;
+      let totalSubscriptionsFiltered = 0;
+
+      const getTopicSubscriptionsGenerator = this.topicSubscribersRepository.getTopicSubscriptionsWithConditions({
         query: {
           _organizationId: organizationId,
           _environmentId: environmentId,
@@ -77,24 +79,54 @@ export class TriggerMulticast extends TriggerBase {
         batchSize: SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE,
       });
 
-      for await (const externalSubscriberIdGroup of getTopicDistinctSubscribersGenerator) {
-        const externalSubscriberId = externalSubscriberIdGroup._id;
+      const subscribersMap = new Map<string, { subscriberId: string; topics: Pick<TopicEntity, '_id' | 'key'>[] }>();
 
-        if (actor && actor.subscriberId === externalSubscriberId) {
-          continue;
-        }
+      for await (const subscriptionsBatch of getTopicSubscriptionsGenerator) {
+        totalSubscriptionsEvaluated += subscriptionsBatch.length;
 
-        subscribersList.push({
-          subscriberId: externalSubscriberId,
-          topics: topics?.map((topic) => ({ _id: topic._id, key: topic.key })),
+        const passingSubscriptions = subscriptionsBatch.filter((subscription) => {
+          const resourcePassed = this.evaluateSubscriptionConditions.evaluateConditions(
+            subscription.resourceConditions as Record<string, unknown>,
+            command.payload as Record<string, unknown>
+          );
+          const subscriberPassed = this.evaluateSubscriptionConditions.evaluateConditions(
+            subscription.subscriberConditions as Record<string, unknown>,
+            command.payload as Record<string, unknown>
+          );
+
+          return resourcePassed && subscriberPassed;
         });
 
-        if (subscribersList.length === SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE) {
-          await this.sendToProcessSubscriberService(command, subscribersList, SubscriberSourceEnum.TOPIC);
-          totalProcessed += subscribersList.length;
+        totalSubscriptionsFiltered += subscriptionsBatch.length - passingSubscriptions.length;
 
-          subscribersList = [];
+        for (const subscription of passingSubscriptions) {
+          const externalSubscriberId = subscription.externalSubscriberId;
+
+          if (actor && actor.subscriberId === externalSubscriberId) {
+            continue;
+          }
+
+          if (!subscribersMap.has(externalSubscriberId)) {
+            subscribersMap.set(externalSubscriberId, {
+              subscriberId: externalSubscriberId,
+              topics: topics?.map((topic) => ({ _id: topic._id, key: topic.key })),
+            });
+          }
         }
+
+        if (subscribersMap.size >= SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE) {
+          const batchToProcess = Array.from(subscribersMap.values());
+          await this.sendToProcessSubscriberService(command, batchToProcess, SubscriberSourceEnum.TOPIC);
+          totalProcessed += batchToProcess.length;
+
+          subscribersMap.clear();
+        }
+      }
+
+      if (subscribersMap.size > 0) {
+        const finalBatch = Array.from(subscribersMap.values());
+        await this.sendToProcessSubscriberService(command, finalBatch, SubscriberSourceEnum.TOPIC);
+        totalProcessed += finalBatch.length;
       }
 
       await this.createMulticastTrace(
@@ -109,13 +141,10 @@ export class TriggerMulticast extends TriggerBase {
           singleSubscribers: subscribersToProcess.length,
           topicSubscribers: totalProcessed - subscribersToProcess.length,
           topicsUsed: topics.length,
+          subscriptionsEvaluated: totalSubscriptionsEvaluated,
+          subscriptionsFiltered: totalSubscriptionsFiltered,
         }
       );
-
-      if (subscribersList.length > 0) {
-        await this.sendToProcessSubscriberService(command, subscribersList, SubscriberSourceEnum.TOPIC);
-        totalProcessed += subscribersList.length;
-      }
     } catch (e) {
       const error = e as Error;
       await this.createMulticastTrace(

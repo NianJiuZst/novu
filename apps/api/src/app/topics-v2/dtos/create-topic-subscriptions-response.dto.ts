@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsObject, IsOptional, IsString } from 'class-validator';
 
 export class TopicDto {
   @ApiProperty({
@@ -109,6 +109,26 @@ export class SubscriptionDto {
     nullable: true,
   })
   subscriber: SubscriberDto | null;
+
+  @ApiPropertyOptional({
+    description:
+      'JSONLogic filter conditions set by developer/API for conditional subscription. Only subscribers matching these conditions will receive notifications.',
+    type: 'object',
+    additionalProperties: true,
+  })
+  @IsObject()
+  @IsOptional()
+  resourceConditions?: Record<string, unknown>;
+
+  @ApiPropertyOptional({
+    description:
+      'JSONLogic filter conditions set by subscriber via Inbox UI for conditional subscription. Only notifications matching these conditions will be delivered.',
+    type: 'object',
+    additionalProperties: true,
+  })
+  @IsObject()
+  @IsOptional()
+  subscriberConditions?: Record<string, unknown>;
 
   @ApiProperty({
     description: 'The creation date of the subscription',

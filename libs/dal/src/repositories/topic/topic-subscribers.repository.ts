@@ -99,6 +99,69 @@ export class TopicSubscribersRepository extends BaseRepository<
     }
   }
 
+  async *getTopicSubscriptionsWithConditions({
+    query,
+    batchSize = 500,
+  }: {
+    query: {
+      _environmentId: EnvironmentId;
+      _organizationId: OrganizationId;
+      topicIds: string[];
+      excludeSubscribers: string[];
+    };
+    batchSize?: number;
+  }): AsyncGenerator<
+    Array<{
+      externalSubscriberId: string;
+      resourceConditions?: Record<string, unknown>;
+      subscriberConditions?: Record<string, unknown>;
+    }>,
+    void,
+    unknown
+  > {
+    const { _organizationId, _environmentId, topicIds, excludeSubscribers } = query;
+    const mappedTopicIds = topicIds.map((id) => this.convertStringToObjectId(id));
+
+    const cursor = this._model
+      .find(
+        {
+          _organizationId: this.convertStringToObjectId(_organizationId),
+          _environmentId: this.convertStringToObjectId(_environmentId),
+          _topicId: { $in: mappedTopicIds },
+          externalSubscriberId: { $nin: excludeSubscribers },
+        },
+        {
+          externalSubscriberId: 1,
+          resourceConditions: 1,
+          subscriberConditions: 1,
+        }
+      )
+      .cursor({ batchSize });
+
+    const batch: Array<{
+      externalSubscriberId: string;
+      resourceConditions?: Record<string, unknown>;
+      subscriberConditions?: Record<string, unknown>;
+    }> = [];
+
+    for await (const doc of cursor) {
+      batch.push({
+        externalSubscriberId: doc.externalSubscriberId,
+        resourceConditions: doc.resourceConditions,
+        subscriberConditions: doc.subscriberConditions,
+      });
+
+      if (batch.length >= batchSize) {
+        yield [...batch];
+        batch.length = 0;
+      }
+    }
+
+    if (batch.length > 0) {
+      yield batch;
+    }
+  }
+
   async findOneByTopicKeyAndExternalSubscriberId(
     _environmentId: EnvironmentId,
     _organizationId: OrganizationId,

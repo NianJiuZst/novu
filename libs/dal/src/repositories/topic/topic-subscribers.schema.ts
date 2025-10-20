@@ -34,6 +34,19 @@ const topicSubscribersSchema = new Schema<TopicSubscribersDBModel>(
       required: true,
     },
     externalSubscriberId: Schema.Types.String,
+    resourceConditions: {
+      type: Schema.Types.Mixed,
+      required: false,
+    },
+    subscriberConditions: {
+      type: Schema.Types.Mixed,
+      required: false,
+    },
+    conditionHash: {
+      type: Schema.Types.String,
+      required: false,
+      index: true,
+    },
   },
   schemaOptions
 );
@@ -53,6 +66,15 @@ topicSubscribersSchema.index({
 topicSubscribersSchema.index({
   topicKey: 1,
 });
+
+topicSubscribersSchema.index(
+  {
+    _subscriberId: 1,
+    _topicId: 1,
+    conditionHash: 1,
+  },
+  { unique: true }
+);
 
 export const TopicSubscribers =
   (mongoose.models.TopicSubscribers as mongoose.Model<TopicSubscribersDBModel>) ||

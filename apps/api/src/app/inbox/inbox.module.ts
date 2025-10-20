@@ -7,6 +7,7 @@ import { OutboundWebhooksModule } from '../outbound-webhooks/outbound-webhooks.m
 import { PreferencesModule } from '../preferences';
 import { SharedModule } from '../shared/shared.module';
 import { SubscribersV1Module } from '../subscribers/subscribersV1.module';
+import { TopicsV2Module } from '../topics-v2/topics-v2.module';
 import { InboxController } from './inbox.controller';
 import { USE_CASES } from './usecases';
 
@@ -19,6 +20,7 @@ import { USE_CASES } from './usecases';
     PreferencesModule,
     OrganizationModule,
     OutboundWebhooksModule.forRoot(),
+    TopicsV2Module,
   ],
   providers: [...USE_CASES, CommunityOrganizationRepository, ContextRepository],
   exports: [...USE_CASES],

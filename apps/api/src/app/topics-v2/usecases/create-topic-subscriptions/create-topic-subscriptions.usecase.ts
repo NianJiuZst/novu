@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InstrumentUsecase } from '@novu/application-generic';
+import { generateConditionHash, InstrumentUsecase } from '@novu/application-generic';
 import {
   CreateTopicSubscribersEntity,
   SubscriberEntity,
@@ -79,21 +79,41 @@ export class CreateTopicSubscriptionsUsecase {
       };
     }
 
-    // Check for existing subscriptions to make the operation idempotent
-    const existingSubscriptions = await this.topicSubscribersRepository.find({
+    const conditionHash = generateConditionHash(command.resourceConditions, undefined);
+
+    const existingSubscriptionsQuery: {
+      _environmentId: string;
+      _organizationId: string;
+      _topicId: string;
+      _subscriberId: { $in: string[] };
+      conditionHash?: string;
+      $or?: Array<{ conditionHash: { $exists: boolean } } | { conditionHash: null }>;
+    } = {
       _environmentId: command.environmentId,
       _organizationId: command.organizationId,
       _topicId: topic._id,
       _subscriberId: { $in: foundSubscribers.map((sub) => sub._id) },
-    });
+    };
 
-    // Create topic subscriptions for subscribers that don't already have a subscription
+    if (conditionHash !== undefined) {
+      existingSubscriptionsQuery.conditionHash = conditionHash;
+    } else {
+      existingSubscriptionsQuery.$or = [{ conditionHash: { $exists: false } }, { conditionHash: null }];
+    }
+
+    const existingSubscriptions = await this.topicSubscribersRepository.find(existingSubscriptionsQuery as any);
+
     const existingSubscriberIds = existingSubscriptions.map((sub) => sub._subscriberId.toString());
     const subscribersToCreate = foundSubscribers.filter((sub) => !existingSubscriberIds.includes(sub._id.toString()));
 
     let newSubscriptions: TopicSubscribersEntity[] = [];
     if (subscribersToCreate.length > 0) {
-      const topicSubscribersToCreate = this.mapSubscribersToTopic(topic, subscribersToCreate);
+      const topicSubscribersToCreate = this.mapSubscribersToTopic(
+        topic,
+        subscribersToCreate,
+        command.resourceConditions,
+        conditionHash
+      );
       newSubscriptions = await this.topicSubscribersRepository.addSubscribers(topicSubscribersToCreate);
     }
 
@@ -122,6 +142,8 @@ export class CreateTopicSubscriptionsUsecase {
               updatedAt: subscriber.updatedAt,
             }
           : null,
+        resourceConditions: subscription.resourceConditions,
+        subscriberConditions: subscription.subscriberConditions,
         createdAt: subscription.createdAt ?? '',
         updatedAt: subscription.updatedAt ?? '',
       });
@@ -138,7 +160,12 @@ export class CreateTopicSubscriptionsUsecase {
     };
   }
 
-  private mapSubscribersToTopic(topic: TopicEntity, subscribers: SubscriberEntity[]): CreateTopicSubscribersEntity[] {
+  private mapSubscribersToTopic(
+    topic: TopicEntity,
+    subscribers: SubscriberEntity[],
+    resourceConditions?: Record<string, unknown>,
+    conditionHash?: string
+  ): CreateTopicSubscribersEntity[] {
     return subscribers.map((subscriber) => ({
       _environmentId: subscriber._environmentId,
       _organizationId: subscriber._organizationId,
@@ -146,6 +173,8 @@ export class CreateTopicSubscriptionsUsecase {
       _topicId: topic._id,
       topicKey: topic.key,
       externalSubscriberId: subscriber.subscriberId,
+      resourceConditions,
+      conditionHash,
     }));
   }
 }
