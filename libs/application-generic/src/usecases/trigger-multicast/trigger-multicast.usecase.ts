@@ -8,14 +8,13 @@ import {
   TriggerRecipientSubscriber,
   TriggerRecipientsTypeEnum,
 } from '@novu/shared';
-
+import jsonLogic, { type AdditionalOperation, type RulesLogic } from 'json-logic-js';
 import { PinoLogger } from 'nestjs-pino';
 import { InstrumentUsecase } from '../../instrumentation';
 import { CacheService, FeatureFlagsService } from '../../services';
 import type { EventType, Trace } from '../../services/analytic-logs';
 import { LogRepository, mapEventTypeToTitle, TraceLogRepository } from '../../services/analytic-logs';
 import { SubscriberProcessQueueService } from '../../services/queues/subscriber-process-queue.service';
-import { EvaluateSubscriptionConditions } from '../evaluate-subscription-conditions';
 import { TriggerBase } from '../trigger-base';
 import { TriggerMulticastCommand } from './trigger-multicast.command';
 
@@ -34,8 +33,7 @@ export class TriggerMulticast extends TriggerBase {
     protected cacheService: CacheService,
     protected featureFlagsService: FeatureFlagsService,
     protected logger: PinoLogger,
-    private traceLogRepository: TraceLogRepository,
-    private evaluateSubscriptionConditions: EvaluateSubscriptionConditions
+    private traceLogRepository: TraceLogRepository
   ) {
     super(subscriberProcessQueueService, cacheService, featureFlagsService, logger, QUEUE_CHUNK_SIZE);
     this.logger.setContext(this.constructor.name);
@@ -85,8 +83,8 @@ export class TriggerMulticast extends TriggerBase {
         totalSubscriptionsEvaluated += subscriptionsBatch.length;
 
         const passingSubscriptions = subscriptionsBatch.filter((subscription) => {
-          return this.evaluateSubscriptionConditions.evaluateConditions(
-            subscription.condition as Record<string, unknown>,
+          return this.evaluateConditions(
+            subscription.conditions as Record<string, unknown>,
             command.payload as Record<string, unknown>
           );
         });
@@ -166,6 +164,23 @@ export class TriggerMulticast extends TriggerBase {
       );
 
       throw e;
+    }
+  }
+
+  private evaluateConditions(
+    conditions: Record<string, unknown> | undefined,
+    payload: Record<string, unknown>
+  ): boolean {
+    if (!conditions) {
+      return true;
+    }
+
+    try {
+      const result = jsonLogic.apply(conditions as RulesLogic<AdditionalOperation>, payload);
+
+      return typeof result === 'boolean' ? result : false;
+    } catch {
+      return false;
     }
   }
 

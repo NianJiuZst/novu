@@ -118,7 +118,7 @@ export class SubscriptionDto {
   })
   @IsObject()
   @IsOptional()
-  condition?: Record<string, unknown>;
+  conditions?: Record<string, unknown>;
 
   @ApiProperty({
     description: 'The creation date of the subscription',

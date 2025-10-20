@@ -283,7 +283,7 @@ export class TopicsController {
         userId: user._id,
         topicKey,
         subscriberIds: body.subscriberIds,
-        condition: body.condition as any,
+        conditions: body.conditions as any,
       })
     );
 

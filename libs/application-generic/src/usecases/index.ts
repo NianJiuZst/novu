@@ -12,7 +12,6 @@ export * from './create-or-update-subscriber';
 export * from './create-tenant';
 export * from './delete-preferences';
 export * from './digest-filter-steps';
-export * from './evaluate-subscription-conditions';
 export * from './execute-bridge-request';
 export * from './get-decrypted-integrations';
 export * from './get-decrypted-secret-key';

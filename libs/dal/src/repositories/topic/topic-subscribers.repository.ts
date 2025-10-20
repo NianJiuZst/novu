@@ -1,7 +1,8 @@
 import { DirectionEnum, ExternalSubscriberId } from '@novu/shared';
 
-import { FilterQuery } from 'mongoose';
+import { FilterQuery, mongo } from 'mongoose';
 import { TopicEntity } from '../..';
+import { DalException } from '../../shared';
 import type { EnforceEnvOrOrgIds } from '../../types/enforce';
 import { BaseRepository } from '../base-repository';
 import {
@@ -11,6 +12,16 @@ import {
 } from './topic-subscribers.entity';
 import { TopicSubscribers } from './topic-subscribers.schema';
 import { EnvironmentId, OrganizationId, TopicId, TopicKey } from './types';
+
+export interface BulkAddTopicSubscribersResult {
+  created: TopicSubscribersEntity[];
+  updated: TopicSubscribersEntity[];
+  failed: Array<{
+    message: string;
+    subscriberId: string;
+    topicKey: string;
+  }>;
+}
 
 export class TopicSubscribersRepository extends BaseRepository<
   TopicSubscribersDBModel,
@@ -56,10 +67,79 @@ export class TopicSubscribersRepository extends BaseRepository<
     return await this.aggregate(aggregationPipeline);
   }
 
-  async addSubscribers(subscribers: CreateTopicSubscribersEntity[]): Promise<any[]> {
-    const results = await this.upsertMany(subscribers);
+  async createSubscriptions(subscribers: CreateTopicSubscribersEntity[]): Promise<BulkAddTopicSubscribersResult> {
+    const bulkUpsertWriteOps = subscribers.map((subscriber) => {
+      const { _subscriberId, _topicId, conditionHash, _environmentId } = subscriber;
 
-    return results;
+      return {
+        updateOne: {
+          filter: {
+            _environmentId,
+            _subscriberId,
+            _topicId,
+            ...(conditionHash ? ({ conditionHash } satisfies Partial<CreateTopicSubscribersEntity>) : {}),
+          } satisfies Partial<CreateTopicSubscribersEntity>,
+          update: { $set: subscriber },
+          upsert: true,
+        },
+      };
+    });
+
+    let bulkResponse: mongo.BulkWriteResult;
+    try {
+      bulkResponse = await this.bulkWrite(bulkUpsertWriteOps);
+    } catch (e: unknown) {
+      if (isErrorWithWriteErrors(e)) {
+        if (!e.writeErrors) {
+          throw new DalException(e.message || 'Unknown error');
+        }
+        bulkResponse = e.result as mongo.BulkWriteResult;
+      } else {
+        throw new DalException('An unknown error occurred while adding topic subscribers');
+      }
+    }
+
+    const upsertedIds = bulkResponse.upsertedIds || {};
+    const writeErrors = bulkResponse.getWriteErrors() || [];
+
+    const indexes: number[] = [];
+
+    const createdSubscribers: TopicSubscribersEntity[] = [];
+    for (const [index, _id] of Object.entries(upsertedIds)) {
+      const numericIndex = parseInt(index, 10);
+      indexes.push(numericIndex);
+      const subscriber = subscribers[numericIndex];
+      if (subscriber) {
+        createdSubscribers.push({
+          _id: _id.toString(),
+          ...subscriber,
+        } as TopicSubscribersEntity);
+      }
+    }
+
+    let failed: Array<{ message: string; subscriberId: string; topicKey: string }> = [];
+    if (writeErrors.length > 0) {
+      failed = writeErrors.map((error) => {
+        indexes.push(error.err.index);
+        const subscriber = subscribers[error.err.index];
+
+        return {
+          message: error.err.errmsg,
+          subscriberId: subscriber?.externalSubscriberId ?? 'unknown',
+          topicKey: subscriber?.topicKey ?? 'unknown',
+        };
+      });
+    }
+
+    const updatedSubscribers: TopicSubscribersEntity[] = subscribers
+      .filter((_, index) => !indexes.includes(index))
+      .map((subscriber) => subscriber as TopicSubscribersEntity);
+
+    return {
+      created: createdSubscribers,
+      updated: updatedSubscribers,
+      failed,
+    };
   }
 
   async *getTopicDistinctSubscribers({
@@ -113,7 +193,7 @@ export class TopicSubscribersRepository extends BaseRepository<
   }): AsyncGenerator<
     Array<{
       externalSubscriberId: string;
-      condition?: Record<string, unknown>;
+      conditions?: Record<string, unknown>;
     }>,
     void,
     unknown
@@ -131,20 +211,20 @@ export class TopicSubscribersRepository extends BaseRepository<
         },
         {
           externalSubscriberId: 1,
-          condition: 1,
+          conditions: 1,
         }
       )
       .cursor({ batchSize });
 
     const batch: Array<{
       externalSubscriberId: string;
-      condition?: Record<string, unknown>;
+      conditions?: Record<string, unknown>;
     }> = [];
 
     for await (const doc of cursor) {
       batch.push({
         externalSubscriberId: doc.externalSubscriberId,
-        condition: doc.condition,
+        conditions: doc.conditions,
       });
 
       if (batch.length >= batchSize) {
@@ -282,4 +362,8 @@ export class TopicSubscribersRepository extends BaseRepository<
 
     return subscriptionsPagination;
   }
+}
+
+function isErrorWithWriteErrors(e: unknown): e is { writeErrors?: unknown; message?: string; result?: unknown } {
+  return typeof e === 'object' && e !== null && 'writeErrors' in e;
 }

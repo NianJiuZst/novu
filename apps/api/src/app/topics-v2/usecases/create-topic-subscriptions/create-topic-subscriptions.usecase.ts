@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { generateConditionHash, InstrumentUsecase } from '@novu/application-generic';
 import {
+  BulkAddTopicSubscribersResult,
   CreateTopicSubscribersEntity,
   SubscriberEntity,
   SubscriberRepository,
@@ -28,7 +29,6 @@ export class CreateTopicSubscriptionsUsecase {
 
   @InstrumentUsecase()
   async execute(command: CreateTopicSubscriptionsCommand): Promise<CreateTopicSubscriptionsResponseDto> {
-    // Use upsert topic usecase to create the topic if it doesn't exist
     await this.upsertTopicUseCase.execute({
       environmentId: command.environmentId,
       organizationId: command.organizationId,
@@ -79,7 +79,7 @@ export class CreateTopicSubscriptionsUsecase {
       };
     }
 
-    const conditionHash = generateConditionHash(command.condition);
+    const conditionHash = generateConditionHash(command.conditions);
 
     const existingSubscriptionsQuery: {
       _environmentId: string;
@@ -111,13 +111,23 @@ export class CreateTopicSubscriptionsUsecase {
       const topicSubscribersToCreate = this.mapSubscribersToTopic(
         topic,
         subscribersToCreate,
-        command.condition,
+        command.conditions,
         conditionHash
       );
-      newSubscriptions = await this.topicSubscribersRepository.addSubscribers(topicSubscribersToCreate);
+      const bulkResult: BulkAddTopicSubscribersResult =
+        await this.topicSubscribersRepository.createSubscriptions(topicSubscribersToCreate);
+
+      newSubscriptions = [...bulkResult.created, ...bulkResult.updated];
+
+      for (const failure of bulkResult.failed) {
+        errors.push({
+          subscriberId: failure.subscriberId,
+          code: 'SUBSCRIPTION_CREATION_FAILED',
+          message: failure.message,
+        });
+      }
     }
 
-    // Combine existing and new subscriptions for the response
     const allSubscriptions = [...existingSubscriptions, ...newSubscriptions];
     // Map subscriptions to response format
     for (const subscription of allSubscriptions) {
@@ -142,7 +152,7 @@ export class CreateTopicSubscriptionsUsecase {
               updatedAt: subscriber.updatedAt,
             }
           : null,
-        condition: subscription.condition,
+        conditions: subscription.conditions,
         createdAt: subscription.createdAt ?? '',
         updatedAt: subscription.updatedAt ?? '',
       });
@@ -162,7 +172,7 @@ export class CreateTopicSubscriptionsUsecase {
   private mapSubscribersToTopic(
     topic: TopicEntity,
     subscribers: SubscriberEntity[],
-    condition?: Record<string, unknown>,
+    conditions?: Record<string, unknown>,
     conditionHash?: string
   ): CreateTopicSubscribersEntity[] {
     return subscribers.map((subscriber) => ({
@@ -172,7 +182,7 @@ export class CreateTopicSubscriptionsUsecase {
       _topicId: topic._id,
       topicKey: topic.key,
       externalSubscriberId: subscriber.subscriberId,
-      condition,
+      conditions,
       conditionHash,
     }));
   }

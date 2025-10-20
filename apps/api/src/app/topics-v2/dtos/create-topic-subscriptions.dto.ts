@@ -41,5 +41,5 @@ export class CreateTopicSubscriptionsRequestDto {
   })
   @IsObject()
   @IsOptional()
-  condition?: Record<string, unknown>;
+  conditions?: Record<string, unknown>;
 }

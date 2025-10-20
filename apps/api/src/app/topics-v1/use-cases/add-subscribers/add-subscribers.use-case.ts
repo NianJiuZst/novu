@@ -46,7 +46,7 @@ export class AddSubscribersUseCase {
 
     if (subscribersAvailableToAdd.length > 0) {
       const topicSubscribers = this.mapSubscribersToTopic(topic, subscribersAvailableToAdd);
-      await this.topicSubscribersRepository.addSubscribers(topicSubscribers);
+      await this.topicSubscribersRepository.createSubscriptions(topicSubscribers);
     }
 
     return {
