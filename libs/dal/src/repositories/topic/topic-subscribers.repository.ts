@@ -142,43 +142,6 @@ export class TopicSubscribersRepository extends BaseRepository<
     };
   }
 
-  async *getTopicDistinctSubscribers({
-    query,
-    batchSize = 500,
-  }: {
-    query: {
-      _environmentId: EnvironmentId;
-      _organizationId: OrganizationId;
-      topicIds: string[];
-      excludeSubscribers: string[];
-    };
-    batchSize?: number;
-  }): AsyncGenerator<{ _id: string; topics: string[] }, void, unknown> {
-    const { _organizationId, _environmentId, topicIds, excludeSubscribers } = query;
-    const mappedTopicIds = topicIds.map((id) => this.convertStringToObjectId(id));
-
-    const aggregatePipeline = [
-      {
-        $match: {
-          _organizationId: this.convertStringToObjectId(_organizationId),
-          _environmentId: this.convertStringToObjectId(_environmentId),
-          _topicId: { $in: mappedTopicIds },
-          externalSubscriberId: { $nin: excludeSubscribers },
-        },
-      },
-      {
-        $group: {
-          _id: '$externalSubscriberId',
-          topics: { $push: '$_topicId' },
-        },
-      },
-    ];
-
-    for await (const doc of this._model.aggregate(aggregatePipeline, { batchSize }).cursor()) {
-      yield doc;
-    }
-  }
-
   async *getTopicSubscriptionsWithConditions({
     query,
     batchSize = 500,
