@@ -7,6 +7,7 @@ import { useFormProtection } from '@/hooks/use-form-protection';
 import { cn } from '../../utils/ui';
 
 type SubscriberDrawerProps = {
+  modal?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   subscriberId: string;
@@ -15,7 +16,7 @@ type SubscriberDrawerProps = {
 };
 
 export const SubscriberDrawer = forwardRef<HTMLDivElement, SubscriberDrawerProps>((props, forwardedRef) => {
-  const { open, onOpenChange, subscriberId, readOnly = false, closeOnSave = false } = props;
+  const { modal = false, open, onOpenChange, subscriberId, readOnly = false, closeOnSave = false } = props;
 
   const {
     protectedOnValueChange,
@@ -29,12 +30,14 @@ export const SubscriberDrawer = forwardRef<HTMLDivElement, SubscriberDrawerProps
 
   return (
     <>
-      <Sheet open={open} modal={false} onOpenChange={protectedOnValueChange}>
-        <div
-          className={cn('fade-in animate-in fixed inset-0 z-50 bg-black/20 transition-opacity duration-300', {
-            'pointer-events-none opacity-0': !open,
-          })}
-        />
+      <Sheet open={open} modal={modal} onOpenChange={protectedOnValueChange}>
+        {!modal && (
+          <div
+            className={cn('fade-in animate-in fixed inset-0 z-50 bg-black/20 transition-opacity duration-300', {
+              'pointer-events-none opacity-0': !open,
+            })}
+          />
+        )}
         <SheetContent ref={combinedRef}>
           <VisuallyHidden>
             <SheetTitle />
