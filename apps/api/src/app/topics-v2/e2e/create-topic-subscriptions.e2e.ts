@@ -226,4 +226,54 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
     expect(subscribers.length).to.equal(1);
     expect(subscribers[0]?._subscriberId).to.equal(subscriber1._id);
   });
+
+  it.only('should create multiple subscriptions for the same subscriber with different conditions', async () => {
+    const topicKey = `topic-key-conditions-${Date.now()}`;
+    const conditionsA = { status: 'active', priority: 'high' };
+    await novuClient.topics.subscriptions.create(
+      {
+        subscriberIds: [subscriber1.subscriberId],
+        conditions: conditionsA,
+      },
+      topicKey
+    );
+
+    const conditionsB = { status: 'pending', priority: 'low' };
+    await novuClient.topics.subscriptions.create(
+      {
+        subscriberIds: [subscriber1.subscriberId],
+        conditions: conditionsB,
+      },
+      topicKey
+    );
+
+    const subscriptions = await topicSubscribersRepository.find({
+      _environmentId: session.environment._id,
+      _organizationId: session.organization._id,
+      topicKey,
+      externalSubscriberId: subscriber1.subscriberId,
+    });
+
+    expect(subscriptions.length).to.equal(2);
+
+    const hashes = subscriptions.map((s) => s.conditionHash);
+    expect(new Set(hashes).size).to.equal(2);
+
+    // Add the same subscriber again with the same conditions, expect to be idempotent (not create a new subscription)
+    await novuClient.topics.subscriptions.create(
+      {
+        subscriberIds: [subscriber1.subscriberId],
+        conditions: conditionsA,
+      },
+      topicKey
+    );
+
+    const subscriptionsAfterDuplicate = await topicSubscribersRepository.find({
+      _environmentId: session.environment._id,
+      _organizationId: session.organization._id,
+      topicKey,
+      externalSubscriberId: subscriber1.subscriberId,
+    });
+    expect(subscriptionsAfterDuplicate.length).to.equal(2);
+  });
 });

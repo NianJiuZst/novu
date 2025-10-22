@@ -86,7 +86,7 @@ export class CreateTopicSubscriptionsUsecase {
       _organizationId: string;
       _topicId: string;
       _subscriberId: { $in: string[] };
-      conditionHash?: string;
+      conditionHash?: string | { $exists: boolean };
       $or?: Array<{ conditionHash: { $exists: boolean } } | { conditionHash: null }>;
     } = {
       _environmentId: command.environmentId,
@@ -98,7 +98,7 @@ export class CreateTopicSubscriptionsUsecase {
     if (conditionHash !== undefined) {
       existingSubscriptionsQuery.conditionHash = conditionHash;
     } else {
-      existingSubscriptionsQuery.$or = [{ conditionHash: { $exists: false } }, { conditionHash: null }];
+      existingSubscriptionsQuery.conditionHash = { $exists: false };
     }
 
     const existingSubscriptions = await this.topicSubscribersRepository.find(existingSubscriptionsQuery as any);
