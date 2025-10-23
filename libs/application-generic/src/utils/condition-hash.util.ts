@@ -1,10 +1,17 @@
 import { createHash } from 'crypto';
 
-// Recursively sorts object keys to ensure deterministic hashing
-// Example: {user: {role: "admin", id: "123"}} becomes {user: {id: "123", role: "admin"}}
+interface SubscriptionHashData {
+  conditions: Record<string, unknown> | null;
+  workflows: { _id: string; enabled: boolean }[] | null;
+}
+
 function sortKeysRecursively(obj: unknown): unknown {
-  if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
+  if (obj === null || typeof obj !== 'object') {
     return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(sortKeysRecursively);
   }
 
   return Object.keys(obj)
@@ -18,13 +25,15 @@ function sortKeysRecursively(obj: unknown): unknown {
     );
 }
 
-export function generateConditionHash(condition?: Record<string, unknown>): string | undefined {
-  if (!condition) {
+export function generateConditionHash(data?: SubscriptionHashData): string | undefined {
+  if (!data || (!data.conditions && !data.workflows)) {
     return undefined;
   }
 
-  const sortedCondition = sortKeysRecursively(condition);
-  const normalizedJson = JSON.stringify(sortedCondition);
+  // Sort object keys recursively to produce a deterministic JSON string for hashing.
+  // Arrays are traversed (their elements' keys are sorted) but array order is preserved.
+  const sortedData = sortKeysRecursively(data);
+  const normalizedJson = JSON.stringify(sortedData);
 
   return createHash('sha256').update(normalizedJson).digest('hex');
 }

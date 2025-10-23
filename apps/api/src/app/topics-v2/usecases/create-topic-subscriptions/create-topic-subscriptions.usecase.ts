@@ -80,7 +80,13 @@ export class CreateTopicSubscriptionsUsecase {
       };
     }
 
-    const conditionHash = generateConditionHash(command.conditions);
+    const subscriptionsWorkflows = command.workflows?.ids
+      ? command.workflows.ids.map((id) => ({ _id: id, enabled: true }))
+      : undefined;
+    const conditionHash = generateConditionHash({
+      conditions: command.conditions || null,
+      workflows: subscriptionsWorkflows || null,
+    });
 
     const existingSubscriptionsQuery: {
       _environmentId: string;
@@ -114,7 +120,7 @@ export class CreateTopicSubscriptionsUsecase {
         subscribersToCreate,
         command.conditions,
         conditionHash,
-        command.workflows
+        subscriptionsWorkflows
       );
       const bulkResult: BulkAddTopicSubscribersResult =
         await this.topicSubscribersRepository.createSubscriptions(subscriptionsToCreate);
@@ -180,10 +186,8 @@ export class CreateTopicSubscriptionsUsecase {
     subscribers: SubscriberEntity[],
     conditions?: Record<string, unknown>,
     conditionHash?: string,
-    workflows?: SubscriptionWorkflowsDto
+    subscriptionsWorkflows?: { _id: string; enabled: boolean }[]
   ): CreateTopicSubscribersEntity[] {
-    const transformedWorkflows = workflows?.ids ? workflows.ids.map((id) => ({ _id: id, enabled: true })) : undefined;
-
     return subscribers.map((subscriber) => ({
       _environmentId: subscriber._environmentId,
       _organizationId: subscriber._organizationId,
@@ -193,7 +197,7 @@ export class CreateTopicSubscriptionsUsecase {
       externalSubscriberId: subscriber.subscriberId,
       conditions,
       conditionHash,
-      workflows: transformedWorkflows,
+      workflows: subscriptionsWorkflows,
     }));
   }
 }
