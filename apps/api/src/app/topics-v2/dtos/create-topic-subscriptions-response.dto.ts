@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsObject, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsBoolean, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 export class TopicDto {
   @ApiProperty({
@@ -89,6 +90,22 @@ export class SubscriberDto {
   updatedAt?: string;
 }
 
+export class SubscriptionWorkflowDto {
+  @ApiProperty({
+    description: 'The workflow identifier',
+    example: 'workflow-1',
+  })
+  @IsString()
+  id: string;
+
+  @ApiProperty({
+    description: 'Whether the workflow is enabled for this subscription',
+    example: true,
+  })
+  @IsBoolean()
+  enabled: boolean;
+}
+
 export class SubscriptionDto {
   @ApiProperty({
     description: 'The unique identifier of the subscription',
@@ -119,6 +136,16 @@ export class SubscriptionDto {
   @IsObject()
   @IsOptional()
   conditions?: Record<string, unknown>;
+
+  @ApiPropertyOptional({
+    description: 'The workflows associated with the subscription',
+    type: [SubscriptionWorkflowDto],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SubscriptionWorkflowDto)
+  @IsOptional()
+  workflows?: SubscriptionWorkflowDto[];
 
   @ApiProperty({
     description: 'The creation date of the subscription',

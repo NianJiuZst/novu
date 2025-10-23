@@ -10,7 +10,7 @@ import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 /**
  * All translations for given locale organized by workflow identifier
  */
-export type Workflows = {};
+export type GetMasterJsonResponseDtoWorkflows = {};
 
 /**
  * All translations for given locale organized by layout identifier
@@ -21,7 +21,7 @@ export type GetMasterJsonResponseDto = {
   /**
    * All translations for given locale organized by workflow identifier
    */
-  workflows: Workflows;
+  workflows: GetMasterJsonResponseDtoWorkflows;
   /**
    * All translations for given locale organized by layout identifier
    */
@@ -29,46 +29,53 @@ export type GetMasterJsonResponseDto = {
 };
 
 /** @internal */
-export const Workflows$inboundSchema: z.ZodType<
-  Workflows,
+export const GetMasterJsonResponseDtoWorkflows$inboundSchema: z.ZodType<
+  GetMasterJsonResponseDtoWorkflows,
   z.ZodTypeDef,
   unknown
 > = z.object({});
 
 /** @internal */
-export type Workflows$Outbound = {};
+export type GetMasterJsonResponseDtoWorkflows$Outbound = {};
 
 /** @internal */
-export const Workflows$outboundSchema: z.ZodType<
-  Workflows$Outbound,
+export const GetMasterJsonResponseDtoWorkflows$outboundSchema: z.ZodType<
+  GetMasterJsonResponseDtoWorkflows$Outbound,
   z.ZodTypeDef,
-  Workflows
+  GetMasterJsonResponseDtoWorkflows
 > = z.object({});
 
 /**
  * @internal
  * @deprecated This namespace will be removed in future versions. Use schemas and types that are exported directly from this module.
  */
-export namespace Workflows$ {
-  /** @deprecated use `Workflows$inboundSchema` instead. */
-  export const inboundSchema = Workflows$inboundSchema;
-  /** @deprecated use `Workflows$outboundSchema` instead. */
-  export const outboundSchema = Workflows$outboundSchema;
-  /** @deprecated use `Workflows$Outbound` instead. */
-  export type Outbound = Workflows$Outbound;
+export namespace GetMasterJsonResponseDtoWorkflows$ {
+  /** @deprecated use `GetMasterJsonResponseDtoWorkflows$inboundSchema` instead. */
+  export const inboundSchema = GetMasterJsonResponseDtoWorkflows$inboundSchema;
+  /** @deprecated use `GetMasterJsonResponseDtoWorkflows$outboundSchema` instead. */
+  export const outboundSchema =
+    GetMasterJsonResponseDtoWorkflows$outboundSchema;
+  /** @deprecated use `GetMasterJsonResponseDtoWorkflows$Outbound` instead. */
+  export type Outbound = GetMasterJsonResponseDtoWorkflows$Outbound;
 }
 
-export function workflowsToJSON(workflows: Workflows): string {
-  return JSON.stringify(Workflows$outboundSchema.parse(workflows));
+export function getMasterJsonResponseDtoWorkflowsToJSON(
+  getMasterJsonResponseDtoWorkflows: GetMasterJsonResponseDtoWorkflows,
+): string {
+  return JSON.stringify(
+    GetMasterJsonResponseDtoWorkflows$outboundSchema.parse(
+      getMasterJsonResponseDtoWorkflows,
+    ),
+  );
 }
 
-export function workflowsFromJSON(
+export function getMasterJsonResponseDtoWorkflowsFromJSON(
   jsonString: string,
-): SafeParseResult<Workflows, SDKValidationError> {
+): SafeParseResult<GetMasterJsonResponseDtoWorkflows, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => Workflows$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Workflows' from JSON`,
+    (x) => GetMasterJsonResponseDtoWorkflows$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'GetMasterJsonResponseDtoWorkflows' from JSON`,
   );
 }
 
@@ -119,13 +126,13 @@ export const GetMasterJsonResponseDto$inboundSchema: z.ZodType<
   z.ZodTypeDef,
   unknown
 > = z.object({
-  workflows: z.lazy(() => Workflows$inboundSchema),
+  workflows: z.lazy(() => GetMasterJsonResponseDtoWorkflows$inboundSchema),
   layouts: z.lazy(() => Layouts$inboundSchema),
 });
 
 /** @internal */
 export type GetMasterJsonResponseDto$Outbound = {
-  workflows: Workflows$Outbound;
+  workflows: GetMasterJsonResponseDtoWorkflows$Outbound;
   layouts: Layouts$Outbound;
 };
 
@@ -135,7 +142,7 @@ export const GetMasterJsonResponseDto$outboundSchema: z.ZodType<
   z.ZodTypeDef,
   GetMasterJsonResponseDto
 > = z.object({
-  workflows: z.lazy(() => Workflows$outboundSchema),
+  workflows: z.lazy(() => GetMasterJsonResponseDtoWorkflows$outboundSchema),
   layouts: z.lazy(() => Layouts$outboundSchema),
 });
 

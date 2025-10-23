@@ -284,6 +284,7 @@ export class TopicsController {
         topicKey,
         subscriberIds: body.subscriberIds,
         conditions: body.conditions as any,
+        workflows: body.workflows,
       })
     );
 

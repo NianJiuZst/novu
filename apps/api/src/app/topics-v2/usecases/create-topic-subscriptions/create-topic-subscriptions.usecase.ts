@@ -10,6 +10,7 @@ import {
   TopicSubscribersEntity,
   TopicSubscribersRepository,
 } from '@novu/dal';
+import { SubscriptionWorkflowsDto } from '../../dtos/create-topic-subscriptions.dto';
 import {
   CreateTopicSubscriptionsResponseDto,
   SubscriptionDto,
@@ -108,14 +109,15 @@ export class CreateTopicSubscriptionsUsecase {
 
     let newSubscriptions: TopicSubscribersEntity[] = [];
     if (subscribersToCreate.length > 0) {
-      const topicSubscribersToCreate = this.mapSubscribersToTopic(
+      const subscriptionsToCreate = this.buildSubscriptionEntity(
         topic,
         subscribersToCreate,
         command.conditions,
-        conditionHash
+        conditionHash,
+        command.workflows
       );
       const bulkResult: BulkAddTopicSubscribersResult =
-        await this.topicSubscribersRepository.createSubscriptions(topicSubscribersToCreate);
+        await this.topicSubscribersRepository.createSubscriptions(subscriptionsToCreate);
 
       newSubscriptions = [...bulkResult.created, ...bulkResult.updated];
 
@@ -153,6 +155,10 @@ export class CreateTopicSubscriptionsUsecase {
             }
           : null,
         conditions: subscription.conditions,
+        workflows: subscription.workflows?.map((workflow) => ({
+          id: workflow._id,
+          enabled: workflow.enabled,
+        })),
         createdAt: subscription.createdAt ?? '',
         updatedAt: subscription.updatedAt ?? '',
       });
@@ -169,12 +175,15 @@ export class CreateTopicSubscriptionsUsecase {
     };
   }
 
-  private mapSubscribersToTopic(
+  private buildSubscriptionEntity(
     topic: TopicEntity,
     subscribers: SubscriberEntity[],
     conditions?: Record<string, unknown>,
-    conditionHash?: string
+    conditionHash?: string,
+    workflows?: SubscriptionWorkflowsDto
   ): CreateTopicSubscribersEntity[] {
+    const transformedWorkflows = workflows?.ids ? workflows.ids.map((id) => ({ _id: id, enabled: true })) : undefined;
+
     return subscribers.map((subscriber) => ({
       _environmentId: subscriber._environmentId,
       _organizationId: subscriber._organizationId,
@@ -184,6 +193,7 @@ export class CreateTopicSubscriptionsUsecase {
       externalSubscriberId: subscriber.subscriberId,
       conditions,
       conditionHash,
+      workflows: transformedWorkflows,
     }));
   }
 }

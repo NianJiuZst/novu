@@ -38,6 +38,10 @@ const topicSubscribersSchema = new Schema<TopicSubscribersDBModel>(
       type: Schema.Types.Mixed,
       required: false,
     },
+    workflows: {
+      type: [{ _id: Schema.Types.String, enabled: Schema.Types.Boolean }],
+      required: false,
+    },
     conditionHash: {
       type: Schema.Types.String,
       required: false,

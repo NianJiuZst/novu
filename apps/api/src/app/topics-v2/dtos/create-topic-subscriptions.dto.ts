@@ -1,5 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsDefined, IsObject, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsDefined, IsObject, IsOptional, ValidateNested } from 'class-validator';
+
+export class SubscriptionWorkflowsDto {
+  @ApiProperty({
+    description: 'List of workflow identifiers',
+    example: ['workflow-id-1', 'workflow-id-2'],
+    type: [String],
+  })
+  @IsArray()
+  @IsDefined()
+  ids: string[];
+}
 
 export class CreateTopicSubscriptionsRequestDto {
   @ApiProperty({
@@ -42,4 +54,16 @@ export class CreateTopicSubscriptionsRequestDto {
   @IsObject()
   @IsOptional()
   conditions?: Record<string, unknown>;
+
+  @ApiPropertyOptional({
+    description: 'List of workflow IDs to associate with the subscription',
+    type: () => SubscriptionWorkflowsDto,
+    example: {
+      ids: ['workflow-id-1', 'workflow-id-2'],
+    },
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => SubscriptionWorkflowsDto)
+  workflows?: SubscriptionWorkflowsDto;
 }

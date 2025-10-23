@@ -8,6 +8,12 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 import {
+  SubscriptionWorkflowDto,
+  SubscriptionWorkflowDto$inboundSchema,
+  SubscriptionWorkflowDto$Outbound,
+  SubscriptionWorkflowDto$outboundSchema,
+} from "./subscriptionworkflowdto.js";
+import {
   TopicDto,
   TopicDto$inboundSchema,
   TopicDto$Outbound,
@@ -61,6 +67,10 @@ export type SubscriptionDto = {
    * JSONLogic filter conditions for conditional subscription. Only notifications matching these conditions will be delivered.
    */
   conditions?: { [k: string]: any } | undefined;
+  /**
+   * The workflows associated with the subscription
+   */
+  workflows?: Array<SubscriptionWorkflowDto> | undefined;
   /**
    * The creation date of the subscription
    */
@@ -154,6 +164,7 @@ export const SubscriptionDto$inboundSchema: z.ZodType<
   topic: TopicDto$inboundSchema,
   subscriber: z.nullable(z.lazy(() => Subscriber$inboundSchema)),
   conditions: z.record(z.any()).optional(),
+  workflows: z.array(SubscriptionWorkflowDto$inboundSchema).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 }).transform((v) => {
@@ -168,6 +179,7 @@ export type SubscriptionDto$Outbound = {
   topic: TopicDto$Outbound;
   subscriber: Subscriber$Outbound | null;
   conditions?: { [k: string]: any } | undefined;
+  workflows?: Array<SubscriptionWorkflowDto$Outbound> | undefined;
   createdAt: string;
   updatedAt: string;
 };
@@ -182,6 +194,7 @@ export const SubscriptionDto$outboundSchema: z.ZodType<
   topic: TopicDto$outboundSchema,
   subscriber: z.nullable(z.lazy(() => Subscriber$outboundSchema)),
   conditions: z.record(z.any()).optional(),
+  workflows: z.array(SubscriptionWorkflowDto$outboundSchema).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 }).transform((v) => {

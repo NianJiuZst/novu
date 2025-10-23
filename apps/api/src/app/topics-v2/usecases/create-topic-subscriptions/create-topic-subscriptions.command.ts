@@ -13,4 +13,8 @@ export class CreateTopicSubscriptionsCommand extends EnvironmentWithUserCommand 
   @IsObject()
   @IsOptional()
   conditions?: Record<string, unknown>;
+
+  @IsOptional()
+  @IsObject()
+  workflows?: { ids: string[] };
 }

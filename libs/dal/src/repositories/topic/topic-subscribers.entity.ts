@@ -21,6 +21,8 @@ export class TopicSubscribersEntity {
   conditions?: Record<string, unknown>;
   conditionHash?: string;
 
+  workflows?: { _id: string; enabled: boolean }[];
+
   createdAt?: string;
   updatedAt?: string;
 }

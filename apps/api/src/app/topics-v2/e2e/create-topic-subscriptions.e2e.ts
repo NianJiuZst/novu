@@ -227,25 +227,39 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
     expect(subscribers[0]?._subscriberId).to.equal(subscriber1._id);
   });
 
-  it.only('should create multiple subscriptions for the same subscriber with different conditions', async () => {
+  it('should create multiple subscriptions for the same subscriber with different conditions', async () => {
     const topicKey = `topic-key-conditions-${Date.now()}`;
     const conditionsA = { status: 'active', priority: 'high' };
-    await novuClient.topics.subscriptions.create(
+    const responseA = await novuClient.topics.subscriptions.create(
       {
         subscriberIds: [subscriber1.subscriberId],
         conditions: conditionsA,
-      },
+        workflows: { ids: ['workflow-1', 'workflow-2'] },
+      } as any,
       topicKey
     );
 
+    expect(responseA.result.data[0].workflows?.length).to.equal(2);
+    expect(responseA.result.data[0].workflows?.[0]?.id).to.be.oneOf(['workflow-1', 'workflow-2']);
+    expect(responseA.result.data[0].workflows?.[0]?.enabled).to.equal(true);
+    expect(responseA.result.data[0].workflows?.[1]?.id).to.be.oneOf(['workflow-1', 'workflow-2']);
+    expect(responseA.result.data[0].workflows?.[1]?.enabled).to.equal(true);
+
     const conditionsB = { status: 'pending', priority: 'low' };
-    await novuClient.topics.subscriptions.create(
+    const responseB = await novuClient.topics.subscriptions.create(
       {
         subscriberIds: [subscriber1.subscriberId],
         conditions: conditionsB,
-      },
+        workflows: { ids: ['workflow-3', 'workflow-4'] },
+      } as any,
       topicKey
     );
+
+    expect(responseB.result.data[0].workflows?.length).to.equal(2);
+    expect(responseB.result.data[0].workflows?.[0]?.id).to.be.oneOf(['workflow-3', 'workflow-4']);
+    expect(responseB.result.data[0].workflows?.[0]?.enabled).to.equal(true);
+    expect(responseB.result.data[0].workflows?.[1]?.id).to.be.oneOf(['workflow-3', 'workflow-4']);
+    expect(responseB.result.data[0].workflows?.[1]?.enabled).to.equal(true);
 
     const subscriptions = await topicSubscribersRepository.find({
       _environmentId: session.environment._id,
@@ -259,12 +273,12 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
     const hashes = subscriptions.map((s) => s.conditionHash);
     expect(new Set(hashes).size).to.equal(2);
 
-    // Add the same subscriber again with the same conditions, expect to be idempotent (not create a new subscription)
     await novuClient.topics.subscriptions.create(
       {
         subscriberIds: [subscriber1.subscriberId],
         conditions: conditionsA,
-      },
+        workflows: { ids: ['workflow-1', 'workflow-2'] },
+      } as any,
       topicKey
     );
 
