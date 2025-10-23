@@ -4,6 +4,7 @@ export * from './buildBridgeEndpointUrl';
 export * from './condition-hash.util';
 export * from './deepmerge';
 export * from './digest';
+export * from './duration-utils';
 export * from './email-normalization';
 export * from './exceptions';
 export * from './filter';
