@@ -22,6 +22,7 @@ import {
   NotificationEntity,
   NotificationRepository,
   SubscriberRepository,
+  TopicSubscribersRepository,
 } from '@novu/dal';
 import {
   ExecutionDetailsSourceEnum,
@@ -65,7 +66,8 @@ export class RunJob {
     private logger: PinoLogger,
     private subscriberRepository: SubscriberRepository,
     private featureFlagsService: FeatureFlagsService,
-    private executeBridgeJob: ExecuteBridgeJob
+    private executeBridgeJob: ExecuteBridgeJob,
+    private topicSubscribersRepository: TopicSubscribersRepository
   ) {
     this.logger.setContext(this.constructor.name);
   }
@@ -132,6 +134,14 @@ export class RunJob {
 
       if (!notification) {
         throw new PlatformException(`Notification with id ${job._notificationId} not found`);
+      }
+
+      if (Array.isArray(notification.topics) && notification.topics.length > 0) {
+        const filtered = await this.handleTopicSubscriptionFiltering(job, notification);
+        if (filtered) {
+          shouldQueueNextJob = false;
+          return;
+        }
       }
 
       if (isSubscribersScheduleEnabled) {
@@ -697,5 +707,113 @@ export class RunJob {
     );
 
     return true;
+  }
+
+  private async handleTopicSubscriptionFiltering(job: JobEntity, notification: NotificationEntity): Promise<boolean> {
+    const {
+      _environmentId: environmentId,
+      _organizationId: organizationId,
+      subscriberId: subscriberExternalId,
+      _templateId: templateId,
+      transactionId,
+      _templateId: _workflowId,
+    } = job;
+
+    if (notification.topics.length === 0) {
+      return false;
+    }
+
+    const perTopicSubscriptions = await Promise.all(
+      notification.topics.map((topic) =>
+        this.topicSubscribersRepository.find({
+          _environmentId: environmentId,
+          _organizationId: organizationId,
+          _topicId: topic._topicId,
+          externalSubscriberId: subscriberExternalId,
+        })
+      )
+    );
+    const subscriptions = perTopicSubscriptions.flat();
+
+    let allowDelivery = false;
+    let disabledFoundForWorkflow = false;
+
+    for (const subscription of subscriptions) {
+      if (!subscription) {
+        continue;
+      }
+
+      const subscriptionWorkflows = subscription.workflows;
+
+      if (!subscriptionWorkflows || subscriptionWorkflows.length === 0) {
+        allowDelivery = true;
+        continue;
+      }
+
+      const entry = subscriptionWorkflows.find((workflow) => workflow._id === _workflowId);
+      if (entry?.enabled === true) {
+        allowDelivery = true;
+      }
+      if (entry && entry.enabled === false) {
+        disabledFoundForWorkflow = true;
+      }
+    }
+
+    if (!allowDelivery && disabledFoundForWorkflow) {
+      await this.jobRepository.updateStatus(environmentId, job._id, JobStatusEnum.CANCELED);
+
+      await this.stepRunRepository.create(job, {
+        status: JobStatusEnum.SKIPPED,
+      });
+
+      await this.createExecutionDetails.execute(
+        CreateExecutionDetailsCommand.create({
+          ...CreateExecutionDetailsCommand.getDetailsFromJob(job),
+          detail: DetailEnum.STEP_FILTERED_BY_TOPIC_SUBSCRIPTION_WORKFLOWS,
+          source: ExecutionDetailsSourceEnum.INTERNAL,
+          status: ExecutionDetailsStatusEnum.SUCCESS,
+          isTest: false,
+          isRetry: false,
+          raw: JSON.stringify({ topicKeys }),
+        })
+      );
+
+      const pendingJobs = await this.jobRepository.find({
+        _environmentId: environmentId,
+        transactionId: transactionId,
+        status: [JobStatusEnum.PENDING],
+        _subscriberId: job._subscriberId,
+        _templateId: templateId,
+      });
+
+      if (pendingJobs?.length) {
+        await this.jobRepository.cancelPendingJobs({
+          transactionId: transactionId,
+          _environmentId: environmentId,
+          _subscriberId: job._subscriberId,
+          _templateId: templateId,
+        });
+
+        await this.stepRunRepository.createMany(pendingJobs, { status: JobStatusEnum.SKIPPED });
+
+        for (const pendingJob of pendingJobs) {
+          await this.createExecutionDetails.execute(
+            CreateExecutionDetailsCommand.create({
+              ...CreateExecutionDetailsCommand.getDetailsFromJob(pendingJob),
+              detail: DetailEnum.STEP_FILTERED_BY_TOPIC_SUBSCRIPTION_WORKFLOWS,
+              source: ExecutionDetailsSourceEnum.INTERNAL,
+              status: ExecutionDetailsStatusEnum.SUCCESS,
+              isTest: false,
+              isRetry: false,
+              raw: JSON.stringify({ topicKeys }),
+            })
+          );
+        }
+      }
+
+      return true;
+    }
+
+    return false;
   }
 }

@@ -6,7 +6,13 @@ import {
   TriggerEventRequestDto,
   TriggerRecipientsTypeEnum,
 } from '@novu/api/models/components';
-import { MessageRepository, NotificationRepository, NotificationTemplateEntity, SubscriberEntity } from '@novu/dal';
+import {
+  MessageRepository,
+  NotificationRepository,
+  NotificationTemplateEntity,
+  SubscriberEntity,
+  TopicSubscribersRepository,
+} from '@novu/dal';
 import {
   ChannelTypeEnum,
   DigestTypeEnum,
@@ -344,7 +350,7 @@ describe('Topic Trigger Event #novu-v2', () => {
       }
     });
 
-    it.only('should deliver only to subscriptions with passing conditions', async () => {
+    it('should deliver only to subscriptions with passing conditions', async () => {
       const conditionsTopicKey = `topic-key-conditions-${Date.now()}`;
 
       const newSubscriber = await subscriberService.createSubscriber();
@@ -610,6 +616,103 @@ describe('Topic Trigger Event #novu-v2', () => {
         expect(message?._subscriberId.toString()).to.be.eql(subscriber._id);
         expect(message?.phone).to.equal(subscriber.phone);
       }
+    });
+
+    it.only('should deliver considering subscription workflows enablement', async () => {
+      const workflowsTopicKeyEnabled = `topic-key-workflows-enabled-${Date.now()}`;
+      const workflowsTopicKeyDisabled = `topic-key-workflows-disabled-${Date.now()}`;
+      const workflowsTopicKeyNoWorkflows = `topic-key-workflows-no-workflows-${Date.now()}`;
+
+      const topicSubscribersRepository = new TopicSubscribersRepository();
+
+      const subscribedSubscriber = await subscriberService.createSubscriber();
+
+      const workflowId = template.triggers[0].identifier;
+
+      // Create subscription with workflows enabled (default true)
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [subscribedSubscriber.subscriberId],
+          workflows: { ids: [workflowId] },
+        } as any,
+        workflowsTopicKeyEnabled
+      );
+
+      // Create subscription with workflows then flip to disabled via DAL
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [subscribedSubscriber.subscriberId],
+          workflows: { ids: [workflowId] },
+        } as any,
+        workflowsTopicKeyDisabled
+      );
+
+      await topicSubscribersRepository.updateOne(
+        {
+          _environmentId: session.environment._id,
+          _organizationId: session.organization._id,
+          topicKey: workflowsTopicKeyDisabled,
+          externalSubscriberId: subscribedSubscriber.subscriberId,
+        } as any,
+        {
+          $set: { workflows: [{ _id: workflowId, enabled: false }] },
+        } as any
+      );
+
+      // Create subscription without workflows (opt-in feature -> should still send)
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [subscribedSubscriber.subscriberId],
+        },
+        workflowsTopicKeyNoWorkflows
+      );
+
+      // Trigger event with workflows enabled
+      await novuClient.trigger({
+        workflowId,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: workflowsTopicKeyEnabled }],
+      });
+      await session.waitForJobCompletion(template._id);
+      const enabledMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscribedSubscriber._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(enabledMessages.length, 'Enabled Subscription Messages, expected to delivery the message').to.equal(1);
+
+      // Trigger event with workflows disabled
+      await novuClient.trigger({
+        workflowId,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: workflowsTopicKeyDisabled }],
+      });
+      await session.waitForJobCompletion(template._id);
+      const disabledMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscribedSubscriber._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(disabledMessages.length, 'Disabled Subscription Messages, expected to not delivery the message').to.equal(
+        0
+      );
+
+      // Trigger event with no workflows
+      await novuClient.trigger({
+        workflowId,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: workflowsTopicKeyNoWorkflows }],
+      });
+      await session.waitForJobCompletion(template._id);
+      const noWorkflowsMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscribedSubscriber._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(
+        noWorkflowsMessages.length,
+        'No Workflow Subscription Messages, expected to delivery the message'
+      ).to.equal(1);
     });
 
     it('should not contain events from a different digestKey ', async () => {

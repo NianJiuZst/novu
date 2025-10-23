@@ -44,6 +44,7 @@ export class JobEntity {
   error?: any;
   createdAt: string;
   updatedAt: string;
+  //_templateId is _workflowId
   _templateId: string;
   digest?: IWorkflowStepMetadata & {
     events?: any[];
