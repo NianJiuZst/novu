@@ -343,6 +343,90 @@ describe('Topic Trigger Event #novu-v2', () => {
         expect(message?.phone).to.equal(subscriber.phone);
       }
     });
+
+    it.only('should deliver only to subscriptions with passing conditions', async () => {
+      const conditionsTopicKey = `topic-key-conditions-${Date.now()}`;
+
+      const newSubscriber = await subscriberService.createSubscriber();
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [newSubscriber.subscriberId],
+          conditions: {
+            and: [
+              {
+                '==': [
+                  {
+                    var: 'payload.status',
+                  },
+                  'completed',
+                ],
+              },
+              {
+                '>': [
+                  {
+                    var: 'payload.price',
+                  },
+                  100,
+                ],
+              },
+            ],
+          } as Record<string, unknown>,
+        },
+        conditionsTopicKey
+      );
+
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [secondSubscriber.subscriberId],
+          conditions: {
+            '==': [
+              {
+                var: 'payload.status',
+              },
+              'failed',
+            ],
+          } as Record<string, unknown>,
+        },
+        conditionsTopicKey
+      );
+
+      const toWithConditions = [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: conditionsTopicKey }];
+
+      await novuClient.trigger({
+        workflowId: template.triggers[0].identifier,
+        to: toWithConditions,
+        payload: { status: 'completed', price: 150 },
+      });
+
+      await session.waitForJobCompletion(template._id);
+
+      const passMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: newSubscriber._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+
+      expect(passMessages.length).to.equal(1);
+
+      await novuClient.trigger({
+        workflowId: template.triggers[0].identifier,
+        to: toWithConditions,
+        payload: { status: 'not-completed', price: 150 },
+      });
+
+      await session.waitForJobCompletion(template._id);
+
+      const filteredSubscriptionMessage = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: newSubscriber._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+
+      // messages were not incremented because with subscription was filtered out
+      expect(filteredSubscriptionMessage.length).to.equal(1);
+    });
   });
 
   describe('Trigger event for multiple topics and multiple subscribers - /v1/events/trigger (POST)', () => {
