@@ -169,7 +169,8 @@ export type EventType =
   | 'step_skipped'
   | 'step_skipped_outside_of_the_schedule'
   | 'step_extended_to_schedule'
-  | 'step_skipped_max_extensions_reached';
+  | 'step_skipped_max_extensions_reached'
+  | 'step_filtered_by_topic_subscription_workflows';
 
 export type EntityType = 'request' | 'step_run';
 

@@ -924,7 +924,7 @@ export class RunJob {
           status: ExecutionDetailsStatusEnum.SUCCESS,
           isTest: false,
           isRetry: false,
-          raw: JSON.stringify({ topicKeys }),
+          raw: JSON.stringify({ topics: notification.topics }),
         })
       );
 
@@ -955,7 +955,7 @@ export class RunJob {
               status: ExecutionDetailsStatusEnum.SUCCESS,
               isTest: false,
               isRetry: false,
-              raw: JSON.stringify({ topicKeys }),
+              raw: JSON.stringify({ topics: notification.topics }),
             })
           );
         }

@@ -215,6 +215,7 @@ export * from "./subscriberworkflowpreferencedto.js";
 export * from "./subscriptiondto.js";
 export * from "./subscriptionerrordto.js";
 export * from "./subscriptionsdeleteerrordto.js";
+export * from "./subscriptionworkflowdto.js";
 export * from "./syncworkflowdto.js";
 export * from "./tenantpayloaddto.js";
 export * from "./textalignenum.js";

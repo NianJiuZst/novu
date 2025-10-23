@@ -460,6 +460,8 @@ export function mapEventTypeToTitle(eventType: EventType): string {
       return 'Step was extended to the next available time in the subscriber schedule';
     case 'step_skipped_max_extensions_reached':
       return 'Step was executed due to maximum number of subscriber schedule extensions reached';
+    case 'step_filtered_by_topic_subscription_workflows':
+      return 'Step filtered by topic subscription workflows';
 
     default: {
       // Exhaustive check - this will cause a compile error if we miss any TraceEvent cases
