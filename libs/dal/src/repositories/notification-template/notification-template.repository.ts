@@ -1,5 +1,5 @@
 import { DirectionEnum, ResourceOriginEnum, ResourceTypeEnum, SeverityLevelEnum } from '@novu/shared';
-import { ClientSession, FilterQuery } from 'mongoose';
+import { ClientSession, FilterQuery, Types } from 'mongoose';
 import { SoftDeleteModel } from 'mongoose-delete';
 import { DalException } from '../../shared';
 import type { EnforceEnvOrOrgIds } from '../../types/enforce';
@@ -72,6 +72,27 @@ export class NotificationTemplateRepository extends BaseRepository<
     const query = this.MongooseModel.find(requestQuery, undefined, { session }).populate('steps.template');
 
     const items = await query;
+
+    return this.mapEntities(items);
+  }
+
+  async findByIdsOrIdentifiers(environmentId: string, idsOrIdentifiers: string[]) {
+    const objectIds: Types.ObjectId[] = [];
+    const identifiers: string[] = [];
+
+    for (const id of idsOrIdentifiers) {
+      if (BaseRepository.isInternalId(id)) {
+        objectIds.push(this.convertStringToObjectId(id));
+      }
+      identifiers.push(id);
+    }
+
+    const items = await this.MongooseModel.find({
+      $or: [
+        { _id: { $in: objectIds }, _environmentId: environmentId },
+        { 'triggers.identifier': { $in: identifiers }, _environmentId: environmentId },
+      ],
+    });
 
     return this.mapEntities(items);
   }

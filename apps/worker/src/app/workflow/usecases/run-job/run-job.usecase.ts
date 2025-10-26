@@ -27,6 +27,8 @@ import {
   TopicSubscribersRepository,
 } from '@novu/dal';
 import {
+  DeliveryLifecycleDetail,
+  DeliveryLifecycleStatusEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
   FeatureFlagsKeysEnum,
@@ -883,6 +885,7 @@ export class RunJob {
         })
       )
     );
+
     const subscriptions = perTopicSubscriptions.flat();
 
     let allowDelivery = false;
@@ -910,7 +913,10 @@ export class RunJob {
     }
 
     if (!allowDelivery && disabledFoundForWorkflow) {
-      await this.jobRepository.updateStatus(environmentId, job._id, JobStatusEnum.CANCELED);
+      await this.jobRepository.updateStatus(environmentId, job._id, JobStatusEnum.CANCELED, {
+        status: DeliveryLifecycleStatusEnum.SKIPPED,
+        detail: DeliveryLifecycleDetail.SUBSCRIBER_STEP_FILTERED_BY_TOPIC_SUBSCRIPTION_WORKFLOWS,
+      });
 
       await this.stepRunRepository.create(job, {
         status: JobStatusEnum.SKIPPED,
@@ -942,6 +948,10 @@ export class RunJob {
           _environmentId: environmentId,
           _subscriberId: job._subscriberId,
           _templateId: templateId,
+          deliveryLifecycleStateOverride: {
+            status: DeliveryLifecycleStatusEnum.SKIPPED,
+            detail: DeliveryLifecycleDetail.SUBSCRIBER_STEP_FILTERED_BY_TOPIC_SUBSCRIPTION_WORKFLOWS,
+          },
         });
 
         await this.stepRunRepository.createMany(pendingJobs, { status: JobStatusEnum.SKIPPED });

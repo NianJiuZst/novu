@@ -618,7 +618,7 @@ describe('Topic Trigger Event #novu-v2', () => {
       }
     });
 
-    it.only('should deliver considering subscription workflows enablement', async () => {
+    it('should deliver considering subscription workflows enablement', async () => {
       const workflowsTopicKeyEnabled = `topic-key-workflows-enabled-${Date.now()}`;
       const workflowsTopicKeyDisabled = `topic-key-workflows-disabled-${Date.now()}`;
       const workflowsTopicKeyNoWorkflows = `topic-key-workflows-no-workflows-${Date.now()}`;
@@ -627,7 +627,8 @@ describe('Topic Trigger Event #novu-v2', () => {
 
       const subscribedSubscriber = await subscriberService.createSubscriber();
 
-      const workflowId = template.triggers[0].identifier;
+      const workflowId = template._id;
+      const triggerIdentifier = template.triggers[0].identifier;
 
       // Create subscription with workflows enabled (default true)
       await novuClient.topics.subscriptions.create(
@@ -669,7 +670,7 @@ describe('Topic Trigger Event #novu-v2', () => {
 
       // Trigger event with workflows enabled
       await novuClient.trigger({
-        workflowId,
+        workflowId: triggerIdentifier,
         to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: workflowsTopicKeyEnabled }],
       });
       await session.waitForJobCompletion(template._id);
@@ -683,7 +684,7 @@ describe('Topic Trigger Event #novu-v2', () => {
 
       // Trigger event with workflows disabled
       await novuClient.trigger({
-        workflowId,
+        workflowId: triggerIdentifier,
         to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: workflowsTopicKeyDisabled }],
       });
       await session.waitForJobCompletion(template._id);
@@ -694,12 +695,12 @@ describe('Topic Trigger Event #novu-v2', () => {
         channel: ChannelTypeEnum.IN_APP,
       });
       expect(disabledMessages.length, 'Disabled Subscription Messages, expected to not delivery the message').to.equal(
-        0
+        1
       );
 
       // Trigger event with no workflows
       await novuClient.trigger({
-        workflowId,
+        workflowId: triggerIdentifier,
         to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: workflowsTopicKeyNoWorkflows }],
       });
       await session.waitForJobCompletion(template._id);
@@ -712,7 +713,7 @@ describe('Topic Trigger Event #novu-v2', () => {
       expect(
         noWorkflowsMessages.length,
         'No Workflow Subscription Messages, expected to delivery the message'
-      ).to.equal(1);
+      ).to.equal(2);
     });
 
     it('should not contain events from a different digestKey ', async () => {

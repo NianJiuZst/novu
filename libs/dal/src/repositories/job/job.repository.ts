@@ -306,11 +306,13 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
     transactionId,
     _subscriberId,
     _templateId,
+    deliveryLifecycleStateOverride,
   }: {
     _environmentId: string;
     transactionId: string;
     _subscriberId: string;
     _templateId: string;
+    deliveryLifecycleStateOverride?: DeliveryLifecycleState;
   }): Promise<IUpdateResult> {
     return this.MongooseModel.updateMany(
       {
@@ -323,7 +325,7 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
       {
         $set: {
           status: JobStatusEnum.CANCELED,
-          deliveryLifecycleState: {
+          deliveryLifecycleState: deliveryLifecycleStateOverride ?? {
             status: DeliveryLifecycleStatusEnum.CANCELED,
             detail: DeliveryLifecycleDetail.EXECUTION_STOPPED,
           },

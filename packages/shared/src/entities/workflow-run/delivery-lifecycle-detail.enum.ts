@@ -1,6 +1,7 @@
 export enum DeliveryLifecycleDetail {
   USER_STEP_CONDITION = 'step_condition',
   SUBSCRIBER_PREFERENCE = 'preference',
+  SUBSCRIBER_STEP_FILTERED_BY_TOPIC_SUBSCRIPTION_WORKFLOWS = 'step_filtered_by_topic_subscription_workflows',
   USER_MISSING_PHONE = 'missing_phone',
   USER_MISSING_EMAIL = 'missing_email',
   USER_MISSING_PUSH_TOKEN = 'missing_push_token',

@@ -3,6 +3,7 @@ import { generateConditionHash, InstrumentUsecase } from '@novu/application-gene
 import {
   BulkAddTopicSubscribersResult,
   CreateTopicSubscribersEntity,
+  NotificationTemplateRepository,
   SubscriberEntity,
   SubscriberRepository,
   TopicEntity,
@@ -10,7 +11,6 @@ import {
   TopicSubscribersEntity,
   TopicSubscribersRepository,
 } from '@novu/dal';
-import { SubscriptionWorkflowsDto } from '../../dtos/create-topic-subscriptions.dto';
 import {
   CreateTopicSubscriptionsResponseDto,
   SubscriptionDto,
@@ -25,6 +25,7 @@ export class CreateTopicSubscriptionsUsecase {
     private topicRepository: TopicRepository,
     private topicSubscribersRepository: TopicSubscribersRepository,
     private subscriberRepository: SubscriberRepository,
+    private notificationTemplateRepository: NotificationTemplateRepository,
     private upsertTopicUseCase: UpsertTopicUseCase
   ) {}
 
@@ -80,9 +81,28 @@ export class CreateTopicSubscriptionsUsecase {
       };
     }
 
-    const subscriptionsWorkflows = command.workflows?.ids
-      ? command.workflows.ids.map((id) => ({ _id: id, enabled: true }))
-      : undefined;
+    let subscriptionsWorkflows: { _id: string; enabled: boolean }[] | undefined;
+
+    if (command.workflows?.ids && command.workflows.ids.length > 0) {
+      const foundWorkflows = await this.notificationTemplateRepository.findByIdsOrIdentifiers(
+        command.environmentId,
+        command.workflows.ids
+      );
+
+      const foundWorkflowIds = new Set(foundWorkflows.map((workflow) => workflow._id));
+      const notFoundWorkflows = command.workflows.ids.filter((id) => !foundWorkflowIds.has(id));
+
+      for (const workflowId of notFoundWorkflows) {
+        errors.push({
+          workflowId,
+          code: 'WORKFLOW_NOT_FOUND',
+          message: `Workflow with ID or identifier '${workflowId}' could not be found.`,
+        });
+      }
+
+      subscriptionsWorkflows = foundWorkflows.map((workflow) => ({ _id: workflow._id, enabled: true }));
+    }
+
     const conditionHash = generateConditionHash({
       conditions: command.conditions || null,
       workflows: subscriptionsWorkflows || null,

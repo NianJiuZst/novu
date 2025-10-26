@@ -161,11 +161,21 @@ export class SubscriptionDto {
 }
 
 export class SubscriptionErrorDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The subscriber ID that failed',
     example: 'invalid-subscriber-id',
   })
-  subscriberId: string;
+  @IsString()
+  @IsOptional()
+  subscriberId?: string;
+
+  @ApiPropertyOptional({
+    description: 'The workflow ID that failed',
+    example: 'workflow-id',
+  })
+  @IsString()
+  @IsOptional()
+  workflowId?: string;
 
   @ApiProperty({
     description: 'The error code',

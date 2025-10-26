@@ -265,6 +265,7 @@ export class WorkflowRunService {
       const priorityOrder = [
         DeliveryLifecycleDetail.SUBSCRIBER_PREFERENCE,
         DeliveryLifecycleDetail.USER_STEP_CONDITION,
+        DeliveryLifecycleDetail.SUBSCRIBER_STEP_FILTERED_BY_TOPIC_SUBSCRIPTION_WORKFLOWS,
         DeliveryLifecycleDetail.USER_MISSING_EMAIL,
         DeliveryLifecycleDetail.USER_MISSING_PHONE,
         DeliveryLifecycleDetail.USER_MISSING_PUSH_TOKEN,
