@@ -29,6 +29,7 @@ import { UnsnoozeNotification } from './unsnooze-notification/unsnooze-notificat
 import { UpdateAllNotifications } from './update-all-notifications/update-all-notifications.usecase';
 import { UpdateNotificationAction } from './update-notification-action/update-notification-action.usecase';
 import { UpdatePreferences } from './update-preferences/update-preferences.usecase';
+import { UpdateTopicSubscription } from './update-topic-subscription/update-topic-subscription.usecase';
 
 export const USE_CASES = [
   Session,
@@ -51,6 +52,7 @@ export const USE_CASES = [
   DeleteManyNotifications,
   DeleteAllNotifications,
   GetTopicSubscriptions,
+  UpdateTopicSubscription,
   GenerateUniqueApiKey,
   CommunityUserRepository,
   UpsertControlValuesUseCase,

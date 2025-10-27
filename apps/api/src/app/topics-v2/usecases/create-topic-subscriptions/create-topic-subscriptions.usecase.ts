@@ -35,6 +35,7 @@ export class CreateTopicSubscriptionsUsecase {
       environmentId: command.environmentId,
       organizationId: command.organizationId,
       key: command.topicKey,
+      name: command.topicName,
     });
 
     // Get the topic entity from the repository after upsert
@@ -88,7 +89,10 @@ export class CreateTopicSubscriptionsUsecase {
         command.workflows.ids
       );
 
-      const foundWorkflowIds = new Set(foundWorkflows.map((workflow) => workflow._id));
+      const foundWorkflowIds = new Set([
+        ...foundWorkflows.map((workflow) => workflow._id),
+        ...foundWorkflows.map((workflow) => workflow.triggers?.[0]?.identifier as string),
+      ]);
       const notFoundWorkflows = command.workflows.ids.filter((id) => !foundWorkflowIds.has(id));
 
       for (const workflowId of notFoundWorkflows) {
@@ -132,6 +136,19 @@ export class CreateTopicSubscriptionsUsecase {
     const existingSubscriberIds = existingSubscriptions.map((sub) => sub._subscriberId.toString());
     const subscribersToCreate = foundSubscribers.filter((sub) => !existingSubscriberIds.includes(sub._id.toString()));
 
+    for (const existingSubscription of existingSubscriptions) {
+      const subscriber = foundSubscribers.find(
+        (sub) => sub._id.toString() === existingSubscription._subscriberId.toString()
+      );
+      if (subscriber) {
+        errors.push({
+          subscriberId: subscriber.subscriberId,
+          code: 'SUBSCRIPTION_ALREADY_EXISTS',
+          message: `Subscription for subscriber '${subscriber.subscriberId}' already exists for this topic with the same conditions.`,
+        });
+      }
+    }
+
     let newSubscriptions: TopicSubscribersEntity[] = [];
     if (subscribersToCreate.length > 0) {
       const subscriptionsToCreate = this.buildSubscriptionEntity(
@@ -155,9 +172,7 @@ export class CreateTopicSubscriptionsUsecase {
       }
     }
 
-    const allSubscriptions = [...existingSubscriptions, ...newSubscriptions];
-    // Map subscriptions to response format
-    for (const subscription of allSubscriptions) {
+    for (const subscription of newSubscriptions) {
       const subscriber = foundSubscribers.find((sub) => sub._id.toString() === subscription._subscriberId.toString());
 
       subscriptionData.push({

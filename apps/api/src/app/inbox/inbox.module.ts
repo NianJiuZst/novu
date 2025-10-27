@@ -7,6 +7,8 @@ import { OutboundWebhooksModule } from '../outbound-webhooks/outbound-webhooks.m
 import { PreferencesModule } from '../preferences';
 import { SharedModule } from '../shared/shared.module';
 import { SubscribersV1Module } from '../subscribers/subscribersV1.module';
+import { CreateTopicSubscriptionsUsecase } from '../topics-v2/usecases/create-topic-subscriptions/create-topic-subscriptions.usecase';
+import { UpsertTopicUseCase } from '../topics-v2/usecases/upsert-topic/upsert-topic.usecase';
 import { InboxController } from './inbox.controller';
 import { USE_CASES } from './usecases';
 
@@ -20,7 +22,13 @@ import { USE_CASES } from './usecases';
     OrganizationModule,
     OutboundWebhooksModule.forRoot(),
   ],
-  providers: [...USE_CASES, CommunityOrganizationRepository, ContextRepository],
+  providers: [
+    ...USE_CASES,
+    CommunityOrganizationRepository,
+    ContextRepository,
+    UpsertTopicUseCase,
+    CreateTopicSubscriptionsUsecase,
+  ],
   exports: [...USE_CASES],
   controllers: [InboxController],
 })

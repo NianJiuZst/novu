@@ -6,6 +6,10 @@ export class CreateTopicSubscriptionsCommand extends EnvironmentWithUserCommand 
   @IsDefined()
   topicKey: string;
 
+  @IsString()
+  @IsOptional()
+  topicName?: string;
+
   @IsArray()
   @IsDefined()
   subscriberIds: string[];
