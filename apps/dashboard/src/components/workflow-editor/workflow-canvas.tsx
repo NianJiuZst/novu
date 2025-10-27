@@ -165,7 +165,7 @@ const WorkflowCanvasChild = ({
           />
         </ReactFlow>
 
-        {workflow && currentEnvironment?.name === EnvironmentEnum.DEVELOPMENT && (
+        {workflow && currentEnvironment?.type === EnvironmentTypeEnum.DEV && (
           <WorkflowChecklist steps={steps} workflow={workflow} />
         )}
       </div>
