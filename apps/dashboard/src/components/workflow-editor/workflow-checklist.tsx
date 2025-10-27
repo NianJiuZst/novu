@@ -1,7 +1,6 @@
-import { useUser } from '@clerk/clerk-react';
 import { ChannelTypeEnum, WorkflowResponseDto } from '@novu/shared';
 import { motion } from 'motion/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   RiArrowRightDoubleFill,
   RiCheckboxCircleFill,
@@ -11,7 +10,6 @@ import {
 } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import { useEnvironment, useFetchEnvironments } from '@/context/environment/hooks';
-import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { useFetchIntegrations } from '@/hooks/use-fetch-integrations';
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { StepTypeEnum } from '@/utils/enums';
@@ -41,14 +39,32 @@ const preventDefault = (e: Event) => {
 
 export function WorkflowChecklist({ steps, workflow }: WorkflowChecklistProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useUser();
   const { currentEnvironment } = useEnvironment();
   const { integrations } = useFetchIntegrations();
   const { environments = [] } = useFetchEnvironments({ organizationId: currentEnvironment?._id });
   const checklistItems = useChecklistItems(steps);
   const telemetry = useTelemetry();
 
+  const getWorkflowChecklistKey = useCallback((workflowId: string) => `workflow-checklist-${workflowId}`, []);
+
+  const isWorkflowChecklistClosed = useCallback(
+    (workflowId: string) => {
+      const stored = localStorage.getItem(getWorkflowChecklistKey(workflowId));
+      return stored === 'closed' || stored === 'completed';
+    },
+    [getWorkflowChecklistKey]
+  );
+
+  const setWorkflowChecklistState = useCallback(
+    (workflowId: string, state: 'closed' | 'completed') => {
+      localStorage.setItem(getWorkflowChecklistKey(workflowId), state);
+    },
+    [getWorkflowChecklistKey]
+  );
+
   useEffect(() => {
+    if (!workflow?.workflowId) return;
+
     const allItemsCompleted = checklistItems.every((item) => item.isCompleted(steps));
     const isFinishedLoading = currentEnvironment && workflow && integrations && environments;
 
@@ -57,38 +73,37 @@ export function WorkflowChecklist({ steps, workflow }: WorkflowChecklistProps) {
         setIsOpen(false);
 
         telemetry(TelemetryEvent.WORKFLOW_CHECKLIST_COMPLETED, {
-          workflowId: workflow?.workflowId,
+          workflowId: workflow.workflowId,
         });
 
-        if (user) {
-          user.update({
-            unsafeMetadata: {
-              ...user.unsafeMetadata,
-              workflowChecklistCompleted: true,
-              workflowChecklistClosed: true,
-            },
-          });
-        }
-      } else if (!user?.unsafeMetadata?.workflowChecklistClosed) {
+        setWorkflowChecklistState(workflow.workflowId, 'completed');
+      } else if (!isWorkflowChecklistClosed(workflow.workflowId)) {
         setIsOpen(true);
       }
     }
-  }, [steps, checklistItems, currentEnvironment, workflow, integrations, environments, user, telemetry]);
+  }, [
+    steps,
+    checklistItems,
+    currentEnvironment,
+    workflow,
+    integrations,
+    environments,
+    telemetry,
+    isWorkflowChecklistClosed,
+    setWorkflowChecklistState,
+  ]);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
 
+    if (!workflow?.workflowId) return;
+
     if (open) {
       telemetry(TelemetryEvent.WORKFLOW_CHECKLIST_OPENED, {
-        workflowId: workflow?.workflowId,
+        workflowId: workflow.workflowId,
       });
     } else {
-      user?.update({
-        unsafeMetadata: {
-          ...user.unsafeMetadata,
-          workflowChecklistClosed: true,
-        },
-      });
+      setWorkflowChecklistState(workflow.workflowId, 'closed');
     }
   };
 

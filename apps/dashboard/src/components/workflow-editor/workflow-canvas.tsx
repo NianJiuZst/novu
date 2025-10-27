@@ -1,4 +1,4 @@
-import { EnvironmentEnum, EnvironmentTypeEnum, PermissionsEnum, ResourceOriginEnum } from '@novu/shared';
+import { EnvironmentEnum, EnvironmentTypeEnum, PermissionsEnum } from '@novu/shared';
 import {
   Background,
   BackgroundVariant,
@@ -8,7 +8,6 @@ import {
   ViewportHelperFunctionOptions,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { useUser } from '@clerk/clerk-react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { InlineToast } from '@/components/primitives/inline-toast';
@@ -39,7 +38,6 @@ const WorkflowCanvasChild = ({
   const { currentEnvironment } = useEnvironment();
   const { workflow } = useWorkflow();
   const navigate = useNavigate();
-  const { user } = useUser();
   const {
     nodes,
     edges,
@@ -167,10 +165,9 @@ const WorkflowCanvasChild = ({
           />
         </ReactFlow>
 
-        {workflow &&
-          currentEnvironment?.name === EnvironmentEnum.DEVELOPMENT &&
-          workflow.origin === ResourceOriginEnum.NOVU_CLOUD &&
-          !user?.unsafeMetadata?.workflowChecklistCompleted && <WorkflowChecklist steps={steps} workflow={workflow} />}
+        {workflow && currentEnvironment?.name === EnvironmentEnum.DEVELOPMENT && (
+          <WorkflowChecklist steps={steps} workflow={workflow} />
+        )}
       </div>
     </CanvasContext.Provider>
   );
