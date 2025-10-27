@@ -1,7 +1,7 @@
 import { IsBoolean, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
-import { EnvironmentWithUserCommand } from '../../../shared/commands/project.command';
+import { EnvironmentCommand } from '../../../shared/commands/project.command';
 
-export class UpsertTopicCommand extends EnvironmentWithUserCommand {
+export class UpsertTopicCommand extends EnvironmentCommand {
   @IsString()
   @IsNotEmpty()
   @Length(1, 100)

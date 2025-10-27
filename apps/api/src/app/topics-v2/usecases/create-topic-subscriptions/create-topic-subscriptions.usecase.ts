@@ -34,7 +34,6 @@ export class CreateTopicSubscriptionsUsecase {
     await this.upsertTopicUseCase.execute({
       environmentId: command.environmentId,
       organizationId: command.organizationId,
-      userId: command.userId,
       key: command.topicKey,
     });
 
