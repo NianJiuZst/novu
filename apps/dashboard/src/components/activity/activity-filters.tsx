@@ -1,7 +1,7 @@
 import { useOrganization } from '@clerk/clerk-react';
 import { ChannelTypeEnum, FeatureFlagsKeysEnum, SeverityLevelEnum } from '@novu/shared';
 import { CalendarIcon } from 'lucide-react';
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/primitives/badge';
 import { Tooltip, TooltipContent, TooltipPortal, TooltipTrigger } from '@/components/primitives/tooltip';
@@ -70,6 +70,45 @@ export function ActivityFilters({
   const { subscription } = useFetchSubscription();
   const isContextEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_CONTEXT_ENABLED, false);
 
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [localTransactionId, setLocalTransactionId] = useState(filters.transactionId || '');
+  const [localSubscriberId, setLocalSubscriberId] = useState(filters.subscriberId || '');
+  const [localTopicKey, setLocalTopicKey] = useState(filters.topicKey || '');
+  const [localContextKeys, setLocalContextKeys] = useState(filters.contextKeys || '');
+
+  useEffect(() => {
+    setLocalTransactionId(filters.transactionId || '');
+    setLocalSubscriberId(filters.subscriberId || '');
+    setLocalTopicKey(filters.topicKey || '');
+    setLocalContextKeys(filters.contextKeys || '');
+  }, [filters.transactionId, filters.subscriberId, filters.topicKey, filters.contextKeys]);
+
+  const clearDebounceTimeout = useCallback(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+      debounceTimeoutRef.current = null;
+    }
+  }, []);
+
+  const debouncedFilterChange = useCallback(
+    (fieldName: keyof ActivityFiltersData, value: string) => {
+      clearDebounceTimeout();
+
+      debounceTimeoutRef.current = setTimeout(() => {
+        onFiltersChange({
+          ...filters,
+          [fieldName]: value,
+        });
+        debounceTimeoutRef.current = null;
+      }, 400);
+    },
+    [clearDebounceTimeout, onFiltersChange, filters]
+  );
+
+  useEffect(() => {
+    return clearDebounceTimeout;
+  }, [clearDebounceTimeout]);
+
   const maxActivityFeedRetentionOptions = useMemo(() => {
     const missingSubscription = !subscription && !IS_SELF_HOSTED;
 
@@ -136,8 +175,11 @@ export function ActivityFilters({
           type="text"
           size="small"
           title="Transaction ID"
-          value={filters.transactionId}
-          onChange={(value) => onFiltersChange({ ...filters, transactionId: value })}
+          value={localTransactionId}
+          onChange={(value) => {
+            setLocalTransactionId(value);
+            debouncedFilterChange('transactionId', value);
+          }}
           placeholder="Search by full Transaction ID"
         />
       )}
@@ -147,8 +189,11 @@ export function ActivityFilters({
           type="text"
           size="small"
           title="Subscriber ID"
-          value={filters.subscriberId}
-          onChange={(value) => onFiltersChange({ ...filters, subscriberId: value })}
+          value={localSubscriberId}
+          onChange={(value) => {
+            setLocalSubscriberId(value);
+            debouncedFilterChange('subscriberId', value);
+          }}
           placeholder="Search by full Subscriber ID"
         />
       )}
@@ -158,8 +203,11 @@ export function ActivityFilters({
           type="text"
           size="small"
           title="Topic Key"
-          value={filters.topicKey}
-          onChange={(value) => onFiltersChange({ ...filters, topicKey: value })}
+          value={localTopicKey}
+          onChange={(value) => {
+            setLocalTopicKey(value);
+            debouncedFilterChange('topicKey', value);
+          }}
           placeholder="Search by full Topic Key"
         />
       )}
@@ -184,8 +232,11 @@ export function ActivityFilters({
           type="text"
           size="small"
           title="Context"
-          value={filters.contextKeys}
-          onChange={(value) => onFiltersChange({ ...filters, contextKeys: value })}
+          value={localContextKeys}
+          onChange={(value) => {
+            setLocalContextKeys(value);
+            debouncedFilterChange('contextKeys', value);
+          }}
           placeholder="e.g., tenant:org-123, region:us-east-1"
         />
       )}

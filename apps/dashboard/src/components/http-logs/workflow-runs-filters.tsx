@@ -1,4 +1,4 @@
-import { HTMLAttributes, useEffect } from 'react';
+import { HTMLAttributes, useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiLoader4Line } from 'react-icons/ri';
 import { ActivityFilters } from '@/api/activity';
@@ -18,6 +18,9 @@ export type WorkflowRunsFiltersProps = HTMLAttributes<HTMLDivElement> & {
 export function WorkflowRunsFilters(props: WorkflowRunsFiltersProps) {
   const { onFiltersChange, filterValues, onReset, className, isFetching, ...rest } = props;
 
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [localSubscriberId, setLocalSubscriberId] = useState(filterValues.subscriberId || '');
+
   const form = useForm<ActivityFilters>({
     values: filterValues,
     defaultValues: {
@@ -27,7 +30,41 @@ export function WorkflowRunsFilters(props: WorkflowRunsFiltersProps) {
   const { formState, watch } = form;
 
   useEffect(() => {
+    setLocalSubscriberId(filterValues.subscriberId || '');
+  }, [filterValues.subscriberId]);
+
+  const clearDebounceTimeout = useCallback(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+      debounceTimeoutRef.current = null;
+    }
+  }, []);
+
+  const debouncedSubscriberIdChange = useCallback(
+    (value: string) => {
+      clearDebounceTimeout();
+
+      debounceTimeoutRef.current = setTimeout(() => {
+        onFiltersChange({
+          ...filterValues,
+          subscriberId: value,
+        });
+        debounceTimeoutRef.current = null;
+      }, 400);
+    },
+    [clearDebounceTimeout, onFiltersChange, filterValues]
+  );
+
+  useEffect(() => {
+    return clearDebounceTimeout;
+  }, [clearDebounceTimeout]);
+
+  useEffect(() => {
     const subscription = watch((value) => {
+      if (value.subscriberId !== undefined) {
+        return;
+      }
+
       onFiltersChange(value as ActivityFilters);
     });
 
@@ -35,6 +72,8 @@ export function WorkflowRunsFilters(props: WorkflowRunsFiltersProps) {
   }, [watch, onFiltersChange]);
 
   const handleReset = () => {
+    clearDebounceTimeout();
+    setLocalSubscriberId('');
     form.reset(defaultWorkflowRunsFilter);
     onFiltersChange(defaultWorkflowRunsFilter);
     onReset?.();
@@ -72,14 +111,17 @@ export function WorkflowRunsFilters(props: WorkflowRunsFiltersProps) {
           <FormField
             control={form.control}
             name="subscriberId"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="relative">
                 <FacetedFormFilter
                   type="text"
                   size="small"
                   title="Subscriber ID"
-                  value={field.value}
-                  onChange={field.onChange}
+                  value={localSubscriberId}
+                  onChange={(value) => {
+                    setLocalSubscriberId(value);
+                    debouncedSubscriberIdChange(value);
+                  }}
                   placeholder="Search by subscriber ID..."
                 />
               </FormItem>
