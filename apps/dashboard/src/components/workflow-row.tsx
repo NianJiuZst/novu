@@ -13,6 +13,7 @@ import { FaCode } from 'react-icons/fa6';
 import { LuBookUp2 } from 'react-icons/lu';
 import {
   RiDeleteBin2Line,
+  RiErrorWarningLine,
   RiFlashlightLine,
   RiMore2Fill,
   RiPauseCircleLine,
@@ -359,7 +360,24 @@ export const WorkflowRow = ({ workflow }: WorkflowRowProps) => {
               {formatDateSimple(workflow.lastTriggeredAt)}
             </TimeDisplayHoverCard>
           ) : (
-            <span className="text-foreground-400 text-sm font-normal">-</span>
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild onClick={stopPropagation}>
+                <Link
+                  to={`${workflowLink}?integrate=true`}
+                  reloadDocument={isV0Workflow}
+                  className="text-warning-base flex items-center gap-1 text-xs font-medium hover:underline"
+                >
+                  <RiErrorWarningLine className="size-3.5" />
+                  Never triggered
+                </Link>
+              </TooltipTrigger>
+              <TooltipPortal>
+                <TooltipContent>
+                  <span className="font-medium">This workflow has not been triggered yet</span>
+                  <span className="text-foreground-400 block text-xs">Click to integrate workflow</span>
+                </TooltipContent>
+              </TooltipPortal>
+            </Tooltip>
           )}
         </WorkflowLinkTableCell>
         <WorkflowLinkTableCell className="text-foreground-600 text-sm font-medium">

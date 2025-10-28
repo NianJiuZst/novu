@@ -28,15 +28,29 @@ interface WorkflowChecklistProps {
 }
 
 type ChecklistItem = {
+  key?: string;
   title: string;
+  description?: string;
   isCompleted: (steps: Step[]) => boolean;
   onClick: () => void;
+  link?: {
+    text: string;
+    url: string;
+  };
 };
 
 const preventDefault = (e: Event) => {
   e.preventDefault();
   e.stopPropagation();
 };
+
+function getWorkflowChecklistKey(workflowId: string) {
+  return `workflow-checklist-${workflowId}`;
+}
+
+function getWorkflowTriggerCompletedKey(workflowId: string) {
+  return `workflow-trigger-completed-${workflowId}`;
+}
 
 export function WorkflowChecklist({ steps, workflow }: WorkflowChecklistProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,27 +60,14 @@ export function WorkflowChecklist({ steps, workflow }: WorkflowChecklistProps) {
   const checklistItems = useChecklistItems(steps);
   const telemetry = useTelemetry();
 
-  const getWorkflowChecklistKey = useCallback((workflowId: string) => `workflow-checklist-${workflowId}`, []);
+  const isWorkflowChecklistClosed = useCallback((workflowId: string) => {
+    const stored = localStorage.getItem(getWorkflowChecklistKey(workflowId));
+    return stored === 'closed' || stored === 'completed';
+  }, []);
 
-  const getWorkflowTriggerCompletedKey = useCallback(
-    (workflowId: string) => `workflow-trigger-completed-${workflowId}`,
-    []
-  );
-
-  const isWorkflowChecklistClosed = useCallback(
-    (workflowId: string) => {
-      const stored = localStorage.getItem(getWorkflowChecklistKey(workflowId));
-      return stored === 'closed' || stored === 'completed';
-    },
-    [getWorkflowChecklistKey]
-  );
-
-  const setWorkflowChecklistState = useCallback(
-    (workflowId: string, state: 'closed' | 'completed') => {
-      localStorage.setItem(getWorkflowChecklistKey(workflowId), state);
-    },
-    [getWorkflowChecklistKey]
-  );
+  const setWorkflowChecklistState = useCallback((workflowId: string, state: 'closed' | 'completed') => {
+    localStorage.setItem(getWorkflowChecklistKey(workflowId), state);
+  }, []);
 
   useEffect(() => {
     if (!workflow?.workflowId) return;
@@ -110,7 +111,6 @@ export function WorkflowChecklist({ steps, workflow }: WorkflowChecklistProps) {
     telemetry,
     isWorkflowChecklistClosed,
     setWorkflowChecklistState,
-    getWorkflowTriggerCompletedKey,
   ]);
 
   const handleOpenChange = (open: boolean) => {

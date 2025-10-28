@@ -1,7 +1,7 @@
 import { EnvironmentTypeEnum, PermissionsEnum, ResourceOriginEnum } from '@novu/shared';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { RiArrowDownSLine, RiCodeSSlashLine, RiFileCopyLine, RiPlayCircleLine } from 'react-icons/ri';
-import { Link, useMatch, useNavigate } from 'react-router-dom';
+import { Link, useMatch, useNavigate, useSearchParams } from 'react-router-dom';
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 
 import { useAuth } from '@/context/auth/hooks';
@@ -30,10 +30,19 @@ export const WorkflowTabs = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const activityMatch = useMatch(ROUTES.EDIT_WORKFLOW_ACTIVITY);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isIntegrateDrawerOpen, setIsIntegrateDrawerOpen] = useState(false);
 
   const { triggerWorkflow, isPending } = useTriggerWorkflow();
   const isPayloadSchemaEnabled = useIsPayloadSchemaEnabled();
+
+  useEffect(() => {
+    if (searchParams.get('integrate') === 'true') {
+      setIsIntegrateDrawerOpen(true);
+      searchParams.delete('integrate');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // API key management
   const has = useHasPermission();
