@@ -10,6 +10,7 @@ export const QueryKeys = Object.freeze({
   fetchIntegrations: 'fetchIntegrations',
   fetchActivity: 'fetchActivity',
   fetchActivities: 'fetchActivities',
+  fetchMostRecentWorkflowRun: 'fetchMostRecentWorkflowRun',
   fetchWorkflowRunsCount: 'fetchWorkflowRunsCount',
   fetchSubscribers: 'fetchSubscribers',
   fetchSubscriber: 'fetchSubscriber',

@@ -57,6 +57,8 @@ export enum TelemetryEvent {
   WORKFLOW_CHECKLIST_OPENED = 'Workflow checklist opened - [Workflow Editor]',
   WORKFLOW_CHECKLIST_COMPLETED = 'Workflow checklist completed - [Workflow Editor]',
   WORKFLOW_CHECKLIST_STEP_CLICKED = 'Workflow checklist step clicked - [Workflow Editor]',
+  WORKFLOW_CHECKLIST_STEP_COMPLETED = 'Workflow checklist step completed - [Workflow Editor]',
+  WORKFLOW_TEST_TRIGGERED = 'Workflow test triggered - [Workflow Editor]',
   WORKFLOW_INSTRUCTIONS_OPENED = 'Workflow instructions opened - [Workflow Editor]',
   SUBSCRIBERS_PAGE_VISIT = 'Subscribers page visit',
   ANALYTICS_PAGE_VISIT = 'Analytics page visit',
