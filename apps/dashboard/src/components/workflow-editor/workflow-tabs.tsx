@@ -39,8 +39,9 @@ export const WorkflowTabs = () => {
   useEffect(() => {
     if (searchParams.get('integrate') === 'true') {
       setIsIntegrateDrawerOpen(true);
-      searchParams.delete('integrate');
-      setSearchParams(searchParams, { replace: true });
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('integrate');
+      setSearchParams(newParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
 

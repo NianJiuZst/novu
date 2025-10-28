@@ -363,7 +363,11 @@ export const WorkflowRow = ({ workflow }: WorkflowRowProps) => {
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild onClick={stopPropagation}>
                 <Link
-                  to={`${workflowLink}?integrate=true`}
+                  to={(() => {
+                    const url = new URL(workflowLink, window.location.origin);
+                    url.searchParams.set('integrate', 'true');
+                    return url.pathname + url.search;
+                  })()}
                   reloadDocument={isV0Workflow}
                   className="text-warning-base flex items-center gap-1 text-xs font-medium hover:underline"
                 >
