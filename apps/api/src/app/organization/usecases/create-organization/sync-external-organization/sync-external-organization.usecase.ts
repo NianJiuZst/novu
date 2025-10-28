@@ -4,8 +4,6 @@ import { AnalyticsService, PinoLogger } from '@novu/application-generic';
 import { OrganizationEntity, OrganizationRepository, UserRepository } from '@novu/dal';
 import { CreateEnvironmentCommand } from '../../../../environments-v1/usecases/create-environment/create-environment.command';
 import { CreateEnvironment } from '../../../../environments-v1/usecases/create-environment/create-environment.usecase';
-import { CreateNovuIntegrationsCommand } from '../../../../integrations/usecases/create-novu-integrations/create-novu-integrations.command';
-import { CreateNovuIntegrations } from '../../../../integrations/usecases/create-novu-integrations/create-novu-integrations.usecase';
 import { UpsertLayout, UpsertLayoutCommand } from '../../../../layouts-v2/usecases/upsert-layout';
 import { createDefaultLayout } from '../../../../layouts-v2/utils/layout-templates';
 import { GetOrganizationCommand } from '../../get-organization/get-organization.command';
@@ -29,7 +27,6 @@ export class SyncExternalOrganization {
     private readonly getOrganizationUsecase: GetOrganization,
     private readonly userRepository: UserRepository,
     private readonly createEnvironmentUsecase: CreateEnvironment,
-    private readonly createNovuIntegrations: CreateNovuIntegrations,
     private readonly upsertLayoutUsecase: UpsertLayout,
     private analyticsService: AnalyticsService,
     private moduleRef: ModuleRef,
@@ -64,67 +61,47 @@ export class SyncExternalOrganization {
       })
     );
 
-    await this.createNovuIntegrations.execute(
-      CreateNovuIntegrationsCommand.create({
-        environmentId: devEnv._id,
-        organizationId: devEnv._organizationId,
-        userId: user._id,
-        name: devEnv.name,
+    this.createEnvironmentUsecase
+      .execute(
+        CreateEnvironmentCommand.create({
+          userId: user._id,
+          name: 'Production',
+          organizationId: organization._id,
+          parentEnvironmentId: devEnv._id,
+          system: true,
+        })
+      )
+      .then(async (prodEnv) => {
+        this.upsertLayoutUsecase
+          .execute(
+            UpsertLayoutCommand.create({
+              environmentId: prodEnv._id,
+              organizationId: prodEnv._organizationId,
+              userId: user._id,
+              layoutDto: {
+                name: 'Default layout',
+                controlValues: {
+                  email: {
+                    body: JSON.stringify(createDefaultLayout(organization.name || 'Organization')),
+                    editorType: 'block',
+                  },
+                },
+              },
+            })
+          )
+          .catch((error) => {
+            this.logger.error(
+              { error, organizationId: organization._id, environmentId: prodEnv._id },
+              'Failed to create Production layout'
+            );
+          });
       })
-    );
-
-    await this.upsertLayoutUsecase.execute(
-      UpsertLayoutCommand.create({
-        environmentId: devEnv._id,
-        organizationId: devEnv._organizationId,
-        userId: user._id,
-        layoutDto: {
-          name: 'Default layout',
-          controlValues: {
-            email: {
-              body: JSON.stringify(createDefaultLayout(organization.name)),
-              editorType: 'block',
-            },
-          },
-        },
-      })
-    );
-
-    const prodEnv = await this.createEnvironmentUsecase.execute(
-      CreateEnvironmentCommand.create({
-        userId: user._id,
-        name: 'Production',
-        organizationId: organization._id,
-        parentEnvironmentId: devEnv._id,
-        system: true,
-      })
-    );
-
-    await this.createNovuIntegrations.execute(
-      CreateNovuIntegrationsCommand.create({
-        environmentId: prodEnv._id,
-        organizationId: prodEnv._organizationId,
-        userId: user._id,
-        name: prodEnv.name,
-      })
-    );
-
-    await this.upsertLayoutUsecase.execute(
-      UpsertLayoutCommand.create({
-        environmentId: prodEnv._id,
-        organizationId: prodEnv._organizationId,
-        userId: user._id,
-        layoutDto: {
-          name: 'Default layout',
-          controlValues: {
-            email: {
-              body: JSON.stringify(createDefaultLayout(organization.name)),
-              editorType: 'block',
-            },
-          },
-        },
-      })
-    );
+      .catch((error) => {
+        this.logger.error(
+          { error, organizationId: organization._id, userId: user._id },
+          'Failed to create Production environment and integrations'
+        );
+      });
 
     this.analyticsService.upsertGroup(organization._id, organization, user);
 
@@ -140,7 +117,9 @@ export class SyncExternalOrganization {
     );
 
     if (organizationAfterChanges !== null) {
-      await this.createCustomer(user.email, organizationAfterChanges._id);
+      this.createCustomer(user.email, organizationAfterChanges._id).catch((error) => {
+        this.logger.error({ error, organizationId: organizationAfterChanges._id }, 'Failed to create customer');
+      });
     }
 
     return organizationAfterChanges as OrganizationEntity;

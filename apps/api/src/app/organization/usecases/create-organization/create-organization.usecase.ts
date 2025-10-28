@@ -1,12 +1,10 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AnalyticsService } from '@novu/application-generic';
 import { OrganizationEntity, OrganizationRepository, UserRepository } from '@novu/dal';
 import { ApiServiceLevelEnum, EnvironmentEnum, JobTitleEnum, MemberRoleEnum } from '@novu/shared';
 
 import { CreateEnvironmentCommand } from '../../../environments-v1/usecases/create-environment/create-environment.command';
 import { CreateEnvironment } from '../../../environments-v1/usecases/create-environment/create-environment.usecase';
-import { GetOrganizationCommand } from '../get-organization/get-organization.command';
-import { GetOrganization } from '../get-organization/get-organization.usecase';
 import { AddMemberCommand } from '../membership/add-member/add-member.command';
 import { AddMember } from '../membership/add-member/add-member.usecase';
 import { CreateOrganizationCommand } from './create-organization.command';
@@ -16,7 +14,6 @@ export class CreateOrganization {
   constructor(
     private readonly organizationRepository: OrganizationRepository,
     private readonly addMemberUsecase: AddMember,
-    private readonly getOrganizationUsecase: GetOrganization,
     private readonly userRepository: UserRepository,
     private readonly createEnvironmentUsecase: CreateEnvironment,
     private analyticsService: AnalyticsService
@@ -60,32 +57,36 @@ export class CreateOrganization {
       })
     );
 
-    await this.createEnvironmentUsecase.execute(
-      CreateEnvironmentCommand.create({
-        userId: user._id,
-        name: EnvironmentEnum.PRODUCTION,
-        organizationId: createdOrganization._id,
-        parentEnvironmentId: devEnv._id,
-        system: true,
-      })
-    );
+    this.createEnvironmentUsecase
+      .execute(
+        CreateEnvironmentCommand.create({
+          userId: user._id,
+          name: EnvironmentEnum.PRODUCTION,
+          organizationId: createdOrganization._id,
+          parentEnvironmentId: devEnv._id,
+          system: true,
+        })
+      )
+      .catch(() => {
+        // Production environment creation failed, but don't block organization creation
+      });
 
-    this.analyticsService.upsertGroup(createdOrganization._id, createdOrganization, user);
-
-    this.analyticsService.track('[Authentication] - Create Organization', user._id, {
-      _organization: createdOrganization._id,
-      language: command.language,
-      creatorJobTitle: command.jobTitle,
+    // Fire-and-forget analytics tracking to avoid blocking organization creation
+    setImmediate(() => {
+      try {
+        this.analyticsService.upsertGroup(createdOrganization._id, createdOrganization, user);
+        this.analyticsService.track('[Authentication] - Create Organization', user._id, {
+          _organization: createdOrganization._id,
+          language: command.language,
+          creatorJobTitle: command.jobTitle,
+        });
+      } catch (error) {
+        // Silently fail - analytics errors should not affect organization creation
+        console.error('Analytics tracking failed:', error);
+      }
     });
 
-    const organizationAfterChanges = await this.getOrganizationUsecase.execute(
-      GetOrganizationCommand.create({
-        id: createdOrganization._id,
-        userId: command.userId,
-      })
-    );
-
-    return organizationAfterChanges as OrganizationEntity;
+    return createdOrganization;
   }
 
   private async updateJobTitle(user, jobTitle: JobTitleEnum) {
@@ -100,6 +101,14 @@ export class CreateOrganization {
       }
     );
 
-    this.analyticsService.setValue(user._id, 'jobTitle', jobTitle);
+    // Fire-and-forget analytics tracking
+    setImmediate(() => {
+      try {
+        this.analyticsService.setValue(user._id, 'jobTitle', jobTitle);
+      } catch (error) {
+        // Silently fail - analytics errors should not affect job title update
+        console.error('Analytics tracking failed:', error);
+      }
+    });
   }
 }

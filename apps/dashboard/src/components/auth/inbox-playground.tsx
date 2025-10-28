@@ -76,7 +76,6 @@ export function InboxPlayground({ appId, subscriberId }: { appId: string; subscr
 
       telemetry(TelemetryEvent.INBOX_NOTIFICATION_SENT);
       setHasNotificationBeenSent(true);
-      showCustomToast('Notification sent successfully!', 'success');
     } catch (error) {
       console.error('Failed to send notification:', error);
       showCustomToast('Failed to send notification. Please try again later.', 'error');
@@ -99,16 +98,35 @@ export function InboxPlayground({ appId, subscriberId }: { appId: string; subscr
     navigate(qs ? `${ROUTES.INBOX_EMBED}?${qs}` : ROUTES.INBOX_EMBED);
   };
 
+  const handleSkipClick = () => {
+    if (!appId) {
+      return;
+    }
+
+    telemetry(TelemetryEvent.SKIP_ONBOARDING_CLICKED);
+  };
+
+  const getSkipPath = () => {
+    const queryParams = new URLSearchParams();
+    if (environment?._id) {
+      queryParams.set('environmentId', environment._id);
+    }
+    const qs = queryParams.toString();
+    return qs ? `${ROUTES.INBOX_EMBED}?${qs}` : ROUTES.INBOX_EMBED;
+  };
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden pb-3">
       <UsecasePlaygroundHeader
         title={PLAYGROUND_CONFIG.title}
         description={PLAYGROUND_CONFIG.description}
-        showSkipButton={false}
+        showSkipButton={hasNotificationBeenSent}
         showBackButton={true}
         showStepper={true}
         currentStep={PLAYGROUND_CONFIG.currentStep}
         totalSteps={PLAYGROUND_CONFIG.totalSteps}
+        skipPath={hasNotificationBeenSent ? getSkipPath() : undefined}
+        onSkip={handleSkipClick}
       />
 
       <div
