@@ -52,6 +52,14 @@ export function WorkflowChecklist({ steps, workflow }: WorkflowChecklistProps) {
   const telemetry = useTelemetry();
   const triggerCompletedRef = useRef(false);
   const manuallyClosed = useRef(false);
+  const workflowId = workflow?.workflowId;
+
+  useEffect(() => {
+    if (workflowId) {
+      triggerCompletedRef.current = false;
+      manuallyClosed.current = false;
+    }
+  }, [workflowId]);
 
   useEffect(() => {
     if (!workflow?.workflowId) return;
