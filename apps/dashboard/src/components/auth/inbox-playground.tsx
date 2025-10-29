@@ -82,20 +82,22 @@ export function InboxPlayground({ appId, subscriberId }: { appId: string; subscr
     }
   };
 
+  const buildInboxEmbedPath = (environmentId?: string) => {
+    const queryParams = new URLSearchParams();
+    if (environmentId) {
+      queryParams.set('environmentId', environmentId);
+    }
+    const qs = queryParams.toString();
+    return qs ? `${ROUTES.INBOX_EMBED}?${qs}` : ROUTES.INBOX_EMBED;
+  };
+
   const handleNextStepClick = () => {
     if (!appId) {
       return;
     }
 
     telemetry(TelemetryEvent.INBOX_NEXT_STEP_CLICKED);
-    const queryParams = new URLSearchParams();
-
-    if (environment?._id) {
-      queryParams.set('environmentId', environment._id);
-    }
-
-    const qs = queryParams.toString();
-    navigate(qs ? `${ROUTES.INBOX_EMBED}?${qs}` : ROUTES.INBOX_EMBED);
+    navigate(buildInboxEmbedPath(environment?._id));
   };
 
   const handleSkipClick = () => {
@@ -107,12 +109,7 @@ export function InboxPlayground({ appId, subscriberId }: { appId: string; subscr
   };
 
   const getSkipPath = () => {
-    const queryParams = new URLSearchParams();
-    if (environment?._id) {
-      queryParams.set('environmentId', environment._id);
-    }
-    const qs = queryParams.toString();
-    return qs ? `${ROUTES.INBOX_EMBED}?${qs}` : ROUTES.INBOX_EMBED;
+    return buildInboxEmbedPath(environment?._id);
   };
 
   return (

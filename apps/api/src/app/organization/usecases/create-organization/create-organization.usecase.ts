@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { AnalyticsService } from '@novu/application-generic';
+import { AnalyticsService, PinoLogger } from '@novu/application-generic';
 import { OrganizationEntity, OrganizationRepository, UserRepository } from '@novu/dal';
 import { ApiServiceLevelEnum, EnvironmentEnum, JobTitleEnum, MemberRoleEnum } from '@novu/shared';
+import { captureException } from '@sentry/node';
 
 import { CreateEnvironmentCommand } from '../../../environments-v1/usecases/create-environment/create-environment.command';
 import { CreateEnvironment } from '../../../environments-v1/usecases/create-environment/create-environment.usecase';
@@ -16,8 +17,11 @@ export class CreateOrganization {
     private readonly addMemberUsecase: AddMember,
     private readonly userRepository: UserRepository,
     private readonly createEnvironmentUsecase: CreateEnvironment,
-    private analyticsService: AnalyticsService
-  ) {}
+    private analyticsService: AnalyticsService,
+    private logger: PinoLogger
+  ) {
+    this.logger.setContext(this.constructor.name);
+  }
 
   async execute(command: CreateOrganizationCommand): Promise<OrganizationEntity> {
     const user = await this.userRepository.findById(command.userId);
@@ -67,8 +71,26 @@ export class CreateOrganization {
           system: true,
         })
       )
-      .catch(() => {
-        // Production environment creation failed, but don't block organization creation
+      .catch((error) => {
+        this.logger.error(
+          {
+            err: error,
+            organizationId: createdOrganization._id,
+            userId: command.userId,
+            environmentName: EnvironmentEnum.PRODUCTION,
+          },
+          'Failed to create production environment during organization creation'
+        );
+
+        if (process.env.SENTRY_DSN) {
+          captureException(error, {
+            tags: {
+              organizationId: createdOrganization._id,
+              userId: command.userId,
+              environmentName: EnvironmentEnum.PRODUCTION,
+            },
+          });
+        }
       });
 
     // Fire-and-forget analytics tracking to avoid blocking organization creation
@@ -82,7 +104,14 @@ export class CreateOrganization {
         });
       } catch (error) {
         // Silently fail - analytics errors should not affect organization creation
-        console.error('Analytics tracking failed:', error);
+        this.logger.error(
+          {
+            err: error,
+            organizationId: createdOrganization._id,
+            userId: user._id,
+          },
+          'Analytics tracking failed for organization creation'
+        );
       }
     });
 
@@ -107,7 +136,14 @@ export class CreateOrganization {
         this.analyticsService.setValue(user._id, 'jobTitle', jobTitle);
       } catch (error) {
         // Silently fail - analytics errors should not affect job title update
-        console.error('Analytics tracking failed:', error);
+        this.logger.error(
+          {
+            err: error,
+            userId: user._id,
+            jobTitle,
+          },
+          'Analytics tracking failed for job title update'
+        );
       }
     });
   }
