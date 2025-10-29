@@ -1,5 +1,5 @@
-import { ChatProviderIdEnum, ResourceKey } from '@novu/shared';
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { ResourceKey } from '@novu/shared';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { EnvironmentCommand } from '../../../shared/commands/project.command';
 import { IsResourceKey } from '../../../shared/validators/resource-key.validator';
 
@@ -8,9 +8,9 @@ export class GenerateChatOauthUrlCommand extends EnvironmentCommand {
   @IsString()
   readonly integrationIdentifier: string;
 
-  @IsNotEmpty()
-  @IsEnum(ChatProviderIdEnum)
-  readonly providerId: ChatProviderIdEnum;
+  @IsOptional()
+  @IsString()
+  readonly connectionIdentifier?: string;
 
   @IsNotEmpty()
   @IsResourceKey()

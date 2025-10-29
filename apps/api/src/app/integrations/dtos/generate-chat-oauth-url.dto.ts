@@ -1,9 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ChatProviderIdEnum, ResourceKey } from '@novu/shared';
-import { IsDefined, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { makeResourceKey, RESOURCE, ResourceKey } from '@novu/shared';
+import { IsDefined, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { IsResourceKey } from '../../shared/validators/resource-key.validator';
 
 export class GenerateChatOauthUrlRequestDto {
+  @ApiProperty({
+    type: String,
+    description: 'Resource to link the integration to',
+    example: makeResourceKey(RESOURCE.SUBSCRIBER, 'user123'),
+  })
+  @IsDefined()
+  @IsResourceKey()
+  resource: ResourceKey;
+
   @ApiProperty({
     type: String,
     description: 'Integration identifier',
@@ -16,23 +25,10 @@ export class GenerateChatOauthUrlRequestDto {
   integrationIdentifier: string;
 
   @ApiProperty({
-    description: 'Provider ID',
-    enum: [...Object.values(ChatProviderIdEnum)],
-    enumName: 'ChatProviderIdEnum',
-    example: 'slack',
-  })
-  @IsEnum(ChatProviderIdEnum)
-  @IsDefined()
-  @IsNotEmpty({
-    message: 'Provider ID is required',
-  })
-  providerId: ChatProviderIdEnum;
-
-  @ApiProperty({
     type: String,
-    description: 'Resource to link the integration to (e.g. subscriber:123 or context:tenant:123)',
+    description: 'Identifier of the channel connection that will be created',
   })
-  @IsDefined()
-  @IsResourceKey()
-  resource: ResourceKey;
+  @IsString()
+  @IsOptional()
+  connectionIdentifier?: string;
 }

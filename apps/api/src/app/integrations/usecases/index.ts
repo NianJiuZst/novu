@@ -2,6 +2,7 @@ import {
   CalculateLimitNovuIntegration,
   ConditionsFilter,
   GetDecryptedIntegrations,
+  GetNovuProviderCredentials,
   NormalizeVariables,
   SelectIntegration,
 } from '@novu/application-generic';

@@ -412,7 +412,9 @@ export class IntegrationsController {
   })
   @ApiResponse(String)
   @ApiExcludeEndpoint()
+  @SdkMethodName('generateChatOAuthUrl')
   @RequirePermissions(PermissionsEnum.INTEGRATION_WRITE)
+  @ExternalApiAccessible()
   @RequireAuthentication()
   async getChatOAuthUrl(
     @UserSession() user: UserSessionData,
@@ -426,7 +428,7 @@ export class IntegrationsController {
         organizationId: user.organizationId,
         resource: body.resource,
         integrationIdentifier: body.integrationIdentifier,
-        providerId: body.providerId,
+        connectionIdentifier: body.connectionIdentifier,
       })
     );
   }

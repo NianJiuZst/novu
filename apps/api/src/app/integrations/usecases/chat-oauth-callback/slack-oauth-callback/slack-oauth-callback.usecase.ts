@@ -43,6 +43,7 @@ export class SlackOauthCallback {
 
     await this.createChannelConnection.execute(
       CreateChannelConnectionCommand.create({
+        identifier: stateData.identifier,
         organizationId: stateData.organizationId,
         environmentId: stateData.environmentId,
         integrationIdentifier: integration.identifier,

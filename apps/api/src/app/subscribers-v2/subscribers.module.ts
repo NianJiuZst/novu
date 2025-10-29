@@ -2,11 +2,9 @@ import { Module } from '@nestjs/common';
 import {
   analyticsService,
   CacheInMemoryProviderService,
-  CalculateLimitNovuIntegration,
   CreateOrUpdateSubscriberUseCase,
   cacheService,
   featureFlagsService,
-  GetNovuProviderCredentials,
   GetPreferences,
   GetSubscriberTemplatePreference,
   GetWorkflowByIdsUseCase,
@@ -28,16 +26,12 @@ import {
   TopicSubscribersRepository,
   WorkflowOverrideRepository,
 } from '@novu/dal';
-import { ChannelConnectionsModule } from '../channel-connections/channel-connections.module';
-import { ChannelEndpointsModule } from '../channel-endpoints/channel-endpoints.module';
 import { InboxModule } from '../inbox/inbox.module';
 import { UpdatePreferences } from '../inbox/usecases/update-preferences/update-preferences.usecase';
 import { OutboundWebhooksModule } from '../outbound-webhooks/outbound-webhooks.module';
 import { GetSubscriberGlobalPreference } from '../subscribers/usecases/get-subscriber-global-preference';
 import { GetSubscriberPreference } from '../subscribers/usecases/get-subscriber-preference';
 import { TopicsV2Module } from '../topics-v2/topics-v2.module';
-import { ChannelConnectionsController } from './channel-connections.controller';
-import { ChannelEndpointsController } from './channel-endpoints.controller';
 import { SubscribersController } from './subscribers.controller';
 import { GetSubscriber } from './usecases/get-subscriber/get-subscriber.usecase';
 import { GetSubscriberPreferences } from './usecases/get-subscriber-preferences/get-subscriber-preferences.usecase';
@@ -80,14 +74,8 @@ const DAL_MODELS = [
 ];
 
 @Module({
-  imports: [
-    TopicsV2Module,
-    InboxModule,
-    OutboundWebhooksModule.forRoot(),
-    ChannelConnectionsModule,
-    ChannelEndpointsModule,
-  ],
-  controllers: [SubscribersController, ChannelEndpointsController, ChannelConnectionsController],
+  imports: [TopicsV2Module, InboxModule, OutboundWebhooksModule.forRoot()],
+  controllers: [SubscribersController],
   providers: [
     ...USE_CASES,
     ...DAL_MODELS,
