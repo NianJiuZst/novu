@@ -1,6 +1,6 @@
 import { ChannelTypeEnum, WorkflowResponseDto } from '@novu/shared';
 import { motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   RiArrowRightDoubleFill,
   RiCheckboxCircleFill,
@@ -11,7 +11,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useEnvironment, useFetchEnvironments } from '@/context/environment/hooks';
 import { useFetchIntegrations } from '@/hooks/use-fetch-integrations';
-import { useFetchMostRecentWorkflowRun } from '@/hooks/use-fetch-most-recent-workflow-run';
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { StepTypeEnum } from '@/utils/enums';
 import { buildRoute, ROUTES } from '@/utils/routes';
@@ -44,14 +43,6 @@ const preventDefault = (e: Event) => {
   e.stopPropagation();
 };
 
-function getWorkflowChecklistKey(workflowId: string) {
-  return `workflow-checklist-${workflowId}`;
-}
-
-function getWorkflowTriggerCompletedKey(workflowId: string) {
-  return `workflow-trigger-completed-${workflowId}`;
-}
-
 export function WorkflowChecklist({ steps, workflow }: WorkflowChecklistProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { currentEnvironment } = useEnvironment();
@@ -59,15 +50,8 @@ export function WorkflowChecklist({ steps, workflow }: WorkflowChecklistProps) {
   const { environments = [] } = useFetchEnvironments({ organizationId: currentEnvironment?._id });
   const checklistItems = useChecklistItems(steps);
   const telemetry = useTelemetry();
-
-  const isWorkflowChecklistClosed = useCallback((workflowId: string) => {
-    const stored = localStorage.getItem(getWorkflowChecklistKey(workflowId));
-    return stored === 'closed' || stored === 'completed';
-  }, []);
-
-  const setWorkflowChecklistState = useCallback((workflowId: string, state: 'closed' | 'completed') => {
-    localStorage.setItem(getWorkflowChecklistKey(workflowId), state);
-  }, []);
+  const triggerCompletedRef = useRef(false);
+  const manuallyClosed = useRef(false);
 
   useEffect(() => {
     if (!workflow?.workflowId) return;
@@ -78,40 +62,25 @@ export function WorkflowChecklist({ steps, workflow }: WorkflowChecklistProps) {
     if (isFinishedLoading) {
       const triggerItem = checklistItems.find((item) => 'key' in item && item.key === 'trigger');
       const isTriggerCompleted = triggerItem?.isCompleted(steps);
-      const wasTriggerPreviouslyCompleted =
-        localStorage.getItem(getWorkflowTriggerCompletedKey(workflow.workflowId)) === 'true';
 
-      if (isTriggerCompleted && !wasTriggerPreviouslyCompleted) {
+      if (isTriggerCompleted && !triggerCompletedRef.current) {
         telemetry(TelemetryEvent.WORKFLOW_CHECKLIST_STEP_COMPLETED, {
           workflowId: workflow.workflowId,
           stepTitle: 'Trigger workflow from your application',
         });
-        localStorage.setItem(getWorkflowTriggerCompletedKey(workflow.workflowId), 'true');
+        triggerCompletedRef.current = true;
       }
 
       if (allItemsCompleted) {
         setIsOpen(false);
-
         telemetry(TelemetryEvent.WORKFLOW_CHECKLIST_COMPLETED, {
           workflowId: workflow.workflowId,
         });
-
-        setWorkflowChecklistState(workflow.workflowId, 'completed');
-      } else if (!isWorkflowChecklistClosed(workflow.workflowId)) {
+      } else if (!manuallyClosed.current) {
         setIsOpen(true);
       }
     }
-  }, [
-    steps,
-    checklistItems,
-    currentEnvironment,
-    workflow,
-    integrations,
-    environments,
-    telemetry,
-    isWorkflowChecklistClosed,
-    setWorkflowChecklistState,
-  ]);
+  }, [steps, checklistItems, currentEnvironment, workflow, integrations, environments, telemetry]);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -119,11 +88,12 @@ export function WorkflowChecklist({ steps, workflow }: WorkflowChecklistProps) {
     if (!workflow?.workflowId) return;
 
     if (open) {
+      manuallyClosed.current = false;
       telemetry(TelemetryEvent.WORKFLOW_CHECKLIST_OPENED, {
         workflowId: workflow.workflowId,
       });
     } else {
-      setWorkflowChecklistState(workflow.workflowId, 'closed');
+      manuallyClosed.current = true;
     }
   };
 
@@ -216,11 +186,6 @@ function useChecklistItems(steps: Step[]) {
   const { integrations } = useFetchIntegrations();
   const telemetry = useTelemetry();
 
-  const { mostRecentRun } = useFetchMostRecentWorkflowRun({
-    workflowId: workflow?._id,
-    enabled: !!workflow?._id,
-  });
-
   const foundInAppIntegration = integrations?.find(
     (integration) =>
       integration._environmentId === currentEnvironment?._id && integration.channel === ChannelTypeEnum.IN_APP
@@ -284,16 +249,7 @@ function useChecklistItems(steps: Step[]) {
         key: 'trigger',
         title: 'Trigger workflow from your application',
         description: 'Trigger the workflow to test it in production',
-        isCompleted: () => {
-          if (!mostRecentRun) {
-            return false;
-          }
-
-          const payload = mostRecentRun.payload as Record<string, unknown> | undefined;
-          const source = payload?.__source;
-
-          return source !== 'dashboard';
-        },
+        isCompleted: () => !!workflow?.lastTriggeredAt,
         onClick: () => {
           telemetry(TelemetryEvent.WORKFLOW_CHECKLIST_STEP_CLICKED, { stepTitle: 'Trigger workflow' });
           navigate(
@@ -309,7 +265,7 @@ function useChecklistItems(steps: Step[]) {
         },
       },
     ],
-    [currentEnvironment, workflow, foundInAppIntegration, navigate, steps, telemetry, mostRecentRun]
+    [currentEnvironment, workflow, foundInAppIntegration, navigate, steps, telemetry]
   );
 }
 
