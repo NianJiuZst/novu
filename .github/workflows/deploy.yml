@@ -55,6 +55,12 @@ on:
         type: boolean
         default: false
 
+      run_clickhouse_migrations:
+        description: "Run ClickHouse Migrations"
+        required: false
+        type: boolean
+        default: true
+
 jobs:
   prepare-matrix:
     runs-on: ubuntu-latest
@@ -221,6 +227,7 @@ jobs:
 
   run-clickhouse-migrations:
     needs: prepare-matrix
+    if: github.event.inputs.run_clickhouse_migrations == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -270,6 +277,10 @@ jobs:
 
   build:
     needs: [prepare-matrix, run-clickhouse-migrations]
+    if: |
+      !cancelled() &&
+      needs.prepare-matrix.result == 'success' &&
+      (needs.run-clickhouse-migrations.result == 'success' || needs.run-clickhouse-migrations.result == 'skipped')
     timeout-minutes: 60
     runs-on: ubuntu-latest
     environment: ${{ fromJson(needs.prepare-matrix.outputs.env_matrix).environment[0] }}
@@ -340,6 +351,11 @@ jobs:
 
   deploy:
     needs: [build, prepare-matrix, run-clickhouse-migrations]
+    if: |
+      !cancelled() &&
+      needs.build.result == 'success' &&
+      needs.prepare-matrix.result == 'success' &&
+      (needs.run-clickhouse-migrations.result == 'success' || needs.run-clickhouse-migrations.result == 'skipped')
     runs-on: ubuntu-latest
     strategy:
       matrix:

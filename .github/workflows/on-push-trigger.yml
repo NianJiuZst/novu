@@ -27,4 +27,5 @@ jobs:
             -f deploy_api=true \
             -f deploy_worker=true \
             -f deploy_ws=true \
-            -f deploy_webhook=true
+            -f deploy_webhook=false \
+            -f run_clickhouse_migrations=true
