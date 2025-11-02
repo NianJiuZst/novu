@@ -3,15 +3,18 @@ import { RiInputField, RiQuestionLine } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
 import { FormRoot } from '@/components/primitives/form/form';
 import { Panel, PanelContent, PanelHeader } from '@/components/primitives/panel';
+import { ConditionsModeSwitcher, type ConditionsMode } from './conditions-mode-switcher';
 
 type EditStepConditionsLayoutProps = ComponentProps<typeof FormRoot> & {
   stepName?: string;
   children: React.ReactNode;
   disabled?: boolean;
+  mode?: ConditionsMode;
+  onModeChange?: (mode: ConditionsMode) => void;
 };
 
 export const EditStepConditionsLayout = (props: EditStepConditionsLayoutProps) => {
-  const { stepName, children, ...rest } = props;
+  const { stepName, children, mode, onModeChange, ...rest } = props;
 
   return (
     <FormRoot className="flex h-full flex-col overflow-hidden" {...rest}>
@@ -20,6 +23,11 @@ export const EditStepConditionsLayout = (props: EditStepConditionsLayoutProps) =
           <PanelHeader>
             <RiInputField className="text-feature size-4" />
             <span className="text-neutral-950">Step conditions for — {stepName}</span>
+            {mode && onModeChange && (
+              <div className="ml-auto">
+                <ConditionsModeSwitcher mode={mode} onModeChange={onModeChange} />
+              </div>
+            )}
           </PanelHeader>
           <PanelContent className="flex flex-col gap-2 border-solid">{children}</PanelContent>
         </Panel>

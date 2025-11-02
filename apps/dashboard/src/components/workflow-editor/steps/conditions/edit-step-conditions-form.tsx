@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ContentIssueEnum, type StepUpdateDto } from '@novu/shared';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   defaultRuleProcessorJsonLogic,
@@ -30,7 +30,9 @@ import {
 } from '@/utils/conditions';
 import { type EnhancedLiquidVariable } from '@/utils/parseStepVariables';
 import { TelemetryEvent } from '@/utils/telemetry';
+import { type ConditionsMode } from './conditions-mode-switcher';
 import { EditStepConditionsLayout } from './edit-step-conditions-layout';
+import { JsonConditionsEditor } from './json-conditions-editor';
 
 const PAYLOAD_FIELD_PREFIX = 'payload.';
 const SUBSCRIBER_DATA_FIELD_PREFIX = 'subscriber.data.';
@@ -169,6 +171,9 @@ export const EditStepConditionsForm = () => {
   const track = useTelemetry();
   const { workflow, step, update, digestStepBeforeCurrent } = useWorkflow();
   const hasConditions = !!step?.controls.values.skip;
+  const [mode, setMode] = useState<ConditionsMode>('ui');
+  const [jsonValue, setJsonValue] = useState<string>('');
+  const [jsonError, setJsonError] = useState<string>();
   const query = useMemo(
     () =>
       // Need to generate unique ids on the query and rules, otherwise react-querybuilder's
@@ -224,6 +229,63 @@ export const EditStepConditionsForm = () => {
       query,
     },
   });
+
+  useEffect(() => {
+    if (hasConditions) {
+      setJsonValue(JSON.stringify(step.controls.values.skip, null, 2));
+    }
+  }, [hasConditions, step]);
+
+  const handleModeChange = (newMode: ConditionsMode) => {
+    if (newMode === 'json') {
+      const currentQuery = form.getValues('query');
+      const jsonLogic = formatQuery(currentQuery, { format: 'jsonlogic', ruleProcessor: customRuleProcessor });
+      setJsonValue(JSON.stringify(jsonLogic || {}, null, 2));
+      setJsonError(undefined);
+    } else if (newMode === 'ui') {
+      try {
+        const parsed = JSON.parse(jsonValue || '{}');
+        const newQuery = parseJsonLogic(parsed, {
+          generateIDs: true,
+          ...parseJsonLogicOptions,
+        });
+        form.setValue('query', newQuery);
+        setJsonError(undefined);
+        saveForm();
+      } catch (error) {
+        setJsonError(error instanceof Error ? error.message : 'Invalid JSON');
+        return;
+      }
+    }
+    setMode(newMode);
+  };
+
+  const handleJsonChange = (value: string) => {
+    setJsonValue(value);
+    setJsonError(undefined);
+
+    try {
+      JSON.parse(value);
+    } catch (error) {
+      setJsonError(error instanceof Error ? error.message : 'Invalid JSON');
+    }
+  };
+
+  const handleJsonBlur = () => {
+    if (!step || !workflow || jsonError) return;
+
+    try {
+      const parsed = JSON.parse(jsonValue || '{}');
+      const newQuery = parseJsonLogic(parsed, {
+        generateIDs: true,
+        ...parseJsonLogicOptions,
+      });
+      form.setValue('query', newQuery);
+      saveForm();
+    } catch (error) {
+      setJsonError(error instanceof Error ? error.message : 'Invalid JSON');
+    }
+  };
 
   const { onBlur, saveForm } = useFormAutosave({
     previousData: {
@@ -306,27 +368,38 @@ export const EditStepConditionsForm = () => {
       <Form {...form}>
         <EditStepConditionsLayout
           stepName={step?.name}
+          mode={mode}
+          onModeChange={handleModeChange}
           onBlur={onBlur}
           onSubmit={(e) => {
             e.preventDefault();
             e.stopPropagation();
           }}
         >
-          <FormField
-            control={form.control}
-            name="query"
-            render={({ field }) => (
-              <ConditionsEditor
-                saveForm={saveForm}
-                query={field.value}
-                onQueryChange={field.onChange}
-                fields={fields}
-                variables={variables}
-                isAllowedVariable={isAllowedVariable}
-                enhancedVariables={filteredEnhancedVariables}
-              />
-            )}
-          />
+          {mode === 'ui' ? (
+            <FormField
+              control={form.control}
+              name="query"
+              render={({ field }) => (
+                <ConditionsEditor
+                  saveForm={saveForm}
+                  query={field.value}
+                  onQueryChange={field.onChange}
+                  fields={fields}
+                  variables={variables}
+                  isAllowedVariable={isAllowedVariable}
+                  enhancedVariables={filteredEnhancedVariables}
+                />
+              )}
+            />
+          ) : (
+            <JsonConditionsEditor
+              value={jsonValue}
+              onChange={handleJsonChange}
+              onBlur={handleJsonBlur}
+              error={jsonError}
+            />
+          )}
         </EditStepConditionsLayout>
       </Form>
     </>
