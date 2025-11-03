@@ -1,5 +1,5 @@
 import { RiCodeBoxLine, RiLayoutGridLine } from 'react-icons/ri';
-import { TabsList, TabsTrigger } from '@/components/primitives/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/primitives/tabs';
 
 export type ConditionsMode = 'ui' | 'json';
 
@@ -10,20 +10,17 @@ type ConditionsModeSwitcherProps = {
 
 export function ConditionsModeSwitcher({ mode, onModeChange }: ConditionsModeSwitcherProps) {
   return (
-    <TabsList
-      value={mode}
-      onValueChange={(value) => value && onModeChange(value as ConditionsMode)}
-      variant="default"
-      className="h-auto w-auto"
-    >
-      <TabsTrigger value="ui" size="sm" className="gap-1.5">
-        <RiLayoutGridLine className="size-3.5" />
-        <span>UI</span>
-      </TabsTrigger>
-      <TabsTrigger value="json" size="sm" className="gap-1.5">
-        <RiCodeBoxLine className="size-3.5" />
-        <span>JSON</span>
-      </TabsTrigger>
-    </TabsList>
+    <Tabs value={mode} onValueChange={(value: string) => value && onModeChange(value as ConditionsMode)}>
+      <TabsList variant="default" className="h-auto w-auto">
+        <TabsTrigger value="ui" size="sm" className="gap-1.5">
+          <RiLayoutGridLine className="size-3.5" />
+          <span>UI</span>
+        </TabsTrigger>
+        <TabsTrigger value="json" size="sm" className="gap-1.5">
+          <RiCodeBoxLine className="size-3.5" />
+          <span>JSON</span>
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
   );
 }
