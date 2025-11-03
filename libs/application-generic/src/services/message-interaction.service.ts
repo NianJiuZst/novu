@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { DeliveryLifecycleDetail, DeliveryLifecycleStatusEnum } from '@novu/shared';
 import { PinoLogger } from 'nestjs-pino';
+import { WorkflowRunStatusEnum } from './analytic-logs';
 import { Trace, TraceLogRepository } from './analytic-logs/trace-log';
 import { WorkflowRunService } from './workflow-run.service';
-import { WorkflowRunStatusEnum } from './analytic-logs';
 
 export interface MessageInteractionResult {
   success: boolean;

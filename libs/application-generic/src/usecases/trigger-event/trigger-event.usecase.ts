@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   ContextRepository,
   EnvironmentRepository,
@@ -380,7 +380,7 @@ export class TriggerEvent {
     }
 
     try {
-      const contexts = await this.contextRepository.upsertContextsFromPayload(
+      const contexts = await this.contextRepository.findOrCreateContextsFromPayload(
         command.environmentId,
         command.organizationId,
         command.context
@@ -411,12 +411,6 @@ export class TriggerEvent {
 
       if (error instanceof BadRequestException) {
         this.createWorkflowTrace(command, 'workflow_context_resolution_failed', 'error', 'Context resolution failed', {
-          context: command.context,
-        });
-      }
-
-      if (error instanceof NotFoundException) {
-        this.createWorkflowTrace(command, 'workflow_context_not_found', 'error', 'Context not found', {
           context: command.context,
         });
       }
