@@ -1,5 +1,5 @@
 import { RiCodeBoxLine, RiLayoutGridLine } from 'react-icons/ri';
-import { ToggleGroup, ToggleGroupItem } from '@/components/primitives/toggle-group';
+import { TabsList, TabsTrigger } from '@/components/primitives/tabs';
 
 export type ConditionsMode = 'ui' | 'json';
 
@@ -10,21 +10,20 @@ type ConditionsModeSwitcherProps = {
 
 export function ConditionsModeSwitcher({ mode, onModeChange }: ConditionsModeSwitcherProps) {
   return (
-    <ToggleGroup
-      type="single"
+    <TabsList
       value={mode}
       onValueChange={(value) => value && onModeChange(value as ConditionsMode)}
-      variant="outline"
-      size="sm"
+      variant="default"
+      className="h-auto w-auto"
     >
-      <ToggleGroupItem value="ui" aria-label="UI Mode" className="gap-1.5 px-3 py-1 text-xs">
+      <TabsTrigger value="ui" size="sm" className="gap-1.5">
         <RiLayoutGridLine className="size-3.5" />
         <span>UI</span>
-      </ToggleGroupItem>
-      <ToggleGroupItem value="json" aria-label="JSON Mode" className="gap-1.5 px-3 py-1 text-xs">
+      </TabsTrigger>
+      <TabsTrigger value="json" size="sm" className="gap-1.5">
         <RiCodeBoxLine className="size-3.5" />
         <span>JSON</span>
-      </ToggleGroupItem>
-    </ToggleGroup>
+      </TabsTrigger>
+    </TabsList>
   );
 }
