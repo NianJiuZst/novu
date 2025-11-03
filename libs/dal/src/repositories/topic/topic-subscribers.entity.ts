@@ -1,3 +1,4 @@
+import type { AdditionalOperation, RulesLogic } from 'json-logic-js';
 import type { ChangePropsValueType } from '../../types/helpers';
 import {
   EnvironmentId,
@@ -9,6 +10,19 @@ import {
   TopicSubscriberId,
 } from './types';
 
+type Filter = {
+  workflows: string[];
+  tags: string[];
+};
+
+type Rule = {
+  filter?: Filter;
+  type: 'workflow';
+  condition: boolean | RulesLogic<AdditionalOperation>;
+};
+
+type Group = { group: Rule[] };
+
 export class TopicSubscribersEntity {
   _id: TopicSubscriberId;
   _environmentId: EnvironmentId;
@@ -18,10 +32,11 @@ export class TopicSubscribersEntity {
   topicKey: TopicKey;
   // TODO: Rename to subscriberId, to align with workflowId and stepId that are also externally provided identifiers by Novu users
   externalSubscriberId: ExternalSubscriberId;
-  conditions?: Record<string, unknown>;
-  conditionHash?: string;
 
-  workflows?: { _id: string; enabled: boolean }[];
+  name?: string;
+  identifier?: string;
+  rules?: Array<Rule | Group>;
+  rulesHash?: string;
 
   createdAt?: string;
   updatedAt?: string;

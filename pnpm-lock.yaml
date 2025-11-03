@@ -2908,6 +2908,9 @@ importers:
       apollo-boost:
         specifier: 0.4.9
         version: 0.4.9(graphql@16.9.0)
+      json-logic-js:
+        specifier: ^2.0.5
+        version: 2.0.5
       rimraf:
         specifier: ^3.0.2
         version: 3.0.2

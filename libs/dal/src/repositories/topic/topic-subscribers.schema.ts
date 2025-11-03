@@ -33,16 +33,20 @@ const topicSubscribersSchema = new Schema<TopicSubscribersDBModel>(
       index: true,
       required: true,
     },
+    name: {
+      type: Schema.Types.String,
+      required: false,
+    },
+    identifier: {
+      type: Schema.Types.String,
+      required: false,
+    },
     externalSubscriberId: Schema.Types.String,
-    conditions: {
+    rules: {
       type: Schema.Types.Mixed,
       required: false,
     },
-    workflows: {
-      type: [{ _id: Schema.Types.String, enabled: Schema.Types.Boolean }],
-      required: false,
-    },
-    conditionHash: {
+    rulesHash: {
       type: Schema.Types.String,
       required: false,
     },
@@ -70,7 +74,7 @@ topicSubscribersSchema.index(
   {
     _subscriberId: 1,
     _topicId: 1,
-    conditionHash: 1,
+    rulesHash: 1,
   },
   { unique: true }
 );

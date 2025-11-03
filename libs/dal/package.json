@@ -44,6 +44,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.15.0",
+    "json-logic-js": "^2.0.5",
     "apollo-boost": "0.4.9",
     "rimraf": "^3.0.2",
     "supertest": "^7.0.0",
