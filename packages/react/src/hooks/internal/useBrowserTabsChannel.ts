@@ -1,5 +1,17 @@
 import { useEffect, useState } from 'react';
 
+function isReactNative() {
+  return (
+    typeof navigator !== 'undefined' &&
+    typeof navigator.product === 'string' &&
+    navigator.product.toLowerCase() === 'reactnative'
+  );
+}
+
+function canUseBroadcastChannel() {
+  return !isReactNative() && typeof BroadcastChannel !== 'undefined';
+}
+
 export const useBrowserTabsChannel = <T = unknown>({
   channelName,
   onMessage,
@@ -7,23 +19,47 @@ export const useBrowserTabsChannel = <T = unknown>({
   channelName: string;
   onMessage: (args: T) => void;
 }) => {
-  const [tabsChannel] = useState(
-    typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(channelName) : undefined
-  );
+  const [tabsChannel] = useState(() => {
+    try {
+      return canUseBroadcastChannel() ? new BroadcastChannel(channelName) : undefined;
+    } catch (error) {
+      return undefined;
+    }
+  });
 
   const postMessage = (data: T) => {
-    tabsChannel?.postMessage(data);
+    try {
+      tabsChannel?.postMessage(data);
+    } catch (error) {
+      console.warn('Failed to post message to BroadcastChannel:', error);
+    }
   };
 
   useEffect(() => {
+    if (!tabsChannel) {
+      return;
+    }
+
     const listener = (event: MessageEvent<T>) => {
-      onMessage(event.data);
+      try {
+        onMessage(event.data);
+      } catch (error) {
+        console.warn('Failed to handle BroadcastChannel message:', error);
+      }
     };
 
-    tabsChannel?.addEventListener('message', listener);
+    try {
+      tabsChannel.addEventListener('message', listener);
+    } catch (error) {
+      console.warn('Failed to add BroadcastChannel listener:', error);
+    }
 
     return () => {
-      tabsChannel?.removeEventListener('message', listener);
+      try {
+        tabsChannel?.removeEventListener('message', listener);
+      } catch (error) {
+        console.warn('Failed to remove BroadcastChannel listener:', error);
+      }
     };
   }, []);
 
