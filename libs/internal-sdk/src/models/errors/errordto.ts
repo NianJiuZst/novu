@@ -109,8 +109,11 @@ export const Five$inboundSchema: z.ZodType<Five, z.ZodTypeDef, unknown> = z
 export type Five$Outbound = string | number | boolean | { [k: string]: any };
 
 /** @internal */
-export const Five$outboundSchema: z.ZodType<Five$Outbound, z.ZodTypeDef, Five> =
-  z.union([z.string(), z.number(), z.boolean(), z.record(z.any())]);
+export const Five$outboundSchema: z.ZodType<
+  Five$Outbound,
+  z.ZodTypeDef,
+  unknown
+> = z.union([z.string(), z.number(), z.boolean(), z.record(z.any())]);
 
 /**
  * @internal
@@ -203,7 +206,7 @@ export type Message$Outbound =
 export const Message$outboundSchema: z.ZodType<
   Message$Outbound,
   z.ZodTypeDef,
-  Message
+  unknown
 > = z.union([
   z.string(),
   z.number(),

@@ -103,7 +103,7 @@ export function subscribersControllerGetSubscriberRequestFromJSON(
 export const SubscribersControllerGetSubscriberResponse$inboundSchema:
   z.ZodType<SubscribersControllerGetSubscriberResponse, z.ZodTypeDef, unknown> =
     z.object({
-      Headers: z.record(z.array(z.string())),
+      Headers: z.record(z.array(z.string())).default({}),
       Result: components.SubscriberResponseDto$inboundSchema,
     }).transform((v) => {
       return remap$(v, {

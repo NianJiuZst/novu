@@ -209,7 +209,7 @@ export const TopicsControllerListTopicSubscriptionsResponse$inboundSchema:
     z.ZodTypeDef,
     unknown
   > = z.object({
-    Headers: z.record(z.array(z.string())),
+    Headers: z.record(z.array(z.string())).default({}),
     Result: components.ListTopicSubscriptionsResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {

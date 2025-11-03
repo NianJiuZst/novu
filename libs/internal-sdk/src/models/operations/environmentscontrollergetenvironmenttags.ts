@@ -111,7 +111,7 @@ export const EnvironmentsControllerGetEnvironmentTagsResponse$inboundSchema:
     z.ZodTypeDef,
     unknown
   > = z.object({
-    Headers: z.record(z.array(z.string())),
+    Headers: z.record(z.array(z.string())).default({}),
     Result: z.array(components.GetEnvironmentTagsDto$inboundSchema),
   }).transform((v) => {
     return remap$(v, {

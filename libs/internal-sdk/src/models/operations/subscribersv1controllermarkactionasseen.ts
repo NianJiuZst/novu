@@ -124,7 +124,7 @@ export const SubscribersV1ControllerMarkActionAsSeenResponse$inboundSchema:
     z.ZodTypeDef,
     unknown
   > = z.object({
-    Headers: z.record(z.array(z.string())),
+    Headers: z.record(z.array(z.string())).default({}),
     Result: components.MessageResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {

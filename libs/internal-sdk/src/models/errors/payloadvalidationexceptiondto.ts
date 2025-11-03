@@ -156,7 +156,7 @@ export type MessagePayloadValidationExceptionDto5$Outbound =
 export const MessagePayloadValidationExceptionDto5$outboundSchema: z.ZodType<
   MessagePayloadValidationExceptionDto5$Outbound,
   z.ZodTypeDef,
-  MessagePayloadValidationExceptionDto5
+  unknown
 > = z.union([z.string(), z.number(), z.boolean(), z.record(z.any())]);
 
 /**
@@ -277,7 +277,7 @@ export type PayloadValidationExceptionDtoMessage$Outbound =
 export const PayloadValidationExceptionDtoMessage$outboundSchema: z.ZodType<
   PayloadValidationExceptionDtoMessage$Outbound,
   z.ZodTypeDef,
-  PayloadValidationExceptionDtoMessage
+  unknown
 > = z.union([
   z.string(),
   z.number(),

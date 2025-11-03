@@ -119,7 +119,7 @@ export const EnvironmentsControllerV1UpdateMyEnvironmentResponse$inboundSchema:
     z.ZodTypeDef,
     unknown
   > = z.object({
-    Headers: z.record(z.array(z.string())),
+    Headers: z.record(z.array(z.string())).default({}),
     Result: components.EnvironmentResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {

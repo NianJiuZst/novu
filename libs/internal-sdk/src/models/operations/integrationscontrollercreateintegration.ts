@@ -112,7 +112,7 @@ export const IntegrationsControllerCreateIntegrationResponse$inboundSchema:
     z.ZodTypeDef,
     unknown
   > = z.object({
-    Headers: z.record(z.array(z.string())),
+    Headers: z.record(z.array(z.string())).default({}),
     Result: components.IntegrationResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {

@@ -102,7 +102,7 @@ export const LayoutsControllerDuplicateResponse$inboundSchema: z.ZodType<
   z.ZodTypeDef,
   unknown
 > = z.object({
-  Headers: z.record(z.array(z.string())),
+  Headers: z.record(z.array(z.string())).default({}),
   Result: components.LayoutResponseDto$inboundSchema,
 }).transform((v) => {
   return remap$(v, {

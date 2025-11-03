@@ -460,6 +460,8 @@ export function mapEventTypeToTitle(eventType: EventType): string {
       return 'Step was executed due to maximum number of subscriber schedule extensions reached';
     case 'push_invalid_token_removed':
       return 'Invalid push device token was removed from subscriber';
+    case 'step_filtered_by_topic_subscription_workflows':
+      return 'Step filtered by topic subscription workflows';
     default: {
       // Exhaustive check - this will cause a compile error if we miss any TraceEvent cases
       const _exhaustiveCheck: never = eventType;

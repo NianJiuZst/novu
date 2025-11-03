@@ -11,7 +11,11 @@ export type SubscriptionErrorDto = {
   /**
    * The subscriber ID that failed
    */
-  subscriberId: string;
+  subscriberId?: string | undefined;
+  /**
+   * The workflow ID that failed
+   */
+  workflowId?: string | undefined;
   /**
    * The error code
    */
@@ -28,14 +32,16 @@ export const SubscriptionErrorDto$inboundSchema: z.ZodType<
   z.ZodTypeDef,
   unknown
 > = z.object({
-  subscriberId: z.string(),
+  subscriberId: z.string().optional(),
+  workflowId: z.string().optional(),
   code: z.string(),
   message: z.string(),
 });
 
 /** @internal */
 export type SubscriptionErrorDto$Outbound = {
-  subscriberId: string;
+  subscriberId?: string | undefined;
+  workflowId?: string | undefined;
   code: string;
   message: string;
 };
@@ -46,7 +52,8 @@ export const SubscriptionErrorDto$outboundSchema: z.ZodType<
   z.ZodTypeDef,
   SubscriptionErrorDto
 > = z.object({
-  subscriberId: z.string(),
+  subscriberId: z.string().optional(),
+  workflowId: z.string().optional(),
   code: z.string(),
   message: z.string(),
 });

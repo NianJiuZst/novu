@@ -110,7 +110,7 @@ export const SubscribersV1ControllerBulkCreateSubscribersResponse$inboundSchema:
     z.ZodTypeDef,
     unknown
   > = z.object({
-    Headers: z.record(z.array(z.string())),
+    Headers: z.record(z.array(z.string())).default({}),
     Result: components.BulkCreateSubscriberResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {

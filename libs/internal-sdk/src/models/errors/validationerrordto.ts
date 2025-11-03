@@ -127,7 +127,7 @@ export type Message5$Outbound = string | number | boolean | {
 export const Message5$outboundSchema: z.ZodType<
   Message5$Outbound,
   z.ZodTypeDef,
-  Message5
+  unknown
 > = z.union([z.string(), z.number(), z.boolean(), z.record(z.any())]);
 
 /**
@@ -230,7 +230,7 @@ export type ValidationErrorDtoMessage$Outbound =
 export const ValidationErrorDtoMessage$outboundSchema: z.ZodType<
   ValidationErrorDtoMessage$Outbound,
   z.ZodTypeDef,
-  ValidationErrorDtoMessage
+  unknown
 > = z.union([
   z.string(),
   z.number(),

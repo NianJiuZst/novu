@@ -209,7 +209,7 @@ export const SubscribersControllerSearchSubscribersResponse$inboundSchema:
     z.ZodTypeDef,
     unknown
   > = z.object({
-    Headers: z.record(z.array(z.string())),
+    Headers: z.record(z.array(z.string())).default({}),
     Result: components.ListSubscribersResponseDto$inboundSchema,
   }).transform((v) => {
     return remap$(v, {

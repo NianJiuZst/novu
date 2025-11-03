@@ -194,6 +194,10 @@ export type MessageResponseDto = {
    * Provider specific overrides used when triggering the notification
    */
   overrides?: MessageResponseDtoOverrides | undefined;
+  /**
+   * Context keys associated with the message (format: "type:id")
+   */
+  contextKeys?: Array<string> | undefined;
 };
 
 /** @internal */
@@ -385,6 +389,7 @@ export const MessageResponseDto$inboundSchema: z.ZodType<
   errorText: z.string().optional(),
   payload: z.lazy(() => MessageResponseDtoPayload$inboundSchema).optional(),
   overrides: z.lazy(() => MessageResponseDtoOverrides$inboundSchema).optional(),
+  contextKeys: z.array(z.string()).optional(),
 }).transform((v) => {
   return remap$(v, {
     "_id": "id",
@@ -434,6 +439,7 @@ export type MessageResponseDto$Outbound = {
   errorText?: string | undefined;
   payload?: MessageResponseDtoPayload$Outbound | undefined;
   overrides?: MessageResponseDtoOverrides$Outbound | undefined;
+  contextKeys?: Array<string> | undefined;
 };
 
 /** @internal */
@@ -478,6 +484,7 @@ export const MessageResponseDto$outboundSchema: z.ZodType<
   payload: z.lazy(() => MessageResponseDtoPayload$outboundSchema).optional(),
   overrides: z.lazy(() => MessageResponseDtoOverrides$outboundSchema)
     .optional(),
+  contextKeys: z.array(z.string()).optional(),
 }).transform((v) => {
   return remap$(v, {
     id: "_id",
