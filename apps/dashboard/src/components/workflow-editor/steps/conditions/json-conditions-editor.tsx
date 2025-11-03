@@ -57,25 +57,30 @@ export function JsonConditionsEditor({ value, onChange, error, onBlur }: JsonCon
         />
       </div>
 
-      {error ? (
-        <div className="flex items-start gap-2 rounded-md border border-destructive/20 bg-destructive/5 p-2 text-xs text-destructive">
-          <RiAlertLine className="mt-0.5 size-3.5 shrink-0" />
-          <span>{error}</span>
-        </div>
-      ) : (
-        <p className="text-xs text-neutral-500">
-          Edit JSON Logic directly. See{' '}
-          <a
-            href="https://jsonlogic.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-feature underline hover:no-underline"
-          >
-            JSON Logic documentation
-          </a>{' '}
-          for syntax reference.
-        </p>
-      )}
+      <div className="flex flex-col gap-2">
+        {error ? (
+          <div className="flex items-start gap-2 rounded-md border border-destructive/20 bg-destructive/5 p-3 text-xs text-destructive">
+            <RiAlertLine className="mt-0.5 size-4 shrink-0" />
+            <div className="flex flex-col gap-1">
+              <span className="font-medium">Validation Error</span>
+              <span className="whitespace-pre-line text-foreground-600">{error}</span>
+            </div>
+          </div>
+        ) : (
+          <p className="text-xs text-neutral-500">
+            Edit JSON Logic directly. See{' '}
+            <a
+              href="https://jsonlogic.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-feature underline hover:no-underline"
+            >
+              JSON Logic documentation
+            </a>{' '}
+            for syntax reference.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

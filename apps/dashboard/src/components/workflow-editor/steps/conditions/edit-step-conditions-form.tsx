@@ -265,7 +265,24 @@ export const EditStepConditionsForm = () => {
     setJsonError(undefined);
 
     try {
-      JSON.parse(value);
+      const parsed = JSON.parse(value);
+      const newQuery = parseJsonLogic(parsed, {
+        generateIDs: true,
+        ...parseJsonLogicOptions,
+      });
+      
+      const schema = getConditionsSchema(fields, isAllowedVariable);
+      const validationResult = schema.safeParse({ query: newQuery });
+      
+      if (!validationResult.success) {
+        const errors = validationResult.error.errors;
+        if (errors.length > 1) {
+          const errorList = errors.map((err, idx) => `${idx + 1}. ${err.message}`).join('\n');
+          setJsonError(`Multiple validation errors:\n${errorList}`);
+        } else {
+          setJsonError(errors[0]?.message || 'Validation error');
+        }
+      }
     } catch (error) {
       setJsonError(error instanceof Error ? error.message : 'Invalid JSON');
     }
@@ -347,21 +364,26 @@ export const EditStepConditionsForm = () => {
     const stepConditionIssues = step.issues?.controls?.skip;
 
     if (stepConditionIssues && stepConditionIssues.length > 0) {
-      stepConditionIssues.forEach((issue) => {
-        const queryPath = 'query.rules.' + issue.variableName?.split('.').join('.rules.');
+      if (mode === 'ui') {
+        stepConditionIssues.forEach((issue) => {
+          const queryPath = 'query.rules.' + issue.variableName?.split('.').join('.rules.');
 
-        if (issue.issueType === ContentIssueEnum.MISSING_VALUE) {
-          form.setError(`${queryPath}.value` as keyof typeof form.formState.errors, {
-            message: issue.message,
-          });
-        } else {
-          form.setError(`${queryPath}.field` as keyof typeof form.formState.errors, {
-            message: issue.message,
-          });
-        }
-      });
+          if (issue.issueType === ContentIssueEnum.MISSING_VALUE) {
+            form.setError(`${queryPath}.value` as keyof typeof form.formState.errors, {
+              message: issue.message,
+            });
+          } else {
+            form.setError(`${queryPath}.field` as keyof typeof form.formState.errors, {
+              message: issue.message,
+            });
+          }
+        });
+      } else {
+        const errorMessages = stepConditionIssues.map((issue) => issue.message).join('; ');
+        setJsonError(errorMessages);
+      }
     }
-  }, [form, step]);
+  }, [form, step, mode]);
 
   return (
     <>
