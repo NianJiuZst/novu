@@ -36,7 +36,11 @@ export type SwitchRule = {
   condition: boolean;
 };
 
-export type TopicSubscriberRule = CustomRule | SwitchRule;
+export type TopicSubscriberRule = {
+  filter?: Filter;
+  type: ConditionType;
+  condition: boolean | RulesLogic<AdditionalOperation>;
+};
 
 export function isSubscriptionCustomRule(rule: TopicSubscriberRule): rule is CustomRule {
   return rule.type === ConditionType.CUSTOM;
