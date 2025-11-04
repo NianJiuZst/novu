@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   isSubscriptionCustomRule,
   isSubscriptionSwitchRule,
+  NotificationTemplateRepository,
   TopicEntity,
   TopicRepository,
   type TopicSubscriberRule,
@@ -16,7 +17,7 @@ import {
   TriggerRecipientsTypeEnum,
 } from '@novu/shared';
 import jsonLogic from 'json-logic-js';
-import { PinoLogger } from 'nestjs-pino';
+import { PinoLogger } from '../..';
 import { InstrumentUsecase } from '../../instrumentation';
 import { CacheService, FeatureFlagsService } from '../../services';
 import type { EventType, Trace } from '../../services/analytic-logs';
@@ -37,6 +38,7 @@ export class TriggerMulticast extends TriggerBase {
     subscriberProcessQueueService: SubscriberProcessQueueService,
     private topicSubscribersRepository: TopicSubscribersRepository,
     private topicRepository: TopicRepository,
+    private notificationTemplateRepository: NotificationTemplateRepository,
     protected cacheService: CacheService,
     protected featureFlagsService: FeatureFlagsService,
     protected logger: PinoLogger,
@@ -89,13 +91,27 @@ export class TriggerMulticast extends TriggerBase {
       for await (const subscriptionsBatch of getTopicSubscriptionsGenerator) {
         totalSubscriptionsEvaluated += subscriptionsBatch.length;
 
-        const passingSubscriptions = subscriptionsBatch.filter((subscription) =>
-          this.evaluateSubscriptionRules(subscription.rules, command.payload)
+        const passingSubscriptions = await Promise.all(
+          subscriptionsBatch.map(async (subscription, index) => {
+            const passes = await this.evaluateSubscriptionRules(
+              subscription.rules,
+              command.payload,
+              command.template._id,
+              command.environmentId,
+              command.organizationId
+            );
+
+            return { subscription, passes };
+          })
         );
 
-        totalSubscriptionsFiltered += subscriptionsBatch.length - passingSubscriptions.length;
+        const filteredPassingSubscriptions = passingSubscriptions
+          .filter(({ passes }) => passes)
+          .map(({ subscription }) => subscription);
 
-        for (const subscription of passingSubscriptions) {
+        totalSubscriptionsFiltered += subscriptionsBatch.length - filteredPassingSubscriptions.length;
+
+        for (const subscription of filteredPassingSubscriptions) {
           const externalSubscriberId = subscription.externalSubscriberId;
 
           if (actor && actor.subscriberId === externalSubscriberId) {
@@ -171,33 +187,129 @@ export class TriggerMulticast extends TriggerBase {
     }
   }
 
-  private evaluateSubscriptionRules(
+  private async evaluateSubscriptionRules(
     rules: TopicSubscriberRule[] | undefined,
-    payload: Record<string, unknown>
-  ): boolean {
+    payload: Record<string, unknown>,
+    workflowId: string,
+    environmentId: string,
+    organizationId: string
+  ): Promise<boolean> {
     if (!rules || rules.length === 0) {
+      this.logger.trace('No rules found, returning true');
       return true;
     }
 
-    return rules.every((rule) => this.evaluateRule(rule, payload));
+    const results = await Promise.all(
+      rules.map((rule, index) => this.evaluateRule(rule, payload, workflowId, environmentId, organizationId, index))
+    );
+
+    const allPassed = results.every((result) => result);
+
+    return allPassed;
   }
 
-  private evaluateRule(rule: TopicSubscriberRule, payload: Record<string, unknown>): boolean {
+  /**
+   * Evaluates subscription rules with performance optimization by prioritizing in-memory computations
+   * (boolean evaluations and condition calculations) over database queries. This approach enables
+   * early termination when rules fail, avoiding unnecessary workflow filter lookups from the database.
+   */
+  private async evaluateRule(
+    rule: TopicSubscriberRule,
+    payload: Record<string, unknown>,
+    workflowId: string,
+    environmentId: string,
+    organizationId: string,
+    ruleIndex?: number
+  ): Promise<boolean> {
     if (isSubscriptionSwitchRule(rule)) {
-      return rule.condition;
+      if (rule.condition === false) {
+        this.logger.error({ nv: { ruleIndex, workflowId } }, 'Switch rule condition is false, returning false');
+        return false;
+      }
+
+      const filterMatches = await this.checkWorkflowFilter(rule.filter, workflowId, environmentId, organizationId);
+
+      if (!filterMatches) {
+        return false;
+      }
+
+      return rule.condition === true;
     }
 
     if (isSubscriptionCustomRule(rule)) {
       try {
-        const result = jsonLogic.apply(rule, payload);
+        const conditionResult = jsonLogic.apply(rule.condition, { payload });
 
-        return typeof result === 'boolean' ? result : false;
-      } catch {
+        if (typeof conditionResult !== 'boolean' || !conditionResult) {
+          this.logger.error(
+            { nv: { ruleIndex, conditionResult, workflowId } },
+            'Custom rule condition failed, returning false'
+          );
+          return false;
+        }
+
+        const filterMatches = await this.checkWorkflowFilter(rule.filter, workflowId, environmentId, organizationId);
+
+        return filterMatches;
+      } catch (error) {
+        this.logger.error(
+          { nv: { ruleIndex, error, workflowId }, err: error },
+          'Error evaluating custom rule, returning false'
+        );
         return false;
       }
     }
 
-    this.logger.error({ nv: { rule } }, 'Invalid rule type, skipping evaluation');
+    this.logger.error({ nv: { rule, ruleIndex, workflowId } }, 'Invalid rule type, skipping evaluation');
+
+    return true;
+  }
+
+  private async checkWorkflowFilter(
+    filter: { workflows?: string[]; tags?: string[] } | undefined,
+    workflowId: string,
+    environmentId: string,
+    organizationId: string
+  ): Promise<boolean> {
+    if (!filter) {
+      return true;
+    }
+
+    const workflowIdString = String(workflowId);
+    const hasWorkflowsFilter = filter.workflows && filter.workflows.length > 0;
+    const hasTagsFilter = filter.tags && filter.tags.length > 0;
+
+    if (hasWorkflowsFilter) {
+      const workflowIds = filter.workflows.map((id) => String(id));
+      const matchesWorkflow = workflowIds.includes(workflowIdString);
+
+      if (matchesWorkflow) {
+        return true;
+      }
+    }
+
+    if (hasTagsFilter) {
+      const workflowsByTags = await this.notificationTemplateRepository.find(
+        {
+          _environmentId: environmentId,
+          _organizationId: organizationId,
+          tags: { $in: filter.tags },
+        },
+        '_id'
+      );
+
+      const workflowIdsFromTags = workflowsByTags.map((workflow) => String(workflow._id));
+      const matchesTag = workflowIdsFromTags.includes(workflowIdString);
+
+      if (matchesTag) {
+        return true;
+      }
+    }
+
+    // If both filters are present and no match, return false
+    if (hasWorkflowsFilter || hasTagsFilter) {
+      return false;
+    }
 
     return true;
   }

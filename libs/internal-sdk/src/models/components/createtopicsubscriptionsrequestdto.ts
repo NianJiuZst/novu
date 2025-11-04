@@ -6,16 +6,12 @@ import * as z from "zod/v3";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
-
-/**
- * List of workflow IDs to associate with the subscription
- */
-export type Workflows = {
-  /**
-   * List of workflow identifiers
-   */
-  ids: Array<string>;
-};
+import {
+  TopicSubscriberRuleDto,
+  TopicSubscriberRuleDto$inboundSchema,
+  TopicSubscriberRuleDto$Outbound,
+  TopicSubscriberRuleDto$outboundSchema,
+} from "./topicsubscriberruledto.js";
 
 export type CreateTopicSubscriptionsRequestDto = {
   /**
@@ -23,64 +19,10 @@ export type CreateTopicSubscriptionsRequestDto = {
    */
   subscriberIds: Array<string>;
   /**
-   * JSONLogic filter conditions for conditional subscription. Supports complex logical operations with AND, OR, and comparison operators. See https://jsonlogic.com/ for full typing reference.
+   * Rules for conditional subscription. Supports complex logical operations with AND, OR, and comparison operators, or boolean values. See https://jsonlogic.com/ for full typing reference.
    */
-  conditions?: { [k: string]: any } | undefined;
-  /**
-   * List of workflow IDs to associate with the subscription
-   */
-  workflows?: Workflows | undefined;
+  rules?: Array<TopicSubscriberRuleDto> | undefined;
 };
-
-/** @internal */
-export const Workflows$inboundSchema: z.ZodType<
-  Workflows,
-  z.ZodTypeDef,
-  unknown
-> = z.object({
-  ids: z.array(z.string()),
-});
-
-/** @internal */
-export type Workflows$Outbound = {
-  ids: Array<string>;
-};
-
-/** @internal */
-export const Workflows$outboundSchema: z.ZodType<
-  Workflows$Outbound,
-  z.ZodTypeDef,
-  Workflows
-> = z.object({
-  ids: z.array(z.string()),
-});
-
-/**
- * @internal
- * @deprecated This namespace will be removed in future versions. Use schemas and types that are exported directly from this module.
- */
-export namespace Workflows$ {
-  /** @deprecated use `Workflows$inboundSchema` instead. */
-  export const inboundSchema = Workflows$inboundSchema;
-  /** @deprecated use `Workflows$outboundSchema` instead. */
-  export const outboundSchema = Workflows$outboundSchema;
-  /** @deprecated use `Workflows$Outbound` instead. */
-  export type Outbound = Workflows$Outbound;
-}
-
-export function workflowsToJSON(workflows: Workflows): string {
-  return JSON.stringify(Workflows$outboundSchema.parse(workflows));
-}
-
-export function workflowsFromJSON(
-  jsonString: string,
-): SafeParseResult<Workflows, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => Workflows$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Workflows' from JSON`,
-  );
-}
 
 /** @internal */
 export const CreateTopicSubscriptionsRequestDto$inboundSchema: z.ZodType<
@@ -89,15 +31,13 @@ export const CreateTopicSubscriptionsRequestDto$inboundSchema: z.ZodType<
   unknown
 > = z.object({
   subscriberIds: z.array(z.string()),
-  conditions: z.record(z.any()).optional(),
-  workflows: z.lazy(() => Workflows$inboundSchema).optional(),
+  rules: z.array(TopicSubscriberRuleDto$inboundSchema).optional(),
 });
 
 /** @internal */
 export type CreateTopicSubscriptionsRequestDto$Outbound = {
   subscriberIds: Array<string>;
-  conditions?: { [k: string]: any } | undefined;
-  workflows?: Workflows$Outbound | undefined;
+  rules?: Array<TopicSubscriberRuleDto$Outbound> | undefined;
 };
 
 /** @internal */
@@ -107,8 +47,7 @@ export const CreateTopicSubscriptionsRequestDto$outboundSchema: z.ZodType<
   CreateTopicSubscriptionsRequestDto
 > = z.object({
   subscriberIds: z.array(z.string()),
-  conditions: z.record(z.any()).optional(),
-  workflows: z.lazy(() => Workflows$outboundSchema).optional(),
+  rules: z.array(TopicSubscriberRuleDto$outboundSchema).optional(),
 });
 
 /**

@@ -8,12 +8,6 @@ import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 import {
-  SubscriptionWorkflowDto,
-  SubscriptionWorkflowDto$inboundSchema,
-  SubscriptionWorkflowDto$Outbound,
-  SubscriptionWorkflowDto$outboundSchema,
-} from "./subscriptionworkflowdto.js";
-import {
   TopicDto,
   TopicDto$inboundSchema,
   TopicDto$Outbound,
@@ -64,13 +58,9 @@ export type SubscriptionDto = {
    */
   subscriber: Subscriber | null;
   /**
-   * JSONLogic filter conditions for conditional subscription. Only notifications matching these conditions will be delivered.
+   * Rules for conditional subscription. Only notifications matching these rules will be delivered.
    */
-  conditions?: { [k: string]: any } | undefined;
-  /**
-   * The workflows associated with the subscription
-   */
-  workflows?: Array<SubscriptionWorkflowDto> | undefined;
+  rules?: Array<{ [k: string]: any }> | undefined;
   /**
    * The creation date of the subscription
    */
@@ -163,8 +153,7 @@ export const SubscriptionDto$inboundSchema: z.ZodType<
   _id: z.string(),
   topic: TopicDto$inboundSchema,
   subscriber: z.nullable(z.lazy(() => Subscriber$inboundSchema)),
-  conditions: z.record(z.any()).optional(),
-  workflows: z.array(SubscriptionWorkflowDto$inboundSchema).optional(),
+  rules: z.array(z.record(z.any())).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 }).transform((v) => {
@@ -178,8 +167,7 @@ export type SubscriptionDto$Outbound = {
   _id: string;
   topic: TopicDto$Outbound;
   subscriber: Subscriber$Outbound | null;
-  conditions?: { [k: string]: any } | undefined;
-  workflows?: Array<SubscriptionWorkflowDto$Outbound> | undefined;
+  rules?: Array<{ [k: string]: any }> | undefined;
   createdAt: string;
   updatedAt: string;
 };
@@ -193,8 +181,7 @@ export const SubscriptionDto$outboundSchema: z.ZodType<
   id: z.string(),
   topic: TopicDto$outboundSchema,
   subscriber: z.nullable(z.lazy(() => Subscriber$outboundSchema)),
-  conditions: z.record(z.any()).optional(),
-  workflows: z.array(SubscriptionWorkflowDto$outboundSchema).optional(),
+  rules: z.array(z.record(z.any())).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 }).transform((v) => {

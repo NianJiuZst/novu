@@ -33,6 +33,7 @@ typescript:
     devDependencies: {}
     peerDependencies: {}
   additionalPackageJSON: {}
+  additionalScripts: {}
   author: Novu
   baseErrorName: NovuError
   clientServerStatusCodesAsErrors: true

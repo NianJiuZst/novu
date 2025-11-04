@@ -6,13 +6,7 @@ import {
   TriggerEventRequestDto,
   TriggerRecipientsTypeEnum,
 } from '@novu/api/models/components';
-import {
-  MessageRepository,
-  NotificationRepository,
-  NotificationTemplateEntity,
-  SubscriberEntity,
-  TopicSubscribersRepository,
-} from '@novu/dal';
+import { MessageRepository, NotificationRepository, NotificationTemplateEntity, SubscriberEntity } from '@novu/dal';
 import {
   ChannelTypeEnum,
   DigestTypeEnum,
@@ -357,42 +351,58 @@ describe('Topic Trigger Event #novu-v2', () => {
       await novuClient.topics.subscriptions.create(
         {
           subscriberIds: [newSubscriber.subscriberId],
-          conditions: {
-            and: [
-              {
-                '==': [
+          rules: [
+            {
+              filter: {
+                workflows: [template._id],
+              },
+              type: 'custom',
+              condition: {
+                and: [
                   {
-                    var: 'payload.status',
+                    '==': [
+                      {
+                        var: 'payload.status',
+                      },
+                      'completed',
+                    ],
                   },
-                  'completed',
+                  {
+                    '>': [
+                      {
+                        var: 'payload.price',
+                      },
+                      100,
+                    ],
+                  },
                 ],
               },
-              {
-                '>': [
-                  {
-                    var: 'payload.price',
-                  },
-                  100,
-                ],
-              },
-            ],
-          } as Record<string, unknown>,
-        },
+            },
+          ],
+        } as any,
         conditionsTopicKey
       );
 
       await novuClient.topics.subscriptions.create(
         {
           subscriberIds: [secondSubscriber.subscriberId],
-          conditions: {
-            '==': [
-              {
-                var: 'payload.status',
+          rules: [
+            {
+              filter: {
+                workflows: [template._id],
               },
-              'failed',
-            ],
-          } as Record<string, unknown>,
-        },
+              type: 'custom',
+              condition: {
+                '==': [
+                  {
+                    var: 'payload.status',
+                  },
+                  'failed',
+                ],
+              },
+            },
+          ],
+        } as any,
         conditionsTopicKey
       );
 
@@ -413,7 +423,7 @@ describe('Topic Trigger Event #novu-v2', () => {
         channel: ChannelTypeEnum.IN_APP,
       });
 
-      expect(passMessages.length).to.equal(1);
+      expect(passMessages.length, 'Passed Subscription Messages, expected to delivery the message').to.equal(1);
 
       await novuClient.trigger({
         workflowId: template.triggers[0].identifier,
@@ -431,7 +441,10 @@ describe('Topic Trigger Event #novu-v2', () => {
       });
 
       // messages were not incremented because with subscription was filtered out
-      expect(filteredSubscriptionMessage.length).to.equal(1);
+      expect(
+        filteredSubscriptionMessage.length,
+        'Filtered Subscription Messages, expected to not delivery the message'
+      ).to.equal(1);
     });
   });
 
@@ -623,41 +636,41 @@ describe('Topic Trigger Event #novu-v2', () => {
       const workflowsTopicKeyDisabled = `topic-key-workflows-disabled-${Date.now()}`;
       const workflowsTopicKeyNoWorkflows = `topic-key-workflows-no-workflows-${Date.now()}`;
 
-      const topicSubscribersRepository = new TopicSubscribersRepository();
-
       const subscribedSubscriber = await subscriberService.createSubscriber();
 
       const workflowId = template._id;
       const triggerIdentifier = template.triggers[0].identifier;
 
-      // Create subscription with workflows enabled (default true)
       await novuClient.topics.subscriptions.create(
         {
           subscriberIds: [subscribedSubscriber.subscriberId],
-          workflows: { ids: [workflowId] },
+          rules: [
+            {
+              type: 'switch',
+              condition: true,
+              filter: {
+                workflows: [workflowId],
+              },
+            },
+          ],
         } as any,
         workflowsTopicKeyEnabled
       );
 
-      // Create subscription with workflows then flip to disabled via DAL
       await novuClient.topics.subscriptions.create(
         {
           subscriberIds: [subscribedSubscriber.subscriberId],
-          workflows: { ids: [workflowId] },
+          rules: [
+            {
+              type: 'switch',
+              condition: false,
+              filter: {
+                workflows: [workflowId],
+              },
+            },
+          ],
         } as any,
         workflowsTopicKeyDisabled
-      );
-
-      await topicSubscribersRepository.updateOne(
-        {
-          _environmentId: session.environment._id,
-          _organizationId: session.organization._id,
-          topicKey: workflowsTopicKeyDisabled,
-          externalSubscriberId: subscribedSubscriber.subscriberId,
-        } as any,
-        {
-          $set: { workflows: [{ _id: workflowId, enabled: false }] },
-        } as any
       );
 
       // Create subscription without workflows (opt-in feature -> should still send)

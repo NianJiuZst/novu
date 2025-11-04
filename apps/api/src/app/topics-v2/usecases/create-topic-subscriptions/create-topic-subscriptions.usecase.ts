@@ -166,8 +166,6 @@ export class CreateTopicSubscriptionsUsecase {
               firstName: subscriber.firstName,
               lastName: subscriber.lastName,
               email: subscriber.email,
-              createdAt: subscriber.createdAt,
-              updatedAt: subscriber.updatedAt,
             }
           : null,
         rules: subscription.rules,

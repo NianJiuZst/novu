@@ -61,20 +61,6 @@ export class SubscriberDto {
     required: false,
   })
   email?: string;
-
-  @ApiProperty({
-    description: 'The creation date of the subscriber',
-    example: '2025-04-24T05:40:21Z',
-    required: false,
-  })
-  createdAt?: string;
-
-  @ApiProperty({
-    description: 'The last update date of the subscriber',
-    example: '2025-04-24T05:40:21Z',
-    required: false,
-  })
-  updatedAt?: string;
 }
 
 export class SubscriptionDto {

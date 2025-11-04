@@ -5,10 +5,8 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
-  IsBoolean,
   IsDefined,
   IsEnum,
-  IsObject,
   IsOptional,
   IsString,
   ValidateNested,
@@ -48,7 +46,7 @@ export class FilterDto {
   tags?: string[];
 }
 
-export class CustomRuleDto {
+export class TopicSubscriberRuleDto {
   @ApiPropertyOptional({
     description: 'Filter configuration for the rule',
     type: FilterDto,
@@ -69,46 +67,14 @@ export class CustomRuleDto {
 
   @ApiPropertyOptional({
     description:
-      'JSON Logic condition. Supports complex logical operations with AND, OR, and comparison operators. See https://jsonlogic.com/ for full typing reference.',
-    type: 'object',
-    additionalProperties: true,
+      'JSON Logic condition or boolean value. Supports complex logical operations with AND, OR, and comparison operators. See https://jsonlogic.com/ for full typing reference.',
+    oneOf: [{ type: 'object', additionalProperties: true }, { type: 'boolean' }],
   })
-  @IsObject()
   @IsOptional()
-  condition?: RulesLogic<AdditionalOperation>;
+  condition?: RulesLogic<AdditionalOperation> | boolean;
 }
 
-export class SwitchRuleDto {
-  @ApiPropertyOptional({
-    description: 'Filter configuration for the rule',
-    type: FilterDto,
-  })
-  @ValidateNested()
-  @Type(() => FilterDto)
-  @IsOptional()
-  filter?: FilterDto;
-
-  @ApiProperty({
-    description: 'Type of condition rule',
-    enum: ConditionType,
-    example: ConditionType.SWITCH,
-  })
-  @IsEnum(ConditionType)
-  @IsDefined()
-  type: ConditionType.SWITCH;
-
-  @ApiPropertyOptional({
-    description: 'Boolean condition value',
-    example: true,
-  })
-  @IsBoolean()
-  @IsOptional()
-  condition?: boolean;
-}
-
-export type TopicSubscriberRuleDto = CustomRuleDto | SwitchRuleDto;
-
-@ApiExtraModels(CustomRuleDto, SwitchRuleDto)
+@ApiExtraModels(TopicSubscriberRuleDto)
 export class CreateTopicSubscriptionsRequestDto {
   @ApiProperty({
     description: 'List of subscriber identifiers to subscribe to the topic (max: 100)',
@@ -123,31 +89,15 @@ export class CreateTopicSubscriptionsRequestDto {
 
   @ApiPropertyOptional({
     description:
-      'Rules for conditional subscription. Supports complex logical operations with AND, OR, and comparison operators. See https://jsonlogic.com/ for full typing reference.',
+      'Rules for conditional subscription. Supports complex logical operations with AND, OR, and comparison operators, or boolean values. See https://jsonlogic.com/ for full typing reference.',
     type: 'array',
     items: {
-      oneOf: [{ $ref: getSchemaPath(CustomRuleDto) }, { $ref: getSchemaPath(SwitchRuleDto) }],
-      discriminator: {
-        propertyName: 'type',
-        mapping: {
-          [ConditionType.CUSTOM]: getSchemaPath(CustomRuleDto),
-          [ConditionType.SWITCH]: getSchemaPath(SwitchRuleDto),
-        },
-      },
+      $ref: getSchemaPath(TopicSubscriberRuleDto),
     },
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => Object, {
-    discriminator: {
-      property: 'type',
-      subTypes: [
-        { name: ConditionType.CUSTOM, value: CustomRuleDto },
-        { name: ConditionType.SWITCH, value: SwitchRuleDto },
-      ],
-    },
-    keepDiscriminatorProperty: true,
-  })
+  @Type(() => TopicSubscriberRuleDto)
   @IsOptional()
   rules?: TopicSubscriberRuleDto[];
 }

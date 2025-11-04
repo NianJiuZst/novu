@@ -116,8 +116,6 @@ export class DeleteTopicSubscriptionsUsecase {
               firstName: subscriber.firstName,
               lastName: subscriber.lastName,
               email: subscriber.email,
-              createdAt: subscriber.createdAt,
-              updatedAt: subscriber.updatedAt,
             }
           : null,
         createdAt: new Date().toISOString(),

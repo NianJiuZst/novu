@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TopicSubscriberRule } from '@novu/dal';
-import { IsBoolean, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class TopicDto {
   @ApiProperty({
@@ -72,22 +72,6 @@ export class SubscriberDto {
   @IsString()
   @IsOptional()
   email?: string;
-
-  @ApiPropertyOptional({
-    description: 'The creation date of the subscriber',
-    example: '2025-04-24T05:40:21Z',
-  })
-  @IsString()
-  @IsOptional()
-  createdAt?: string;
-
-  @ApiPropertyOptional({
-    description: 'The last update date of the subscriber',
-    example: '2025-04-24T05:40:21Z',
-  })
-  @IsString()
-  @IsOptional()
-  updatedAt?: string;
 }
 
 export class SubscriptionWorkflowDto {
@@ -129,10 +113,13 @@ export class SubscriptionDto {
 
   @ApiPropertyOptional({
     description: 'Rules for conditional subscription. Only notifications matching these rules will be delivered.',
-    type: 'object',
-    additionalProperties: true,
+    type: 'array',
+    items: {
+      type: 'object',
+      additionalProperties: true,
+    },
   })
-  @IsObject()
+  @IsArray()
   @IsOptional()
   rules?: TopicSubscriberRule[];
 
