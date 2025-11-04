@@ -10,18 +10,41 @@ import {
   TopicSubscriberId,
 } from './types';
 
-type Filter = {
+export enum ConditionType {
+  SWITCH = 'switch',
+  CUSTOM = 'custom',
+}
+
+export enum FilterType {
+  WORKFLOW = 'workflow',
+}
+
+export type Filter = {
   workflows: string[];
   tags: string[];
 };
 
-type Rule = {
+export type CustomRule = {
   filter?: Filter;
-  type: 'workflow';
-  condition: boolean | RulesLogic<AdditionalOperation>;
+  type: ConditionType.CUSTOM;
+  condition: RulesLogic<AdditionalOperation>;
 };
 
-type Group = { group: Rule[] };
+export type SwitchRule = {
+  filter?: Filter;
+  type: ConditionType.SWITCH;
+  condition: boolean;
+};
+
+export type TopicSubscriberRule = CustomRule | SwitchRule;
+
+export function isSubscriptionCustomRule(rule: TopicSubscriberRule): rule is CustomRule {
+  return rule.type === ConditionType.CUSTOM;
+}
+
+export function isSubscriptionSwitchRule(rule: TopicSubscriberRule): rule is SwitchRule {
+  return rule.type === ConditionType.SWITCH;
+}
 
 export class TopicSubscribersEntity {
   _id: TopicSubscriberId;
@@ -35,7 +58,7 @@ export class TopicSubscribersEntity {
 
   name?: string;
   identifier?: string;
-  rules?: Array<Rule | Group>;
+  rules?: TopicSubscriberRule[];
   rulesHash?: string;
 
   createdAt?: string;

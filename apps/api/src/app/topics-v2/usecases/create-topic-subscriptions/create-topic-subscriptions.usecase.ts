@@ -2,15 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { generateConditionHash, InstrumentUsecase } from '@novu/application-generic';
 import {
   BulkAddTopicSubscribersResult,
+  ConditionType,
   CreateTopicSubscribersEntity,
+  CustomRule,
+  Filter,
   NotificationTemplateRepository,
   SubscriberEntity,
   SubscriberRepository,
+  SwitchRule,
   TopicEntity,
   TopicRepository,
+  TopicSubscriberRule,
   TopicSubscribersEntity,
   TopicSubscribersRepository,
 } from '@novu/dal';
+import { AdditionalOperation, RulesLogic } from 'json-logic-js';
+import { TopicSubscriberRuleDto } from '../../dtos/create-topic-subscriptions.dto';
 import {
   CreateTopicSubscriptionsResponseDto,
   SubscriptionDto,
@@ -31,23 +38,7 @@ export class CreateTopicSubscriptionsUsecase {
 
   @InstrumentUsecase()
   async execute(command: CreateTopicSubscriptionsCommand): Promise<CreateTopicSubscriptionsResponseDto> {
-    await this.upsertTopicUseCase.execute({
-      environmentId: command.environmentId,
-      organizationId: command.organizationId,
-      userId: command.userId,
-      key: command.topicKey,
-    });
-
-    // Get the topic entity from the repository after upsert
-    const topic = await this.topicRepository.findTopicByKey(
-      command.topicKey,
-      command.organizationId,
-      command.environmentId
-    );
-
-    if (!topic) {
-      throw new Error(`Topic with key ${command.topicKey} not found after upsert`);
-    }
+    const topic = await this.upsertAndFindOne(command);
 
     const errors: SubscriptionErrorDto[] = [];
     const subscriptionData: SubscriptionDto[] = [];
@@ -103,18 +94,17 @@ export class CreateTopicSubscriptionsUsecase {
       subscriptionsWorkflows = foundWorkflows.map((workflow) => ({ _id: workflow._id, enabled: true }));
     }
 
-    const conditionHash = generateConditionHash({
-      conditions: command.conditions || null,
-      workflows: subscriptionsWorkflows || null,
-    });
+    const ruleEntity = this.mapRulesFromDtoToEntity(command.rules);
+
+    const rulesHash = generateConditionHash(ruleEntity);
 
     const existingSubscriptionsQuery: {
       _environmentId: string;
       _organizationId: string;
       _topicId: string;
       _subscriberId: { $in: string[] };
-      conditionHash?: string | { $exists: boolean };
-      $or?: Array<{ conditionHash: { $exists: boolean } } | { conditionHash: null }>;
+      rulesHash?: string | { $exists: boolean };
+      $or?: Array<{ rulesHash: { $exists: boolean } } | { rulesHash: null }>;
     } = {
       _environmentId: command.environmentId,
       _organizationId: command.organizationId,
@@ -122,10 +112,10 @@ export class CreateTopicSubscriptionsUsecase {
       _subscriberId: { $in: foundSubscribers.map((sub) => sub._id) },
     };
 
-    if (conditionHash !== undefined) {
-      existingSubscriptionsQuery.conditionHash = conditionHash;
+    if (rulesHash) {
+      existingSubscriptionsQuery.rulesHash = rulesHash;
     } else {
-      existingSubscriptionsQuery.conditionHash = { $exists: false };
+      existingSubscriptionsQuery.rulesHash = { $exists: false };
     }
 
     const existingSubscriptions = await this.topicSubscribersRepository.find(existingSubscriptionsQuery as any);
@@ -138,8 +128,8 @@ export class CreateTopicSubscriptionsUsecase {
       const subscriptionsToCreate = this.buildSubscriptionEntity(
         topic,
         subscribersToCreate,
-        command.conditions,
-        conditionHash,
+        ruleEntity,
+        rulesHash,
         subscriptionsWorkflows
       );
       const bulkResult: BulkAddTopicSubscribersResult =
@@ -180,11 +170,7 @@ export class CreateTopicSubscriptionsUsecase {
               updatedAt: subscriber.updatedAt,
             }
           : null,
-        conditions: subscription.conditions,
-        workflows: subscription.workflows?.map((workflow) => ({
-          id: workflow._id,
-          enabled: workflow.enabled,
-        })),
+        rules: subscription.rules,
         createdAt: subscription.createdAt ?? '',
         updatedAt: subscription.updatedAt ?? '',
       });
@@ -201,11 +187,64 @@ export class CreateTopicSubscriptionsUsecase {
     };
   }
 
+  private async upsertAndFindOne(command: CreateTopicSubscriptionsCommand) {
+    await this.upsertTopicUseCase.execute({
+      environmentId: command.environmentId,
+      organizationId: command.organizationId,
+      userId: command.userId,
+      key: command.topicKey,
+    });
+
+    // Get the topic entity from the repository after upsert
+    const topic = await this.topicRepository.findTopicByKey(
+      command.topicKey,
+      command.organizationId,
+      command.environmentId
+    );
+
+    if (!topic) {
+      throw new Error(`Topic with key ${command.topicKey} not found after upsert`);
+    }
+
+    return topic;
+  }
+
+  private mapRulesFromDtoToEntity(rules?: TopicSubscriberRuleDto[]): TopicSubscriberRule[] | undefined {
+    if (!rules) {
+      return undefined;
+    }
+
+    return rules.map((rule) => {
+      const filter: Filter | undefined = rule.filter
+        ? {
+            workflows: rule.filter.workflows ?? [],
+            tags: rule.filter.tags ?? [],
+          }
+        : undefined;
+
+      const condition = rule.condition === undefined ? true : rule.condition;
+
+      if (typeof condition === 'boolean') {
+        return {
+          filter,
+          condition,
+          type: ConditionType.SWITCH,
+        } satisfies SwitchRule;
+      }
+
+      return {
+        filter,
+        condition: condition as RulesLogic<AdditionalOperation>,
+        type: ConditionType.CUSTOM,
+      } satisfies CustomRule;
+    });
+  }
+
   private buildSubscriptionEntity(
     topic: TopicEntity,
     subscribers: SubscriberEntity[],
-    conditions?: Record<string, unknown>,
-    conditionHash?: string,
+    rules?: TopicSubscriberRule[],
+    rulesHash?: string,
     subscriptionsWorkflows?: { _id: string; enabled: boolean }[]
   ): CreateTopicSubscribersEntity[] {
     return subscribers.map((subscriber) => ({
@@ -215,8 +254,8 @@ export class CreateTopicSubscriptionsUsecase {
       _topicId: topic._id,
       topicKey: topic.key,
       externalSubscriberId: subscriber.subscriberId,
-      conditions,
-      conditionHash,
+      rules,
+      rulesHash,
       workflows: subscriptionsWorkflows,
     }));
   }

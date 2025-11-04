@@ -1,5 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { TopicEntity, TopicRepository, TopicSubscribersRepository } from '@novu/dal';
+import {
+  isSubscriptionCustomRule,
+  isSubscriptionSwitchRule,
+  TopicEntity,
+  TopicRepository,
+  type TopicSubscriberRule,
+  TopicSubscribersRepository,
+} from '@novu/dal';
 import {
   ISubscribersDefine,
   ITopic,
@@ -8,7 +15,7 @@ import {
   TriggerRecipientSubscriber,
   TriggerRecipientsTypeEnum,
 } from '@novu/shared';
-import jsonLogic, { type AdditionalOperation, type RulesLogic } from 'json-logic-js';
+import jsonLogic from 'json-logic-js';
 import { PinoLogger } from 'nestjs-pino';
 import { InstrumentUsecase } from '../../instrumentation';
 import { CacheService, FeatureFlagsService } from '../../services';
@@ -67,7 +74,7 @@ export class TriggerMulticast extends TriggerBase {
       let totalSubscriptionsEvaluated = 0;
       let totalSubscriptionsFiltered = 0;
 
-      const getTopicSubscriptionsGenerator = this.topicSubscribersRepository.getTopicSubscriptionsWithConditions({
+      const getTopicSubscriptionsGenerator = this.topicSubscribersRepository.getTopicSubscriptionsWithRules({
         query: {
           _organizationId: organizationId,
           _environmentId: environmentId,
@@ -82,12 +89,9 @@ export class TriggerMulticast extends TriggerBase {
       for await (const subscriptionsBatch of getTopicSubscriptionsGenerator) {
         totalSubscriptionsEvaluated += subscriptionsBatch.length;
 
-        const passingSubscriptions = subscriptionsBatch.filter((subscription) => {
-          return this.evaluateConditions(
-            subscription.conditions as Record<string, unknown>,
-            { payload: command.payload } as Record<string, unknown>
-          );
-        });
+        const passingSubscriptions = subscriptionsBatch.filter((subscription) =>
+          this.evaluateSubscriptionRules(subscription.rules, command.payload)
+        );
 
         totalSubscriptionsFiltered += subscriptionsBatch.length - passingSubscriptions.length;
 
@@ -167,21 +171,35 @@ export class TriggerMulticast extends TriggerBase {
     }
   }
 
-  private evaluateConditions(
-    conditions: Record<string, unknown> | undefined,
+  private evaluateSubscriptionRules(
+    rules: TopicSubscriberRule[] | undefined,
     payload: Record<string, unknown>
   ): boolean {
-    if (!conditions) {
+    if (!rules || rules.length === 0) {
       return true;
     }
 
-    try {
-      const result = jsonLogic.apply(conditions as RulesLogic<AdditionalOperation>, payload);
+    return rules.every((rule) => this.evaluateRule(rule, payload));
+  }
 
-      return typeof result === 'boolean' ? result : false;
-    } catch {
-      return false;
+  private evaluateRule(rule: TopicSubscriberRule, payload: Record<string, unknown>): boolean {
+    if (isSubscriptionSwitchRule(rule)) {
+      return rule.condition;
     }
+
+    if (isSubscriptionCustomRule(rule)) {
+      try {
+        const result = jsonLogic.apply(rule, payload);
+
+        return typeof result === 'boolean' ? result : false;
+      } catch {
+        return false;
+      }
+    }
+
+    this.logger.error({ nv: { rule } }, 'Invalid rule type, skipping evaluation');
+
+    return true;
   }
 
   private async createMulticastTrace(
@@ -189,7 +207,7 @@ export class TriggerMulticast extends TriggerBase {
     eventType: EventType,
     status: 'success' | 'error' | 'warning' = 'success',
     message?: string,
-    rawData?: any
+    rawData?: Record<string, unknown>
   ): Promise<void> {
     if (!command.requestId) {
       return;

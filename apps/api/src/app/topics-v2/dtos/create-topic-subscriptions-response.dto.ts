@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { TopicSubscriberRule } from '@novu/dal';
+import { IsBoolean, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class TopicDto {
   @ApiProperty({
@@ -128,24 +128,13 @@ export class SubscriptionDto {
   subscriber: SubscriberDto | null;
 
   @ApiPropertyOptional({
-    description:
-      'JSONLogic filter conditions for conditional subscription. Only notifications matching these conditions will be delivered.',
+    description: 'Rules for conditional subscription. Only notifications matching these rules will be delivered.',
     type: 'object',
     additionalProperties: true,
   })
   @IsObject()
   @IsOptional()
-  conditions?: Record<string, unknown>;
-
-  @ApiPropertyOptional({
-    description: 'The workflows associated with the subscription',
-    type: [SubscriptionWorkflowDto],
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => SubscriptionWorkflowDto)
-  @IsOptional()
-  workflows?: SubscriptionWorkflowDto[];
+  rules?: TopicSubscriberRule[];
 
   @ApiProperty({
     description: 'The creation date of the subscription',

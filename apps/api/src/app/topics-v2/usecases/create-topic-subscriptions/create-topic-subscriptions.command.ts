@@ -1,5 +1,6 @@
 import { IsArray, IsDefined, IsObject, IsOptional, IsString } from 'class-validator';
 import { EnvironmentWithUserCommand } from '../../../shared/commands/project.command';
+import { TopicSubscriberRuleDto } from '../../dtos/create-topic-subscriptions.dto';
 
 export class CreateTopicSubscriptionsCommand extends EnvironmentWithUserCommand {
   @IsString()
@@ -10,9 +11,8 @@ export class CreateTopicSubscriptionsCommand extends EnvironmentWithUserCommand 
   @IsDefined()
   subscriberIds: string[];
 
-  @IsObject()
   @IsOptional()
-  conditions?: Record<string, unknown>;
+  rules?: TopicSubscriberRuleDto[];
 
   @IsOptional()
   @IsObject()

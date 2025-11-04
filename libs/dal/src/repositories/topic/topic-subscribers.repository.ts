@@ -7,11 +7,19 @@ import type { EnforceEnvOrOrgIds } from '../../types/enforce';
 import { BaseRepository } from '../base-repository';
 import {
   CreateTopicSubscribersEntity,
+  TopicSubscriberRule,
   TopicSubscribersDBModel,
   TopicSubscribersEntity,
 } from './topic-subscribers.entity';
 import { TopicSubscribers } from './topic-subscribers.schema';
 import { EnvironmentId, OrganizationId, TopicId, TopicKey } from './types';
+
+type SelectedTopicSubscriberFields = Pick<TopicSubscribersEntity, 'externalSubscriberId' | 'rules'>;
+
+export const SELECTED_TOPIC_SUBSCRIBER_FIELDS_PROJECTION = {
+  externalSubscriberId: 1,
+  rules: 1,
+} as const satisfies Record<keyof SelectedTopicSubscriberFields, 1>;
 
 export interface BulkAddTopicSubscribersResult {
   created: TopicSubscribersEntity[];
@@ -67,9 +75,9 @@ export class TopicSubscribersRepository extends BaseRepository<
     return await this.aggregate(aggregationPipeline);
   }
 
-  async createSubscriptions(subscribers: CreateTopicSubscribersEntity[]): Promise<BulkAddTopicSubscribersResult> {
-    const bulkUpsertWriteOps = subscribers.map((subscriber) => {
-      const { _subscriberId, _topicId, conditionHash, _environmentId } = subscriber;
+  async createSubscriptions(subscriptions: CreateTopicSubscribersEntity[]): Promise<BulkAddTopicSubscribersResult> {
+    const bulkUpsertWriteOps = subscriptions.map((subscription) => {
+      const { _subscriberId, _topicId, rulesHash, _environmentId } = subscription;
 
       return {
         updateOne: {
@@ -77,9 +85,9 @@ export class TopicSubscribersRepository extends BaseRepository<
             _environmentId,
             _subscriberId,
             _topicId,
-            ...(conditionHash ? ({ conditionHash } satisfies Partial<CreateTopicSubscribersEntity>) : {}),
+            ...(rulesHash ? ({ rulesHash } satisfies Partial<CreateTopicSubscribersEntity>) : {}),
           } satisfies Partial<CreateTopicSubscribersEntity>,
-          update: { $set: subscriber },
+          update: { $set: subscription },
           upsert: true,
         },
       };
@@ -108,7 +116,7 @@ export class TopicSubscribersRepository extends BaseRepository<
     for (const [index, _id] of Object.entries(upsertedIds)) {
       const numericIndex = parseInt(index, 10);
       indexes.push(numericIndex);
-      const subscriber = subscribers[numericIndex];
+      const subscriber = subscriptions[numericIndex];
       if (subscriber) {
         createdSubscribers.push({
           _id: _id.toString(),
@@ -121,7 +129,7 @@ export class TopicSubscribersRepository extends BaseRepository<
     if (writeErrors.length > 0) {
       failed = writeErrors.map((error) => {
         indexes.push(error.err.index);
-        const subscriber = subscribers[error.err.index];
+        const subscriber = subscriptions[error.err.index];
 
         return {
           message: error.err.errmsg,
@@ -131,7 +139,7 @@ export class TopicSubscribersRepository extends BaseRepository<
       });
     }
 
-    const updatedSubscribers: TopicSubscribersEntity[] = subscribers
+    const updatedSubscribers: TopicSubscribersEntity[] = subscriptions
       .filter((_, index) => !indexes.includes(index))
       .map((subscriber) => subscriber as TopicSubscribersEntity);
 
@@ -142,7 +150,7 @@ export class TopicSubscribersRepository extends BaseRepository<
     };
   }
 
-  async *getTopicSubscriptionsWithConditions({
+  async *getTopicSubscriptionsWithRules({
     query,
     batchSize = 500,
   }: {
@@ -153,14 +161,7 @@ export class TopicSubscribersRepository extends BaseRepository<
       excludeSubscribers: string[];
     };
     batchSize?: number;
-  }): AsyncGenerator<
-    Array<{
-      externalSubscriberId: string;
-      conditions?: Record<string, unknown>;
-    }>,
-    void,
-    unknown
-  > {
+  }): AsyncGenerator<Array<SelectedTopicSubscriberFields>, void, unknown> {
     const { _organizationId, _environmentId, topicIds, excludeSubscribers } = query;
     const mappedTopicIds = topicIds.map((id) => this.convertStringToObjectId(id));
 
@@ -172,22 +173,20 @@ export class TopicSubscribersRepository extends BaseRepository<
           _topicId: { $in: mappedTopicIds },
           externalSubscriberId: { $nin: excludeSubscribers },
         },
-        {
-          externalSubscriberId: 1,
-          conditions: 1,
-        }
+        SELECTED_TOPIC_SUBSCRIBER_FIELDS_PROJECTION
       )
       .cursor({ batchSize });
 
     const batch: Array<{
       externalSubscriberId: string;
-      conditions?: Record<string, unknown>;
+      rules?: TopicSubscriberRule[];
     }> = [];
 
     for await (const doc of cursor) {
+      const selectedDoc = doc as SelectedTopicSubscriberFields;
       batch.push({
-        externalSubscriberId: doc.externalSubscriberId,
-        conditions: doc.conditions,
+        externalSubscriberId: selectedDoc.externalSubscriberId,
+        rules: selectedDoc.rules,
       });
 
       if (batch.length >= batchSize) {

@@ -1,10 +1,5 @@
 import { createHash } from 'crypto';
 
-interface SubscriptionHashData {
-  conditions: Record<string, unknown> | null;
-  workflows: { _id: string; enabled: boolean }[] | null;
-}
-
 function sortKeysRecursively(obj: unknown): unknown {
   if (obj === null || typeof obj !== 'object') {
     return obj;
@@ -25,8 +20,8 @@ function sortKeysRecursively(obj: unknown): unknown {
     );
 }
 
-export function generateConditionHash(data?: SubscriptionHashData): string | undefined {
-  if (!data || (!data.conditions && !data.workflows)) {
+export function generateConditionHash(data?: unknown): string | undefined {
+  if (!data) {
     return undefined;
   }
 

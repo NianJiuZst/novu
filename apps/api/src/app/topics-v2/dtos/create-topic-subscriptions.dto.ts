@@ -1,6 +1,19 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import { ConditionType } from '@novu/dal';
 import { Type } from 'class-transformer';
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsDefined, IsObject, IsOptional, ValidateNested } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsBoolean,
+  IsDefined,
+  IsEnum,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { AdditionalOperation, RulesLogic } from 'json-logic-js';
 
 export class SubscriptionWorkflowsDto {
   @ApiProperty({
@@ -13,6 +26,89 @@ export class SubscriptionWorkflowsDto {
   ids: string[];
 }
 
+export class FilterDto {
+  @ApiPropertyOptional({
+    description: 'List of workflow identifiers to filter by',
+    example: ['workflow-id-1', 'workflow-id-2'],
+    type: [String],
+  })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  workflows?: string[];
+
+  @ApiPropertyOptional({
+    description: 'List of tags to filter by',
+    example: ['tag1', 'tag2'],
+    type: [String],
+  })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  tags?: string[];
+}
+
+export class CustomRuleDto {
+  @ApiPropertyOptional({
+    description: 'Filter configuration for the rule',
+    type: FilterDto,
+  })
+  @ValidateNested()
+  @Type(() => FilterDto)
+  @IsOptional()
+  filter?: FilterDto;
+
+  @ApiProperty({
+    description: 'Type of condition rule',
+    enum: ConditionType,
+    example: ConditionType.CUSTOM,
+  })
+  @IsEnum(ConditionType)
+  @IsDefined()
+  type: ConditionType.CUSTOM;
+
+  @ApiPropertyOptional({
+    description:
+      'JSON Logic condition. Supports complex logical operations with AND, OR, and comparison operators. See https://jsonlogic.com/ for full typing reference.',
+    type: 'object',
+    additionalProperties: true,
+  })
+  @IsObject()
+  @IsOptional()
+  condition?: RulesLogic<AdditionalOperation>;
+}
+
+export class SwitchRuleDto {
+  @ApiPropertyOptional({
+    description: 'Filter configuration for the rule',
+    type: FilterDto,
+  })
+  @ValidateNested()
+  @Type(() => FilterDto)
+  @IsOptional()
+  filter?: FilterDto;
+
+  @ApiProperty({
+    description: 'Type of condition rule',
+    enum: ConditionType,
+    example: ConditionType.SWITCH,
+  })
+  @IsEnum(ConditionType)
+  @IsDefined()
+  type: ConditionType.SWITCH;
+
+  @ApiPropertyOptional({
+    description: 'Boolean condition value',
+    example: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  condition?: boolean;
+}
+
+export type TopicSubscriberRuleDto = CustomRuleDto | SwitchRuleDto;
+
+@ApiExtraModels(CustomRuleDto, SwitchRuleDto)
 export class CreateTopicSubscriptionsRequestDto {
   @ApiProperty({
     description: 'List of subscriber identifiers to subscribe to the topic (max: 100)',
@@ -27,43 +123,31 @@ export class CreateTopicSubscriptionsRequestDto {
 
   @ApiPropertyOptional({
     description:
-      'JSONLogic filter conditions for conditional subscription. Supports complex logical operations with AND, OR, and comparison operators. See https://jsonlogic.com/ for full typing reference.',
-    type: 'object',
-    example: {
-      and: [
-        {
-          '==': [
-            {
-              var: 'payload.status',
-            },
-            'Completed',
-          ],
+      'Rules for conditional subscription. Supports complex logical operations with AND, OR, and comparison operators. See https://jsonlogic.com/ for full typing reference.',
+    type: 'array',
+    items: {
+      oneOf: [{ $ref: getSchemaPath(CustomRuleDto) }, { $ref: getSchemaPath(SwitchRuleDto) }],
+      discriminator: {
+        propertyName: 'type',
+        mapping: {
+          [ConditionType.CUSTOM]: getSchemaPath(CustomRuleDto),
+          [ConditionType.SWITCH]: getSchemaPath(SwitchRuleDto),
         },
-        {
-          '>': [
-            {
-              var: 'payload.price',
-            },
-            100,
-          ],
-        },
+      },
+    },
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => Object, {
+    discriminator: {
+      property: 'type',
+      subTypes: [
+        { name: ConditionType.CUSTOM, value: CustomRuleDto },
+        { name: ConditionType.SWITCH, value: SwitchRuleDto },
       ],
     },
-    additionalProperties: true,
-  })
-  @IsObject()
-  @IsOptional()
-  conditions?: Record<string, unknown>;
-
-  @ApiPropertyOptional({
-    description: 'List of workflow IDs to associate with the subscription',
-    type: () => SubscriptionWorkflowsDto,
-    example: {
-      ids: ['workflow-id-1', 'workflow-id-2'],
-    },
+    keepDiscriminatorProperty: true,
   })
   @IsOptional()
-  @ValidateNested()
-  @Type(() => SubscriptionWorkflowsDto)
-  workflows?: SubscriptionWorkflowsDto;
+  rules?: TopicSubscriberRuleDto[];
 }
