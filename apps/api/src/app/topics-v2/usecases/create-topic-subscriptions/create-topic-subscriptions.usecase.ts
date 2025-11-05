@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { generateConditionHash, InstrumentUsecase } from '@novu/application-generic';
 import {
   BulkAddTopicSubscribersResult,
+  CheckboxRule,
   ConditionType,
   CreateTopicSubscribersEntity,
   CustomRule,
@@ -9,7 +10,6 @@ import {
   NotificationTemplateRepository,
   SubscriberEntity,
   SubscriberRepository,
-  SwitchRule,
   TopicEntity,
   TopicRepository,
   TopicSubscriberRule,
@@ -213,12 +213,10 @@ export class CreateTopicSubscriptionsUsecase {
     }
 
     return rules.map((rule) => {
-      const filter: Filter | undefined = rule.filter
-        ? {
-            workflows: rule.filter.workflows ?? [],
-            tags: rule.filter.tags ?? [],
-          }
-        : undefined;
+      const filter: Filter = {
+        workflows: rule.filter.workflows ?? [],
+        tags: rule.filter.tags ?? [],
+      };
 
       const condition = rule.condition === undefined ? true : rule.condition;
 
@@ -226,8 +224,8 @@ export class CreateTopicSubscriptionsUsecase {
         return {
           filter,
           condition,
-          type: ConditionType.SWITCH,
-        } satisfies SwitchRule;
+          type: ConditionType.CHECKBOX,
+        } satisfies CheckboxRule;
       }
 
       return {

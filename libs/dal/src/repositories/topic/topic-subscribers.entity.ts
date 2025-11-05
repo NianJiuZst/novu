@@ -11,7 +11,7 @@ import {
 } from './types';
 
 export enum ConditionType {
-  SWITCH = 'switch',
+  CHECKBOX = 'checkbox',
   CUSTOM = 'custom',
 }
 
@@ -30,9 +30,9 @@ export type CustomRule = {
   condition: RulesLogic<AdditionalOperation>;
 };
 
-export type SwitchRule = {
+export type CheckboxRule = {
   filter: Filter;
-  type: ConditionType.SWITCH;
+  type: ConditionType.CHECKBOX;
   condition: boolean;
 };
 
@@ -46,8 +46,8 @@ export function isSubscriptionCustomRule(rule: TopicSubscriberRule): rule is Cus
   return rule.type === ConditionType.CUSTOM;
 }
 
-export function isSubscriptionSwitchRule(rule: TopicSubscriberRule): rule is SwitchRule {
-  return rule.type === ConditionType.SWITCH;
+export function isSubscriptionCheckboxRule(rule: TopicSubscriberRule): rule is CheckboxRule {
+  return rule.type === ConditionType.CHECKBOX;
 }
 
 export class TopicSubscribersEntity {

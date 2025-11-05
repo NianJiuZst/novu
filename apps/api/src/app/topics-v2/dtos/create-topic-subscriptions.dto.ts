@@ -54,7 +54,7 @@ export class TopicSubscriberRuleDto {
   @ValidateNested()
   @Type(() => FilterDto)
   @IsOptional()
-  filter?: FilterDto;
+  filter: FilterDto;
 
   @ApiProperty({
     description: 'Type of condition rule',

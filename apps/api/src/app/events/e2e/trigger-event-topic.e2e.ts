@@ -646,7 +646,7 @@ describe('Topic Trigger Event #novu-v2', () => {
           subscriberIds: [subscribedSubscriber.subscriberId],
           rules: [
             {
-              type: 'switch',
+              type: 'checkbox',
               condition: true,
               filter: {
                 workflows: [workflowId],
@@ -662,7 +662,7 @@ describe('Topic Trigger Event #novu-v2', () => {
           subscriberIds: [subscribedSubscriber.subscriberId],
           rules: [
             {
-              type: 'switch',
+              type: 'checkbox',
               condition: false,
               filter: {
                 workflows: [workflowId],
@@ -727,6 +727,396 @@ describe('Topic Trigger Event #novu-v2', () => {
         noWorkflowsMessages.length,
         'No Workflow Subscription Messages, expected to delivery the message'
       ).to.equal(2);
+    });
+
+    it('should filter subscriptions by tags and combined workflow filters', async () => {
+      const tagFilterTopicKey = `topic-key-tag-filter-${Date.now()}`;
+      const combinedFilterTopicKey = `topic-key-combined-filter-${Date.now()}`;
+      const nonMatchingTagTopicKey = `topic-key-non-matching-tag-${Date.now()}`;
+
+      const taggedTemplate = await session.createTemplate({
+        tags: ['important', 'promotional'],
+      });
+      const otherTaggedTemplate = await session.createTemplate({
+        tags: ['newsletter'],
+      });
+
+      const subscriberWithTagFilter = await subscriberService.createSubscriber();
+      const subscriberWithCombinedFilter = await subscriberService.createSubscriber();
+      const subscriberWithNonMatchingTag = await subscriberService.createSubscriber();
+
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [subscriberWithTagFilter.subscriberId],
+          rules: [
+            {
+              type: 'custom',
+              condition: {
+                '==': [{ var: 'payload.status' }, 'active'],
+              },
+              filter: {
+                tags: ['important'],
+              },
+            },
+          ],
+        } as any,
+        tagFilterTopicKey
+      );
+
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [subscriberWithCombinedFilter.subscriberId],
+          rules: [
+            {
+              type: 'checkbox',
+              condition: true,
+              filter: {
+                workflows: [taggedTemplate._id],
+                tags: ['promotional'],
+              },
+            },
+          ],
+        } as any,
+        combinedFilterTopicKey
+      );
+
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [subscriberWithNonMatchingTag.subscriberId],
+          rules: [
+            {
+              type: 'custom',
+              condition: {
+                '==': [{ var: 'payload.status' }, 'active'],
+              },
+              filter: {
+                tags: ['nonexistent-tag'],
+              },
+            },
+          ],
+        } as any,
+        nonMatchingTagTopicKey
+      );
+
+      await novuClient.trigger({
+        workflowId: taggedTemplate.triggers[0].identifier,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: tagFilterTopicKey }],
+        payload: { status: 'active' },
+      });
+      await session.waitForJobCompletion(taggedTemplate._id);
+
+      const tagFilterMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriberWithTagFilter._id,
+        _templateId: taggedTemplate._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(tagFilterMessages.length, 'Tag filter should deliver when tag matches').to.equal(1);
+
+      await novuClient.trigger({
+        workflowId: taggedTemplate.triggers[0].identifier,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: combinedFilterTopicKey }],
+      });
+      await session.waitForJobCompletion(taggedTemplate._id);
+
+      const combinedFilterMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriberWithCombinedFilter._id,
+        _templateId: taggedTemplate._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(
+        combinedFilterMessages.length,
+        'Combined filter should deliver when both workflow ID and tag match'
+      ).to.equal(1);
+
+      await novuClient.trigger({
+        workflowId: taggedTemplate.triggers[0].identifier,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: nonMatchingTagTopicKey }],
+        payload: { status: 'active' },
+      });
+      await session.waitForJobCompletion(taggedTemplate._id);
+
+      const nonMatchingTagMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriberWithNonMatchingTag._id,
+        _templateId: taggedTemplate._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(nonMatchingTagMessages.length, 'Non-matching tag filter should not deliver').to.equal(0);
+
+      await novuClient.trigger({
+        workflowId: otherTaggedTemplate.triggers[0].identifier,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: tagFilterTopicKey }],
+        payload: { status: 'active' },
+      });
+      await session.waitForJobCompletion(otherTaggedTemplate._id);
+
+      const tagFilterMessagesAfterOtherTemplate = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriberWithTagFilter._id,
+        _templateId: otherTaggedTemplate._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(
+        tagFilterMessagesAfterOtherTemplate.length,
+        'Tag filter should not deliver when workflow tag does not match filter'
+      ).to.equal(0);
+    });
+
+    it('should require all rules to pass for subscription delivery', async () => {
+      const multipleRulesTopicKey = `topic-key-multiple-rules-${Date.now()}`;
+
+      const subscriberAllPassing = await subscriberService.createSubscriber();
+      const subscriberOneFailing = await subscriberService.createSubscriber();
+      const subscriberMixedRules = await subscriberService.createSubscriber();
+
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [subscriberAllPassing.subscriberId],
+          rules: [
+            {
+              type: 'custom',
+              condition: {
+                '>': [{ var: 'payload.price' }, 100],
+              },
+              filter: {
+                workflows: [template._id],
+              },
+            },
+            {
+              type: 'custom',
+              condition: {
+                '==': [{ var: 'payload.status' }, 'active'],
+              },
+              filter: {
+                workflows: [template._id],
+              },
+            },
+          ],
+        } as any,
+        multipleRulesTopicKey
+      );
+
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [subscriberOneFailing.subscriberId],
+          rules: [
+            {
+              type: 'custom',
+              condition: {
+                '>': [{ var: 'payload.price' }, 100],
+              },
+              filter: {
+                workflows: [template._id],
+              },
+            },
+            {
+              type: 'custom',
+              condition: {
+                '==': [{ var: 'payload.status' }, 'inactive'],
+              },
+              filter: {
+                workflows: [template._id],
+              },
+            },
+          ],
+        } as any,
+        multipleRulesTopicKey
+      );
+
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [subscriberMixedRules.subscriberId],
+          rules: [
+            {
+              type: 'checkbox',
+              condition: true,
+              filter: {
+                workflows: [template._id],
+              },
+            },
+            {
+              type: 'custom',
+              condition: {
+                '==': [{ var: 'payload.category' }, 'premium'],
+              },
+              filter: {
+                workflows: [template._id],
+              },
+            },
+          ],
+        } as any,
+        multipleRulesTopicKey
+      );
+
+      await novuClient.trigger({
+        workflowId: template.triggers[0].identifier,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: multipleRulesTopicKey }],
+        payload: { price: 150, status: 'active', category: 'premium' },
+      });
+      await session.waitForJobCompletion(template._id);
+
+      const allPassingMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriberAllPassing._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(allPassingMessages.length, 'All rules passing should deliver').to.equal(1);
+
+      const oneFailingMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriberOneFailing._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(oneFailingMessages.length, 'One rule failing should not deliver').to.equal(0);
+
+      const mixedRulesMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriberMixedRules._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(mixedRulesMessages.length, 'Mixed checkbox and custom rules all passing should deliver').to.equal(1);
+
+      await novuClient.trigger({
+        workflowId: template.triggers[0].identifier,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: multipleRulesTopicKey }],
+        payload: { price: 150, status: 'active', category: 'standard' },
+      });
+      await session.waitForJobCompletion(template._id);
+
+      const mixedRulesMessagesAfterSecondTrigger = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriberMixedRules._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(
+        mixedRulesMessagesAfterSecondTrigger.length,
+        'Mixed rules with second rule failing should not deliver additional message'
+      ).to.equal(1);
+    });
+
+    it('should handle workflow filter mismatches correctly', async () => {
+      const workflowMismatchTopicKey = `topic-key-workflow-mismatch-${Date.now()}`;
+
+      const differentTemplate = await session.createTemplate();
+      const subscriberConditionPassWorkflowFail = await subscriberService.createSubscriber();
+      const subscriberConditionFailWorkflowPass = await subscriberService.createSubscriber();
+      const subscriberCheckboxEnabledWorkflowFail = await subscriberService.createSubscriber();
+
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [subscriberConditionPassWorkflowFail.subscriberId],
+          rules: [
+            {
+              type: 'custom',
+              condition: {
+                '==': [{ var: 'payload.status' }, 'active'],
+              },
+              filter: {
+                workflows: [differentTemplate._id],
+              },
+            },
+          ],
+        } as any,
+        workflowMismatchTopicKey
+      );
+
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [subscriberConditionFailWorkflowPass.subscriberId],
+          rules: [
+            {
+              type: 'custom',
+              condition: {
+                '==': [{ var: 'payload.status' }, 'inactive'],
+              },
+              filter: {
+                workflows: [template._id],
+              },
+            },
+          ],
+        } as any,
+        workflowMismatchTopicKey
+      );
+
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [subscriberCheckboxEnabledWorkflowFail.subscriberId],
+          rules: [
+            {
+              type: 'checkbox',
+              condition: true,
+              filter: {
+                workflows: [differentTemplate._id],
+              },
+            },
+          ],
+        } as any,
+        workflowMismatchTopicKey
+      );
+
+      await novuClient.trigger({
+        workflowId: template.triggers[0].identifier,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: workflowMismatchTopicKey }],
+        payload: { status: 'active' },
+      });
+      await session.waitForJobCompletion(template._id);
+
+      const conditionPassWorkflowFailMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriberConditionPassWorkflowFail._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(
+        conditionPassWorkflowFailMessages.length,
+        'Condition passes but workflow filter does not match should not deliver'
+      ).to.equal(0);
+
+      const conditionFailWorkflowPassMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriberConditionFailWorkflowPass._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(
+        conditionFailWorkflowPassMessages.length,
+        'Condition fails but workflow filter matches should not deliver'
+      ).to.equal(0);
+
+      const checkboxEnabledWorkflowFailMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriberCheckboxEnabledWorkflowFail._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(
+        checkboxEnabledWorkflowFailMessages.length,
+        'Checkbox enabled but workflow filter does not match should not deliver'
+      ).to.equal(0);
+
+      await novuClient.trigger({
+        workflowId: differentTemplate.triggers[0].identifier,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: workflowMismatchTopicKey }],
+        payload: { status: 'active' },
+      });
+      await session.waitForJobCompletion(differentTemplate._id);
+
+      const conditionPassWorkflowMatchMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriberConditionPassWorkflowFail._id,
+        _templateId: differentTemplate._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(
+        conditionPassWorkflowMatchMessages.length,
+        'Condition passes and workflow filter matches should deliver'
+      ).to.equal(1);
     });
 
     it('should not contain events from a different digestKey ', async () => {

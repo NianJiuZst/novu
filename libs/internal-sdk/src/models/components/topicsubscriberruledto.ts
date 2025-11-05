@@ -18,7 +18,7 @@ import {
  * Type of condition rule
  */
 export const Type = {
-  Switch: "switch",
+  Checkbox: "checkbox",
   Custom: "custom",
 } as const;
 /**

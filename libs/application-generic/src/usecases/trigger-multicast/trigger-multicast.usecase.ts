@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
+  isSubscriptionCheckboxRule,
   isSubscriptionCustomRule,
-  isSubscriptionSwitchRule,
   NotificationTemplateRepository,
   TopicEntity,
   TopicRepository,
@@ -221,9 +221,9 @@ export class TriggerMulticast extends TriggerBase {
     organizationId: string,
     ruleIndex?: number
   ): Promise<boolean> {
-    if (isSubscriptionSwitchRule(rule)) {
+    if (isSubscriptionCheckboxRule(rule)) {
       if (rule.condition === false) {
-        this.logger.error({ nv: { ruleIndex, workflowId } }, 'Switch rule condition is false, returning false');
+        this.logger.error({ nv: { ruleIndex, workflowId } }, 'Checkbox rule condition is false, returning false');
         return false;
       }
 
