@@ -122,7 +122,6 @@ export const WorkflowRow = ({ workflow }: WorkflowRowProps) => {
   const isHttpLogsPageEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_HTTP_LOGS_PAGE_ENABLED, false);
   const triggeredFromApi = useHasApiTrigger({
     workflowId: workflow._id,
-    lastTriggeredAt: workflow.lastTriggeredAt,
   });
   const isV0Workflow = workflow.origin === ResourceOriginEnum.NOVU_CLOUD_V1;
   const isDuplicable =

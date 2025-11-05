@@ -196,7 +196,6 @@ function useChecklistItems(steps: Step[]) {
   const telemetry = useTelemetry();
   const triggeredFromApi = useHasApiTrigger({
     workflowId: workflow?._id,
-    lastTriggeredAt: workflow?.lastTriggeredAt,
   });
 
   const foundInAppIntegration = integrations?.find(
