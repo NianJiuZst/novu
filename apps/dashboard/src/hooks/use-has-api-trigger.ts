@@ -1,8 +1,6 @@
-import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { useQuery } from '@tanstack/react-query';
-import { getWorkflowRunsList } from '@/api/activity';
+import { getActivityList } from '@/api/activity';
 import { useEnvironment } from '@/context/environment/hooks';
-import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { QueryKeys } from '@/utils/query-keys';
 
 const STORAGE_KEY = 'novu_api_trigger_';
@@ -42,7 +40,6 @@ type UseHasApiTriggerOptions = {
 
 export function useHasApiTrigger({ workflowId, lastTriggeredAt }: UseHasApiTriggerOptions) {
   const { currentEnvironment } = useEnvironment();
-  const isWorkflowRunsEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_WORKFLOW_RUN_PAGE_MIGRATION_ENABLED);
 
   const { data: triggeredFromApi = false } = useQuery({
     queryKey: [QueryKeys.hasApiTrigger, currentEnvironment?._id, workflowId],
@@ -55,16 +52,21 @@ export function useHasApiTrigger({ workflowId, lastTriggeredAt }: UseHasApiTrigg
       if (cached) return true;
 
       try {
-        const { data: runs } = await getWorkflowRunsList({
+        const { data: activities } = await getActivityList({
           environment: currentEnvironment,
-          limit: 50,
+          page: 0,
+          limit: 10,
           filters: { workflows: [workflowId] },
           signal,
         });
 
-        if (!runs?.length) return false;
+        if (!activities?.length) return false;
 
-        const isApiTriggered = hasApiTrigger(runs);
+        const cutoffTimestamp = new Date(lastTriggeredAt);
+        const recentActivities = activities.filter((activity) => new Date(activity.createdAt) > cutoffTimestamp);
+        if (!recentActivities.length) return false;
+
+        const isApiTriggered = hasApiTrigger(recentActivities);
         if (isApiTriggered) {
           cacheApiTrigger(currentEnvironment._id, workflowId);
         }
@@ -74,7 +76,7 @@ export function useHasApiTrigger({ workflowId, lastTriggeredAt }: UseHasApiTrigg
         return false;
       }
     },
-    enabled: isWorkflowRunsEnabled && !!currentEnvironment?._id && !!workflowId && !!lastTriggeredAt,
+    enabled: !!currentEnvironment?._id && !!workflowId && !!lastTriggeredAt,
     staleTime: 60_000,
     gcTime: 300_000,
     retry: false,
