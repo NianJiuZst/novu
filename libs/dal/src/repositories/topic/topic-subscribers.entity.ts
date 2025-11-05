@@ -25,19 +25,19 @@ export type Filter = {
 };
 
 export type CustomRule = {
-  filter?: Filter;
+  filter: Filter;
   type: ConditionType.CUSTOM;
   condition: RulesLogic<AdditionalOperation>;
 };
 
 export type SwitchRule = {
-  filter?: Filter;
+  filter: Filter;
   type: ConditionType.SWITCH;
   condition: boolean;
 };
 
 export type TopicSubscriberRule = {
-  filter?: Filter;
+  filter: Filter;
   type: ConditionType;
   condition: boolean | RulesLogic<AdditionalOperation>;
 };
