@@ -11,6 +11,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useEnvironment, useFetchEnvironments } from '@/context/environment/hooks';
 import { useFetchIntegrations } from '@/hooks/use-fetch-integrations';
+import { useHasApiTrigger } from '@/hooks/use-has-api-trigger';
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { StepTypeEnum } from '@/utils/enums';
 import { buildRoute, ROUTES } from '@/utils/routes';
@@ -193,6 +194,10 @@ function useChecklistItems(steps: Step[]) {
   const { workflow } = useWorkflow();
   const { integrations } = useFetchIntegrations();
   const telemetry = useTelemetry();
+  const triggeredFromApi = useHasApiTrigger({
+    workflowId: workflow?._id,
+    lastTriggeredAt: workflow?.lastTriggeredAt,
+  });
 
   const foundInAppIntegration = integrations?.find(
     (integration) =>
@@ -257,7 +262,7 @@ function useChecklistItems(steps: Step[]) {
         key: 'trigger',
         title: 'Trigger workflow from your application',
         description: 'Trigger the workflow to test it in production',
-        isCompleted: () => !!workflow?.lastTriggeredAt,
+        isCompleted: () => !!workflow?.lastTriggeredAt && triggeredFromApi,
         onClick: () => {
           telemetry(TelemetryEvent.WORKFLOW_CHECKLIST_STEP_CLICKED, { stepTitle: 'Trigger workflow' });
           navigate(
@@ -273,7 +278,7 @@ function useChecklistItems(steps: Step[]) {
         },
       },
     ],
-    [currentEnvironment, workflow, foundInAppIntegration, navigate, steps, telemetry]
+    [currentEnvironment, workflow, foundInAppIntegration, navigate, steps, telemetry, triggeredFromApi]
   );
 }
 

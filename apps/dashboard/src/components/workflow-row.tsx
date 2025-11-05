@@ -13,7 +13,6 @@ import { FaCode } from 'react-icons/fa6';
 import { LuBookUp2 } from 'react-icons/lu';
 import {
   RiDeleteBin2Line,
-  RiErrorWarningLine,
   RiFlashlightLine,
   RiMore2Fill,
   RiPauseCircleLine,
@@ -49,6 +48,7 @@ import { useAuth } from '@/context/auth/hooks';
 import { useEnvironment, useFetchEnvironments } from '@/context/environment/hooks';
 import { useDeleteWorkflow } from '@/hooks/use-delete-workflow';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
+import { useHasApiTrigger } from '@/hooks/use-has-api-trigger';
 import { useHasPermission } from '@/hooks/use-has-permission';
 import { usePatchWorkflow } from '@/hooks/use-patch-workflow';
 import { useSyncWorkflow } from '@/hooks/use-sync-workflow';
@@ -120,6 +120,10 @@ export const WorkflowRow = ({ workflow }: WorkflowRowProps) => {
   const navigate = useNavigate();
   const { safeSync, PromoteConfirmModal } = useSyncWorkflow(workflow);
   const isHttpLogsPageEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_HTTP_LOGS_PAGE_ENABLED, false);
+  const triggeredFromApi = useHasApiTrigger({
+    workflowId: workflow._id,
+    lastTriggeredAt: workflow.lastTriggeredAt,
+  });
   const isV0Workflow = workflow.origin === ResourceOriginEnum.NOVU_CLOUD_V1;
   const isDuplicable =
     workflow.origin === ResourceOriginEnum.NOVU_CLOUD && currentEnvironment?.type === EnvironmentTypeEnum.DEV;
@@ -355,7 +359,7 @@ export const WorkflowRow = ({ workflow }: WorkflowRowProps) => {
         </WorkflowLinkTableCell>
 
         <WorkflowLinkTableCell className="text-foreground-600 text-sm font-medium">
-          {workflow.lastTriggeredAt ? (
+          {workflow.lastTriggeredAt && triggeredFromApi ? (
             <TimeDisplayHoverCard date={new Date(workflow.lastTriggeredAt)}>
               {formatDateSimple(workflow.lastTriggeredAt)}
             </TimeDisplayHoverCard>
@@ -369,9 +373,8 @@ export const WorkflowRow = ({ workflow }: WorkflowRowProps) => {
                     return url.pathname + url.search;
                   })()}
                   reloadDocument={isV0Workflow}
-                  className="text-warning-base flex items-center gap-1 text-xs font-medium hover:underline"
+                  className="text-foreground-600 text-sm font-medium hover:underline"
                 >
-                  <RiErrorWarningLine className="size-3.5" />
                   Never triggered
                 </Link>
               </TooltipTrigger>
