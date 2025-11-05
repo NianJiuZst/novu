@@ -242,6 +242,48 @@ export class TopicSubscribersRepository extends BaseRepository<
     });
   }
 
+  async countSubscriptionsPerSubscriber({
+    environmentId,
+    organizationId,
+    topicId,
+    subscriberIds,
+  }: {
+    environmentId: EnvironmentId;
+    organizationId: OrganizationId;
+    topicId: TopicId;
+    subscriberIds: string[];
+  }): Promise<Map<string, number>> {
+    if (subscriberIds.length === 0) {
+      return new Map();
+    }
+
+    const aggregationResults = await this.aggregate([
+      {
+        $match: {
+          _environmentId: this.convertStringToObjectId(environmentId),
+          _organizationId: this.convertStringToObjectId(organizationId),
+          _topicId: this.convertStringToObjectId(topicId),
+          _subscriberId: {
+            $in: subscriberIds.map((id) => this.convertStringToObjectId(id)),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$_subscriberId',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const countMap = new Map<string, number>();
+    for (const result of aggregationResults) {
+      countMap.set(result._id.toString(), result.count);
+    }
+
+    return countMap;
+  }
+
   async findTopicSubscriptionsWithPagination({
     environmentId,
     organizationId,

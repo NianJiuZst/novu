@@ -120,14 +120,23 @@ export class CreateTopicSubscriptionsUsecase {
 
     const existingSubscriptions = await this.topicSubscribersRepository.find(existingSubscriptionsQuery as any);
 
-    const existingSubscriberIds = existingSubscriptions.map((sub) => sub._subscriberId.toString());
-    const subscribersToCreate = foundSubscribers.filter((sub) => !existingSubscriberIds.includes(sub._id.toString()));
+    const existingSubscriberIds = existingSubscriptions.map((sub) => sub._subscriberId);
+    const subscribersToCreate = foundSubscribers.filter((sub) => !existingSubscriberIds.includes(sub._id));
+
+    const { validSubscribers, limitErrors } = await this.validateSubscriptionLimit(
+      topic,
+      subscribersToCreate,
+      command.environmentId,
+      command.organizationId
+    );
+
+    errors.push(...limitErrors);
 
     let newSubscriptions: TopicSubscribersEntity[] = [];
-    if (subscribersToCreate.length > 0) {
+    if (validSubscribers.length > 0) {
       const subscriptionsToCreate = this.buildSubscriptionEntity(
         topic,
-        subscribersToCreate,
+        validSubscribers,
         ruleEntity,
         rulesHash,
         subscriptionsWorkflows
@@ -135,7 +144,20 @@ export class CreateTopicSubscriptionsUsecase {
       const bulkResult: BulkAddTopicSubscribersResult =
         await this.topicSubscribersRepository.createSubscriptions(subscriptionsToCreate);
 
-      newSubscriptions = [...bulkResult.created, ...bulkResult.updated];
+      const updatedSubscriptionsWithId: TopicSubscribersEntity[] = [];
+      if (bulkResult.updated.length > 0) {
+        const updatedSubscriberIds = bulkResult.updated.map((sub) => sub._subscriberId);
+        const fetchedUpdated = await this.topicSubscribersRepository.find({
+          _environmentId: command.environmentId,
+          _organizationId: command.organizationId,
+          _topicId: topic._id,
+          _subscriberId: { $in: updatedSubscriberIds },
+          ...(rulesHash ? { rulesHash } : { rulesHash: { $exists: false } }),
+        });
+        updatedSubscriptionsWithId.push(...fetchedUpdated);
+      }
+
+      newSubscriptions = [...bulkResult.created, ...updatedSubscriptionsWithId];
 
       for (const failure of bulkResult.failed) {
         errors.push({
@@ -149,10 +171,10 @@ export class CreateTopicSubscriptionsUsecase {
     const allSubscriptions = [...existingSubscriptions, ...newSubscriptions];
     // Map subscriptions to response format
     for (const subscription of allSubscriptions) {
-      const subscriber = foundSubscribers.find((sub) => sub._id.toString() === subscription._subscriberId.toString());
+      const subscriber = foundSubscribers.find((sub) => sub._id === subscription._subscriberId);
 
       subscriptionData.push({
-        _id: subscription._id.toString(),
+        _id: subscription._id,
         topic: {
           _id: topic._id,
           key: topic.key,
@@ -234,6 +256,60 @@ export class CreateTopicSubscriptionsUsecase {
         type: ConditionType.CUSTOM,
       } satisfies CustomRule;
     });
+  }
+
+  private async validateSubscriptionLimit(
+    topic: TopicEntity,
+    subscribers: SubscriberEntity[],
+    environmentId: string,
+    organizationId: string
+  ): Promise<{
+    validSubscribers: SubscriberEntity[];
+    limitErrors: SubscriptionErrorDto[];
+  }> {
+    const MAX_SUBSCRIPTIONS_PER_SUBSCRIBER = 10;
+    const BATCH_SIZE = 100;
+
+    if (subscribers.length === 0) {
+      return { validSubscribers: [], limitErrors: [] };
+    }
+
+    const subscriberCountMap = new Map<string, number>();
+
+    for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
+      const batch = subscribers.slice(i, i + BATCH_SIZE);
+      const subscriberIds = batch.map((sub) => sub._id.toString());
+
+      const batchCountMap = await this.topicSubscribersRepository.countSubscriptionsPerSubscriber({
+        environmentId,
+        organizationId,
+        topicId: topic._id,
+        subscriberIds,
+      });
+
+      for (const [subscriberId, count] of batchCountMap.entries()) {
+        subscriberCountMap.set(subscriberId, count);
+      }
+    }
+
+    const validSubscribers: SubscriberEntity[] = [];
+    const limitErrors: SubscriptionErrorDto[] = [];
+
+    for (const subscriber of subscribers) {
+      const count = subscriberCountMap.get(subscriber._id) || 0;
+
+      if (count >= MAX_SUBSCRIPTIONS_PER_SUBSCRIBER) {
+        limitErrors.push({
+          subscriberId: subscriber.subscriberId,
+          code: 'SUBSCRIPTION_LIMIT_EXCEEDED',
+          message: `Subscriber ${subscriber.subscriberId} has reached the maximum allowed of ${MAX_SUBSCRIPTIONS_PER_SUBSCRIBER} subscriptions for topic "${topic.key}"`,
+        });
+      } else {
+        validSubscribers.push(subscriber);
+      }
+    }
+
+    return { validSubscribers, limitErrors };
   }
 
   private buildSubscriptionEntity(
