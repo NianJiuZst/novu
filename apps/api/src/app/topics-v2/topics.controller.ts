@@ -288,6 +288,8 @@ export class TopicsController {
         topicKey,
         subscriberIds: body.subscriberIds,
         rules: body.rules,
+        name: body.name,
+        identifier: body.identifier,
       })
     );
 
@@ -383,6 +385,7 @@ export class TopicsController {
         topicKey,
         subscriptionId,
         rules: body.rules,
+        name: body.name,
       })
     );
   }

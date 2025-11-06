@@ -7,30 +7,25 @@ const topicSubscribersSchema = new Schema<TopicSubscribersDBModel>(
     _environmentId: {
       type: Schema.Types.ObjectId,
       ref: 'Environment',
-      index: true,
       required: true,
     },
     _organizationId: {
       type: Schema.Types.ObjectId,
       ref: 'Organization',
-      index: true,
       required: true,
     },
     _subscriberId: {
       type: Schema.Types.ObjectId,
       ref: 'Subscriber',
-      index: true,
       required: true,
     },
     _topicId: {
       type: Schema.Types.ObjectId,
       ref: 'Topic',
-      index: true,
       required: true,
     },
     topicKey: {
       type: Schema.Types.String,
-      index: true,
       required: true,
     },
     name: {
@@ -54,9 +49,13 @@ const topicSubscribersSchema = new Schema<TopicSubscribersDBModel>(
   schemaOptions
 );
 
-topicSubscribersSchema.index({
-  _environmentId: 1,
-});
+topicSubscribersSchema.index(
+  {
+    _environmentId: 1,
+    identifier: 1,
+  },
+  { unique: true }
+);
 
 topicSubscribersSchema.index({
   _subscriberId: 1,

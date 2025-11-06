@@ -1,6 +1,6 @@
 import { ApiExtraModels, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsOptional, ValidateNested } from 'class-validator';
+import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { TopicSubscriberRuleDto } from './create-topic-subscriptions.dto';
 
 @ApiExtraModels(TopicSubscriberRuleDto)
@@ -18,4 +18,13 @@ export class UpdateTopicSubscriptionRequestDto {
   @Type(() => TopicSubscriberRuleDto)
   @IsOptional()
   rules?: TopicSubscriberRuleDto[];
+
+  @ApiPropertyOptional({
+    description: 'Name for the subscription',
+    example: 'My Subscription',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
+  name?: string;
 }

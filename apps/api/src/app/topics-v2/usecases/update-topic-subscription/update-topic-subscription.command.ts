@@ -11,4 +11,8 @@ export class UpdateTopicSubscriptionCommand extends EnvironmentWithUserCommand {
 
   @IsOptional()
   rules?: TopicSubscriberRuleDto[];
+
+  @IsOptional()
+  @IsString()
+  name?: string;
 }

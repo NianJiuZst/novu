@@ -139,7 +139,9 @@ export class CreateTopicSubscriptionsUsecase {
         validSubscribers,
         ruleEntity,
         rulesHash,
-        subscriptionsWorkflows
+        subscriptionsWorkflows,
+        command.name,
+        command.identifier
       );
       const bulkResult: BulkAddTopicSubscribersResult =
         await this.topicSubscribersRepository.createSubscriptions(subscriptionsToCreate);
@@ -317,18 +319,26 @@ export class CreateTopicSubscriptionsUsecase {
     subscribers: SubscriberEntity[],
     rules?: TopicSubscriberRule[],
     rulesHash?: string,
-    subscriptionsWorkflows?: { _id: string; enabled: boolean }[]
+    subscriptionsWorkflows?: { _id: string; enabled: boolean }[],
+    name?: string,
+    identifier?: string
   ): CreateTopicSubscribersEntity[] {
-    return subscribers.map((subscriber) => ({
-      _environmentId: subscriber._environmentId,
-      _organizationId: subscriber._organizationId,
-      _subscriberId: subscriber._id,
-      _topicId: topic._id,
-      topicKey: topic.key,
-      externalSubscriberId: subscriber.subscriberId,
-      rules,
-      rulesHash,
-      workflows: subscriptionsWorkflows,
-    }));
+    return subscribers.map((subscriber) => {
+      const generatedIdentifier = identifier || `tk=${topic.key}:si=${subscriber.subscriberId}`;
+
+      return {
+        _environmentId: subscriber._environmentId,
+        _organizationId: subscriber._organizationId,
+        _subscriberId: subscriber._id,
+        _topicId: topic._id,
+        topicKey: topic.key,
+        externalSubscriberId: subscriber.subscriberId,
+        name,
+        identifier: generatedIdentifier,
+        rules,
+        rulesHash,
+        workflows: subscriptionsWorkflows,
+      };
+    });
   }
 }

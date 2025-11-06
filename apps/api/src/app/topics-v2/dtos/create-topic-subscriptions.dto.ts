@@ -100,4 +100,23 @@ export class CreateTopicSubscriptionsRequestDto {
   @Type(() => TopicSubscriberRuleDto)
   @IsOptional()
   rules?: TopicSubscriberRuleDto[];
+
+  @ApiPropertyOptional({
+    description: 'Name for the subscription',
+    example: 'My Subscription',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Identifier for the subscription. If not provided, will be auto-generated in format: tk=<TOPIC_KEY>:si=<SUBSCRIBER_IDENTIFIER>',
+    example: 'tk=my-topic:si=subscriber-123',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
+  identifier?: string;
 }

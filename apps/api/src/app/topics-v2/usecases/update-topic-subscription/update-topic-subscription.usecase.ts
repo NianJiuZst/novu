@@ -63,6 +63,10 @@ export class UpdateTopicSubscriptionUsecase {
       updateData.rulesHash = rulesHash;
     }
 
+    if (command.name !== undefined) {
+      updateData.name = command.name;
+    }
+
     if (Object.keys(updateData).length === 0) {
       const subscriber = await this.subscriberRepository.findOne({
         _id: subscription._subscriberId,
