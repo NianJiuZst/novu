@@ -229,37 +229,47 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
 
   it('should create multiple subscriptions for the same subscriber with different conditions', async () => {
     const topicKey = `topic-key-conditions-${Date.now()}`;
-    const conditionsA = { status: 'active', priority: 'high' };
+    const rulesA = [
+      {
+        filter: { workflows: ['workflow-1'] },
+        type: ConditionType.CUSTOM,
+        condition: {
+          and: [{ '==': [{ var: 'status' }, 'active'] }, { '==': [{ var: 'priority' }, 'high'] }],
+        },
+      },
+    ];
     const responseA = await novuClient.topics.subscriptions.create(
       {
         subscriberIds: [subscriber1.subscriberId],
-        conditions: conditionsA,
-        workflows: { ids: ['workflow-1', 'workflow-2'] },
-      } as any,
+        rules: rulesA,
+      },
       topicKey
     );
 
-    expect(responseA.result.data[0].workflows?.length).to.equal(2);
-    expect(responseA.result.data[0].workflows?.[0]?.id).to.be.oneOf(['workflow-1', 'workflow-2']);
-    expect(responseA.result.data[0].workflows?.[0]?.enabled).to.equal(true);
-    expect(responseA.result.data[0].workflows?.[1]?.id).to.be.oneOf(['workflow-1', 'workflow-2']);
-    expect(responseA.result.data[0].workflows?.[1]?.enabled).to.equal(true);
+    expect(responseA.result.data.length).to.equal(1);
+    expect(responseA.result.data[0].id).to.exist;
+    expect(responseA.result.data[0].topic.key).to.equal(topicKey);
 
-    const conditionsB = { status: 'pending', priority: 'low' };
+    const rulesB = [
+      {
+        filter: { workflows: ['workflow-2'] },
+        type: ConditionType.CUSTOM,
+        condition: {
+          and: [{ '==': [{ var: 'status' }, 'pending'] }, { '==': [{ var: 'priority' }, 'low'] }],
+        },
+      },
+    ];
     const responseB = await novuClient.topics.subscriptions.create(
       {
         subscriberIds: [subscriber1.subscriberId],
-        conditions: conditionsB,
-        workflows: { ids: ['workflow-3', 'workflow-4'] },
-      } as any,
+        rules: rulesB,
+      },
       topicKey
     );
 
-    expect(responseB.result.data[0].workflows?.length).to.equal(2);
-    expect(responseB.result.data[0].workflows?.[0]?.id).to.be.oneOf(['workflow-3', 'workflow-4']);
-    expect(responseB.result.data[0].workflows?.[0]?.enabled).to.equal(true);
-    expect(responseB.result.data[0].workflows?.[1]?.id).to.be.oneOf(['workflow-3', 'workflow-4']);
-    expect(responseB.result.data[0].workflows?.[1]?.enabled).to.equal(true);
+    expect(responseB.result.data.length).to.equal(1);
+    expect(responseB.result.data[0].id).to.exist;
+    expect(responseB.result.data[0].topic.key).to.equal(topicKey);
 
     const subscriptions = await topicSubscribersRepository.find({
       _environmentId: session.environment._id,
@@ -270,15 +280,14 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
 
     expect(subscriptions.length).to.equal(2);
 
-    const hashes = subscriptions.map((s) => s.conditionHash);
+    const hashes = subscriptions.map((s) => s.rulesHash);
     expect(new Set(hashes).size).to.equal(2);
 
     await novuClient.topics.subscriptions.create(
       {
         subscriberIds: [subscriber1.subscriberId],
-        conditions: conditionsA,
-        workflows: { ids: ['workflow-1', 'workflow-2'] },
-      } as any,
+        rules: rulesA,
+      },
       topicKey
     );
 
@@ -333,9 +342,14 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
         await novuClient.topics.subscriptions.create(
           {
             subscriberIds: [subscriber1.subscriberId],
-            conditions: { index: 11, unique: 'value-11' },
-            workflows: { ids: ['workflow-11'] },
-          } as any,
+            rules: [
+              {
+                filter: { workflows: [`workflow-${MAX_SUBSCRIPTIONS_PER_SUBSCRIBER}`] },
+                type: ConditionType.CHECKBOX,
+                condition: true,
+              },
+            ],
+          },
           topicKey
         );
         // Should never reach here - request should throw an error

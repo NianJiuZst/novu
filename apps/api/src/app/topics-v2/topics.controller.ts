@@ -25,7 +25,7 @@ import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.de
 import { SdkGroupName, SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 import { UserSession } from '../shared/framework/user.decorator';
 import { CreateTopicSubscriptionsRequestDto } from './dtos/create-topic-subscriptions.dto';
-import { CreateTopicSubscriptionsResponseDto } from './dtos/create-topic-subscriptions-response.dto';
+import { CreateTopicSubscriptionsResponseDto, SubscriptionDto } from './dtos/create-topic-subscriptions-response.dto';
 import { CreateUpdateTopicRequestDto } from './dtos/create-update-topic.dto';
 import { DeleteTopicResponseDto } from './dtos/delete-topic-response.dto';
 import { DeleteTopicSubscriptionsRequestDto } from './dtos/delete-topic-subscriptions.dto';
@@ -36,6 +36,7 @@ import { ListTopicsQueryDto } from './dtos/list-topics-query.dto';
 import { ListTopicsResponseDto } from './dtos/list-topics-response.dto';
 import { TopicResponseDto } from './dtos/topic-response.dto';
 import { UpdateTopicRequestDto } from './dtos/update-topic.dto';
+import { UpdateTopicSubscriptionRequestDto } from './dtos/update-topic-subscription.dto';
 import { CreateTopicSubscriptionsCommand } from './usecases/create-topic-subscriptions/create-topic-subscriptions.command';
 import { CreateTopicSubscriptionsUsecase } from './usecases/create-topic-subscriptions/create-topic-subscriptions.usecase';
 import { DeleteTopicCommand } from './usecases/delete-topic/delete-topic.command';
@@ -50,6 +51,8 @@ import { ListTopicsCommand } from './usecases/list-topics/list-topics.command';
 import { ListTopicsUseCase } from './usecases/list-topics/list-topics.usecase';
 import { UpdateTopicCommand } from './usecases/update-topic/update-topic.command';
 import { UpdateTopicUseCase } from './usecases/update-topic/update-topic.usecase';
+import { UpdateTopicSubscriptionCommand } from './usecases/update-topic-subscription/update-topic-subscription.command';
+import { UpdateTopicSubscriptionUsecase } from './usecases/update-topic-subscription/update-topic-subscription.usecase';
 import { UpsertTopicCommand } from './usecases/upsert-topic/upsert-topic.command';
 import { UpsertTopicUseCase } from './usecases/upsert-topic/upsert-topic.usecase';
 
@@ -69,7 +72,8 @@ export class TopicsController {
     private deleteTopicUsecase: DeleteTopicUseCase,
     private listTopicSubscriptionsUsecase: ListTopicSubscriptionsUseCase,
     private createTopicSubscriptionsUsecase: CreateTopicSubscriptionsUsecase,
-    private deleteTopicSubscriptionsUsecase: DeleteTopicSubscriptionsUsecase
+    private deleteTopicSubscriptionsUsecase: DeleteTopicSubscriptionsUsecase,
+    private updateTopicSubscriptionUsecase: UpdateTopicSubscriptionUsecase
   ) {}
 
   @Get('')
@@ -351,5 +355,35 @@ export class TopicsController {
 
     // All subscriptions were successfully deleted
     return typeSafeResult;
+  }
+
+  @Patch('/:topicKey/subscriptions/:subscriptionId')
+  @ExternalApiAccessible()
+  @SdkGroupName('Topics.Subscriptions')
+  @SdkMethodName('update')
+  @ApiOperation({
+    summary: 'Update a topic subscription',
+    description: `Update a subscription by its unique identifier **subscriptionId** for a topic. You can update the rules and workflows associated with the subscription.`,
+  })
+  @ApiParam({ name: 'topicKey', description: 'The key identifier of the topic', type: String })
+  @ApiParam({ name: 'subscriptionId', description: 'The unique identifier of the subscription', type: String })
+  @ApiResponse(SubscriptionDto, 200)
+  @RequirePermissions(PermissionsEnum.TOPIC_WRITE)
+  async updateTopicSubscription(
+    @UserSession() user: UserSessionData,
+    @Param('topicKey') topicKey: string,
+    @Param('subscriptionId') subscriptionId: string,
+    @Body() body: UpdateTopicSubscriptionRequestDto
+  ): Promise<SubscriptionDto> {
+    return await this.updateTopicSubscriptionUsecase.execute(
+      UpdateTopicSubscriptionCommand.create({
+        environmentId: user.environmentId,
+        organizationId: user.organizationId,
+        userId: user._id,
+        topicKey,
+        subscriptionId,
+        rules: body.rules,
+      })
+    );
   }
 }

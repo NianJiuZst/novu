@@ -252,6 +252,7 @@ export * from "./updatelayoutdto.js";
 export * from "./updatesubscriberchannelrequestdto.js";
 export * from "./updatesubscriberonlineflagrequestdto.js";
 export * from "./updatetopicrequestdto.js";
+export * from "./updatetopicsubscriptionrequestdto.js";
 export * from "./updateworkflowdto.js";
 export * from "./uploadtranslationsrequestdto.js";
 export * from "./uploadtranslationsresponsedto.js";
