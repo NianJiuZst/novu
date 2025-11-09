@@ -1,5 +1,5 @@
 {
-  "include": ["src"],
+  "include": ["src/**/*", "src/**/*.d.ts"],
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "target": "ES6",

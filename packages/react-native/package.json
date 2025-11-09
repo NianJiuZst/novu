@@ -46,10 +46,13 @@
     "typescript": "5.6.2"
   },
   "peerDependencies": {
-    "react": ">=17"
+    "react": ">=17",
+    "react-native": ">=0.51.0"
   },
   "dependencies": {
-    "@novu/react": "workspace:*"
+    "@novu/react": "workspace:*",
+    "@ungap/event": "^0.2.2",
+    "@ungap/event-target": "^0.2.4"
   },
   "nx": {
     "tags": [
