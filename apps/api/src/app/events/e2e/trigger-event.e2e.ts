@@ -3577,6 +3577,69 @@ describe('Trigger event - /v1/events/trigger (POST) #novu-v2', () => {
       expect(notSkippedMessages.length).to.equal(1);
     });
 
+    it('should execute step based on array item conditions', async () => {
+      const workflowBody: CreateWorkflowDto = {
+        name: 'Test Array Item Conditions Workflow',
+        workflowId: 'test-array-item-conditions-workflow',
+        __source: WorkflowCreationSourceEnum.DASHBOARD,
+        steps: [
+          {
+            type: StepTypeEnum.IN_APP,
+            name: 'Message Name',
+            controlValues: {
+              body: 'Hello {{subscriber.lastName}}, Welcome!',
+              skip: {
+                '==': [{ var: 'payload.criteria.0.code' }, 'poi'],
+              },
+            },
+          },
+        ],
+      };
+
+      const response = await session.testAgent.post('/v2/workflows').send(workflowBody);
+      expect(response.status).to.equal(201);
+      const workflow: WorkflowResponseDto = response.body.data;
+
+      subscriber = await subscriberService.createSubscriber();
+
+      // Should execute step - matches array item condition
+      await novuClient.trigger({
+        workflowId: workflow.workflowId,
+        to: [subscriber.subscriberId],
+        payload: {
+          criteria: [
+            { code: 'poi', state: 'approved' },
+            { code: 'poa', state: 'pending' },
+          ],
+        },
+      });
+      await session.waitForJobCompletion(workflow._id);
+      const matchedMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriber._id,
+      });
+      expect(matchedMessages.length).to.equal(1);
+
+      // Should not execute step - doesn't match array item condition
+      subscriber = await subscriberService.createSubscriber();
+      await novuClient.trigger({
+        workflowId: workflow.workflowId,
+        to: [subscriber.subscriberId],
+        payload: {
+          criteria: [
+            { code: 'poa', state: 'approved' },
+            { code: 'poi', state: 'pending' },
+          ],
+        },
+      });
+      await session.waitForJobCompletion(workflow._id);
+      const skippedMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: subscriber._id,
+      });
+      expect(skippedMessages.length).to.equal(0);
+    });
+
     it('should successfully trigger a workflow with SMS followed by in-app notification', async () => {
       const workflowBody: CreateWorkflowDto = {
         name: 'Test SMS -> In-App Workflow',

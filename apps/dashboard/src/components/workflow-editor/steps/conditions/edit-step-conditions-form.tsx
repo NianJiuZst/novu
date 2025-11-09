@@ -36,12 +36,19 @@ const PAYLOAD_FIELD_PREFIX = 'payload.';
 const SUBSCRIBER_DATA_FIELD_PREFIX = 'subscriber.data.';
 const CONTEXT_FIELD_PREFIX = 'context.';
 
-// Custom rule processor to handle relative date operators
+// Custom rule processor to handle relative date operators and normalize array bracket notation
 const customRuleProcessor = (rule: RuleType, options: any) => {
+  // Normalize array bracket notation to dot notation for JsonLogic compatibility
+  // JsonLogic doesn't support criteria[0].code, it needs criteria.0.code
+  const normalizedRule = {
+    ...rule,
+    field: rule.field.replace(/\[(\d+)\]/g, '.$1'),
+  };
+
   // Handle relative date operators
-  if (isRelativeDateOperator(rule.operator)) {
+  if (isRelativeDateOperator(normalizedRule.operator)) {
     try {
-      const parsedValue = JSON.parse(rule.value as string);
+      const parsedValue = JSON.parse(normalizedRule.value as string);
 
       if (
         parsedValue &&
@@ -49,18 +56,18 @@ const customRuleProcessor = (rule: RuleType, options: any) => {
         parsedValue.unit
       ) {
         const result = {
-          [rule.operator]: [{ var: rule.field }, parsedValue],
+          [normalizedRule.operator]: [{ var: normalizedRule.field }, parsedValue],
         };
 
         return result;
       }
     } catch (error) {
-      console.warn('Failed to parse relative date value:', rule.value, error);
+      console.warn('Failed to parse relative date value:', normalizedRule.value, error);
     }
   }
 
   // Fall back to the default rule processor for all other operators
-  return defaultRuleProcessorJsonLogic(rule, options);
+  return defaultRuleProcessorJsonLogic(normalizedRule, options);
 };
 
 const getRuleSchema = (

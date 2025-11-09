@@ -1154,6 +1154,76 @@ describe('Message filter matcher', () => {
       expect(result.filters).to.contain('online');
     });
   });
+
+  it('should correctly match array item conditions with nested properties', async () => {
+    const matchedMessage = await conditionsFilter.filter(
+      mapConditionsFilterCommand({
+        step: makeStep('Array Item Match', FieldLogicalOperatorEnum.AND, [
+          {
+            operator: FieldOperatorEnum.EQUAL,
+            value: 'poi',
+            field: 'criteria.0.code',
+            on: FilterPartTypeEnum.PAYLOAD,
+          },
+        ]),
+        variables: {
+          payload: {
+            criteria: [
+              {
+                state: 'approved',
+                verifier: 'onfido',
+                doc_type: 'passport',
+                code: 'poi',
+              },
+              {
+                state: 'approved',
+                verifier: 'deriv_kyc',
+                doc_type: 'physical',
+                code: 'poa',
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(matchedMessage.passed).to.equal(true);
+  });
+
+  it('should correctly fail when array item value does not match', async () => {
+    const matchedMessage = await conditionsFilter.filter(
+      mapConditionsFilterCommand({
+        step: makeStep('Array Item No Match', FieldLogicalOperatorEnum.AND, [
+          {
+            operator: FieldOperatorEnum.EQUAL,
+            value: 'poa',
+            field: 'criteria.0.code',
+            on: FilterPartTypeEnum.PAYLOAD,
+          },
+        ]),
+        variables: {
+          payload: {
+            criteria: [
+              {
+                state: 'approved',
+                verifier: 'onfido',
+                doc_type: 'passport',
+                code: 'poi',
+              },
+              {
+                state: 'approved',
+                verifier: 'deriv_kyc',
+                doc_type: 'physical',
+                code: 'poa',
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(matchedMessage.passed).to.equal(false);
+  });
 });
 
 function makeStep(
