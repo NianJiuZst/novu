@@ -1,3 +1,5 @@
+import 'event-target-polyfill';
+
 import { WebSocket } from 'partysocket';
 import { InboxService } from '../api';
 import { BaseModule } from '../base-module';
