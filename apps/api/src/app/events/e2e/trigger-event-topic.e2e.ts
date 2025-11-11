@@ -6,7 +6,13 @@ import {
   TriggerEventRequestDto,
   TriggerRecipientsTypeEnum,
 } from '@novu/api/models/components';
-import { MessageRepository, NotificationRepository, NotificationTemplateEntity, SubscriberEntity } from '@novu/dal';
+import {
+  MessageRepository,
+  NotificationRepository,
+  NotificationTemplateEntity,
+  SubscriberEntity,
+  TopicRepository,
+} from '@novu/dal';
 import {
   ChannelTypeEnum,
   DigestTypeEnum,
@@ -29,6 +35,7 @@ describe('Topic Trigger Event #novu-v2', () => {
     let secondSubscriber: SubscriberEntity;
     let subscribers: SubscriberEntity[];
     let subscriberService: SubscribersService;
+    let topicRepository: TopicRepository;
     let createdTopicDto: TopicResponseDto;
     let to: Array<TopicPayloadDto | SubscriberPayloadDto | string>;
     const notificationRepository = new NotificationRepository();
@@ -36,21 +43,28 @@ describe('Topic Trigger Event #novu-v2', () => {
     let novuClient: Novu;
 
     beforeEach(async () => {
-      session = new UserSession();
-      await session.initialize();
+      try {
+        session = new UserSession();
+        await session.initialize();
 
-      template = await session.createTemplate();
-      subscriberService = new SubscribersService(session.organization._id, session.environment._id);
-      firstSubscriber = await subscriberService.createSubscriber();
-      secondSubscriber = await subscriberService.createSubscriber();
-      subscribers = [firstSubscriber, secondSubscriber];
+        template = await session.createTemplate();
+        subscriberService = new SubscribersService(session.organization._id, session.environment._id);
+        topicRepository = new TopicRepository();
+        firstSubscriber = await subscriberService.createSubscriber();
+        secondSubscriber = await subscriberService.createSubscriber();
+        subscribers = [firstSubscriber, secondSubscriber];
 
-      const topicKey = 'topic-key-trigger-event';
-      const topicName = 'topic-name-trigger-event';
-      createdTopicDto = await createTopic(session, topicKey, topicName);
-      await addSubscribersToTopic(session, createdTopicDto, subscribers);
-      to = [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: createdTopicDto.key }];
-      novuClient = initNovuClassSdk(session);
+        const topicKey = 'topic-key-trigger-event';
+        const topicName = 'topic-name-trigger-event';
+        createdTopicDto = await createTopic(session, topicKey, topicName);
+        await addSubscribersToTopic(session, createdTopicDto, subscribers);
+        to = [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: createdTopicDto.key }];
+        novuClient = initNovuClassSdk(session);
+      } catch (error) {
+        console.error('Error in beforeEach');
+        console.error(error);
+        throw error;
+      }
     });
 
     it('should trigger an event successfully', async () => {
@@ -342,6 +356,117 @@ describe('Topic Trigger Event #novu-v2', () => {
         expect(message?._subscriberId.toString()).to.be.eql(subscriber._id);
         expect(message?.phone).to.equal(subscriber.phone);
       }
+    });
+
+    it('should deliver only to subscriptions with passing conditions', async () => {
+      const conditionsTopicKey = `topic-key-conditions-${Date.now()}`;
+
+      const newSubscriber = await subscriberService.createSubscriber();
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [newSubscriber.subscriberId],
+          preferences: [
+            {
+              filter: {
+                workflowIds: [template._id],
+              },
+              condition: {
+                and: [
+                  {
+                    '==': [
+                      {
+                        var: 'payload.status',
+                      },
+                      'completed',
+                    ],
+                  },
+                  {
+                    '>': [
+                      {
+                        var: 'payload.price',
+                      },
+                      100,
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        } as any,
+        conditionsTopicKey
+      );
+
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [secondSubscriber.subscriberId],
+          preferences: [
+            {
+              filter: {
+                workflowIds: [template._id],
+              },
+              condition: {
+                '==': [
+                  {
+                    var: 'payload.status',
+                  },
+                  'failed',
+                ],
+              },
+            },
+          ],
+        } as any,
+        conditionsTopicKey
+      );
+
+      const toWithConditions = [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: conditionsTopicKey }];
+
+      await novuClient.trigger({
+        workflowId: template.triggers[0].identifier,
+        to: toWithConditions,
+        payload: { status: 'completed', price: 150 },
+      });
+
+      await session.waitForJobCompletion(template._id);
+
+      const passMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: newSubscriber._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+
+      expect(passMessages.length, 'Passed Subscription Messages, expected to deliver the message').to.equal(1);
+
+      await novuClient.trigger({
+        workflowId: template.triggers[0].identifier,
+        to: toWithConditions,
+        payload: { status: 'not-completed', price: 150 },
+      });
+
+      await session.waitForJobCompletion(template._id);
+
+      const filteredSubscriptionMessage = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: newSubscriber._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+      expect(
+        filteredSubscriptionMessage.length,
+        'Filtered Subscription Messages, expected to not deliver the message'
+      ).to.equal(1);
+
+      const secondSubscriberMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: secondSubscriber._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+
+      expect(
+        secondSubscriberMessages.length,
+        'Second subscriber should not receive messages as condition did not match'
+      ).to.equal(0);
     });
   });
 

@@ -24,7 +24,11 @@ import { DirectionEnum } from '../shared/dtos/base-responses';
 import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
 import { SdkGroupName, SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 import { UserSession } from '../shared/framework/user.decorator';
-import { CreateTopicSubscriptionsRequestDto } from './dtos/create-topic-subscriptions.dto';
+import {
+  CreateTopicSubscriptionsRequestDto,
+  GroupPreferenceFilterDto,
+  WorkflowPreferenceDto,
+} from './dtos/create-topic-subscriptions.dto';
 import { CreateTopicSubscriptionsResponseDto } from './dtos/create-topic-subscriptions-response.dto';
 import { CreateUpdateTopicRequestDto } from './dtos/create-update-topic.dto';
 import { DeleteTopicResponseDto } from './dtos/delete-topic-response.dto';
@@ -276,6 +280,7 @@ export class TopicsController {
     @Param('topicKey') topicKey: string,
     @Body() body: CreateTopicSubscriptionsRequestDto
   ): Promise<CreateTopicSubscriptionsResponseDto> {
+    console.log(`@@@@@@@@@@@ body: ${JSON.stringify({ body }, null, 2)}`);
     const result = await this.createTopicSubscriptionsUsecase.execute(
       CreateTopicSubscriptionsCommand.create({
         environmentId: user.environmentId,
@@ -283,6 +288,7 @@ export class TopicsController {
         userId: user._id,
         topicKey,
         subscriberIds: body.subscriberIds,
+        preferences: body.preferences ? this.convertPreferencesToGroupFilters(body.preferences) : undefined,
       })
     );
 
@@ -350,5 +356,36 @@ export class TopicsController {
 
     // All subscriptions were successfully deleted
     return typeSafeResult;
+  }
+
+  private convertPreferencesToGroupFilters(
+    preferences: Array<string | WorkflowPreferenceDto | GroupPreferenceFilterDto>
+  ): Array<GroupPreferenceFilterDto> {
+    return preferences.map((preference) => {
+      if (typeof preference === 'string') {
+        return {
+          filter: {
+            workflowIds: [preference],
+          },
+        };
+      }
+
+      if (this.isGroupPreferenceFilter(preference)) {
+        return preference;
+      }
+
+      return {
+        filter: {
+          workflowIds: [preference.workflowId],
+        },
+        condition: preference.condition,
+      };
+    });
+  }
+
+  private isGroupPreferenceFilter(
+    preference: WorkflowPreferenceDto | GroupPreferenceFilterDto
+  ): preference is GroupPreferenceFilterDto {
+    return 'filter' in preference;
   }
 }

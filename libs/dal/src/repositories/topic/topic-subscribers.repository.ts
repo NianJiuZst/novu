@@ -1,7 +1,7 @@
 import { DirectionEnum, ExternalSubscriberId } from '@novu/shared';
 
-import { FilterQuery } from 'mongoose';
-import { TopicEntity } from '../..';
+import { FilterQuery, mongo } from 'mongoose';
+import { DalException, TopicEntity } from '../..';
 import type { EnforceEnvOrOrgIds } from '../../types/enforce';
 import { BaseRepository } from '../base-repository';
 import {
@@ -11,6 +11,16 @@ import {
 } from './topic-subscribers.entity';
 import { TopicSubscribers } from './topic-subscribers.schema';
 import { EnvironmentId, OrganizationId, TopicId, TopicKey } from './types';
+
+export interface BulkAddTopicSubscribersResult {
+  created: TopicSubscribersEntity[];
+  updated: TopicSubscribersEntity[];
+  failed: Array<{
+    message: string;
+    subscriberId: string;
+    topicKey: string;
+  }>;
+}
 
 export class TopicSubscribersRepository extends BaseRepository<
   TopicSubscribersDBModel,
@@ -56,10 +66,79 @@ export class TopicSubscribersRepository extends BaseRepository<
     return await this.aggregate(aggregationPipeline);
   }
 
-  async addSubscribers(subscribers: CreateTopicSubscribersEntity[]): Promise<any[]> {
-    const results = await this.upsertMany(subscribers);
+  async createSubscriptions(subscriptions: CreateTopicSubscribersEntity[]): Promise<BulkAddTopicSubscribersResult> {
+    const bulkUpsertWriteOps = subscriptions.map((subscription) => {
+      const { _subscriberId, _topicId, _environmentId, preferencesHash } = subscription;
 
-    return results;
+      return {
+        updateOne: {
+          filter: {
+            _environmentId,
+            _subscriberId,
+            _topicId,
+            preferencesHash,
+          } satisfies Partial<CreateTopicSubscribersEntity>,
+          update: { $set: subscription },
+          upsert: true,
+        },
+      };
+    });
+
+    let bulkResponse: mongo.BulkWriteResult;
+    try {
+      bulkResponse = await this.bulkWrite(bulkUpsertWriteOps);
+    } catch (e: unknown) {
+      if (isErrorWithWriteErrors(e)) {
+        if (!e.writeErrors) {
+          throw new DalException(e.message || 'Unknown error');
+        }
+        bulkResponse = e.result as mongo.BulkWriteResult;
+      } else {
+        throw new DalException('An unknown error occurred while adding topic subscribers');
+      }
+    }
+
+    const upsertedIds = bulkResponse.upsertedIds || {};
+    const writeErrors = bulkResponse.getWriteErrors() || [];
+
+    const indexes: number[] = [];
+
+    const createdSubscribers: TopicSubscribersEntity[] = [];
+    for (const [index, _id] of Object.entries(upsertedIds)) {
+      const numericIndex = parseInt(index, 10);
+      indexes.push(numericIndex);
+      const subscriber = subscriptions[numericIndex];
+      if (subscriber) {
+        createdSubscribers.push({
+          _id: _id.toString(),
+          ...subscriber,
+        } as TopicSubscribersEntity);
+      }
+    }
+
+    let failed: Array<{ message: string; subscriberId: string; topicKey: string }> = [];
+    if (writeErrors.length > 0) {
+      failed = writeErrors.map((error) => {
+        indexes.push(error.err.index);
+        const subscriber = subscriptions[error.err.index];
+
+        return {
+          message: error.err.errmsg,
+          subscriberId: subscriber?.externalSubscriberId ?? 'unknown',
+          topicKey: subscriber?.topicKey ?? 'unknown',
+        };
+      });
+    }
+
+    const updatedSubscribers: TopicSubscribersEntity[] = subscriptions
+      .filter((_, index) => !indexes.includes(index))
+      .map((subscriber) => subscriber as TopicSubscribersEntity);
+
+    return {
+      created: createdSubscribers,
+      updated: updatedSubscribers,
+      failed,
+    };
   }
 
   async *getTopicDistinctSubscribers({
@@ -73,7 +152,7 @@ export class TopicSubscribersRepository extends BaseRepository<
       excludeSubscribers: string[];
     };
     batchSize?: number;
-  }): AsyncGenerator<{ _id: string; topics: string[] }, void, unknown> {
+  }): AsyncGenerator<{ _id: string; subscriberId: string; _topicId: string; preferencesHash: string }, void, unknown> {
     const { _organizationId, _environmentId, topicIds, excludeSubscribers } = query;
     const mappedTopicIds = topicIds.map((id) => this.convertStringToObjectId(id));
 
@@ -87,9 +166,11 @@ export class TopicSubscribersRepository extends BaseRepository<
         },
       },
       {
-        $group: {
-          _id: '$externalSubscriberId',
-          topics: { $push: '$_topicId' },
+        $project: {
+          _id: '$_id',
+          subscriberId: '$externalSubscriberId',
+          _topicId: '$_topicId',
+          preferencesHash: '$preferencesHash',
         },
       },
     ];
@@ -223,4 +304,8 @@ export class TopicSubscribersRepository extends BaseRepository<
 
     return subscriptionsPagination;
   }
+}
+
+function isErrorWithWriteErrors(e: unknown): e is { writeErrors?: unknown; message?: string; result?: unknown } {
+  return typeof e === 'object' && e !== null && 'writeErrors' in e;
 }

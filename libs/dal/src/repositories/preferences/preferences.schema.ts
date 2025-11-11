@@ -27,6 +27,10 @@ const preferencesSchema = new Schema<PreferencesDBModel>(
       type: Schema.Types.ObjectId,
       ref: 'NotificationTemplate',
     },
+    _topicSubscriptionId: {
+      type: Schema.Types.ObjectId,
+      ref: 'TopicSubscribers',
+    },
     type: Schema.Types.String,
     preferences: {
       all: {
@@ -35,6 +39,9 @@ const preferencesSchema = new Schema<PreferencesDBModel>(
         },
         readOnly: {
           type: Schema.Types.Boolean,
+        },
+        condition: {
+          type: Schema.Types.Mixed,
         },
       },
       channels: {

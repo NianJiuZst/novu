@@ -86,13 +86,13 @@ export class SubscriptionDto {
 
   @ApiProperty({
     description: 'The topic information',
-    type: TopicDto,
+    type: () => TopicDto,
   })
   topic: TopicDto;
 
   @ApiProperty({
     description: 'The subscriber information',
-    type: SubscriberDto,
+    type: () => SubscriberDto,
     nullable: true,
   })
   subscriber: SubscriberDto | null;
@@ -153,7 +153,7 @@ export class MetaDto {
 export class DeleteTopicSubscriptionsResponseDto {
   @ApiProperty({
     description: 'The list of successfully deleted subscriptions',
-    type: [SubscriptionDto],
+    type: () => [SubscriptionDto],
   })
   data: SubscriptionDto[];
 

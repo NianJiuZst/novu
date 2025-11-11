@@ -1,13 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { TopicEntity, TopicRepository, TopicSubscribersRepository } from '@novu/dal';
+import { PreferencesRepository, TopicEntity, TopicRepository, TopicSubscribersRepository } from '@novu/dal';
 import {
   ISubscribersDefine,
   ITopic,
+  PreferencesTypeEnum,
   SubscriberSourceEnum,
   TriggerRecipient,
   TriggerRecipientSubscriber,
   TriggerRecipientsTypeEnum,
+  WorkflowPreferencesPartial,
 } from '@novu/shared';
+import type { RulesLogic } from 'json-logic-js';
+import jsonLogic from 'json-logic-js';
 
 import { PinoLogger } from 'nestjs-pino';
 import { InstrumentUsecase } from '../../instrumentation';
@@ -21,8 +25,6 @@ import { TriggerMulticastCommand } from './trigger-multicast.command';
 const QUEUE_CHUNK_SIZE = Number(process.env.MULTICAST_QUEUE_CHUNK_SIZE) || 100;
 const SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE = Number(process.env.SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE) || 100;
 
-const isNotTopic = (recipient: TriggerRecipient): recipient is TriggerRecipientSubscriber => !isTopic(recipient);
-
 const isTopic = (recipient: TriggerRecipient): recipient is ITopic =>
   (recipient as ITopic).type && (recipient as ITopic).type === TriggerRecipientsTypeEnum.TOPIC;
 
@@ -32,6 +34,7 @@ export class TriggerMulticast extends TriggerBase {
     subscriberProcessQueueService: SubscriberProcessQueueService,
     private topicSubscribersRepository: TopicSubscribersRepository,
     private topicRepository: TopicRepository,
+    private preferencesRepository: PreferencesRepository,
     protected cacheService: CacheService,
     protected featureFlagsService: FeatureFlagsService,
     protected logger: PinoLogger,
@@ -66,7 +69,9 @@ export class TriggerMulticast extends TriggerBase {
       const allTopicExcludedSubscribers = Array.from(
         new Set([...Array.from(topicExclusions.values()).flatMap((set) => Array.from(set))])
       );
-      let subscribersList: { subscriberId: string; topics: Pick<TopicEntity, '_id' | 'key'>[] }[] = [];
+      let totalSubscriptionsEvaluated = 0;
+      let totalSubscriptionsFiltered = 0;
+
       const getTopicDistinctSubscribersGenerator = this.topicSubscribersRepository.getTopicDistinctSubscribers({
         query: {
           _organizationId: organizationId,
@@ -77,24 +82,62 @@ export class TriggerMulticast extends TriggerBase {
         batchSize: SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE,
       });
 
-      for await (const externalSubscriberIdGroup of getTopicDistinctSubscribersGenerator) {
-        const externalSubscriberId = externalSubscriberIdGroup._id;
+      const subscribersMap = new Map<string, { subscriberId: string; topics: Pick<TopicEntity, '_id' | 'key'>[] }>();
+
+      for await (const subscription of getTopicDistinctSubscribersGenerator) {
+        const externalSubscriberId = subscription.subscriberId;
+        const subscriptionId = subscription._id.toString();
+        const topicId = subscription._topicId.toString();
+        const preferencesHash = subscription.preferencesHash;
 
         if (actor && actor.subscriberId === externalSubscriberId) {
           continue;
         }
 
-        subscribersList.push({
-          subscriberId: externalSubscriberId,
-          topics: topics?.map((topic) => ({ _id: topic._id, key: topic.key })),
-        });
+        totalSubscriptionsEvaluated++;
 
-        if (subscribersList.length === SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE) {
-          await this.sendToProcessSubscriberService(command, subscribersList, SubscriberSourceEnum.TOPIC);
-          totalProcessed += subscribersList.length;
+        const shouldIncludeSubscription = await this.evaluateSubscriptionPreferences(
+          command,
+          externalSubscriberId,
+          subscriptionId,
+          preferencesHash
+        );
 
-          subscribersList = [];
+        if (!shouldIncludeSubscription) {
+          totalSubscriptionsFiltered++;
+          continue;
         }
+
+        const topic = topics.find((t) => t._id === topicId);
+        if (!topic) {
+          continue;
+        }
+
+        const existingSubscriber = subscribersMap.get(externalSubscriberId);
+        if (existingSubscriber) {
+          if (!existingSubscriber.topics.some((t) => t._id === topic._id)) {
+            existingSubscriber.topics.push({ _id: topic._id, key: topic.key });
+          }
+        } else {
+          subscribersMap.set(externalSubscriberId, {
+            subscriberId: externalSubscriberId,
+            topics: [{ _id: topic._id, key: topic.key }],
+          });
+        }
+
+        if (subscribersMap.size >= SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE) {
+          const batchToProcess = Array.from(subscribersMap.values());
+          await this.sendToProcessSubscriberService(command, batchToProcess, SubscriberSourceEnum.TOPIC);
+          totalProcessed += batchToProcess.length;
+
+          subscribersMap.clear();
+        }
+      }
+
+      if (subscribersMap.size > 0) {
+        const finalBatch = Array.from(subscribersMap.values());
+        await this.sendToProcessSubscriberService(command, finalBatch, SubscriberSourceEnum.TOPIC);
+        totalProcessed += finalBatch.length;
       }
 
       await this.createMulticastTrace(
@@ -109,13 +152,10 @@ export class TriggerMulticast extends TriggerBase {
           singleSubscribers: subscribersToProcess.length,
           topicSubscribers: totalProcessed - subscribersToProcess.length,
           topicsUsed: topics.length,
+          subscriptionsEvaluated: totalSubscriptionsEvaluated,
+          subscriptionsFiltered: totalSubscriptionsFiltered,
         }
       );
-
-      if (subscribersList.length > 0) {
-        await this.sendToProcessSubscriberService(command, subscribersList, SubscriberSourceEnum.TOPIC);
-        totalProcessed += subscribersList.length;
-      }
     } catch (e) {
       const error = e as Error;
       await this.createMulticastTrace(
@@ -146,12 +186,101 @@ export class TriggerMulticast extends TriggerBase {
     }
   }
 
+  private async evaluateSubscriptionPreferences(
+    command: TriggerMulticastCommand,
+    externalSubscriberId: string,
+    subscriptionId: string,
+    preferencesHash: string
+  ): Promise<boolean> {
+    try {
+      // If no preferences hash, meaning no condition is set, so we allow the subscription to pass through
+      if (!preferencesHash) {
+        return true;
+      }
+
+      const subscriptionPreferences = await this.preferencesRepository.find({
+        _environmentId: command.environmentId,
+        _organizationId: command.organizationId,
+        _templateId: command.template._id,
+        _topicSubscriptionId: subscriptionId,
+        type: PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
+      });
+
+      if (!subscriptionPreferences || subscriptionPreferences.length === 0) {
+        return true;
+      }
+
+      for (const preference of subscriptionPreferences) {
+        const passes = await this.evaluatePreferenceCondition(preference.preferences, command.payload);
+
+        if (!passes) {
+          return false;
+        }
+      }
+
+      return true;
+    } catch (error) {
+      this.logger.error(
+        {
+          error,
+          externalSubscriberId,
+          workflowId: command.template._id,
+          transactionId: command.transactionId,
+        },
+        'Error evaluating subscription preferences, allowing subscription to pass through'
+      );
+
+      return true;
+    }
+  }
+
+  private async evaluatePreferenceCondition(
+    preferences: WorkflowPreferencesPartial,
+    payload: Record<string, unknown>
+  ): Promise<boolean> {
+    if (!preferences?.all?.condition) {
+      return true;
+    }
+
+    const condition = preferences.all.condition;
+
+    if (typeof condition === 'boolean') {
+      return condition;
+    }
+
+    try {
+      const result = jsonLogic.apply(condition as RulesLogic, { payload });
+
+      if (typeof result !== 'boolean') {
+        this.logger.warn(
+          {
+            condition,
+            result,
+          },
+          'Preference condition evaluation did not return a boolean, treating as false'
+        );
+        return false;
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error(
+        {
+          error,
+          condition,
+        },
+        'Error evaluating preference condition, treating as false'
+      );
+      return false;
+    }
+  }
+
   private async createMulticastTrace(
     command: TriggerMulticastCommand,
     eventType: EventType,
     status: 'success' | 'error' | 'warning' = 'success',
     message?: string,
-    rawData?: any
+    rawData?: Record<string, unknown>
   ): Promise<void> {
     if (!command.requestId) {
       return;

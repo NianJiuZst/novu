@@ -1,5 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsDefined, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { RulesLogic } from 'json-logic-js';
+import { WorkflowDto } from '../../inbox/dtos/workflow.dto';
 
 export class TopicDto {
   @ApiProperty({
@@ -89,6 +92,35 @@ export class SubscriberDto {
   updatedAt?: string;
 }
 
+export class SubscriptionPreferenceDto {
+  @ApiPropertyOptional({
+    type: () => WorkflowDto,
+    description: 'Workflow information if this is a template-level preference',
+    nullable: true,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => WorkflowDto)
+  workflow?: WorkflowDto;
+
+  @ApiProperty({
+    type: Boolean,
+    description: 'Whether the preference is enabled',
+    example: true,
+  })
+  @IsDefined()
+  enabled: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Optional condition using JSON Logic rules',
+    required: false,
+    example: { and: [{ '===': [{ var: 'tier' }, 'premium'] }] },
+  })
+  @IsObject()
+  @IsOptional()
+  condition?: boolean | RulesLogic;
+}
+
 export class SubscriptionDto {
   @ApiProperty({
     description: 'The unique identifier of the subscription',
@@ -99,16 +131,24 @@ export class SubscriptionDto {
 
   @ApiProperty({
     description: 'The topic information',
-    type: TopicDto,
+    type: () => TopicDto,
   })
   topic: TopicDto;
 
   @ApiProperty({
     description: 'The subscriber information',
-    type: SubscriberDto,
+    type: () => SubscriberDto,
     nullable: true,
   })
   subscriber: SubscriberDto | null;
+
+  @ApiPropertyOptional({
+    description: 'The preferences for workflows in this subscription',
+    type: () => [SubscriptionPreferenceDto],
+  })
+  @IsArray()
+  @IsOptional()
+  preferences?: SubscriptionPreferenceDto[];
 
   @ApiProperty({
     description: 'The creation date of the subscription',
@@ -166,7 +206,7 @@ export class MetaDto {
 export class CreateTopicSubscriptionsResponseDto {
   @ApiProperty({
     description: 'The list of successfully created subscriptions',
-    type: [SubscriptionDto],
+    type: () => [SubscriptionDto],
   })
   data: SubscriptionDto[];
 

@@ -1,6 +1,7 @@
 export * from './base62';
 export * from './bridge';
 export * from './buildBridgeEndpointUrl';
+export * from './create-deterministic-hash';
 export * from './deepmerge';
 export * from './digest';
 export * from './duration-utils';
