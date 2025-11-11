@@ -1,5 +1,6 @@
 import { Novu } from '@novu/api';
 import { SubscriberEntity, TopicRepository, TopicSubscribersRepository } from '@novu/dal';
+import { StepTypeEnum } from '@novu/shared';
 import { SubscribersService, UserSession } from '@novu/testing';
 import { expect } from 'chai';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
@@ -225,5 +226,100 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
     );
     expect(subscribers.length).to.equal(1);
     expect(subscribers[0]?._subscriberId).to.equal(subscriber1._id);
+  });
+
+  it('should create multiple subscriptions for the same subscriber with different conditions', async () => {
+    const topicKey = `topic-key-conditions-${Date.now()}`;
+
+    const workflow1 = await session.createTemplate({
+      name: 'Workflow 1',
+      steps: [
+        {
+          type: StepTypeEnum.IN_APP,
+          content: 'Test content',
+        },
+      ],
+    });
+
+    const workflow2 = await session.createTemplate({
+      name: 'Workflow 2',
+      steps: [
+        {
+          type: StepTypeEnum.IN_APP,
+          content: 'Test content',
+        },
+      ],
+    });
+
+    const preferencesA = [
+      {
+        filter: { workflowIds: [workflow1._id] },
+        condition: {
+          and: [{ '==': [{ var: 'status' }, 'active'] }, { '==': [{ var: 'priority' }, 'high'] }],
+        },
+      },
+    ];
+
+    const responseA = await novuClient.topics.subscriptions.create(
+      {
+        subscriberIds: [subscriber1.subscriberId],
+        preferences: preferencesA,
+      },
+      topicKey
+    );
+
+    expect(responseA.result.data.length, 'responseA.result.data.length').to.equal(1);
+    expect(responseA.result.data[0].id, 'responseA.result.data[0].id').to.exist;
+    expect(responseA.result.data[0].topic.key, 'responseA.result.data[0].topic.key').to.equal(topicKey);
+
+    const preferencesB = [
+      {
+        filter: { workflowIds: [workflow2._id] },
+        condition: {
+          and: [{ '==': [{ var: 'status' }, 'pending'] }, { '==': [{ var: 'priority' }, 'low'] }],
+        },
+      },
+    ];
+
+    const responseB = await novuClient.topics.subscriptions.create(
+      {
+        subscriberIds: [subscriber1.subscriberId],
+        preferences: preferencesB,
+      },
+      topicKey
+    );
+
+    expect(responseB.result.data.length, 'responseB.result.data.length').to.equal(1);
+    expect(responseB.result.data[0].id, 'responseB.result.data[0].id').to.exist;
+    expect(responseB.result.data[0].topic.key, 'responseB.result.data[0].topic.key').to.equal(topicKey);
+
+    const subscriptions = await topicSubscribersRepository.find({
+      _environmentId: session.environment._id,
+      _organizationId: session.organization._id,
+      topicKey,
+      externalSubscriberId: subscriber1.subscriberId,
+    });
+
+    expect(subscriptions.length).to.equal(2);
+
+    const hashes = subscriptions.map((s) => s.preferencesHash).filter((h) => h !== undefined);
+    expect(hashes.length).to.equal(2);
+    expect(new Set(hashes).size).to.equal(2);
+
+    await novuClient.topics.subscriptions.create(
+      {
+        subscriberIds: [subscriber1.subscriberId],
+        preferences: preferencesA,
+      },
+      topicKey
+    );
+
+    const subscriptionsAfterDuplicate = await topicSubscribersRepository.find({
+      _environmentId: session.environment._id,
+      _organizationId: session.organization._id,
+      topicKey,
+      externalSubscriberId: subscriber1.subscriberId,
+    });
+    expect(subscriptionsAfterDuplicate.length).to.equal(2);
   });
 });

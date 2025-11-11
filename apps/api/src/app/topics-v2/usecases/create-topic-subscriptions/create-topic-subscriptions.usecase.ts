@@ -88,17 +88,14 @@ export class CreateTopicSubscriptionsUsecase {
       _organizationId: string;
       _topicId: string;
       _subscriberId: { $in: string[] };
-      preferencesHash?: string;
+      preferencesHash?: string | null;
     } = {
       _environmentId: command.environmentId,
       _organizationId: command.organizationId,
       _topicId: topic._id,
       _subscriberId: { $in: foundSubscribers.map((sub) => sub._id) },
+      preferencesHash: preferencesHash ?? null,
     };
-
-    if (preferencesHash) {
-      existingSubscriptionsQuery.preferencesHash = preferencesHash;
-    }
 
     const existingSubscriptions = await this.topicSubscribersRepository.find(
       existingSubscriptionsQuery as Parameters<typeof this.topicSubscribersRepository.find>[0]
