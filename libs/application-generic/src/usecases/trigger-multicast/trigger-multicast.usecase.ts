@@ -1,5 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PreferencesRepository, TopicEntity, TopicRepository, TopicSubscribersRepository } from '@novu/dal';
+import {
+  PreferencesRepository,
+  SubscriberRepository,
+  TopicEntity,
+  TopicRepository,
+  TopicSubscribersRepository,
+} from '@novu/dal';
 import {
   ISubscribersDefine,
   ITopic,
@@ -19,6 +25,8 @@ import { CacheService, FeatureFlagsService } from '../../services';
 import type { EventType, Trace } from '../../services/analytic-logs';
 import { LogRepository, mapEventTypeToTitle, TraceLogRepository } from '../../services/analytic-logs';
 import { SubscriberProcessQueueService } from '../../services/queues/subscriber-process-queue.service';
+import { GetPreferencesCommand } from '../get-preferences/get-preferences.command';
+import { GetPreferences } from '../get-preferences/get-preferences.usecase';
 import { TriggerBase } from '../trigger-base';
 import { TriggerMulticastCommand } from './trigger-multicast.command';
 
@@ -35,6 +43,8 @@ export class TriggerMulticast extends TriggerBase {
     private topicSubscribersRepository: TopicSubscribersRepository,
     private topicRepository: TopicRepository,
     private preferencesRepository: PreferencesRepository,
+    private subscriberRepository: SubscriberRepository,
+    private getPreferences: GetPreferences,
     protected cacheService: CacheService,
     protected featureFlagsService: FeatureFlagsService,
     protected logger: PinoLogger,
@@ -207,7 +217,7 @@ export class TriggerMulticast extends TriggerBase {
       });
 
       if (!subscriptionPreferences || subscriptionPreferences.length === 0) {
-        return true;
+        return await this.evaluateFallbackPreferences(command, externalSubscriberId);
       }
 
       for (const preference of subscriptionPreferences) {
@@ -275,6 +285,49 @@ export class TriggerMulticast extends TriggerBase {
     }
 
     return enabled;
+  }
+
+  private async evaluateFallbackPreferences(
+    command: TriggerMulticastCommand,
+    externalSubscriberId: string
+  ): Promise<boolean> {
+    try {
+      const subscriber = await this.subscriberRepository.findBySubscriberId(
+        command.environmentId,
+        externalSubscriberId
+      );
+
+      if (!subscriber) {
+        return true;
+      }
+
+      const mergedPreferences = await this.getPreferences.safeExecute(
+        GetPreferencesCommand.create({
+          environmentId: command.environmentId,
+          organizationId: command.organizationId,
+          subscriberId: subscriber._id,
+          templateId: command.template._id,
+        })
+      );
+
+      if (!mergedPreferences) {
+        return true;
+      }
+
+      return await this.evaluatePreferenceCondition(mergedPreferences.preferences, command.payload);
+    } catch (error) {
+      this.logger.error(
+        {
+          error,
+          externalSubscriberId,
+          workflowId: command.template._id,
+          transactionId: command.transactionId,
+        },
+        'Error evaluating fallback preferences, allowing subscription to pass through'
+      );
+
+      return true;
+    }
   }
 
   private async createMulticastTrace(

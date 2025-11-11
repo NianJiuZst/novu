@@ -531,6 +531,88 @@ describe('Topic Trigger Event #novu-v2', () => {
 
       expect(booleanFalseMessages.length, 'Enabled false - expected to not deliver the message').to.equal(0);
     });
+
+    it.only('should filter subscriptions by tags and combined workflow filters', async () => {
+      const taggedTemplate = await session.createTemplate({
+        tags: ['important', 'promotional'],
+      });
+
+      const subscriberWithTagFilter = await subscriberService.createSubscriber();
+      const subscriberWithCombinedFilter = await subscriberService.createSubscriber();
+      const subscriberWithMisconfiguredTagFilter = await subscriberService.createSubscriber();
+
+      const testCases = [
+        {
+          name: 'tag filter',
+          topicKey: `topic-key-tag-filter-${Date.now()}`,
+          subscriber: subscriberWithTagFilter,
+          preferences: [
+            {
+              filter: { tags: ['important'] },
+              condition: { '==': [{ var: 'payload.status' }, 'active'] },
+            },
+          ],
+          triggerPayload: { status: 'active' },
+          expectedMessageCount: 1,
+          description: 'Tag filter should deliver when tag matches',
+        },
+        {
+          name: 'combined filter',
+          topicKey: `topic-key-combined-filter-${Date.now()}`,
+          subscriber: subscriberWithCombinedFilter,
+          preferences: [
+            {
+              filter: { workflowIds: [taggedTemplate._id], tags: ['promotional'] },
+              enabled: true,
+            },
+          ],
+          triggerPayload: {},
+          expectedMessageCount: 1,
+          description: 'Combined filter should deliver when both workflow ID and tag match',
+        },
+        {
+          name: 'misconfigured tag filter',
+          topicKey: `topic-key-misconfigured-tag-filter-${Date.now()}`,
+          subscriber: subscriberWithMisconfiguredTagFilter,
+          preferences: [
+            {
+              filter: { tags: ['nonexistent-tag'] },
+              condition: { '==': [{ var: 'payload.status' }, 'active'] },
+            },
+          ],
+          triggerPayload: { status: 'active' },
+          expectedMessageCount: 1,
+          description: 'Misconfigured tag filter should deliver, because we have global preferences.',
+        },
+      ];
+
+      for (const testCase of testCases) {
+        await novuClient.topics.subscriptions.create(
+          {
+            subscriberIds: [testCase.subscriber.subscriberId],
+            preferences: testCase.preferences,
+          } as any,
+          testCase.topicKey
+        );
+
+        await novuClient.trigger({
+          workflowId: taggedTemplate.triggers[0].identifier,
+          to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: testCase.topicKey }],
+          payload: testCase.triggerPayload,
+        });
+
+        await session.waitForJobCompletion(taggedTemplate._id);
+
+        const messages = await messageRepository.find({
+          _environmentId: session.environment._id,
+          _subscriberId: testCase.subscriber._id,
+          _templateId: taggedTemplate._id,
+          channel: ChannelTypeEnum.IN_APP,
+        });
+
+        expect(messages.length, testCase.description).to.equal(testCase.expectedMessageCount);
+      }
+    });
   });
 
   describe('Trigger event for multiple topics and multiple subscribers - /v1/events/trigger (POST)', () => {
