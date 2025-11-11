@@ -103,7 +103,17 @@ export class CreateTopicSubscriptionsUsecase {
 
     // Create topic subscriptions for subscribers that don't already have a subscription
     const existingSubscriberIds = existingSubscriptions.map((sub) => sub._subscriberId.toString());
-    const subscribersToCreate = foundSubscribers.filter((sub) => !existingSubscriberIds.includes(sub._id.toString()));
+    let subscribersToCreate = foundSubscribers.filter((sub) => !existingSubscriberIds.includes(sub._id.toString()));
+
+    // Validate limit only for subscribers that need new subscriptions
+    if (subscribersToCreate.length > 0) {
+      const { validSubscribers: validSubscribersToCreate, limitErrors: limitErrorsToCreate } =
+        await this.validateSubscriptionLimit(topic, subscribersToCreate, command.environmentId, command.organizationId);
+
+      errors.push(...limitErrorsToCreate);
+
+      subscribersToCreate = validSubscribersToCreate;
+    }
 
     for (const subscription of existingSubscriptions) {
       const subscriber = foundSubscribers.find((sub) => sub._id.toString() === subscription._subscriberId.toString());
@@ -203,6 +213,60 @@ export class CreateTopicSubscriptionsUsecase {
       throw new Error(`Topic with key ${command.topicKey} not found after upsert`);
     }
     return topic;
+  }
+
+  private async validateSubscriptionLimit(
+    topic: TopicEntity,
+    subscribers: SubscriberEntity[],
+    environmentId: string,
+    organizationId: string
+  ): Promise<{
+    validSubscribers: SubscriberEntity[];
+    limitErrors: SubscriptionErrorDto[];
+  }> {
+    const MAX_SUBSCRIPTIONS_PER_SUBSCRIBER = 10;
+    const BATCH_SIZE = 100;
+
+    if (subscribers.length === 0) {
+      return { validSubscribers: [], limitErrors: [] };
+    }
+
+    const subscriberCountMap = new Map<string, number>();
+
+    for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
+      const batch = subscribers.slice(i, i + BATCH_SIZE);
+      const subscriberIds = batch.map((sub) => sub._id.toString());
+
+      const batchCountMap = await this.topicSubscribersRepository.countSubscriptionsPerSubscriber({
+        environmentId,
+        organizationId,
+        topicId: topic._id,
+        subscriberIds,
+      });
+
+      for (const [subscriberId, count] of batchCountMap.entries()) {
+        subscriberCountMap.set(subscriberId, count);
+      }
+    }
+
+    const validSubscribers: SubscriberEntity[] = [];
+    const limitErrors: SubscriptionErrorDto[] = [];
+
+    for (const subscriber of subscribers) {
+      const count = subscriberCountMap.get(subscriber._id.toString()) || 0;
+
+      if (count >= MAX_SUBSCRIPTIONS_PER_SUBSCRIBER) {
+        limitErrors.push({
+          subscriberId: subscriber.subscriberId,
+          code: 'SUBSCRIPTION_LIMIT_EXCEEDED',
+          message: `Subscriber ${subscriber.subscriberId} has reached the maximum allowed of ${MAX_SUBSCRIPTIONS_PER_SUBSCRIBER} subscriptions for topic "${topic.key}"`,
+        });
+      } else {
+        validSubscribers.push(subscriber);
+      }
+    }
+
+    return { validSubscribers, limitErrors };
   }
 
   private buildSubscriptionEntity(

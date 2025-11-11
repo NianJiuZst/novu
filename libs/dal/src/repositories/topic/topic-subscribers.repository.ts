@@ -304,6 +304,54 @@ export class TopicSubscribersRepository extends BaseRepository<
 
     return subscriptionsPagination;
   }
+
+  async countSubscriptionsPerSubscriber({
+    environmentId,
+    organizationId,
+    topicId,
+    subscriberIds,
+  }: {
+    environmentId: string;
+    organizationId: string;
+    topicId: string;
+    subscriberIds: string[];
+  }): Promise<Map<string, number>> {
+    if (subscriberIds.length === 0) {
+      return new Map();
+    }
+
+    const mappedSubscriberIds = subscriberIds.map((id) => this.convertStringToObjectId(id));
+    const mappedTopicId = this.convertStringToObjectId(topicId);
+
+    const aggregationPipeline = [
+      {
+        $match: {
+          _environmentId: this.convertStringToObjectId(environmentId),
+          _organizationId: this.convertStringToObjectId(organizationId),
+          _topicId: mappedTopicId,
+          _subscriberId: { $in: mappedSubscriberIds },
+        },
+      },
+      {
+        $group: {
+          _id: '$_subscriberId',
+          count: { $sum: 1 },
+        },
+      },
+    ];
+
+    const results = await this.aggregate(aggregationPipeline);
+    const countMap = new Map<string, number>();
+
+    for (const result of results) {
+      const subscriberId = result._id?.toString();
+      if (subscriberId) {
+        countMap.set(subscriberId, result.count || 0);
+      }
+    }
+
+    return countMap;
+  }
 }
 
 function isErrorWithWriteErrors(e: unknown): e is { writeErrors?: unknown; message?: string; result?: unknown } {
