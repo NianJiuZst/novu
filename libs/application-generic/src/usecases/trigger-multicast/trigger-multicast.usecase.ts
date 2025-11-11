@@ -238,41 +238,43 @@ export class TriggerMulticast extends TriggerBase {
     preferences: WorkflowPreferencesPartial,
     payload: Record<string, unknown>
   ): Promise<boolean> {
-    if (!preferences?.all?.condition) {
-      return true;
-    }
+    const condition = preferences.all?.condition;
 
-    const condition = preferences.all.condition;
+    if (condition !== undefined && condition !== null) {
+      try {
+        const result = jsonLogic.apply(condition as RulesLogic, { payload });
 
-    if (typeof condition === 'boolean') {
-      return condition;
-    }
+        if (typeof result !== 'boolean') {
+          this.logger.warn(
+            {
+              condition,
+              result,
+            },
+            'Preference condition evaluation did not return a boolean, treating as false'
+          );
+          return false;
+        }
 
-    try {
-      const result = jsonLogic.apply(condition as RulesLogic, { payload });
-
-      if (typeof result !== 'boolean') {
-        this.logger.warn(
+        return result;
+      } catch (error) {
+        this.logger.error(
           {
+            error,
             condition,
-            result,
           },
-          'Preference condition evaluation did not return a boolean, treating as false'
+          'Error evaluating preference condition, treating as false'
         );
         return false;
       }
-
-      return result;
-    } catch (error) {
-      this.logger.error(
-        {
-          error,
-          condition,
-        },
-        'Error evaluating preference condition, treating as false'
-      );
-      return false;
     }
+
+    const enabled = preferences.all?.enabled;
+
+    if (enabled === undefined || enabled === null) {
+      return true;
+    }
+
+    return enabled;
   }
 
   private async createMulticastTrace(

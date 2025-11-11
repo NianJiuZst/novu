@@ -307,7 +307,7 @@ export class CreateTopicSubscriptionsUsecase {
               }
             : undefined,
           enabled: preferences?.all?.enabled ?? true,
-          condition: preferences?.all?.condition as boolean | RulesLogic | undefined,
+          condition: preferences?.all?.condition as RulesLogic | undefined,
         };
       })
       .filter((pref): pref is NonNullable<typeof pref> => pref !== null);
@@ -321,11 +321,10 @@ export class CreateTopicSubscriptionsUsecase {
       return undefined;
     }
 
-    const hasConditions = command.preferences.some((pref) => pref.condition);
-
-    this.logger.error(
-      `Has conditions: ${JSON.stringify({ hasConditions, preferences: command.preferences }, null, 2)}`
+    const hasConditions = command.preferences.some(
+      (pref) => pref.condition !== undefined || pref.enabled !== undefined
     );
+
     if (hasConditions) {
       return await this.createPreferencesWithConditions(command, subscription);
     }
@@ -364,10 +363,12 @@ export class CreateTopicSubscriptionsUsecase {
       );
 
       const condition = preferenceFilter?.condition;
+      const enabled = preferenceFilter?.enabled ?? true;
 
       const workflowPreferences = {
         all: {
-          condition,
+          enabled,
+          ...(condition !== undefined && { condition }),
         },
       };
 
@@ -397,7 +398,7 @@ export class CreateTopicSubscriptionsUsecase {
               }
             : undefined,
           enabled: createdPreference.preferences?.all?.enabled ?? true,
-          condition: createdPreference.preferences?.all?.condition as boolean | RulesLogic | undefined,
+          condition: createdPreference.preferences?.all?.condition as RulesLogic | undefined,
         });
       }
     }
@@ -456,7 +457,6 @@ export class CreateTopicSubscriptionsUsecase {
               }
             : undefined,
           enabled: preferenceResponse.preferences?.all?.enabled ?? true,
-          condition: preferenceResponse.preferences?.all?.condition,
         });
       }
     }

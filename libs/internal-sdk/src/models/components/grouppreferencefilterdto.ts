@@ -11,19 +11,24 @@ import {
 
 export type GroupPreferenceFilterDto = {
   /**
-   * Filter criteria for workflow IDs and tags
+   * Whether the preference is enabled. Used when condition is not provided.
    */
-  filter: GroupPreferenceFilterDetailsDto;
+  enabled?: boolean | undefined;
   /**
    * Optional condition using JSON Logic rules
    */
   condition?: { [k: string]: any } | undefined;
+  /**
+   * Filter criteria for workflow IDs and tags
+   */
+  filter: GroupPreferenceFilterDetailsDto;
 };
 
 /** @internal */
 export type GroupPreferenceFilterDto$Outbound = {
-  filter: GroupPreferenceFilterDetailsDto$Outbound;
+  enabled?: boolean | undefined;
   condition?: { [k: string]: any } | undefined;
+  filter: GroupPreferenceFilterDetailsDto$Outbound;
 };
 
 /** @internal */
@@ -32,8 +37,9 @@ export const GroupPreferenceFilterDto$outboundSchema: z.ZodType<
   z.ZodTypeDef,
   GroupPreferenceFilterDto
 > = z.object({
-  filter: GroupPreferenceFilterDetailsDto$outboundSchema,
+  enabled: z.boolean().optional(),
   condition: z.record(z.any()).optional(),
+  filter: GroupPreferenceFilterDetailsDto$outboundSchema,
 });
 
 export function groupPreferenceFilterDtoToJSON(

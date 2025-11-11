@@ -65,6 +65,7 @@ export const ProvidersIdEnum = {
   Smsmode: "smsmode",
   Imedia: "imedia",
   Sinch: "sinch",
+  IsendproSms: "isendpro-sms",
   Fcm: "fcm",
   Apns: "apns",
   Expo: "expo",

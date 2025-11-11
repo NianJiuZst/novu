@@ -5,8 +5,6 @@ import {
   ArrayMinSize,
   IsArray,
   IsDefined,
-  IsNotEmpty,
-  IsObject,
   IsOptional,
   IsString,
   ValidateIf,
@@ -14,14 +12,15 @@ import {
 } from 'class-validator';
 import { RulesLogic } from 'json-logic-js';
 
-export class WorkflowPreferenceDto {
+export class BasePreferenceDto {
   @ApiProperty({
-    description: 'The workflow identifier',
-    example: 'workflow-123',
+    description: 'Whether the preference is enabled. Used when condition is not provided.',
+    required: false,
+    type: Boolean,
+    example: true,
   })
-  @IsString()
-  @IsDefined()
-  workflowId: string;
+  @IsOptional()
+  enabled?: boolean;
 
   @ApiProperty({
     description: 'Optional condition using JSON Logic rules',
@@ -31,10 +30,18 @@ export class WorkflowPreferenceDto {
     example: { and: [{ '===': [{ var: 'tier' }, 'premium'] }] },
   })
   @ValidateIf((o) => o.condition !== undefined)
-  @IsObject()
-  @IsNotEmpty({ message: 'Condition cannot be an empty object. Omit the condition field if not needed.' })
   @IsOptional()
   condition?: RulesLogic;
+}
+
+export class WorkflowPreferenceDto extends BasePreferenceDto {
+  @ApiProperty({
+    description: 'The workflow identifier',
+    example: 'workflow-123',
+  })
+  @IsString()
+  @IsDefined()
+  workflowId: string;
 }
 
 export class GroupPreferenceFilterDetailsDto {
@@ -59,7 +66,7 @@ export class GroupPreferenceFilterDetailsDto {
   tags?: string[];
 }
 
-export class GroupPreferenceFilterDto {
+export class GroupPreferenceFilterDto extends BasePreferenceDto {
   @ApiProperty({
     description: 'Filter criteria for workflow IDs and tags',
     type: GroupPreferenceFilterDetailsDto,
@@ -68,19 +75,6 @@ export class GroupPreferenceFilterDto {
   @Type(() => GroupPreferenceFilterDetailsDto)
   @IsDefined()
   filter: GroupPreferenceFilterDetailsDto;
-
-  @ApiProperty({
-    description: 'Optional condition using JSON Logic rules',
-    required: false,
-    type: 'object',
-    additionalProperties: true,
-    example: { and: [{ '===': [{ var: 'tier' }, 'premium'] }] },
-  })
-  @ValidateIf((o) => o.condition !== undefined)
-  @IsObject()
-  @IsNotEmpty({ message: 'Condition cannot be an empty object. Omit the condition field if not needed.' })
-  @IsOptional()
-  condition?: RulesLogic;
 }
 
 @ApiExtraModels(WorkflowPreferenceDto, GroupPreferenceFilterDto)

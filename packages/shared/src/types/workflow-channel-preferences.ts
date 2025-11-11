@@ -49,11 +49,11 @@ export type WorkflowPreference = {
   /**
    * A condition specifying if the preference is applicable.
    *
-   * If `true`, the preference is applicable.
+   * Uses JSON Logic rules to evaluate if the preference should be applied.
    *
-   * @default true
+   * If not provided, the `enabled` property will be used to determine if the preference is applicable.
    */
-  condition?: boolean | RulesLogic;
+  condition?: RulesLogic;
 };
 
 /** A preference for a notification delivery channel. */

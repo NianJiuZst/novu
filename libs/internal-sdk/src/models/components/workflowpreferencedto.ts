@@ -9,13 +9,17 @@ import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type WorkflowPreferenceDto = {
   /**
-   * The workflow identifier
+   * Whether the preference is enabled. Used when condition is not provided.
    */
-  workflowId: string;
+  enabled?: boolean | undefined;
   /**
    * Optional condition using JSON Logic rules
    */
   condition?: { [k: string]: any } | undefined;
+  /**
+   * The workflow identifier
+   */
+  workflowId: string;
 };
 
 /** @internal */
@@ -24,13 +28,15 @@ export const WorkflowPreferenceDto$inboundSchema: z.ZodType<
   z.ZodTypeDef,
   unknown
 > = z.object({
-  workflowId: z.string(),
+  enabled: z.boolean().optional(),
   condition: z.record(z.any()).optional(),
+  workflowId: z.string(),
 });
 /** @internal */
 export type WorkflowPreferenceDto$Outbound = {
-  workflowId: string;
+  enabled?: boolean | undefined;
   condition?: { [k: string]: any } | undefined;
+  workflowId: string;
 };
 
 /** @internal */
@@ -39,8 +45,9 @@ export const WorkflowPreferenceDto$outboundSchema: z.ZodType<
   z.ZodTypeDef,
   WorkflowPreferenceDto
 > = z.object({
-  workflowId: z.string(),
+  enabled: z.boolean().optional(),
   condition: z.record(z.any()).optional(),
+  workflowId: z.string(),
 });
 
 export function workflowPreferenceDtoToJSON(

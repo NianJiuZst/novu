@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsDefined, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsDefined, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
 import { RulesLogic } from 'json-logic-js';
 import { WorkflowDto } from '../../inbox/dtos/workflow.dto';
 
@@ -114,11 +114,13 @@ export class SubscriptionPreferenceDto {
   @ApiPropertyOptional({
     description: 'Optional condition using JSON Logic rules',
     required: false,
+    type: 'object',
+    additionalProperties: true,
     example: { and: [{ '===': [{ var: 'tier' }, 'premium'] }] },
   })
-  @IsObject()
+  @ValidateIf((o) => o.condition !== undefined)
   @IsOptional()
-  condition?: boolean | RulesLogic;
+  condition?: RulesLogic;
 }
 
 export class SubscriptionDto {

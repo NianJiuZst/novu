@@ -370,6 +370,7 @@ describe('Topic Trigger Event #novu-v2', () => {
               filter: {
                 workflowIds: [template._id],
               },
+              enabled: false,
               condition: {
                 and: [
                   {
@@ -404,6 +405,7 @@ describe('Topic Trigger Event #novu-v2', () => {
               filter: {
                 workflowIds: [template._id],
               },
+              enabled: false,
               condition: {
                 '==': [
                   {
@@ -467,6 +469,67 @@ describe('Topic Trigger Event #novu-v2', () => {
         secondSubscriberMessages.length,
         'Second subscriber should not receive messages as condition did not match'
       ).to.equal(0);
+
+      const booleanConditionTopicKey = `topic-key-boolean-conditions-${Date.now()}`;
+      const booleanTrueSubscriber = await subscriberService.createSubscriber();
+      const booleanFalseSubscriber = await subscriberService.createSubscriber();
+
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [booleanTrueSubscriber.subscriberId],
+          preferences: [
+            {
+              filter: {
+                workflowIds: [template._id],
+              },
+              enabled: true,
+            },
+          ],
+        } as any,
+        booleanConditionTopicKey
+      );
+
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [booleanFalseSubscriber.subscriberId],
+          preferences: [
+            {
+              filter: {
+                workflowIds: [template._id],
+              },
+              enabled: false,
+            },
+          ],
+        } as any,
+        booleanConditionTopicKey
+      );
+
+      const toWithBooleanConditions = [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: booleanConditionTopicKey }];
+
+      await novuClient.trigger({
+        workflowId: template.triggers[0].identifier,
+        to: toWithBooleanConditions,
+      });
+
+      await session.waitForJobCompletion(template._id);
+
+      const booleanTrueMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: booleanTrueSubscriber._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+
+      expect(booleanTrueMessages.length, 'Enabled true - expected to deliver the message').to.equal(1);
+
+      const booleanFalseMessages = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _subscriberId: booleanFalseSubscriber._id,
+        _templateId: template._id,
+        channel: ChannelTypeEnum.IN_APP,
+      });
+
+      expect(booleanFalseMessages.length, 'Enabled false - expected to not deliver the message').to.equal(0);
     });
   });
 

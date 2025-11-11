@@ -50,11 +50,6 @@ export type SubscriptionPreferenceDtoWorkflow = {
   severity: SeverityLevelEnum;
 };
 
-/**
- * Optional condition using JSON Logic rules
- */
-export type Condition = {};
-
 export type SubscriptionPreferenceDto = {
   /**
    * Workflow information if this is a template-level preference
@@ -67,7 +62,7 @@ export type SubscriptionPreferenceDto = {
   /**
    * Optional condition using JSON Logic rules
    */
-  condition?: Condition | undefined;
+  condition?: { [k: string]: any } | undefined;
 };
 
 /** @internal */
@@ -113,23 +108,6 @@ export function subscriptionPreferenceDtoWorkflowFromJSON(
 }
 
 /** @internal */
-export const Condition$inboundSchema: z.ZodType<
-  Condition,
-  z.ZodTypeDef,
-  unknown
-> = z.object({});
-
-export function conditionFromJSON(
-  jsonString: string,
-): SafeParseResult<Condition, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => Condition$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Condition' from JSON`,
-  );
-}
-
-/** @internal */
 export const SubscriptionPreferenceDto$inboundSchema: z.ZodType<
   SubscriptionPreferenceDto,
   z.ZodTypeDef,
@@ -139,7 +117,7 @@ export const SubscriptionPreferenceDto$inboundSchema: z.ZodType<
     z.lazy(() => SubscriptionPreferenceDtoWorkflow$inboundSchema),
   ).optional(),
   enabled: z.boolean(),
-  condition: z.lazy(() => Condition$inboundSchema).optional(),
+  condition: z.record(z.any()).optional(),
 });
 
 export function subscriptionPreferenceDtoFromJSON(

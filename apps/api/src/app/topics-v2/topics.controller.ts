@@ -280,7 +280,6 @@ export class TopicsController {
     @Param('topicKey') topicKey: string,
     @Body() body: CreateTopicSubscriptionsRequestDto
   ): Promise<CreateTopicSubscriptionsResponseDto> {
-    console.log(`@@@@@@@@@@@ body: ${JSON.stringify({ body }, null, 2)}`);
     const result = await this.createTopicSubscriptionsUsecase.execute(
       CreateTopicSubscriptionsCommand.create({
         environmentId: user.environmentId,
