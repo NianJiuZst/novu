@@ -6,6 +6,7 @@ import { ListSubscriberSubscriptionsUseCase } from './list-subscriber-subscripti
 import { ListTopicSubscriptionsUseCase } from './list-topic-subscriptions/list-topic-subscriptions.usecase';
 import { ListTopicsUseCase } from './list-topics/list-topics.usecase';
 import { UpdateTopicUseCase } from './update-topic/update-topic.usecase';
+import { UpdateTopicSubscriptionUsecase } from './update-topic-subscription/update-topic-subscription.usecase';
 import { UpsertTopicUseCase } from './upsert-topic/upsert-topic.usecase';
 
 export const USE_CASES = [
@@ -17,5 +18,6 @@ export const USE_CASES = [
   ListTopicSubscriptionsUseCase,
   ListTopicsUseCase,
   UpdateTopicUseCase,
+  UpdateTopicSubscriptionUsecase,
   UpsertTopicUseCase,
 ];

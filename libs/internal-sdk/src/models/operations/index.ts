@@ -68,6 +68,7 @@ export * from "./topicscontrollergettopic.js";
 export * from "./topicscontrollerlisttopics.js";
 export * from "./topicscontrollerlisttopicsubscriptions.js";
 export * from "./topicscontrollerupdatetopic.js";
+export * from "./topicscontrollerupdatetopicsubscription.js";
 export * from "./topicscontrollerupserttopic.js";
 export * from "./topicsv1controllergettopicsubscriber.js";
 export * from "./translationcontrollercreatetranslationendpoint.js";

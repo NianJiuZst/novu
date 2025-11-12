@@ -323,7 +323,7 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
     expect(subscriptionsAfterDuplicate.length).to.equal(2);
   });
 
-  it.only('should enforce subscription limit of 10 per subscriber per topic', async () => {
+  it('should enforce subscription limit of 10 per subscriber per topic', async () => {
     try {
       const topicKey = `topic-key-limit-${Date.now()}`;
       const MAX_SUBSCRIPTIONS_PER_SUBSCRIBER = 10;

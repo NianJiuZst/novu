@@ -7,6 +7,7 @@ import {
   PinoLogger,
 } from '@novu/application-generic';
 import {
+  BaseRepository,
   CreateTopicSubscribersEntity,
   NotificationTemplateRepository,
   PreferencesRepository,
@@ -401,7 +402,7 @@ export class CreateTopicSubscriptionsUsecase {
       return undefined;
     }
 
-    const workflowIds = await this.extractWorkflowIds(
+    const { workflowIds, identifierToObjectIdMap } = await this.extractWorkflowIdsWithMapping(
       command.preferences,
       command.environmentId,
       command.organizationId
@@ -419,9 +420,18 @@ export class CreateTopicSubscriptionsUsecase {
     const preferencesResult: SubscriptionPreferenceDto[] = [];
 
     for (const workflowId of workflowIds) {
-      const preferenceFilter = command.preferences.find(
-        (pref) => pref.filter.workflowIds?.includes(workflowId) || (pref.filter.tags && pref.filter.tags.length > 0)
-      );
+      const preferenceFilter = command.preferences.find((pref) => {
+        if (pref.filter.tags && pref.filter.tags.length > 0) {
+          return true;
+        }
+        if (pref.filter.workflowIds && pref.filter.workflowIds.length > 0) {
+          return pref.filter.workflowIds.some((id) => {
+            const resolvedId = identifierToObjectIdMap.get(id) || id;
+            return resolvedId === workflowId;
+          });
+        }
+        return false;
+      });
 
       const condition = preferenceFilter?.condition;
       const enabled = preferenceFilter?.enabled ?? true;
@@ -530,15 +540,33 @@ export class CreateTopicSubscriptionsUsecase {
     environmentId: string,
     organizationId: string
   ): Promise<string[]> {
+    const result = await this.extractWorkflowIdsWithMapping(preferences, environmentId, organizationId);
+    return result.workflowIds;
+  }
+
+  private async extractWorkflowIdsWithMapping(
+    preferences: GroupPreferenceFilterDto[],
+    environmentId: string,
+    organizationId: string
+  ): Promise<{ workflowIds: string[]; identifierToObjectIdMap: Map<string, string> }> {
     if (!preferences) {
-      return [];
+      return { workflowIds: [], identifierToObjectIdMap: new Map() };
     }
 
     const workflowIds: string[] = [];
+    const workflowIdentifiers: string[] = [];
+    const identifierToObjectIdMap = new Map<string, string>();
 
     for (const pref of preferences) {
       if (pref.filter.workflowIds && pref.filter.workflowIds.length > 0) {
-        workflowIds.push(...pref.filter.workflowIds);
+        for (const workflowId of pref.filter.workflowIds) {
+          if (BaseRepository.isInternalId(workflowId)) {
+            workflowIds.push(workflowId);
+            identifierToObjectIdMap.set(workflowId, workflowId);
+          } else {
+            workflowIdentifiers.push(workflowId);
+          }
+        }
       }
 
       if (pref.filter.tags && pref.filter.tags.length > 0) {
@@ -548,10 +576,36 @@ export class CreateTopicSubscriptionsUsecase {
           tags: pref.filter.tags,
         });
 
-        workflowIds.push(...workflows.map((workflow) => workflow._id));
+        for (const workflow of workflows) {
+          workflowIds.push(workflow._id);
+          if (workflow.triggers?.[0]?.identifier) {
+            identifierToObjectIdMap.set(workflow.triggers[0].identifier, workflow._id);
+          }
+        }
       }
     }
 
-    return [...new Set(workflowIds)];
+    if (workflowIdentifiers.length > 0) {
+      const workflowsByIdentifier = await this.notificationTemplateRepository.findByTriggerIdentifierBulk(
+        environmentId,
+        workflowIdentifiers
+      );
+      const workflowByIdentifierMap = new Map<string, string>();
+      for (const workflow of workflowsByIdentifier) {
+        const identifier = workflow.triggers?.[0]?.identifier;
+        if (identifier) {
+          workflowByIdentifierMap.set(identifier, workflow._id);
+        }
+      }
+      for (const identifier of workflowIdentifiers) {
+        const objectId = workflowByIdentifierMap.get(identifier);
+        if (objectId) {
+          workflowIds.push(objectId);
+          identifierToObjectIdMap.set(identifier, objectId);
+        }
+      }
+    }
+
+    return { workflowIds: [...new Set(workflowIds)], identifierToObjectIdMap };
   }
 }

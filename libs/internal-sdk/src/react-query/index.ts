@@ -69,6 +69,7 @@ export * from "./topicsSubscribersRetrieve.js";
 export * from "./topicsSubscriptionsCreate.js";
 export * from "./topicsSubscriptionsDelete.js";
 export * from "./topicsSubscriptionsList.js";
+export * from "./topicsSubscriptionsUpdate.js";
 export * from "./topicsUpdate.js";
 export * from "./translationsCreate.js";
 export * from "./translationsDelete.js";
