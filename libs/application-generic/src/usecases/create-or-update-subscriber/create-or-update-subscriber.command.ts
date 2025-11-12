@@ -80,4 +80,8 @@ export class CreateOrUpdateSubscriberCommand extends EnvironmentCommand {
   @IsOptional()
   @IsBoolean()
   failIfExists?: boolean = false;
+
+  @IsOptional()
+  @IsString()
+  userId?: string;
 }

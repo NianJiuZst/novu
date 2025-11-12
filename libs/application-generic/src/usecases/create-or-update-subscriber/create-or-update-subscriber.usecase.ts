@@ -1,11 +1,24 @@
-import { ConflictException, Injectable } from '@nestjs/common';
-import { SubscriberEntity, SubscriberRepository } from '@novu/dal';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import {
+  CommunityOrganizationRepository,
+  EnvironmentEntity,
+  EnvironmentRepository,
+  OrganizationEntity,
+  SubscriberEntity,
+  SubscriberRepository,
+  UserEntity,
+} from '@novu/dal';
+import { FeatureFlagsKeysEnum, VALID_ID_REGEX } from '@novu/shared';
+import { z } from 'zod';
 import { RetryOnError } from '../../decorators/retry-on-error-decorator';
 import { InstrumentUsecase } from '../../instrumentation';
-import { AnalyticsService, buildSubscriberKey, InvalidateCacheService } from '../../services';
+import { PinoLogger } from '../../logging';
+import { AnalyticsService, buildSubscriberKey, FeatureFlagsService, InvalidateCacheService } from '../../services';
 import { OAuthHandlerEnum, UpdateSubscriberChannel, UpdateSubscriberChannelCommand } from '../subscribers';
 import { UpdateSubscriber, UpdateSubscriberCommand } from '../update-subscriber';
 import { CreateOrUpdateSubscriberCommand } from './create-or-update-subscriber.command';
+
+const subscriberIdSchema = z.string().trim().regex(VALID_ID_REGEX);
 
 @Injectable()
 export class CreateOrUpdateSubscriberUseCase {
@@ -14,8 +27,14 @@ export class CreateOrUpdateSubscriberUseCase {
     private subscriberRepository: SubscriberRepository,
     private updateSubscriberUseCase: UpdateSubscriber,
     private updateSubscriberChannel: UpdateSubscriberChannel,
-    private analyticsService: AnalyticsService
-  ) {}
+    private analyticsService: AnalyticsService,
+    private featureFlagService: FeatureFlagsService,
+    private environmentRepository: EnvironmentRepository,
+    private communityOrganizationRepository: CommunityOrganizationRepository,
+    private logger: PinoLogger
+  ) {
+    this.logger.setContext(this.constructor.name);
+  }
 
   @RetryOnError('MongoServerError', {
     maxRetries: 3,
@@ -23,7 +42,19 @@ export class CreateOrUpdateSubscriberUseCase {
   })
   @InstrumentUsecase()
   async execute(command: CreateOrUpdateSubscriberCommand) {
-    const persistedSubscriber = await this.getExistingSubscriber(command);
+    const [environment, organization, persistedSubscriber] = await Promise.all([
+      this.environmentRepository.findOne({ _id: command.environmentId }),
+      this.communityOrganizationRepository.findOne({ _id: command.organizationId }),
+      this.getExistingSubscriber(command),
+    ]);
+
+    await this.validateItem({
+      itemId: command.subscriberId,
+      environment,
+      organization,
+      userId: command.userId,
+    });
+
     if (command.failIfExists && persistedSubscriber) {
       throw new ConflictException(`Subscriber with id "${command.subscriberId}" already exists`);
     }
@@ -149,5 +180,38 @@ export class CreateOrUpdateSubscriberUseCase {
     _environmentId: string;
   }): Promise<SubscriberEntity | null> {
     return await this.subscriberRepository.findBySubscriberId(_environmentId, subscriberId, false);
+  }
+
+  private async validateItem({
+    itemId,
+    userId,
+    environment,
+    organization,
+  }: {
+    itemId: string;
+    environment?: EnvironmentEntity;
+    organization?: OrganizationEntity;
+    userId?: string;
+  }) {
+    const isDryRun = await this.featureFlagService.getFlag({
+      environment,
+      organization,
+      user: userId ? ({ _id: userId } as UserEntity) : undefined,
+      key: FeatureFlagsKeysEnum.IS_SUBSCRIBER_ID_VALIDATION_DRY_RUN_ENABLED,
+      defaultValue: true,
+    });
+    const result = subscriberIdSchema.safeParse(itemId);
+
+    if (result.success) {
+      return;
+    }
+
+    if (isDryRun) {
+      this.logger.warn(`[Dry run] Invalid subscriberId: ${itemId}`);
+    } else {
+      throw new BadRequestException(
+        `Invalid subscriberId: ${itemId}, only alphanumeric characters, -, _, and . or valid email addresses are allowed`
+      );
+    }
   }
 }

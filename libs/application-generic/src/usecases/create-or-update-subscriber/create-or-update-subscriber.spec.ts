@@ -1,7 +1,15 @@
 import { Test } from '@nestjs/testing';
-import { SubscriberRepository } from '@novu/dal';
+import { CommunityOrganizationRepository, EnvironmentRepository, SubscriberRepository } from '@novu/dal';
 import { UserSession } from '@novu/testing';
-import { CacheInMemoryProviderService, CacheService, InvalidateCacheService } from '../../services';
+import {
+  AnalyticsService,
+  CacheInMemoryProviderService,
+  CacheService,
+  FeatureFlagsService,
+  InvalidateCacheService,
+} from '../../services';
+import { PinoLogger } from '../../logging';
+import { UpdateSubscriberChannel } from '../subscribers';
 import { UpdateSubscriber } from '../update-subscriber';
 import { CreateOrUpdateSubscriberCommand } from './create-or-update-subscriber.command';
 import { CreateOrUpdateSubscriberUseCase } from './create-or-update-subscriber.usecase';
@@ -32,7 +40,29 @@ describe('Create Subscriber', () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [SubscriberRepository, InvalidateCacheService],
-      providers: [UpdateSubscriber, cacheInMemoryProviderService, cacheService],
+      providers: [
+        CreateOrUpdateSubscriberUseCase,
+        UpdateSubscriber,
+        UpdateSubscriberChannel,
+        AnalyticsService,
+        cacheInMemoryProviderService,
+        cacheService,
+        EnvironmentRepository,
+        CommunityOrganizationRepository,
+        {
+          provide: FeatureFlagsService,
+          useValue: {
+            getFlag: jest.fn().mockResolvedValue(true),
+          },
+        },
+        {
+          provide: PinoLogger,
+          useValue: {
+            setContext: jest.fn(),
+            warn: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     session = new UserSession();

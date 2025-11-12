@@ -183,6 +183,7 @@ export class SubscribersController {
          * channels: body.channels || [],
          */
         failIfExists,
+        userId: user._id,
       })
     );
 
