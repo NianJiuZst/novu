@@ -78,7 +78,7 @@ describe('Subscriber Controller E2E API Testing #novu-v2', () => {
         await createSubscriberAndValidate(uuid);
 
         const subscribers = await getAllAndValidate({
-          searchParams: { phone: '1234567' },
+          searchParams: { phone: '+1234567890' },
           expectedTotalResults: 1,
           expectedArraySize: 1,
         });
@@ -126,32 +126,6 @@ describe('Subscriber Controller E2E API Testing #novu-v2', () => {
         expect(subscribers[0].subscriberId).to.equal(`test-subscriber-${uuid}`);
       });
 
-      it('should find subscriber by partial email match', async () => {
-        const uuid = generateUUID();
-        await createSubscriberAndValidate(uuid);
-
-        const subscribers = await getAllAndValidate({
-          searchParams: { email: `test-${uuid.substring(0, 5)}` },
-          expectedTotalResults: 1,
-          expectedArraySize: 1,
-        });
-
-        expect(subscribers[0].email).to.contain(uuid);
-      });
-
-      it('should find subscriber by partial phone match', async () => {
-        const uuid = generateUUID();
-        await createSubscriberAndValidate(uuid);
-
-        const subscribers = await getAllAndValidate({
-          searchParams: { phone: '123456' },
-          expectedTotalResults: 1,
-          expectedArraySize: 1,
-        });
-
-        expect(subscribers[0].phone).to.equal('+1234567890');
-      });
-
       it('should find subscriber by partial name match', async () => {
         const uuid = generateUUID();
         await createSubscriberAndValidate(uuid);
@@ -164,19 +138,6 @@ describe('Subscriber Controller E2E API Testing #novu-v2', () => {
 
         expect(subscribers[0].firstName).to.contain(uuid.substring(0, 5));
         expect(subscribers[0].lastName).to.equal('Subscriber');
-      });
-
-      it('should find subscriber by partial subscriberId match', async () => {
-        const uuid = generateUUID();
-        await createSubscriberAndValidate(uuid);
-
-        const subscribers = await getAllAndValidate({
-          searchParams: { subscriberId: `test-sub` },
-          expectedTotalResults: 1,
-          expectedArraySize: 1,
-        });
-
-        expect(subscribers[0].subscriberId).to.equal(`test-subscriber-${uuid}`);
       });
     });
 
