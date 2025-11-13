@@ -70,14 +70,21 @@ export class TopicSubscribersRepository extends BaseRepository<
     const bulkUpsertWriteOps = subscriptions.map((subscription) => {
       const { _subscriberId, _topicId, _environmentId, preferencesHash } = subscription;
 
+      const filter: Partial<CreateTopicSubscribersEntity> = {
+        _environmentId,
+        _subscriberId,
+        _topicId,
+      };
+
+      if (preferencesHash) {
+        filter.preferencesHash = preferencesHash;
+      } else {
+        filter.preferencesHash = null as unknown as undefined;
+      }
+
       return {
         updateOne: {
-          filter: {
-            _environmentId,
-            _subscriberId,
-            _topicId,
-            preferencesHash,
-          } satisfies Partial<CreateTopicSubscribersEntity>,
+          filter,
           update: { $set: subscription },
           upsert: true,
         },
@@ -101,12 +108,12 @@ export class TopicSubscribersRepository extends BaseRepository<
     const upsertedIds = bulkResponse.upsertedIds || {};
     const writeErrors = bulkResponse.getWriteErrors() || [];
 
-    const indexes: number[] = [];
+    const createdOrFailedIndexes: number[] = [];
 
     const createdSubscribers: TopicSubscribersEntity[] = [];
     for (const [index, _id] of Object.entries(upsertedIds)) {
       const numericIndex = parseInt(index, 10);
-      indexes.push(numericIndex);
+      createdOrFailedIndexes.push(numericIndex);
       const subscriber = subscriptions[numericIndex];
       if (subscriber) {
         createdSubscribers.push({
@@ -119,7 +126,7 @@ export class TopicSubscribersRepository extends BaseRepository<
     let failed: Array<{ message: string; subscriberId: string; topicKey: string }> = [];
     if (writeErrors.length > 0) {
       failed = writeErrors.map((error) => {
-        indexes.push(error.err.index);
+        createdOrFailedIndexes.push(error.err.index);
         const subscriber = subscriptions[error.err.index];
 
         return {
@@ -130,9 +137,31 @@ export class TopicSubscribersRepository extends BaseRepository<
       });
     }
 
-    const updatedSubscribers: TopicSubscribersEntity[] = subscriptions
-      .filter((_, index) => !indexes.includes(index))
-      .map((subscriber) => subscriber as TopicSubscribersEntity);
+    const updatedSubscriptionsInput = subscriptions.filter((_, index) => !createdOrFailedIndexes.includes(index));
+
+    const updatedSubscribers: TopicSubscribersEntity[] = [];
+    if (updatedSubscriptionsInput.length > 0) {
+      for (const subscription of updatedSubscriptionsInput) {
+        const { _subscriberId, _topicId, _environmentId, _organizationId, preferencesHash } = subscription;
+
+        const filter: Partial<CreateTopicSubscribersEntity> = {
+          _organizationId,
+          _subscriberId,
+          _topicId,
+        };
+
+        if (preferencesHash) {
+          filter.preferencesHash = preferencesHash;
+        } else {
+          filter.preferencesHash = null as unknown as undefined;
+        }
+
+        const found = await this.findOne({ ...filter, _environmentId });
+        if (found) {
+          updatedSubscribers.push(found);
+        }
+      }
+    }
 
     return {
       created: createdSubscribers,

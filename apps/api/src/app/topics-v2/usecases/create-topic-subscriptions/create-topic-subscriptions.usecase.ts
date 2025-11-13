@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   createDeterministicHash,
   GetPreferences,
@@ -9,6 +9,7 @@ import {
 import {
   BaseRepository,
   CreateTopicSubscribersEntity,
+  NotificationTemplateEntity,
   NotificationTemplateRepository,
   PreferencesRepository,
   SubscriberEntity,
@@ -20,6 +21,7 @@ import {
 } from '@novu/dal';
 import { PreferencesTypeEnum, SeverityLevelEnum } from '@novu/shared';
 import { RulesLogic } from 'json-logic-js';
+import _ from 'lodash';
 import { GroupPreferenceFilterDto } from '../../dtos/create-topic-subscriptions.dto';
 import {
   CreateTopicSubscriptionsResponseDto,
@@ -47,6 +49,11 @@ export class CreateTopicSubscriptionsUsecase {
 
   @InstrumentUsecase()
   async execute(command: CreateTopicSubscriptionsCommand): Promise<CreateTopicSubscriptionsResponseDto> {
+    const workflows = await this.validateAndFetchWorkflows(
+      command.preferences,
+      command.environmentId,
+      command.organizationId
+    );
     const topic = await this.upsertTopic(command);
 
     const errors: SubscriptionErrorDto[] = [];
@@ -95,7 +102,7 @@ export class CreateTopicSubscriptionsUsecase {
       _organizationId: command.organizationId,
       _topicId: topic._id,
       _subscriberId: { $in: foundSubscribers.map((sub) => sub._id) },
-      preferencesHash: preferencesHash ?? null,
+      ...(preferencesHash ? { preferencesHash } : { preferencesHash: null }),
     };
 
     const existingSubscriptions = await this.topicSubscribersRepository.find(
@@ -118,7 +125,7 @@ export class CreateTopicSubscriptionsUsecase {
 
     for (const subscription of existingSubscriptions) {
       const subscriber = foundSubscribers.find((sub) => sub._id.toString() === subscription._subscriberId.toString());
-      const preferences = await this.fetchPreferencesForSubscription(command, subscription);
+      const preferences = await this.fetchPreferencesForSubscription(command, subscription, workflows);
 
       subscriptionData.push({
         _id: subscription._id.toString(),
@@ -157,7 +164,37 @@ export class CreateTopicSubscriptionsUsecase {
       for (const subscription of newSubscriptions.created) {
         const subscriber = foundSubscribers.find((sub) => sub._id.toString() === subscription._subscriberId.toString());
 
-        const preferences = await this.createPreferencesForSubscription(command, subscription);
+        const preferences = await this.createPreferencesForSubscription(command, subscription, workflows);
+
+        subscriptionData.push({
+          _id: subscription._id.toString(),
+          topic: {
+            _id: topic._id,
+            key: topic.key,
+            name: topic.name,
+          },
+          subscriber: subscriber
+            ? {
+                _id: subscriber._id,
+                subscriberId: subscriber.subscriberId,
+                avatar: subscriber.avatar,
+                firstName: subscriber.firstName,
+                lastName: subscriber.lastName,
+                email: subscriber.email,
+                createdAt: subscriber.createdAt,
+                updatedAt: subscriber.updatedAt,
+              }
+            : null,
+          preferences,
+          createdAt: subscription.createdAt ?? '',
+          updatedAt: subscription.updatedAt ?? '',
+        });
+      }
+
+      for (const subscription of newSubscriptions.updated) {
+        const subscriber = foundSubscribers.find((sub) => sub._id.toString() === subscription._subscriberId.toString());
+
+        const preferences = await this.fetchPreferencesForSubscription(command, subscription, workflows);
 
         subscriptionData.push({
           _id: subscription._id.toString(),
@@ -312,18 +349,10 @@ export class CreateTopicSubscriptionsUsecase {
 
   private async fetchPreferencesForSubscription(
     command: CreateTopicSubscriptionsCommand,
-    subscription: TopicSubscribersEntity
+    subscription: TopicSubscribersEntity,
+    workflows: NotificationTemplateEntity[]
   ): Promise<SubscriptionPreferenceDto[] | undefined> {
-    if (!command.preferences || command.preferences.length === 0) {
-      return undefined;
-    }
-
-    const workflowIds = await this.extractWorkflowIds(
-      command.preferences,
-      command.environmentId,
-      command.organizationId
-    );
-    if (workflowIds.length === 0) {
+    if (!command.preferences || command.preferences.length === 0 || workflows.length === 0) {
       return undefined;
     }
 
@@ -332,19 +361,13 @@ export class CreateTopicSubscriptionsUsecase {
       _organizationId: command.organizationId,
       _topicSubscriptionId: subscription._id,
       _subscriberId: subscription._subscriberId,
-      _templateId: { $in: workflowIds },
+      _templateId: { $in: workflows.map((w) => w._id) },
       type: PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
     });
 
     if (preferencesEntities.length === 0) {
       return undefined;
     }
-
-    const workflows = await Promise.all(
-      workflowIds.map((id) => this.notificationTemplateRepository.findById(id, command.environmentId).catch(() => null))
-    );
-
-    const workflowMap = new Map(workflows.filter((w): w is NonNullable<typeof w> => w !== null).map((w) => [w._id, w]));
 
     return preferencesEntities
       .map((pref) => {
@@ -353,7 +376,7 @@ export class CreateTopicSubscriptionsUsecase {
           return null;
         }
 
-        const workflow = workflowMap.get(workflowId);
+        const workflow = workflows.find((w) => w._id === workflowId);
         const preferences = pref.preferences;
 
         return {
@@ -377,7 +400,8 @@ export class CreateTopicSubscriptionsUsecase {
 
   private async createPreferencesForSubscription(
     command: CreateTopicSubscriptionsCommand,
-    subscription: TopicSubscribersEntity
+    subscription: TopicSubscribersEntity,
+    workflows: NotificationTemplateEntity[]
   ): Promise<SubscriptionPreferenceDto[] | undefined> {
     if (!command.preferences || command.preferences.length === 0) {
       return undefined;
@@ -388,46 +412,32 @@ export class CreateTopicSubscriptionsUsecase {
     );
 
     if (hasConditions) {
-      return await this.createPreferencesWithConditions(command, subscription);
+      return await this.createPreferencesWithConditions(command, subscription, workflows);
     }
 
-    return await this.createPreferencesWithoutConditions(command, subscription);
+    return await this.createPreferencesWithoutConditions(command, subscription, workflows);
   }
 
   private async createPreferencesWithConditions(
     command: CreateTopicSubscriptionsCommand,
-    subscription: TopicSubscribersEntity
+    subscription: TopicSubscribersEntity,
+    workflows: NotificationTemplateEntity[]
   ): Promise<SubscriptionPreferenceDto[] | undefined> {
-    if (!command.preferences) {
+    if (!command.preferences || workflows.length === 0) {
       return undefined;
     }
-
-    const { workflowIds, identifierToObjectIdMap } = await this.extractWorkflowIdsWithMapping(
-      command.preferences,
-      command.environmentId,
-      command.organizationId
-    );
-    if (workflowIds.length === 0) {
-      return undefined;
-    }
-
-    const workflows = await Promise.all(
-      workflowIds.map((id) => this.notificationTemplateRepository.findById(id, command.environmentId))
-    );
-
-    const workflowMap = new Map(workflows.filter((w): w is NonNullable<typeof w> => w !== null).map((w) => [w._id, w]));
 
     const preferencesResult: SubscriptionPreferenceDto[] = [];
 
-    for (const workflowId of workflowIds) {
+    for (const workflow of workflows) {
       const preferenceFilter = command.preferences.find((pref) => {
         if (pref.filter.tags && pref.filter.tags.length > 0) {
-          return true;
+          return workflow.tags && pref.filter.tags.some((tag) => workflow.tags.includes(tag));
         }
         if (pref.filter.workflowIds && pref.filter.workflowIds.length > 0) {
           return pref.filter.workflowIds.some((id) => {
-            const resolvedId = identifierToObjectIdMap.get(id) || id;
-            return resolvedId === workflowId;
+            const workflowIdentifier = workflow.triggers?.[0]?.identifier;
+            return id === workflow._id || id === workflowIdentifier;
           });
         }
         return false;
@@ -447,27 +457,23 @@ export class CreateTopicSubscriptionsUsecase {
         _environmentId: command.environmentId,
         _organizationId: command.organizationId,
         _subscriberId: subscription._subscriberId,
-        _templateId: workflowId,
+        _templateId: workflow._id,
         _topicSubscriptionId: subscription._id,
         type: PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
         preferences: workflowPreferences,
       });
 
       if (createdPreference) {
-        const workflow = workflowMap.get(workflowId);
-
         preferencesResult.push({
-          workflow: workflow
-            ? {
-                id: workflow._id,
-                identifier: workflow.triggers?.[0]?.identifier || '',
-                name: workflow.name || '',
-                critical: workflow.critical || false,
-                tags: workflow.tags,
-                data: workflow.data,
-                severity: workflow.severity || SeverityLevelEnum.NONE,
-              }
-            : undefined,
+          workflow: {
+            id: workflow._id,
+            identifier: workflow.triggers?.[0]?.identifier || '',
+            name: workflow.name || '',
+            critical: workflow.critical || false,
+            tags: workflow.tags,
+            data: workflow.data,
+            severity: workflow.severity || SeverityLevelEnum.NONE,
+          },
           enabled: createdPreference.preferences?.all?.enabled ?? true,
           condition: createdPreference.preferences?.all?.condition as RulesLogic | undefined,
         });
@@ -479,54 +485,36 @@ export class CreateTopicSubscriptionsUsecase {
 
   private async createPreferencesWithoutConditions(
     command: CreateTopicSubscriptionsCommand,
-    subscription: TopicSubscribersEntity
+    subscription: TopicSubscribersEntity,
+    workflows: NotificationTemplateEntity[]
   ): Promise<SubscriptionPreferenceDto[] | undefined> {
-    if (!command.preferences) {
+    if (!command.preferences || workflows.length === 0) {
       return undefined;
     }
-
-    const workflowIds = await this.extractWorkflowIds(
-      command.preferences,
-      command.environmentId,
-      command.organizationId
-    );
-    if (workflowIds.length === 0) {
-      return undefined;
-    }
-
-    const workflows = await Promise.all(
-      workflowIds.map((id) => this.notificationTemplateRepository.findById(id, command.environmentId).catch(() => null))
-    );
-
-    const workflowMap = new Map(workflows.filter((w): w is NonNullable<typeof w> => w !== null).map((w) => [w._id, w]));
 
     const preferencesResult: SubscriptionPreferenceDto[] = [];
 
-    for (const workflowId of workflowIds) {
+    for (const workflow of workflows) {
       const preferenceResponse = await this.getPreferences.safeExecute(
         GetPreferencesCommand.create({
           environmentId: command.environmentId,
           organizationId: command.organizationId,
-          templateId: workflowId,
+          templateId: workflow._id,
           subscriberId: subscription._subscriberId,
         })
       );
 
       if (preferenceResponse) {
-        const workflow = workflowMap.get(workflowId);
-
         preferencesResult.push({
-          workflow: workflow
-            ? {
-                id: workflow._id,
-                identifier: workflow.triggers?.[0]?.identifier || '',
-                name: workflow.name || '',
-                critical: workflow.critical || false,
-                tags: workflow.tags,
-                data: workflow.data,
-                severity: workflow.severity || SeverityLevelEnum.NONE,
-              }
-            : undefined,
+          workflow: {
+            id: workflow._id,
+            identifier: workflow.triggers?.[0]?.identifier || '',
+            name: workflow.name || '',
+            critical: workflow.critical || false,
+            tags: workflow.tags,
+            data: workflow.data,
+            severity: workflow.severity || SeverityLevelEnum.NONE,
+          },
           enabled: preferenceResponse.preferences?.all?.enabled ?? true,
         });
       }
@@ -535,77 +523,145 @@ export class CreateTopicSubscriptionsUsecase {
     return preferencesResult.length > 0 ? preferencesResult : undefined;
   }
 
-  private async extractWorkflowIds(
-    preferences: GroupPreferenceFilterDto[],
+  private async validateAndFetchWorkflows(
+    preferences: GroupPreferenceFilterDto[] | undefined,
     environmentId: string,
     organizationId: string
-  ): Promise<string[]> {
-    const result = await this.extractWorkflowIdsWithMapping(preferences, environmentId, organizationId);
-    return result.workflowIds;
-  }
+  ): Promise<NotificationTemplateEntity[]> {
+    let workflowsById: NotificationTemplateEntity[] = [];
+    let workflowsByIdentifier: NotificationTemplateEntity[] = [];
+    const workflowsByTags: NotificationTemplateEntity[] = [];
 
-  private async extractWorkflowIdsWithMapping(
-    preferences: GroupPreferenceFilterDto[],
-    environmentId: string,
-    organizationId: string
-  ): Promise<{ workflowIds: string[]; identifierToObjectIdMap: Map<string, string> }> {
-    if (!preferences) {
-      return { workflowIds: [], identifierToObjectIdMap: new Map() };
+    if (!preferences || preferences.length === 0) {
+      return [];
     }
 
-    const workflowIds: string[] = [];
-    const workflowIdentifiers: string[] = [];
-    const identifierToObjectIdMap = new Map<string, string>();
-
     for (const pref of preferences) {
-      if (pref.filter.workflowIds && pref.filter.workflowIds.length > 0) {
-        for (const workflowId of pref.filter.workflowIds) {
-          if (BaseRepository.isInternalId(workflowId)) {
-            workflowIds.push(workflowId);
-            identifierToObjectIdMap.set(workflowId, workflowId);
-          } else {
-            workflowIdentifiers.push(workflowId);
-          }
+      const missingWorkflowIds: string[] = [];
+      const missingTags: string[] = [];
+
+      const fetchWorkflowIdsByIdsResult = await this.validateAndFetchWorkflowsByIds(
+        pref.filter.workflowIds,
+        environmentId
+      );
+      workflowsById = fetchWorkflowIdsByIdsResult.workflowsById;
+      workflowsByIdentifier = fetchWorkflowIdsByIdsResult.workflowsByIdentifier;
+      missingWorkflowIds.push(...fetchWorkflowIdsByIdsResult.missingWorkflowIds);
+
+      const findByTagsResult = await this.findByTags(pref, organizationId, environmentId);
+      workflowsByTags.push(...findByTagsResult.workflowsByTags);
+      missingTags.push(...findByTagsResult.missingTags);
+
+      if (missingWorkflowIds.length > 0 || missingTags.length > 0) {
+        const errorMessages: string[] = [];
+
+        if (missingWorkflowIds.length > 0) {
+          errorMessages.push(
+            `Workflows not found: ${missingWorkflowIds.join(', ')}. Please verify the workflow IDs or identifiers exist.`
+          );
+        }
+
+        if (missingTags.length > 0) {
+          errorMessages.push(
+            `No workflows found for tags: ${missingTags.join(', ')}. Please verify the tags exist and have associated workflows.`
+          );
+        }
+
+        throw new NotFoundException(errorMessages.join(' '));
+      }
+    }
+
+    return _.uniqBy([...workflowsById, ...workflowsByIdentifier, ...workflowsByTags], '_id');
+  }
+
+  private async findByTags(
+    pref: GroupPreferenceFilterDto,
+    organizationId: string,
+    environmentId: string
+  ): Promise<{ workflowsByTags: NotificationTemplateEntity[]; missingTags: string[] }> {
+    const missingTags: string[] = [];
+    let workflowsByTags: NotificationTemplateEntity[] = [];
+
+    if (pref.filter.tags && pref.filter.tags.length > 0) {
+      workflowsByTags = await this.notificationTemplateRepository.filterActive({
+        organizationId,
+        environmentId,
+        tags: pref.filter.tags,
+      });
+
+      for (const tag of pref.filter.tags) {
+        const hasWorkflowWithTag = workflowsByTags.some((workflow) => workflow.tags?.includes(tag));
+        if (!hasWorkflowWithTag) {
+          missingTags.push(tag);
         }
       }
+    }
+    return { workflowsByTags, missingTags };
+  }
 
-      if (pref.filter.tags && pref.filter.tags.length > 0) {
-        const workflows = await this.notificationTemplateRepository.filterActive({
-          organizationId,
-          environmentId,
-          tags: pref.filter.tags,
-        });
+  private async validateAndFetchWorkflowsByIds(
+    workflowIds: string[] | undefined,
+    environmentId: string
+  ): Promise<{
+    workflowsById: NotificationTemplateEntity[];
+    workflowsByIdentifier: NotificationTemplateEntity[];
+    missingWorkflowIds: string[];
+  }> {
+    if (!workflowIds || workflowIds.length === 0) {
+      return {
+        workflowsById: [],
+        workflowsByIdentifier: [],
+        missingWorkflowIds: [],
+      };
+    }
 
-        for (const workflow of workflows) {
-          workflowIds.push(workflow._id);
-          if (workflow.triggers?.[0]?.identifier) {
-            identifierToObjectIdMap.set(workflow.triggers[0].identifier, workflow._id);
-          }
+    const internalIds: string[] = [];
+    const workflowIdentifiers: string[] = [];
+
+    for (const workflowId of workflowIds) {
+      if (BaseRepository.isInternalId(workflowId)) {
+        internalIds.push(workflowId);
+      } else {
+        workflowIdentifiers.push(workflowId);
+      }
+    }
+
+    let workflowsById: NotificationTemplateEntity[] = [];
+    let workflowsByIdentifier: NotificationTemplateEntity[] = [];
+    const missingWorkflowIds: string[] = [];
+
+    if (internalIds.length > 0) {
+      const uniqueWorkflowIds = [...new Set(internalIds)];
+      workflowsById = await this.notificationTemplateRepository.find({
+        _id: { $in: uniqueWorkflowIds },
+        _environmentId: environmentId,
+      });
+
+      const foundWorkflowIds = new Set(workflowsById.map((w) => w._id.toString()));
+
+      for (const workflowId of uniqueWorkflowIds) {
+        if (!foundWorkflowIds.has(workflowId)) {
+          missingWorkflowIds.push(workflowId);
         }
       }
     }
 
     if (workflowIdentifiers.length > 0) {
-      const workflowsByIdentifier = await this.notificationTemplateRepository.findByTriggerIdentifierBulk(
+      const uniqueWorkflowIdentifiers = [...new Set(workflowIdentifiers)];
+      workflowsByIdentifier = await this.notificationTemplateRepository.findByTriggerIdentifierBulk(
         environmentId,
-        workflowIdentifiers
+        uniqueWorkflowIdentifiers
       );
-      const workflowByIdentifierMap = new Map<string, string>();
-      for (const workflow of workflowsByIdentifier) {
-        const identifier = workflow.triggers?.[0]?.identifier;
-        if (identifier) {
-          workflowByIdentifierMap.set(identifier, workflow._id);
-        }
-      }
-      for (const identifier of workflowIdentifiers) {
-        const objectId = workflowByIdentifierMap.get(identifier);
-        if (objectId) {
-          workflowIds.push(objectId);
-          identifierToObjectIdMap.set(identifier, objectId);
+
+      const foundIdentifiers = new Set(workflowsByIdentifier.map((w) => w.triggers?.[0]?.identifier).filter(Boolean));
+
+      for (const identifier of uniqueWorkflowIdentifiers) {
+        if (!foundIdentifiers.has(identifier)) {
+          missingWorkflowIds.push(identifier);
         }
       }
     }
 
-    return { workflowIds: [...new Set(workflowIds)], identifierToObjectIdMap };
+    return { workflowsById, workflowsByIdentifier, missingWorkflowIds };
   }
 }

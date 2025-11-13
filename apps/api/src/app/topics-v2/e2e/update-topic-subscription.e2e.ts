@@ -5,7 +5,7 @@ import { SubscribersService, UserSession } from '@novu/testing';
 import { expect } from 'chai';
 import { expectSdkExceptionGeneric, initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
-describe.only('Update topic subscription - /v2/topics/:topicKey/subscriptions/:subscriptionId (PATCH) #novu-v2', async () => {
+describe('Update topic subscription - /v2/topics/:topicKey/subscriptions/:subscriptionId (PATCH) #novu-v2', async () => {
   let session: UserSession;
   let novuClient: Novu;
   let subscriber1: SubscriberEntity;
@@ -114,9 +114,6 @@ describe.only('Update topic subscription - /v2/topics/:topicKey/subscriptions/:s
         ],
       },
     });
-
-    console.log('@@@@@');
-    console.log(updateResponse);
 
     expect(updateResponse, 'Should have updated the subscription').to.exist;
     expect(updateResponse.result.id, 'Should have updated the subscription').to.equal(subscriptionId);

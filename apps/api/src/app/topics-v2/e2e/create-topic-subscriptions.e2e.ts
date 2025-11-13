@@ -1,5 +1,5 @@
 import { Novu } from '@novu/api';
-import { NotificationTemplateEntity, SubscriberEntity, TopicRepository, TopicSubscribersRepository } from '@novu/dal';
+import { SubscriberEntity, TopicSubscribersRepository } from '@novu/dal';
 import { StepTypeEnum } from '@novu/shared';
 import { SubscribersService, UserSession } from '@novu/testing';
 import { expect } from 'chai';
@@ -12,14 +12,12 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
   let subscriber2: SubscriberEntity;
   let subscriber3: SubscriberEntity;
   let topicSubscribersRepository: TopicSubscribersRepository;
-  let topicRepository: TopicRepository;
 
   before(async () => {
     session = new UserSession();
     await session.initialize();
     novuClient = initNovuClassSdk(session);
     topicSubscribersRepository = new TopicSubscribersRepository();
-    topicRepository = new TopicRepository();
 
     // Create subscribers
     const subscribersService = new SubscribersService(session.organization._id, session.environment._id);
