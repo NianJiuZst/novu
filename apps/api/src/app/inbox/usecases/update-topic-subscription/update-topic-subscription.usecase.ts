@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { generateConditionHash, InstrumentUsecase } from '@novu/application-generic';
+import { createDeterministicHash, InstrumentUsecase } from '@novu/application-generic';
 import {
+  PreferencesRepository,
   SubscriberEntity,
   SubscriberRepository,
   TopicEntity,
@@ -8,6 +9,7 @@ import {
   TopicSubscribersEntity,
   TopicSubscribersRepository,
 } from '@novu/dal';
+import { PreferencesTypeEnum } from '@novu/shared';
 import {
   SubscriberDto,
   SubscriptionWorkflowDto,
@@ -21,7 +23,8 @@ export class UpdateTopicSubscription {
   constructor(
     private topicRepository: TopicRepository,
     private topicSubscribersRepository: TopicSubscribersRepository,
-    private subscriberRepository: SubscriberRepository
+    private subscriberRepository: SubscriberRepository,
+    private preferencesRepository: PreferencesRepository
   ) {}
 
   @InstrumentUsecase()
@@ -56,14 +59,36 @@ export class UpdateTopicSubscription {
       throw new NotFoundException(`Topic with key ${command.topicKey} not found`);
     }
 
-    const workflows = command.workflows.map((workflow) => ({
-      _id: workflow.id,
-      enabled: workflow.enabled,
-    }));
+    const workflowIds = command.workflows.map((workflow) => workflow.id);
 
-    const conditionHash = command.conditions
-      ? generateConditionHash({ conditions: command.conditions, workflows })
-      : undefined;
+    await this.preferencesRepository.delete({
+      _environmentId: command.environmentId,
+      _organizationId: command.organizationId,
+      _topicSubscriptionId: existingSubscription._id,
+      _subscriberId: existingSubscription._subscriberId,
+      type: PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
+    });
+
+    for (const workflow of command.workflows) {
+      await this.preferencesRepository.create({
+        _environmentId: command.environmentId,
+        _organizationId: command.organizationId,
+        _topicSubscriptionId: existingSubscription._id,
+        _subscriberId: existingSubscription._subscriberId,
+        _templateId: workflow.id,
+        type: PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
+        preferences: {
+          all: {
+            enabled: workflow.enabled,
+          },
+        },
+      });
+    }
+
+    const preferencesHash = createDeterministicHash({
+      workflows: command.workflows,
+      conditions: command.conditions,
+    });
 
     const updatedSubscription = await this.topicSubscribersRepository.findOneAndUpdate(
       {
@@ -73,9 +98,7 @@ export class UpdateTopicSubscription {
       },
       {
         $set: {
-          workflows,
-          conditions: command.conditions,
-          conditionHash,
+          preferencesHash,
         },
       },
       { new: true }
@@ -85,26 +108,34 @@ export class UpdateTopicSubscription {
       throw new Error('Failed to update subscription');
     }
 
-    return this.mapToDto(updatedSubscription, topic, subscriber);
+    return await this.mapToDto(updatedSubscription, topic, subscriber, workflowIds);
   }
 
-  private mapToDto(
+  private async mapToDto(
     subscription: TopicSubscribersEntity,
     topic: TopicEntity,
-    subscriber: SubscriberEntity
-  ): TopicSubscriptionDto {
-    const workflowDtos: SubscriptionWorkflowDto[] =
-      subscription.workflows?.map((workflow) => ({
-        id: workflow._id,
-        name: '',
-        enabled: workflow.enabled,
-      })) || [];
+    subscriber: SubscriberEntity,
+    workflowIds: string[]
+  ): Promise<TopicSubscriptionDto> {
+    const preferencesEntities = await this.preferencesRepository.find({
+      _environmentId: subscription._environmentId,
+      _organizationId: subscription._organizationId,
+      _topicSubscriptionId: subscription._id,
+      _subscriberId: subscription._subscriberId,
+      _templateId: { $in: workflowIds },
+      type: PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
+    });
+
+    const workflowDtos: SubscriptionWorkflowDto[] = preferencesEntities.map((pref) => ({
+      id: pref._templateId?.toString() || '',
+      name: '',
+      enabled: pref.preferences?.all?.enabled ?? true,
+    }));
 
     return {
       _id: subscription._id,
       topic: this.mapTopicToDto(topic),
       subscriber: this.mapSubscriberToDto(subscriber),
-      conditions: subscription.conditions,
       workflows: workflowDtos,
       createdAt: subscription.createdAt || '',
       updatedAt: subscription.updatedAt || '',

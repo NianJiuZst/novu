@@ -3,6 +3,7 @@ import { InstrumentUsecase } from '@novu/application-generic';
 import {
   NotificationTemplateEntity,
   NotificationTemplateRepository,
+  PreferencesRepository,
   SubscriberEntity,
   SubscriberRepository,
   TopicEntity,
@@ -10,7 +11,8 @@ import {
   TopicSubscribersEntity,
   TopicSubscribersRepository,
 } from '@novu/dal';
-import { DirectionEnum } from '@novu/shared';
+import { DirectionEnum, PreferencesTypeEnum } from '@novu/shared';
+import { UpsertTopicCommand } from '../../../topics-v2/usecases/upsert-topic/upsert-topic.command';
 import { UpsertTopicUseCase } from '../../../topics-v2/usecases/upsert-topic/upsert-topic.usecase';
 import {
   SubscriberDto,
@@ -27,16 +29,19 @@ export class GetTopicSubscriptions {
     private topicSubscribersRepository: TopicSubscribersRepository,
     private notificationTemplateRepository: NotificationTemplateRepository,
     private subscriberRepository: SubscriberRepository,
+    private preferencesRepository: PreferencesRepository,
     private upsertTopicUseCase: UpsertTopicUseCase
   ) {}
 
   @InstrumentUsecase()
   async execute(command: GetTopicSubscriptionsCommand): Promise<TopicSubscriptionDto[]> {
-    await this.upsertTopicUseCase.execute({
-      environmentId: command.environmentId,
-      organizationId: command.organizationId,
-      key: command.topicKey,
-    });
+    await this.upsertTopicUseCase.execute(
+      UpsertTopicCommand.create({
+        environmentId: command.environmentId,
+        organizationId: command.organizationId,
+        key: command.topicKey,
+      })
+    );
 
     const topic = await this.topicRepository.findTopicByKey(
       command.topicKey,
@@ -67,7 +72,7 @@ export class GetTopicSubscriptions {
       return this.buildEmptyStateResponse(topic, subscriber, workflows);
     }
 
-    return this.buildSubscriptionsResponse(subscriptions, topic, subscriber, workflows);
+    return await this.buildSubscriptionsResponse(subscriptions, topic, subscriber, workflows);
   }
 
   private async queryWorkflows(command: GetTopicSubscriptionsCommand) {
@@ -117,19 +122,30 @@ export class GetTopicSubscriptions {
     ];
   }
 
-  private buildSubscriptionsResponse(
+  private async buildSubscriptionsResponse(
     subscriptions: TopicSubscribersEntity[],
     topic: TopicEntity,
     subscriber: SubscriberEntity,
     workflows: NotificationTemplateEntity[]
-  ): TopicSubscriptionDto[] {
-    return subscriptions.map((subscription) => {
+  ): Promise<TopicSubscriptionDto[]> {
+    const result: TopicSubscriptionDto[] = [];
+
+    for (const subscription of subscriptions) {
+      const preferencesEntities =
+        workflows.length > 0
+          ? await this.preferencesRepository.find({
+              _environmentId: subscription._environmentId,
+              _organizationId: subscription._organizationId,
+              _topicSubscriptionId: subscription._id,
+              _subscriberId: subscription._subscriberId,
+              _templateId: { $in: workflows.map((w) => w._id) },
+              type: PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
+            })
+          : [];
+
       const workflowDtos: SubscriptionWorkflowDto[] = workflows.map((workflowEntity) => {
-        const isEnabled = subscription.workflows
-          ? subscription.workflows.some(
-              (subscriptionWorkflow) => subscriptionWorkflow._id === workflowEntity._id && subscriptionWorkflow.enabled
-            )
-          : true;
+        const preference = preferencesEntities.find((pref) => pref._templateId?.toString() === workflowEntity._id);
+        const isEnabled = preference?.preferences?.all?.enabled ?? true;
 
         return {
           id: workflowEntity._id,
@@ -138,16 +154,17 @@ export class GetTopicSubscriptions {
         };
       });
 
-      return {
+      result.push({
         _id: subscription._id,
         topic: this.mapTopicToDto(topic),
         subscriber: this.mapSubscriberToDto(subscriber),
-        conditions: subscription.conditions,
         workflows: workflowDtos,
         createdAt: subscription.createdAt || '',
         updatedAt: subscription.updatedAt || '',
-      };
-    });
+      });
+    }
+
+    return result;
   }
 
   private mapTopicToDto(topic: TopicEntity): TopicDto {

@@ -141,7 +141,6 @@ export class TopicsController {
       UpsertTopicCommand.create({
         environmentId: user.environmentId,
         organizationId: user.organizationId,
-        userId: user._id,
         key: body.key,
         name: body.name,
         failIfExists,
