@@ -101,7 +101,7 @@ export class CreateTopicSubscriptionsRequestDto {
     description:
       'List of subscriber IDs to subscribe to the topic (max: 100). @deprecated Use the "subscriptions" property instead.',
     type: [String],
-    examples: [['subscriberId1', 'subscriberId2']],
+    example: ['subscriberId1', 'subscriberId2'],
     deprecated: true,
   })
   @IsArray()
@@ -118,12 +118,9 @@ export class CreateTopicSubscriptionsRequestDto {
     items: {
       oneOf: [{ type: 'string' }, { $ref: getSchemaPath(TopicSubscriberIdentifierDto) }],
     },
-    examples: [
-      ['subscriberId1', 'subscriberId2'],
-      [
-        { identifier: 'subscriber-123-subscription-a', subscriberId: 'subscriber-123' },
-        { identifier: 'subscriber-456-subscription-b', subscriberId: 'subscriber-456' },
-      ],
+    example: [
+      { identifier: 'subscriber-123-subscription-a', subscriberId: 'subscriber-123' },
+      { identifier: 'subscriber-456-subscription-b', subscriberId: 'subscriber-456' },
     ],
   })
   @IsArray()
@@ -151,12 +148,7 @@ export class CreateTopicSubscriptionsRequestDto {
         { $ref: getSchemaPath(GroupPreferenceFilterDto) },
       ],
     },
-    examples: [
-      'workflow-123',
-      { workflowId: 'workflow-123' },
-      { workflowId: 'workflow-123', condition: { '===': [{ var: 'tier' }, 'premium'] } },
-      { filter: { workflowIds: ['workflow-1'], tags: ['tag1'] }, condition: { '===': [{ var: 'role' }, 'admin'] } },
-    ],
+    example: [{ workflowId: 'workflow-123', condition: { '===': [{ var: 'tier' }, 'premium'] } }],
   })
   @IsArray()
   @ValidateNested({ each: true })
