@@ -109,6 +109,8 @@ export class InboxController {
     @Body() body: SubscriberSessionRequestDto,
     @Headers('origin') origin: string
   ): Promise<SubscriberSessionResponseDto> {
+    // eslint-disable-next-line no-console
+    console.log('origin');
     return await this.initializeSessionUsecase.execute(
       SessionCommand.create({
         requestData: body,
