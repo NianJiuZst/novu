@@ -408,7 +408,9 @@ export class IntegrationsController {
   @ApiOperation({
     summary: 'Generate chat OAuth URL',
     description: `Generate an OAuth URL for chat integrations like Slack. 
-    The subscriber will use this URL to authorize the chat integration.`,
+    This URL allows subscribers to authorize the integration, enabling the system to send messages 
+    through their chat workspace. The authorization process creates either a workspace connection 
+    for broader access or an incoming webhook endpoint for direct message delivery.`,
   })
   @ApiResponse(String)
   @ApiExcludeEndpoint()
@@ -426,9 +428,11 @@ export class IntegrationsController {
       GenerateChatOauthUrlCommand.create({
         environmentId: user.environmentId,
         organizationId: user.organizationId,
-        resource: body.resource,
+        subscriberId: body.subscriberId,
         integrationIdentifier: body.integrationIdentifier,
         connectionIdentifier: body.connectionIdentifier,
+        context: body.context,
+        scope: body.scope,
       })
     );
   }
