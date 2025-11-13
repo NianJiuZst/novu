@@ -1,5 +1,12 @@
 import { Module } from '@nestjs/common';
-import { CommunityOrganizationRepository, ContextRepository } from '@novu/dal';
+import {
+  CommunityOrganizationRepository,
+  ContextRepository,
+  NotificationTemplateRepository,
+  SubscriberRepository,
+  TopicRepository,
+  TopicSubscribersRepository,
+} from '@novu/dal';
 import { AuthModule } from '../auth/auth.module';
 import { IntegrationModule } from '../integrations/integrations.module';
 import { OrganizationModule } from '../organization/organization.module';
@@ -7,6 +14,8 @@ import { OutboundWebhooksModule } from '../outbound-webhooks/outbound-webhooks.m
 import { PreferencesModule } from '../preferences';
 import { SharedModule } from '../shared/shared.module';
 import { SubscribersV1Module } from '../subscribers/subscribersV1.module';
+import { CreateTopicSubscriptionsUsecase } from '../topics-v2/usecases/create-topic-subscriptions/create-topic-subscriptions.usecase';
+import { UpsertTopicUseCase } from '../topics-v2/usecases/upsert-topic/upsert-topic.usecase';
 import { InboxController } from './inbox.controller';
 import { USE_CASES } from './usecases';
 
@@ -20,7 +29,17 @@ import { USE_CASES } from './usecases';
     OrganizationModule,
     OutboundWebhooksModule.forRoot(),
   ],
-  providers: [...USE_CASES, CommunityOrganizationRepository, ContextRepository],
+  providers: [
+    ...USE_CASES,
+    CommunityOrganizationRepository,
+    ContextRepository,
+    TopicRepository,
+    TopicSubscribersRepository,
+    NotificationTemplateRepository,
+    SubscriberRepository,
+    UpsertTopicUseCase,
+    CreateTopicSubscriptionsUsecase,
+  ],
   exports: [...USE_CASES],
   controllers: [InboxController],
 })

@@ -18,6 +18,7 @@ import { DeleteManyNotifications } from './delete-many-notifications/delete-many
 import { DeleteNotification } from './delete-notification/delete-notification.usecase';
 import { GetInboxPreferences } from './get-inbox-preferences/get-inbox-preferences.usecase';
 import { GetNotifications } from './get-notifications/get-notifications.usecase';
+import { GetTopicSubscriptions } from './get-topic-subscriptions/get-topic-subscriptions.usecase';
 import { MarkManyNotificationsAs } from './mark-many-notifications-as/mark-many-notifications-as.usecase';
 import { MarkNotificationAs } from './mark-notification-as/mark-notification-as.usecase';
 import { MarkNotificationsAsSeen } from './mark-notifications-as-seen/mark-notifications-as-seen.usecase';
@@ -28,6 +29,7 @@ import { UnsnoozeNotification } from './unsnooze-notification/unsnooze-notificat
 import { UpdateAllNotifications } from './update-all-notifications/update-all-notifications.usecase';
 import { UpdateNotificationAction } from './update-notification-action/update-notification-action.usecase';
 import { UpdatePreferences } from './update-preferences/update-preferences.usecase';
+import { UpdateTopicSubscription } from './update-topic-subscription/update-topic-subscription.usecase';
 
 export const USE_CASES = [
   Session,
@@ -49,6 +51,8 @@ export const USE_CASES = [
   DeleteNotification,
   DeleteManyNotifications,
   DeleteAllNotifications,
+  GetTopicSubscriptions,
+  UpdateTopicSubscription,
   GenerateUniqueApiKey,
   CommunityUserRepository,
   UpsertControlValuesUseCase,
