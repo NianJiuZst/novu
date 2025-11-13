@@ -9,10 +9,17 @@ import {
   GroupPreferenceFilterDto$outboundSchema,
 } from "./grouppreferencefilterdto.js";
 import {
+  TopicSubscriberIdentifierDto,
+  TopicSubscriberIdentifierDto$Outbound,
+  TopicSubscriberIdentifierDto$outboundSchema,
+} from "./topicsubscriberidentifierdto.js";
+import {
   WorkflowPreferenceDto,
   WorkflowPreferenceDto$Outbound,
   WorkflowPreferenceDto$outboundSchema,
 } from "./workflowpreferencedto.js";
+
+export type SubscriberIds = TopicSubscriberIdentifierDto | string;
 
 export type Preferences =
   | WorkflowPreferenceDto
@@ -21,9 +28,9 @@ export type Preferences =
 
 export type CreateTopicSubscriptionsRequestDto = {
   /**
-   * List of subscriber identifiers to subscribe to the topic (max: 100)
+   * List of subscriber identifiers to subscribe to the topic (max: 100). Can be either a string array or an array of objects with identifier and subscriberId
    */
-  subscriberIds: Array<string>;
+  subscriberIds: Array<TopicSubscriberIdentifierDto | string>;
   /**
    * The name of the topic
    */
@@ -35,6 +42,22 @@ export type CreateTopicSubscriptionsRequestDto = {
     | Array<WorkflowPreferenceDto | GroupPreferenceFilterDto | string>
     | undefined;
 };
+
+/** @internal */
+export type SubscriberIds$Outbound =
+  | TopicSubscriberIdentifierDto$Outbound
+  | string;
+
+/** @internal */
+export const SubscriberIds$outboundSchema: z.ZodType<
+  SubscriberIds$Outbound,
+  z.ZodTypeDef,
+  SubscriberIds
+> = z.union([TopicSubscriberIdentifierDto$outboundSchema, z.string()]);
+
+export function subscriberIdsToJSON(subscriberIds: SubscriberIds): string {
+  return JSON.stringify(SubscriberIds$outboundSchema.parse(subscriberIds));
+}
 
 /** @internal */
 export type Preferences$Outbound =
@@ -59,7 +82,7 @@ export function preferencesToJSON(preferences: Preferences): string {
 
 /** @internal */
 export type CreateTopicSubscriptionsRequestDto$Outbound = {
-  subscriberIds: Array<string>;
+  subscriberIds: Array<TopicSubscriberIdentifierDto$Outbound | string>;
   name?: string | undefined;
   preferences?:
     | Array<
@@ -76,7 +99,9 @@ export const CreateTopicSubscriptionsRequestDto$outboundSchema: z.ZodType<
   z.ZodTypeDef,
   CreateTopicSubscriptionsRequestDto
 > = z.object({
-  subscriberIds: z.array(z.string()),
+  subscriberIds: z.array(
+    z.union([TopicSubscriberIdentifierDto$outboundSchema, z.string()]),
+  ),
   name: z.string().optional(),
   preferences: z.array(
     z.union([

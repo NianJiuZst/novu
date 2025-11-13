@@ -232,6 +232,7 @@ export * from "./topicdto.js";
 export * from "./topicpayloaddto.js";
 export * from "./topicresponsedto.js";
 export * from "./topicsubscriberdto.js";
+export * from "./topicsubscriberidentifierdto.js";
 export * from "./topicsubscriptionresponsedto.js";
 export * from "./traceresponsedto.js";
 export * from "./translationgroupdto.js";

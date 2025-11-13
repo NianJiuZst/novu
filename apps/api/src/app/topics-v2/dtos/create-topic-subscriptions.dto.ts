@@ -12,6 +12,24 @@ import {
 } from 'class-validator';
 import { RulesLogic } from 'json-logic-js';
 
+export class TopicSubscriberIdentifierDto {
+  @ApiProperty({
+    description: 'Unique identifier for this subscription',
+    example: 'subscriber-123-subscription-a',
+  })
+  @IsString()
+  @IsDefined()
+  identifier: string;
+
+  @ApiProperty({
+    description: 'The subscriber ID',
+    example: 'subscriber-123',
+  })
+  @IsString()
+  @IsDefined()
+  subscriberId: string;
+}
+
 export class BasePreferenceDto {
   @ApiProperty({
     description: 'Whether the preference is enabled. Used when condition is not provided.',
@@ -77,18 +95,28 @@ export class GroupPreferenceFilterDto extends BasePreferenceDto {
   filter: GroupPreferenceFilterDetailsDto;
 }
 
-@ApiExtraModels(WorkflowPreferenceDto, GroupPreferenceFilterDto)
+@ApiExtraModels(WorkflowPreferenceDto, GroupPreferenceFilterDto, TopicSubscriberIdentifierDto)
 export class CreateTopicSubscriptionsRequestDto {
   @ApiProperty({
-    description: 'List of subscriber identifiers to subscribe to the topic (max: 100)',
-    example: ['subscriberId1', 'subscriberId2'],
-    type: [String],
+    description:
+      'List of subscriber identifiers to subscribe to the topic (max: 100). Can be either a string array or an array of objects with identifier and subscriberId',
+    type: 'array',
+    items: {
+      oneOf: [{ type: 'string' }, { $ref: getSchemaPath(TopicSubscriberIdentifierDto) }],
+    },
+    examples: [
+      ['subscriberId1', 'subscriberId2'],
+      [
+        { identifier: 'subscriber-123-subscription-a', subscriberId: 'subscriber-123' },
+        { identifier: 'subscriber-456-subscription-b', subscriberId: 'subscriber-456' },
+      ],
+    ],
   })
   @IsArray()
   @IsDefined()
   @ArrayMaxSize(100, { message: 'Cannot subscribe more than 100 subscribers at once' })
   @ArrayMinSize(1, { message: 'At least one subscriber identifier is required' })
-  subscriberIds: string[];
+  subscriberIds: Array<string | TopicSubscriberIdentifierDto>;
 
   @ApiProperty({
     description: 'The name of the topic',

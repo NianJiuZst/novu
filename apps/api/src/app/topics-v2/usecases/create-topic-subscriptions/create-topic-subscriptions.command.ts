@@ -9,7 +9,7 @@ export class CreateTopicSubscriptionsCommand extends EnvironmentWithUserCommand 
 
   @IsArray()
   @IsDefined()
-  subscriberIds: string[] | { identifier: string; subscriberId: string }[]; // todo refactor to use the new property
+  subscriberIds: Array<string | { identifier: string; subscriberId: string }>;
 
   @IsString()
   @IsOptional()

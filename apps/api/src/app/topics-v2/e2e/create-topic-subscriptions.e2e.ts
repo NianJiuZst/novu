@@ -5,7 +5,7 @@ import { SubscribersService, UserSession } from '@novu/testing';
 import { expect } from 'chai';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
-describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST) #novu-v2', async () => {
+describe.only('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST) #novu-v2', async () => {
   let session: UserSession;
   let novuClient: Novu;
   let subscriber1: SubscriberEntity;
@@ -260,7 +260,9 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
 
     const responseA = await novuClient.topics.subscriptions.create(
       {
-        subscriberIds: [subscriber1.subscriberId],
+        subscriberIds: [
+          { identifier: `${subscriber1.subscriberId}-subscription-a`, subscriberId: subscriber1.subscriberId },
+        ],
         preferences: preferencesA,
       },
       topicKey
@@ -281,7 +283,9 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
 
     const responseB = await novuClient.topics.subscriptions.create(
       {
-        subscriberIds: [subscriber1.subscriberId],
+        subscriberIds: [
+          { identifier: `${subscriber1.subscriberId}-subscription-b`, subscriberId: subscriber1.subscriberId },
+        ],
         preferences: preferencesB,
       },
       topicKey
@@ -306,7 +310,9 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
 
     await novuClient.topics.subscriptions.create(
       {
-        subscriberIds: [subscriber1.subscriberId],
+        subscriberIds: [
+          { identifier: `${subscriber1.subscriberId}-subscription-a`, subscriberId: subscriber1.subscriberId },
+        ],
         preferences: preferencesA,
       },
       topicKey
@@ -348,7 +354,9 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
       for (let i = 0; i < MAX_SUBSCRIPTIONS_PER_SUBSCRIBER; i++) {
         const response = await novuClient.topics.subscriptions.create(
           {
-            subscriberIds: [subscriber1.subscriberId],
+            subscriberIds: [
+              { identifier: `${subscriber1.subscriberId}-subscription-${i}`, subscriberId: subscriber1.subscriberId },
+            ],
             preferences: [
               {
                 filter: { workflowIds: [workflow._id] },
@@ -381,7 +389,9 @@ describe('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (POST)
       try {
         await novuClient.topics.subscriptions.create(
           {
-            subscriberIds: [subscriber1.subscriberId],
+            subscriberIds: [
+              { identifier: `${subscriber1.subscriberId}-subscription-10`, subscriberId: subscriber1.subscriberId },
+            ],
             preferences: [
               {
                 filter: { workflowIds: [workflow._id] },
