@@ -284,13 +284,15 @@ export class TopicsController {
     @Param('topicKey') topicKey: string,
     @Body() body: CreateTopicSubscriptionsRequestDto
   ): Promise<CreateTopicSubscriptionsResponseDto> {
+    const rawSubscriptions = body.subscriptions || body.subscriberIds || [];
+
     const result = await this.createTopicSubscriptionsUsecase.execute(
       CreateTopicSubscriptionsCommand.create({
         environmentId: user.environmentId,
         organizationId: user.organizationId,
         userId: user._id,
         topicKey,
-        subscriberIds: body.subscriberIds,
+        subscriptions: this.mapSubscriptions(rawSubscriptions),
         preferences: body.preferences ? this.convertPreferencesToGroupFilters(body.preferences) : undefined,
       })
     );
@@ -390,6 +392,20 @@ export class TopicsController {
         preferences: body.preferences ? this.convertPreferencesToGroupFilters(body.preferences) : undefined,
       })
     );
+  }
+
+  private mapSubscriptions(
+    subscriptions: Array<string | { identifier: string; subscriberId: string }>
+  ): Array<{ identifier?: string; subscriberId: string }> {
+    return subscriptions.map((subscription) => {
+      if (typeof subscription === 'string') {
+        return {
+          subscriberId: subscription,
+        };
+      }
+
+      return subscription;
+    });
   }
 
   private convertPreferencesToGroupFilters(

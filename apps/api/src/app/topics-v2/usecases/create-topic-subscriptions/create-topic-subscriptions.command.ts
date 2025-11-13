@@ -1,6 +1,16 @@
-import { IsArray, IsDefined, IsOptional, IsString } from 'class-validator';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsDefined, IsOptional, IsString } from 'class-validator';
 import { EnvironmentWithUserCommand } from '../../../shared/commands/project.command';
 import { GroupPreferenceFilterDto } from '../../dtos/create-topic-subscriptions.dto';
+
+export class TopicSubscriberIdentifier {
+  @IsString()
+  @IsDefined()
+  identifier?: string;
+
+  @IsString()
+  @IsDefined()
+  subscriberId: string;
+}
 
 export class CreateTopicSubscriptionsCommand extends EnvironmentWithUserCommand {
   @IsString()
@@ -9,7 +19,9 @@ export class CreateTopicSubscriptionsCommand extends EnvironmentWithUserCommand 
 
   @IsArray()
   @IsDefined()
-  subscriberIds: Array<string | { identifier: string; subscriberId: string }>;
+  @ArrayMinSize(1, { message: 'At least one subscription is required' })
+  @ArrayMaxSize(100, { message: 'Cannot subscribe more than 100 subscriptions at once' })
+  subscriptions: TopicSubscriberIdentifier[];
 
   @IsString()
   @IsOptional()

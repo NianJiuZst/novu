@@ -55,7 +55,7 @@ export class CreateTopicSubscriptionsUsecase {
     const errors: SubscriptionErrorDto[] = [];
     const subscriptionData: SubscriptionDto[] = [];
 
-    const externalSubscriberIds = command.subscriberIds.map((id) => (typeof id === 'string' ? id : id.subscriberId));
+    const externalSubscriberIds = command.subscriptions.map((subscription) => subscription.subscriberId);
     const foundSubscribers = await this.subscriberRepository.searchByExternalSubscriberIds({
       _environmentId: command.environmentId,
       _organizationId: command.organizationId,
@@ -77,9 +77,9 @@ export class CreateTopicSubscriptionsUsecase {
       return {
         data: [],
         meta: {
-          totalCount: command.subscriberIds.length,
+          totalCount: command.subscriptions.length,
           successful: 0,
-          failed: command.subscriberIds.length,
+          failed: command.subscriptions.length,
         },
         errors,
       };
@@ -153,7 +153,7 @@ export class CreateTopicSubscriptionsUsecase {
         topic,
         subscribersToCreate,
         preferencesHash,
-        command.subscriberIds
+        command.subscriptions
       );
       const newSubscriptions = await this.topicSubscribersRepository.createSubscriptions(subscriptionsToCreate);
 
@@ -221,7 +221,7 @@ export class CreateTopicSubscriptionsUsecase {
     return {
       data: subscriptionData,
       meta: {
-        totalCount: command.subscriberIds.length,
+        totalCount: command.subscriptions.length,
         successful: subscriptionData.length,
         failed: errors.length,
       },
@@ -307,7 +307,7 @@ export class CreateTopicSubscriptionsUsecase {
     topic: TopicEntity,
     subscribers: SubscriberEntity[],
     preferencesHash: string | undefined,
-    subscriberIds: Array<string | { identifier: string; subscriberId: string }>
+    subscriptions: Array<{ identifier?: string; subscriberId: string }>
   ): CreateTopicSubscribersEntity[] {
     return subscribers.map((subscriber) => ({
       _environmentId: subscriber._environmentId,
@@ -318,29 +318,9 @@ export class CreateTopicSubscriptionsUsecase {
       externalSubscriberId: subscriber.subscriberId,
       preferencesHash,
       identifier:
-        this.findIdentifier(subscriberIds, subscriber.subscriberId) || `tk=${topic.key}:si=${subscriber.subscriberId}`,
+        subscriptions.find((subscription) => subscription.subscriberId === subscriber.subscriberId)?.identifier ||
+        `tk=${topic.key}:si=${subscriber.subscriberId}`,
     }));
-  }
-
-  private findIdentifier(
-    subscriberIds: Array<string | { identifier: string; subscriberId: string }>,
-    subscriberId: string
-  ): string | undefined {
-    // fast fail if the subscriberIds is an array of objects and the first object has no identifier
-    if (
-      subscriberIds.length > 0 &&
-      typeof subscriberIds[0] === 'object' &&
-      subscriberIds[0] !== null &&
-      'identifier' in subscriberIds[0] &&
-      !subscriberIds[0]?.identifier
-    ) {
-      return undefined;
-    }
-
-    const found = subscriberIds.find((id) =>
-      typeof id === 'string' ? id === subscriberId : id.subscriberId === subscriberId
-    );
-    return typeof found === 'object' ? found?.identifier : undefined;
   }
 
   private async fetchPreferencesForSubscription(

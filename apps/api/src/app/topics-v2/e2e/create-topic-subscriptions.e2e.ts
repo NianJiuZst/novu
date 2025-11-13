@@ -260,7 +260,7 @@ describe.only('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (
 
     const responseA = await novuClient.topics.subscriptions.create(
       {
-        subscriberIds: [
+        subscriptions: [
           { identifier: `${subscriber1.subscriberId}-subscription-a`, subscriberId: subscriber1.subscriberId },
         ],
         preferences: preferencesA,
@@ -283,7 +283,7 @@ describe.only('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (
 
     const responseB = await novuClient.topics.subscriptions.create(
       {
-        subscriberIds: [
+        subscriptions: [
           { identifier: `${subscriber1.subscriberId}-subscription-b`, subscriberId: subscriber1.subscriberId },
         ],
         preferences: preferencesB,
@@ -310,7 +310,7 @@ describe.only('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (
 
     await novuClient.topics.subscriptions.create(
       {
-        subscriberIds: [
+        subscriptions: [
           { identifier: `${subscriber1.subscriberId}-subscription-a`, subscriberId: subscriber1.subscriberId },
         ],
         preferences: preferencesA,
@@ -354,7 +354,7 @@ describe.only('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (
       for (let i = 0; i < MAX_SUBSCRIPTIONS_PER_SUBSCRIBER; i++) {
         const response = await novuClient.topics.subscriptions.create(
           {
-            subscriberIds: [
+            subscriptions: [
               { identifier: `${subscriber1.subscriberId}-subscription-${i}`, subscriberId: subscriber1.subscriberId },
             ],
             preferences: [
@@ -389,7 +389,7 @@ describe.only('Create topic subscriptions - /v2/topics/:topicKey/subscriptions (
       try {
         await novuClient.topics.subscriptions.create(
           {
-            subscriberIds: [
+            subscriptions: [
               { identifier: `${subscriber1.subscriberId}-subscription-10`, subscriberId: subscriber1.subscriberId },
             ],
             preferences: [

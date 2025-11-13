@@ -19,7 +19,7 @@ import {
   WorkflowPreferenceDto$outboundSchema,
 } from "./workflowpreferencedto.js";
 
-export type SubscriberIds = TopicSubscriberIdentifierDto | string;
+export type Subscriptions = TopicSubscriberIdentifierDto | string;
 
 export type Preferences =
   | WorkflowPreferenceDto
@@ -28,9 +28,15 @@ export type Preferences =
 
 export type CreateTopicSubscriptionsRequestDto = {
   /**
-   * List of subscriber identifiers to subscribe to the topic (max: 100). Can be either a string array or an array of objects with identifier and subscriberId
+   * List of subscriber IDs to subscribe to the topic (max: 100). @deprecated Use the "subscriptions" property instead.
+   *
+   * @deprecated field: This will be removed in a future release, please migrate away from it as soon as possible.
    */
-  subscriberIds: Array<TopicSubscriberIdentifierDto | string>;
+  subscriberIds?: Array<string> | undefined;
+  /**
+   * List of subscriptions to subscribe to the topic (max: 100). Can be either a string array of subscriber IDs or an array of objects with identifier and subscriberId
+   */
+  subscriptions?: Array<TopicSubscriberIdentifierDto | string> | undefined;
   /**
    * The name of the topic
    */
@@ -44,19 +50,19 @@ export type CreateTopicSubscriptionsRequestDto = {
 };
 
 /** @internal */
-export type SubscriberIds$Outbound =
+export type Subscriptions$Outbound =
   | TopicSubscriberIdentifierDto$Outbound
   | string;
 
 /** @internal */
-export const SubscriberIds$outboundSchema: z.ZodType<
-  SubscriberIds$Outbound,
+export const Subscriptions$outboundSchema: z.ZodType<
+  Subscriptions$Outbound,
   z.ZodTypeDef,
-  SubscriberIds
+  Subscriptions
 > = z.union([TopicSubscriberIdentifierDto$outboundSchema, z.string()]);
 
-export function subscriberIdsToJSON(subscriberIds: SubscriberIds): string {
-  return JSON.stringify(SubscriberIds$outboundSchema.parse(subscriberIds));
+export function subscriptionsToJSON(subscriptions: Subscriptions): string {
+  return JSON.stringify(Subscriptions$outboundSchema.parse(subscriptions));
 }
 
 /** @internal */
@@ -82,7 +88,10 @@ export function preferencesToJSON(preferences: Preferences): string {
 
 /** @internal */
 export type CreateTopicSubscriptionsRequestDto$Outbound = {
-  subscriberIds: Array<TopicSubscriberIdentifierDto$Outbound | string>;
+  subscriberIds?: Array<string> | undefined;
+  subscriptions?:
+    | Array<TopicSubscriberIdentifierDto$Outbound | string>
+    | undefined;
   name?: string | undefined;
   preferences?:
     | Array<
@@ -99,9 +108,10 @@ export const CreateTopicSubscriptionsRequestDto$outboundSchema: z.ZodType<
   z.ZodTypeDef,
   CreateTopicSubscriptionsRequestDto
 > = z.object({
-  subscriberIds: z.array(
+  subscriberIds: z.array(z.string()).optional(),
+  subscriptions: z.array(
     z.union([TopicSubscriberIdentifierDto$outboundSchema, z.string()]),
-  ),
+  ).optional(),
   name: z.string().optional(),
   preferences: z.array(
     z.union([

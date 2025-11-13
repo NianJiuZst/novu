@@ -99,7 +99,21 @@ export class GroupPreferenceFilterDto extends BasePreferenceDto {
 export class CreateTopicSubscriptionsRequestDto {
   @ApiProperty({
     description:
-      'List of subscriber identifiers to subscribe to the topic (max: 100). Can be either a string array or an array of objects with identifier and subscriberId',
+      'List of subscriber IDs to subscribe to the topic (max: 100). @deprecated Use the "subscriptions" property instead.',
+    type: [String],
+    examples: [['subscriberId1', 'subscriberId2']],
+    deprecated: true,
+  })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  @ArrayMaxSize(100, { message: 'Cannot subscribe more than 100 subscribers at once' })
+  @ArrayMinSize(1, { message: 'At least one subscriber identifier is required' })
+  subscriberIds?: string[];
+
+  @ApiProperty({
+    description:
+      'List of subscriptions to subscribe to the topic (max: 100). Can be either a string array of subscriber IDs or an array of objects with identifier and subscriberId',
     type: 'array',
     items: {
       oneOf: [{ type: 'string' }, { $ref: getSchemaPath(TopicSubscriberIdentifierDto) }],
@@ -113,10 +127,10 @@ export class CreateTopicSubscriptionsRequestDto {
     ],
   })
   @IsArray()
-  @IsDefined()
-  @ArrayMaxSize(100, { message: 'Cannot subscribe more than 100 subscribers at once' })
-  @ArrayMinSize(1, { message: 'At least one subscriber identifier is required' })
-  subscriberIds: Array<string | TopicSubscriberIdentifierDto>;
+  @IsOptional()
+  @ArrayMaxSize(100, { message: 'Cannot subscribe more than 100 subscriptions at once' })
+  @ArrayMinSize(1, { message: 'At least one subscription is required' })
+  subscriptions?: Array<string | TopicSubscriberIdentifierDto>;
 
   @ApiProperty({
     description: 'The name of the topic',
