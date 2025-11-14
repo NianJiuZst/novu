@@ -14,15 +14,15 @@ import {
   TopicSubscriberIdentifierDto$outboundSchema,
 } from "./topicsubscriberidentifierdto.js";
 import {
-  WorkflowPreferenceDto,
-  WorkflowPreferenceDto$Outbound,
-  WorkflowPreferenceDto$outboundSchema,
-} from "./workflowpreferencedto.js";
+  WorkflowPreferenceRequestDto,
+  WorkflowPreferenceRequestDto$Outbound,
+  WorkflowPreferenceRequestDto$outboundSchema,
+} from "./workflowpreferencerequestdto.js";
 
 export type Subscriptions = TopicSubscriberIdentifierDto | string;
 
 export type Preferences =
-  | WorkflowPreferenceDto
+  | WorkflowPreferenceRequestDto
   | GroupPreferenceFilterDto
   | string;
 
@@ -45,7 +45,7 @@ export type CreateTopicSubscriptionsRequestDto = {
    * The preferences of the topic. Can be a simple workflow ID string, workflow preference object, or group filter object
    */
   preferences?:
-    | Array<WorkflowPreferenceDto | GroupPreferenceFilterDto | string>
+    | Array<WorkflowPreferenceRequestDto | GroupPreferenceFilterDto | string>
     | undefined;
 };
 
@@ -67,7 +67,7 @@ export function subscriptionsToJSON(subscriptions: Subscriptions): string {
 
 /** @internal */
 export type Preferences$Outbound =
-  | WorkflowPreferenceDto$Outbound
+  | WorkflowPreferenceRequestDto$Outbound
   | GroupPreferenceFilterDto$Outbound
   | string;
 
@@ -77,7 +77,7 @@ export const Preferences$outboundSchema: z.ZodType<
   z.ZodTypeDef,
   Preferences
 > = z.union([
-  WorkflowPreferenceDto$outboundSchema,
+  WorkflowPreferenceRequestDto$outboundSchema,
   GroupPreferenceFilterDto$outboundSchema,
   z.string(),
 ]);
@@ -95,7 +95,7 @@ export type CreateTopicSubscriptionsRequestDto$Outbound = {
   name?: string | undefined;
   preferences?:
     | Array<
-      | WorkflowPreferenceDto$Outbound
+      | WorkflowPreferenceRequestDto$Outbound
       | GroupPreferenceFilterDto$Outbound
       | string
     >
@@ -115,7 +115,7 @@ export const CreateTopicSubscriptionsRequestDto$outboundSchema: z.ZodType<
   name: z.string().optional(),
   preferences: z.array(
     z.union([
-      WorkflowPreferenceDto$outboundSchema,
+      WorkflowPreferenceRequestDto$outboundSchema,
       GroupPreferenceFilterDto$outboundSchema,
       z.string(),
     ]),

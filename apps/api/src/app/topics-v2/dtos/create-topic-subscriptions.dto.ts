@@ -52,7 +52,7 @@ export class BasePreferenceDto {
   condition?: RulesLogic;
 }
 
-export class WorkflowPreferenceDto extends BasePreferenceDto {
+export class WorkflowPreferenceRequestDto extends BasePreferenceDto {
   @ApiProperty({
     description: 'The workflow identifier',
     example: 'workflow-123',
@@ -95,7 +95,7 @@ export class GroupPreferenceFilterDto extends BasePreferenceDto {
   filter: GroupPreferenceFilterDetailsDto;
 }
 
-@ApiExtraModels(WorkflowPreferenceDto, GroupPreferenceFilterDto, TopicSubscriberIdentifierDto)
+@ApiExtraModels(WorkflowPreferenceRequestDto, GroupPreferenceFilterDto, TopicSubscriberIdentifierDto)
 export class CreateTopicSubscriptionsRequestDto {
   @ApiProperty({
     description:
@@ -144,7 +144,7 @@ export class CreateTopicSubscriptionsRequestDto {
     items: {
       oneOf: [
         { type: 'string' },
-        { $ref: getSchemaPath(WorkflowPreferenceDto) },
+        { $ref: getSchemaPath(WorkflowPreferenceRequestDto) },
         { $ref: getSchemaPath(GroupPreferenceFilterDto) },
       ],
     },
@@ -154,5 +154,5 @@ export class CreateTopicSubscriptionsRequestDto {
   @ValidateNested({ each: true })
   @Type(() => Object)
   @IsOptional()
-  preferences?: Array<string | WorkflowPreferenceDto | GroupPreferenceFilterDto>;
+  preferences?: Array<string | WorkflowPreferenceRequestDto | GroupPreferenceFilterDto>;
 }

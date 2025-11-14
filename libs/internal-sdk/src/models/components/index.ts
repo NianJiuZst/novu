@@ -263,6 +263,7 @@ export * from "./workflowcreationsourceenum.js";
 export * from "./workflowinfodto.js";
 export * from "./workflowlistresponsedto.js";
 export * from "./workflowpreferencedto.js";
+export * from "./workflowpreferencerequestdto.js";
 export * from "./workflowpreferencesdto.js";
 export * from "./workflowpreferencesresponsedto.js";
 export * from "./workflowresponse.js";

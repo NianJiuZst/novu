@@ -9,17 +9,13 @@ import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type WorkflowPreferenceDto = {
   /**
-   * Whether the preference is enabled. Used when condition is not provided.
+   * A flag specifying if notification delivery is enabled for the workflow. If true, notification delivery is enabled by default for all channels. This setting can be overridden by the channel preferences.
    */
   enabled?: boolean | undefined;
   /**
-   * Optional condition using JSON Logic rules
+   * A flag specifying if the preference is read-only. If true, the preference cannot be changed by the Subscriber.
    */
-  condition?: { [k: string]: any } | undefined;
-  /**
-   * The workflow identifier
-   */
-  workflowId: string;
+  readOnly?: boolean | undefined;
 };
 
 /** @internal */
@@ -28,15 +24,13 @@ export const WorkflowPreferenceDto$inboundSchema: z.ZodType<
   z.ZodTypeDef,
   unknown
 > = z.object({
-  enabled: z.boolean().optional(),
-  condition: z.record(z.any()).optional(),
-  workflowId: z.string(),
+  enabled: z.boolean().default(true),
+  readOnly: z.boolean().default(false),
 });
 /** @internal */
 export type WorkflowPreferenceDto$Outbound = {
-  enabled?: boolean | undefined;
-  condition?: { [k: string]: any } | undefined;
-  workflowId: string;
+  enabled: boolean;
+  readOnly: boolean;
 };
 
 /** @internal */
@@ -45,9 +39,8 @@ export const WorkflowPreferenceDto$outboundSchema: z.ZodType<
   z.ZodTypeDef,
   WorkflowPreferenceDto
 > = z.object({
-  enabled: z.boolean().optional(),
-  condition: z.record(z.any()).optional(),
-  workflowId: z.string(),
+  enabled: z.boolean().default(true),
+  readOnly: z.boolean().default(false),
 });
 
 export function workflowPreferenceDtoToJSON(
