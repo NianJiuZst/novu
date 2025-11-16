@@ -533,7 +533,6 @@ describe('Topic Trigger Event #novu-v2', () => {
     });
 
     it('should filter subscriptions by tags and combined workflow filters', async () => {
-    it('should filter subscriptions by tags and combined workflow filters', async () => {
       const taggedTemplate = await session.createTemplate({
         tags: ['important', 'promotional'],
       });
@@ -916,4 +915,6 @@ const triggerEvent = async (
     to,
     payload,
   });
-};
+
+}
+;
