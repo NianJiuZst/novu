@@ -27,7 +27,7 @@ import { UserSession } from '../shared/framework/user.decorator';
 import {
   CreateTopicSubscriptionsRequestDto,
   GroupPreferenceFilterDto,
-  WorkflowPreferenceDto,
+  WorkflowPreferenceRequestDto,
 } from './dtos/create-topic-subscriptions.dto';
 import { CreateTopicSubscriptionsResponseDto, SubscriptionDto } from './dtos/create-topic-subscriptions-response.dto';
 import { CreateUpdateTopicRequestDto } from './dtos/create-update-topic.dto';
@@ -408,7 +408,7 @@ export class TopicsController {
   }
 
   private convertPreferencesToGroupFilters(
-    preferences: Array<string | WorkflowPreferenceDto | GroupPreferenceFilterDto>
+    preferences: Array<string | WorkflowPreferenceRequestDto | GroupPreferenceFilterDto>
   ): Array<GroupPreferenceFilterDto> {
     return preferences.map((preference) => {
       if (typeof preference === 'string') {
@@ -433,7 +433,7 @@ export class TopicsController {
   }
 
   private isGroupPreferenceFilter(
-    preference: WorkflowPreferenceDto | GroupPreferenceFilterDto
+    preference: WorkflowPreferenceRequestDto | GroupPreferenceFilterDto
   ): preference is GroupPreferenceFilterDto {
     return 'filter' in preference;
   }

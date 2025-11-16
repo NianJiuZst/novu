@@ -1,9 +1,9 @@
 import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { GroupPreferenceFilterDto, WorkflowPreferenceDto } from './create-topic-subscriptions.dto';
+import { GroupPreferenceFilterDto, WorkflowPreferenceRequestDto } from './create-topic-subscriptions.dto';
 
-@ApiExtraModels(WorkflowPreferenceDto, GroupPreferenceFilterDto)
+@ApiExtraModels(WorkflowPreferenceRequestDto, GroupPreferenceFilterDto)
 export class UpdateTopicSubscriptionRequestDto {
   @ApiProperty({
     description: 'The name of the subscription',
@@ -20,7 +20,7 @@ export class UpdateTopicSubscriptionRequestDto {
     items: {
       oneOf: [
         { type: 'string' },
-        { $ref: getSchemaPath(WorkflowPreferenceDto) },
+        { $ref: getSchemaPath(WorkflowPreferenceRequestDto) },
         { $ref: getSchemaPath(GroupPreferenceFilterDto) },
       ],
     },
@@ -30,5 +30,5 @@ export class UpdateTopicSubscriptionRequestDto {
   @ValidateNested({ each: true })
   @Type(() => Object)
   @IsOptional()
-  preferences?: Array<string | WorkflowPreferenceDto | GroupPreferenceFilterDto>;
+  preferences?: Array<string | WorkflowPreferenceRequestDto | GroupPreferenceFilterDto>;
 }

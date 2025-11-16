@@ -537,6 +537,10 @@ describe('Topic Trigger Event #novu-v2', () => {
         tags: ['important', 'promotional'],
       });
 
+      await session.createTemplate({
+        tags: ['nonexistent-tag'],
+      });
+
       const subscriberWithTagFilter = await subscriberService.createSubscriber();
       const subscriberWithCombinedFilter = await subscriberService.createSubscriber();
       const subscriberWithMisconfiguredTagFilter = await subscriberService.createSubscriber();
@@ -911,4 +915,6 @@ const triggerEvent = async (
     to,
     payload,
   });
-};
+
+}
+;
