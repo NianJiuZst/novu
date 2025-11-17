@@ -47,8 +47,11 @@ import { GetNotificationsRequestDto } from './dtos/get-notifications-request.dto
 import { GetNotificationsResponseDto } from './dtos/get-notifications-response.dto';
 import { GetPreferencesRequestDto } from './dtos/get-preferences-request.dto';
 import { GetPreferencesResponseDto } from './dtos/get-preferences-response.dto';
-import { GetTopicSubscriptionsQueryDto } from './dtos/get-topic-subscriptions-query.dto';
-import { GetTopicSubscriptionsResponseDto, TopicSubscriptionDto } from './dtos/get-topic-subscriptions-response.dto';
+import {
+  GetTopicSubscriptionsResponseDto,
+  TopicSubscriptionDetailsDto,
+  TopicSubscriptionDto,
+} from './dtos/get-topic-subscriptions-response.dto';
 import { MarkNotificationsAsSeenRequestDto } from './dtos/mark-notifications-as-seen-request.dto';
 import { SnoozeNotificationRequestDto } from './dtos/snooze-notification-request.dto';
 import { SubscriberSessionRequestDto } from './dtos/subscriber-session-request.dto';
@@ -66,6 +69,8 @@ import { GetInboxPreferencesCommand } from './usecases/get-inbox-preferences/get
 import { GetInboxPreferences } from './usecases/get-inbox-preferences/get-inbox-preferences.usecase';
 import { GetNotificationsCommand } from './usecases/get-notifications/get-notifications.command';
 import { GetNotifications } from './usecases/get-notifications/get-notifications.usecase';
+import { GetTopicSubscriptionCommand } from './usecases/get-topic-subscription/get-topic-subscription.command';
+import { GetTopicSubscription } from './usecases/get-topic-subscription/get-topic-subscription.usecase';
 import { GetTopicSubscriptionsCommand } from './usecases/get-topic-subscriptions/get-topic-subscriptions.command';
 import { GetTopicSubscriptions } from './usecases/get-topic-subscriptions/get-topic-subscriptions.usecase';
 import { MarkNotificationAsCommand } from './usecases/mark-notification-as/mark-notification-as.command';
@@ -113,6 +118,7 @@ export class InboxController {
     private deleteNotificationUsecase: DeleteNotification,
     private deleteAllNotificationsUsecase: DeleteAllNotifications,
     private getTopicSubscriptionsUsecase: GetTopicSubscriptions,
+    private getTopicSubscriptionUsecase: GetTopicSubscription,
     private createTopicSubscriptionsUsecase: CreateTopicSubscriptionsUsecase,
     private updateTopicSubscriptionUsecase: UpdateTopicSubscription
   ) {}
@@ -564,18 +570,32 @@ export class InboxController {
   @Get('/topics/:topicKey/subscriptions')
   async getTopicSubscriptions(
     @SubscriberSession() subscriberSession: SubscriberSession,
-    @Param('topicKey') topicKey: string,
-    @Query() query: GetTopicSubscriptionsQueryDto
-  ): Promise<TopicSubscriptionDto[]> {
+    @Param('topicKey') topicKey: string
+  ): Promise<TopicSubscriptionDetailsDto[]> {
     return await this.getTopicSubscriptionsUsecase.execute(
       GetTopicSubscriptionsCommand.create({
         environmentId: subscriberSession._environmentId,
         organizationId: subscriberSession._organizationId,
         subscriberId: subscriberSession.subscriberId,
         topicKey,
-        tags: query.tags,
-        workflowIds: query.workflowIds,
-        includeEmptyState: query.includeEmptyState,
+      })
+    );
+  }
+
+  @UseGuards(AuthGuard('subscriberJwt'))
+  @Get('/topics/:topicKey/subscriptions/:subscriptionId')
+  async getTopicSubscription(
+    @SubscriberSession() subscriberSession: SubscriberSession,
+    @Param('topicKey') topicKey: string,
+    @Param('subscriptionId') subscriptionId: string
+  ): Promise<TopicSubscriptionDetailsDto> {
+    return await this.getTopicSubscriptionUsecase.execute(
+      GetTopicSubscriptionCommand.create({
+        environmentId: subscriberSession._environmentId,
+        organizationId: subscriberSession._organizationId,
+        subscriberId: subscriberSession.subscriberId,
+        topicKey,
+        subscriptionId,
       })
     );
   }

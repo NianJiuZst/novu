@@ -1,0 +1,55 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InstrumentUsecase } from '@novu/application-generic';
+import { NotificationTemplateRepository, PreferencesRepository, TopicSubscribersRepository } from '@novu/dal';
+import { PreferencesTypeEnum } from '@novu/shared';
+import { TopicSubscriptionDetailsDto } from '../../dtos/get-topic-subscriptions-response.dto';
+import { mapTopicSubscriptionToDto } from '../../utils/topic-subscription-mapper';
+import { GetTopicSubscriptionCommand } from './get-topic-subscription.command';
+
+@Injectable()
+export class GetTopicSubscription {
+  constructor(
+    private topicSubscribersRepository: TopicSubscribersRepository,
+    private preferencesRepository: PreferencesRepository,
+    private notificationTemplateRepository: NotificationTemplateRepository
+  ) {}
+
+  @InstrumentUsecase()
+  async execute(command: GetTopicSubscriptionCommand): Promise<TopicSubscriptionDetailsDto> {
+    const subscription = await this.topicSubscribersRepository.findOne({
+      _environmentId: command.environmentId,
+      _organizationId: command.organizationId,
+      topicKey: command.topicKey,
+      _id: command.subscriptionId,
+    });
+
+    if (!subscription) {
+      throw new NotFoundException(
+        `Subscription with ID ${command.subscriptionId} not found for topic ${command.topicKey}`
+      );
+    }
+
+    const preferencesEntities = await this.preferencesRepository.find({
+      _environmentId: subscription._environmentId,
+      _organizationId: subscription._organizationId,
+      _topicSubscriptionId: subscription._id,
+      _subscriberId: subscription._subscriberId,
+      type: PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
+    });
+
+    const preferencesWorkflowIds = preferencesEntities
+      .map((pref) => pref._templateId?.toString())
+      .filter((id): id is string => id !== undefined);
+
+    const workflowEntities =
+      preferencesWorkflowIds.length > 0
+        ? await this.notificationTemplateRepository.find({
+            _id: { $in: preferencesWorkflowIds },
+            _environmentId: subscription._environmentId,
+            _organizationId: subscription._organizationId,
+          })
+        : [];
+
+    return mapTopicSubscriptionToDto(subscription, preferencesEntities, workflowEntities);
+  }
+}

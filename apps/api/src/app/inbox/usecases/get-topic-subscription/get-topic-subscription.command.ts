@@ -1,8 +1,12 @@
 import { IsDefined, IsString } from 'class-validator';
 import { EnvironmentWithSubscriber } from '../../../shared/commands/project.command';
 
-export class GetTopicSubscriptionsCommand extends EnvironmentWithSubscriber {
+export class GetTopicSubscriptionCommand extends EnvironmentWithSubscriber {
   @IsString()
   @IsDefined()
   topicKey: string;
+
+  @IsString()
+  @IsDefined()
+  subscriptionId: string;
 }

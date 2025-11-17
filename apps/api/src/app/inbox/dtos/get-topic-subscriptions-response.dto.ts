@@ -1,6 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsDefined,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateIf,
+  ValidateNested,
+} from 'class-validator';
+import { RulesLogic } from 'json-logic-js';
+import { WorkflowDto } from './workflow.dto';
 
 export class TopicDto {
   @ApiProperty({
@@ -234,4 +245,69 @@ export class GetTopicSubscriptionsResponseDto {
     type: [SubscriptionErrorDto],
   })
   errors?: SubscriptionErrorDto[];
+}
+
+export class SubscriptionPreferenceDto {
+  @ApiPropertyOptional({
+    type: () => WorkflowDto,
+    description: 'Workflow information if this is a template-level preference',
+    nullable: true,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => WorkflowDto)
+  workflow?: WorkflowDto;
+
+  @ApiProperty({
+    type: Boolean,
+    description: 'Whether the preference is enabled',
+    example: true,
+  })
+  @IsDefined()
+  enabled: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Optional condition using JSON Logic rules',
+    required: false,
+    type: 'object',
+    additionalProperties: true,
+    example: { and: [{ '===': [{ var: 'tier' }, 'premium'] }] },
+  })
+  @ValidateIf((o) => o.condition !== undefined)
+  @IsOptional()
+  condition?: RulesLogic;
+}
+
+export class TopicSubscriptionDetailsDto {
+  @ApiProperty({
+    description: 'The unique identifier of the subscription',
+    example: '64f5e95d3d7946d80d0cb679',
+  })
+  @IsString()
+  id: string;
+
+  @ApiProperty({
+    description: 'The identifier of the subscription',
+    example: 'subscription-identifier',
+  })
+  @IsString()
+  identifier: string;
+
+  @ApiPropertyOptional({
+    description: 'The name of the subscription',
+    example: 'My Subscription',
+  })
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @ApiPropertyOptional({
+    description: 'The preferences/rules for the subscription',
+    type: [SubscriptionPreferenceDto],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SubscriptionPreferenceDto)
+  @IsOptional()
+  preferences?: SubscriptionPreferenceDto[];
 }

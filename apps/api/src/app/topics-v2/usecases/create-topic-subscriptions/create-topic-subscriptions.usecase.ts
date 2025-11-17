@@ -87,29 +87,17 @@ export class CreateTopicSubscriptionsUsecase {
 
     const preferencesHash = createDeterministicHash(command.preferences);
 
-    const existingSubscriptionsQuery: {
-      _environmentId: string;
-      _organizationId: string;
-      _topicId: string;
-      _subscriberId: { $in: string[] };
-      preferencesHash?: string | null;
-    } = {
+    const existingSubscriptions = await this.topicSubscribersRepository.find({
       _environmentId: command.environmentId,
       _organizationId: command.organizationId,
       _topicId: topic._id,
       _subscriberId: { $in: foundSubscribers.map((sub) => sub._id) },
       ...(preferencesHash ? { preferencesHash } : { preferencesHash: null }),
-    };
+    });
 
-    const existingSubscriptions = await this.topicSubscribersRepository.find(
-      existingSubscriptionsQuery as Parameters<typeof this.topicSubscribersRepository.find>[0]
-    );
-
-    // Create topic subscriptions for subscribers that don't already have a subscription
     const existingSubscriberIds = existingSubscriptions.map((sub) => sub._subscriberId.toString());
     let subscribersToCreate = foundSubscribers.filter((sub) => !existingSubscriberIds.includes(sub._id.toString()));
 
-    // Validate limit only for subscribers that need new subscriptions
     if (subscribersToCreate.length > 0) {
       const { validSubscribers: validSubscribersToCreate, limitErrors: limitErrorsToCreate } =
         await this.validateSubscriptionLimit(topic, subscribersToCreate, command.environmentId, command.organizationId);
