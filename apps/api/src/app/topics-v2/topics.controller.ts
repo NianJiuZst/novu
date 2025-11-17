@@ -292,6 +292,7 @@ export class TopicsController {
         userId: user._id,
         topicKey,
         subscriptions: this.mapSubscriptions(rawSubscriptions),
+        name: body.name,
         preferences: body.preferences ? this.convertPreferencesToGroupFilters(body.preferences) : undefined,
       })
     );
@@ -394,8 +395,8 @@ export class TopicsController {
   }
 
   private mapSubscriptions(
-    subscriptions: Array<string | { identifier: string; subscriberId: string }>
-  ): Array<{ identifier?: string; subscriberId: string }> {
+    subscriptions: Array<string | { identifier: string; subscriberId: string; name?: string }>
+  ): Array<{ identifier?: string; subscriberId: string; name?: string }> {
     return subscriptions.map((subscription) => {
       if (typeof subscription === 'string') {
         return {

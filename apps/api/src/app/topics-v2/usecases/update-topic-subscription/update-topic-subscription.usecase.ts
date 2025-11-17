@@ -349,6 +349,8 @@ export class UpdateTopicSubscriptionUsecase {
   ): SubscriptionDto {
     return {
       _id: subscription._id.toString(),
+      identifier: subscription.identifier,
+      name: subscription.name,
       topic: {
         _id: topic._id,
         key: topic.key,

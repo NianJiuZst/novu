@@ -1,15 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsArray,
-  IsBoolean,
-  IsDefined,
-  IsObject,
-  IsOptional,
-  IsString,
-  ValidateIf,
-  ValidateNested,
-} from 'class-validator';
+import { IsArray, IsDefined, IsObject, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
 import { RulesLogic } from 'json-logic-js';
 import { WorkflowDto } from './workflow.dto';
 
@@ -101,28 +92,6 @@ export class SubscriberDto {
   updatedAt?: string;
 }
 
-export class SubscriptionWorkflowDto {
-  @ApiProperty({
-    description: 'The workflow identifier',
-    example: 'workflow-1',
-  })
-  @IsString()
-  id: string;
-
-  @ApiProperty({
-    description: 'The workflow name',
-    example: 'Welcome Email',
-  })
-  name: string;
-
-  @ApiProperty({
-    description: 'Whether the workflow is enabled for this subscription',
-    example: true,
-  })
-  @IsBoolean()
-  enabled: boolean;
-}
-
 export class TopicSubscriptionDto {
   @ApiProperty({
     description: 'The unique identifier of the subscription',
@@ -153,16 +122,6 @@ export class TopicSubscriptionDto {
   @IsObject()
   @IsOptional()
   conditions?: Record<string, unknown>;
-
-  @ApiPropertyOptional({
-    description: 'The workflows associated with the subscription',
-    type: [SubscriptionWorkflowDto],
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => SubscriptionWorkflowDto)
-  @IsOptional()
-  workflows?: SubscriptionWorkflowDto[];
 
   @ApiProperty({
     description: 'The creation date of the subscription',
@@ -225,26 +184,6 @@ export class MetaDto {
     example: 1,
   })
   failed: number;
-}
-
-export class GetTopicSubscriptionsResponseDto {
-  @ApiProperty({
-    description: 'The list of successfully created subscriptions',
-    type: [TopicSubscriptionDto],
-  })
-  data: TopicSubscriptionDto[];
-
-  @ApiProperty({
-    description: 'Metadata about the operation',
-    type: MetaDto,
-  })
-  meta: MetaDto;
-
-  @ApiPropertyOptional({
-    description: 'The list of errors for failed subscription attempts',
-    type: [SubscriptionErrorDto],
-  })
-  errors?: SubscriptionErrorDto[];
 }
 
 export class SubscriptionPreferenceDto {

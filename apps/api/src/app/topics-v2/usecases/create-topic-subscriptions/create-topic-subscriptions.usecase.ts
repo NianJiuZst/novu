@@ -113,6 +113,8 @@ export class CreateTopicSubscriptionsUsecase {
 
       subscriptionData.push({
         _id: subscription._id.toString(),
+        identifier: subscription.identifier,
+        name: subscription.name,
         topic: {
           _id: topic._id,
           key: topic.key,
@@ -152,6 +154,8 @@ export class CreateTopicSubscriptionsUsecase {
 
         subscriptionData.push({
           _id: subscription._id.toString(),
+          identifier: subscription.identifier,
+          name: subscription.name,
           topic: {
             _id: topic._id,
             key: topic.key,
@@ -182,6 +186,8 @@ export class CreateTopicSubscriptionsUsecase {
 
         subscriptionData.push({
           _id: subscription._id.toString(),
+          identifier: subscription.identifier,
+          name: subscription.name,
           topic: {
             _id: topic._id,
             key: topic.key,
@@ -222,6 +228,7 @@ export class CreateTopicSubscriptionsUsecase {
       environmentId: command.environmentId,
       organizationId: command.organizationId,
       key: command.topicKey,
+      name: command.name,
     });
 
     const topic = await this.topicRepository.findTopicByKey(
@@ -294,20 +301,22 @@ export class CreateTopicSubscriptionsUsecase {
     topic: TopicEntity,
     subscribers: SubscriberEntity[],
     preferencesHash: string | undefined,
-    subscriptions: Array<{ identifier?: string; subscriberId: string }>
+    subscriptions: Array<{ identifier?: string; subscriberId: string; name?: string }>
   ): CreateTopicSubscribersEntity[] {
-    return subscribers.map((subscriber) => ({
-      _environmentId: subscriber._environmentId,
-      _organizationId: subscriber._organizationId,
-      _subscriberId: subscriber._id,
-      _topicId: topic._id,
-      topicKey: topic.key,
-      externalSubscriberId: subscriber.subscriberId,
-      preferencesHash,
-      identifier:
-        subscriptions.find((subscription) => subscription.subscriberId === subscriber.subscriberId)?.identifier ||
-        `tk=${topic.key}:si=${subscriber.subscriberId}`,
-    }));
+    return subscribers.map((subscriber) => {
+      const subscription = subscriptions.find((sub) => sub.subscriberId === subscriber.subscriberId);
+      return {
+        _environmentId: subscriber._environmentId,
+        _organizationId: subscriber._organizationId,
+        _subscriberId: subscriber._id,
+        _topicId: topic._id,
+        topicKey: topic.key,
+        externalSubscriberId: subscriber.subscriberId,
+        preferencesHash,
+        identifier: subscription?.identifier || `tk=${topic.key}:si=${subscriber.subscriberId}`,
+        name: subscription?.name,
+      };
+    });
   }
 
   private async fetchPreferencesForSubscription(

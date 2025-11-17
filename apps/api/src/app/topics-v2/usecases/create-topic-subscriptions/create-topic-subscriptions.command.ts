@@ -10,6 +10,10 @@ export class TopicSubscriberIdentifier {
   @IsString()
   @IsDefined()
   subscriberId: string;
+
+  @IsString()
+  @IsOptional()
+  name?: string;
 }
 
 export class CreateTopicSubscriptionsCommand extends EnvironmentWithUserCommand {

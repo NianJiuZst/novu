@@ -41,17 +41,14 @@ import { CreateTopicSubscriptionsUsecase } from '../topics-v2/usecases/create-to
 import { ActionTypeRequestDto } from './dtos/action-type-request.dto';
 import { BulkUpdatePreferencesRequestDto } from './dtos/bulk-update-preferences-request.dto';
 import { CreateTopicSubscriptionRequestDto } from './dtos/create-topic-subscription-request.dto';
+import { CreateTopicSubscriptionsResponseDto } from './dtos/create-topic-subscriptions-response.dto';
 import { GetNotificationsCountRequestDto } from './dtos/get-notifications-count-request.dto';
 import { GetNotificationsCountResponseDto } from './dtos/get-notifications-count-response.dto';
 import { GetNotificationsRequestDto } from './dtos/get-notifications-request.dto';
 import { GetNotificationsResponseDto } from './dtos/get-notifications-response.dto';
 import { GetPreferencesRequestDto } from './dtos/get-preferences-request.dto';
 import { GetPreferencesResponseDto } from './dtos/get-preferences-response.dto';
-import {
-  GetTopicSubscriptionsResponseDto,
-  TopicSubscriptionDetailsDto,
-  TopicSubscriptionDto,
-} from './dtos/get-topic-subscriptions-response.dto';
+import { TopicSubscriptionDetailsDto, TopicSubscriptionDto } from './dtos/get-topic-subscriptions-response.dto';
 import { MarkNotificationsAsSeenRequestDto } from './dtos/mark-notifications-as-seen-request.dto';
 import { SnoozeNotificationRequestDto } from './dtos/snooze-notification-request.dto';
 import { SubscriberSessionRequestDto } from './dtos/subscriber-session-request.dto';
@@ -606,7 +603,7 @@ export class InboxController {
     @SubscriberSession() subscriberSession: SubscriberSession,
     @Param('topicKey') topicKey: string,
     @Body() body: CreateTopicSubscriptionRequestDto
-  ): Promise<GetTopicSubscriptionsResponseDto> {
+  ): Promise<CreateTopicSubscriptionsResponseDto> {
     const result = await this.createTopicSubscriptionsUsecase.execute(
       CreateTopicSubscriptionsCommand.create({
         environmentId: subscriberSession._environmentId,
@@ -618,21 +615,11 @@ export class InboxController {
       })
     );
 
-    const typeSafeResult: GetTopicSubscriptionsResponseDto = {
-      data: result.data.map((item) => ({
-        ...item,
-        createdAt: item.createdAt || '',
-        updatedAt: item.updatedAt || '',
-      })),
-      meta: result.meta,
-      errors: result.errors,
-    };
-
-    if (typeSafeResult.meta.failed > 0 && typeSafeResult.meta.successful === 0) {
-      throw new BadRequestException(typeSafeResult);
+    if (result.meta.failed > 0 && result.meta.successful === 0) {
+      throw new BadRequestException(result);
     }
 
-    return typeSafeResult;
+    return result;
   }
 
   @UseGuards(AuthGuard('subscriberJwt'))

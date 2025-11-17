@@ -1,4 +1,4 @@
-import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -28,6 +28,14 @@ export class TopicSubscriberIdentifierDto {
   @IsString()
   @IsDefined()
   subscriberId: string;
+
+  @ApiPropertyOptional({
+    description: 'The name of the subscription',
+    example: 'My Subscription',
+  })
+  @IsString()
+  @IsOptional()
+  name?: string;
 }
 
 export class BasePreferenceDto {
