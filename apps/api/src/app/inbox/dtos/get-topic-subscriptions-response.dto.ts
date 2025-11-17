@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsDefined, IsObject, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
+import { IsArray, IsDefined, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
 import { RulesLogic } from 'json-logic-js';
 import { WorkflowDto } from './workflow.dto';
 
@@ -90,50 +90,6 @@ export class SubscriberDto {
   @IsString()
   @IsOptional()
   updatedAt?: string;
-}
-
-export class TopicSubscriptionDto {
-  @ApiProperty({
-    description: 'The unique identifier of the subscription',
-    example: '64f5e95d3d7946d80d0cb679',
-  })
-  @IsString()
-  _id: string;
-
-  @ApiProperty({
-    description: 'The topic information',
-    type: TopicDto,
-  })
-  topic: TopicDto;
-
-  @ApiProperty({
-    description: 'The subscriber information',
-    type: SubscriberDto,
-    nullable: true,
-  })
-  subscriber: SubscriberDto | null;
-
-  @ApiPropertyOptional({
-    description:
-      'JSONLogic filter conditions for conditional subscription. Only notifications matching these conditions will be delivered.',
-    type: 'object',
-    additionalProperties: true,
-  })
-  @IsObject()
-  @IsOptional()
-  conditions?: Record<string, unknown>;
-
-  @ApiProperty({
-    description: 'The creation date of the subscription',
-    example: '2025-04-24T05:40:21Z',
-  })
-  createdAt: string;
-
-  @ApiProperty({
-    description: 'The last update date of the subscription',
-    example: '2025-04-24T05:40:21Z',
-  })
-  updatedAt: string;
 }
 
 export class SubscriptionErrorDto {

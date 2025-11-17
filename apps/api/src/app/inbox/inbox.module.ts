@@ -16,6 +16,7 @@ import { SharedModule } from '../shared/shared.module';
 import { SubscribersV1Module } from '../subscribers/subscribersV1.module';
 import { TopicsV2Module } from '../topics-v2/topics-v2.module';
 import { CreateTopicSubscriptionsUsecase } from '../topics-v2/usecases/create-topic-subscriptions/create-topic-subscriptions.usecase';
+import { UpdateTopicSubscriptionUsecase } from '../topics-v2/usecases/update-topic-subscription/update-topic-subscription.usecase';
 import { UpsertTopicUseCase } from '../topics-v2/usecases/upsert-topic/upsert-topic.usecase';
 import { InboxController } from './inbox.controller';
 import { USE_CASES } from './usecases';
@@ -41,6 +42,7 @@ import { USE_CASES } from './usecases';
     SubscriberRepository,
     UpsertTopicUseCase,
     CreateTopicSubscriptionsUsecase,
+    UpdateTopicSubscriptionUsecase,
   ],
   exports: [...USE_CASES],
   controllers: [InboxController],

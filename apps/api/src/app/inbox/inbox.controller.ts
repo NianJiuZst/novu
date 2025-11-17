@@ -36,8 +36,16 @@ import {
   GetSubscriberGlobalPreference,
   GetSubscriberGlobalPreferenceCommand,
 } from '../subscribers/usecases/get-subscriber-global-preference';
+import {
+  GroupPreferenceFilterDto,
+  WorkflowPreferenceRequestDto,
+} from '../topics-v2/dtos/create-topic-subscriptions.dto';
+import { SubscriptionDto } from '../topics-v2/dtos/create-topic-subscriptions-response.dto';
+import { UpdateTopicSubscriptionRequestDto } from '../topics-v2/dtos/update-topic-subscription.dto';
 import { CreateTopicSubscriptionsCommand } from '../topics-v2/usecases/create-topic-subscriptions/create-topic-subscriptions.command';
 import { CreateTopicSubscriptionsUsecase } from '../topics-v2/usecases/create-topic-subscriptions/create-topic-subscriptions.usecase';
+import { UpdateTopicSubscriptionCommand } from '../topics-v2/usecases/update-topic-subscription/update-topic-subscription.command';
+import { UpdateTopicSubscriptionUsecase } from '../topics-v2/usecases/update-topic-subscription/update-topic-subscription.usecase';
 import { ActionTypeRequestDto } from './dtos/action-type-request.dto';
 import { BulkUpdatePreferencesRequestDto } from './dtos/bulk-update-preferences-request.dto';
 import { CreateTopicSubscriptionRequestDto } from './dtos/create-topic-subscription-request.dto';
@@ -48,14 +56,13 @@ import { GetNotificationsRequestDto } from './dtos/get-notifications-request.dto
 import { GetNotificationsResponseDto } from './dtos/get-notifications-response.dto';
 import { GetPreferencesRequestDto } from './dtos/get-preferences-request.dto';
 import { GetPreferencesResponseDto } from './dtos/get-preferences-response.dto';
-import { TopicSubscriptionDetailsDto, TopicSubscriptionDto } from './dtos/get-topic-subscriptions-response.dto';
+import { TopicSubscriptionDetailsDto } from './dtos/get-topic-subscriptions-response.dto';
 import { MarkNotificationsAsSeenRequestDto } from './dtos/mark-notifications-as-seen-request.dto';
 import { SnoozeNotificationRequestDto } from './dtos/snooze-notification-request.dto';
 import { SubscriberSessionRequestDto } from './dtos/subscriber-session-request.dto';
 import { SubscriberSessionResponseDto } from './dtos/subscriber-session-response.dto';
 import { UpdateAllNotificationsRequestDto } from './dtos/update-all-notifications-request.dto';
 import { UpdatePreferencesRequestDto } from './dtos/update-preferences-request.dto';
-import { UpdateTopicSubscriptionRequestDto } from './dtos/update-topic-subscription-request.dto';
 import { BulkUpdatePreferencesCommand } from './usecases/bulk-update-preferences/bulk-update-preferences.command';
 import { BulkUpdatePreferences } from './usecases/bulk-update-preferences/bulk-update-preferences.usecase';
 import { DeleteAllNotificationsCommand } from './usecases/delete-all-notifications/delete-all-notifications.command';
@@ -88,8 +95,6 @@ import { UpdateNotificationActionCommand } from './usecases/update-notification-
 import { UpdateNotificationAction } from './usecases/update-notification-action/update-notification-action.usecase';
 import { UpdatePreferencesCommand } from './usecases/update-preferences/update-preferences.command';
 import { UpdatePreferences } from './usecases/update-preferences/update-preferences.usecase';
-import { UpdateTopicSubscriptionCommand } from './usecases/update-topic-subscription/update-topic-subscription.command';
-import { UpdateTopicSubscription } from './usecases/update-topic-subscription/update-topic-subscription.usecase';
 import type { InboxNotification, InboxPreference } from './utils/types';
 
 @ApiCommonResponses()
@@ -117,7 +122,7 @@ export class InboxController {
     private getTopicSubscriptionsUsecase: GetTopicSubscriptions,
     private getTopicSubscriptionUsecase: GetTopicSubscription,
     private createTopicSubscriptionsUsecase: CreateTopicSubscriptionsUsecase,
-    private updateTopicSubscriptionUsecase: UpdateTopicSubscription
+    private updateTopicSubscriptionUsecase: UpdateTopicSubscriptionUsecase
   ) {}
 
   @KeylessAccessible()
@@ -629,19 +634,50 @@ export class InboxController {
     @Param('topicKey') topicKey: string,
     @Param('subscriptionId') subscriptionId: string,
     @Body() body: UpdateTopicSubscriptionRequestDto
-  ): Promise<TopicSubscriptionDto> {
+  ): Promise<SubscriptionDto> {
     return await this.updateTopicSubscriptionUsecase.execute(
       UpdateTopicSubscriptionCommand.create({
         environmentId: subscriberSession._environmentId,
         organizationId: subscriberSession._organizationId,
-        subscriberId: subscriberSession.subscriberId,
-        contextKeys: subscriberSession.contextKeys,
+        userId: subscriberSession._id,
         topicKey,
         subscriptionId,
-        workflows: body.workflows.map((w) => ({ id: w.id, enabled: w.enabled })),
-        conditions: body.conditions,
+        name: body.name,
+        preferences: body.preferences ? this.convertPreferencesToGroupFilters(body.preferences) : undefined,
       })
     );
+  }
+
+  private convertPreferencesToGroupFilters(
+    preferences: Array<string | WorkflowPreferenceRequestDto | GroupPreferenceFilterDto>
+  ): Array<GroupPreferenceFilterDto> {
+    return preferences.map((preference) => {
+      if (typeof preference === 'string') {
+        return {
+          filter: {
+            workflowIds: [preference],
+          },
+        };
+      }
+
+      if (this.isGroupPreferenceFilter(preference)) {
+        return preference;
+      }
+
+      return {
+        filter: {
+          workflowIds: [preference.workflowId],
+        },
+        condition: preference.condition,
+        enabled: preference.enabled,
+      };
+    });
+  }
+
+  private isGroupPreferenceFilter(
+    preference: WorkflowPreferenceRequestDto | GroupPreferenceFilterDto
+  ): preference is GroupPreferenceFilterDto {
+    return 'filter' in preference;
   }
 
   @KeylessAccessible()
