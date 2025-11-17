@@ -618,8 +618,17 @@ export class InboxController {
         organizationId: subscriberSession._organizationId,
         userId: subscriberSession._id,
         topicKey,
-        subscriptions: [{ subscriberId: subscriberSession.subscriberId }],
-        name: body.topic?.name,
+        subscriptions: [
+          typeof body.subscription === 'string'
+            ? { subscriberId: body.subscription }
+            : {
+                subscriberId: subscriberSession.subscriberId,
+                identifier: body.subscription?.identifier,
+                name: body.subscription?.name,
+              },
+        ],
+        name: body.name,
+        preferences: body.preferences ? this.convertPreferencesToGroupFilters(body.preferences) : undefined,
       })
     );
 

@@ -1,60 +1,64 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsDefined, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  GroupPreferenceFilterDto,
+  WorkflowPreferenceRequestDto,
+} from '../../shared/dtos/subscriptions/create-subscriptions.dto';
 
-export class CreateTopicSubscriptionWorkflowsDto {
+export class SubscriptionMetadataRequestDto {
   @ApiProperty({
-    description: 'List of workflow identifiers to subscribe to',
-    example: ['workflow-id-1', 'workflow-id-2'],
-    type: [String],
-  })
-  @IsArray()
-  @IsDefined()
-  ids: string[];
-}
-
-export class CreateTopicSubscriptionTopicDto {
-  @ApiProperty({
-    description: 'The name to set for the topic',
-    example: 'Product Updates',
+    description: 'Unique identifier for this subscription',
+    example: 'subscriber-123-subscription-a',
   })
   @IsString()
   @IsDefined()
-  name: string;
+  identifier?: string;
+
+  @ApiPropertyOptional({
+    description: 'The name of the subscription',
+    example: 'My Subscription',
+  })
+  @IsString()
+  @IsOptional()
+  name?: string;
 }
 
+@ApiExtraModels(WorkflowPreferenceRequestDto, GroupPreferenceFilterDto, SubscriptionMetadataRequestDto)
 export class CreateTopicSubscriptionRequestDto {
-  @ApiPropertyOptional({
-    description: 'List of workflow IDs to subscribe to (all enabled by default)',
-    type: () => CreateTopicSubscriptionWorkflowsDto,
-    example: {
-      ids: ['workflow-id-1', 'workflow-id-2'],
-    },
+  @ApiProperty({
+    description:
+      'The subscription to subscribe to the topic. Can be either a string of the subscription ID or an object with identifier and subscriberId',
+    oneOf: [{ type: 'string' }, { $ref: getSchemaPath(SubscriptionMetadataRequestDto) }],
+    example: { identifier: 'subscriber-123-subscription-a', subscriberId: 'subscriber-123' },
   })
   @IsOptional()
-  @ValidateNested()
-  @Type(() => CreateTopicSubscriptionWorkflowsDto)
-  workflows?: CreateTopicSubscriptionWorkflowsDto;
+  subscription?: string | SubscriptionMetadataRequestDto;
 
-  @ApiPropertyOptional({
-    description: 'Optional topic information to update',
-    type: () => CreateTopicSubscriptionTopicDto,
-    example: {
-      name: 'Product Updates',
-    },
+  @ApiProperty({
+    description: 'The name of the topic',
+    example: 'My Topic',
   })
+  @IsString()
   @IsOptional()
-  @ValidateNested()
-  @Type(() => CreateTopicSubscriptionTopicDto)
-  topic?: CreateTopicSubscriptionTopicDto;
+  name?: string;
 
-  @ApiPropertyOptional({
-    description: 'Filter workflows by tags',
-    type: [String],
-    example: ['billing', 'notifications'],
+  @ApiProperty({
+    description:
+      'The preferences of the topic. Can be a simple workflow ID string, workflow preference object, or group filter object',
+    type: 'array',
+    items: {
+      oneOf: [
+        { type: 'string' },
+        { $ref: getSchemaPath(WorkflowPreferenceRequestDto) },
+        { $ref: getSchemaPath(GroupPreferenceFilterDto) },
+      ],
+    },
+    example: [{ workflowId: 'workflow-123', condition: { '===': [{ var: 'tier' }, 'premium'] } }],
   })
-  @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => Object)
+  @IsOptional()
+  preferences?: Array<string | WorkflowPreferenceRequestDto | GroupPreferenceFilterDto>;
 }
