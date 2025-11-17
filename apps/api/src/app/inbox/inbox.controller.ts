@@ -69,6 +69,8 @@ import { DeleteAllNotificationsCommand } from './usecases/delete-all-notificatio
 import { DeleteAllNotifications } from './usecases/delete-all-notifications/delete-all-notifications.usecase';
 import { DeleteNotificationCommand } from './usecases/delete-notification/delete-notification.command';
 import { DeleteNotification } from './usecases/delete-notification/delete-notification.usecase';
+import { DeleteTopicSubscriptionCommand } from './usecases/delete-topic-subscription/delete-topic-subscription.command';
+import { DeleteTopicSubscription } from './usecases/delete-topic-subscription/delete-topic-subscription.usecase';
 import { GetInboxPreferencesCommand } from './usecases/get-inbox-preferences/get-inbox-preferences.command';
 import { GetInboxPreferences } from './usecases/get-inbox-preferences/get-inbox-preferences.usecase';
 import { GetNotificationsCommand } from './usecases/get-notifications/get-notifications.command';
@@ -122,7 +124,8 @@ export class InboxController {
     private getTopicSubscriptionsUsecase: GetTopicSubscriptions,
     private getTopicSubscriptionUsecase: GetTopicSubscription,
     private createTopicSubscriptionsUsecase: CreateTopicSubscriptionsUsecase,
-    private updateTopicSubscriptionUsecase: UpdateTopicSubscriptionUsecase
+    private updateTopicSubscriptionUsecase: UpdateTopicSubscriptionUsecase,
+    private deleteTopicSubscriptionUsecase: DeleteTopicSubscription
   ) {}
 
   @KeylessAccessible()
@@ -644,6 +647,22 @@ export class InboxController {
         subscriptionId,
         name: body.name,
         preferences: body.preferences ? this.convertPreferencesToGroupFilters(body.preferences) : undefined,
+      })
+    );
+  }
+
+  @UseGuards(AuthGuard('subscriberJwt'))
+  @Delete('/subscription/:subscriptionId')
+  async deleteTopicSubscription(
+    @SubscriberSession() subscriberSession: SubscriberSession,
+    @Param('subscriptionId') subscriptionId: string
+  ): Promise<{ success: boolean }> {
+    return await this.deleteTopicSubscriptionUsecase.execute(
+      DeleteTopicSubscriptionCommand.create({
+        environmentId: subscriberSession._environmentId,
+        organizationId: subscriberSession._organizationId,
+        subscriberId: subscriberSession.subscriberId,
+        subscriptionId,
       })
     );
   }

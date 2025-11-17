@@ -16,6 +16,7 @@ import { BulkUpdatePreferences } from './bulk-update-preferences/bulk-update-pre
 import { DeleteAllNotifications } from './delete-all-notifications/delete-all-notifications.usecase';
 import { DeleteManyNotifications } from './delete-many-notifications/delete-many-notifications.usecase';
 import { DeleteNotification } from './delete-notification/delete-notification.usecase';
+import { DeleteTopicSubscription } from './delete-topic-subscription/delete-topic-subscription.usecase';
 import { GetInboxPreferences } from './get-inbox-preferences/get-inbox-preferences.usecase';
 import { GetNotifications } from './get-notifications/get-notifications.usecase';
 import { GetTopicSubscription } from './get-topic-subscription/get-topic-subscription.usecase';
@@ -51,6 +52,7 @@ export const USE_CASES = [
   DeleteNotification,
   DeleteManyNotifications,
   DeleteAllNotifications,
+  DeleteTopicSubscription,
   GetTopicSubscription,
   GetTopicSubscriptions,
   GenerateUniqueApiKey,
