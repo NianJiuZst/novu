@@ -16,7 +16,7 @@ import {
   SubscriptionErrorDto$inboundSchema,
 } from "./subscriptionerrordto.js";
 
-export type CreateTopicSubscriptionsResponseDto = {
+export type CreateSubscriptionsResponseDto = {
   /**
    * The list of successfully created subscriptions
    */
@@ -32,8 +32,8 @@ export type CreateTopicSubscriptionsResponseDto = {
 };
 
 /** @internal */
-export const CreateTopicSubscriptionsResponseDto$inboundSchema: z.ZodType<
-  CreateTopicSubscriptionsResponseDto,
+export const CreateSubscriptionsResponseDto$inboundSchema: z.ZodType<
+  CreateSubscriptionsResponseDto,
   z.ZodTypeDef,
   unknown
 > = z.object({
@@ -42,13 +42,12 @@ export const CreateTopicSubscriptionsResponseDto$inboundSchema: z.ZodType<
   errors: z.array(SubscriptionErrorDto$inboundSchema).optional(),
 });
 
-export function createTopicSubscriptionsResponseDtoFromJSON(
+export function createSubscriptionsResponseDtoFromJSON(
   jsonString: string,
-): SafeParseResult<CreateTopicSubscriptionsResponseDto, SDKValidationError> {
+): SafeParseResult<CreateSubscriptionsResponseDto, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) =>
-      CreateTopicSubscriptionsResponseDto$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'CreateTopicSubscriptionsResponseDto' from JSON`,
+    (x) => CreateSubscriptionsResponseDto$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'CreateSubscriptionsResponseDto' from JSON`,
   );
 }

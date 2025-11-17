@@ -49,6 +49,14 @@ export type SubscriptionDto = {
    */
   id: string;
   /**
+   * The identifier of the subscription
+   */
+  identifier: string;
+  /**
+   * The name of the subscription
+   */
+  name?: string | undefined;
+  /**
    * The topic information
    */
   topic: TopicDto;
@@ -105,6 +113,8 @@ export const SubscriptionDto$inboundSchema: z.ZodType<
   unknown
 > = z.object({
   _id: z.string(),
+  identifier: z.string(),
+  name: z.string().optional(),
   topic: TopicDto$inboundSchema,
   subscriber: z.nullable(z.lazy(() => Subscriber$inboundSchema)),
   preferences: z.array(SubscriptionPreferenceDto$inboundSchema).optional(),

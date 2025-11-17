@@ -15,14 +15,17 @@ import {
 import { PreferencesTypeEnum, SeverityLevelEnum } from '@novu/shared';
 import { RulesLogic } from 'json-logic-js';
 import _ from 'lodash';
-import { GroupPreferenceFilterDto } from '../../dtos/create-topic-subscriptions.dto';
-import { SubscriptionDto, SubscriptionPreferenceDto } from '../../dtos/create-topic-subscriptions-response.dto';
+import { GroupPreferenceFilterDto } from '../../../shared/dtos/subscriptions/create-subscriptions.dto';
+import {
+  SubscriptionDto,
+  SubscriptionPreferenceDto,
+} from '../../../shared/dtos/subscriptions/create-subscriptions-response.dto';
 import { CreateSubscriptionPreferencesCommand } from '../create-subscription-preferences/create-subscription-preferences.command';
 import { CreateSubscriptionPreferencesUsecase } from '../create-subscription-preferences/create-subscription-preferences.usecase';
-import { UpdateTopicSubscriptionCommand } from './update-topic-subscription.command';
+import { UpdateSubscriptionCommand } from './update-subscription.command';
 
 @Injectable()
-export class UpdateTopicSubscriptionUsecase {
+export class UpdateSubscriptionUsecase {
   constructor(
     private topicRepository: TopicRepository,
     private topicSubscribersRepository: TopicSubscribersRepository,
@@ -36,7 +39,7 @@ export class UpdateTopicSubscriptionUsecase {
   }
 
   @InstrumentUsecase()
-  async execute(command: UpdateTopicSubscriptionCommand): Promise<SubscriptionDto> {
+  async execute(command: UpdateSubscriptionCommand): Promise<SubscriptionDto> {
     const workflows = await this.validateAndFetchWorkflows(
       command.preferences,
       command.environmentId,
@@ -118,7 +121,7 @@ export class UpdateTopicSubscriptionUsecase {
   }
 
   private async updatePreferencesForSubscription(
-    command: UpdateTopicSubscriptionCommand,
+    command: UpdateSubscriptionCommand,
     subscription: TopicSubscribersEntity,
     workflows: NotificationTemplateEntity[]
   ): Promise<void> {

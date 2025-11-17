@@ -85,6 +85,12 @@ export class SubscriptionDto {
   _id: string;
 
   @ApiProperty({
+    description: 'The identifier of the subscription',
+    example: 'tk=product-updates:si=subscriber-123',
+  })
+  identifier: string;
+
+  @ApiProperty({
     description: 'The topic information',
     type: () => TopicDto,
   })

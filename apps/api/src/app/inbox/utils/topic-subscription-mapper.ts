@@ -1,7 +1,8 @@
 import { NotificationTemplateEntity, PreferencesEntity, TopicSubscribersEntity } from '@novu/dal';
 import { SeverityLevelEnum } from '@novu/shared';
 import { RulesLogic } from 'json-logic-js';
-import { SubscriptionPreferenceDto, TopicSubscriptionDetailsDto } from '../dtos/get-topic-subscriptions-response.dto';
+import { SubscriptionPreferenceDto } from '../../shared/dtos/subscriptions/create-subscriptions-response.dto';
+import { TopicSubscriptionDetailsDto } from '../dtos/get-topic-subscriptions-response.dto';
 
 export function mapTopicSubscriptionToDto(
   subscription: TopicSubscribersEntity,

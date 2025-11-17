@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { createDeterministicHash, InstrumentUsecase, PinoLogger } from '@novu/application-generic';
 import {
   BaseRepository,
@@ -13,30 +13,28 @@ import {
   TopicSubscribersEntity,
   TopicSubscribersRepository,
 } from '@novu/dal';
-import { PreferencesTypeEnum, SeverityLevelEnum } from '@novu/shared';
+import { PreferencesTypeEnum, SeverityLevelEnum, VALID_ID_REGEX } from '@novu/shared';
 import { RulesLogic } from 'json-logic-js';
 import _ from 'lodash';
-import { GroupPreferenceFilterDto } from '../../dtos/create-topic-subscriptions.dto';
+import { GroupPreferenceFilterDto } from '../../../shared/dtos/subscriptions/create-subscriptions.dto';
 import {
-  CreateTopicSubscriptionsResponseDto,
+  CreateSubscriptionsResponseDto,
   SubscriptionDto,
   SubscriptionErrorDto,
   SubscriptionPreferenceDto,
-} from '../../dtos/create-topic-subscriptions-response.dto';
+} from '../../../shared/dtos/subscriptions/create-subscriptions-response.dto';
 import { CreateSubscriptionPreferencesCommand } from '../create-subscription-preferences/create-subscription-preferences.command';
 import { CreateSubscriptionPreferencesUsecase } from '../create-subscription-preferences/create-subscription-preferences.usecase';
-import { UpsertTopicUseCase } from '../upsert-topic/upsert-topic.usecase';
-import { CreateTopicSubscriptionsCommand } from './create-topic-subscriptions.command';
+import { CreateSubscriptionsCommand } from './create-subscriptions.command';
 
 @Injectable()
-export class CreateTopicSubscriptionsUsecase {
+export class CreateSubscriptionsUsecase {
   constructor(
     private topicRepository: TopicRepository,
     private topicSubscribersRepository: TopicSubscribersRepository,
     private subscriberRepository: SubscriberRepository,
     private preferencesRepository: PreferencesRepository,
     private notificationTemplateRepository: NotificationTemplateRepository,
-    private upsertTopicUseCase: UpsertTopicUseCase,
     private createSubscriptionPreferencesUsecase: CreateSubscriptionPreferencesUsecase,
     private logger: PinoLogger
   ) {
@@ -44,7 +42,7 @@ export class CreateTopicSubscriptionsUsecase {
   }
 
   @InstrumentUsecase()
-  async execute(command: CreateTopicSubscriptionsCommand): Promise<CreateTopicSubscriptionsResponseDto> {
+  async execute(command: CreateSubscriptionsCommand): Promise<CreateSubscriptionsResponseDto> {
     const workflows = await this.validateAndFetchWorkflows(
       command.preferences,
       command.environmentId,
@@ -223,24 +221,50 @@ export class CreateTopicSubscriptionsUsecase {
     };
   }
 
-  private async upsertTopic(command: CreateTopicSubscriptionsCommand) {
-    await this.upsertTopicUseCase.execute({
-      environmentId: command.environmentId,
-      organizationId: command.organizationId,
-      key: command.topicKey,
-      name: command.name,
-    });
-
-    const topic = await this.topicRepository.findTopicByKey(
+  private async upsertTopic(command: CreateSubscriptionsCommand): Promise<TopicEntity> {
+    let topic = await this.topicRepository.findTopicByKey(
       command.topicKey,
       command.organizationId,
       command.environmentId
     );
 
     if (!topic) {
+      this.validateTopicKey(command.topicKey);
+
+      topic = await this.topicRepository.createTopic({
+        _environmentId: command.environmentId,
+        _organizationId: command.organizationId,
+        key: command.topicKey,
+        name: command.name,
+      });
+    } else if (command.name) {
+      topic = await this.topicRepository.findOneAndUpdate(
+        {
+          _id: topic._id,
+          _environmentId: command.environmentId,
+          _organizationId: command.organizationId,
+        },
+        {
+          $set: { name: command.name },
+        }
+      );
+    }
+
+    if (!topic) {
       throw new Error(`Topic with key ${command.topicKey} not found after upsert`);
     }
+
     return topic;
+  }
+
+  private validateTopicKey(key: string): void {
+    if (VALID_ID_REGEX.test(key)) {
+      return;
+    }
+
+    throw new BadRequestException(
+      `Invalid topic key: "${key}". Topic keys must contain only alphanumeric characters (a-z, A-Z, 0-9), hyphens (-), underscores (_), colons (:), or be a valid email address.`
+    );
   }
 
   private async validateSubscriptionLimit(
@@ -320,7 +344,7 @@ export class CreateTopicSubscriptionsUsecase {
   }
 
   private async fetchPreferencesForSubscription(
-    command: CreateTopicSubscriptionsCommand,
+    command: CreateSubscriptionsCommand,
     subscription: TopicSubscribersEntity,
     workflows: NotificationTemplateEntity[]
   ): Promise<SubscriptionPreferenceDto[] | undefined> {
@@ -371,7 +395,7 @@ export class CreateTopicSubscriptionsUsecase {
   }
 
   private async createPreferencesForSubscription(
-    command: CreateTopicSubscriptionsCommand,
+    command: CreateSubscriptionsCommand,
     subscription: TopicSubscribersEntity,
     workflows: NotificationTemplateEntity[]
   ): Promise<SubscriptionPreferenceDto[] | undefined> {

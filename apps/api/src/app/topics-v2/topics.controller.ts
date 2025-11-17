@@ -21,15 +21,20 @@ import { Response } from 'express';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
 import { ThrottlerCategory } from '../rate-limiting/guards/throttler.decorator';
 import { DirectionEnum } from '../shared/dtos/base-responses';
+import {
+  GroupPreferenceFilterDto,
+  WorkflowPreferenceRequestDto,
+} from '../shared/dtos/subscriptions/create-subscriptions.dto';
+import {
+  CreateSubscriptionsResponseDto,
+  SubscriptionDto,
+} from '../shared/dtos/subscriptions/create-subscriptions-response.dto';
 import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
 import { SdkGroupName, SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
 import { UserSession } from '../shared/framework/user.decorator';
-import {
-  CreateTopicSubscriptionsRequestDto,
-  GroupPreferenceFilterDto,
-  WorkflowPreferenceRequestDto,
-} from './dtos/create-topic-subscriptions.dto';
-import { CreateTopicSubscriptionsResponseDto, SubscriptionDto } from './dtos/create-topic-subscriptions-response.dto';
+import { CreateSubscriptionsCommand, CreateSubscriptionsUsecase } from '../subscriptions/usecases/create-subscriptions';
+import { UpdateSubscriptionCommand, UpdateSubscriptionUsecase } from '../subscriptions/usecases/update-subscription';
+import { CreateTopicSubscriptionsRequestDto } from './dtos/create-topic-subscriptions.dto';
 import { CreateUpdateTopicRequestDto } from './dtos/create-update-topic.dto';
 import { DeleteTopicResponseDto } from './dtos/delete-topic-response.dto';
 import { DeleteTopicSubscriptionsRequestDto } from './dtos/delete-topic-subscriptions.dto';
@@ -41,8 +46,6 @@ import { ListTopicsResponseDto } from './dtos/list-topics-response.dto';
 import { TopicResponseDto } from './dtos/topic-response.dto';
 import { UpdateTopicRequestDto } from './dtos/update-topic.dto';
 import { UpdateTopicSubscriptionRequestDto } from './dtos/update-topic-subscription.dto';
-import { CreateTopicSubscriptionsCommand } from './usecases/create-topic-subscriptions/create-topic-subscriptions.command';
-import { CreateTopicSubscriptionsUsecase } from './usecases/create-topic-subscriptions/create-topic-subscriptions.usecase';
 import { DeleteTopicCommand } from './usecases/delete-topic/delete-topic.command';
 import { DeleteTopicUseCase } from './usecases/delete-topic/delete-topic.usecase';
 import { DeleteTopicSubscriptionsCommand } from './usecases/delete-topic-subscriptions/delete-topic-subscriptions.command';
@@ -55,8 +58,6 @@ import { ListTopicsCommand } from './usecases/list-topics/list-topics.command';
 import { ListTopicsUseCase } from './usecases/list-topics/list-topics.usecase';
 import { UpdateTopicCommand } from './usecases/update-topic/update-topic.command';
 import { UpdateTopicUseCase } from './usecases/update-topic/update-topic.usecase';
-import { UpdateTopicSubscriptionCommand } from './usecases/update-topic-subscription/update-topic-subscription.command';
-import { UpdateTopicSubscriptionUsecase } from './usecases/update-topic-subscription/update-topic-subscription.usecase';
 import { UpsertTopicCommand } from './usecases/upsert-topic/upsert-topic.command';
 import { UpsertTopicUseCase } from './usecases/upsert-topic/upsert-topic.usecase';
 
@@ -75,9 +76,9 @@ export class TopicsController {
     private updateTopicUsecase: UpdateTopicUseCase,
     private deleteTopicUsecase: DeleteTopicUseCase,
     private listTopicSubscriptionsUsecase: ListTopicSubscriptionsUseCase,
-    private createTopicSubscriptionsUsecase: CreateTopicSubscriptionsUsecase,
+    private createSubscriptionsUsecase: CreateSubscriptionsUsecase,
     private deleteTopicSubscriptionsUsecase: DeleteTopicSubscriptionsUsecase,
-    private updateTopicSubscriptionUsecase: UpdateTopicSubscriptionUsecase
+    private updateSubscriptionUsecase: UpdateSubscriptionUsecase
   ) {}
 
   @Get('')
@@ -274,7 +275,7 @@ export class TopicsController {
       Its like subscribing to a common interest group. if topic does not exist, it will be created.`,
   })
   @ApiParam({ name: 'topicKey', description: 'The key identifier of the topic', type: String })
-  @ApiResponse(CreateTopicSubscriptionsResponseDto, 201, false, true, {
+  @ApiResponse(CreateSubscriptionsResponseDto, 201, false, true, {
     description: 'Subscriptions created successfully',
   })
   @RequirePermissions(PermissionsEnum.TOPIC_WRITE)
@@ -282,11 +283,11 @@ export class TopicsController {
     @UserSession() user: UserSessionData,
     @Param('topicKey') topicKey: string,
     @Body() body: CreateTopicSubscriptionsRequestDto
-  ): Promise<CreateTopicSubscriptionsResponseDto> {
+  ): Promise<CreateSubscriptionsResponseDto> {
     const rawSubscriptions = body.subscriptions || body.subscriberIds || [];
 
-    const result = await this.createTopicSubscriptionsUsecase.execute(
-      CreateTopicSubscriptionsCommand.create({
+    const result = await this.createSubscriptionsUsecase.execute(
+      CreateSubscriptionsCommand.create({
         environmentId: user.environmentId,
         organizationId: user.organizationId,
         userId: user._id,
@@ -297,7 +298,7 @@ export class TopicsController {
       })
     );
 
-    const typeSafeResult: CreateTopicSubscriptionsResponseDto = {
+    const typeSafeResult: CreateSubscriptionsResponseDto = {
       data: result.data.map((item) => ({
         ...item,
         createdAt: item.createdAt || '',
@@ -381,8 +382,8 @@ export class TopicsController {
     @Param('subscriptionId') subscriptionId: string,
     @Body() body: UpdateTopicSubscriptionRequestDto
   ): Promise<SubscriptionDto> {
-    return await this.updateTopicSubscriptionUsecase.execute(
-      UpdateTopicSubscriptionCommand.create({
+    return await this.updateSubscriptionUsecase.execute(
+      UpdateSubscriptionCommand.create({
         environmentId: user.environmentId,
         organizationId: user.organizationId,
         userId: user._id,

@@ -13,12 +13,17 @@ export type TopicSubscriberIdentifierDto = {
    * The subscriber ID
    */
   subscriberId: string;
+  /**
+   * The name of the subscription
+   */
+  name?: string | undefined;
 };
 
 /** @internal */
 export type TopicSubscriberIdentifierDto$Outbound = {
   identifier: string;
   subscriberId: string;
+  name?: string | undefined;
 };
 
 /** @internal */
@@ -29,6 +34,7 @@ export const TopicSubscriberIdentifierDto$outboundSchema: z.ZodType<
 > = z.object({
   identifier: z.string(),
   subscriberId: z.string(),
+  name: z.string().optional(),
 });
 
 export function topicSubscriberIdentifierDtoToJSON(

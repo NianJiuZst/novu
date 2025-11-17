@@ -1,6 +1,6 @@
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsDefined, IsOptional, IsString } from 'class-validator';
 import { EnvironmentWithUserCommand } from '../../../shared/commands/project.command';
-import { GroupPreferenceFilterDto } from '../../dtos/create-topic-subscriptions.dto';
+import { GroupPreferenceFilterDto } from '../../../shared/dtos/subscriptions/create-subscriptions.dto';
 
 export class TopicSubscriberIdentifier {
   @IsString()
@@ -16,7 +16,7 @@ export class TopicSubscriberIdentifier {
   name?: string;
 }
 
-export class CreateTopicSubscriptionsCommand extends EnvironmentWithUserCommand {
+export class CreateSubscriptionsCommand extends EnvironmentWithUserCommand {
   @IsString()
   @IsDefined()
   topicKey: string;

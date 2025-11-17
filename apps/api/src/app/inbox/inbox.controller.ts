@@ -27,6 +27,15 @@ import { TriggerEventRequestDto } from '../events/dtos';
 import { TriggerEventResponseDto } from '../events/dtos/trigger-event-response.dto';
 import { ParseEventRequestMulticastCommand } from '../events/usecases/parse-event-request';
 import { ParseEventRequest } from '../events/usecases/parse-event-request/parse-event-request.usecase';
+import {
+  GroupPreferenceFilterDto,
+  WorkflowPreferenceRequestDto,
+} from '../shared/dtos/subscriptions/create-subscriptions.dto';
+import {
+  CreateSubscriptionsResponseDto,
+  SubscriptionDto,
+} from '../shared/dtos/subscriptions/create-subscriptions-response.dto';
+import { UpdateSubscriptionRequestDto } from '../shared/dtos/subscriptions/update-subscription.dto';
 import { ExcludeFromIdempotency } from '../shared/framework/exclude-from-idempotency';
 import { ApiCommonResponses } from '../shared/framework/response.decorator';
 import { KeylessAccessible } from '../shared/framework/swagger/keyless.security';
@@ -36,20 +45,11 @@ import {
   GetSubscriberGlobalPreference,
   GetSubscriberGlobalPreferenceCommand,
 } from '../subscribers/usecases/get-subscriber-global-preference';
-import {
-  GroupPreferenceFilterDto,
-  WorkflowPreferenceRequestDto,
-} from '../topics-v2/dtos/create-topic-subscriptions.dto';
-import { SubscriptionDto } from '../topics-v2/dtos/create-topic-subscriptions-response.dto';
-import { UpdateTopicSubscriptionRequestDto } from '../topics-v2/dtos/update-topic-subscription.dto';
-import { CreateTopicSubscriptionsCommand } from '../topics-v2/usecases/create-topic-subscriptions/create-topic-subscriptions.command';
-import { CreateTopicSubscriptionsUsecase } from '../topics-v2/usecases/create-topic-subscriptions/create-topic-subscriptions.usecase';
-import { UpdateTopicSubscriptionCommand } from '../topics-v2/usecases/update-topic-subscription/update-topic-subscription.command';
-import { UpdateTopicSubscriptionUsecase } from '../topics-v2/usecases/update-topic-subscription/update-topic-subscription.usecase';
+import { CreateSubscriptionsCommand, CreateSubscriptionsUsecase } from '../subscriptions/usecases/create-subscriptions';
+import { UpdateSubscriptionCommand, UpdateSubscriptionUsecase } from '../subscriptions/usecases/update-subscription';
 import { ActionTypeRequestDto } from './dtos/action-type-request.dto';
 import { BulkUpdatePreferencesRequestDto } from './dtos/bulk-update-preferences-request.dto';
 import { CreateTopicSubscriptionRequestDto } from './dtos/create-topic-subscription-request.dto';
-import { CreateTopicSubscriptionsResponseDto } from './dtos/create-topic-subscriptions-response.dto';
 import { GetNotificationsCountRequestDto } from './dtos/get-notifications-count-request.dto';
 import { GetNotificationsCountResponseDto } from './dtos/get-notifications-count-response.dto';
 import { GetNotificationsRequestDto } from './dtos/get-notifications-request.dto';
@@ -123,8 +123,8 @@ export class InboxController {
     private deleteAllNotificationsUsecase: DeleteAllNotifications,
     private getTopicSubscriptionsUsecase: GetTopicSubscriptions,
     private getTopicSubscriptionUsecase: GetTopicSubscription,
-    private createTopicSubscriptionsUsecase: CreateTopicSubscriptionsUsecase,
-    private updateTopicSubscriptionUsecase: UpdateTopicSubscriptionUsecase,
+    private createSubscriptionsUsecase: CreateSubscriptionsUsecase,
+    private updateSubscriptionUsecase: UpdateSubscriptionUsecase,
     private deleteTopicSubscriptionUsecase: DeleteTopicSubscription
   ) {}
 
@@ -611,9 +611,9 @@ export class InboxController {
     @SubscriberSession() subscriberSession: SubscriberSession,
     @Param('topicKey') topicKey: string,
     @Body() body: CreateTopicSubscriptionRequestDto
-  ): Promise<CreateTopicSubscriptionsResponseDto> {
-    const result = await this.createTopicSubscriptionsUsecase.execute(
-      CreateTopicSubscriptionsCommand.create({
+  ): Promise<CreateSubscriptionsResponseDto> {
+    const result = await this.createSubscriptionsUsecase.execute(
+      CreateSubscriptionsCommand.create({
         environmentId: subscriberSession._environmentId,
         organizationId: subscriberSession._organizationId,
         userId: subscriberSession._id,
@@ -636,10 +636,10 @@ export class InboxController {
     @SubscriberSession() subscriberSession: SubscriberSession,
     @Param('topicKey') topicKey: string,
     @Param('subscriptionId') subscriptionId: string,
-    @Body() body: UpdateTopicSubscriptionRequestDto
+    @Body() body: UpdateSubscriptionRequestDto
   ): Promise<SubscriptionDto> {
-    return await this.updateTopicSubscriptionUsecase.execute(
-      UpdateTopicSubscriptionCommand.create({
+    return await this.updateSubscriptionUsecase.execute(
+      UpdateSubscriptionCommand.create({
         environmentId: subscriberSession._environmentId,
         organizationId: subscriberSession._organizationId,
         userId: subscriberSession._id,

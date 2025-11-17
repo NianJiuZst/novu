@@ -1,13 +1,10 @@
 import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
-import {
-  GroupPreferenceFilterDto,
-  WorkflowPreferenceRequestDto,
-} from '../../shared/dtos/subscriptions/create-subscriptions.dto';
+import { GroupPreferenceFilterDto, WorkflowPreferenceRequestDto } from './create-subscriptions.dto';
 
 @ApiExtraModels(WorkflowPreferenceRequestDto, GroupPreferenceFilterDto)
-export class UpdateTopicSubscriptionRequestDto {
+export class UpdateSubscriptionRequestDto {
   @ApiProperty({
     description: 'The name of the subscription',
     example: 'My Subscription',

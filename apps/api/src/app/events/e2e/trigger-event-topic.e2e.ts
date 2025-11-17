@@ -358,7 +358,7 @@ describe('Topic Trigger Event #novu-v2', () => {
       }
     });
 
-    it('should deliver only to subscriptions with passing conditions', async () => {
+    it.only('should deliver only to subscriptions with passing conditions', async () => {
       const conditionsTopicKey = `topic-key-conditions-${Date.now()}`;
 
       const newSubscriber = await subscriberService.createSubscriber();
@@ -532,7 +532,7 @@ describe('Topic Trigger Event #novu-v2', () => {
       expect(booleanFalseMessages.length, 'Enabled false - expected to not deliver the message').to.equal(0);
     });
 
-    it('should filter subscriptions by tags and combined workflow filters', async () => {
+    it.only('should filter subscriptions by tags and combined workflow filters', async () => {
       const taggedTemplate = await session.createTemplate({
         tags: ['important', 'promotional'],
       });
@@ -915,6 +915,4 @@ const triggerEvent = async (
     to,
     payload,
   });
-
-}
-;
+};

@@ -9,7 +9,7 @@ import {
   WorkflowPreferencesPartial,
 } from '@novu/shared';
 import { RulesLogic } from 'json-logic-js';
-import { SubscriptionPreferenceDto } from '../../dtos/create-topic-subscriptions-response.dto';
+import { SubscriptionPreferenceDto } from '../../../shared/dtos/subscriptions/create-subscriptions-response.dto';
 import { CreateSubscriptionPreferencesCommand } from './create-subscription-preferences.command';
 
 @Injectable()
