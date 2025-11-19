@@ -33,7 +33,7 @@ import {
 } from '../shared/dtos/subscriptions/create-subscriptions.dto';
 import {
   CreateSubscriptionsResponseDto,
-  SubscriptionDto,
+  SubscriptionResponseDto,
 } from '../shared/dtos/subscriptions/create-subscriptions-response.dto';
 import { UpdateSubscriptionRequestDto } from '../shared/dtos/subscriptions/update-subscription.dto';
 import { ExcludeFromIdempotency } from '../shared/framework/exclude-from-idempotency';
@@ -63,6 +63,7 @@ import { SubscriberSessionRequestDto } from './dtos/subscriber-session-request.d
 import { SubscriberSessionResponseDto } from './dtos/subscriber-session-response.dto';
 import { UpdateAllNotificationsRequestDto } from './dtos/update-all-notifications-request.dto';
 import { UpdatePreferencesRequestDto } from './dtos/update-preferences-request.dto';
+import { UpdateSubscriptionPreferencesRequestDto } from './dtos/update-subscription-preferences-request.dto';
 import { BulkUpdatePreferencesCommand } from './usecases/bulk-update-preferences/bulk-update-preferences.command';
 import { BulkUpdatePreferences } from './usecases/bulk-update-preferences/bulk-update-preferences.usecase';
 import { DeleteAllNotificationsCommand } from './usecases/delete-all-notifications/delete-all-notifications.command';
@@ -458,6 +459,31 @@ export class InboxController {
   }
 
   @UseGuards(AuthGuard('subscriberJwt'))
+  @Patch('/preferences/subscriptions/:subscriptionIdOrIdentifier/workflows/:workflowIdOrIdentifier')
+  async updateSubscriptionWorkflowPreference(
+    @SubscriberSession() subscriberSession: SubscriberSession,
+    @Param('workflowIdOrIdentifier') workflowIdOrIdentifier: string,
+    @Param('subscriptionIdOrIdentifier') subscriptionIdOrIdentifier: string,
+    @Body() body: UpdateSubscriptionPreferencesRequestDto
+  ): Promise<InboxPreference> {
+    return await this.updatePreferencesUsecase.execute(
+      UpdatePreferencesCommand.create({
+        organizationId: subscriberSession._organizationId,
+        subscriberId: subscriberSession.subscriberId,
+        environmentId: subscriberSession._environmentId,
+        level: PreferenceLevelEnum.TEMPLATE,
+        workflowIdOrIdentifier,
+        subscriptionIdOrIdentifier,
+        includeInactiveChannels: false,
+        all: {
+          enabled: body.enabled,
+          condition: body.condition,
+        },
+      })
+    );
+  }
+
+  @UseGuards(AuthGuard('subscriberJwt'))
   @Post('/notifications/seen')
   @HttpCode(HttpStatus.NO_CONTENT)
   async markNotificationsAsSeen(
@@ -646,7 +672,7 @@ export class InboxController {
     @Param('topicKey') topicKey: string,
     @Param('subscriptionId') subscriptionId: string,
     @Body() body: UpdateSubscriptionRequestDto
-  ): Promise<SubscriptionDto> {
+  ): Promise<SubscriptionResponseDto> {
     return await this.updateSubscriptionUsecase.execute(
       UpdateSubscriptionCommand.create({
         environmentId: subscriberSession._environmentId,

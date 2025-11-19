@@ -58,6 +58,7 @@ export class CreateSubscriptionPreferencesUsecase {
             data: workflow.data,
             severity: workflow.severity || SeverityLevelEnum.NONE,
           },
+          subscriptionId: command.subscriptionId,
           enabled: createdPreference.preferences?.all?.enabled ?? true,
           condition: createdPreference.preferences?.all?.condition as RulesLogic | undefined,
         });
@@ -71,36 +72,36 @@ export class CreateSubscriptionPreferencesUsecase {
     command: CreateSubscriptionPreferencesCommand,
     workflow: { _id: string; tags?: string[]; triggers?: Array<{ identifier?: string }> }
   ): Promise<WorkflowPreferences | undefined> {
-    const providedDefaults = this.findProvidedDefaults(command, workflow);
+    const preferenceFilterDefinition = this.findPreferenceFilterDefinition(command, workflow);
+    let enabled: boolean | undefined;
 
-    if (providedDefaults) {
-      const enabled = providedDefaults.enabled ?? true;
-      const condition = providedDefaults.condition;
-
-      const partialPreferences: WorkflowPreferencesPartial = {
-        all: {
-          enabled,
-          readOnly: false,
-          ...(condition !== undefined && { condition }),
-        },
-      };
-
-      return buildWorkflowPreferences(partialPreferences);
+    if (preferenceFilterDefinition?.enabled !== undefined) {
+      enabled = preferenceFilterDefinition.enabled;
+    } else {
+      enabled = (
+        await this.getPreferences.safeExecute(
+          GetPreferencesCommand.create({
+            environmentId: command.environmentId,
+            organizationId: command.organizationId,
+            templateId: workflow._id,
+            subscriberId: command._subscriberId,
+          })
+        )
+      )?.preferences.all?.enabled;
     }
 
-    const fallbackDefaults = await this.getPreferences.safeExecute(
-      GetPreferencesCommand.create({
-        environmentId: command.environmentId,
-        organizationId: command.organizationId,
-        templateId: workflow._id,
-        subscriberId: command._subscriberId,
-      })
-    );
+    const partialPreferences: WorkflowPreferencesPartial = {
+      all: {
+        enabled,
+        readOnly: false,
+        ...(preferenceFilterDefinition?.condition !== undefined && { condition: preferenceFilterDefinition.condition }),
+      },
+    };
 
-    return fallbackDefaults?.preferences;
+    return buildWorkflowPreferences(partialPreferences);
   }
 
-  private findProvidedDefaults(
+  private findPreferenceFilterDefinition(
     command: CreateSubscriptionPreferencesCommand,
     workflow: { _id: string; tags?: string[]; triggers?: Array<{ identifier?: string }> }
   ) {

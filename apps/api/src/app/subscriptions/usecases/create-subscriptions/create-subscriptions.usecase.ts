@@ -19,9 +19,9 @@ import _ from 'lodash';
 import { GroupPreferenceFilterDto } from '../../../shared/dtos/subscriptions/create-subscriptions.dto';
 import {
   CreateSubscriptionsResponseDto,
-  SubscriptionDto,
   SubscriptionErrorDto,
   SubscriptionPreferenceDto,
+  SubscriptionResponseDto,
 } from '../../../shared/dtos/subscriptions/create-subscriptions-response.dto';
 import { CreateSubscriptionPreferencesCommand } from '../create-subscription-preferences/create-subscription-preferences.command';
 import { CreateSubscriptionPreferencesUsecase } from '../create-subscription-preferences/create-subscription-preferences.usecase';
@@ -51,7 +51,7 @@ export class CreateSubscriptionsUsecase {
     const topic = await this.upsertTopic(command);
 
     const errors: SubscriptionErrorDto[] = [];
-    const subscriptionData: SubscriptionDto[] = [];
+    const subscriptionData: SubscriptionResponseDto[] = [];
 
     const externalSubscriberIds = command.subscriptions.map((subscription) => subscription.subscriberId);
     const foundSubscribers = await this.subscriberRepository.searchByExternalSubscriberIds({
@@ -387,6 +387,7 @@ export class CreateSubscriptionsUsecase {
                 severity: workflow.severity || SeverityLevelEnum.NONE,
               }
             : undefined,
+          subscriptionId: subscription._id.toString(),
           enabled: preferences?.all?.enabled ?? true,
           condition: preferences?.all?.condition as RulesLogic | undefined,
         };

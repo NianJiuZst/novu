@@ -31,6 +31,7 @@ export function mapTopicSubscriptionToDto(
               severity: workflow.severity || SeverityLevelEnum.NONE,
             }
           : undefined,
+        subscriptionId: subscription._id,
         enabled: preferences?.all?.enabled ?? true,
         condition: preferences?.all?.condition as RulesLogic | undefined,
       };

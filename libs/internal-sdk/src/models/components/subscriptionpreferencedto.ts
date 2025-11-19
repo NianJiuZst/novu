@@ -52,6 +52,10 @@ export type SubscriptionPreferenceDtoWorkflow = {
 
 export type SubscriptionPreferenceDto = {
   /**
+   * The unique identifier of the subscription
+   */
+  subscriptionId: string;
+  /**
    * Workflow information if this is a template-level preference
    */
   workflow?: SubscriptionPreferenceDtoWorkflow | null | undefined;
@@ -113,6 +117,7 @@ export const SubscriptionPreferenceDto$inboundSchema: z.ZodType<
   z.ZodTypeDef,
   unknown
 > = z.object({
+  subscriptionId: z.string(),
   workflow: z.nullable(
     z.lazy(() => SubscriptionPreferenceDtoWorkflow$inboundSchema),
   ).optional(),

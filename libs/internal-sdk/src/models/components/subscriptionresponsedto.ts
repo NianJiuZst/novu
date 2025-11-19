@@ -7,12 +7,16 @@ import { remap as remap$ } from "../../lib/primitives.js";
 import { safeParse } from "../../lib/schemas.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
+import {
+  SubscriptionPreferenceDto,
+  SubscriptionPreferenceDto$inboundSchema,
+} from "./subscriptionpreferencedto.js";
 import { TopicDto, TopicDto$inboundSchema } from "./topicdto.js";
 
 /**
  * The subscriber information
  */
-export type SubscriptionDtoSubscriber = {
+export type Subscriber = {
   /**
    * The identifier of the subscriber
    */
@@ -39,7 +43,7 @@ export type SubscriptionDtoSubscriber = {
   email?: string | null | undefined;
 };
 
-export type SubscriptionDto = {
+export type SubscriptionResponseDto = {
   /**
    * The unique identifier of the subscription
    */
@@ -49,13 +53,21 @@ export type SubscriptionDto = {
    */
   identifier: string;
   /**
+   * The name of the subscription
+   */
+  name?: string | undefined;
+  /**
    * The topic information
    */
   topic: TopicDto;
   /**
    * The subscriber information
    */
-  subscriber: SubscriptionDtoSubscriber | null;
+  subscriber: Subscriber | null;
+  /**
+   * The preferences for workflows in this subscription
+   */
+  preferences?: Array<SubscriptionPreferenceDto> | undefined;
   /**
    * The creation date of the subscription
    */
@@ -67,8 +79,8 @@ export type SubscriptionDto = {
 };
 
 /** @internal */
-export const SubscriptionDtoSubscriber$inboundSchema: z.ZodType<
-  SubscriptionDtoSubscriber,
+export const Subscriber$inboundSchema: z.ZodType<
+  Subscriber,
   z.ZodTypeDef,
   unknown
 > = z.object({
@@ -84,26 +96,28 @@ export const SubscriptionDtoSubscriber$inboundSchema: z.ZodType<
   });
 });
 
-export function subscriptionDtoSubscriberFromJSON(
+export function subscriberFromJSON(
   jsonString: string,
-): SafeParseResult<SubscriptionDtoSubscriber, SDKValidationError> {
+): SafeParseResult<Subscriber, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => SubscriptionDtoSubscriber$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'SubscriptionDtoSubscriber' from JSON`,
+    (x) => Subscriber$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'Subscriber' from JSON`,
   );
 }
 
 /** @internal */
-export const SubscriptionDto$inboundSchema: z.ZodType<
-  SubscriptionDto,
+export const SubscriptionResponseDto$inboundSchema: z.ZodType<
+  SubscriptionResponseDto,
   z.ZodTypeDef,
   unknown
 > = z.object({
   _id: z.string(),
   identifier: z.string(),
+  name: z.string().optional(),
   topic: TopicDto$inboundSchema,
-  subscriber: z.nullable(z.lazy(() => SubscriptionDtoSubscriber$inboundSchema)),
+  subscriber: z.nullable(z.lazy(() => Subscriber$inboundSchema)),
+  preferences: z.array(SubscriptionPreferenceDto$inboundSchema).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 }).transform((v) => {
@@ -112,12 +126,12 @@ export const SubscriptionDto$inboundSchema: z.ZodType<
   });
 });
 
-export function subscriptionDtoFromJSON(
+export function subscriptionResponseDtoFromJSON(
   jsonString: string,
-): SafeParseResult<SubscriptionDto, SDKValidationError> {
+): SafeParseResult<SubscriptionResponseDto, SDKValidationError> {
   return safeParse(
     jsonString,
-    (x) => SubscriptionDto$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'SubscriptionDto' from JSON`,
+    (x) => SubscriptionResponseDto$inboundSchema.parse(JSON.parse(x)),
+    `Failed to parse 'SubscriptionResponseDto' from JSON`,
   );
 }

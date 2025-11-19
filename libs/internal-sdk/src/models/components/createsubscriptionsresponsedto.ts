@@ -8,19 +8,19 @@ import { Result as SafeParseResult } from "../../types/fp.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 import { MetaDto, MetaDto$inboundSchema } from "./metadto.js";
 import {
-  SubscriptionDto,
-  SubscriptionDto$inboundSchema,
-} from "./subscriptiondto.js";
-import {
   SubscriptionErrorDto,
   SubscriptionErrorDto$inboundSchema,
 } from "./subscriptionerrordto.js";
+import {
+  SubscriptionResponseDto,
+  SubscriptionResponseDto$inboundSchema,
+} from "./subscriptionresponsedto.js";
 
 export type CreateSubscriptionsResponseDto = {
   /**
    * The list of successfully created subscriptions
    */
-  data: Array<SubscriptionDto>;
+  data: Array<SubscriptionResponseDto>;
   /**
    * Metadata about the operation
    */
@@ -37,7 +37,7 @@ export const CreateSubscriptionsResponseDto$inboundSchema: z.ZodType<
   z.ZodTypeDef,
   unknown
 > = z.object({
-  data: z.array(SubscriptionDto$inboundSchema),
+  data: z.array(SubscriptionResponseDto$inboundSchema),
   meta: MetaDto$inboundSchema,
   errors: z.array(SubscriptionErrorDto$inboundSchema).optional(),
 });

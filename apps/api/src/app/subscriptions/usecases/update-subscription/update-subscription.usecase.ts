@@ -17,8 +17,8 @@ import { RulesLogic } from 'json-logic-js';
 import _ from 'lodash';
 import { GroupPreferenceFilterDto } from '../../../shared/dtos/subscriptions/create-subscriptions.dto';
 import {
-  SubscriptionDto,
   SubscriptionPreferenceDto,
+  SubscriptionResponseDto,
 } from '../../../shared/dtos/subscriptions/create-subscriptions-response.dto';
 import { CreateSubscriptionPreferencesCommand } from '../create-subscription-preferences/create-subscription-preferences.command';
 import { CreateSubscriptionPreferencesUsecase } from '../create-subscription-preferences/create-subscription-preferences.usecase';
@@ -39,7 +39,7 @@ export class UpdateSubscriptionUsecase {
   }
 
   @InstrumentUsecase()
-  async execute(command: UpdateSubscriptionCommand): Promise<SubscriptionDto> {
+  async execute(command: UpdateSubscriptionCommand): Promise<SubscriptionResponseDto> {
     const workflows = await this.validateAndFetchWorkflows(
       command.preferences,
       command.environmentId,
@@ -195,6 +195,7 @@ export class UpdateSubscriptionUsecase {
                 severity: workflow.severity || SeverityLevelEnum.NONE,
               }
             : undefined,
+          subscriptionId: subscription._id,
           enabled: preferences?.all?.enabled ?? true,
           condition: preferences?.all?.condition as RulesLogic | undefined,
         };
@@ -349,7 +350,7 @@ export class UpdateSubscriptionUsecase {
     subscriber: SubscriberEntity | null,
     topic: TopicEntity,
     preferences?: SubscriptionPreferenceDto[]
-  ): SubscriptionDto {
+  ): SubscriptionResponseDto {
     return {
       _id: subscription._id.toString(),
       identifier: subscription.identifier,

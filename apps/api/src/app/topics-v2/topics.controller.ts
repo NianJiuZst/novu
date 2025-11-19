@@ -27,7 +27,7 @@ import {
 } from '../shared/dtos/subscriptions/create-subscriptions.dto';
 import {
   CreateSubscriptionsResponseDto,
-  SubscriptionDto,
+  SubscriptionResponseDto,
 } from '../shared/dtos/subscriptions/create-subscriptions-response.dto';
 import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
 import { SdkGroupName, SdkMethodName } from '../shared/framework/swagger/sdk.decorators';
@@ -374,14 +374,14 @@ export class TopicsController {
   })
   @ApiParam({ name: 'topicKey', description: 'The key identifier of the topic', type: String })
   @ApiParam({ name: 'subscriptionId', description: 'The unique identifier of the subscription', type: String })
-  @ApiResponse(SubscriptionDto, 200)
+  @ApiResponse(SubscriptionResponseDto, 200)
   @RequirePermissions(PermissionsEnum.TOPIC_WRITE)
   async updateTopicSubscription(
     @UserSession() user: UserSessionData,
     @Param('topicKey') topicKey: string,
     @Param('subscriptionId') subscriptionId: string,
     @Body() body: UpdateTopicSubscriptionRequestDto
-  ): Promise<SubscriptionDto> {
+  ): Promise<SubscriptionResponseDto> {
     return await this.updateSubscriptionUsecase.execute(
       UpdateSubscriptionCommand.create({
         environmentId: user.environmentId,

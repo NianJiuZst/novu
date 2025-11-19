@@ -93,6 +93,13 @@ export class SubscriberDto {
 }
 
 export class SubscriptionPreferenceDto {
+  @ApiProperty({
+    description: 'The unique identifier of the subscription',
+    example: '64f5e95d3d7946d80d0cb679',
+  })
+  @IsString()
+  subscriptionId: string;
+
   @ApiPropertyOptional({
     type: () => WorkflowDto,
     description: 'Workflow information if this is a template-level preference',
@@ -123,7 +130,7 @@ export class SubscriptionPreferenceDto {
   condition?: RulesLogic;
 }
 
-export class SubscriptionDto {
+export class SubscriptionResponseDto {
   @ApiProperty({
     description: 'The unique identifier of the subscription',
     example: '64f5e95d3d7946d80d0cb679',
@@ -223,9 +230,9 @@ export class MetaDto {
 export class CreateSubscriptionsResponseDto {
   @ApiProperty({
     description: 'The list of successfully created subscriptions',
-    type: () => [SubscriptionDto],
+    type: () => [SubscriptionResponseDto],
   })
-  data: SubscriptionDto[];
+  data: SubscriptionResponseDto[];
 
   @ApiProperty({
     description: 'Metadata about the operation',
