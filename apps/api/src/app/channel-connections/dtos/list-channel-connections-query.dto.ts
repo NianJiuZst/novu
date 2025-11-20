@@ -1,15 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  ChannelTypeEnum,
-  makeResourceKey,
-  ProvidersIdEnum,
-  ProvidersIdEnumConst,
-  RESOURCE,
-  ResourceKey,
-} from '@novu/shared';
+import { ChannelTypeEnum, ProvidersIdEnum, ProvidersIdEnumConst } from '@novu/shared';
 import { Transform } from 'class-transformer';
 import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
-import { IsResourceKey } from '../../shared/validators/resource-key.validator';
 import { CursorPaginationQueryDto } from './cursor-pagination-query.dto';
 import { GetChannelConnectionResponseDto } from './get-channel-connection-response.dto';
 
@@ -18,13 +10,13 @@ export class ListChannelConnectionsQueryDto extends CursorPaginationQueryDto<
   'createdAt' | 'updatedAt'
 > {
   @ApiPropertyOptional({
-    description: 'Resource to filter results.',
+    description: 'The subscriber ID to filter results by',
     type: String,
-    example: makeResourceKey(RESOURCE.SUBSCRIBER, 'user123'),
+    example: 'subscriber-123',
   })
-  @IsResourceKey()
   @IsOptional()
-  resource?: ResourceKey;
+  @IsString()
+  subscriberId?: string;
 
   @ApiPropertyOptional({
     description: 'Filter by channel type (email, sms, push, chat, etc.).',
@@ -57,7 +49,7 @@ export class ListChannelConnectionsQueryDto extends CursorPaginationQueryDto<
   integrationIdentifier?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter by context keys.',
+    description: 'Filter by exact context keys, order insensitive (format: "type:id")',
     type: String,
     isArray: true,
     example: ['tenant:org-123', 'region:us-east-1'],

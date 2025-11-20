@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { createHash, GetNovuProviderCredentials, GetNovuProviderCredentialsCommand } from '@novu/application-generic';
 import { EnvironmentRepository, ICredentialsEntity, IntegrationEntity, SubscriberRepository } from '@novu/dal';
-import { ChatProviderIdEnum, ContextPayload, parseResourceKey, RESOURCE, ResourceKey } from '@novu/shared';
+import { ChatProviderIdEnum, ContextPayload } from '@novu/shared';
 import { CHAT_OAUTH_CALLBACK_PATH } from '../chat-oauth.constants';
 import { GenerateSlackOauthUrlCommand } from './generate-slack-oauth-url.command';
 
 export type StateData = {
   identifier?: string;
-  resource?: ResourceKey;
+  subscriberId?: string;
   context?: ContextPayload;
   environmentId: string;
   organizationId: string;
@@ -16,18 +16,18 @@ export type StateData = {
   timestamp: number;
 };
 
+export const SLACK_DEFAULT_OAUTH_SCOPES = [
+  'chat:write',
+  'chat:write.public',
+  'channels:read',
+  'groups:read',
+  'users:read',
+  'users:read.email',
+] as const;
+
 @Injectable()
 export class GenerateSlackOauthUrl {
   private readonly SLACK_OAUTH_URL = 'https://slack.com/oauth/v2/authorize?';
-
-  private readonly SLACK_OAUTH_SCOPES = [
-    'chat:write',
-    'chat:write.public',
-    'channels:read',
-    'groups:read',
-    'users:read',
-    'users:read.email',
-  ] as const;
 
   constructor(
     private environmentRepository: EnvironmentRepository,
@@ -36,59 +36,57 @@ export class GenerateSlackOauthUrl {
   ) {}
 
   async execute(command: GenerateSlackOauthUrlCommand): Promise<string> {
-    this.validateResourceOrContext(command);
+    this.validateSubscriberIdOrContext(command);
     await this.assertResourceExists(command);
 
     const { clientId } = await this.getIntegrationCredentials(command.integration);
     const secureState = await this.createSecureState(
       command.integration,
-      command.resource,
+      command.subscriberId,
       command.context,
       command.connectionIdentifier
     );
 
-    return this.getOAuthUrl(clientId!, secureState);
+    return this.getOAuthUrl(clientId!, secureState, command.scope);
   }
 
-  private validateResourceOrContext(command: GenerateSlackOauthUrlCommand): void {
-    const { resource, context } = command;
+  private validateSubscriberIdOrContext(command: GenerateSlackOauthUrlCommand): void {
+    const { subscriberId, context, scope } = command;
 
-    if (!resource && !context) {
-      throw new BadRequestException('Either resource or context must be provided');
+    if (scope?.includes('incoming-webhook')) {
+      if (!subscriberId) {
+        throw new BadRequestException('subscriberId is required for incoming webhook');
+      }
+    }
+
+    if (!subscriberId && !context) {
+      throw new BadRequestException('Either subscriberId or context must be provided');
     }
   }
 
   private async assertResourceExists(command: GenerateSlackOauthUrlCommand) {
-    const { resource, organizationId, environmentId } = command;
+    const { subscriberId, organizationId, environmentId } = command;
 
-    if (!resource) {
+    if (!subscriberId) {
       return;
     }
 
-    const { type, id } = parseResourceKey(resource);
+    const found = await this.subscriberRepository.findOne({
+      subscriberId,
+      _organizationId: organizationId,
+      _environmentId: environmentId,
+    });
 
-    switch (type) {
-      case RESOURCE.SUBSCRIBER: {
-        const found = await this.subscriberRepository.findOne({
-          subscriberId: id,
-          _organizationId: organizationId,
-          _environmentId: environmentId,
-        });
+    if (!found) throw new NotFoundException(`Subscriber not found: ${subscriberId}`);
 
-        if (!found) throw new NotFoundException(`Subscriber not found: ${id}`);
-
-        return;
-      }
-      default:
-        throw new NotFoundException(`Resource type not found: ${type}`);
-    }
+    return;
   }
 
-  private async getOAuthUrl(clientId: string, secureState: string): Promise<string> {
+  private async getOAuthUrl(clientId: string, secureState: string, scope?: string[]): Promise<string> {
     const oauthParams = new URLSearchParams({
       state: secureState,
       client_id: clientId,
-      scope: this.SLACK_OAUTH_SCOPES.join(','),
+      scope: scope?.join(',') ?? SLACK_DEFAULT_OAUTH_SCOPES.join(','),
       redirect_uri: GenerateSlackOauthUrl.buildRedirectUri(),
     });
 
@@ -97,7 +95,7 @@ export class GenerateSlackOauthUrl {
 
   private async createSecureState(
     integration: IntegrationEntity,
-    resource?: ResourceKey,
+    subscriberId?: string,
     context?: ContextPayload,
     connectionIdentifier?: string
   ): Promise<string> {
@@ -105,7 +103,7 @@ export class GenerateSlackOauthUrl {
 
     const stateData: StateData = {
       identifier: connectionIdentifier,
-      resource,
+      subscriberId,
       context,
       environmentId: _environmentId,
       organizationId: _organizationId,
@@ -133,9 +131,9 @@ export class GenerateSlackOauthUrl {
 
       const data = JSON.parse(payload);
 
-      // Validate timestamp (24 hours expiry)
-      const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-      if (Date.now() - data.timestamp > TWENTY_FOUR_HOURS) {
+      // Validate timestamp (5 minutes expiry)
+      const FIVE_MINUTES = 5 * 60 * 1000;
+      if (Date.now() - data.timestamp > FIVE_MINUTES) {
         throw new Error('OAuth state expired');
       }
 

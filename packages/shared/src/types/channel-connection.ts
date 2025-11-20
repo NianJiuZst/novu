@@ -1,6 +1,9 @@
-import { ChannelTypeEnum, EnvironmentId, OrganizationId, ProvidersIdEnum, ResourceKey } from '../../types';
+import { ChannelTypeEnum } from './channel';
+import { EnvironmentId } from './environment';
+import { OrganizationId } from './organization';
+import { ProvidersIdEnum } from './providers';
 
-export interface IChannelConnection {
+export type ChannelConnection = {
   _id: string;
   identifier: string;
 
@@ -10,7 +13,7 @@ export interface IChannelConnection {
   integrationIdentifier: string;
   providerId: ProvidersIdEnum;
   channel: ChannelTypeEnum;
-  resource?: ResourceKey;
+  subscriberId?: string;
   contextKeys: string[];
 
   workspace: { id: string; name?: string };
@@ -18,4 +21,4 @@ export interface IChannelConnection {
 
   createdAt: string;
   updatedAt: string;
-}
+};
