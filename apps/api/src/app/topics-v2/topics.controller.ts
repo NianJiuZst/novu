@@ -284,15 +284,13 @@ export class TopicsController {
     @Param('topicKey') topicKey: string,
     @Body() body: CreateTopicSubscriptionsRequestDto
   ): Promise<CreateSubscriptionsResponseDto> {
-    const rawSubscriptions = body.subscriptions || body.subscriberIds || [];
-
     const result = await this.createSubscriptionsUsecase.execute(
       CreateSubscriptionsCommand.create({
         environmentId: user.environmentId,
         organizationId: user.organizationId,
         userId: user._id,
         topicKey,
-        subscriptions: this.mapSubscriptions(rawSubscriptions),
+        subscriptions: this.mapSubscriptions(body.subscriptions || body.subscriberIds || []),
         name: body.name,
         preferences: body.preferences ? this.convertPreferencesToGroupFilters(body.preferences) : undefined,
       })

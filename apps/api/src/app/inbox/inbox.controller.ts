@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -27,15 +26,6 @@ import { TriggerEventRequestDto } from '../events/dtos';
 import { TriggerEventResponseDto } from '../events/dtos/trigger-event-response.dto';
 import { ParseEventRequestMulticastCommand } from '../events/usecases/parse-event-request';
 import { ParseEventRequest } from '../events/usecases/parse-event-request/parse-event-request.usecase';
-import {
-  GroupPreferenceFilterDto,
-  WorkflowPreferenceRequestDto,
-} from '../shared/dtos/subscriptions/create-subscriptions.dto';
-import {
-  CreateSubscriptionsResponseDto,
-  SubscriptionResponseDto,
-} from '../shared/dtos/subscriptions/create-subscriptions-response.dto';
-import { UpdateSubscriptionRequestDto } from '../shared/dtos/subscriptions/update-subscription.dto';
 import { ExcludeFromIdempotency } from '../shared/framework/exclude-from-idempotency';
 import { ApiCommonResponses } from '../shared/framework/response.decorator';
 import { KeylessAccessible } from '../shared/framework/swagger/keyless.security';
@@ -45,41 +35,30 @@ import {
   GetSubscriberGlobalPreference,
   GetSubscriberGlobalPreferenceCommand,
 } from '../subscribers/usecases/get-subscriber-global-preference';
-import { CreateSubscriptionsCommand, CreateSubscriptionsUsecase } from '../subscriptions/usecases/create-subscriptions';
-import { UpdateSubscriptionCommand, UpdateSubscriptionUsecase } from '../subscriptions/usecases/update-subscription';
 import { ActionTypeRequestDto } from './dtos/action-type-request.dto';
 import { BulkUpdatePreferencesRequestDto } from './dtos/bulk-update-preferences-request.dto';
-import { CreateTopicSubscriptionRequestDto } from './dtos/create-topic-subscription-request.dto';
 import { GetNotificationsCountRequestDto } from './dtos/get-notifications-count-request.dto';
 import { GetNotificationsCountResponseDto } from './dtos/get-notifications-count-response.dto';
 import { GetNotificationsRequestDto } from './dtos/get-notifications-request.dto';
 import { GetNotificationsResponseDto } from './dtos/get-notifications-response.dto';
 import { GetPreferencesRequestDto } from './dtos/get-preferences-request.dto';
 import { GetPreferencesResponseDto } from './dtos/get-preferences-response.dto';
-import { TopicSubscriptionDetailsDto } from './dtos/get-topic-subscriptions-response.dto';
 import { MarkNotificationsAsSeenRequestDto } from './dtos/mark-notifications-as-seen-request.dto';
 import { SnoozeNotificationRequestDto } from './dtos/snooze-notification-request.dto';
 import { SubscriberSessionRequestDto } from './dtos/subscriber-session-request.dto';
 import { SubscriberSessionResponseDto } from './dtos/subscriber-session-response.dto';
 import { UpdateAllNotificationsRequestDto } from './dtos/update-all-notifications-request.dto';
 import { UpdatePreferencesRequestDto } from './dtos/update-preferences-request.dto';
-import { UpdateSubscriptionPreferencesRequestDto } from './dtos/update-subscription-preferences-request.dto';
 import { BulkUpdatePreferencesCommand } from './usecases/bulk-update-preferences/bulk-update-preferences.command';
 import { BulkUpdatePreferences } from './usecases/bulk-update-preferences/bulk-update-preferences.usecase';
 import { DeleteAllNotificationsCommand } from './usecases/delete-all-notifications/delete-all-notifications.command';
 import { DeleteAllNotifications } from './usecases/delete-all-notifications/delete-all-notifications.usecase';
 import { DeleteNotificationCommand } from './usecases/delete-notification/delete-notification.command';
 import { DeleteNotification } from './usecases/delete-notification/delete-notification.usecase';
-import { DeleteTopicSubscriptionCommand } from './usecases/delete-topic-subscription/delete-topic-subscription.command';
-import { DeleteTopicSubscription } from './usecases/delete-topic-subscription/delete-topic-subscription.usecase';
 import { GetInboxPreferencesCommand } from './usecases/get-inbox-preferences/get-inbox-preferences.command';
 import { GetInboxPreferences } from './usecases/get-inbox-preferences/get-inbox-preferences.usecase';
 import { GetNotificationsCommand } from './usecases/get-notifications/get-notifications.command';
 import { GetNotifications } from './usecases/get-notifications/get-notifications.usecase';
-import { GetTopicSubscriptionCommand } from './usecases/get-topic-subscription/get-topic-subscription.command';
-import { GetTopicSubscription } from './usecases/get-topic-subscription/get-topic-subscription.usecase';
-import { GetTopicSubscriptionsCommand } from './usecases/get-topic-subscriptions/get-topic-subscriptions.command';
-import { GetTopicSubscriptions } from './usecases/get-topic-subscriptions/get-topic-subscriptions.usecase';
 import { MarkNotificationAsCommand } from './usecases/mark-notification-as/mark-notification-as.command';
 import { MarkNotificationAs } from './usecases/mark-notification-as/mark-notification-as.usecase';
 import { MarkNotificationsAsSeenCommand } from './usecases/mark-notifications-as-seen/mark-notifications-as-seen.command';
@@ -121,12 +100,7 @@ export class InboxController {
     private parseEventRequest: ParseEventRequest,
     private getSubscriberGlobalPreference: GetSubscriberGlobalPreference,
     private deleteNotificationUsecase: DeleteNotification,
-    private deleteAllNotificationsUsecase: DeleteAllNotifications,
-    private getTopicSubscriptionsUsecase: GetTopicSubscriptions,
-    private getTopicSubscriptionUsecase: GetTopicSubscription,
-    private createSubscriptionsUsecase: CreateSubscriptionsUsecase,
-    private updateSubscriptionUsecase: UpdateSubscriptionUsecase,
-    private deleteTopicSubscriptionUsecase: DeleteTopicSubscription
+    private deleteAllNotificationsUsecase: DeleteAllNotifications
   ) {}
 
   @KeylessAccessible()
@@ -459,31 +433,6 @@ export class InboxController {
   }
 
   @UseGuards(AuthGuard('subscriberJwt'))
-  @Patch('/preferences/subscriptions/:subscriptionIdOrIdentifier/workflows/:workflowIdOrIdentifier')
-  async updateSubscriptionWorkflowPreference(
-    @SubscriberSession() subscriberSession: SubscriberSession,
-    @Param('workflowIdOrIdentifier') workflowIdOrIdentifier: string,
-    @Param('subscriptionIdOrIdentifier') subscriptionIdOrIdentifier: string,
-    @Body() body: UpdateSubscriptionPreferencesRequestDto
-  ): Promise<InboxPreference> {
-    return await this.updatePreferencesUsecase.execute(
-      UpdatePreferencesCommand.create({
-        organizationId: subscriberSession._organizationId,
-        subscriberId: subscriberSession.subscriberId,
-        environmentId: subscriberSession._environmentId,
-        level: PreferenceLevelEnum.TEMPLATE,
-        workflowIdOrIdentifier,
-        subscriptionIdOrIdentifier,
-        includeInactiveChannels: false,
-        all: {
-          enabled: body.enabled,
-          condition: body.condition,
-        },
-      })
-    );
-  }
-
-  @UseGuards(AuthGuard('subscriberJwt'))
   @Post('/notifications/seen')
   @HttpCode(HttpStatus.NO_CONTENT)
   async markNotificationsAsSeen(
@@ -595,143 +544,6 @@ export class InboxController {
         },
       })
     );
-  }
-
-  @UseGuards(AuthGuard('subscriberJwt'))
-  @Get('/topics/:topicKey/subscriptions')
-  async getTopicSubscriptions(
-    @SubscriberSession() subscriberSession: SubscriberSession,
-    @Param('topicKey') topicKey: string
-  ): Promise<TopicSubscriptionDetailsDto[]> {
-    return await this.getTopicSubscriptionsUsecase.execute(
-      GetTopicSubscriptionsCommand.create({
-        environmentId: subscriberSession._environmentId,
-        organizationId: subscriberSession._organizationId,
-        subscriberId: subscriberSession.subscriberId,
-        topicKey,
-      })
-    );
-  }
-
-  @UseGuards(AuthGuard('subscriberJwt'))
-  @Get('/topics/:topicKey/subscriptions/:subscriptionId')
-  async getTopicSubscription(
-    @SubscriberSession() subscriberSession: SubscriberSession,
-    @Param('topicKey') topicKey: string,
-    @Param('subscriptionId') subscriptionId: string
-  ): Promise<TopicSubscriptionDetailsDto> {
-    return await this.getTopicSubscriptionUsecase.execute(
-      GetTopicSubscriptionCommand.create({
-        environmentId: subscriberSession._environmentId,
-        organizationId: subscriberSession._organizationId,
-        subscriberId: subscriberSession.subscriberId,
-        topicKey,
-        subscriptionId,
-      })
-    );
-  }
-
-  @UseGuards(AuthGuard('subscriberJwt'))
-  @Post('/topics/:topicKey/subscription')
-  async createTopicSubscription(
-    @SubscriberSession() subscriberSession: SubscriberSession,
-    @Param('topicKey') topicKey: string,
-    @Body() body: CreateTopicSubscriptionRequestDto
-  ): Promise<CreateSubscriptionsResponseDto> {
-    const result = await this.createSubscriptionsUsecase.execute(
-      CreateSubscriptionsCommand.create({
-        environmentId: subscriberSession._environmentId,
-        organizationId: subscriberSession._organizationId,
-        userId: subscriberSession._id,
-        topicKey,
-        subscriptions: [
-          typeof body.subscription === 'string'
-            ? { subscriberId: body.subscription }
-            : {
-                subscriberId: subscriberSession.subscriberId,
-                identifier: body.subscription?.identifier,
-                name: body.subscription?.name,
-              },
-        ],
-        name: body.name,
-        preferences: body.preferences ? this.convertPreferencesToGroupFilters(body.preferences) : undefined,
-      })
-    );
-
-    if (result.meta.failed > 0 && result.meta.successful === 0) {
-      throw new BadRequestException(result);
-    }
-
-    return result;
-  }
-
-  @UseGuards(AuthGuard('subscriberJwt'))
-  @Post('/topics/:topicKey/subscription/:subscriptionId')
-  async updateTopicSubscription(
-    @SubscriberSession() subscriberSession: SubscriberSession,
-    @Param('topicKey') topicKey: string,
-    @Param('subscriptionId') subscriptionId: string,
-    @Body() body: UpdateSubscriptionRequestDto
-  ): Promise<SubscriptionResponseDto> {
-    return await this.updateSubscriptionUsecase.execute(
-      UpdateSubscriptionCommand.create({
-        environmentId: subscriberSession._environmentId,
-        organizationId: subscriberSession._organizationId,
-        userId: subscriberSession._id,
-        topicKey,
-        subscriptionId,
-        name: body.name,
-        preferences: body.preferences ? this.convertPreferencesToGroupFilters(body.preferences) : undefined,
-      })
-    );
-  }
-
-  @UseGuards(AuthGuard('subscriberJwt'))
-  @Delete('/subscription/:subscriptionId')
-  async deleteTopicSubscription(
-    @SubscriberSession() subscriberSession: SubscriberSession,
-    @Param('subscriptionId') subscriptionId: string
-  ): Promise<{ success: boolean }> {
-    return await this.deleteTopicSubscriptionUsecase.execute(
-      DeleteTopicSubscriptionCommand.create({
-        environmentId: subscriberSession._environmentId,
-        organizationId: subscriberSession._organizationId,
-        subscriberId: subscriberSession.subscriberId,
-        subscriptionId,
-      })
-    );
-  }
-
-  private convertPreferencesToGroupFilters(
-    preferences: Array<string | WorkflowPreferenceRequestDto | GroupPreferenceFilterDto>
-  ): Array<GroupPreferenceFilterDto> {
-    return preferences.map((preference) => {
-      if (typeof preference === 'string') {
-        return {
-          filter: {
-            workflowIds: [preference],
-          },
-        };
-      }
-
-      if (this.isGroupPreferenceFilter(preference)) {
-        return preference;
-      }
-
-      return {
-        filter: {
-          workflowIds: [preference.workflowId],
-        },
-        condition: preference.condition,
-        enabled: preference.enabled,
-      };
-    });
-  }
-
-  private isGroupPreferenceFilter(
-    preference: WorkflowPreferenceRequestDto | GroupPreferenceFilterDto
-  ): preference is GroupPreferenceFilterDto {
-    return 'filter' in preference;
   }
 
   @KeylessAccessible()

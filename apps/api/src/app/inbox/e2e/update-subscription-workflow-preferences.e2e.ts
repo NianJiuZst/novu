@@ -34,7 +34,7 @@ describe('Update subscription workflow preferences - /inbox/preferences/subscrip
       session,
       topicKey,
       body: {
-        subscription: { identifier: subscriptionIdentifier },
+        identifier: subscriptionIdentifier,
         preferences: [{ workflowId: workflow._id, condition: true }],
       },
     });
@@ -89,7 +89,7 @@ describe('Update subscription workflow preferences - /inbox/preferences/subscrip
       session,
       topicKey: topicKey1,
       body: {
-        subscription: { identifier: `subscription-${Date.now()}-1` },
+        identifier: `subscription-${Date.now()}-1`,
       },
     });
     expect(subscription1Response.status).to.equal(201);
@@ -99,7 +99,7 @@ describe('Update subscription workflow preferences - /inbox/preferences/subscrip
       session,
       topicKey: topicKey2,
       body: {
-        subscription: { identifier: `subscription-${Date.now()}-2` },
+        identifier: `subscription-${Date.now()}-2`,
       },
     });
     expect(subscription2Response.status).to.equal(201);

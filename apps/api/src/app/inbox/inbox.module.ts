@@ -20,6 +20,7 @@ import { UpdateSubscriptionUsecase } from '../subscriptions/usecases/update-subs
 import { TopicsV2Module } from '../topics-v2/topics-v2.module';
 import { UpsertTopicUseCase } from '../topics-v2/usecases/upsert-topic/upsert-topic.usecase';
 import { InboxController } from './inbox.controller';
+import { InboxTopicController } from './inbox.topic.controller';
 import { USE_CASES } from './usecases';
 
 @Module({
@@ -47,6 +48,6 @@ import { USE_CASES } from './usecases';
     UpdateSubscriptionUsecase,
   ],
   exports: [...USE_CASES],
-  controllers: [InboxController],
+  controllers: [InboxController, InboxTopicController],
 })
 export class InboxModule {}

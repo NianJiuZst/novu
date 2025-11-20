@@ -6,14 +6,25 @@ import {
   WorkflowPreferenceRequestDto,
 } from '../../shared/dtos/subscriptions/create-subscriptions.dto';
 
-export class SubscriptionMetadataRequestDto {
+export class TopicIdentifierDto {
+  @ApiPropertyOptional({
+    description: 'The name of the topic',
+    example: 'My Topic',
+  })
+  @IsString()
+  @IsOptional()
+  name?: string;
+}
+
+@ApiExtraModels(WorkflowPreferenceRequestDto, GroupPreferenceFilterDto, TopicIdentifierDto)
+export class CreateTopicSubscriptionRequestDto {
   @ApiProperty({
     description: 'Unique identifier for this subscription',
     example: 'subscriber-123-subscription-a',
   })
   @IsString()
   @IsDefined()
-  identifier?: string;
+  identifier: string;
 
   @ApiPropertyOptional({
     description: 'The name of the subscription',
@@ -22,26 +33,15 @@ export class SubscriptionMetadataRequestDto {
   @IsString()
   @IsOptional()
   name?: string;
-}
 
-@ApiExtraModels(WorkflowPreferenceRequestDto, GroupPreferenceFilterDto, SubscriptionMetadataRequestDto)
-export class CreateTopicSubscriptionRequestDto {
-  @ApiProperty({
-    description:
-      'The subscription to subscribe to the topic. Can be either a string of the subscription ID or an object with identifier and subscriberId',
-    oneOf: [{ type: 'string' }, { $ref: getSchemaPath(SubscriptionMetadataRequestDto) }],
-    example: { identifier: 'subscriber-123-subscription-a', subscriberId: 'subscriber-123' },
+  @ApiPropertyOptional({
+    description: 'The topic details',
+    type: TopicIdentifierDto,
   })
+  @ValidateNested()
+  @Type(() => TopicIdentifierDto)
   @IsOptional()
-  subscription?: string | SubscriptionMetadataRequestDto;
-
-  @ApiProperty({
-    description: 'The name of the topic',
-    example: 'My Topic',
-  })
-  @IsString()
-  @IsOptional()
-  name?: string;
+  topic?: TopicIdentifierDto;
 
   @ApiProperty({
     description:
