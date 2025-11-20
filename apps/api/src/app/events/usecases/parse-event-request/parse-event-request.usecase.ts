@@ -35,7 +35,6 @@ import {
   TriggerEventStatusEnum,
   TriggerRecipientsPayload,
 } from '@novu/shared';
-import { addBreadcrumb } from '@sentry/node';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { toMerged } from 'es-toolkit';
@@ -190,13 +189,6 @@ export class ParseEventRequest {
         };
       }
 
-      addBreadcrumb({
-        message: 'Sending trigger',
-        data: {
-          triggerIdentifier: command.identifier,
-        },
-      });
-
       // Modify Attachment Key Name, Upload attachments to Storage Provider and Remove file from payload
       if (command.payload && Array.isArray(command.payload.attachments)) {
         this.modifyAttachments(command);
@@ -324,9 +316,8 @@ export class ParseEventRequest {
     transactionId: string;
     discoveredWorkflow?: DiscoverWorkflowOutput | null;
   }) {
-    const commandArgs = {
-      ...command,
-    };
+    // biome-ignore lint/correctness/noUnusedVariables: eliminate from queue
+    const { workflow, ...commandArgs } = command;
 
     const isDryRun = await this.featureFlagService.getFlag({
       environment: { _id: command.environmentId },
