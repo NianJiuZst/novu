@@ -65,6 +65,7 @@ export const ProvidersIdEnum = {
   Smsmode: 'smsmode',
   Imedia: 'imedia',
   Sinch: 'sinch',
+  IsendproSms: 'isendpro-sms',
   Fcm: 'fcm',
   Apns: 'apns',
   Expo: 'expo',
@@ -72,6 +73,7 @@ export const ProvidersIdEnum = {
   Pushpad: 'pushpad',
   PushWebhook: 'push-webhook',
   PusherBeams: 'pusher-beams',
+  Appio: 'appio',
   Novu: 'novu',
   Slack: 'slack',
   Discord: 'discord',
@@ -93,17 +95,3 @@ export type ProvidersIdEnum = ClosedEnum<typeof ProvidersIdEnum>;
 
 /** @internal */
 export const ProvidersIdEnum$inboundSchema: z.ZodNativeEnum<typeof ProvidersIdEnum> = z.nativeEnum(ProvidersIdEnum);
-
-/** @internal */
-export const ProvidersIdEnum$outboundSchema: z.ZodNativeEnum<typeof ProvidersIdEnum> = ProvidersIdEnum$inboundSchema;
-
-/**
- * @internal
- * @deprecated This namespace will be removed in future versions. Use schemas and types that are exported directly from this module.
- */
-export namespace ProvidersIdEnum$ {
-  /** @deprecated use `ProvidersIdEnum$inboundSchema` instead. */
-  export const inboundSchema = ProvidersIdEnum$inboundSchema;
-  /** @deprecated use `ProvidersIdEnum$outboundSchema` instead. */
-  export const outboundSchema = ProvidersIdEnum$outboundSchema;
-}

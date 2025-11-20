@@ -1,5 +1,4 @@
 import {
-  CHArray,
   CHDateTime64,
   CHLowCardinality,
   CHNullable,
@@ -43,6 +42,7 @@ const schemaDefinition = {
 
   // Workflow run metadata
   workflow_run_identifier: { type: CHString('') }, // default value is empty string
+  workflow_id: { type: CHString('') }, // Maps to NotificationTemplateEntity._id
 };
 
 export const ORDER_BY: (keyof typeof schemaDefinition)[] = [
@@ -101,6 +101,7 @@ export type EventType =
   | 'step_filter_failed'
   | 'subscriber_integration_missing'
   | 'subscriber_channel_missing'
+  | 'subscriber_context_channel_missing'
   | 'subscriber_validation_failed'
   | 'topic_not_found'
   | 'provider_error'
@@ -164,12 +165,12 @@ export type EventType =
   | 'workflow_actor_processing_completed'
   | 'workflow_context_resolution_failed'
   | 'workflow_context_resolution_completed'
-  | 'workflow_context_not_found'
   | 'workflow_execution_failed'
   | 'step_skipped'
   | 'step_skipped_outside_of_the_schedule'
   | 'step_extended_to_schedule'
-  | 'step_skipped_max_extensions_reached';
+  | 'step_skipped_max_extensions_reached'
+  | 'push_invalid_token_removed';
 
 export type EntityType = 'request' | 'step_run';
 
