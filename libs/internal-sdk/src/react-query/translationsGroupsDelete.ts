@@ -17,7 +17,8 @@ import { useNovuContext } from "./_context.js";
 import { MutationHookOptions } from "./_types.js";
 
 export type TranslationsGroupsDeleteMutationVariables = {
-  resourceType: operations.TranslationControllerDeleteTranslationGroupEndpointPathParamResourceType;
+  resourceType:
+    operations.TranslationControllerDeleteTranslationGroupEndpointPathParamResourceType;
   resourceId: string;
   idempotencyKey?: string | undefined;
   options?: RequestOptions;
