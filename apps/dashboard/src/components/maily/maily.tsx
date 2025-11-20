@@ -3,7 +3,7 @@ import { BlockGroupItem } from '@maily-to/core/blocks';
 import { Variable } from '@maily-to/core/extensions';
 import type { Editor, NodeViewProps, Editor as TiptapEditor } from '@tiptap/core';
 import { Editor as TiptapEditorReact } from '@tiptap/react';
-import { ForwardRefExoticComponent, HTMLAttributes, useCallback, useMemo } from 'react';
+import { ForwardRefExoticComponent, HTMLAttributes, useCallback, useMemo, useRef } from 'react';
 import { useDataRef } from '@/hooks/use-data-ref';
 import { useRemoveGrammarly } from '@/hooks/use-remove-grammarly';
 import { LocalizationResourceEnum, TranslationKey } from '@/types/translations';
@@ -83,6 +83,8 @@ export const Maily = ({
   translationValueInput,
   ...rest
 }: MailyProps) => {
+  const editorRef = useRef<TiptapEditor | null>(null);
+
   const primitives = useMemo(
     () => variables?.primitives.map((v) => ({ name: v.name, required: false })) ?? [],
     [variables?.primitives]
@@ -119,6 +121,25 @@ export const Maily = ({
     },
     [calculateVariablesDataRef]
   );
+
+  const handleContainerClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+    const editor = editorRef.current;
+
+    // If clicking the container padding or the editor wrapper margin area
+    if ((target === event.currentTarget || target === editorParentRef.current) && editor) {
+      const { doc } = editor.state;
+      const lastNode = doc.lastChild;
+
+      const isLastNodeEmpty = lastNode?.type.name === 'paragraph' && lastNode.content.size === 0;
+
+      if (isLastNodeEmpty) {
+        editor.commands.focus('end');
+      } else {
+        editor.chain().insertContentAt(doc.content.size, { type: 'paragraph' }).focus('end').run();
+      }
+    }
+  };
 
   const extensions = useCreateExtensions({
     handleCalculateVariables,
@@ -179,7 +200,8 @@ export const Maily = ({
   );
 
   return (
-    <div className="relative h-full flex-1 overflow-y-auto bg-neutral-50 px-16 pt-8">
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+    <div className="relative h-full flex-1 overflow-y-auto bg-neutral-50 px-16 pt-8" onClick={handleContainerClick}>
       {overrideTippyBoxStyles()}
       <div
         ref={editorParentRef}
@@ -198,6 +220,9 @@ export const Maily = ({
         {...rest}
       >
         <MailyEditor
+          onCreate={(editor) => {
+            editorRef.current = editor;
+          }}
           config={DEFAULT_EDITOR_CONFIG}
           blocks={blocks}
           extensions={extensions}
