@@ -151,13 +151,7 @@ export class UpsertPreferences {
   }
 
   private async upsert(command: UpsertPreferencesCommand): Promise<PreferencesEntity | undefined> {
-    console.log('UPSERT PREFERENCES %%%%%%%%%%%%%%%%%%%%%%');
-    console.log(JSON.stringify(command, null, 2));
-
     const foundPreference = await this.getPreference(command);
-
-    console.log('FOUND PREFERENCE %%%%%%%%%%%%%%%%%%%%%%');
-    console.log(JSON.stringify(foundPreference, null, 2));
 
     if (foundPreference) {
       return this.updatePreferences(foundPreference, command);
