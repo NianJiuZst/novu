@@ -10,8 +10,9 @@ import {
   MessageRepository,
   NotificationRepository,
   NotificationTemplateEntity,
+  PreferencesRepository,
   SubscriberEntity,
-  TopicRepository,
+  TopicSubscribersRepository,
 } from '@novu/dal';
 import {
   ChannelTypeEnum,
@@ -19,6 +20,7 @@ import {
   DigestUnitEnum,
   ExternalSubscriberId,
   IEmailBlock,
+  PreferencesTypeEnum,
   StepTypeEnum,
   TopicKey,
   TopicName,
@@ -35,36 +37,30 @@ describe('Topic Trigger Event #novu-v2', () => {
     let secondSubscriber: SubscriberEntity;
     let subscribers: SubscriberEntity[];
     let subscriberService: SubscribersService;
-    let topicRepository: TopicRepository;
     let createdTopicDto: TopicResponseDto;
     let to: Array<TopicPayloadDto | SubscriberPayloadDto | string>;
     const notificationRepository = new NotificationRepository();
     const messageRepository = new MessageRepository();
+    const preferencesRepository = new PreferencesRepository();
+    const topicSubscribersRepository = new TopicSubscribersRepository();
     let novuClient: Novu;
 
     beforeEach(async () => {
-      try {
-        session = new UserSession();
-        await session.initialize();
+      session = new UserSession();
+      await session.initialize();
 
-        template = await session.createTemplate();
-        subscriberService = new SubscribersService(session.organization._id, session.environment._id);
-        topicRepository = new TopicRepository();
-        firstSubscriber = await subscriberService.createSubscriber();
-        secondSubscriber = await subscriberService.createSubscriber();
-        subscribers = [firstSubscriber, secondSubscriber];
+      template = await session.createTemplate();
+      subscriberService = new SubscribersService(session.organization._id, session.environment._id);
+      firstSubscriber = await subscriberService.createSubscriber();
+      secondSubscriber = await subscriberService.createSubscriber();
+      subscribers = [firstSubscriber, secondSubscriber];
 
-        const topicKey = 'topic-key-trigger-event';
-        const topicName = 'topic-name-trigger-event';
-        createdTopicDto = await createTopic(session, topicKey, topicName);
-        await addSubscribersToTopic(session, createdTopicDto, subscribers);
-        to = [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: createdTopicDto.key }];
-        novuClient = initNovuClassSdk(session);
-      } catch (error) {
-        console.error('Error in beforeEach');
-        console.error(error);
-        throw error;
-      }
+      const topicKey = 'topic-key-trigger-event';
+      const topicName = 'topic-name-trigger-event';
+      createdTopicDto = await createTopic(session, topicKey, topicName);
+      await addSubscribersToTopic(session, createdTopicDto, subscribers);
+      to = [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: createdTopicDto.key }];
+      novuClient = initNovuClassSdk(session);
     });
 
     it('should trigger an event successfully', async () => {
@@ -616,6 +612,212 @@ describe('Topic Trigger Event #novu-v2', () => {
 
         expect(messages.length, testCase.description).to.equal(testCase.expectedMessageCount);
       }
+    });
+
+    it('should test subscription fallback to workflow preference', async () => {
+      // when a subscriber is missing workflow preference, we expect the trigger engine to fallback to the main preference
+      const tag = 'alert';
+      // Step 1: Create workflow with tag
+      const workflowWithTag = await session.createTemplate({
+        tags: [tag],
+      });
+
+      const topicKey = `topic-key-dynamic-pref-${Date.now()}`;
+      const subscriber = await subscriberService.createSubscriber();
+
+      // Step 2: Create subscription with tag filter
+      await novuClient.topics.subscriptions.create(
+        {
+          subscriberIds: [subscriber.subscriberId],
+          preferences: [
+            {
+              filter: { tags: [tag] },
+              enabled: true,
+            },
+          ],
+        } as any,
+        topicKey
+      );
+
+      // Step 3: Validate preference entity creation
+      const topicSubscription = await topicSubscribersRepository.findOne({
+        _environmentId: session.environment._id,
+        topicKey: topicKey,
+        _subscriberId: subscriber._id,
+      });
+      if (!topicSubscription) throw new Error('Topic subscription not found');
+
+      const preferencesStep3 = await preferencesRepository.find({
+        _environmentId: session.environment._id,
+        _topicSubscriptionId: topicSubscription._id,
+      });
+
+      expect(preferencesStep3.length, 'Step 3: Should have exactly 1 preference created for the tag filter').to.equal(
+        1
+      );
+      if (!preferencesStep3[0]._templateId) throw new Error('Template ID not found in preference');
+      expect(
+        preferencesStep3[0]._templateId.toString(),
+        'Step 3: Preference should reference the workflow with tag'
+      ).to.equal(workflowWithTag._id);
+
+      // Step 4: Create new workflow with tag
+      const newWorkflowWithTag = await session.createTemplate({
+        tags: [tag],
+        steps: [
+          {
+            type: StepTypeEnum.IN_APP,
+            content: 'Test content for <b>{{firstName}}</b>',
+          },
+        ],
+      });
+
+      // Step 5 & 6: Trigger and expect delivery (fallback to default enabled)
+      await novuClient.trigger({
+        workflowId: newWorkflowWithTag.triggers[0].identifier,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: topicKey }],
+        payload: { text: 'step 5 and 6' },
+      });
+
+      await session.waitForJobCompletion(newWorkflowWithTag._id);
+      const messagesStep6 = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _templateId: newWorkflowWithTag._id,
+        _subscriberId: subscriber._id,
+      });
+
+      expect(
+        messagesStep6.length,
+        'Step 6: Should deliver message when subscriber has tag preference and workflow defaults are enabled'
+      ).to.equal(1);
+
+      // Step 7: Disable workflow preferences
+      const workflowPreference = await preferencesRepository.findOne({
+        _templateId: newWorkflowWithTag._id,
+        _environmentId: session.environment._id,
+        type: PreferencesTypeEnum.USER_WORKFLOW,
+      });
+      if (!workflowPreference) {
+        throw new Error('Workflow preference should exist');
+      }
+      await preferencesRepository.update(
+        {
+          _id: workflowPreference._id,
+          _environmentId: session.environment._id,
+        },
+        {
+          $set: {
+            preferences: {
+              all: {
+                enabled: false,
+              },
+              channels: {
+                [ChannelTypeEnum.EMAIL]: { enabled: false },
+                [ChannelTypeEnum.SMS]: { enabled: false },
+                [ChannelTypeEnum.IN_APP]: { enabled: false },
+                [ChannelTypeEnum.CHAT]: { enabled: false },
+                [ChannelTypeEnum.PUSH]: { enabled: false },
+              },
+            },
+          },
+        }
+      );
+
+      // Step 8 & 9: Trigger and expect NO delivery (respects disabled default)
+      await novuClient.trigger({
+        workflowId: newWorkflowWithTag.triggers[0].identifier,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: topicKey }],
+        payload: { text: 'step 8 and 9' },
+      });
+
+      // Wait a bit for processing since waitForJobCompletion might not work well if filtered
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const messagesStep9 = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _templateId: newWorkflowWithTag._id,
+        _subscriberId: subscriber._id,
+      });
+      expect(
+        messagesStep9.length,
+        'Step 9: Should not deliver new message when workflow preferences are disabled (should remain at 1 from previous trigger)'
+      ).to.equal(1);
+
+      // Step 10: Update subscription
+      await novuClient.topics.subscriptions.update({
+        topicKey,
+        subscriptionId: topicSubscription._id,
+        updateTopicSubscriptionRequestDto: {
+          preferences: [
+            {
+              filter: { tags: [tag] },
+              enabled: true,
+            },
+          ],
+        },
+      });
+
+      // Step 11: Validate 2 preference entities
+      const preferencesStep11 = await preferencesRepository.find({
+        _environmentId: session.environment._id,
+        _topicSubscriptionId: topicSubscription._id,
+      });
+      expect(
+        preferencesStep11.length,
+        'Step 11: Should have 2 preference entities after re-creating subscription (one for each workflow with tag)'
+      ).to.equal(2);
+
+      // Step 12: Enable workflow preferences back otherwise when we process preferences in Send Message usecase it will be filtered out
+      await preferencesRepository.update(
+        {
+          _id: workflowPreference._id,
+          _environmentId: session.environment._id,
+        },
+        {
+          $set: {
+            preferences: {
+              all: {
+                enabled: true,
+              },
+              channels: {
+                [ChannelTypeEnum.EMAIL]: { enabled: true },
+                [ChannelTypeEnum.SMS]: { enabled: true },
+                [ChannelTypeEnum.IN_APP]: { enabled: true },
+                [ChannelTypeEnum.CHAT]: { enabled: true },
+                [ChannelTypeEnum.PUSH]: { enabled: true },
+              },
+            },
+          },
+        }
+      );
+
+      // Step 13: Trigger and expect delivery (topic preference overrides disabled default)
+      await novuClient.trigger({
+        workflowId: newWorkflowWithTag.triggers[0].identifier,
+        to: [{ type: TriggerRecipientsTypeEnum.Topic, topicKey: topicKey }],
+        payload: { text: 'step 12' },
+      });
+
+      await session.waitForJobCompletion(newWorkflowWithTag._id);
+
+      const pres = await preferencesRepository.find({
+        _environmentId: session.environment._id,
+      });
+
+      console.log(
+        '1111 pres',
+        JSON.stringify({ preferences: pres, workflowId: newWorkflowWithTag._id, subscriberId: subscriber._id }, null, 2)
+      );
+
+      const messagesStep12 = await messageRepository.find({
+        _environmentId: session.environment._id,
+        _templateId: newWorkflowWithTag._id,
+        _subscriberId: subscriber._id,
+      });
+      expect(
+        messagesStep12.length,
+        'Step 12: Should deliver message when topic preference overrides disabled workflow default (total should be 2)'
+      ).to.equal(2);
     });
   });
 
