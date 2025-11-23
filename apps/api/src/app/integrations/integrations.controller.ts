@@ -449,8 +449,10 @@ export class IntegrationsController {
   @ApiExcludeEndpoint()
   async handleChatOAuthCallback(
     @Res() res: Response,
-    @Query('code') providerCode: string,
-    @Query('state') state: string,
+    @Query('code') providerCode?: string,
+    @Query('tenant') tenant?: string,
+    @Query('admin_consent') adminConsent?: string,
+    @Query('state') state?: string,
     @Query('error') error?: string,
     @Query('error_description') errorDescription?: string
   ): Promise<void> {
@@ -458,13 +460,19 @@ export class IntegrationsController {
       throw new BadRequestException(`OAuth error: ${error}${errorDescription ? ` - ${errorDescription}` : ''}`);
     }
 
-    if (!providerCode || !state) {
-      throw new BadRequestException('Missing required OAuth parameters: code and state');
+    if (!state) {
+      throw new BadRequestException('Missing required OAuth parameter: state');
+    }
+
+    if (!providerCode && !tenant) {
+      throw new BadRequestException('Missing required OAuth parameters: code or tenant');
     }
 
     const result = await this.chatOauthCallbackUsecase.execute(
       ChatOauthCallbackCommand.create({
         providerCode,
+        tenant,
+        adminConsent,
         state,
       })
     );
