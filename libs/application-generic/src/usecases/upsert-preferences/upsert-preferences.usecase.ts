@@ -6,9 +6,9 @@ import {
   WorkflowPreferences,
   WorkflowPreferencesPartial,
 } from '@novu/shared';
+import { deepmerge } from 'deepmerge-ts';
 import { Instrument } from '../../instrumentation';
 import { FeatureFlagsService } from '../../services/feature-flags/feature-flags.service';
-import { deepMerge } from '../../utils';
 import { UpsertSubscriberGlobalPreferencesCommand } from './upsert-subscriber-global-preferences.command';
 import { UpsertSubscriberWorkflowPreferencesCommand } from './upsert-subscriber-workflow-preferences.command';
 import { UpsertUserWorkflowPreferencesCommand } from './upsert-user-workflow-preferences.command';
@@ -178,10 +178,10 @@ export class UpsertPreferences {
     foundPreference: PreferencesEntity,
     command: UpsertPreferencesCommand
   ): Promise<PreferencesEntity> {
-    const mergedPreferences = deepMerge([
+    const mergedPreferences = deepmerge(
       foundPreference.preferences,
-      command.preferences as WorkflowPreferencesPartial,
-    ]);
+      command.preferences as WorkflowPreferencesPartial
+    ) as WorkflowPreferences;
 
     await this.preferencesRepository.update(
       {
