@@ -2680,6 +2680,9 @@ importers:
       ioredis:
         specifier: ^5.2.4
         version: 5.3.2
+      json-logic-js:
+        specifier: ^2.0.5
+        version: 2.0.5
       jsonwebtoken:
         specifier: 9.0.0
         version: 9.0.0
@@ -2747,6 +2750,9 @@ importers:
       '@types/jest':
         specifier: 29.5.2
         version: 29.5.2
+      '@types/json-logic-js':
+        specifier: ^2.0.8
+        version: 2.0.8
       '@types/newrelic':
         specifier: ^9.14.6
         version: 9.14.6
@@ -4041,6 +4047,9 @@ importers:
 
   packages/shared:
     devDependencies:
+      '@types/json-logic-js':
+        specifier: ^2.0.8
+        version: 2.0.8
       madge:
         specifier: ^8.0.0
         version: 8.0.0(typescript@5.6.2)
