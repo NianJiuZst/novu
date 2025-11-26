@@ -4,47 +4,142 @@ import sanitizeTypes, { IOptions } from 'sanitize-html';
  * Options for the sanitize-html library.
  *
  * We are providing a permissive approach by default, with the exception of
- * disabling `script` tags.
+ * disabling `script` tags and dangerous event handler attributes.
  *
  * @see https://www.npmjs.com/package/sanitize-html#default-options
  */
-const SAFE_IMG_ATTRIBUTES = ['src', 'alt', 'width', 'height', 'loading', 'srcset', 'sizes', 'crossorigin', 'usemap', 'ismap', 'class', 'id', 'style', 'title', 'dir', 'lang'];
+const DANGEROUS_ATTRIBUTES = [
+  'onerror',
+  'onload',
+  'onabort',
+  'onafterprint',
+  'onanimationend',
+  'onanimationiteration',
+  'onanimationstart',
+  'onbeforeprint',
+  'onbeforeunload',
+  'onblur',
+  'oncanplay',
+  'oncanplaythrough',
+  'onchange',
+  'onclick',
+  'oncontextmenu',
+  'oncopy',
+  'oncut',
+  'ondblclick',
+  'ondrag',
+  'ondragend',
+  'ondragenter',
+  'ondragleave',
+  'ondragover',
+  'ondragstart',
+  'ondrop',
+  'ondurationchange',
+  'onended',
+  'onerror',
+  'onfocus',
+  'onfocusin',
+  'onfocusout',
+  'onfullscreenchange',
+  'onfullscreenerror',
+  'onhashchange',
+  'oninput',
+  'oninvalid',
+  'onkeydown',
+  'onkeypress',
+  'onkeyup',
+  'onload',
+  'onloadeddata',
+  'onloadedmetadata',
+  'onloadstart',
+  'onmessage',
+  'onmousedown',
+  'onmouseenter',
+  'onmouseleave',
+  'onmousemove',
+  'onmouseout',
+  'onmouseover',
+  'onmouseup',
+  'onmousewheel',
+  'onoffline',
+  'ononline',
+  'onpagehide',
+  'onpageshow',
+  'onpaste',
+  'onpause',
+  'onplay',
+  'onplaying',
+  'onpopstate',
+  'onprogress',
+  'onratechange',
+  'onresize',
+  'onreset',
+  'onscroll',
+  'onsearch',
+  'onseeked',
+  'onseeking',
+  'onselect',
+  'onshow',
+  'onstalled',
+  'onstorage',
+  'onsubmit',
+  'onsuspend',
+  'ontimeupdate',
+  'ontoggle',
+  'ontouchcancel',
+  'ontouchend',
+  'ontouchmove',
+  'ontouchstart',
+  'ontransitionend',
+  'onunload',
+  'onvolumechange',
+  'onwaiting',
+  'onwheel',
+];
+
+const allowedTags = sanitizeTypes.defaults.allowedTags.concat([
+  'style',
+  'img',
+  'html',
+  'head',
+  'body',
+  'link',
+  'meta',
+  'title',
+]);
+
+const stripDangerousAttributes = (attribs: Record<string, string>): Record<string, string> => {
+  const safeAttribs: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(attribs)) {
+    if (!DANGEROUS_ATTRIBUTES.includes(key.toLowerCase())) {
+      safeAttribs[key] = value;
+    }
+  }
+
+  return safeAttribs;
+};
+
+const transformTags = allowedTags.reduce((acc, tag) => {
+  acc[tag] = (tagName: string, attribs: Record<string, string>) => ({
+    tagName,
+    attribs: stripDangerousAttributes(attribs),
+  });
+
+  return acc;
+}, {} as Record<string, (tagName: string, attribs: Record<string, string>) => { tagName: string; attribs: Record<string, string> }>);
 
 const sanitizeOptions: IOptions = {
   /**
    * Additional tags to allow.
    */
-  allowedTags: sanitizeTypes.defaults.allowedTags.concat([
-    'style',
-    'img',
-    'html',
-    'head',
-    'body',
-    'link',
-    'meta',
-    'title',
-  ]),
+  allowedTags,
   allowedAttributes: false,
   /**
-   * Transform img tags to strip dangerous event handler attributes (onerror, onload, etc.)
-   * while keeping all other attributes permissive for other tags.
+   * Transform all tags to strip dangerous event handler attributes (onerror, onload, etc.)
+   * while keeping all other attributes permissive.
    */
-  transformTags: {
-    img: (tagName, attribs) => {
-      const safeAttribs: Record<string, string> = {};
-
-      for (const [key, value] of Object.entries(attribs)) {
-        if (SAFE_IMG_ATTRIBUTES.includes(key.toLowerCase())) {
-          safeAttribs[key] = value;
-        }
-      }
-
-      return {
-        tagName,
-        attribs: safeAttribs,
-      };
-    },
-  },
+  transformTags,
   /**
    * Additional URL schemes to allow in src, href, and other URL attributes.
    * Including 'cid:' for Content-ID references used in email attachments.
