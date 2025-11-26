@@ -167,7 +167,7 @@ async function waitForHealthCheck(): Promise<void> {
   }
 }
 
-function formatZodError(err: ZodError, level = 0): string {
+function formatZodError(err: ZodError, level = 0, url?: string): string {
   let pre = '  '.repeat(level);
   pre = level > 0 ? `│${pre}` : pre;
   pre += ' '.repeat(level);
@@ -181,7 +181,11 @@ function formatZodError(err: ZodError, level = 0): string {
   const headline = len === 1 ? `${len} issue found` : `${len} issues found`;
 
   if (len) {
-    append(`┌ ${headline}:`);
+    if (level === 0 && url) {
+      append(`┌ ${headline} (${url}):`);
+    } else {
+      append(`┌ ${headline}:`);
+    }
   }
 
   for (const issue of err.issues) {
@@ -262,10 +266,11 @@ function logE2EFailure(error: unknown): void {
     return;
   }
 
-  const typedError = error as Error & { cause?: unknown };
+  const typedError = error as Error & { cause?: unknown; rawResponse?: { url?: string } };
   if (typedError.cause instanceof ZodError) {
+    const url = typedError.rawResponse?.url;
     console.error('\n[Zod validation error]');
-    console.error(formatZodError(typedError.cause));
+    console.error(formatZodError(typedError.cause, 0, url));
 
     return;
   }
