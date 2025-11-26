@@ -178,10 +178,7 @@ export class UpsertPreferences {
     foundPreference: PreferencesEntity,
     command: UpsertPreferencesCommand
   ): Promise<PreferencesEntity> {
-    const mergedPreferences = deepmerge(
-      foundPreference.preferences,
-      command.preferences as WorkflowPreferencesPartial
-    ) as WorkflowPreferences;
+    const mergedPreferences = deepmerge(foundPreference.preferences, command.preferences as WorkflowPreferencesPartial);
 
     await this.preferencesRepository.update(
       {
