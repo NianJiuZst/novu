@@ -18,8 +18,9 @@ import {
   UserSessionData,
 } from '@novu/shared';
 import { isEmpty, merge } from 'es-toolkit/compat';
-import { AdditionalOperation, RulesLogic } from 'json-logic-js';
+import { RulesLogic } from 'json-logic-js';
 import { JSONSchemaDto } from '../../../shared/dtos/json-schema.dto';
+import { ExtendedOperations } from '../../../shared/services/query-parser/query-parser.service';
 import {
   QueryIssueTypeEnum,
   QueryValidatorService,
@@ -101,7 +102,7 @@ export class BuildStepIssuesUsecase {
     });
     const customIssues = await this.processControlValuesByCustomeRules(user, stepType, sanitizedControlValues || {});
     const skipLogicIssues = sanitizedControlValues?.skip
-      ? this.validateSkipField(variableSchema, sanitizedControlValues.skip as RulesLogic<AdditionalOperation>)
+      ? this.validateSkipField(variableSchema, sanitizedControlValues.skip as RulesLogic<ExtendedOperations>)
       : {};
 
     return merge(schemaIssues, liquidIssues, customIssues, skipLogicIssues);
@@ -174,7 +175,7 @@ export class BuildStepIssuesUsecase {
   }
 
   @Instrument()
-  private validateSkipField(variableSchema: JSONSchemaDto, skipLogic: RulesLogic<AdditionalOperation>): StepIssuesDto {
+  private validateSkipField(variableSchema: JSONSchemaDto, skipLogic: RulesLogic<ExtendedOperations>): StepIssuesDto {
     const issues: StepIssuesDto = {};
     const { primitives } = parseStepVariables(variableSchema);
     const allowedVariables = primitives.map((variable) => variable.name);

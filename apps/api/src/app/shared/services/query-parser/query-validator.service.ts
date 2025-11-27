@@ -1,5 +1,6 @@
-import { AdditionalOperation, RulesLogic } from 'json-logic-js';
+import { RulesLogic } from 'json-logic-js';
 
+import { ExtendedOperations, extractRuleFromTitled, TitledRule } from './query-parser.service';
 import { COMPARISON_OPERATORS, JsonComparisonOperatorEnum, JsonLogicOperatorEnum } from './types';
 
 type QueryIssue = {
@@ -93,7 +94,7 @@ export class QueryValidatorService {
     issues,
     path = [],
   }: {
-    node: RulesLogic<AdditionalOperation>;
+    node: RulesLogic<ExtendedOperations>;
     issues: QueryIssue[];
     path?: number[];
   }) {
@@ -125,7 +126,7 @@ export class QueryValidatorService {
 
       // handle negation '!' operator
       if (key === JsonLogicOperatorEnum.NOT) {
-        this.validateNode({ node: value as RulesLogic<AdditionalOperation>, issues, path });
+        this.validateNode({ node: value as RulesLogic<ExtendedOperations>, issues, path });
         continue;
       }
 
@@ -275,8 +276,9 @@ export class QueryValidatorService {
     }
   }
 
-  public validateQueryRules(node: RulesLogic<AdditionalOperation>): QueryIssue[] {
+  public validateQueryRules(input: RulesLogic<ExtendedOperations> | TitledRule): QueryIssue[] {
     const issues: QueryIssue[] = [];
+    const node = extractRuleFromTitled(input);
 
     this.validateNode({ node, issues });
 

@@ -1,4 +1,49 @@
-import jsonLogic, { AdditionalOperation, RulesLogic } from 'json-logic-js';
+import jsonLogic, { RulesLogic } from 'json-logic-js';
+
+type RelativeDateValue = {
+  amount: number;
+  unit: 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years';
+};
+
+type OperationValue = RulesLogic | string | number | boolean | null | RelativeDateValue | unknown[];
+
+interface CustomOperations {
+  '=': [OperationValue, OperationValue];
+  startsWith: [OperationValue, OperationValue];
+  endsWith: [OperationValue, OperationValue];
+  contains: [OperationValue, OperationValue];
+  doesNotContain: [OperationValue, OperationValue];
+  doesNotBeginWith: [OperationValue, OperationValue];
+  doesNotEndWith: [OperationValue, OperationValue];
+  null: OperationValue;
+  notNull: OperationValue;
+  notIn: [OperationValue, OperationValue[]];
+  between: [OperationValue, [number, number]];
+  notBetween: [OperationValue, [number, number]];
+  moreThanXAgo: [OperationValue, RelativeDateValue];
+  lessThanXAgo: [OperationValue, RelativeDateValue];
+  withinLast: [OperationValue, RelativeDateValue];
+  notWithinLast: [OperationValue, RelativeDateValue];
+  exactlyXAgo: [OperationValue, RelativeDateValue];
+}
+
+export type ExtendedOperations = {
+  [K in keyof CustomOperations]: { [P in K]: CustomOperations[K] };
+}[keyof CustomOperations];
+
+export type TitledRule = {
+  title?: string;
+  rule: RulesLogic<ExtendedOperations> | TitledRuleLogic;
+};
+
+type TitledRuleLogic =
+  | { and: (RulesLogic<ExtendedOperations> | TitledRule)[] }
+  | { or: (RulesLogic<ExtendedOperations> | TitledRule)[] };
+
+export type RuleTitle = {
+  title: string;
+  path: number[];
+};
 
 type RangeValidation =
   | {
@@ -375,11 +420,13 @@ const initializeCustomOperators = (): void => {
 initializeCustomOperators();
 
 export function evaluateRules(
-  rule: RulesLogic<AdditionalOperation>,
+  input: RulesLogic<ExtendedOperations> | TitledRule,
   data: unknown,
   safe = false
 ): { result: boolean; error: string | undefined } {
   try {
+    const rule = extractRuleFromTitled(input);
+
     return { result: jsonLogic.apply(rule, data), error: undefined };
   } catch (error) {
     if (safe) {
@@ -390,7 +437,7 @@ export function evaluateRules(
   }
 }
 
-export function isValidRule(rule: RulesLogic<AdditionalOperation>): boolean {
+export function isValidRule(rule: RulesLogic<ExtendedOperations>): boolean {
   try {
     return jsonLogic.is_logic(rule);
   } catch {
@@ -398,10 +445,11 @@ export function isValidRule(rule: RulesLogic<AdditionalOperation>): boolean {
   }
 }
 
-export function extractFieldsFromRules(rules: RulesLogic<AdditionalOperation>): string[] {
+export function extractFieldsFromRules(input: RulesLogic<ExtendedOperations> | TitledRule): string[] {
   const variables = new Set<string>();
+  const rules = extractRuleFromTitled(input);
 
-  const collectVariables = (node: RulesLogic<AdditionalOperation>) => {
+  const collectVariables = (node: RulesLogic<ExtendedOperations>) => {
     if (!node || typeof node !== 'object') {
       return;
     }
@@ -415,16 +463,16 @@ export function extractFieldsFromRules(rules: RulesLogic<AdditionalOperation>): 
       }
 
       if (Array.isArray(value)) {
-        value.forEach((item) => {
+        for (const item of value) {
           if (typeof item === 'object') {
             collectVariables(item);
           }
-        });
+        }
         continue;
       }
 
       if (typeof value === 'object') {
-        collectVariables(value as RulesLogic<AdditionalOperation>);
+        collectVariables(value as RulesLogic<ExtendedOperations>);
       }
     }
   };
@@ -432,4 +480,99 @@ export function extractFieldsFromRules(rules: RulesLogic<AdditionalOperation>): 
   collectVariables(rules);
 
   return Array.from(variables);
+}
+
+function isTitledRule(rule: unknown): rule is TitledRule {
+  if (!rule || typeof rule !== 'object') {
+    return false;
+  }
+
+  const obj = rule as Record<string, unknown>;
+
+  return 'rule' in obj && typeof obj.rule === 'object' && obj.rule !== null;
+}
+
+export function extractRuleFromTitled(
+  input: RulesLogic<ExtendedOperations> | TitledRule
+): RulesLogic<ExtendedOperations> {
+  if (!isTitledRule(input)) {
+    return input;
+  }
+
+  const processNode = (node: unknown): unknown => {
+    if (!node || typeof node !== 'object') {
+      return node;
+    }
+
+    if (isTitledRule(node)) {
+      return processNode(node.rule);
+    }
+
+    if (Array.isArray(node)) {
+      return node.map(processNode);
+    }
+
+    const result: Record<string, unknown> = {};
+    const entries = Object.entries(node);
+
+    for (const [key, value] of entries) {
+      if (Array.isArray(value)) {
+        result[key] = value.map(processNode);
+      } else if (typeof value === 'object' && value !== null) {
+        result[key] = processNode(value);
+      } else {
+        result[key] = value;
+      }
+    }
+
+    return result;
+  };
+
+  return processNode(input.rule) as RulesLogic<ExtendedOperations>;
+}
+
+export function extractTitlesFromRules(input: RulesLogic<ExtendedOperations> | TitledRule): RuleTitle[] {
+  const titles: RuleTitle[] = [];
+
+  const collectTitles = (node: unknown, path: number[] = []) => {
+    if (!node || typeof node !== 'object') {
+      return;
+    }
+
+    if (isTitledRule(node)) {
+      if (node.title) {
+        titles.push({ title: node.title, path: [...path] });
+      }
+
+      collectTitles(node.rule, path);
+
+      return;
+    }
+
+    if (Array.isArray(node)) {
+      node.forEach((item, index) => {
+        collectTitles(item, [...path, index]);
+      });
+
+      return;
+    }
+
+    const entries = Object.entries(node);
+
+    for (const [key, value] of entries) {
+      if (key === 'and' || key === 'or') {
+        if (Array.isArray(value)) {
+          value.forEach((item, index) => {
+            collectTitles(item, [...path, index]);
+          });
+        }
+      } else if (typeof value === 'object' && value !== null) {
+        collectTitles(value, path);
+      }
+    }
+  };
+
+  collectTitles(input);
+
+  return titles;
 }

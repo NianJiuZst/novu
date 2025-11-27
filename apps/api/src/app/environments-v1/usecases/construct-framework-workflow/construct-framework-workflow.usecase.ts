@@ -11,9 +11,9 @@ import {
 import { workflow } from '@novu/framework/express';
 import { ActionStep, ChannelStep, Schema, Step, StepOutput, Workflow } from '@novu/framework/internal';
 import { LAYOUT_PREVIEW_EMAIL_STEP, LAYOUT_PREVIEW_WORKFLOW_ID, StepTypeEnum } from '@novu/shared';
-import { AdditionalOperation, RulesLogic } from 'json-logic-js';
+import { RulesLogic } from 'json-logic-js';
 import _ from 'lodash';
-import { evaluateRules } from '../../../shared/services/query-parser/query-parser.service';
+import { ExtendedOperations, evaluateRules } from '../../../shared/services/query-parser/query-parser.service';
 import { isMatchingJsonSchema } from '../../../workflows-v2/util/jsonToSchema';
 import {
   ChatOutputRendererUsecase,
@@ -363,7 +363,7 @@ export class ConstructFrameworkWorkflow {
     controlValues: { [x: string]: unknown },
     variables: FullPayloadForRender
   ): Promise<boolean> {
-    const skipRules = controlValues.skip as RulesLogic<AdditionalOperation>;
+    const skipRules = controlValues.skip as RulesLogic<ExtendedOperations>;
 
     if (_.isEmpty(skipRules)) {
       return false;
