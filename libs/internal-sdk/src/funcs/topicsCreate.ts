@@ -131,7 +131,7 @@ async function $do(
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "TopicsController_upsertTopic",
-    oAuth2Scopes: [],
+    oAuth2Scopes: null,
 
     resolvedSecurity: requestSecurity,
 
@@ -161,7 +161,7 @@ async function $do(
     query: query,
     body: body,
     userAgent: client._options.userAgent,
-    timeoutMs: options?.timeoutMs || client._options.timeoutMs || 5000,
+    timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1,
   }, options);
   if (!requestRes.ok) {
     return [requestRes, { status: "invalid" }];

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ExecutionDetailsEntity, ExecutionDetailsRepository } from '@novu/dal';
 import { ExecutionDetailsStatusEnum, FeatureFlagsKeysEnum } from '@novu/shared';
+import { Instrument } from '../../instrumentation';
 import { FeatureFlagsService, LogRepository, StepType } from '../../services';
 import { EntityType, EventType, TraceLogRepository, TraceStatus } from '../../services/analytic-logs/trace-log';
 import { CreateExecutionDetailsCommand } from './create-execution-details.command';
@@ -49,6 +50,7 @@ const mapDetailToEventType = {
   [DetailEnum.SUBSCRIBER_MISSING_EMAIL_ADDRESS]: 'subscriber_missing_email_address',
   [DetailEnum.SUBSCRIBER_MISSING_PHONE_NUMBER]: 'subscriber_missing_phone_number',
   [DetailEnum.SUBSCRIBER_NO_ACTIVE_CHANNEL]: 'subscriber_channel_missing',
+  [DetailEnum.SUBSCRIBER_CONTEXT_NO_ACTIVE_CHANNEL]: 'subscriber_context_channel_missing',
   [DetailEnum.SUBSCRIBER_NOT_MEMBER_OF_ORGANIZATION]: 'subscriber_validation_failed',
 
   // Provider events
@@ -105,6 +107,14 @@ const mapDetailToEventType = {
   [DetailEnum.CHAT_MISSING_PHONE_NUMBER]: 'chat_phone_missing',
   [DetailEnum.CHAT_SOME_CHANNELS_SKIPPED]: 'chat_some_channels_skipped',
 
+  // MS Teams events
+  [DetailEnum.MSTEAMS_BOT_NOT_INSTALLED]: 'msteams_bot_not_installed',
+  [DetailEnum.MSTEAMS_CHANNEL_NOT_FOUND]: 'msteams_channel_not_found',
+  [DetailEnum.MSTEAMS_USER_NOT_FOUND]: 'msteams_user_not_found',
+  [DetailEnum.MSTEAMS_INSUFFICIENT_PERMISSIONS]: 'msteams_insufficient_permissions',
+  [DetailEnum.MSTEAMS_TENANT_NOT_CONSENTED]: 'msteams_tenant_not_consented',
+  [DetailEnum.MSTEAMS_INVALID_CREDENTIALS]: 'msteams_invalid_credentials',
+
   // Push events
   [DetailEnum.PUSH_MISSING_DEVICE_TOKENS]: 'push_tokens_missing',
   [DetailEnum.PUSH_SOME_CHANNELS_SKIPPED]: 'push_some_channels_skipped',
@@ -120,6 +130,7 @@ const mapDetailToEventType = {
   [DetailEnum.SKIPPED_STEP_OUTSIDE_OF_THE_SCHEDULE]: 'step_skipped_outside_of_the_schedule',
   [DetailEnum.STEP_EXTENDED_TO_SCHEDULE]: 'step_extended_to_schedule',
   [DetailEnum.SKIPPED_STEP_MAX_EXTENSIONS_REACHED]: 'step_skipped_max_extensions_reached',
+  [DetailEnum.PUSH_INVALID_TOKEN_REMOVED]: 'push_invalid_token_removed',
 } satisfies Record<DetailEnum, EventType>;
 
 @Injectable()
@@ -130,6 +141,7 @@ export class CreateExecutionDetails {
     private featureFlagsService: FeatureFlagsService
   ) {}
 
+  @Instrument()
   async execute(command: CreateExecutionDetailsCommand): Promise<void> {
     const isClickhouseOnlyEnabled = await this.featureFlagsService.getFlag({
       key: FeatureFlagsKeysEnum.IS_EXECUTION_DETAILS_CLICKHOUSE_ONLY_ENABLED,
@@ -180,6 +192,7 @@ export class CreateExecutionDetails {
       entity_id: command.jobId,
       step_run_type: command.channel as StepType,
       workflow_run_identifier: command.workflowRunIdentifier,
+      workflow_id: command.notificationTemplateId,
     };
 
     await this.traceLogRepository.createStepRun([traceData]);

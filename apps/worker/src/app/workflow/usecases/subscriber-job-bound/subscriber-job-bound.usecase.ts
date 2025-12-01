@@ -65,7 +65,6 @@ export class SubscriberJobBound {
       identifier,
       _subscriberSource,
       requestCategory,
-      environmentName,
       topics,
       contextKeys,
     } = command;
@@ -105,9 +104,9 @@ export class SubscriberJobBound {
       source: command.payload.__source || 'api',
       subscriberSource: _subscriberSource || null,
       requestCategory: requestCategory || null,
-      environmentName,
       statelessWorkflow: !!command.bridge?.url,
     });
+
     const subscriberProcessed = await this.createOrUpdateSubscriberUsecase.execute(
       CreateOrUpdateSubscriberCommand.create({
         environmentId,
@@ -119,6 +118,7 @@ export class SubscriberJobBound {
         phone: subscriber?.phone,
         avatar: subscriber?.avatar,
         locale: subscriber?.locale,
+        timezone: subscriber?.timezone,
         data: subscriber?.data,
         channels: subscriber?.channels,
         activeWorkerName: process.env.ACTIVE_WORKER,
@@ -343,6 +343,7 @@ export class SubscriberJobBound {
         entity_type: 'request',
         entity_id: command.requestId,
         workflow_run_identifier: command.identifier,
+        workflow_id: command.templateId,
       };
 
       await this.traceLogRepository.createRequest([traceData]);

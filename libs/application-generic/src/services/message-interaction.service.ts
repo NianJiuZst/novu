@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { DeliveryLifecycleStatus } from '@novu/shared';
+import { DeliveryLifecycleDetail, DeliveryLifecycleStatusEnum } from '@novu/shared';
 import { PinoLogger } from 'nestjs-pino';
+import { WorkflowRunStatusEnum } from './analytic-logs';
 import { Trace, TraceLogRepository } from './analytic-logs/trace-log';
 import { WorkflowRunService } from './workflow-run.service';
 
@@ -26,7 +27,8 @@ export class MessageInteractionService {
 
   async trace(
     interactionsTraces: MessageInteractionTrace[],
-    deliveryLifecycleStatus: DeliveryLifecycleStatus | null
+    deliveryLifecycleStatus: DeliveryLifecycleStatusEnum | null,
+    deliveryLifecycleDetail?: DeliveryLifecycleDetail
   ): Promise<MessageInteractionResult> {
     try {
       if (interactionsTraces.length > 0) {
@@ -48,6 +50,7 @@ export class MessageInteractionService {
                 raw_data: trace.raw_data,
                 status: trace.status,
                 workflow_run_identifier: trace.workflow_run_identifier,
+                workflow_id: trace.workflow_id,
               }) satisfies Omit<Trace, 'id' | 'expires_at' | 'entity_type'>
           )
         );
@@ -61,7 +64,11 @@ export class MessageInteractionService {
           `Successfully logged ${interactionsTraces.length} message interaction traces`
         );
 
-        await this.updateDeliveryLifecycle(interactionsTraces, deliveryLifecycleStatus);
+        await this.updateDeliveryLifecycle({
+          traces: interactionsTraces,
+          deliveryLifecycleStatus,
+          deliveryLifecycleDetail,
+        });
       }
 
       return {
@@ -87,10 +94,15 @@ export class MessageInteractionService {
     }
   }
 
-  private async updateDeliveryLifecycle(
-    traces: MessageInteractionTrace[],
-    deliveryLifecycleStatus: DeliveryLifecycleStatus
-  ) {
+  private async updateDeliveryLifecycle({
+    traces,
+    deliveryLifecycleStatus,
+    deliveryLifecycleDetail,
+  }: {
+    traces: MessageInteractionTrace[];
+    deliveryLifecycleStatus: DeliveryLifecycleStatusEnum;
+    deliveryLifecycleDetail?: DeliveryLifecycleDetail;
+  }) {
     const tracesByNotificationId = traces.reduce<Record<string, MessageInteractionTrace[]>>((acc, trace) => {
       if (!acc[trace._notificationId]) acc[trace._notificationId] = [];
       acc[trace._notificationId].push(trace);
@@ -102,11 +114,13 @@ export class MessageInteractionService {
       const trace = tracesByNotificationId[notificationId][0];
 
       await this.workflowRunService.updateDeliveryLifecycle({
+        workflowStatus: WorkflowRunStatusEnum.COMPLETED,
         notificationId: trace._notificationId,
         environmentId: trace.environment_id,
         organizationId: trace.organization_id,
-        subscriberId: trace.subscriber_id,
+        _subscriberId: trace.subscriber_id,
         deliveryLifecycleStatus,
+        ...(deliveryLifecycleDetail && { deliveryLifecycleDetail }),
       });
     }
   }

@@ -127,7 +127,7 @@ async function $do(
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "NotificationsController_getNotification",
-    oAuth2Scopes: [],
+    oAuth2Scopes: null,
 
     resolvedSecurity: requestSecurity,
 
@@ -156,7 +156,7 @@ async function $do(
     headers: headers,
     body: body,
     userAgent: client._options.userAgent,
-    timeoutMs: options?.timeoutMs || client._options.timeoutMs || 5000,
+    timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1,
   }, options);
   if (!requestRes.ok) {
     return [requestRes, { status: "invalid" }];

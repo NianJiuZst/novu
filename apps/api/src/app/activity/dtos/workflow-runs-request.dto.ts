@@ -64,4 +64,20 @@ export class GetWorkflowRunsRequestDto {
   @IsString({ each: true })
   @IsIn(Object.values(SeverityLevelEnum), { each: true })
   severity?: SeverityLevelEnum[];
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    // No parameter = no filter
+    if (value === undefined) return undefined;
+
+    // Empty string = filter for records with no (default) context
+    if (value === '') return [];
+
+    // Normalize to array and remove empty strings
+    const array = Array.isArray(value) ? value : [value];
+    return array.filter((v) => v !== '');
+  })
+  @IsArray()
+  @IsString({ each: true })
+  contextKeys?: string[];
 }

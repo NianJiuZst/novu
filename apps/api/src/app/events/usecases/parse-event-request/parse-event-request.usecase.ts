@@ -35,7 +35,6 @@ import {
   TriggerEventStatusEnum,
   TriggerRecipientsPayload,
 } from '@novu/shared';
-import { addBreadcrumb } from '@sentry/node';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { toMerged } from 'es-toolkit';
@@ -79,14 +78,14 @@ export class ParseEventRequest {
         const discoveredWorkflow = await this.queryDiscoverWorkflow(command);
 
         if (!discoveredWorkflow) {
-          await this.createRequestTrace(
+          await this.createRequestTrace({
             requestId,
             command,
-            'request_workflow_not_found',
+            eventType: 'request_workflow_not_found',
             transactionId,
-            'error',
-            'Bridge workflow not found'
-          );
+            status: 'error',
+            message: 'Bridge workflow not found',
+          });
           throw new UnprocessableEntityException('workflow_not_found');
         }
 
@@ -106,14 +105,14 @@ export class ParseEventRequest {
         }));
 
       if (!template) {
-        await this.createRequestTrace(
+        await this.createRequestTrace({
           requestId,
           command,
-          'request_workflow_not_found',
+          eventType: 'request_workflow_not_found',
           transactionId,
-          'error',
-          'Notification template not found'
-        );
+          status: 'error',
+          message: 'Notification template not found',
+        });
         throw new UnprocessableEntityException('workflow_not_found');
       }
 
@@ -127,15 +126,15 @@ export class ParseEventRequest {
           command.payload = validatedPayload;
         } catch (error) {
           if (error instanceof PayloadValidationException) {
-            await this.createRequestTrace(
+            await this.createRequestTrace({
               requestId,
               command,
-              'request_payload_validation_failed',
+              eventType: 'request_payload_validation_failed',
               transactionId,
-              'error',
-              'Payload validation failed',
-              { validationErrors: error.message, payload: command.payload }
-            );
+              status: 'error',
+              message: 'Payload validation failed',
+              rawData: { validationErrors: error.message, payload: command.payload },
+            });
           }
           throw error;
         }
@@ -190,13 +189,6 @@ export class ParseEventRequest {
         };
       }
 
-      addBreadcrumb({
-        message: 'Sending trigger',
-        data: {
-          triggerIdentifier: command.identifier,
-        },
-      });
-
       // Modify Attachment Key Name, Upload attachments to Storage Provider and Remove file from payload
       if (command.payload && Array.isArray(command.payload.attachments)) {
         this.modifyAttachments(command);
@@ -222,35 +214,43 @@ export class ParseEventRequest {
 
       return result;
     } catch (error) {
-      // Trace: Request failed
-      await this.createRequestTrace(
+      await this.createRequestTrace({
         requestId,
         command,
-        'request_failed',
+        eventType: 'request_failed',
         transactionId,
-        'error',
-        `Request processing failed: ${error.message}`,
-        { error: error.message, stack: error.stack }
-      );
+        status: 'error',
+        message: `Request processing failed: ${error.message}`,
+        rawData: { error: error.message, stack: error.stack },
+      });
 
       throw error;
     }
   }
 
-  private async createRequestTrace(
-    requestId: string | undefined,
-    command: ParseEventRequestCommand,
-    eventType: EventType,
-    transactionId: string,
-    status: 'success' | 'error' = 'success',
-    message?: string,
-    rawData?: any
-  ): Promise<void> {
+  private async createRequestTrace({
+    requestId,
+    command,
+    eventType,
+    transactionId,
+    status = 'success',
+    message,
+    rawData,
+  }: {
+    requestId: string | undefined;
+    command: ParseEventRequestCommand;
+    eventType: EventType;
+    transactionId: string;
+    status?: 'success' | 'error';
+    message?: string;
+    rawData?: any;
+  }): Promise<void> {
     if (!requestId) {
       this.logger.warn(
         { command, eventType, transactionId, status, message, rawData },
         'Request trace skipped, no request ID found'
       );
+
       return;
     }
 
@@ -270,6 +270,7 @@ export class ParseEventRequest {
         entity_type: 'request',
         entity_id: requestId,
         workflow_run_identifier: command.identifier,
+        workflow_id: command.workflow?._id || '',
       };
 
       await this.traceLogRepository.createRequest([traceData]);
@@ -315,9 +316,8 @@ export class ParseEventRequest {
     transactionId: string;
     discoveredWorkflow?: DiscoverWorkflowOutput | null;
   }) {
-    const commandArgs = {
-      ...command,
-    };
+    // biome-ignore lint/correctness/noUnusedVariables: eliminate from queue
+    const { workflow, ...commandArgs } = command;
 
     const isDryRun = await this.featureFlagService.getFlag({
       environment: { _id: command.environmentId },
@@ -341,15 +341,15 @@ export class ParseEventRequest {
        * otherwise we should continue with the valid recipients.
        */
       if (!validRecipients && !isDryRun) {
-        await this.createRequestTrace(
+        await this.createRequestTrace({
           requestId,
           command,
-          'request_invalid_recipients',
+          eventType: 'request_invalid_recipients',
           transactionId,
-          'error',
-          'All recipients are invalid',
-          { invalidRecipients }
-        );
+          status: 'error',
+          message: 'All recipients are invalid',
+          rawData: { invalidRecipients },
+        });
 
         return {
           acknowledged: true,
@@ -371,16 +371,19 @@ export class ParseEventRequest {
       requestId,
     };
 
-    await this.workflowQueueService.add({ name: transactionId, data: jobData, groupId: command.organizationId });
-    this.logger.info(
-      { ...command, transactionId, discoveredWorkflowId: discoveredWorkflow?.workflowId },
-      'Event dispatched to [Workflow] Queue'
-    );
+    if (!command.skipQueueInsertion) {
+      await this.workflowQueueService.add({ name: transactionId, data: jobData, groupId: command.organizationId });
+      this.logger.info(
+        { ...command, transactionId, discoveredWorkflowId: discoveredWorkflow?.workflowId },
+        'Event dispatched to [Workflow] Queue'
+      );
+    }
 
     return {
       acknowledged: true,
       status: TriggerEventStatusEnum.PROCESSED,
       transactionId,
+      jobData: command.skipQueueInsertion ? jobData : undefined,
     };
   }
 
@@ -399,7 +402,9 @@ export class ParseEventRequest {
   }) {
     return await this.notificationTemplateRepository.findByTriggerIdentifier(
       command.environmentId,
-      command.triggerIdentifier
+      command.triggerIdentifier,
+      undefined,
+      false
     );
   }
 

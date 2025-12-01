@@ -29,7 +29,7 @@ import { Result } from "../types/fp.js";
  * Retrieve a translation group
  *
  * @remarks
- * Retrieves a single translation group by resource type (workflow) and resource ID (workflowId)
+ * Retrieves a single translation group by resource type (workflow, layout) and resource ID (workflowId, layoutId)
  */
 export function translationsGroupsRetrieve(
   client: NovuCore,
@@ -135,7 +135,7 @@ async function $do(
     options: client._options,
     baseURL: options?.serverURL ?? client._baseURL ?? "",
     operationID: "TranslationController_getTranslationGroupEndpoint",
-    oAuth2Scopes: [],
+    oAuth2Scopes: null,
 
     resolvedSecurity: requestSecurity,
 
@@ -164,7 +164,7 @@ async function $do(
     headers: headers,
     body: body,
     userAgent: client._options.userAgent,
-    timeoutMs: options?.timeoutMs || client._options.timeoutMs || 5000,
+    timeoutMs: options?.timeoutMs || client._options.timeoutMs || -1,
   }, options);
   if (!requestRes.ok) {
     return [requestRes, { status: "invalid" }];

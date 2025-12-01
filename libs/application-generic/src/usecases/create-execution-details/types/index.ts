@@ -43,6 +43,7 @@ export enum DetailEnum {
   SUBSCRIBER_MISSING_EMAIL_ADDRESS = 'Subscriber missing email address',
   SUBSCRIBER_MISSING_PHONE_NUMBER = 'Subscriber missing phone number',
   SUBSCRIBER_NO_ACTIVE_CHANNEL = 'Subscriber does not have a configured channel',
+  SUBSCRIBER_CONTEXT_NO_ACTIVE_CHANNEL = 'Subscriber does not have a configured channel with the given context',
   MESSAGE_SENT = 'Message sent',
   PROVIDER_ERROR = 'Unexpected provider error',
   START_DIGESTING = 'Start digesting',
@@ -73,6 +74,13 @@ export enum DetailEnum {
   THROTTLE_WINDOW_IN_PAST = 'Throttle window date is in the past',
   STEP_EXTENDED_TO_SCHEDULE = 'Step was extended to the next available time in the subscriber schedule',
   SKIPPED_STEP_MAX_EXTENSIONS_REACHED = 'Step was executed due to maximum number of subscriber schedule extensions reached',
+  PUSH_INVALID_TOKEN_REMOVED = 'Invalid push device token was removed from subscriber',
+  MSTEAMS_BOT_NOT_INSTALLED = 'MS Teams bot is not installed in the team/channel or for the user',
+  MSTEAMS_CHANNEL_NOT_FOUND = 'MS Teams channel or user not found',
+  MSTEAMS_USER_NOT_FOUND = 'MS Teams user not found',
+  MSTEAMS_INSUFFICIENT_PERMISSIONS = 'Insufficient permissions to send MS Teams message',
+  MSTEAMS_TENANT_NOT_CONSENTED = 'Tenant admin consent not granted for MS Teams',
+  MSTEAMS_INVALID_CREDENTIALS = 'Invalid MS Teams bot credentials',
 }
 
 export function createProviderSelectedMessage(providerId: string): string {

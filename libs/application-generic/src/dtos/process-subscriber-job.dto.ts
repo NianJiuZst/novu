@@ -1,7 +1,6 @@
 import { SubscriberEntity, TopicEntity } from '@novu/dal';
 import { DiscoverWorkflowOutput } from '@novu/framework/internal';
 import {
-  ContextKey,
   ISubscribersDefine,
   ITenantDefine,
   StatelessControls,
@@ -14,7 +13,6 @@ import { IBulkJobParams, IJobParams } from '../services/queues/queue-base.servic
 
 export interface IProcessSubscriberDataDto {
   environmentId: string;
-  environmentName: string;
   organizationId: string;
   userId: string;
   transactionId: string;
@@ -24,7 +22,7 @@ export interface IProcessSubscriberDataDto {
   overrides: TriggerOverrides;
   tenant?: ITenantDefine;
   actor?: SubscriberEntity;
-  contextKeys?: ContextKey[];
+  contextKeys?: string[];
   subscriber: ISubscribersDefine;
   templateId: string;
   _subscriberSource: SubscriberSourceEnum;

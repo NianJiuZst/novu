@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   AnalyticsService,
   buildSubscriberKey,
@@ -8,7 +8,6 @@ import {
   CreateExecutionDetails,
   CreateExecutionDetailsCommand,
   DetailEnum,
-  FeatureFlagsService,
   GetPreferences,
   GetSubscriberTemplatePreference,
   GetSubscriberTemplatePreferenceCommand,
@@ -19,10 +18,9 @@ import {
   NormalizeVariables,
   NormalizeVariablesCommand,
   PlatformException,
-  ResolveContextFromKeys,
-  ResolveContextFromKeysCommand,
 } from '@novu/application-generic';
 import {
+  ContextRepository,
   JobEntity,
   NotificationTemplateRepository,
   SubscriberRepository,
@@ -32,11 +30,10 @@ import {
 import { ContextResolved, ExecuteOutput } from '@novu/framework/internal';
 import {
   DeliveryLifecycleDetail,
-  DeliveryLifecycleStatus,
+  DeliveryLifecycleStatusEnum,
   DigestTypeEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
-  FeatureFlagsKeysEnum,
   IDigestRegularMetadata,
   IDigestTimedMetadata,
   IPreferenceChannels,
@@ -78,9 +75,8 @@ export class SendMessage {
     private tenantRepository: TenantRepository,
     private analyticsService: AnalyticsService,
     private normalizeVariablesUsecase: NormalizeVariables,
-    private resolveContextFromKeys: ResolveContextFromKeys,
-    private executeBridgeJob: ExecuteBridgeJob,
-    private featureFlagsService: FeatureFlagsService
+    private contextRepository: ContextRepository,
+    private executeBridgeJob: ExecuteBridgeJob
   ) {}
 
   @InstrumentUsecase()
@@ -142,7 +138,7 @@ export class SendMessage {
       return {
         status: SendMessageStatus.SKIPPED,
         deliveryLifecycleState: {
-          status: DeliveryLifecycleStatus.SKIPPED,
+          status: DeliveryLifecycleStatusEnum.SKIPPED,
           detail: !channelPreference.result
             ? DeliveryLifecycleDetail.SUBSCRIBER_PREFERENCE
             : DeliveryLifecycleDetail.USER_STEP_CONDITION,
@@ -150,20 +146,9 @@ export class SendMessage {
       };
     }
 
-    const isNotificationSeverityEnabled = await this.featureFlagsService.getFlag({
-      key: FeatureFlagsKeysEnum.IS_NOTIFICATION_SEVERITY_ENABLED,
-      defaultValue: false,
-      organization: { _id: command.organizationId },
-    });
-
     let severity = command.severity;
     const { overrides } = command;
-    if (
-      isNotificationSeverityEnabled &&
-      stepType !== StepTypeEnum.TRIGGER &&
-      overrides?.severity &&
-      overrides.severity !== severity
-    ) {
+    if (stepType !== StepTypeEnum.TRIGGER && overrides?.severity && overrides.severity !== severity) {
       severity = overrides.severity;
 
       await this.createExecutionDetails.execute(
@@ -394,7 +379,10 @@ export class SendMessage {
 
     const result = this.stepPreferred(subscriberPreference, job);
 
-    const preferenceDetailFromPreferenceType: Record<PreferencesTypeEnum, DetailEnum> = {
+    const preferenceDetailFromPreferenceType: Record<
+      Exclude<PreferencesTypeEnum, PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW>,
+      DetailEnum
+    > = {
       [PreferencesTypeEnum.WORKFLOW_RESOURCE]: DetailEnum.STEP_FILTERED_BY_WORKFLOW_RESOURCE_PREFERENCES,
       [PreferencesTypeEnum.SUBSCRIBER_WORKFLOW]: DetailEnum.STEP_FILTERED_BY_SUBSCRIBER_WORKFLOW_PREFERENCES,
       [PreferencesTypeEnum.SUBSCRIBER_GLOBAL]: DetailEnum.STEP_FILTERED_BY_SUBSCRIBER_GLOBAL_PREFERENCES,
@@ -413,6 +401,17 @@ export class SendMessage {
           isRetry: false,
           raw: JSON.stringify(subscriberPreference),
         })
+      );
+
+      Logger.log(
+        {
+          reason,
+          subscriberId: job.subscriberId,
+          templateId: job._templateId,
+          transactionId: job.transactionId,
+          channel: job.type,
+        },
+        'Skipped step by preference'
       );
     }
 
@@ -455,14 +454,11 @@ export class SendMessage {
   private async resolveContext(command: SendMessageCommand): Promise<ContextResolved> {
     const { contextKeys, environmentId, organizationId } = command;
 
-    const contexts = await this.resolveContextFromKeys.execute(
-      ResolveContextFromKeysCommand.create({
-        environmentId,
-        organizationId,
-        userId: command.userId,
-        contextKeys: contextKeys || [],
-      })
-    );
+    if (!contextKeys || contextKeys.length === 0) {
+      return {} as ContextResolved;
+    }
+
+    const contexts = await this.contextRepository.findByKeys(environmentId, organizationId, contextKeys);
 
     return contexts.reduce((acc, context) => {
       acc[context.type] = {

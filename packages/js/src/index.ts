@@ -1,8 +1,28 @@
+export type { RulesLogic } from 'json-logic-js';
 export type { EventHandler, Events, SocketEventNames } from './event-emitter';
 export { Novu } from './novu';
+export type {
+  PreferenceFilter,
+  SubscriptionGroupPreference,
+  SubscriptionPreferences,
+  SubscriptionWorkflowPreference,
+  WorkflowFilter,
+  WorkflowGroupFilter,
+  WorkflowIdentifierOrId,
+} from './subscriptions';
+export {
+  CreateSubscriptionArgs,
+  DeleteSubscriptionArgs,
+  GetSubscriptionArgs,
+  ListSubscriptionsArgs,
+  SubscriptionPreference,
+  TopicSubscription,
+  UpdateSubscriptionPreferenceArgs,
+} from './subscriptions';
 export {
   ChannelPreference,
   ChannelType,
+  Context,
   DaySchedule,
   DefaultSchedule,
   FiltersCountResponse,
@@ -11,7 +31,6 @@ export {
   Notification,
   NotificationFilter,
   NotificationStatus,
-  NovuError,
   NovuOptions,
   Preference,
   PreferenceLevel,
@@ -26,6 +45,7 @@ export {
   WeeklySchedule,
   WorkflowCriticalityEnum,
 } from './types';
+export { NovuError } from './utils/errors';
 export {
   areSeveritiesEqual,
   areTagsEqual,
