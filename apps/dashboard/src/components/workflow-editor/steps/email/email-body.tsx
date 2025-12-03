@@ -1,9 +1,3 @@
-import { Variable } from '@novu/maily-core/extensions';
-import { FeatureFlagsKeysEnum } from '@novu/shared';
-import { Editor, NodeViewProps } from '@tiptap/core';
-import { EditorView } from '@uiw/react-codemirror';
-import React, { useCallback, useMemo, useRef } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
 import { EditorOverlays } from '@/components/editor-overlays';
 import { HtmlEditor } from '@/components/html-editor';
 import { VariableFrom } from '@/components/maily/types';
@@ -25,6 +19,12 @@ import { useParseVariables } from '@/hooks/use-parse-variables';
 import { useTelemetry } from '@/hooks/use-telemetry';
 import { LocalizationResourceEnum } from '@/types/translations';
 import { EnhancedParsedVariables, IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
+import { Variable } from '@novu/maily-core/extensions';
+import { FeatureFlagsKeysEnum } from '@novu/shared';
+import { Editor, NodeViewProps } from '@tiptap/core';
+import { EditorView } from '@uiw/react-codemirror';
+import React, { useCallback, useMemo, useRef } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { Maily } from '../../../maily/maily';
 import { createEditorBlocks, DEFAULT_BLOCK_CONFIG } from '../../../maily/maily-config';
 import { isMailyJson } from '../../../maily/maily-utils';
@@ -335,7 +335,7 @@ export const EmailBody = () => {
 
         return (
           <Maily
-            key={`${editorKey}-repeat-block-enabled`}
+            key={`${editorKey}-repeat-block-enabled-${field.value?.slice(0, 50) || ''}`}
             value={isMaily ? field.value : ''}
             onChange={field.onChange}
             variables={parsedVariables}
