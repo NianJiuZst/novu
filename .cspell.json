@@ -92,6 +92,7 @@
     "cidrmatch",
     "cidrmax",
     "cimg",
+    "cimode",
     "circleci",
     "cirdmatch",
     "classpath",
@@ -772,7 +773,10 @@
     "kobalte",
     "jsonrepair",
     "xoxb",
-    "fanout"
+    "fanout",
+    "adminconsent",
+    "Arik",
+    "Chakma"
   ],
   "flagWords": [],
   "patterns": [

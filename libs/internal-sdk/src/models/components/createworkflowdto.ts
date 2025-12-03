@@ -139,31 +139,15 @@ export type Steps$Outbound =
 
 /** @internal */
 export const Steps$outboundSchema: z.ZodType<Steps$Outbound, z.ZodTypeDef, Steps> = z.union([
-  InAppStepUpsertDto$outboundSchema.and(
-    z.object({ type: z.literal('in_app') }).transform((v) => ({
-      type: v.type,
-    }))
-  ),
-  EmailStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('email') }).transform((v) => ({ type: v.type }))),
-  SmsStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('sms') }).transform((v) => ({ type: v.type }))),
-  PushStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('push') }).transform((v) => ({ type: v.type }))),
-  ChatStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('chat') }).transform((v) => ({ type: v.type }))),
-  DelayStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('delay') }).transform((v) => ({ type: v.type }))),
-  DigestStepUpsertDto$outboundSchema.and(
-    z.object({ type: z.literal('digest') }).transform((v) => ({
-      type: v.type,
-    }))
-  ),
-  ThrottleStepUpsertDto$outboundSchema.and(
-    z.object({ type: z.literal('throttle') }).transform((v) => ({
-      type: v.type,
-    }))
-  ),
-  CustomStepUpsertDto$outboundSchema.and(
-    z.object({ type: z.literal('custom') }).transform((v) => ({
-      type: v.type,
-    }))
-  ),
+  InAppStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('in_app') })),
+  EmailStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('email') })),
+  SmsStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('sms') })),
+  PushStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('push') })),
+  ChatStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('chat') })),
+  DelayStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('delay') })),
+  DigestStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('digest') })),
+  ThrottleStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('throttle') })),
+  CustomStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('custom') })),
 ]);
 
 export function stepsToJSON(steps: Steps): string {
@@ -210,51 +194,15 @@ export const CreateWorkflowDto$outboundSchema: z.ZodType<CreateWorkflowDto$Outbo
       workflowId: z.string(),
       steps: z.array(
         z.union([
-          InAppStepUpsertDto$outboundSchema.and(
-            z.object({ type: z.literal('in_app') }).transform((v) => ({
-              type: v.type,
-            }))
-          ),
-          EmailStepUpsertDto$outboundSchema.and(
-            z.object({ type: z.literal('email') }).transform((v) => ({
-              type: v.type,
-            }))
-          ),
-          SmsStepUpsertDto$outboundSchema.and(
-            z.object({ type: z.literal('sms') }).transform((v) => ({
-              type: v.type,
-            }))
-          ),
-          PushStepUpsertDto$outboundSchema.and(
-            z.object({ type: z.literal('push') }).transform((v) => ({
-              type: v.type,
-            }))
-          ),
-          ChatStepUpsertDto$outboundSchema.and(
-            z.object({ type: z.literal('chat') }).transform((v) => ({
-              type: v.type,
-            }))
-          ),
-          DelayStepUpsertDto$outboundSchema.and(
-            z.object({ type: z.literal('delay') }).transform((v) => ({
-              type: v.type,
-            }))
-          ),
-          DigestStepUpsertDto$outboundSchema.and(
-            z.object({ type: z.literal('digest') }).transform((v) => ({
-              type: v.type,
-            }))
-          ),
-          ThrottleStepUpsertDto$outboundSchema.and(
-            z.object({ type: z.literal('throttle') }).transform((v) => ({
-              type: v.type,
-            }))
-          ),
-          CustomStepUpsertDto$outboundSchema.and(
-            z.object({ type: z.literal('custom') }).transform((v) => ({
-              type: v.type,
-            }))
-          ),
+          InAppStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('in_app') })),
+          EmailStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('email') })),
+          SmsStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('sms') })),
+          PushStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('push') })),
+          ChatStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('chat') })),
+          DelayStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('delay') })),
+          DigestStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('digest') })),
+          ThrottleStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('throttle') })),
+          CustomStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('custom') })),
         ])
       ),
       source: WorkflowCreationSourceEnum$outboundSchema.default('editor'),

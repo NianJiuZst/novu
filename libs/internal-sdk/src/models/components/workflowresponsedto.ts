@@ -238,31 +238,15 @@ export function lastPublishedByFromJSON(jsonString: string): SafeParseResult<Las
 /** @internal */
 export const WorkflowResponseDtoSteps$inboundSchema: z.ZodType<WorkflowResponseDtoSteps, z.ZodTypeDef, unknown> =
   z.union([
-    InAppStepResponseDto$inboundSchema.and(
-      z.object({ type: z.literal('in_app') }).transform((v) => ({
-        type: v.type,
-      }))
-    ),
-    EmailStepResponseDto$inboundSchema.and(z.object({ type: z.literal('email') }).transform((v) => ({ type: v.type }))),
-    SmsStepResponseDto$inboundSchema.and(z.object({ type: z.literal('sms') }).transform((v) => ({ type: v.type }))),
-    PushStepResponseDto$inboundSchema.and(z.object({ type: z.literal('push') }).transform((v) => ({ type: v.type }))),
-    ChatStepResponseDto$inboundSchema.and(z.object({ type: z.literal('chat') }).transform((v) => ({ type: v.type }))),
-    DelayStepResponseDto$inboundSchema.and(z.object({ type: z.literal('delay') }).transform((v) => ({ type: v.type }))),
-    DigestStepResponseDto$inboundSchema.and(
-      z.object({ type: z.literal('digest') }).transform((v) => ({
-        type: v.type,
-      }))
-    ),
-    CustomStepResponseDto$inboundSchema.and(
-      z.object({ type: z.literal('custom') }).transform((v) => ({
-        type: v.type,
-      }))
-    ),
-    ThrottleStepResponseDto$inboundSchema.and(
-      z.object({ type: z.literal('throttle') }).transform((v) => ({
-        type: v.type,
-      }))
-    ),
+    InAppStepResponseDto$inboundSchema.and(z.object({ type: z.literal('in_app') })),
+    EmailStepResponseDto$inboundSchema.and(z.object({ type: z.literal('email') })),
+    SmsStepResponseDto$inboundSchema.and(z.object({ type: z.literal('sms') })),
+    PushStepResponseDto$inboundSchema.and(z.object({ type: z.literal('push') })),
+    ChatStepResponseDto$inboundSchema.and(z.object({ type: z.literal('chat') })),
+    DelayStepResponseDto$inboundSchema.and(z.object({ type: z.literal('delay') })),
+    DigestStepResponseDto$inboundSchema.and(z.object({ type: z.literal('digest') })),
+    CustomStepResponseDto$inboundSchema.and(z.object({ type: z.literal('custom') })),
+    ThrottleStepResponseDto$inboundSchema.and(z.object({ type: z.literal('throttle') })),
   ]);
 
 export function workflowResponseDtoStepsFromJSON(
@@ -295,51 +279,15 @@ export const WorkflowResponseDto$inboundSchema: z.ZodType<WorkflowResponseDto, z
     lastPublishedBy: z.nullable(z.lazy(() => LastPublishedBy$inboundSchema)).optional(),
     steps: z.array(
       z.union([
-        InAppStepResponseDto$inboundSchema.and(
-          z.object({ type: z.literal('in_app') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        EmailStepResponseDto$inboundSchema.and(
-          z.object({ type: z.literal('email') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        SmsStepResponseDto$inboundSchema.and(
-          z.object({ type: z.literal('sms') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        PushStepResponseDto$inboundSchema.and(
-          z.object({ type: z.literal('push') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        ChatStepResponseDto$inboundSchema.and(
-          z.object({ type: z.literal('chat') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        DelayStepResponseDto$inboundSchema.and(
-          z.object({ type: z.literal('delay') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        DigestStepResponseDto$inboundSchema.and(
-          z.object({ type: z.literal('digest') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        CustomStepResponseDto$inboundSchema.and(
-          z.object({ type: z.literal('custom') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        ThrottleStepResponseDto$inboundSchema.and(
-          z.object({ type: z.literal('throttle') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
+        InAppStepResponseDto$inboundSchema.and(z.object({ type: z.literal('in_app') })),
+        EmailStepResponseDto$inboundSchema.and(z.object({ type: z.literal('email') })),
+        SmsStepResponseDto$inboundSchema.and(z.object({ type: z.literal('sms') })),
+        PushStepResponseDto$inboundSchema.and(z.object({ type: z.literal('push') })),
+        ChatStepResponseDto$inboundSchema.and(z.object({ type: z.literal('chat') })),
+        DelayStepResponseDto$inboundSchema.and(z.object({ type: z.literal('delay') })),
+        DigestStepResponseDto$inboundSchema.and(z.object({ type: z.literal('digest') })),
+        CustomStepResponseDto$inboundSchema.and(z.object({ type: z.literal('custom') })),
+        ThrottleStepResponseDto$inboundSchema.and(z.object({ type: z.literal('throttle') })),
       ])
     ),
     origin: ResourceOriginEnum$inboundSchema,

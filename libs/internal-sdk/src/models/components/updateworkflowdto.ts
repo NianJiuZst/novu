@@ -134,26 +134,14 @@ export const UpdateWorkflowDtoSteps$outboundSchema: z.ZodType<
   z.ZodTypeDef,
   UpdateWorkflowDtoSteps
 > = z.union([
-  InAppStepUpsertDto$outboundSchema.and(
-    z.object({ type: z.literal('in_app') }).transform((v) => ({
-      type: v.type,
-    }))
-  ),
-  EmailStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('email') }).transform((v) => ({ type: v.type }))),
-  SmsStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('sms') }).transform((v) => ({ type: v.type }))),
-  PushStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('push') }).transform((v) => ({ type: v.type }))),
-  ChatStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('chat') }).transform((v) => ({ type: v.type }))),
-  DelayStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('delay') }).transform((v) => ({ type: v.type }))),
-  DigestStepUpsertDto$outboundSchema.and(
-    z.object({ type: z.literal('digest') }).transform((v) => ({
-      type: v.type,
-    }))
-  ),
-  CustomStepUpsertDto$outboundSchema.and(
-    z.object({ type: z.literal('custom') }).transform((v) => ({
-      type: v.type,
-    }))
-  ),
+  InAppStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('in_app') })),
+  EmailStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('email') })),
+  SmsStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('sms') })),
+  PushStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('push') })),
+  ChatStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('chat') })),
+  DelayStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('delay') })),
+  DigestStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('digest') })),
+  CustomStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('custom') })),
 ]);
 
 export function updateWorkflowDtoStepsToJSON(updateWorkflowDtoSteps: UpdateWorkflowDtoSteps): string {
@@ -198,46 +186,14 @@ export const UpdateWorkflowDto$outboundSchema: z.ZodType<UpdateWorkflowDto$Outbo
     workflowId: z.string().optional(),
     steps: z.array(
       z.union([
-        InAppStepUpsertDto$outboundSchema.and(
-          z.object({ type: z.literal('in_app') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        EmailStepUpsertDto$outboundSchema.and(
-          z.object({ type: z.literal('email') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        SmsStepUpsertDto$outboundSchema.and(
-          z.object({ type: z.literal('sms') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        PushStepUpsertDto$outboundSchema.and(
-          z.object({ type: z.literal('push') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        ChatStepUpsertDto$outboundSchema.and(
-          z.object({ type: z.literal('chat') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        DelayStepUpsertDto$outboundSchema.and(
-          z.object({ type: z.literal('delay') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        DigestStepUpsertDto$outboundSchema.and(
-          z.object({ type: z.literal('digest') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
-        CustomStepUpsertDto$outboundSchema.and(
-          z.object({ type: z.literal('custom') }).transform((v) => ({
-            type: v.type,
-          }))
-        ),
+        InAppStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('in_app') })),
+        EmailStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('email') })),
+        SmsStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('sms') })),
+        PushStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('push') })),
+        ChatStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('chat') })),
+        DelayStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('delay') })),
+        DigestStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('digest') })),
+        CustomStepUpsertDto$outboundSchema.and(z.object({ type: z.literal('custom') })),
       ])
     ),
     preferences: PreferencesRequestDto$outboundSchema,
