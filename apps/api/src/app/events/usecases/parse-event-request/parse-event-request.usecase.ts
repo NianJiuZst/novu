@@ -48,6 +48,12 @@ import {
   ParseEventRequestMulticastCommand,
 } from './parse-event-request.command';
 
+const ajv = new Ajv({
+  allErrors: true,
+  useDefaults: true,
+});
+addFormats(ajv);
+
 @Injectable()
 export class ParseEventRequest {
   constructor(
@@ -511,12 +517,6 @@ export class ParseEventRequest {
   }
 
   private validateAndApplyPayloadDefaults(payload: any, schema: any): any {
-    const ajv = new Ajv({
-      allErrors: true,
-      useDefaults: true,
-    });
-    addFormats(ajv);
-
     const validate = ajv.compile(schema);
 
     // Create a deep copy of the payload to avoid mutating the original
