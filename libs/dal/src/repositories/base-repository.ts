@@ -400,11 +400,11 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   protected mapEntity<TData>(data: TData): TData extends null ? null : T_MappedEntity {
-    return plainToInstance(this.entity, JSON.parse(JSON.stringify(data))) as any;
+    return plainToInstance(this.entity, structuredClone(data)) as any;
   }
 
   protected mapEntities(data: any): T_MappedEntity[] {
-    return plainToInstance<T_MappedEntity, T_MappedEntity[]>(this.entity, JSON.parse(JSON.stringify(data)));
+    return plainToInstance<T_MappedEntity, T_MappedEntity[]>(this.entity, structuredClone(data));
   }
 
   /*
