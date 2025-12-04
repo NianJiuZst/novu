@@ -410,9 +410,11 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
 
   protected mapEntities(data: any): T_MappedEntity[] {
     const plainData = Array.isArray(data)
-      ? data.map((item) => (item && typeof item === 'object' && 'toObject' in item && typeof item.toObject === 'function' 
-          ? item.toObject() 
-          : item))
+      ? data.map((item) =>
+          item && typeof item === 'object' && 'toObject' in item && typeof item.toObject === 'function'
+            ? item.toObject()
+            : item
+        )
       : data;
 
     return plainToInstance<T_MappedEntity, T_MappedEntity[]>(this.entity, structuredClone(plainData));
