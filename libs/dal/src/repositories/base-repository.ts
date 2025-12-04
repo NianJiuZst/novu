@@ -400,11 +400,22 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   protected mapEntity<TData>(data: TData): TData extends null ? null : T_MappedEntity {
-    return plainToInstance(this.entity, structuredClone(data)) as any;
+    const plainData =
+      data && typeof data === 'object' && 'toObject' in data && typeof data.toObject === 'function'
+        ? data.toObject()
+        : data;
+
+    return plainToInstance(this.entity, structuredClone(plainData)) as any;
   }
 
   protected mapEntities(data: any): T_MappedEntity[] {
-    return plainToInstance<T_MappedEntity, T_MappedEntity[]>(this.entity, JSON.parse(JSON.stringify(data)));
+    const plainData = Array.isArray(data)
+      ? data.map((item) => (item && typeof item === 'object' && 'toObject' in item && typeof item.toObject === 'function' 
+          ? item.toObject() 
+          : item))
+      : data;
+
+    return plainToInstance<T_MappedEntity, T_MappedEntity[]>(this.entity, structuredClone(plainData));
   }
 
   /*
