@@ -520,7 +520,7 @@ export class ParseEventRequest {
     const validate = ajv.compile(schema);
 
     // Create a deep copy of the payload to avoid mutating the original
-    const payloadWithDefaults = JSON.parse(JSON.stringify(payload));
+    const payloadWithDefaults = structuredClone(payload);
     const valid = validate(payloadWithDefaults);
 
     if (!valid && validate.errors) {
