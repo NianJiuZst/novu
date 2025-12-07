@@ -22,6 +22,7 @@ import {
   SettingsPage,
   SignInPage,
   SignUpPage,
+  StudioPage,
   TemplateModal,
   TranslationsPage,
   WelcomePage,
@@ -111,6 +112,10 @@ const router = createBrowserRouter([
         path: ROUTES.ROOT,
         element: <DashboardRoute />,
         children: [
+          {
+            path: ROUTES.STUDIO,
+            element: <StudioPage />,
+          },
           /* Direct routes matching environment-specific paths (e.g., /topics -> /env/:envId/topics) 
              will be automatically redirected by the CatchAllRoute component */
           {

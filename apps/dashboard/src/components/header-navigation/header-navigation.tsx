@@ -5,6 +5,7 @@ import { useCommandPalette } from '@/components/command-palette/hooks/use-comman
 import { InboxButton } from '@/components/inbox-button';
 import { UserProfile } from '@/components/user-profile';
 import { RegionSelector } from '@/context/region/region-selector';
+import { useIsLocalStudio } from '@/context/studio/hooks';
 import { cn } from '@/utils/ui';
 import { IS_ENTERPRISE, IS_SELF_HOSTED } from '../../config';
 import { useEnvironment } from '../../context/environment/hooks';
@@ -26,6 +27,7 @@ export const HeaderNavigation = (props: HeaderNavigationProps) => {
   const has = useHasPermission();
   const canPublish = has({ permission: PermissionsEnum.ENVIRONMENT_WRITE });
   const { openCommandPalette } = useCommandPalette();
+  const isLocalStudio = useIsLocalStudio();
 
   return (
     <div
@@ -47,8 +49,8 @@ export const HeaderNavigation = (props: HeaderNavigationProps) => {
           <RiSearchLine className="size-3 text-text-sub" />
           <Kbd className="bg-bg-weak rounded-4 h-[16px]">⌘K</Kbd>
         </Button>
-        {currentEnvironment?.type === EnvironmentTypeEnum.DEV && canPublish && <PublishButton />}
-        {!hideBridgeUrl ? <EditBridgeUrlButton /> : null}
+        {!isLocalStudio && currentEnvironment?.type === EnvironmentTypeEnum.DEV && canPublish && <PublishButton />}
+        {!isLocalStudio && !hideBridgeUrl ? <EditBridgeUrlButton /> : null}
         {!(IS_SELF_HOSTED && IS_ENTERPRISE) && <CustomerSupportButton />}
         <div className="flex items-center gap-2">
           <InboxButton />

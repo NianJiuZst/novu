@@ -1,3 +1,7 @@
+import { ErrorBoundary, withProfiler } from '@sentry/react';
+import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HelmetProvider } from 'react-helmet-async';
+import { Outlet } from 'react-router-dom';
 import { ToastIcon } from '@/components/primitives/sonner';
 import { showToast } from '@/components/primitives/sonner-helpers';
 import { TooltipProvider } from '@/components/primitives/tooltip';
@@ -8,10 +12,7 @@ import { EscapeKeyManagerProvider } from '@/context/escape-key-manager/escape-ke
 import { IdentityProvider } from '@/context/identity-provider';
 import { RegionProvider } from '@/context/region';
 import { SegmentProvider } from '@/context/segment';
-import { ErrorBoundary, withProfiler } from '@sentry/react';
-import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { HelmetProvider } from 'react-helmet-async';
-import { Outlet } from 'react-router-dom';
+import { StudioStateProvider } from '@/context/studio/studio-state-provider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -64,23 +65,25 @@ const RootRouteInternal = () => {
       )}
     >
       <QueryClientProvider client={queryClient}>
-        <ClerkProvider>
-          <SegmentProvider>
-            <AuthProvider>
-              <RegionProvider>
-                <IdentityProvider>
-                  <HelmetProvider>
-                    <TooltipProvider delayDuration={100}>
-                      <EscapeKeyManagerProvider>
-                        <Outlet />
-                      </EscapeKeyManagerProvider>
-                    </TooltipProvider>
-                  </HelmetProvider>
-                </IdentityProvider>
-              </RegionProvider>
-            </AuthProvider>
-          </SegmentProvider>
-        </ClerkProvider>
+        <StudioStateProvider>
+          <ClerkProvider>
+            <SegmentProvider>
+              <AuthProvider>
+                <RegionProvider>
+                  <IdentityProvider>
+                    <HelmetProvider>
+                      <TooltipProvider delayDuration={100}>
+                        <EscapeKeyManagerProvider>
+                          <Outlet />
+                        </EscapeKeyManagerProvider>
+                      </TooltipProvider>
+                    </HelmetProvider>
+                  </IdentityProvider>
+                </RegionProvider>
+              </AuthProvider>
+            </SegmentProvider>
+          </ClerkProvider>
+        </StudioStateProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

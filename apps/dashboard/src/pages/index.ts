@@ -13,6 +13,7 @@ export * from './questionnaire-page';
 export * from './settings';
 export * from './sign-in';
 export * from './sign-up';
+export * from './studio';
 export * from './translations';
 export * from './usecase-select-page';
 export * from './welcome-page';

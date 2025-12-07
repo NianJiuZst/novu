@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import {
   RiBarChartBoxLine,
   RiBuildingLine,
+  RiCodeSSlashLine,
   RiDatabase2Line,
   RiDiscussLine,
   RiGroup2Line,
@@ -19,6 +20,7 @@ import {
 import { Badge } from '@/components/primitives/badge';
 import { SidebarContent } from '@/components/side-navigation/sidebar';
 import { useEnvironment } from '@/context/environment/hooks';
+import { useIsLocalStudio } from '@/context/studio/hooks';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { Protect } from '@/utils/protect';
 import { buildRoute, ROUTES } from '@/utils/routes';
@@ -93,11 +95,14 @@ export const SideNavigation = () => {
   const isContextEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_CONTEXT_ENABLED, false);
 
   const { currentEnvironment, environments, switchEnvironment } = useEnvironment();
+  const isLocalStudio = useIsLocalStudio();
 
   const onEnvironmentChange = (value: string) => {
     const environment = environments?.find((env) => env.name === value);
     switchEnvironment(environment?.slug);
   };
+
+  const isLocalEnvironment = isLocalStudio && currentEnvironment?.slug === 'local';
 
   return (
     <aside className="bg-neutral-alpha-50 relative flex h-full w-[275px] flex-shrink-0 flex-col">
@@ -109,148 +114,171 @@ export const SideNavigation = () => {
           onChange={onEnvironmentChange}
         />
         <nav className="flex h-full flex-1 flex-col overflow-auto">
-          <div className="flex flex-col gap-4">
-            <NavigationGroup>
-              <Protect permission={PermissionsEnum.WORKFLOW_READ}>
-                <NavigationLink to={buildRoute(ROUTES.WORKFLOWS, { environmentSlug: currentEnvironment?.slug ?? '' })}>
-                  <RiRouteFill className="size-4" />
-                  <span>Workflows</span>
+          {isLocalEnvironment ? (
+            <div className="flex flex-col gap-4">
+              <NavigationGroup>
+                <NavigationLink to={ROUTES.STUDIO}>
+                  <RiCodeSSlashLine className="size-4" />
+                  <span>Studio</span>
                 </NavigationLink>
-              </Protect>
+              </NavigationGroup>
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-col gap-4">
+                <NavigationGroup>
+                  <Protect permission={PermissionsEnum.WORKFLOW_READ}>
+                    <NavigationLink
+                      to={buildRoute(ROUTES.WORKFLOWS, { environmentSlug: currentEnvironment?.slug ?? '' })}
+                    >
+                      <RiRouteFill className="size-4" />
+                      <span>Workflows</span>
+                    </NavigationLink>
+                  </Protect>
 
-              <Protect permission={PermissionsEnum.WORKFLOW_READ}>
-                <NavigationLink to={buildRoute(ROUTES.LAYOUTS, { environmentSlug: currentEnvironment?.slug ?? '' })}>
-                  <RiLayout5Line className="size-4" />
-                  <span>Email Layouts</span>
-                </NavigationLink>
-              </Protect>
+                  <Protect permission={PermissionsEnum.WORKFLOW_READ}>
+                    <NavigationLink
+                      to={buildRoute(ROUTES.LAYOUTS, { environmentSlug: currentEnvironment?.slug ?? '' })}
+                    >
+                      <RiLayout5Line className="size-4" />
+                      <span>Email Layouts</span>
+                    </NavigationLink>
+                  </Protect>
 
-              <NavigationLink to={buildRoute(ROUTES.TRANSLATIONS, { environmentSlug: currentEnvironment?.slug ?? '' })}>
-                <RiTranslate2 className="size-4" />
-                <span>
-                  Translations{' '}
-                  <Badge variant="lighter" className="text-xs">
-                    BETA
-                  </Badge>
-                </span>
-              </NavigationLink>
-            </NavigationGroup>
-            <NavigationGroup label="Data">
-              <Protect permission={PermissionsEnum.SUBSCRIBER_READ}>
-                <NavigationLink
-                  to={buildRoute(ROUTES.SUBSCRIBERS, { environmentSlug: currentEnvironment?.slug ?? '' })}
-                >
-                  <RiGroup2Line className="size-4" />
-                  <span>Subscribers</span>
-                </NavigationLink>
-              </Protect>
-              <Protect permission={PermissionsEnum.TOPIC_READ}>
-                <NavigationLink to={buildRoute(ROUTES.TOPICS, { environmentSlug: currentEnvironment?.slug ?? '' })}>
-                  <RiDiscussLine className="size-4" />
-                  <span>Topics</span>
-                </NavigationLink>
-              </Protect>
-              {isContextEnabled && (
-                <Protect permission={PermissionsEnum.WORKFLOW_READ}>
-                  <NavigationLink to={buildRoute(ROUTES.CONTEXTS, { environmentSlug: currentEnvironment?.slug ?? '' })}>
-                    <RiBuildingLine className="size-4" />
+                  <NavigationLink
+                    to={buildRoute(ROUTES.TRANSLATIONS, { environmentSlug: currentEnvironment?.slug ?? '' })}
+                  >
+                    <RiTranslate2 className="size-4" />
                     <span>
-                      Contexts{' '}
+                      Translations{' '}
                       <Badge variant="lighter" className="text-xs">
                         BETA
                       </Badge>
                     </span>
                   </NavigationLink>
-                </Protect>
-              )}
-            </NavigationGroup>
-            <Protect permission={PermissionsEnum.NOTIFICATION_READ}>
-              <NavigationGroup label="Monitor">
+                </NavigationGroup>
+                <NavigationGroup label="Data">
+                  <Protect permission={PermissionsEnum.SUBSCRIBER_READ}>
+                    <NavigationLink
+                      to={buildRoute(ROUTES.SUBSCRIBERS, { environmentSlug: currentEnvironment?.slug ?? '' })}
+                    >
+                      <RiGroup2Line className="size-4" />
+                      <span>Subscribers</span>
+                    </NavigationLink>
+                  </Protect>
+                  <Protect permission={PermissionsEnum.TOPIC_READ}>
+                    <NavigationLink to={buildRoute(ROUTES.TOPICS, { environmentSlug: currentEnvironment?.slug ?? '' })}>
+                      <RiDiscussLine className="size-4" />
+                      <span>Topics</span>
+                    </NavigationLink>
+                  </Protect>
+                  {isContextEnabled && (
+                    <Protect permission={PermissionsEnum.WORKFLOW_READ}>
+                      <NavigationLink
+                        to={buildRoute(ROUTES.CONTEXTS, { environmentSlug: currentEnvironment?.slug ?? '' })}
+                      >
+                        <RiBuildingLine className="size-4" />
+                        <span>
+                          Contexts{' '}
+                          <Badge variant="lighter" className="text-xs">
+                            BETA
+                          </Badge>
+                        </span>
+                      </NavigationLink>
+                    </Protect>
+                  )}
+                </NavigationGroup>
                 <Protect permission={PermissionsEnum.NOTIFICATION_READ}>
-                  <NavigationLink
-                    to={buildRoute(isHttpLogsPageEnabled ? ROUTES.ACTIVITY_WORKFLOW_RUNS : ROUTES.ACTIVITY_FEED, {
-                      environmentSlug: currentEnvironment?.slug ?? '',
-                    })}
-                  >
-                    <RiBarChartBoxLine className="size-4" />
-                    <span>Activity Feed</span>
-                  </NavigationLink>
+                  <NavigationGroup label="Monitor">
+                    <Protect permission={PermissionsEnum.NOTIFICATION_READ}>
+                      <NavigationLink
+                        to={buildRoute(isHttpLogsPageEnabled ? ROUTES.ACTIVITY_WORKFLOW_RUNS : ROUTES.ACTIVITY_FEED, {
+                          environmentSlug: currentEnvironment?.slug ?? '',
+                        })}
+                      >
+                        <RiBarChartBoxLine className="size-4" />
+                        <span>Activity Feed</span>
+                      </NavigationLink>
+                    </Protect>
+                    {isAnalyticsPageEnabled && (
+                      <Protect permission={PermissionsEnum.NOTIFICATION_READ}>
+                        <NavigationLink
+                          to={buildRoute(ROUTES.ANALYTICS, { environmentSlug: currentEnvironment?.slug ?? '' })}
+                        >
+                          <RiLineChartLine className="size-4" />
+                          <span>Analytics</span>
+                        </NavigationLink>
+                      </Protect>
+                    )}
+                  </NavigationGroup>
                 </Protect>
-                {isAnalyticsPageEnabled && (
-                  <Protect permission={PermissionsEnum.NOTIFICATION_READ}>
-                    <NavigationLink
-                      to={buildRoute(ROUTES.ANALYTICS, { environmentSlug: currentEnvironment?.slug ?? '' })}
-                    >
-                      <RiLineChartLine className="size-4" />
-                      <span>Analytics</span>
-                    </NavigationLink>
-                  </Protect>
-                )}
-              </NavigationGroup>
-            </Protect>
-            <Protect
-              condition={(has) =>
-                has({ permission: PermissionsEnum.API_KEY_READ }) ||
-                has({ permission: PermissionsEnum.INTEGRATION_READ }) ||
-                has({ permission: PermissionsEnum.WEBHOOK_READ }) ||
-                has({ permission: PermissionsEnum.WEBHOOK_WRITE })
-              }
-            >
-              <NavigationGroup label="Developer">
-                <Protect permission={PermissionsEnum.API_KEY_READ}>
-                  <NavigationLink to={buildRoute(ROUTES.API_KEYS, { environmentSlug: currentEnvironment?.slug ?? '' })}>
-                    <RiKey2Line className="size-4" />
-                    <span>API Keys</span>
-                  </NavigationLink>
-                </Protect>
-                {isWebhooksManagementEnabled && (
-                  <Protect
-                    condition={(has) =>
-                      has({ permission: PermissionsEnum.WEBHOOK_READ }) ||
-                      has({ permission: PermissionsEnum.WEBHOOK_WRITE })
-                    }
-                  >
-                    <NavigationLink
-                      to={buildRoute(ROUTES.WEBHOOKS, { environmentSlug: currentEnvironment?.slug ?? '' })}
-                    >
-                      <RiSignalTowerLine className="size-4" />
-                      <span className="flex items-center gap-2">Webhooks</span>
-                    </NavigationLink>
-                  </Protect>
-                )}
-                <NavigationLink
-                  to={buildRoute(ROUTES.ENVIRONMENTS, { environmentSlug: currentEnvironment?.slug ?? '' })}
+                <Protect
+                  condition={(has) =>
+                    has({ permission: PermissionsEnum.API_KEY_READ }) ||
+                    has({ permission: PermissionsEnum.INTEGRATION_READ }) ||
+                    has({ permission: PermissionsEnum.WEBHOOK_READ }) ||
+                    has({ permission: PermissionsEnum.WEBHOOK_WRITE })
+                  }
                 >
-                  <RiDatabase2Line className="size-4" />
-                  <span>Environments</span>
-                </NavigationLink>
-                <Protect permission={PermissionsEnum.INTEGRATION_READ}>
-                  <NavigationLink
-                    to={buildRoute(ROUTES.INTEGRATIONS, { environmentSlug: currentEnvironment?.slug ?? '' })}
-                  >
-                    <RiStore3Line className="size-4" />
-                    <span>Integration Store</span>
-                  </NavigationLink>
+                  <NavigationGroup label="Developer">
+                    <Protect permission={PermissionsEnum.API_KEY_READ}>
+                      <NavigationLink
+                        to={buildRoute(ROUTES.API_KEYS, { environmentSlug: currentEnvironment?.slug ?? '' })}
+                      >
+                        <RiKey2Line className="size-4" />
+                        <span>API Keys</span>
+                      </NavigationLink>
+                    </Protect>
+                    {isWebhooksManagementEnabled && (
+                      <Protect
+                        condition={(has) =>
+                          has({ permission: PermissionsEnum.WEBHOOK_READ }) ||
+                          has({ permission: PermissionsEnum.WEBHOOK_WRITE })
+                        }
+                      >
+                        <NavigationLink
+                          to={buildRoute(ROUTES.WEBHOOKS, { environmentSlug: currentEnvironment?.slug ?? '' })}
+                        >
+                          <RiSignalTowerLine className="size-4" />
+                          <span className="flex items-center gap-2">Webhooks</span>
+                        </NavigationLink>
+                      </Protect>
+                    )}
+                    <NavigationLink
+                      to={buildRoute(ROUTES.ENVIRONMENTS, { environmentSlug: currentEnvironment?.slug ?? '' })}
+                    >
+                      <RiDatabase2Line className="size-4" />
+                      <span>Environments</span>
+                    </NavigationLink>
+                    <Protect permission={PermissionsEnum.INTEGRATION_READ}>
+                      <NavigationLink
+                        to={buildRoute(ROUTES.INTEGRATIONS, { environmentSlug: currentEnvironment?.slug ?? '' })}
+                      >
+                        <RiStore3Line className="size-4" />
+                        <span>Integration Store</span>
+                      </NavigationLink>
+                    </Protect>
+                  </NavigationGroup>
                 </Protect>
-              </NavigationGroup>
-            </Protect>
-            {!IS_SELF_HOSTED || IS_ENTERPRISE ? (
-              <NavigationGroup label="Application">
-                <NavigationLink to={ROUTES.SETTINGS}>
-                  <RiSettings4Line className="size-4" />
-                  <span>Settings</span>
-                </NavigationLink>
-              </NavigationGroup>
-            ) : null}
-          </div>
+                {!IS_SELF_HOSTED || IS_ENTERPRISE ? (
+                  <NavigationGroup label="Application">
+                    <NavigationLink to={ROUTES.SETTINGS}>
+                      <RiSettings4Line className="size-4" />
+                      <span>Settings</span>
+                    </NavigationLink>
+                  </NavigationGroup>
+                ) : null}
+              </div>
 
-          <BottomSection
-            isTrialActive={isTrialActive}
-            isFreeTier={isFreeTier}
-            isLoadingSubscription={isLoadingSubscription}
-            subscription={subscription}
-            daysLeft={daysLeft}
-          />
+              <BottomSection
+                isTrialActive={isTrialActive}
+                isFreeTier={isFreeTier}
+                isLoadingSubscription={isLoadingSubscription}
+                subscription={subscription}
+                daysLeft={daysLeft}
+              />
+            </>
+          )}
         </nav>
       </SidebarContent>
     </aside>

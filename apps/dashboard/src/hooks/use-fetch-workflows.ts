@@ -1,6 +1,7 @@
 import { DirectionEnum } from '@novu/shared';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { getWorkflows } from '@/api/workflows';
+import { useIsLocalStudio } from '@/context/studio/hooks';
 import { QueryKeys } from '@/utils/query-keys';
 import { useEnvironment } from '../context/environment/hooks';
 
@@ -24,6 +25,7 @@ export function useFetchWorkflows({
   status = [],
 }: UseWorkflowsParams = {}) {
   const { currentEnvironment } = useEnvironment();
+  const isLocalStudio = useIsLocalStudio();
 
   const workflowsQuery = useQuery({
     queryKey: [
@@ -34,7 +36,7 @@ export function useFetchWorkflows({
     queryFn: () =>
       getWorkflows({ environment: currentEnvironment!, limit, offset, query, orderBy, orderDirection, tags, status }),
     placeholderData: keepPreviousData,
-    enabled: !!currentEnvironment?._id,
+    enabled: !!currentEnvironment?._id && !isLocalStudio,
     refetchOnWindowFocus: true,
   });
 
