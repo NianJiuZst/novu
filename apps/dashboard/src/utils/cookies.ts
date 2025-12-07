@@ -29,3 +29,4 @@ export function createCookieHandler(cookieName: string) {
 }
 
 export const hubspotCookie = createCookieHandler('hubspotutk');
+export const novuOnboardedCookie = createCookieHandler('nv_onboarded');

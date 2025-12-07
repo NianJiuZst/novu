@@ -7,6 +7,7 @@ export * from './create-workflow';
 export * from './error-page';
 export * from './integrations-list-page';
 export * from './layouts';
+export * from './local-studio-authenticator';
 export * from './organization-list';
 export * from './questionnaire-page';
 export * from './settings';
