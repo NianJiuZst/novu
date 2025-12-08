@@ -20,15 +20,16 @@ import { parseJsonValue } from '@/components/workflow-editor/steps/utils/preview
 import { getEditorTitle } from '@/components/workflow-editor/steps/utils/step-utils';
 import { TestWorkflowDrawer } from '@/components/workflow-editor/test-workflow/test-workflow-drawer';
 import { TranslationStatus } from '@/components/workflow-editor/translation-status';
+import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { useFetchTranslationGroup } from '@/hooks/use-fetch-translation-group';
 import { useFetchWorkflowTestData } from '@/hooks/use-fetch-workflow-test-data';
 import { useIsTranslationEnabled } from '@/hooks/use-is-translation-enabled';
 import { LocalizationResourceEnum } from '@/types/translations';
 import { cn } from '@/utils/ui';
-import { PermissionsEnum, StepResponseDto, StepTypeEnum, WorkflowResponseDto } from '@novu/shared';
+import { FeatureFlagsKeysEnum, PermissionsEnum, StepResponseDto, StepTypeEnum, WorkflowResponseDto } from '@novu/shared';
 import { useCallback, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { RiCodeBlock, RiEdit2Line, RiEyeLine, RiPlayCircleLine, RiSparklingFill } from 'react-icons/ri';
+import { RiCodeBlock, RiEdit2Line, RiEyeLine, RiPlayCircleLine, RiSparklingLine } from 'react-icons/ri';
 import { useParams } from 'react-router-dom';
 import { Protect } from '../../../utils/protect';
 
@@ -81,8 +82,9 @@ function StepEditorContent() {
   const isTranslationsEnabled = useIsTranslationEnabled({
     isTranslationEnabledOnResource: workflow?.isTranslationEnabled ?? false,
   });
+  const isAiStepGenerationEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_AI_STEP_GENERATION_ENABLED);
 
-  const showAiButton = AI_SUPPORTED_STEP_TYPES.includes(step.type as StepTypeEnum);
+  const showAiButton = isAiStepGenerationEnabled && AI_SUPPORTED_STEP_TYPES.includes(step.type as StepTypeEnum);
 
   const handleAiInsert = useCallback(
     (content: GenerateContentResponse['content'], suggestedPayload?: Record<string, string>) => {
@@ -322,15 +324,23 @@ function StepEditorContent() {
                 e.stopPropagation();
                 setIsAiDialogOpen(true);
               }}
-              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 shadow-lg ring-1 ring-inset ring-transparent transition-all hover:shadow-xl"
+              className="flex items-center justify-center gap-1 overflow-hidden rounded-full border border-[#ff884d] py-2 pl-2 pr-2.5 shadow-[0px_18px_88px_-4px_rgba(28,40,64,0.14),0px_1px_2px_0px_rgba(0,0,0,0.05)] transition-all hover:shadow-xl"
               style={{
-                background: 'linear-gradient(white, white) padding-box, linear-gradient(135deg, #ec4899, #f97316) border-box',
-                border: '2px solid transparent',
-                borderRadius: '14px',
+                background: 'linear-gradient(113.916deg, rgba(0, 0, 0, 0) 12.861%, rgba(0, 0, 0, 0.02) 117.52%), linear-gradient(90deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%)',
               }}
             >
-              <RiSparklingFill className="size-4 text-orange-500" />
-              Compose with AI
+              <RiSparklingLine className="size-4" style={{ color: '#ff884d' }} />
+              <span
+                className="bg-clip-text text-xs font-medium leading-4"
+                style={{
+                  background: 'linear-gradient(90deg, #ff884d 0%, #f97316 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                Compose with AI
+              </span>
             </button>
           </div>
           <AiSuggestionsDialog
