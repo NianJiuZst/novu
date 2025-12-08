@@ -18,7 +18,7 @@
     "start:debug": "nest start --debug --watch --inspect",
     "start:prod": "node dist/main.js",
     "build:metadata": "cross-env ts-node scripts/generate-metadata.ts",
-    "lint": "biome lint .",
+    "lint": "biome lint . --diagnostic-level=error",
     "lint:fix": "biome lint --write .",
     "check": "biome check .",
     "check:fix": "biome check --write .",
