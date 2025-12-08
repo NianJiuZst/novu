@@ -1,6 +1,6 @@
 import { ClickHouseClient, ClickHouseService, createClickHouseClient } from '@novu/application-generic';
 import { DalService } from '@novu/dal';
-import { testServer } from '@novu/testing';
+import { JobsService, testServer } from '@novu/testing';
 import axios from 'axios';
 import chai from 'chai';
 import { Connection } from 'mongoose';
@@ -12,6 +12,7 @@ let databaseConnection: Connection;
 let analyticsConnection: ClickHouseClient | undefined;
 let clickHouseService: ClickHouseService | undefined;
 const dalService = new DalService();
+const jobsService = new JobsService();
 
 async function getDatabaseConnection(): Promise<Connection> {
   if (!databaseConnection) {
@@ -324,6 +325,7 @@ before(async () => {
 
   await dropDatabase();
   await cleanupClickHouseDatabase();
+  await jobsService.clearAllQueues();
   const bootstrapped = await bootstrap();
   await testServer.create(bootstrapped.app);
 
@@ -344,4 +346,5 @@ afterEach(async function () {
   }
 
   sinon.restore();
+  await jobsService.clearAllQueues();
 });
