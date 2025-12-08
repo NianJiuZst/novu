@@ -1,22 +1,30 @@
-import { ChannelTypeEnum, FeatureFlagsKeysEnum, type GeneratePreviewResponseDto } from '@novu/shared';
-import { ReactNode } from 'react';
 import {
-  InAppPreview,
-  InAppPreviewActions,
-  InAppPreviewAvatar,
-  InAppPreviewBell,
-  InAppPreviewBody,
-  InAppPreviewHeader,
-  InAppPreviewNotification,
-  InAppPreviewNotificationContent,
-  InAppPreviewPrimaryAction,
-  InAppPreviewSecondaryAction,
-  InAppPreviewSubject,
+    InAppPreview,
+    InAppPreviewActions,
+    InAppPreviewAvatar,
+    InAppPreviewBell,
+    InAppPreviewBody,
+    InAppPreviewHeader,
+    InAppPreviewNotification,
+    InAppPreviewNotificationContent,
+    InAppPreviewPrimaryAction,
+    InAppPreviewSecondaryAction,
+    InAppPreviewSubject,
 } from '@/components/workflow-editor/in-app-preview';
+import { ChannelTypeEnum, type GeneratePreviewResponseDto } from '@novu/shared';
+import { ReactNode } from 'react';
 
 import { cn } from '../../../../utils/ui';
 
-const InboxPreviewContainer = ({ children, className }: { children: ReactNode; className?: string }) => {
+const InboxPreviewContainer = ({
+  children,
+  className,
+  showGradient = true,
+}: {
+  children: ReactNode;
+  className?: string;
+  showGradient?: boolean;
+}) => {
   return (
     <div className={cn('relative my-2', className)}>
       <div className="relative mx-auto max-w-sm">
@@ -26,7 +34,7 @@ const InboxPreviewContainer = ({ children, className }: { children: ReactNode; c
           {children}
         </InAppPreview>
       </div>
-      <div className="absolute -bottom-3 h-16 w-full bg-gradient-to-b from-transparent to-80% to-bg-weak" />
+      {showGradient && <div className="absolute -bottom-3 h-16 w-full bg-gradient-to-b from-transparent to-80% to-bg-weak" />}
     </div>
   );
 };
@@ -34,15 +42,17 @@ const InboxPreviewContainer = ({ children, className }: { children: ReactNode; c
 export const InboxPreview = ({
   isPreviewPending,
   previewData,
+  showGradient = true,
 }: {
   isPreviewPending: boolean;
   previewData?: GeneratePreviewResponseDto;
+  showGradient?: boolean;
 }) => {
   const previewResult = previewData?.result;
 
   if (isPreviewPending || previewData === undefined) {
     return (
-      <InboxPreviewContainer>
+      <InboxPreviewContainer showGradient={showGradient}>
         <InAppPreviewNotification>
           <InAppPreviewAvatar isPending />
           <InAppPreviewNotificationContent>
@@ -60,7 +70,7 @@ export const InboxPreview = ({
 
   if (previewResult?.type === undefined || previewResult?.type !== ChannelTypeEnum.IN_APP) {
     return (
-      <InboxPreviewContainer>
+      <InboxPreviewContainer showGradient={showGradient}>
         <InAppPreviewNotification className="flex-1 items-center">
           <InAppPreviewNotificationContent className="my-auto">
             <InAppPreviewBody className="mb-4 text-center">No preview available</InAppPreviewBody>
@@ -73,7 +83,7 @@ export const InboxPreview = ({
   const preview = previewResult.preview;
 
   return (
-    <InboxPreviewContainer>
+    <InboxPreviewContainer showGradient={showGradient}>
       <InAppPreviewNotification>
         <InAppPreviewAvatar src={preview?.avatar} />
         <InAppPreviewNotificationContent>

@@ -23,7 +23,7 @@ export function ErrorState({ stepType, onBackToPrompt }: ErrorStateProps) {
       case StepTypeEnum.PUSH:
         return <PushPreview previewData={undefined} isPreviewPending={true} />;
       case StepTypeEnum.IN_APP:
-        return <InboxPreview previewData={undefined} isPreviewPending={true} />;
+        return <InboxPreview previewData={undefined} isPreviewPending={true} showGradient={false} />;
       case StepTypeEnum.CHAT:
         return <ChatPreview previewData={undefined} isPreviewPending={true} />;
       default:

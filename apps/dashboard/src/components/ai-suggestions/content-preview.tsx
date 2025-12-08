@@ -140,7 +140,7 @@ export function ContentPreview({ stepType, content, previewPayload, suggestedPay
       case StepTypeEnum.PUSH:
         return <PushPreview previewData={previewData} isPreviewPending={false} />;
       case StepTypeEnum.IN_APP:
-        return <InboxPreview previewData={previewData} isPreviewPending={false} />;
+        return <InboxPreview previewData={previewData} isPreviewPending={false} showGradient={false} />;
       case StepTypeEnum.CHAT:
         return <ChatPreview previewData={previewData} isPreviewPending={false} />;
       default:
