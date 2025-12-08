@@ -1,9 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { StepTypeEnum } from '@novu/shared';
 import { render as mailyRender } from '@novu/maily-render';
+import { PinoLogger } from '@novu/application-generic';
 import { GenerateContentCommand } from './generate-content.command';
 import { GenerateContentResponseDto } from '../../dtos';
 
@@ -134,7 +135,9 @@ const responseWrapperSchema = (contentSchema: z.ZodTypeAny) =>
 
 @Injectable()
 export class GenerateContentUseCase {
-  private readonly logger = new Logger(GenerateContentUseCase.name);
+  constructor(private readonly logger: PinoLogger) {
+    this.logger.setContext(GenerateContentUseCase.name);
+  }
 
   private getSchemaForStepType(stepType: StepTypeEnum) {
     switch (stepType) {
@@ -220,7 +223,7 @@ Chat message guidelines:
   }
 
   async execute(command: GenerateContentCommand): Promise<GenerateContentResponseDto> {
-    this.logger.log(`Generating ${command.stepType} content for user: ${command.userId}`);
+    this.logger.info(`Generating ${command.stepType} content for user: ${command.userId}`);
 
     const schema = this.getSchemaForStepType(command.stepType);
     const systemPrompt = this.getSystemPrompt(command.stepType, command.context);
@@ -235,7 +238,7 @@ Chat message guidelines:
       })),
     });
 
-    this.logger.log(`Successfully generated ${command.stepType} content`);
+    this.logger.info(`Successfully generated ${command.stepType} content`);
 
     const response = result.object as GenerateContentResponseDto;
 
