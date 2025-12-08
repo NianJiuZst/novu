@@ -17,6 +17,7 @@ type AiSuggestionsDialogProps = {
   stepType: StepTypeEnum;
   context?: AiWorkflowContext;
   previewPayload?: string;
+  hasExistingContent?: boolean;
   onInsert: (content: GenerateContentResponse['content'], suggestedPayload?: Record<string, string>) => void;
 };
 
@@ -26,6 +27,7 @@ export function AiSuggestionsDialog({
   stepType,
   context,
   previewPayload,
+  hasExistingContent = false,
   onInsert,
 }: AiSuggestionsDialogProps) {
   const [prompt, setPrompt] = useState('');
@@ -132,17 +134,36 @@ export function AiSuggestionsDialog({
           )}
         </div>
 
-        <div className="flex shrink-0 items-center justify-end border-t border-[#f2f5f8] px-3 py-1.5">
-          <button
-            type="button"
-            onClick={handleInsert}
-            disabled={!lastResponse || isLoading}
-            className="flex items-center gap-1 rounded-lg bg-[#e5484d] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#dc3d43] disabled:bg-[#e1e4ea] disabled:text-[#99a0ae]"
-          >
-            Insert content
-            <RiCornerDownLeftLine className="size-4" />
-          </button>
-        </div>
+        {/* Footer - Only show when loading, error, or has response */}
+        {(isLoading || isError || hasResponse) && (
+          <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[#f2f5f8] px-3 py-1.5">
+            {/* Show "Keep editing" for loading, error, or success states */}
+            {(isLoading || isError || hasResponse) && (
+              <button
+                type="button"
+                onClick={reset}
+                className="flex items-center gap-0.5 rounded-lg bg-white px-2 py-1.5 text-xs font-medium text-[#525866] shadow-[0px_1px_3px_0px_rgba(14,18,27,0.12),0px_0px_0px_1px_#e1e4ea] transition-colors hover:bg-neutral-50"
+              >
+                Keep editing
+              </button>
+            )}
+            {/* Show "Replace/Insert content" only on success */}
+            {hasResponse && !isLoading && (
+              <button
+                type="button"
+                onClick={handleInsert}
+                className="flex items-center gap-1 rounded-lg border border-[rgba(255,255,255,0.12)] px-1 py-1.5 text-xs font-medium text-white shadow-[0px_1px_2px_0px_rgba(14,18,27,0.24),0px_0px_0px_1px_#dd2450] transition-colors hover:opacity-90"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 100%), linear-gradient(90deg, #dd2450 0%, #dd2450 100%)',
+                }}
+              >
+                <span className="px-1">{hasExistingContent ? 'Replace content' : 'Insert content'}</span>
+                <RiCornerDownLeftLine className="size-4" />
+              </button>
+            )}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

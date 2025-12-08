@@ -28,7 +28,7 @@ import { useIsTranslationEnabled } from '@/hooks/use-is-translation-enabled';
 import { LocalizationResourceEnum } from '@/types/translations';
 import { cn } from '@/utils/ui';
 import { FeatureFlagsKeysEnum, PermissionsEnum, StepResponseDto, StepTypeEnum, WorkflowResponseDto } from '@novu/shared';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { RiCodeBlock, RiEdit2Line, RiEyeLine, RiPlayCircleLine, RiSparklingLine } from 'react-icons/ri';
 import { useParams } from 'react-router-dom';
@@ -98,6 +98,24 @@ function StepEditorContent() {
   const isAiStepGenerationEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_AI_STEP_GENERATION_ENABLED);
 
   const showAiButton = isAiStepGenerationEnabled && AI_SUPPORTED_STEP_TYPES.includes(step.type as StepTypeEnum);
+
+  // Check if there's existing content in the step
+  const hasExistingContent = useMemo(() => {
+    const formValues = form.getValues();
+    switch (step.type) {
+      case StepTypeEnum.EMAIL:
+        return !!(formValues.subject || formValues.body);
+      case StepTypeEnum.SMS:
+      case StepTypeEnum.CHAT:
+        return !!formValues.body;
+      case StepTypeEnum.PUSH:
+        return !!(formValues.subject || formValues.body);
+      case StepTypeEnum.IN_APP:
+        return !!(formValues.subject || formValues.body);
+      default:
+        return false;
+    }
+  }, [form, step.type]);
 
   const handleAiInsert = useCallback(
     (content: GenerateContentResponse['content'], suggestedPayload?: Record<string, string>) => {
@@ -383,6 +401,7 @@ function StepEditorContent() {
               workflowDescription: workflow.description,
             }}
             previewPayload={editorValue}
+            hasExistingContent={hasExistingContent}
             onInsert={handleAiInsert}
           />
         </>
