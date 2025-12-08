@@ -23,6 +23,7 @@ import {
   SignInPage,
   SignUpPage,
   StudioPage,
+  StudioStepEditorPage,
   StudioWorkflowDetailPage,
   TemplateModal,
   TranslationsPage,
@@ -120,6 +121,10 @@ const router = createBrowserRouter([
           {
             path: ROUTES.STUDIO_WORKFLOW,
             element: <StudioWorkflowDetailPage />,
+          },
+          {
+            path: ROUTES.STUDIO_STEP_EDITOR,
+            element: <StudioStepEditorPage />,
           },
           /* Direct routes matching environment-specific paths (e.g., /topics -> /env/:envId/topics) 
              will be automatically redirected by the CatchAllRoute component */

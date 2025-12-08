@@ -1,14 +1,17 @@
 import { Background, BackgroundVariant, ReactFlow, ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { DiscoverStepOutput } from '@/types/studio';
 import { StepTypeEnum } from '@/utils/enums';
+import { buildRoute, ROUTES } from '@/utils/routes';
 import { NODE_WIDTH } from '../workflow-editor/base-node';
 import { CanvasContext } from '../workflow-editor/drag-context';
 import { edgeTypes, nodeTypes } from '../workflow-editor/node-utils';
 
 type StudioWorkflowCanvasChildProps = {
   steps: DiscoverStepOutput[];
+  workflowId: string;
 };
 
 const stepTypeMap: Record<string, StepTypeEnum> = {
@@ -63,9 +66,11 @@ function convertStepsToNodesAndEdges(steps: DiscoverStepOutput[]) {
   return { nodes, edges };
 }
 
-const StudioWorkflowCanvasChild = ({ steps }: StudioWorkflowCanvasChildProps) => {
+const StudioWorkflowCanvasChild = ({ steps, workflowId }: StudioWorkflowCanvasChildProps) => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const reactFlowInstance = useReactFlow();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const { nodes, edges } = useMemo(() => convertStepsToNodesAndEdges(steps), [steps]);
 
@@ -105,11 +110,23 @@ const StudioWorkflowCanvasChild = ({ steps }: StudioWorkflowCanvasChildProps) =>
       copyNode: () => {},
       addNode: () => {},
       removeNode: () => {},
-      selectNode: () => {},
+      selectNode: (id: string) => {
+        const stepIndex = parseInt(id.replace('step-', ''), 10);
+        if (!Number.isNaN(stepIndex) && steps[stepIndex]) {
+          const searchParams = new URLSearchParams(location.search);
+          navigate({
+            pathname: buildRoute(ROUTES.STUDIO_STEP_EDITOR, {
+              workflowId,
+              stepId: steps[stepIndex].stepId,
+            }),
+            search: searchParams.toString(),
+          });
+        }
+      },
       unselectNode: () => {},
       selectedNodeId: undefined,
     }),
-    []
+    [steps, workflowId, navigate, location.search]
   );
 
   return (
@@ -143,11 +160,16 @@ const StudioWorkflowCanvasChild = ({ steps }: StudioWorkflowCanvasChildProps) =>
   );
 };
 
-export const StudioWorkflowCanvas = ({ steps }: StudioWorkflowCanvasChildProps) => {
+type StudioWorkflowCanvasProps = {
+  steps: DiscoverStepOutput[];
+  workflowId: string;
+};
+
+export const StudioWorkflowCanvas = ({ steps, workflowId }: StudioWorkflowCanvasProps) => {
   return (
     <ReactFlowProvider>
       <div className="relative h-full w-full">
-        <StudioWorkflowCanvasChild steps={steps} />
+        <StudioWorkflowCanvasChild steps={steps} workflowId={workflowId} />
       </div>
     </ReactFlowProvider>
   );

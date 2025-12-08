@@ -10,6 +10,7 @@ export const ROUTES = {
   LOCAL_STUDIO_AUTH: '/local-studio/auth',
   STUDIO: '/studio',
   STUDIO_WORKFLOW: '/studio/workflows/:workflowId',
+  STUDIO_STEP_EDITOR: '/studio/workflows/:workflowId/steps/:stepId',
   ENV: '/env',
   SETTINGS: '/settings',
   SETTINGS_ACCOUNT: '/settings/account',

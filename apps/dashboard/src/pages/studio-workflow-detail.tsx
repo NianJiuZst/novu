@@ -96,7 +96,7 @@ export function StudioWorkflowDetailPage() {
             }
           />
           <main className="flex flex-1 flex-col overflow-hidden">
-            <StudioWorkflowCanvas steps={workflow.steps} />
+            <StudioWorkflowCanvas steps={workflow.steps} workflowId={workflow.workflowId} />
           </main>
         </div>
       </div>
