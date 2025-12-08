@@ -1,3 +1,5 @@
+export type { DiscoverStepOutput, DiscoverWorkflowOutput } from '@novu/framework/internal';
+
 type BaseStudioState = {
   testUser: {
     id: string;

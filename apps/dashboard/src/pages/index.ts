@@ -14,6 +14,7 @@ export * from './settings';
 export * from './sign-in';
 export * from './sign-up';
 export * from './studio';
+export * from './studio-workflow-detail';
 export * from './translations';
 export * from './usecase-select-page';
 export * from './welcome-page';

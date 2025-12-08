@@ -9,6 +9,7 @@ export const ROUTES = {
   ROOT: '/',
   LOCAL_STUDIO_AUTH: '/local-studio/auth',
   STUDIO: '/studio',
+  STUDIO_WORKFLOW: '/studio/workflows/:workflowId',
   ENV: '/env',
   SETTINGS: '/settings',
   SETTINGS_ACCOUNT: '/settings/account',

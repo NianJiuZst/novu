@@ -82,8 +82,12 @@ export function EnvironmentProvider({ children }: { children: React.ReactNode })
       }
 
       if (newEnvironmentSlug === 'local') {
-        if (pathname !== ROUTES.STUDIO) {
-          navigate(ROUTES.STUDIO);
+        if (pathname !== ROUTES.STUDIO && !pathname.startsWith(ROUTES.STUDIO + '/')) {
+          const searchParams = new URLSearchParams(window.location.search);
+          navigate({
+            pathname: ROUTES.STUDIO,
+            search: searchParams.toString(),
+          });
         }
 
         return;
