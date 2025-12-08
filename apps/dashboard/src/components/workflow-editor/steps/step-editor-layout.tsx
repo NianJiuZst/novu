@@ -20,6 +20,7 @@ import { parseJsonValue } from '@/components/workflow-editor/steps/utils/preview
 import { getEditorTitle } from '@/components/workflow-editor/steps/utils/step-utils';
 import { TestWorkflowDrawer } from '@/components/workflow-editor/test-workflow/test-workflow-drawer';
 import { TranslationStatus } from '@/components/workflow-editor/translation-status';
+import { useWorkflowSchema } from '@/components/workflow-editor/workflow-schema-provider';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { useFetchTranslationGroup } from '@/hooks/use-fetch-translation-group';
 import { useFetchWorkflowTestData } from '@/hooks/use-fetch-workflow-test-data';
@@ -31,6 +32,7 @@ import { useCallback, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { RiCodeBlock, RiEdit2Line, RiEyeLine, RiPlayCircleLine, RiSparklingLine } from 'react-icons/ri';
 import { useParams } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 import { Protect } from '../../../utils/protect';
 
 const AI_SUPPORTED_STEP_TYPES = [
@@ -40,6 +42,16 @@ const AI_SUPPORTED_STEP_TYPES = [
   StepTypeEnum.IN_APP,
   StepTypeEnum.CHAT,
 ];
+
+// Helper function to infer JSON Schema type from a value
+function inferTypeFromValue(value: any): 'string' | 'number' | 'boolean' | 'object' | 'array' {
+  if (typeof value === 'string') return 'string';
+  if (typeof value === 'number') return 'number';
+  if (typeof value === 'boolean') return 'boolean';
+  if (Array.isArray(value)) return 'array';
+  if (typeof value === 'object' && value !== null) return 'object';
+  return 'string'; // Default to string
+}
 
 // Generate sample values for common payload variable names
 function getSampleValueForVariable(varName: string): string {
@@ -79,6 +91,7 @@ function StepEditorContent() {
   const [isTestDrawerOpen, setIsTestDrawerOpen] = useState(false);
   const [isAiDialogOpen, setIsAiDialogOpen] = useState(false);
   const { testData } = useFetchWorkflowTestData({ workflowSlug });
+  const { addProperty, getSchemaPropertyByKey, isPayloadSchemaEnabled } = useWorkflowSchema();
   const isTranslationsEnabled = useIsTranslationEnabled({
     isTranslationEnabledOnResource: workflow?.isTranslationEnabled ?? false,
   });
@@ -88,21 +101,14 @@ function StepEditorContent() {
 
   const handleAiInsert = useCallback(
     (content: GenerateContentResponse['content'], suggestedPayload?: Record<string, string>) => {
-      console.log('handleAiInsert called', { stepType: step.type, content, suggestedPayload });
       
       // Insert content into form
       switch (step.type) {
         case StepTypeEnum.EMAIL:
           if ('subject' in content && 'body' in content) {
             const emailContent = content as EmailContent;
-            console.log('Inserting email content:', {
-              subject: emailContent.subject,
-              bodyType: typeof emailContent.body,
-              body: emailContent.body,
-            });
             
             const bodyStr = typeof emailContent.body === 'object' ? JSON.stringify(emailContent.body) : emailContent.body;
-            console.log('Setting body as:', bodyStr);
             
             // Clear body first
             form.setValue('body', '');
@@ -114,7 +120,6 @@ function StepEditorContent() {
                 form.setValue('body', bodyStr);
                 // Trigger form update to force all fields to re-render
                 form.trigger(['subject', 'body']);
-                console.log('Form values after insert:', form.getValues());
               });
             });
           }
@@ -205,6 +210,32 @@ function StepEditorContent() {
             },
           };
           setEditorValue(JSON.stringify(mergedPayload, null, 2));
+
+          // Add new payload properties to schema if payload schema is enabled
+          if (isPayloadSchemaEnabled) {
+            for (const [key, value] of Object.entries(newPayloadKeys)) {
+              // Check if property already exists in schema
+              const existingProperty = getSchemaPropertyByKey(key);
+              
+              if (!existingProperty) {
+                // Infer type from the sample value
+                const inferredType = inferTypeFromValue(value);
+                
+                // Add property to schema
+                addProperty({
+                  id: uuidv4(),
+                  keyName: key,
+                  definition: {
+                    type: inferredType,
+                    description: `AI-generated payload variable`,
+                  },
+                  isRequired: false,
+                  isNullable: false,
+                });
+                
+              }
+            }
+          }
         }
       } catch {
         // If parsing fails, ignore the suggested payload
@@ -212,7 +243,7 @@ function StepEditorContent() {
 
       setIsAiDialogOpen(false);
     },
-    [form, step.type, editorValue, setEditorValue]
+    [form, step.type, editorValue, setEditorValue, isPayloadSchemaEnabled, addProperty, getSchemaPropertyByKey]
   );
 
   // Fetch translation group to get outdated locales status

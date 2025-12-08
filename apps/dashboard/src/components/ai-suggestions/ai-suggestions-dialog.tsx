@@ -178,9 +178,7 @@ export function AiSuggestionsDialog({
   }, [stepType]);
 
   const handleInsert = useCallback(() => {
-    console.log('handleInsert clicked', { lastResponse });
     if (lastResponse?.content) {
-      console.log('Calling onInsert with:', { content: lastResponse.content, suggestedPayload: lastResponse.suggestedPayload });
       onInsert(lastResponse.content, lastResponse.suggestedPayload);
       handleClose();
     } else {
