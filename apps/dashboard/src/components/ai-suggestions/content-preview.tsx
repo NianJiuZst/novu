@@ -153,8 +153,15 @@ export function ContentPreview({ stepType, content, previewPayload, suggestedPay
   };
 
   return (
-    <div className="flex flex-1 items-center justify-center overflow-hidden p-8">
-      <div className="h-full w-full max-w-4xl overflow-auto">{renderPreview()}</div>
+    <div className="flex flex-1 flex-col items-center justify-between overflow-hidden p-8">
+      <div className="flex w-full flex-1 items-center justify-center overflow-auto">
+        <div className="h-full w-full max-w-4xl">{renderPreview()}</div>
+      </div>
+      <div className="flex shrink-0 flex-col items-center pt-4">
+        <p className="text-center text-xs font-medium leading-4 text-[#99a0ae]">
+          You can always edit your content once inserted into the step editor
+        </p>
+      </div>
     </div>
   );
 }
