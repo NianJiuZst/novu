@@ -1,5 +1,5 @@
 import { Novu } from '@novu/api';
-import { WorkflowRunRepository } from '@novu/application-generic';
+import { ClickHouseService, WorkflowRunRepository } from '@novu/application-generic';
 import { NotificationTemplateEntity, SubscriberEntity } from '@novu/dal';
 import { EmailBlockTypeEnum, StepTypeEnum } from '@novu/shared';
 import { SubscribersService, UserSession } from '@novu/testing';
@@ -13,8 +13,13 @@ describe('Workflow Run - GET /v1/activity/workflow-runs/:workflowRunId #novu-v2'
   let subscriberService: SubscribersService;
   let novuClient: Novu;
   let workflowRunRepository: WorkflowRunRepository;
+  const clickHouseService = new ClickHouseService();
 
   beforeEach(async () => {
+    await clickHouseService.init();
+
+    (process.env as any).IS_WORKFLOW_RUN_LOGS_WRITE_ENABLED = 'true';
+
     session = new UserSession();
     await session.initialize();
     subscriberService = new SubscribersService(session.organization._id, session.environment._id);
@@ -37,6 +42,10 @@ describe('Workflow Run - GET /v1/activity/workflow-runs/:workflowRunId #novu-v2'
     });
   });
 
+  afterEach(() => {
+    delete (process.env as any).IS_WORKFLOW_RUN_LOGS_WRITE_ENABLED;
+  });
+
   it('should return workflow run details by ID', async () => {
     await novuClient.trigger({
       workflowId: template.triggers[0].identifier,
@@ -46,6 +55,7 @@ describe('Workflow Run - GET /v1/activity/workflow-runs/:workflowRunId #novu-v2'
 
     await session.waitForWorkflowQueueCompletion();
     await session.waitForSubscriberQueueCompletion();
+    await session.waitForStandardQueueCompletion();
 
     const workflowRun = await workflowRunRepository.findOne({
       where: {

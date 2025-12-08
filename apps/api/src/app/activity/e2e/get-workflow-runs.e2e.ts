@@ -6,8 +6,8 @@ import { SubscribersService, UserSession } from '@novu/testing';
 import { expect } from 'chai';
 import { sleep } from '../../events/e2e/utils/sleep.util';
 import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
-import { GetWorkflowRunsResponseDto } from '../dtos/workflow-runs-response.dto';
 import { WorkflowRunStatusDtoEnum } from '../dtos/shared.dto';
+import { GetWorkflowRunsResponseDto } from '../dtos/workflow-runs-response.dto';
 
 describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs #novu-v2', () => {
   let session: UserSession;
@@ -162,6 +162,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
 
     await session.waitForWorkflowQueueCompletion();
     await session.waitForSubscriberQueueCompletion();
+    await session.waitForStandardQueueCompletion();
 
     // Force ClickHouse merge to deduplicate workflow runs
     const databaseName = process.env.CLICK_HOUSE_DATABASE || 'test_logs';
@@ -214,6 +215,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
 
     await session.waitForWorkflowQueueCompletion();
     await session.waitForSubscriberQueueCompletion();
+    await session.waitForStandardQueueCompletion();
 
     const fetchedRunNumbers = new Set<number>();
     const forwardPages: Array<{
@@ -388,6 +390,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
 
     await session.waitForWorkflowQueueCompletion();
     await session.waitForSubscriberQueueCompletion();
+    await session.waitForStandardQueueCompletion();
 
     const { body } = await session.testAgent
       .get('/v1/activity/workflow-runs')
@@ -421,6 +424,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
 
     await session.waitForWorkflowQueueCompletion();
     await session.waitForSubscriberQueueCompletion();
+    await session.waitForStandardQueueCompletion();
 
     const { body } = await session.testAgent
       .get('/v1/activity/workflow-runs')
@@ -452,6 +456,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
 
     await session.waitForWorkflowQueueCompletion();
     await session.waitForSubscriberQueueCompletion();
+    await session.waitForStandardQueueCompletion();
 
     const { body } = await session.testAgent
       .get('/v1/activity/workflow-runs')
@@ -483,6 +488,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
 
     await session.waitForWorkflowQueueCompletion();
     await session.waitForSubscriberQueueCompletion();
+    await session.waitForStandardQueueCompletion();
 
     const { body } = await session.testAgent
       .get('/v1/activity/workflow-runs')
@@ -530,6 +536,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
 
     await session.waitForWorkflowQueueCompletion();
     await session.waitForSubscriberQueueCompletion();
+    await session.waitForStandardQueueCompletion();
 
     const beforeTrigger = new Date();
 
@@ -542,6 +549,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
 
     await session.waitForWorkflowQueueCompletion();
     await session.waitForSubscriberQueueCompletion();
+    await session.waitForStandardQueueCompletion();
 
     const afterTrigger = new Date();
 
@@ -554,6 +562,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
 
     await session.waitForWorkflowQueueCompletion();
     await session.waitForSubscriberQueueCompletion();
+    await session.waitForStandardQueueCompletion();
 
     const { body } = await session.testAgent
       .get('/v1/activity/workflow-runs')
@@ -589,6 +598,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
 
     await session.waitForWorkflowQueueCompletion();
     await session.waitForSubscriberQueueCompletion();
+    await session.waitForStandardQueueCompletion();
 
     const { body } = await session.testAgent
       .get('/v1/activity/workflow-runs')
@@ -626,6 +636,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
 
     await session.waitForWorkflowQueueCompletion();
     await session.waitForSubscriberQueueCompletion();
+    await session.waitForStandardQueueCompletion();
 
     // Filter by EMAIL channel only
     const { body: bodyEmailFiltered } = (await session.testAgent

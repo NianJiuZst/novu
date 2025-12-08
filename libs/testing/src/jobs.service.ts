@@ -4,6 +4,8 @@ import { JobTopicNameEnum } from '@novu/shared';
 import { Queue } from 'bullmq';
 import { TestingQueueService } from './testing-queue.service';
 
+const DEFAULT_QUEUE_WAIT_TIMEOUT = process.env.CI ? 20000 : 10000;
+
 /**
  * This service is contains utilities to manage the jobs in the Redis queue and Mongo during testing.
  */
@@ -24,7 +26,7 @@ export class JobsService {
   public async waitForJobCompletion({
     templateId,
     organizationId,
-    maxWaitTime = 10000,
+    maxWaitTime = DEFAULT_QUEUE_WAIT_TIMEOUT,
   }: {
     templateId?: string | string[];
     organizationId?: string | string[];
@@ -74,7 +76,7 @@ export class JobsService {
   public async waitForDbJobCompletion({
     templateId,
     organizationId,
-    maxWaitTime = 10000,
+    maxWaitTime = DEFAULT_QUEUE_WAIT_TIMEOUT,
   }: {
     templateId?: string | string[];
     organizationId?: string | string[];
@@ -118,7 +120,7 @@ export class JobsService {
    * This is useful in testing when you want the trigger to be asserted in specific parts of the execution.
    * For example, you can wait for the workflow queue to be completed and then assert that the trigger was sent to the subscriber queue.
    */
-  public async waitForWorkflowQueueCompletion(maxWaitTime = 10000) {
+  public async waitForWorkflowQueueCompletion(maxWaitTime = DEFAULT_QUEUE_WAIT_TIMEOUT) {
     return this.waitQueueUntil(
       ({ activeWorkflowJobsCount, waitingWorkflowJobsCount }) => activeWorkflowJobsCount + waitingWorkflowJobsCount > 0,
       maxWaitTime
@@ -136,7 +138,7 @@ export class JobsService {
    * This is useful in testing when you want the trigger to be asserted in specific parts of the execution.
    * For example, you can wait for the subscriber queue to be completed and then assert that the trigger was sent to the standard queue.
    */
-  public async waitForSubscriberQueueCompletion(maxWaitTime = 10000) {
+  public async waitForSubscriberQueueCompletion(maxWaitTime = DEFAULT_QUEUE_WAIT_TIMEOUT) {
     return this.waitQueueUntil(
       ({ activeSubscriberJobsCount, waitingSubscriberJobsCount }) =>
         activeSubscriberJobsCount + waitingSubscriberJobsCount > 0,
@@ -155,7 +157,7 @@ export class JobsService {
    * This is useful in testing when you want the trigger to be asserted in specific parts of the execution.
    * For example, you can wait for the standard queue to be completed and then assert against the stage of the job in Mongo
    */
-  public async waitForStandardQueueCompletion(maxWaitTime = 10000) {
+  public async waitForStandardQueueCompletion(maxWaitTime = DEFAULT_QUEUE_WAIT_TIMEOUT) {
     return this.waitQueueUntil(
       ({ activeStandardJobsCount, waitingStandardJobsCount }) => activeStandardJobsCount + waitingStandardJobsCount > 0,
       maxWaitTime
@@ -164,7 +166,7 @@ export class JobsService {
 
   public async waitQueueUntil(
     cb: (metrics: Awaited<ReturnType<typeof this.getQueueMetrics>>) => boolean,
-    maxWaitTime = 10000
+    maxWaitTime = DEFAULT_QUEUE_WAIT_TIMEOUT
   ) {
     const startTime = Date.now();
 
