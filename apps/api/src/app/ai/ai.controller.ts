@@ -1,23 +1,21 @@
 import { Body, ClassSerializerInterceptor, Controller, Post, UseInterceptors } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiExcludeController, ApiOperation } from '@nestjs/swagger';
 import { UserSessionData } from '@novu/shared';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
-import { ExternalApiAccessible } from '../auth/framework/external-api.decorator';
 import { ApiCommonResponses, ApiResponse } from '../shared/framework/response.decorator';
 import { UserSession } from '../shared/framework/user.decorator';
 import { GenerateContentRequestDto, GenerateContentResponseDto } from './dtos';
 import { GenerateContentCommand, GenerateContentUseCase } from './usecases/generate-content';
 
 @ApiCommonResponses()
+@ApiExcludeController()
 @Controller({ path: '/ai', version: '1' })
 @UseInterceptors(ClassSerializerInterceptor)
 @RequireAuthentication()
-@ApiTags('AI')
 export class AiController {
   constructor(private generateContentUseCase: GenerateContentUseCase) {}
 
   @Post('/content/generate')
-  @ExternalApiAccessible()
   @ApiOperation({
     summary: 'Generate step content using AI',
     description:
