@@ -39,7 +39,7 @@
     "admin:remove-organization": "cross-env NODE_ENV=local MIGRATION=true ts-node --transpileOnly ./admin/remove-organization.ts"
   },
   "dependencies": {
-    "@ai-sdk/openai": "2.1.0-beta.16",
+    "@ai-sdk/openai": "2.0.79",
     "@aws-sdk/client-secrets-manager": "^3.716.0",
     "@godaddy/terminus": "^4.12.1",
     "@google-cloud/storage": "^6.2.3",
@@ -73,7 +73,7 @@
     "@types/newrelic": "^9.14.6",
     "@types/request-ip": "^0.0.41",
     "@upstash/ratelimit": "^0.4.4",
-    "ai": "5.1.0-beta.28",
+    "ai": "5.0.108",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "axios": "^1.9.0",
