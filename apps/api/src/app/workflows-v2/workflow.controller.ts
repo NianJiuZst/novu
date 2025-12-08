@@ -154,6 +154,8 @@ export class WorkflowController {
     @Param('workflowId', ParseSlugIdPipe) workflowIdOrInternalId: string,
     @Body() updateWorkflowDto: UpdateWorkflowDto
   ): Promise<WorkflowResponseDto> {
+    console.log('trigger e2e run');
+
     const upsertSteps = this.normalizeSteps(updateWorkflowDto.steps);
 
     return await this.upsertWorkflowUseCase.execute(
