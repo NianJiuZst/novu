@@ -73,4 +73,3 @@ export function getChannelLabel(stepType: StepTypeEnum): string {
 
   return labels[stepType] || 'content';
 }
-

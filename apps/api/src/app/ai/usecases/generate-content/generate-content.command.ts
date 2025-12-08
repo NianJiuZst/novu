@@ -1,6 +1,6 @@
 import { BaseCommand } from '@novu/application-generic';
-import { IsArray, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 import { StepTypeEnum } from '@novu/shared';
+import { IsArray, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class GenerateContentCommand extends BaseCommand {
   @IsEnum(StepTypeEnum)
@@ -34,6 +34,3 @@ export class GenerateContentCommand extends BaseCommand {
   @IsNotEmpty()
   readonly userId: string;
 }
-
-
-

@@ -67,4 +67,3 @@ export async function generateAiContent(request: GenerateContentRequest): Promis
 
   return response.data;
 }
-

@@ -67,6 +67,3 @@ export class GenerateContentResponseDto {
   })
   suggestedPayload?: Record<string, string>;
 }
-
-
-

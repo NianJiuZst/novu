@@ -161,7 +161,8 @@ function StepEditorContent() {
               }}
               className="flex items-center justify-center gap-1 overflow-hidden rounded-full border border-[#ff884d] py-2 pl-2 pr-2.5 shadow-[0px_18px_88px_-4px_rgba(28,40,64,0.14),0px_1px_2px_0px_rgba(0,0,0,0.05)] transition-all hover:shadow-xl"
               style={{
-                background: 'linear-gradient(113.916deg, rgba(0, 0, 0, 0) 12.861%, rgba(0, 0, 0, 0.02) 117.52%), linear-gradient(90deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%)',
+                background:
+                  'linear-gradient(113.916deg, rgba(0, 0, 0, 0) 12.861%, rgba(0, 0, 0, 0.02) 117.52%), linear-gradient(90deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%)',
               }}
             >
               <RiSparklingLine className="size-4" style={{ color: '#ff884d' }} />

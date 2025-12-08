@@ -146,7 +146,9 @@ export function ContentPreview({ stepType, content, previewPayload, suggestedPay
       default:
         return (
           <div className="max-w-md rounded-lg border border-[#e1e4ea] bg-[#fbfbfb] p-4">
-            <pre className="whitespace-pre-wrap text-left text-xs text-[#525866]">{JSON.stringify(content, null, 2)}</pre>
+            <pre className="whitespace-pre-wrap text-left text-xs text-[#525866]">
+              {JSON.stringify(content, null, 2)}
+            </pre>
           </div>
         );
     }
@@ -165,4 +167,3 @@ export function ContentPreview({ stepType, content, previewPayload, suggestedPay
     </div>
   );
 }
-

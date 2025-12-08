@@ -40,6 +40,3 @@ export class AiController {
     );
   }
 }
-
-
-

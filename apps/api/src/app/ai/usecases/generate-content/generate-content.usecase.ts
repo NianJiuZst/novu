@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
 import { openai } from '@ai-sdk/openai';
+import { Injectable } from '@nestjs/common';
+import { PinoLogger } from '@novu/application-generic';
+import { render as mailyRender } from '@novu/maily-render';
+import { StepTypeEnum } from '@novu/shared';
 import { generateObject } from 'ai';
 import { z } from 'zod';
-import { StepTypeEnum } from '@novu/shared';
-import { render as mailyRender } from '@novu/maily-render';
-import { PinoLogger } from '@novu/application-generic';
-import { GenerateContentCommand } from './generate-content.command';
 import { GenerateContentResponseDto } from '../../dtos';
+import { GenerateContentCommand } from './generate-content.command';
 
 const mailyTextNodeSchema = z.object({
   type: z.literal('text'),
@@ -37,7 +37,9 @@ const mailyParagraphSchema = z.object({
 const mailyHeadingSchema = z.object({
   type: z.literal('heading'),
   attrs: z.object({
-    level: z.union([z.literal(1), z.literal(2), z.literal(3)]).describe('Heading level: 1 for main title, 2 for section, 3 for subsection'),
+    level: z
+      .union([z.literal(1), z.literal(2), z.literal(3)])
+      .describe('Heading level: 1 for main title, 2 for section, 3 for subsection'),
     textAlign: z.enum(['left', 'center', 'right']).nullable().optional(),
   }),
   content: z.array(z.union([mailyTextNodeSchema, mailyVariableNodeSchema])).optional(),
@@ -260,6 +262,3 @@ Chat message guidelines:
     return response;
   }
 }
-
-
-

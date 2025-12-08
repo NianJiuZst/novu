@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
 import { StepTypeEnum } from '@novu/shared';
+import { Type } from 'class-transformer';
+import { IsArray, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 export class MessageDto {
   @ApiProperty({
@@ -71,6 +71,3 @@ export class GenerateContentRequestDto {
   @Type(() => WorkflowContextDto)
   context?: WorkflowContextDto;
 }
-
-
-

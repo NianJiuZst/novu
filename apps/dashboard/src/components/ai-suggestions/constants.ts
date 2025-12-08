@@ -37,4 +37,3 @@ export const PROMPT_SUGGESTIONS_BY_STEP: Record<StepTypeEnum, string[]> = {
   [StepTypeEnum.THROTTLE]: [],
   [StepTypeEnum.CUSTOM]: [],
 };
-

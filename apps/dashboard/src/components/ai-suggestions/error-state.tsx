@@ -157,4 +157,3 @@ function EmailErrorPreview({ onBackToPrompt }: { onBackToPrompt: () => void }) {
     </div>
   );
 }
-
