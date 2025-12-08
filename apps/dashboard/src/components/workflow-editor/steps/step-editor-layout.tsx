@@ -1,11 +1,3 @@
-import {
-  ChatContent,
-  EmailContent,
-  GenerateContentResponse,
-  InAppContent,
-  PushContent,
-  SmsContent,
-} from '@/api/ai';
 import { AiSuggestionsDialog } from '@/components/ai-suggestions';
 import { IssuesPanel } from '@/components/issues-panel';
 import { Button } from '@/components/primitives/button';
@@ -20,62 +12,17 @@ import { parseJsonValue } from '@/components/workflow-editor/steps/utils/preview
 import { getEditorTitle } from '@/components/workflow-editor/steps/utils/step-utils';
 import { TestWorkflowDrawer } from '@/components/workflow-editor/test-workflow/test-workflow-drawer';
 import { TranslationStatus } from '@/components/workflow-editor/translation-status';
-import { useWorkflowSchema } from '@/components/workflow-editor/workflow-schema-provider';
-import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { useFetchTranslationGroup } from '@/hooks/use-fetch-translation-group';
 import { useFetchWorkflowTestData } from '@/hooks/use-fetch-workflow-test-data';
 import { useIsTranslationEnabled } from '@/hooks/use-is-translation-enabled';
 import { LocalizationResourceEnum } from '@/types/translations';
 import { cn } from '@/utils/ui';
-import { FeatureFlagsKeysEnum, PermissionsEnum, StepResponseDto, StepTypeEnum, WorkflowResponseDto } from '@novu/shared';
-import { useCallback, useMemo, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { PermissionsEnum, StepResponseDto, StepTypeEnum, WorkflowResponseDto } from '@novu/shared';
+import { useState } from 'react';
 import { RiCodeBlock, RiEdit2Line, RiEyeLine, RiPlayCircleLine, RiSparklingLine } from 'react-icons/ri';
 import { useParams } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 import { Protect } from '../../../utils/protect';
-
-const AI_SUPPORTED_STEP_TYPES = [
-  StepTypeEnum.EMAIL,
-  StepTypeEnum.SMS,
-  StepTypeEnum.PUSH,
-  StepTypeEnum.IN_APP,
-  StepTypeEnum.CHAT,
-];
-
-// Helper function to infer JSON Schema type from a value
-function inferTypeFromValue(value: any): 'string' | 'number' | 'boolean' | 'object' | 'array' {
-  if (typeof value === 'string') return 'string';
-  if (typeof value === 'number') return 'number';
-  if (typeof value === 'boolean') return 'boolean';
-  if (Array.isArray(value)) return 'array';
-  if (typeof value === 'object' && value !== null) return 'object';
-  return 'string'; // Default to string
-}
-
-// Generate sample values for common payload variable names
-function getSampleValueForVariable(varName: string): string {
-  const lowerName = varName.toLowerCase();
-  if (lowerName.includes('url') || lowerName.includes('link')) {
-    return 'https://example.com';
-  }
-  if (lowerName.includes('email')) {
-    return 'user@example.com';
-  }
-  if (lowerName.includes('name') || lowerName.includes('company')) {
-    return 'Acme Inc';
-  }
-  if (lowerName.includes('order') || lowerName.includes('number') || lowerName.includes('id')) {
-    return '#12345';
-  }
-  if (lowerName.includes('amount') || lowerName.includes('price') || lowerName.includes('total')) {
-    return '$99.00';
-  }
-  if (lowerName.includes('date') || lowerName.includes('time')) {
-    return new Date().toLocaleDateString();
-  }
-  return `sample_${varName}`;
-}
+import { useAiSuggestions } from './use-ai-suggestions';
 
 type StepEditorLayoutProps = {
   workflow: WorkflowResponseDto;
@@ -84,185 +31,24 @@ type StepEditorLayoutProps = {
 };
 
 function StepEditorContent() {
-  const { step, isSubsequentLoad, editorValue, setEditorValue, workflow, selectedLocale, setSelectedLocale } = useStepEditor();
-  const form = useFormContext();
+  const { step, isSubsequentLoad, editorValue, setEditorValue, workflow, selectedLocale, setSelectedLocale } =
+    useStepEditor();
   const editorTitle = getEditorTitle(step.type);
   const { workflowSlug = '' } = useParams<{ workflowSlug: string }>();
   const [isTestDrawerOpen, setIsTestDrawerOpen] = useState(false);
-  const [isAiDialogOpen, setIsAiDialogOpen] = useState(false);
   const { testData } = useFetchWorkflowTestData({ workflowSlug });
-  const { addProperty, getSchemaPropertyByKey, isPayloadSchemaEnabled } = useWorkflowSchema();
   const isTranslationsEnabled = useIsTranslationEnabled({
     isTranslationEnabledOnResource: workflow?.isTranslationEnabled ?? false,
   });
-  const isAiStepGenerationEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_AI_STEP_GENERATION_ENABLED);
 
-  const showAiButton = isAiStepGenerationEnabled && AI_SUPPORTED_STEP_TYPES.includes(step.type as StepTypeEnum);
-
-  // Check if there's existing content in the step
-  const hasExistingContent = useMemo(() => {
-    const formValues = form.getValues();
-    switch (step.type) {
-      case StepTypeEnum.EMAIL:
-        return !!(formValues.subject || formValues.body);
-      case StepTypeEnum.SMS:
-      case StepTypeEnum.CHAT:
-        return !!formValues.body;
-      case StepTypeEnum.PUSH:
-        return !!(formValues.subject || formValues.body);
-      case StepTypeEnum.IN_APP:
-        return !!(formValues.subject || formValues.body);
-      default:
-        return false;
-    }
-  }, [form, step.type]);
-
-  const handleAiInsert = useCallback(
-    (content: GenerateContentResponse['content'], suggestedPayload?: Record<string, string>) => {
-      
-      // Insert content into form
-      switch (step.type) {
-        case StepTypeEnum.EMAIL:
-          if ('subject' in content && 'body' in content) {
-            const emailContent = content as EmailContent;
-            
-            const bodyStr = typeof emailContent.body === 'object' ? JSON.stringify(emailContent.body) : emailContent.body;
-            
-            // Clear body first
-            form.setValue('body', '');
-            
-            // Use requestAnimationFrame to ensure the clear is processed first
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                form.setValue('subject', emailContent.subject);
-                form.setValue('body', bodyStr);
-                // Trigger form update to force all fields to re-render
-                form.trigger(['subject', 'body']);
-              });
-            });
-          }
-          break;
-        case StepTypeEnum.SMS:
-        case StepTypeEnum.CHAT:
-          if ('body' in content) {
-            form.setValue('body', (content as SmsContent | ChatContent).body, { shouldDirty: true, shouldTouch: true });
-          }
-          break;
-        case StepTypeEnum.PUSH:
-          if ('subject' in content && 'body' in content) {
-            const pushContent = content as PushContent;
-            form.setValue('subject', pushContent.subject, { shouldDirty: true, shouldTouch: true });
-            form.setValue('body', pushContent.body, { shouldDirty: true, shouldTouch: true });
-          }
-          break;
-        case StepTypeEnum.IN_APP:
-          if ('body' in content) {
-            const inAppContent = content as InAppContent;
-            if (inAppContent.subject) {
-              form.setValue('subject', inAppContent.subject, { shouldDirty: true, shouldTouch: true });
-            }
-            form.setValue('body', inAppContent.body, { shouldDirty: true, shouldTouch: true });
-            // Handle primary action
-            if (inAppContent.primaryAction) {
-              form.setValue('primaryAction.label', inAppContent.primaryAction.label, { shouldDirty: true, shouldTouch: true });
-              if (inAppContent.primaryAction.url) {
-                form.setValue('primaryAction.redirect.url', inAppContent.primaryAction.url, { shouldDirty: true, shouldTouch: true });
-              }
-            }
-            // Handle secondary action
-            if (inAppContent.secondaryAction) {
-              form.setValue('secondaryAction.label', inAppContent.secondaryAction.label, { shouldDirty: true, shouldTouch: true });
-              if (inAppContent.secondaryAction.url) {
-                form.setValue('secondaryAction.redirect.url', inAppContent.secondaryAction.url, { shouldDirty: true, shouldTouch: true });
-              }
-            }
-          }
-          break;
-      }
-
-      // Merge suggested payload into preview sandbox (only add new keys, don't overwrite existing)
-      try {
-        const currentPayload = JSON.parse(editorValue || '{}');
-        const existingPayload = currentPayload.payload || {};
-
-        // Get payload variables from AI suggestion or extract from content
-        // Filter out any subscriber variables that might have been incorrectly included
-        let payloadToMerge: Record<string, string> = {};
-        if (suggestedPayload) {
-          for (const [key, value] of Object.entries(suggestedPayload)) {
-            // Skip subscriber variables - they come from subscriber data, not payload
-            if (!key.startsWith('subscriber') && !key.includes('subscriber.')) {
-              payloadToMerge[key] = value;
-            }
-          }
-        }
-
-        // If AI didn't provide suggestions, extract payload variables from content
-        if (Object.keys(payloadToMerge).length === 0) {
-          const contentStr = JSON.stringify(content);
-          const payloadVarMatches = contentStr.matchAll(/\{\{payload\.([^}]+)\}\}/g);
-          for (const match of payloadVarMatches) {
-            const varName = match[1].trim();
-            if (!payloadToMerge[varName]) {
-              // Provide a sample value based on variable name
-              payloadToMerge[varName] = getSampleValueForVariable(varName);
-            }
-          }
-        }
-
-        // Only add keys that don't already exist
-        const newPayloadKeys: Record<string, string> = {};
-        for (const [key, value] of Object.entries(payloadToMerge)) {
-          if (!(key in existingPayload)) {
-            newPayloadKeys[key] = value;
-          }
-        }
-
-        // Only update if there are new keys to add
-        if (Object.keys(newPayloadKeys).length > 0) {
-          const mergedPayload = {
-            ...currentPayload,
-            payload: {
-              ...existingPayload,
-              ...newPayloadKeys,
-            },
-          };
-          setEditorValue(JSON.stringify(mergedPayload, null, 2));
-
-          // Add new payload properties to schema if payload schema is enabled
-          if (isPayloadSchemaEnabled) {
-            for (const [key, value] of Object.entries(newPayloadKeys)) {
-              // Check if property already exists in schema
-              const existingProperty = getSchemaPropertyByKey(key);
-              
-              if (!existingProperty) {
-                // Infer type from the sample value
-                const inferredType = inferTypeFromValue(value);
-                
-                // Add property to schema
-                addProperty({
-                  id: uuidv4(),
-                  keyName: key,
-                  definition: {
-                    type: inferredType,
-                    description: `AI-generated payload variable`,
-                  },
-                  isRequired: false,
-                  isNullable: false,
-                });
-                
-              }
-            }
-          }
-        }
-      } catch {
-        // If parsing fails, ignore the suggested payload
-      }
-
-      setIsAiDialogOpen(false);
-    },
-    [form, step.type, editorValue, setEditorValue, isPayloadSchemaEnabled, addProperty, getSchemaPropertyByKey]
-  );
+  // AI Suggestions
+  const { showAiButton, isAiDialogOpen, setIsAiDialogOpen, hasExistingContent, handleAiInsert, aiContext } =
+    useAiSuggestions({
+      workflow,
+      step,
+      editorValue,
+      setEditorValue,
+    });
 
   // Fetch translation group to get outdated locales status
   const { data: translationGroup } = useFetchTranslationGroup({
@@ -396,10 +182,7 @@ function StepEditorContent() {
             open={isAiDialogOpen}
             onOpenChange={setIsAiDialogOpen}
             stepType={step.type as StepTypeEnum}
-            context={{
-              workflowName: workflow.name,
-              workflowDescription: workflow.description,
-            }}
+            context={aiContext}
             previewPayload={editorValue}
             hasExistingContent={hasExistingContent}
             onInsert={handleAiInsert}
