@@ -6,7 +6,7 @@ import { expect } from 'chai';
 import { WorkflowRunStatusDtoEnum } from '../dtos/shared.dto';
 import { GetWorkflowRunsResponseDto } from '../dtos/workflow-runs-response.dto';
 
-describe.only('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs #novu-v2', () => {
+describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs #novu-v2', () => {
   let session: UserSession;
   let template: NotificationTemplateEntity;
   let inAppWorkflow: NotificationTemplateEntity;
