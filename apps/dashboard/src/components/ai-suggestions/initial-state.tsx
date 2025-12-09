@@ -86,7 +86,8 @@ export function InitialState({
           <button
             type="button"
             onClick={onFeelingLucky}
-            className="flex items-center gap-0.5 rounded-lg bg-white p-1.5 text-xs font-medium text-[#525866] shadow-[0px_1px_3px_0px_rgba(14,18,27,0.12),0px_0px_0px_1px_#e1e4ea] transition-colors hover:bg-neutral-50"
+            disabled={suggestions.length === 0}
+            className="flex items-center gap-0.5 rounded-lg bg-white p-1.5 text-xs font-medium text-[#525866] shadow-[0px_1px_3px_0px_rgba(14,18,27,0.12),0px_0px_0px_1px_#e1e4ea] transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span className="px-1">I'm feeling lucky</span>
             <RiSparklingLine className="size-4 text-[#525866]" />

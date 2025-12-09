@@ -32,7 +32,7 @@ export function AiSuggestionsDialog({
 }: AiSuggestionsDialogProps) {
   const [prompt, setPrompt] = useState('');
   const [visibleSuggestionsCount, setVisibleSuggestionsCount] = useState(2);
-  const { isLoading, isError, error, lastResponse, generate, reset } = useGenerateAiContent({
+  const { isLoading, isError, lastResponse, generate, reset } = useGenerateAiContent({
     stepType,
     context,
   });
@@ -62,6 +62,11 @@ export function AiSuggestionsDialog({
 
   const handleFeelingLucky = useCallback(() => {
     const suggestions = PROMPT_SUGGESTIONS_BY_STEP[stepType] || [];
+
+    if (suggestions.length === 0) {
+      return;
+    }
+
     const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
     setPrompt(randomSuggestion);
     generate(randomSuggestion);
