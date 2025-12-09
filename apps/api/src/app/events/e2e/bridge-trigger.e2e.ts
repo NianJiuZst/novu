@@ -1953,6 +1953,8 @@ describe('Novu-Hosted Bridge Trigger #novu-v2', () => {
   it('should execute a Novu-managed workflow', async () => {
     // Log current Redis jobs count before starting the test
     const jobsService = new JobsService();
+    await jobsService.clearAllQueues();
+
     let currentMetrics = await (jobsService as any).getQueueMetrics();
     console.log(
       `[Test] Starting 'should execute a Novu-managed workflow' - Current Redis jobs count: ${currentMetrics.totalCount}`
