@@ -1,6 +1,6 @@
 import { RulesLogic } from 'json-logic-js';
 
-import { ExtendedOperations, extractRuleFromTitled, TitledRule } from './query-parser.service';
+import { ExtendedOperations, extractRuleFromWrapped, AnnotatedRule } from './query-parser.service';
 import { COMPARISON_OPERATORS, JsonComparisonOperatorEnum, JsonLogicOperatorEnum } from './types';
 
 type QueryIssue = {
@@ -276,9 +276,9 @@ export class QueryValidatorService {
     }
   }
 
-  public validateQueryRules(input: RulesLogic<ExtendedOperations> | TitledRule): QueryIssue[] {
+  public validateQueryRules(input: RulesLogic<ExtendedOperations> | AnnotatedRule): QueryIssue[] {
     const issues: QueryIssue[] = [];
-    const node = extractRuleFromTitled(input);
+    const node = extractRuleFromWrapped(input);
 
     this.validateNode({ node, issues });
 

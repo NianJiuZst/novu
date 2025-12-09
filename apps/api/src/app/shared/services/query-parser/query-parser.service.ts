@@ -1,4 +1,4 @@
-import jsonLogic, { RulesLogic } from 'json-logic-js';
+import jsonLogic, { AdditionalOperation, AllReservedOperationsInterface, RulesLogic } from 'json-logic-js';
 
 type RelativeDateValue = {
   amount: number;
@@ -31,17 +31,55 @@ export type ExtendedOperations = {
   [K in keyof CustomOperations]: { [P in K]: CustomOperations[K] };
 }[keyof CustomOperations];
 
-export type TitledRule = {
-  title?: string;
-  rule: RulesLogic<ExtendedOperations> | TitledRuleLogic;
+type RuleAnnotations<T> = { id?: string; rule: T };
+
+type AnnotatableOrAnnotated<AddOps extends AdditionalOperation = never> =
+  | AnnotatableRulesLogic<AddOps>
+  | RuleAnnotations<AnnotatableRulesLogic<AddOps>>;
+
+type IsAny<T> = 0 extends 1 & T ? true : false;
+
+type DeepAnnotatable<T, AddOps extends AdditionalOperation = never> = IsAny<T> extends true
+  ? AnnotatableOrAnnotated<AddOps>
+  : T extends RulesLogic<AddOps>
+    ? AnnotatableOrAnnotated<AddOps>
+    : T extends Array<infer U>
+      ? Array<DeepAnnotatable<U, AddOps>>
+      : T extends readonly [infer A, infer B, infer C]
+        ? [DeepAnnotatable<A, AddOps>, DeepAnnotatable<B, AddOps>, DeepAnnotatable<C, AddOps>]
+        : T extends readonly [infer A, infer B]
+          ? [DeepAnnotatable<A, AddOps>, DeepAnnotatable<B, AddOps>]
+          : T extends readonly [infer A]
+            ? [DeepAnnotatable<A, AddOps>]
+            : T;
+
+type AnnotatableOpsInterface<AddOps extends AdditionalOperation = never> = {
+  [K in keyof AllReservedOperationsInterface<AddOps>]: DeepAnnotatable<
+    AllReservedOperationsInterface<AddOps>[K],
+    AddOps
+  >;
 };
 
-type TitledRuleLogic =
-  | { and: (RulesLogic<ExtendedOperations> | TitledRule)[] }
-  | { or: (RulesLogic<ExtendedOperations> | TitledRule)[] };
+type AnnotatableOps<AddOps extends AdditionalOperation = never> = {
+  [K in keyof AnnotatableOpsInterface<AddOps>]: Pick<AnnotatableOpsInterface<AddOps>, K>;
+}[keyof AnnotatableOpsInterface<AddOps>];
 
-export type RuleTitle = {
-  title: string;
+type TransformAddOps<T, AddOps extends AdditionalOperation = never> = T extends object
+  ? { [K in keyof T]: DeepAnnotatable<T[K], AddOps> }
+  : T;
+
+type AnnotatableRulesLogic<AddOps extends AdditionalOperation = never> =
+  | boolean
+  | string
+  | number
+  | null
+  | AnnotatableOps<AddOps>
+  | TransformAddOps<AddOps, AddOps>;
+
+export type AnnotatedRule = RuleAnnotations<AnnotatableRulesLogic<ExtendedOperations>>;
+
+export type RuleIdentifier = {
+  id: string;
   path: number[];
 };
 
@@ -420,12 +458,12 @@ const initializeCustomOperators = (): void => {
 initializeCustomOperators();
 
 export function evaluateRules(
-  input: RulesLogic<ExtendedOperations> | TitledRule,
+  input: RulesLogic<ExtendedOperations> | AnnotatedRule,
   data: unknown,
   safe = false
 ): { result: boolean; error: string | undefined } {
   try {
-    const rule = extractRuleFromTitled(input);
+    const rule = extractRuleFromWrapped(input);
 
     return { result: jsonLogic.apply(rule, data), error: undefined };
   } catch (error) {
@@ -445,9 +483,9 @@ export function isValidRule(rule: RulesLogic<ExtendedOperations>): boolean {
   }
 }
 
-export function extractFieldsFromRules(input: RulesLogic<ExtendedOperations> | TitledRule): string[] {
+export function extractFieldsFromRules(input: RulesLogic<ExtendedOperations> | AnnotatedRule): string[] {
   const variables = new Set<string>();
-  const rules = extractRuleFromTitled(input);
+  const rules = extractRuleFromWrapped(input);
 
   const collectVariables = (node: RulesLogic<ExtendedOperations>) => {
     if (!node || typeof node !== 'object') {
@@ -482,7 +520,7 @@ export function extractFieldsFromRules(input: RulesLogic<ExtendedOperations> | T
   return Array.from(variables);
 }
 
-function isTitledRule(rule: unknown): rule is TitledRule {
+function isAnnotatedRule(rule: unknown): rule is AnnotatedRule {
   if (!rule || typeof rule !== 'object') {
     return false;
   }
@@ -492,10 +530,10 @@ function isTitledRule(rule: unknown): rule is TitledRule {
   return 'rule' in obj && typeof obj.rule === 'object' && obj.rule !== null;
 }
 
-export function extractRuleFromTitled(
-  input: RulesLogic<ExtendedOperations> | TitledRule
+export function extractRuleFromWrapped(
+  input: RulesLogic<ExtendedOperations> | AnnotatedRule
 ): RulesLogic<ExtendedOperations> {
-  if (!isTitledRule(input)) {
+  if (!isAnnotatedRule(input)) {
     return input;
   }
 
@@ -504,7 +542,7 @@ export function extractRuleFromTitled(
       return node;
     }
 
-    if (isTitledRule(node)) {
+    if (isAnnotatedRule(node)) {
       return processNode(node.rule);
     }
 
@@ -531,27 +569,27 @@ export function extractRuleFromTitled(
   return processNode(input.rule) as RulesLogic<ExtendedOperations>;
 }
 
-export function extractTitlesFromRules(input: RulesLogic<ExtendedOperations> | TitledRule): RuleTitle[] {
-  const titles: RuleTitle[] = [];
+export function extractIdsFromRules(input: RulesLogic<ExtendedOperations> | AnnotatedRule): RuleIdentifier[] {
+  const identifiers: RuleIdentifier[] = [];
 
-  const collectTitles = (node: unknown, path: number[] = []) => {
+  const collectIds = (node: unknown, path: number[] = []) => {
     if (!node || typeof node !== 'object') {
       return;
     }
 
-    if (isTitledRule(node)) {
-      if (node.title) {
-        titles.push({ title: node.title, path: [...path] });
+    if (isAnnotatedRule(node)) {
+      if (node.id) {
+        identifiers.push({ id: node.id, path: [...path] });
       }
 
-      collectTitles(node.rule, path);
+      collectIds(node.rule, path);
 
       return;
     }
 
     if (Array.isArray(node)) {
       node.forEach((item, index) => {
-        collectTitles(item, [...path, index]);
+        collectIds(item, [...path, index]);
       });
 
       return;
@@ -563,16 +601,16 @@ export function extractTitlesFromRules(input: RulesLogic<ExtendedOperations> | T
       if (key === 'and' || key === 'or') {
         if (Array.isArray(value)) {
           value.forEach((item, index) => {
-            collectTitles(item, [...path, index]);
+            collectIds(item, [...path, index]);
           });
         }
       } else if (typeof value === 'object' && value !== null) {
-        collectTitles(value, path);
+        collectIds(value, path);
       }
     }
   };
 
-  collectTitles(input);
+  collectIds(input);
 
-  return titles;
+  return identifiers;
 }

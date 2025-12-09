@@ -2,12 +2,12 @@ import { expect } from 'chai';
 import { RulesLogic } from 'json-logic-js';
 
 import {
+  AnnotatedRule,
   ExtendedOperations,
   evaluateRules,
   extractFieldsFromRules,
-  extractRuleFromTitled,
-  extractTitlesFromRules,
-  TitledRule,
+  extractIdsFromRules,
+  extractRuleFromWrapped,
 } from './query-parser.service';
 
 describe('QueryParserService', () => {
@@ -21,10 +21,10 @@ describe('QueryParserService', () => {
     });
 
     it('should evaluate a simple equality rule 2', () => {
-      const rule: TitledRule = {
+      const rule: AnnotatedRule = {
         rule: {
           and: [
-            { title: 'Value must equal 42', rule: { '=': [{ var: 'value' }, 42] } },
+            { id: 'Value must equal 42', rule: { '=': [{ var: 'value' }, 42] } },
             { notBetween: [{ var: 'number' }, [1, 5]] },
           ],
         },
@@ -670,44 +670,44 @@ describe('QueryParserService', () => {
       expect(fields).to.include('user.age');
     });
 
-    it('should extract fields from titled rules', () => {
-      const titledRule: TitledRule = {
-        title: 'User validation',
+    it('should extract fields from wrapped rules', () => {
+      const annotatedRule: AnnotatedRule = {
+        id: 'User validation',
         rule: {
           and: [
-            { title: 'Email check', rule: { '=': [{ var: 'user.email' }, 'test@example.com'] } } as any,
-            { title: 'Age check', rule: { '>': [{ var: 'user.age' }, 18] } } as any,
+            { id: 'Email check', rule: { '=': [{ var: 'user.email' }, 'test@example.com'] } } as any,
+            { id: 'Age check', rule: { '>': [{ var: 'user.age' }, 18] } } as any,
           ],
         },
       };
 
-      const fields = extractFieldsFromRules(titledRule);
+      const fields = extractFieldsFromRules(annotatedRule);
 
       expect(fields).to.have.lengthOf(2);
       expect(fields).to.include('user.email');
       expect(fields).to.include('user.age');
     });
 
-    it('should extract fields from deeply nested titled rules', () => {
-      const titledRule: TitledRule = {
-        title: 'Main rule',
+    it('should extract fields from deeply nested wrapped rules', () => {
+      const annotatedRule: AnnotatedRule = {
+        id: 'Main rule',
         rule: {
           and: [
             {
-              title: 'Group A',
+              id: 'Group A',
               rule: {
                 or: [
-                  { title: 'A1', rule: { '=': [{ var: 'a' }, 1] } } as any,
-                  { title: 'A2', rule: { '=': [{ var: 'b' }, 2] } } as any,
+                  { id: 'A1', rule: { '=': [{ var: 'a' }, 1] } } as any,
+                  { id: 'A2', rule: { '=': [{ var: 'b' }, 2] } } as any,
                 ],
               },
             } as any,
-            { title: 'Group B', rule: { '!=': [{ var: 'c' }, 0] } } as any,
+            { id: 'Group B', rule: { '!=': [{ var: 'c' }, 0] } } as any,
           ],
         },
       };
 
-      const fields = extractFieldsFromRules(titledRule);
+      const fields = extractFieldsFromRules(annotatedRule);
 
       expect(fields).to.have.lengthOf(3);
       expect(fields).to.include('a');
@@ -727,84 +727,84 @@ describe('QueryParserService', () => {
     });
   });
 
-  describe('Titled Rules', () => {
-    describe('extractRuleFromTitled', () => {
-      it('should return the rule as-is if no title wrapper exists', () => {
+  describe('Wrapped Rules', () => {
+    describe('extractRuleFromWrapped', () => {
+      it('should return the rule as-is if no wrapper exists', () => {
         const rule: RulesLogic<ExtendedOperations> = { '=': [{ var: 'value' }, 42] };
-        const extracted = extractRuleFromTitled(rule);
+        const extracted = extractRuleFromWrapped(rule);
 
         expect(extracted).to.deep.equal(rule);
       });
 
-      it('should extract rule from simple titled rule', () => {
-        const titledRule: TitledRule = {
-          title: 'Foo bar must equal 42',
+      it('should extract rule from simple wrapped rule', () => {
+        const annotatedRule: AnnotatedRule = {
+          id: 'Foo bar must equal 42',
           rule: { '=': [{ var: 'value.foo.bar' }, 42] },
         };
-        const extracted = extractRuleFromTitled(titledRule);
+        const extracted = extractRuleFromWrapped(annotatedRule);
 
         expect(extracted).to.deep.equal({ '=': [{ var: 'value.foo.bar' }, 42] });
       });
 
-      it('should extract rules from nested titled rules with and operator', () => {
-        const titledRule: TitledRule = {
-          title: 'Main rule',
+      it('should extract rules from nested wrapped rules with and operator', () => {
+        const annotatedRule: AnnotatedRule = {
+          id: 'Main rule',
           rule: {
             and: [
               {
-                title: 'Foo bar must equal 42',
+                id: 'Foo bar must equal 42',
                 rule: { '=': [{ var: 'value.foo.bar' }, 42] },
               } as any,
               {
-                title: 'Foo baz must not be empty',
+                id: 'Foo baz must not be empty',
                 rule: { '!!': [{ var: 'value.foo.baz' }] },
               } as any,
             ],
           },
         };
-        const extracted = extractRuleFromTitled(titledRule);
+        const extracted = extractRuleFromWrapped(annotatedRule);
 
         expect(extracted).to.deep.equal({
           and: [{ '=': [{ var: 'value.foo.bar' }, 42] }, { '!!': [{ var: 'value.foo.baz' }] }],
         });
       });
 
-      it('should extract rules from deeply nested titled rules', () => {
-        const titledRule: TitledRule = {
-          title: 'Main rule',
+      it('should extract rules from deeply nested wrapped rules', () => {
+        const annotatedRule: AnnotatedRule = {
+          id: 'Main rule',
           rule: {
             and: [
               {
-                title: 'Subgroup A',
+                id: 'Subgroup A',
                 rule: {
                   or: [
-                    { title: 'A1', rule: { '=': [{ var: 'a' }, 1] } } as any,
-                    { title: 'A2', rule: { '=': [{ var: 'a' }, 2] } } as any,
+                    { id: 'A1', rule: { '=': [{ var: 'a' }, 1] } } as any,
+                    { id: 'A2', rule: { '=': [{ var: 'a' }, 2] } } as any,
                   ],
                 },
               } as any,
-              { title: 'Subgroup B', rule: { '!=': [{ var: 'b' }, 0] } } as any,
+              { id: 'Subgroup B', rule: { '!=': [{ var: 'b' }, 0] } } as any,
             ],
           },
         };
-        const extracted = extractRuleFromTitled(titledRule);
+        const extracted = extractRuleFromWrapped(annotatedRule);
 
         expect(extracted).to.deep.equal({
           and: [{ or: [{ '=': [{ var: 'a' }, 1] }, { '=': [{ var: 'a' }, 2] }] }, { '!=': [{ var: 'b' }, 0] }],
         });
       });
 
-      it('should handle mixed titled and non-titled rules', () => {
-        const input: TitledRule = {
+      it('should handle mixed wrapped and non-wrapped rules', () => {
+        const input: AnnotatedRule = {
           rule: {
             and: [
-              { title: 'First check', rule: { '=': [{ var: 'x' }, 1] } } as any,
+              { id: 'First check', rule: { '=': [{ var: 'x' }, 1] } } as any,
               { '=': [{ var: 'y' }, 2] },
-              { title: 'Third check', rule: { '=': [{ var: 'z' }, 3] } } as any,
+              { id: 'Third check', rule: { '=': [{ var: 'z' }, 3] } } as any,
             ],
           },
         };
-        const extracted = extractRuleFromTitled(input);
+        const extracted = extractRuleFromWrapped(input);
 
         expect(extracted).to.deep.equal({
           and: [{ '=': [{ var: 'x' }, 1] }, { '=': [{ var: 'y' }, 2] }, { '=': [{ var: 'z' }, 3] }],
@@ -812,104 +812,104 @@ describe('QueryParserService', () => {
       });
     });
 
-    describe('extractTitlesFromRules', () => {
-      it('should return empty array if no titles exist', () => {
+    describe('extractIdsFromRules', () => {
+      it('should return empty array if no ids exist', () => {
         const rule: RulesLogic<ExtendedOperations> = { '=': [{ var: 'value' }, 42] };
-        const titles = extractTitlesFromRules(rule);
+        const ids = extractIdsFromRules(rule);
 
-        expect(titles).to.deep.equal([]);
+        expect(ids).to.deep.equal([]);
       });
 
-      it('should extract title from simple titled rule', () => {
-        const titledRule: TitledRule = {
-          title: 'Foo bar must equal 42',
+      it('should extract id from simple wrapped rule', () => {
+        const annotatedRule: AnnotatedRule = {
+          id: 'Foo bar must equal 42',
           rule: { '=': [{ var: 'value.foo.bar' }, 42] },
         };
-        const titles = extractTitlesFromRules(titledRule);
+        const ids = extractIdsFromRules(annotatedRule);
 
-        expect(titles).to.deep.equal([{ title: 'Foo bar must equal 42', path: [] }]);
+        expect(ids).to.deep.equal([{ id: 'Foo bar must equal 42', path: [] }]);
       });
 
-      it('should extract titles from nested titled rules with and operator', () => {
-        const titledRule: TitledRule = {
-          title: 'Main rule',
+      it('should extract ids from nested wrapped rules with and operator', () => {
+        const annotatedRule: AnnotatedRule = {
+          id: 'Main rule',
           rule: {
             and: [
               {
-                title: 'Foo bar must equal 42',
+                id: 'Foo bar must equal 42',
                 rule: { '=': [{ var: 'value.foo.bar' }, 42] },
               } as any,
               {
-                title: 'Foo baz must not be empty',
+                id: 'Foo baz must not be empty',
                 rule: { '!!': [{ var: 'value.foo.baz' }] },
               } as any,
             ],
           },
         };
-        const titles = extractTitlesFromRules(titledRule);
+        const ids = extractIdsFromRules(annotatedRule);
 
-        expect(titles).to.deep.equal([
-          { title: 'Main rule', path: [] },
-          { title: 'Foo bar must equal 42', path: [0] },
-          { title: 'Foo baz must not be empty', path: [1] },
+        expect(ids).to.deep.equal([
+          { id: 'Main rule', path: [] },
+          { id: 'Foo bar must equal 42', path: [0] },
+          { id: 'Foo baz must not be empty', path: [1] },
         ]);
       });
 
-      it('should extract titles from deeply nested titled rules', () => {
-        const titledRule: TitledRule = {
-          title: 'Main rule',
+      it('should extract ids from deeply nested wrapped rules', () => {
+        const annotatedRule: AnnotatedRule = {
+          id: 'Main rule',
           rule: {
             and: [
               {
-                title: 'Subgroup A',
+                id: 'Subgroup A',
                 rule: {
                   or: [
-                    { title: 'A1', rule: { '=': [{ var: 'a' }, 1] } } as any,
-                    { title: 'A2', rule: { '=': [{ var: 'a' }, 2] } } as any,
+                    { id: 'A1', rule: { '=': [{ var: 'a' }, 1] } } as any,
+                    { id: 'A2', rule: { '=': [{ var: 'a' }, 2] } } as any,
                   ],
                 },
               } as any,
-              { title: 'Subgroup B', rule: { '!=': [{ var: 'b' }, 0] } } as any,
+              { id: 'Subgroup B', rule: { '!=': [{ var: 'b' }, 0] } } as any,
             ],
           },
         };
-        const titles = extractTitlesFromRules(titledRule);
+        const ids = extractIdsFromRules(annotatedRule);
 
-        expect(titles).to.deep.equal([
-          { title: 'Main rule', path: [] },
-          { title: 'Subgroup A', path: [0] },
-          { title: 'A1', path: [0, 0] },
-          { title: 'A2', path: [0, 1] },
-          { title: 'Subgroup B', path: [1] },
+        expect(ids).to.deep.equal([
+          { id: 'Main rule', path: [] },
+          { id: 'Subgroup A', path: [0] },
+          { id: 'A1', path: [0, 0] },
+          { id: 'A2', path: [0, 1] },
+          { id: 'Subgroup B', path: [1] },
         ]);
       });
 
-      it('should handle optional titles (only extract present ones)', () => {
-        const input: TitledRule = {
+      it('should handle optional ids (only extract present ones)', () => {
+        const input: AnnotatedRule = {
           rule: {
             and: [
-              { title: 'First check', rule: { '=': [{ var: 'x' }, 1] } } as any,
+              { id: 'First check', rule: { '=': [{ var: 'x' }, 1] } } as any,
               { '=': [{ var: 'y' }, 2] },
-              { title: 'Third check', rule: { '=': [{ var: 'z' }, 3] } } as any,
+              { id: 'Third check', rule: { '=': [{ var: 'z' }, 3] } } as any,
             ],
           },
         };
-        const titles = extractTitlesFromRules(input);
+        const ids = extractIdsFromRules(input);
 
-        expect(titles).to.deep.equal([
-          { title: 'First check', path: [0] },
-          { title: 'Third check', path: [2] },
+        expect(ids).to.deep.equal([
+          { id: 'First check', path: [0] },
+          { id: 'Third check', path: [2] },
         ]);
       });
     });
 
     describe('Integration with evaluateRules', () => {
-      it('should evaluate titled rules correctly when passed through extractRuleFromTitled', () => {
-        const titledRule: TitledRule = {
-          title: 'Value must equal 42',
+      it('should evaluate wrapped rules correctly when passed through extractRuleFromWrapped', () => {
+        const annotatedRule: AnnotatedRule = {
+          id: 'Value must equal 42',
           rule: { '=': [{ var: 'value' }, 42] },
         };
-        const extracted = extractRuleFromTitled(titledRule);
+        const extracted = extractRuleFromWrapped(annotatedRule);
         const data = { value: 42 };
         const { result, error } = evaluateRules(extracted, data);
 
@@ -917,29 +917,29 @@ describe('QueryParserService', () => {
         expect(result).to.be.true;
       });
 
-      it('should evaluate titled rules correctly when passed directly to evaluateRules', () => {
-        const titledRule: TitledRule = {
-          title: 'Value must equal 42',
+      it('should evaluate wrapped rules correctly when passed directly to evaluateRules', () => {
+        const annotatedRule: AnnotatedRule = {
+          id: 'Value must equal 42',
           rule: { '=': [{ var: 'value' }, 42] },
         };
         const data = { value: 42 };
-        const { result, error } = evaluateRules(titledRule, data);
+        const { result, error } = evaluateRules(annotatedRule, data);
 
         expect(error).to.be.undefined;
         expect(result).to.be.true;
       });
 
-      it('should evaluate nested titled rules correctly when passed through extractRuleFromTitled', () => {
-        const titledRule: TitledRule = {
-          title: 'Main validation',
+      it('should evaluate nested wrapped rules correctly when passed through extractRuleFromWrapped', () => {
+        const annotatedRule: AnnotatedRule = {
+          id: 'Main validation',
           rule: {
             and: [
-              { title: 'Check value', rule: { '=': [{ var: 'value' }, 42] } } as any,
-              { title: 'Check text', rule: { startsWith: [{ var: 'text' }, 'hello'] } } as any,
+              { id: 'Check value', rule: { '=': [{ var: 'value' }, 42] } } as any,
+              { id: 'Check text', rule: { startsWith: [{ var: 'text' }, 'hello'] } } as any,
             ],
           },
         };
-        const extracted = extractRuleFromTitled(titledRule);
+        const extracted = extractRuleFromWrapped(annotatedRule);
         const data = { value: 42, text: 'hello world' };
         const { result, error } = evaluateRules(extracted, data);
 
@@ -947,42 +947,42 @@ describe('QueryParserService', () => {
         expect(result).to.be.true;
       });
 
-      it('should evaluate nested titled rules correctly when passed directly to evaluateRules', () => {
-        const titledRule: TitledRule = {
-          title: 'Main validation',
+      it('should evaluate nested wrapped rules correctly when passed directly to evaluateRules', () => {
+        const annotatedRule: AnnotatedRule = {
+          id: 'Main validation',
           rule: {
             and: [
-              { title: 'Check value', rule: { '=': [{ var: 'value' }, 42] } } as any,
-              { title: 'Check text', rule: { startsWith: [{ var: 'text' }, 'hello'] } } as any,
+              { id: 'Check value', rule: { '=': [{ var: 'value' }, 42] } } as any,
+              { id: 'Check text', rule: { startsWith: [{ var: 'text' }, 'hello'] } } as any,
             ],
           },
         };
         const data = { value: 42, text: 'hello world' };
-        const { result, error } = evaluateRules(titledRule, data);
+        const { result, error } = evaluateRules(annotatedRule, data);
 
         expect(error).to.be.undefined;
         expect(result).to.be.true;
       });
 
-      it('should evaluate complex nested titled rules correctly when passed through extractRuleFromTitled', () => {
-        const titledRule: TitledRule = {
-          title: 'Main rule',
+      it('should evaluate complex nested wrapped rules correctly when passed through extractRuleFromWrapped', () => {
+        const annotatedRule: AnnotatedRule = {
+          id: 'Main rule',
           rule: {
             and: [
               {
-                title: 'Subgroup A',
+                id: 'Subgroup A',
                 rule: {
                   or: [
-                    { title: 'A1', rule: { '=': [{ var: 'a' }, 1] } } as any,
-                    { title: 'A2', rule: { '=': [{ var: 'a' }, 2] } } as any,
+                    { id: 'A1', rule: { '=': [{ var: 'a' }, 1] } } as any,
+                    { id: 'A2', rule: { '=': [{ var: 'a' }, 2] } } as any,
                   ],
                 },
               } as any,
-              { title: 'Subgroup B', rule: { '!=': [{ var: 'b' }, 0] } } as any,
+              { id: 'Subgroup B', rule: { '!=': [{ var: 'b' }, 0] } } as any,
             ],
           },
         };
-        const extracted = extractRuleFromTitled(titledRule);
+        const extracted = extractRuleFromWrapped(annotatedRule);
         const data = { a: 2, b: 5 };
         const { result, error } = evaluateRules(extracted, data);
 
@@ -990,32 +990,32 @@ describe('QueryParserService', () => {
         expect(result).to.be.true;
       });
 
-      it('should evaluate complex nested titled rules correctly when passed directly to evaluateRules', () => {
-        const titledRule: TitledRule = {
-          title: 'Main rule',
+      it('should evaluate complex nested wrapped rules correctly when passed directly to evaluateRules', () => {
+        const annotatedRule: AnnotatedRule = {
+          id: 'Main rule',
           rule: {
             and: [
               {
-                title: 'Subgroup A',
+                id: 'Subgroup A',
                 rule: {
                   or: [
-                    { title: 'A1', rule: { '=': [{ var: 'a' }, 1] } } as any,
-                    { title: 'A2', rule: { '=': [{ var: 'a' }, 2] } } as any,
+                    { id: 'A1', rule: { '=': [{ var: 'a' }, 1] } } as any,
+                    { id: 'A2', rule: { '=': [{ var: 'a' }, 2] } } as any,
                   ],
                 },
               } as any,
-              { title: 'Subgroup B', rule: { '!=': [{ var: 'b' }, 0] } } as any,
+              { id: 'Subgroup B', rule: { '!=': [{ var: 'b' }, 0] } } as any,
             ],
           },
         };
         const data = { a: 2, b: 5 };
-        const { result, error } = evaluateRules(titledRule, data);
+        const { result, error } = evaluateRules(annotatedRule, data);
 
         expect(error).to.be.undefined;
         expect(result).to.be.true;
       });
 
-      it('should handle regular rules without titles', () => {
+      it('should handle regular rules without ids', () => {
         const rule: RulesLogic<ExtendedOperations> = { '=': [{ var: 'value' }, 42] };
         const data = { value: 42 };
         const { result, error } = evaluateRules(rule, data);

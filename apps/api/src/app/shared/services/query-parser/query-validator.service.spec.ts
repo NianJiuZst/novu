@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { RulesLogic } from 'json-logic-js';
 
-import { ExtendedOperations, TitledRule } from './query-parser.service';
+import { ExtendedOperations, AnnotatedRule } from './query-parser.service';
 import { QueryIssueTypeEnum, QueryValidatorService } from './query-validator.service';
 import { COMPARISON_OPERATORS, JsonLogicOperatorEnum } from './types';
 
@@ -602,58 +602,58 @@ describe('QueryValidatorService', () => {
     });
   });
 
-  describe('Titled Rules Validation', () => {
-    it('should validate simple titled rule correctly', () => {
-      const titledRule: TitledRule = {
-        title: 'Foo bar must equal 42',
+  describe('Wrapped Rules Validation', () => {
+    it('should validate simple wrapped rule correctly', () => {
+      const annotatedRule: AnnotatedRule = {
+        id: 'Foo bar must equal 42',
         rule: { '==': [{ var: 'payload.foo' }, 42] },
       };
 
-      const issues = queryValidatorService.validateQueryRules(titledRule);
+      const issues = queryValidatorService.validateQueryRules(annotatedRule);
 
       expect(issues).to.be.empty;
     });
 
-    it('should validate nested titled rules correctly', () => {
-      const titledRule: TitledRule = {
-        title: 'Main rule',
+    it('should validate nested wrapped rules correctly', () => {
+      const annotatedRule: AnnotatedRule = {
+        id: 'Main rule',
         rule: {
           and: [
             {
-              title: 'Foo bar must equal 42',
+              id: 'Foo bar must equal 42',
               rule: { '==': [{ var: 'payload.foo' }, 42] },
             } as any,
             {
-              title: 'Subscriber email must be set',
+              id: 'Subscriber email must be set',
               rule: { '!=': [{ var: 'subscriber.email' }, null] },
             } as any,
           ],
         },
       };
 
-      const issues = queryValidatorService.validateQueryRules(titledRule);
+      const issues = queryValidatorService.validateQueryRules(annotatedRule);
 
       expect(issues).to.be.empty;
     });
 
-    it('should detect validation issues in titled rules', () => {
-      const titledRule: TitledRule = {
-        title: 'Main rule',
+    it('should detect validation issues in wrapped rules', () => {
+      const annotatedRule: AnnotatedRule = {
+        id: 'Main rule',
         rule: {
           and: [
             {
-              title: 'Valid check',
+              id: 'Valid check',
               rule: { '==': [{ var: 'payload.foo' }, 42] },
             } as any,
             {
-              title: 'Invalid check',
+              id: 'Invalid check',
               rule: { '==': [{ var: 'invalid.field' }, 'value'] },
             } as any,
           ],
         },
       };
 
-      const issues = queryValidatorService.validateQueryRules(titledRule);
+      const issues = queryValidatorService.validateQueryRules(annotatedRule);
 
       expect(issues).to.have.lengthOf(1);
       expect(issues[0].message).to.include('Value is not valid');
@@ -661,20 +661,20 @@ describe('QueryValidatorService', () => {
       expect(issues[0].type).to.equal(QueryIssueTypeEnum.INVALID_FIELD_VALUE);
     });
 
-    it('should detect missing values in titled rules', () => {
-      const titledRule: TitledRule = {
-        title: 'Main rule',
+    it('should detect missing values in wrapped rules', () => {
+      const annotatedRule: AnnotatedRule = {
+        id: 'Main rule',
         rule: {
           and: [
             {
-              title: 'Check with missing value',
+              id: 'Check with missing value',
               rule: { '==': [{ var: 'payload.foo' }, ''] },
             } as any,
           ],
         },
       };
 
-      const issues = queryValidatorService.validateQueryRules(titledRule);
+      const issues = queryValidatorService.validateQueryRules(annotatedRule);
 
       expect(issues).to.have.lengthOf(1);
       expect(issues[0].message).to.include('Value is required');
@@ -682,42 +682,42 @@ describe('QueryValidatorService', () => {
       expect(issues[0].type).to.equal(QueryIssueTypeEnum.MISSING_VALUE);
     });
 
-    it('should validate deeply nested titled rules', () => {
-      const titledRule: TitledRule = {
-        title: 'Main rule',
+    it('should validate deeply nested wrapped rules', () => {
+      const annotatedRule: AnnotatedRule = {
+        id: 'Main rule',
         rule: {
           and: [
             {
-              title: 'Subgroup A',
+              id: 'Subgroup A',
               rule: {
                 or: [
-                  { title: 'A1', rule: { '==': [{ var: 'payload.foo' }, 1] } } as any,
-                  { title: 'A2', rule: { '==': [{ var: 'payload.bar' }, 2] } } as any,
+                  { id: 'A1', rule: { '==': [{ var: 'payload.foo' }, 1] } } as any,
+                  { id: 'A2', rule: { '==': [{ var: 'payload.bar' }, 2] } } as any,
                 ],
               },
             } as any,
-            { title: 'Subgroup B', rule: { '!=': [{ var: 'subscriber.email' }, null] } } as any,
+            { id: 'Subgroup B', rule: { '!=': [{ var: 'subscriber.email' }, null] } } as any,
           ],
         },
       };
 
-      const issues = queryValidatorService.validateQueryRules(titledRule);
+      const issues = queryValidatorService.validateQueryRules(annotatedRule);
 
       expect(issues).to.be.empty;
     });
 
-    it('should handle mixed titled and non-titled rules', () => {
-      const titledRule: TitledRule = {
+    it('should handle mixed wrapped and non-wrapped rules', () => {
+      const annotatedRule: AnnotatedRule = {
         rule: {
           and: [
-            { title: 'First check', rule: { '==': [{ var: 'payload.foo' }, 1] } } as any,
+            { id: 'First check', rule: { '==': [{ var: 'payload.foo' }, 1] } } as any,
             { '==': [{ var: 'payload.bar' }, 2] },
-            { title: 'Third check', rule: { '==': [{ var: 'invalid.field' }, 3] } } as any,
+            { id: 'Third check', rule: { '==': [{ var: 'invalid.field' }, 3] } } as any,
           ],
         },
       };
 
-      const issues = queryValidatorService.validateQueryRules(titledRule);
+      const issues = queryValidatorService.validateQueryRules(annotatedRule);
 
       expect(issues).to.have.lengthOf(1);
       expect(issues[0].message).to.include('Value is not valid');
