@@ -83,7 +83,7 @@ export function ContentPreview({ stepType, content, previewPayload, suggestedPay
               body: parse(inAppContent.body || ''),
               ...(inAppContent.primaryAction && {
                 primaryAction: {
-                  label: inAppContent.primaryAction.label,
+                  label: parse(inAppContent.primaryAction.label),
                   ...(inAppContent.primaryAction.url && {
                     redirect: { url: parse(inAppContent.primaryAction.url) },
                   }),
@@ -91,7 +91,7 @@ export function ContentPreview({ stepType, content, previewPayload, suggestedPay
               }),
               ...(inAppContent.secondaryAction && {
                 secondaryAction: {
-                  label: inAppContent.secondaryAction.label,
+                  label: parse(inAppContent.secondaryAction.label),
                   ...(inAppContent.secondaryAction.url && {
                     redirect: { url: parse(inAppContent.secondaryAction.url) },
                   }),
