@@ -2,16 +2,25 @@ import { InboxService } from '../api';
 import { BaseModule } from '../base-module';
 import { SubscriptionsCache } from '../cache/subscriptions-cache';
 import { NovuEventEmitter } from '../event-emitter';
-import { Result } from '../types';
-import { createSubscription, deleteSubscription, getSubscription, listSubscriptions } from './helpers';
+import { Options, Result } from '../types';
+import {
+  createSubscription,
+  deleteSubscription,
+  getSubscription,
+  listSubscriptions,
+  updateSubscription,
+} from './helpers';
 import { TopicSubscription } from './subscription';
 import type {
   BaseDeleteSubscriptionArgs,
+  BaseUpdateSubscriptionArgs,
   CreateSubscriptionArgs,
   DeleteSubscriptionArgs,
   GetSubscriptionArgs,
   InstanceDeleteSubscriptionArgs,
+  InstanceUpdateSubscriptionArgs,
   ListSubscriptionsArgs,
+  UpdateSubscriptionArgs,
 } from './types';
 
 export class Subscriptions extends BaseModule {
@@ -40,25 +49,31 @@ export class Subscriptions extends BaseModule {
     this.#useCache = useCache;
   }
 
-  async list(args: ListSubscriptionsArgs): Result<TopicSubscription[]> {
+  async list(args: ListSubscriptionsArgs, options?: Options): Result<TopicSubscription[]> {
     return this.callWithSession(() =>
       listSubscriptions({
         emitter: this._emitter,
         apiService: this._inboxService,
         cache: this.cache,
-        useCache: this.#useCache,
+        options: {
+          ...options,
+          useCache: options?.useCache ?? this.#useCache,
+        },
         args,
       })
     );
   }
 
-  async get(args: GetSubscriptionArgs): Result<TopicSubscription | null> {
+  async get(args: GetSubscriptionArgs, options?: Options): Result<TopicSubscription | null> {
     return this.callWithSession(() =>
       getSubscription({
         emitter: this._emitter,
         apiService: this._inboxService,
         cache: this.cache,
-        useCache: this.#useCache,
+        options: {
+          ...options,
+          useCache: options?.useCache ?? this.#useCache,
+        },
         args,
       })
     );
@@ -67,6 +82,20 @@ export class Subscriptions extends BaseModule {
   async create(args: CreateSubscriptionArgs): Result<TopicSubscription> {
     return this.callWithSession(() =>
       createSubscription({
+        emitter: this._emitter,
+        apiService: this._inboxService,
+        cache: this.cache,
+        useCache: this.#useCache,
+        args,
+      })
+    );
+  }
+
+  async update(args: BaseUpdateSubscriptionArgs): Result<TopicSubscription>;
+  async update(args: InstanceUpdateSubscriptionArgs): Result<TopicSubscription>;
+  async update(args: UpdateSubscriptionArgs): Result<TopicSubscription> {
+    return this.callWithSession(() =>
+      updateSubscription({
         emitter: this._emitter,
         apiService: this._inboxService,
         cache: this.cache,
