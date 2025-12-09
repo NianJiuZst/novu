@@ -74,7 +74,7 @@ export function InitialState({
             placeholder={placeholderText}
             className="h-full w-full resize-none border-0 bg-transparent p-3 text-xs font-normal leading-4 text-[#0e121b] outline-none placeholder:text-[#99a0ae]"
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
+              if (e.key === 'Enter' && !e.shiftKey && prompt.trim()) {
                 e.preventDefault();
                 onSubmit();
               }
