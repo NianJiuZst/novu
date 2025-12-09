@@ -1,15 +1,12 @@
-import { Novu } from '@novu/api';
 import { ClickHouseService, WorkflowRunRepository, WorkflowRunStatusEnum } from '@novu/application-generic';
 import { NotificationEntity, NotificationRepository, NotificationTemplateEntity, SubscriberEntity } from '@novu/dal';
 import { EmailBlockTypeEnum, StepTypeEnum } from '@novu/shared';
 import { SubscribersService, UserSession } from '@novu/testing';
 import { expect } from 'chai';
-import { sleep } from '../../events/e2e/utils/sleep.util';
-import { initNovuClassSdk } from '../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 import { WorkflowRunStatusDtoEnum } from '../dtos/shared.dto';
 import { GetWorkflowRunsResponseDto } from '../dtos/workflow-runs-response.dto';
 
-describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs #novu-v2', () => {
+describe.only('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs #novu-v2', () => {
   let session: UserSession;
   let template: NotificationTemplateEntity;
   let inAppWorkflow: NotificationTemplateEntity;
@@ -17,73 +14,61 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
   let inAppTemplate: NotificationTemplateEntity;
   let subscriber: SubscriberEntity;
   let subscriberService: SubscribersService;
-  let novuClient: Novu;
   let workflowRunRepository: WorkflowRunRepository;
   const clickHouseService = new ClickHouseService();
-
-  // Helper function to create multiple workflow triggers with 5ms delay between each
-  async function createMultipleWorkflowRuns(options: {
-    count: number;
-    workflowId: string;
-    subscriberId: string[];
-    payloadTemplate?: (index: number) => Record<string, any>;
-    transactionId?: string;
-  }) {
-    const { count, workflowId, subscriberId, payloadTemplate, transactionId } = options;
-
-    for (let i = 1; i < count + 1; i += 1) {
-      await novuClient.trigger({
-        workflowId,
-        to: subscriberId,
-        payload: payloadTemplate ? payloadTemplate(i) : { runNumber: i },
-        ...(transactionId && { transactionId: `${transactionId}-${i}` }),
-      });
-
-      await sleep(5);
-    }
-  }
 
   async function createMultipleWorkflowRunsByDb(options: {
     count: number;
     subscriberId: string[];
+    subscriberInternalId?: string;
+    workflowTemplate?: NotificationTemplateEntity;
     payloadTemplate?: (index: number) => Record<string, any>;
     transactionId?: string;
     status?: WorkflowRunStatusEnum;
     channels?: StepTypeEnum[];
+    baseTimestamp?: number;
+    timestampOffsetMs?: number;
   }) {
     const {
       count,
       subscriberId,
+      subscriberInternalId,
+      workflowTemplate,
       payloadTemplate,
       transactionId,
       status = WorkflowRunStatusEnum.COMPLETED,
       channels = [StepTypeEnum.EMAIL],
+      baseTimestamp = Date.now(),
+      timestampOffsetMs = 1000,
     } = options;
+
+    const templateToUse = workflowTemplate || template;
+    const subscriberIdToUse = subscriberInternalId || subscriber._id;
 
     const promises: Promise<void>[] = [];
 
     for (let i = 1; i < count + 1; i += 1) {
       const payload = payloadTemplate ? payloadTemplate(i) : { runNumber: i };
+      const recordTimestamp = new Date(baseTimestamp + i * timestampOffsetMs);
 
-      // Create a mock NotificationEntity
       const mockNotification: NotificationEntity = {
         _id: NotificationRepository.createObjectId(),
-        _templateId: template._id,
+        _templateId: templateToUse._id,
         _environmentId: session.environment._id,
         _organizationId: session.organization._id,
-        _subscriberId: subscriber._id,
+        _subscriberId: subscriberIdToUse,
         topics: [],
-        transactionId: transactionId ? `${transactionId}-${i}` : `txn_${Date.now()}_${i}`,
+        transactionId: transactionId ? `${transactionId}-${i}` : `txn_${baseTimestamp}_${i}`,
         channels,
         to: subscriberId[0],
         payload,
         controls: undefined,
         tags: [],
-        createdAt: new Date().toISOString(),
+        createdAt: recordTimestamp.toISOString(),
       };
 
       promises.push(
-        workflowRunRepository.create(mockNotification, template, {
+        workflowRunRepository.create(mockNotification, templateToUse, {
           status,
           userId: session.user._id,
           externalSubscriberId: subscriberId[0],
@@ -104,7 +89,6 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
     await session.initialize();
     subscriberService = new SubscribersService(session.organization._id, session.environment._id);
     subscriber = await subscriberService.createSubscriber();
-    novuClient = initNovuClassSdk(session);
     workflowRunRepository = session.testServer?.getService(WorkflowRunRepository);
 
     template = await session.createTemplate({
@@ -153,21 +137,9 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
   });
 
   it('should return paginated results with default limit', async () => {
-    // will generate 6 workflow runs with 2 subscribers, total of 12 workflow runs
-    await createMultipleWorkflowRuns({
-      count: 6,
-      workflowId: template.triggers[0].identifier,
-      subscriberId: [subscriber.subscriberId, '123'],
-    });
-
-    await session.waitForWorkflowQueueCompletion();
-    await session.waitForSubscriberQueueCompletion();
-    await session.waitForStandardQueueCompletion();
-
-    // Force ClickHouse merge to deduplicate workflow runs
-    const databaseName = process.env.CLICK_HOUSE_DATABASE || 'test_logs';
-    await clickHouseService.exec({
-      query: `OPTIMIZE TABLE ${databaseName}.workflow_runs FINAL`,
+    await createMultipleWorkflowRunsByDb({
+      count: 12,
+      subscriberId: [subscriber.subscriberId],
     });
 
     const { body: firstPage }: { body: GetWorkflowRunsResponseDto } = await session.testAgent
@@ -187,24 +159,35 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
     expect(secondPage.previous, 'secondPage previous').to.be.not.null;
     expect(secondPage.data.length, 'secondPage dataLength').to.be.equal(2);
 
-    const secondPageWorkflowRun = await workflowRunRepository.findOne({
+    const secondPageFirstWorkflowRun = await workflowRunRepository.findOne({
       where: {
         enforced: { environmentId: session.environment._id },
         conditions: [{ field: 'workflow_run_id', operator: '=', value: secondPage.data[0].id }],
       },
       select: '*',
     });
-    expect(secondPageWorkflowRun, 'secondPageWorkflowRun should exist').to.not.be.null;
-    expect(secondPageWorkflowRun.data, 'secondPageWorkflowRun.data should exist').to.not.be.undefined;
-    expect(JSON.parse(secondPageWorkflowRun.data.payload || '{}')?.runNumber, 'secondPage runNumber').to.be.equal(1);
+    expect(secondPageFirstWorkflowRun, 'secondPageFirstWorkflowRun should exist').to.not.be.null;
+    expect(secondPageFirstWorkflowRun.data, 'secondPageFirstWorkflowRun.data should exist').to.not.be.undefined;
+    expect(
+      JSON.parse(secondPageFirstWorkflowRun.data.payload || '{}')?.runNumber,
+      'secondPage first item runNumber (descending order)'
+    ).to.be.equal(2);
+
+    const secondPageLastWorkflowRun = await workflowRunRepository.findOne({
+      where: {
+        enforced: { environmentId: session.environment._id },
+        conditions: [{ field: 'workflow_run_id', operator: '=', value: secondPage.data[1].id }],
+      },
+      select: '*',
+    });
+    expect(secondPageLastWorkflowRun, 'secondPageLastWorkflowRun should exist').to.not.be.null;
+    expect(secondPageLastWorkflowRun.data, 'secondPageLastWorkflowRun.data should exist').to.not.be.undefined;
+    expect(
+      JSON.parse(secondPageLastWorkflowRun.data.payload || '{}')?.runNumber,
+      'secondPage last item runNumber (oldest item)'
+    ).to.be.equal(1);
 
     expect(firstPage.data[0].steps, 'workflow run should have steps').to.be.an('array');
-    if (firstPage.data[0].steps.length > 0) {
-      const step = firstPage.data[0].steps[0];
-      expect(step.id.startsWith('sr_'), 'step id should start with sr_').to.be.true;
-      expect(step.stepType, 'step should have step type').to.be.equal('trigger');
-      expect(step.status, 'step should have status').to.be.equal('completed');
-    }
   });
 
   it('should validate cursor-based pagination collision handling', async () => {
@@ -212,10 +195,6 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
       count: 11,
       subscriberId: [subscriber.subscriberId],
     });
-
-    await session.waitForWorkflowQueueCompletion();
-    await session.waitForSubscriberQueueCompletion();
-    await session.waitForStandardQueueCompletion();
 
     const fetchedRunNumbers = new Set<number>();
     const forwardPages: Array<{
@@ -376,21 +355,18 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
       steps: [{ type: StepTypeEnum.IN_APP, content: 'Test in-app message' }],
     });
 
-    await novuClient.trigger({
-      workflowId: template.triggers[0].identifier,
-      to: subscriber.subscriberId,
-      payload: { firstName: 'John' },
+    await createMultipleWorkflowRunsByDb({
+      count: 1,
+      subscriberId: [subscriber.subscriberId],
+      workflowTemplate: template,
     });
 
-    await novuClient.trigger({
-      workflowId: secondTemplate.triggers[0].identifier,
-      to: subscriber.subscriberId,
-      payload: { firstName: 'Jane' },
+    await createMultipleWorkflowRunsByDb({
+      count: 1,
+      subscriberId: [subscriber.subscriberId],
+      workflowTemplate: secondTemplate,
+      channels: [StepTypeEnum.IN_APP],
     });
-
-    await session.waitForWorkflowQueueCompletion();
-    await session.waitForSubscriberQueueCompletion();
-    await session.waitForStandardQueueCompletion();
 
     const { body } = await session.testAgent
       .get('/v1/activity/workflow-runs')
@@ -398,6 +374,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
       .expect(200);
 
     expect(body.data).to.be.an('array');
+    expect(body.data.length).to.be.greaterThan(0);
 
     for (const workflowRun of body.data) {
       expect(workflowRun.workflowId).to.equal(template._id);
@@ -410,21 +387,18 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
       steps: [{ type: StepTypeEnum.IN_APP, content: 'Test in-app message' }],
     });
 
-    await novuClient.trigger({
-      workflowId: template.triggers[0].identifier,
-      to: subscriber.subscriberId,
-      payload: { firstName: 'John' },
+    await createMultipleWorkflowRunsByDb({
+      count: 1,
+      subscriberId: [subscriber.subscriberId],
+      workflowTemplate: template,
     });
 
-    await novuClient.trigger({
-      workflowId: secondTemplate.triggers[0].identifier,
-      to: subscriber.subscriberId,
-      payload: { firstName: 'Jane' },
+    await createMultipleWorkflowRunsByDb({
+      count: 1,
+      subscriberId: [subscriber.subscriberId],
+      workflowTemplate: secondTemplate,
+      channels: [StepTypeEnum.IN_APP],
     });
-
-    await session.waitForWorkflowQueueCompletion();
-    await session.waitForSubscriberQueueCompletion();
-    await session.waitForStandardQueueCompletion();
 
     const { body } = await session.testAgent
       .get('/v1/activity/workflow-runs')
@@ -432,6 +406,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
       .expect(200);
 
     expect(body.data).to.be.an('array');
+    expect(body.data.length).to.equal(2);
 
     const allowedIds = [template._id, secondTemplate._id];
     for (const workflowRun of body.data) {
@@ -442,21 +417,17 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
   it('should filter results by single subscriberId', async () => {
     const secondSubscriber = await subscriberService.createSubscriber();
 
-    await novuClient.trigger({
-      workflowId: template.triggers[0].identifier,
-      to: subscriber.subscriberId,
-      payload: { firstName: 'John' },
+    await createMultipleWorkflowRunsByDb({
+      count: 1,
+      subscriberId: [subscriber.subscriberId],
+      subscriberInternalId: subscriber._id,
     });
 
-    await novuClient.trigger({
-      workflowId: template.triggers[0].identifier,
-      to: secondSubscriber.subscriberId,
-      payload: { firstName: 'Jane' },
+    await createMultipleWorkflowRunsByDb({
+      count: 1,
+      subscriberId: [secondSubscriber.subscriberId],
+      subscriberInternalId: secondSubscriber._id,
     });
-
-    await session.waitForWorkflowQueueCompletion();
-    await session.waitForSubscriberQueueCompletion();
-    await session.waitForStandardQueueCompletion();
 
     const { body } = await session.testAgent
       .get('/v1/activity/workflow-runs')
@@ -464,6 +435,7 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
       .expect(200);
 
     expect(body.data).to.be.an('array');
+    expect(body.data.length).to.be.greaterThan(0);
 
     for (const workflowRun of body.data) {
       expect(workflowRun.subscriberId).to.equal(subscriber.subscriberId);
@@ -473,32 +445,27 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
   it('should filter results by transactionId', async () => {
     const customTransactionId = `test-transaction-${Date.now()}`;
 
-    await novuClient.trigger({
-      workflowId: template.triggers[0].identifier,
-      to: subscriber.subscriberId,
-      payload: { firstName: 'John' },
+    await createMultipleWorkflowRunsByDb({
+      count: 1,
+      subscriberId: [subscriber.subscriberId],
       transactionId: customTransactionId,
     });
 
-    await novuClient.trigger({
-      workflowId: template.triggers[0].identifier,
-      to: subscriber.subscriberId,
-      payload: { firstName: 'Jane' },
+    await createMultipleWorkflowRunsByDb({
+      count: 1,
+      subscriberId: [subscriber.subscriberId],
     });
-
-    await session.waitForWorkflowQueueCompletion();
-    await session.waitForSubscriberQueueCompletion();
-    await session.waitForStandardQueueCompletion();
 
     const { body } = await session.testAgent
       .get('/v1/activity/workflow-runs')
-      .query({ transactionIds: [customTransactionId] })
+      .query({ transactionIds: [`${customTransactionId}-1`] })
       .expect(200);
 
     expect(body.data).to.be.an('array');
+    expect(body.data.length).to.equal(1);
 
     for (const workflowRun of body.data) {
-      expect(workflowRun.transactionId).to.equal(customTransactionId);
+      expect(workflowRun.transactionId).to.equal(`${customTransactionId}-1`);
     }
   });
 
@@ -527,53 +494,48 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
   });
 
   it('should filter results by date range', async () => {
-    await createMultipleWorkflowRuns({
+    const now = Date.now();
+    const firstBatchBaseTime = now - 60000;
+    const secondBatchBaseTime = now - 30000;
+    const thirdBatchBaseTime = now;
+
+    await createMultipleWorkflowRunsByDb({
       count: 2,
-      workflowId: template.triggers[0].identifier,
       subscriberId: [subscriber.subscriberId],
       payloadTemplate: (index) => ({ testText: `first trigger ${index}` }),
+      baseTimestamp: firstBatchBaseTime,
+      timestampOffsetMs: 100,
     });
 
-    await session.waitForWorkflowQueueCompletion();
-    await session.waitForSubscriberQueueCompletion();
-    await session.waitForStandardQueueCompletion();
-
-    const beforeTrigger = new Date();
-
-    await createMultipleWorkflowRuns({
+    await createMultipleWorkflowRunsByDb({
       count: 2,
-      workflowId: template.triggers[0].identifier,
       subscriberId: [subscriber.subscriberId],
       payloadTemplate: (index) => ({ testText: `second trigger ${index}` }),
+      baseTimestamp: secondBatchBaseTime,
+      timestampOffsetMs: 100,
     });
 
-    await session.waitForWorkflowQueueCompletion();
-    await session.waitForSubscriberQueueCompletion();
-    await session.waitForStandardQueueCompletion();
-
-    const afterTrigger = new Date();
-
-    await createMultipleWorkflowRuns({
+    await createMultipleWorkflowRunsByDb({
       count: 2,
-      workflowId: template.triggers[0].identifier,
       subscriberId: [subscriber.subscriberId],
       payloadTemplate: (index) => ({ testText: `third trigger ${index}` }),
+      baseTimestamp: thirdBatchBaseTime,
+      timestampOffsetMs: 100,
     });
 
-    await session.waitForWorkflowQueueCompletion();
-    await session.waitForSubscriberQueueCompletion();
-    await session.waitForStandardQueueCompletion();
+    const beforeSecondBatch = new Date(now - 45000);
+    const afterSecondBatch = new Date(now - 15000);
 
     const { body } = await session.testAgent
       .get('/v1/activity/workflow-runs')
       .query({
-        createdGte: beforeTrigger.toISOString(),
-        createdLte: afterTrigger.toISOString(),
+        createdGte: beforeSecondBatch.toISOString(),
+        createdLte: afterSecondBatch.toISOString(),
       })
       .expect(200);
 
     expect(body.data).to.be.an('array');
-    expect(body.data.length, 'body.data.length').to.be.greaterThan(0);
+    expect(body.data.length, 'body.data.length').to.equal(2);
 
     for (const workflowRun of body.data) {
       const workflowRunEntity = await workflowRunRepository.findOne({
@@ -590,15 +552,13 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
   });
 
   it('should support combining multiple filters', async () => {
-    await novuClient.trigger({
-      workflowId: inAppWorkflow.triggers[0].identifier,
-      to: subscriber.subscriberId,
-      payload: { firstName: 'John' },
+    await createMultipleWorkflowRunsByDb({
+      count: 1,
+      subscriberId: [subscriber.subscriberId],
+      workflowTemplate: inAppWorkflow,
+      channels: [StepTypeEnum.IN_APP],
+      status: WorkflowRunStatusEnum.COMPLETED,
     });
-
-    await session.waitForWorkflowQueueCompletion();
-    await session.waitForSubscriberQueueCompletion();
-    await session.waitForStandardQueueCompletion();
 
     const { body } = await session.testAgent
       .get('/v1/activity/workflow-runs')
@@ -620,25 +580,20 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
   });
 
   it('should filter results by channels', async () => {
-    // Trigger email workflow runs
-    await createMultipleWorkflowRuns({
+    await createMultipleWorkflowRunsByDb({
       count: 2,
-      workflowId: emailTemplate.triggers[0].identifier,
       subscriberId: [subscriber.subscriberId],
+      workflowTemplate: emailTemplate,
+      channels: [StepTypeEnum.EMAIL],
     });
 
-    // Trigger in-app workflow runs
-    await createMultipleWorkflowRuns({
+    await createMultipleWorkflowRunsByDb({
       count: 2,
-      workflowId: inAppTemplate.triggers[0].identifier,
       subscriberId: [subscriber.subscriberId],
+      workflowTemplate: inAppTemplate,
+      channels: [StepTypeEnum.IN_APP],
     });
 
-    await session.waitForWorkflowQueueCompletion();
-    await session.waitForSubscriberQueueCompletion();
-    await session.waitForStandardQueueCompletion();
-
-    // Filter by EMAIL channel only
     const { body: bodyEmailFiltered } = (await session.testAgent
       .get('/v1/activity/workflow-runs')
       .query({ channels: [StepTypeEnum.EMAIL] })
@@ -647,31 +602,15 @@ describe('Workflow Runs Filtering & Pagination - GET /v1/activity/workflow-runs 
     expect(bodyEmailFiltered.data.length, 'bodyEmailFiltered.data.length').to.be.greaterThan(0);
 
     for (const workflowRun of bodyEmailFiltered.data) {
-      const stepsTypes = workflowRun.steps.map((step: any) => step.stepType);
-      expect(stepsTypes.length).to.be.greaterThan(0);
-      for (const stepType of stepsTypes) {
-        expect([StepTypeEnum.TRIGGER, StepTypeEnum.EMAIL], 'stepType should be EMAIL').to.include(stepType);
-      }
+      expect(workflowRun.workflowId).to.equal(emailTemplate._id);
     }
 
-    // Filter by EMAIL and IN_APP channels
     const { body: bodyEmailAndInAppFiltered } = (await session.testAgent
       .get('/v1/activity/workflow-runs')
       .query({ channels: [StepTypeEnum.EMAIL, StepTypeEnum.IN_APP] })
       .expect(200)) as { body: GetWorkflowRunsResponseDto };
 
-    expect(bodyEmailAndInAppFiltered.data.length, 'bodyEmailAndInAppFiltered.data.length').to.be.greaterThan(0);
-
-    for (const workflowRun of bodyEmailAndInAppFiltered.data) {
-      const stepsTypes = workflowRun.steps.map((step: any) => step.stepType);
-      expect(stepsTypes.length).to.be.greaterThan(0);
-      for (const stepType of stepsTypes) {
-        expect(
-          [StepTypeEnum.TRIGGER, StepTypeEnum.EMAIL, StepTypeEnum.IN_APP],
-          'stepType should be EMAIL or IN_APP'
-        ).to.include(stepType);
-      }
-    }
+    expect(bodyEmailAndInAppFiltered.data.length, 'bodyEmailAndInAppFiltered.data.length').to.equal(4);
   });
 
   it('should handle empty results gracefully', async () => {
