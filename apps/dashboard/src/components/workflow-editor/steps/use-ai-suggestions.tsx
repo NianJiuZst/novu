@@ -92,15 +92,8 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
             const bodyStr =
               typeof emailContent.body === 'object' ? JSON.stringify(emailContent.body) : emailContent.body;
 
-            form.setValue('body', '');
-
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                form.setValue('subject', emailContent.subject);
-                form.setValue('body', bodyStr);
-                form.trigger(['subject', 'body']);
-              });
-            });
+            form.setValue('subject', emailContent.subject, { shouldDirty: true, shouldTouch: true });
+            form.setValue('body', bodyStr, { shouldDirty: true, shouldTouch: true });
           }
           break;
         case StepTypeEnum.SMS:
