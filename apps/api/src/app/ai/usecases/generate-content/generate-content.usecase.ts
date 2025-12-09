@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { PinoLogger } from '@novu/application-generic';
 import { render as mailyRender } from '@novu/maily-render';
 import { StepTypeEnum } from '@novu/shared';
@@ -23,6 +23,10 @@ type EmailContent = {
   body: string | Record<string, unknown>;
   bodyHtml?: string;
 };
+
+const AI_REQUEST_TIMEOUT_MS = 30000;
+const AI_MAX_RETRIES = 2;
+const MAX_SCHEMA_VALIDATION_RETRIES = 2;
 
 @Injectable()
 export class GenerateContentUseCase {
@@ -58,6 +62,9 @@ export class GenerateContentUseCase {
     const schema = this.getSchemaForStepType(command.stepType, editorType);
     const systemPrompt = this.buildSystemPrompt(command.stepType, editorType, command.context);
 
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), AI_REQUEST_TIMEOUT_MS);
+
     try {
       const result = await generateObject({
         model: openai('gpt-4o'),
@@ -71,34 +78,95 @@ export class GenerateContentUseCase {
           content: msg.content,
         })),
         temperature: 0.7,
+        maxRetries: AI_MAX_RETRIES,
+        abortSignal: abortController.signal,
       });
 
+      clearTimeout(timeoutId);
       this.logger.info(`Successfully generated ${command.stepType} content`);
 
       return result.object as GenerateContentResponseDto;
     } catch (error) {
-      if (retryCount < 2 && error?.name === 'AI_NoObjectGeneratedError') {
-        this.logger.warn(`Schema validation failed, retrying... (attempt ${retryCount + 1}/2)`, {
-          stepType: command.stepType,
-          editorType,
-          errorName: error.name,
-          errorMessage: error.message,
-          responseText: error.text?.substring(0, 500),
-        });
+      clearTimeout(timeoutId);
+
+      if (retryCount < MAX_SCHEMA_VALIDATION_RETRIES && error?.name === 'AI_NoObjectGeneratedError') {
+        this.logger.warn(
+          `Schema validation failed, retrying... (attempt ${retryCount + 1}/${MAX_SCHEMA_VALIDATION_RETRIES})`,
+          {
+            stepType: command.stepType,
+            editorType,
+            errorName: error.name,
+            errorMessage: error.message,
+            responseText: error.text?.substring(0, 500),
+          }
+        );
 
         return await this.generateContent(command, editorType, retryCount + 1);
       }
 
-      this.logger.error(`Failed to generate ${command.stepType} content after retries`, {
-        stepType: command.stepType,
-        editorType,
-        errorName: error?.name,
-        errorMessage: error?.message,
-        responseText: error?.text?.substring(0, 500),
+      this.handleAIError(error, command.stepType);
+    }
+  }
+
+  private handleAIError(error: unknown, stepType: string): never {
+    const errorObj = error as {
+      name?: string;
+      message?: string;
+      statusCode?: number;
+      url?: string;
+      responseBody?: string;
+      text?: string;
+    };
+    const errorContext = {
+      stepType,
+      errorName: errorObj?.name,
+      errorMessage: errorObj?.message,
+      statusCode: errorObj?.statusCode,
+    };
+
+    if (errorObj?.name === 'AbortError' || errorObj?.message?.includes('aborted')) {
+      this.logger.error('AI request timed out', errorContext);
+      throw new ServiceUnavailableException(
+        'Content generation request timed out. Please try again with a simpler prompt.'
+      );
+    }
+
+    if (errorObj?.statusCode) {
+      this.logger.error('OpenAI API call failed', {
+        ...errorContext,
+        statusCode: errorObj.statusCode,
+        url: errorObj.url,
+        responseBody: errorObj.responseBody,
       });
 
-      throw error;
+      if (errorObj.statusCode === 429) {
+        throw new ServiceUnavailableException('AI service is currently rate limited. Please try again in a moment.');
+      }
+
+      if (errorObj.statusCode === 401 || errorObj.statusCode === 403) {
+        this.logger.error('OpenAI authentication failed - check API key configuration');
+        throw new ServiceUnavailableException('AI service configuration error. Please contact support.');
+      }
+
+      if (errorObj.statusCode >= 500) {
+        throw new ServiceUnavailableException('AI service is temporarily unavailable. Please try again later.');
+      }
+
+      throw new BadRequestException('Invalid request to AI service. Please check your input and try again.');
     }
+
+    if (errorObj?.name === 'AI_NoObjectGeneratedError') {
+      this.logger.error('AI failed to generate valid content after retries', {
+        ...errorContext,
+        responseText: errorObj?.text?.substring(0, 500),
+      });
+      throw new BadRequestException(
+        'Failed to generate valid content. Please try rephrasing your request or use a different approach.'
+      );
+    }
+
+    this.logger.error(`Unexpected error during ${stepType} content generation`, errorContext);
+    throw new ServiceUnavailableException('Failed to generate content. Please try again.');
   }
 
   private async handleGenerationError(
