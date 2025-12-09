@@ -1994,9 +1994,12 @@ describe('Novu-Hosted Bridge Trigger #novu-v2', () => {
     await triggerEvent(session, responseData.workflowId, subscriber._id, {});
     currentMetrics = await (jobsService as any).getQueueMetrics();
     console.log(
-      `[Test] Queue breakdown - Workflow: ${currentMetrics.activeWorkflowJobsCount + currentMetrics.waitingWorkflowJobsCount}, Subscriber: ${currentMetrics.activeSubscriberJobsCount + currentMetrics.waitingSubscriberJobsCount}, Standard: ${currentMetrics.activeStandardJobsCount + currentMetrics.waitingStandardJobsCount}`
+      `[Test] Start Wait For Job Completion - Queue breakdown - Workflow: ${currentMetrics.activeWorkflowJobsCount + currentMetrics.waitingWorkflowJobsCount}, Subscriber: ${currentMetrics.activeSubscriberJobsCount + currentMetrics.waitingSubscriberJobsCount}, Standard: ${currentMetrics.activeStandardJobsCount + currentMetrics.waitingStandardJobsCount}`
     );
     await session.waitForJobCompletion();
+    console.log(
+      `[Test] End Wait For Job Completion - Queue breakdown - Workflow: ${currentMetrics.activeWorkflowJobsCount + currentMetrics.waitingWorkflowJobsCount}, Subscriber: ${currentMetrics.activeSubscriberJobsCount + currentMetrics.waitingSubscriberJobsCount}, Standard: ${currentMetrics.activeStandardJobsCount + currentMetrics.waitingStandardJobsCount}`
+    );
 
     const sentMessages = await messageRepository.find({
       _environmentId: session.environment._id,
