@@ -61,22 +61,24 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
 
   const showAiButton = isAiStepGenerationEnabled && AI_SUPPORTED_STEP_TYPES.includes(step.type as StepTypeEnum);
 
+  const watchedSubject = form.watch('subject');
+  const watchedBody = form.watch('body');
+
   const hasExistingContent = useMemo(() => {
-    const formValues = form.getValues();
     switch (step.type) {
       case StepTypeEnum.EMAIL:
-        return !!(formValues.subject || formValues.body);
+        return !!(watchedSubject || watchedBody);
       case StepTypeEnum.SMS:
       case StepTypeEnum.CHAT:
-        return !!formValues.body;
+        return !!watchedBody;
       case StepTypeEnum.PUSH:
-        return !!(formValues.subject || formValues.body);
+        return !!(watchedSubject || watchedBody);
       case StepTypeEnum.IN_APP:
-        return !!(formValues.subject || formValues.body);
+        return !!(watchedSubject || watchedBody);
       default:
         return false;
     }
-  }, [form, step.type]);
+  }, [watchedSubject, watchedBody, step.type]);
 
   const handleAiInsert = useCallback(
     (content: GenerateContentResponse['content'], suggestedPayload?: Record<string, string>) => {
@@ -85,7 +87,8 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
         case StepTypeEnum.EMAIL:
           if ('subject' in content && 'body' in content) {
             const emailContent = content as EmailContent;
-            const bodyStr = typeof emailContent.body === 'object' ? JSON.stringify(emailContent.body) : emailContent.body;
+            const bodyStr =
+              typeof emailContent.body === 'object' ? JSON.stringify(emailContent.body) : emailContent.body;
 
             form.setValue('body', '');
 
@@ -153,7 +156,7 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
         const currentPayload = JSON.parse(editorValue || '{}');
         const existingPayload = currentPayload.payload || {};
 
-        let payloadToMerge: Record<string, string> = {};
+        const payloadToMerge: Record<string, string> = {};
         if (suggestedPayload) {
           for (const [key, value] of Object.entries(suggestedPayload)) {
             if (!key.startsWith('subscriber') && !key.includes('subscriber.')) {
@@ -232,4 +235,3 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
     },
   };
 }
-
