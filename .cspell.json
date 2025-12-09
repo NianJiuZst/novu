@@ -774,7 +774,8 @@
     "jsonrepair",
     "xoxb",
     "fanout",
-    "adminconsent"
+    "adminconsent",
+    "Annotatable"
   ],
   "flagWords": [],
   "patterns": [
