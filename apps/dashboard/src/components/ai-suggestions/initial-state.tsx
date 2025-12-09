@@ -1,3 +1,4 @@
+import { Button } from '@/components/primitives/button';
 import { StepTypeEnum } from '@novu/shared';
 import { RiCornerDownLeftLine, RiLoopLeftLine, RiSparklingLine } from 'react-icons/ri';
 import { PROMPT_SUGGESTIONS_BY_STEP } from './constants';
@@ -45,25 +46,29 @@ export function InitialState({
 
         <div className="flex flex-wrap content-center items-center gap-2">
           {suggestions.slice(0, visibleSuggestionsCount).map((suggestion) => (
-            <button
+            <Button
               key={suggestion}
-              type="button"
+              variant="secondary"
+              mode="outline"
+              size="2xs"
+              className="h-auto rounded-full py-1.5 pl-1.5 pr-2"
+              leadingIcon={RiSparklingLine}
               onClick={() => onSuggestionClick(suggestion)}
-              className="flex items-center gap-1 rounded-full border border-[#e1e4ea] bg-white py-1.5 pl-1.5 pr-2 text-xs font-medium text-[#525866] transition-colors hover:bg-neutral-50"
             >
-              <RiSparklingLine className="size-4 text-[#99a0ae]" />
-              <span>{suggestion}</span>
-            </button>
+              {suggestion}
+            </Button>
           ))}
           {hasMoreSuggestions && (
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              mode="ghost"
+              size="2xs"
+              className="h-auto px-2 text-[#99a0ae] hover:text-[#525866]"
+              trailingIcon={RiLoopLeftLine}
               onClick={onLoadMore}
-              className="flex items-center px-2 text-xs font-medium text-[#99a0ae] transition-colors hover:text-[#525866]"
             >
               Load more
-              <RiLoopLeftLine className="size-5 p-[5px]" />
-            </button>
+            </Button>
           )}
         </div>
 
@@ -83,24 +88,28 @@ export function InitialState({
         </div>
 
         <div className="flex items-center justify-end gap-2">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            className="h-[26px]"
+            mode="outline"
+            size="2xs"
+            trailingIcon={RiSparklingLine}
             onClick={onFeelingLucky}
             disabled={suggestions.length === 0}
-            className="flex items-center gap-0.5 rounded-lg bg-white p-1.5 text-xs font-medium text-[#525866] shadow-[0px_1px_3px_0px_rgba(14,18,27,0.12),0px_0px_0px_1px_#e1e4ea] transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <span className="px-1">I'm feeling lucky</span>
-            <RiSparklingLine className="size-4 text-[#525866]" />
-          </button>
-          <button
-            type="button"
+            I'm feeling lucky
+          </Button>
+          <Button
+            variant="secondary"
+            mode="filled"
+            size="2xs"
+            className="h-[26px]"
+            trailingIcon={RiCornerDownLeftLine}
             onClick={onSubmit}
             disabled={!prompt.trim()}
-            className="flex items-center gap-1 rounded-lg bg-[#f4f5f6] py-1.5 pl-2 pr-1 text-xs font-medium text-[#cacfd8] transition-colors disabled:cursor-not-allowed [&:not(:disabled)]:bg-[#0e121b] [&:not(:disabled)]:text-white"
           >
             Generate step
-            <RiCornerDownLeftLine className="size-4 p-1" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

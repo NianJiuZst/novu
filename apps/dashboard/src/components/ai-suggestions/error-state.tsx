@@ -1,3 +1,4 @@
+import { Button } from '@/components/primitives/button';
 import { ChatPreview } from '@/components/workflow-editor/steps/chat/chat-preview';
 import { InboxPreview } from '@/components/workflow-editor/steps/in-app/inbox-preview';
 import { PushPreview } from '@/components/workflow-editor/steps/push/push-preview';
@@ -38,16 +39,16 @@ export function ErrorState({ stepType, onBackToPrompt }: ErrorStateProps) {
 
         <div className="flex flex-col items-center gap-3">
           <p className="text-center text-xs font-medium leading-4 text-[#fb3748]">Well… that didn't work.</p>
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            className="h-[26px]"
+            mode="outline"
+            size="2xs"
+            leadingIcon={RiArrowLeftSLine}
             onClick={onBackToPrompt}
-            className="flex items-center gap-0.5 overflow-hidden rounded-lg bg-white p-1.5 shadow-[0px_1px_3px_0px_rgba(14,18,27,0.12),0px_0px_0px_1px_#e1e4ea] transition-colors hover:bg-neutral-50"
           >
-            <RiArrowLeftSLine className="size-4" />
-            <div className="flex items-center justify-center px-1 py-0">
-              <span className="text-xs font-medium leading-4 text-[#525866]">Back to prompt</span>
-            </div>
-          </button>
+            Back to prompt
+          </Button>
         </div>
       </div>
     </div>
@@ -142,16 +143,16 @@ function EmailErrorPreview({ onBackToPrompt }: { onBackToPrompt: () => void }) {
 
         <div className="flex flex-col items-center gap-3">
           <p className="text-center text-xs font-medium leading-4 text-[#fb3748]">Well… that didn't work.</p>
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            className="h-[26px]"
+            mode="outline"
+            size="2xs"
+            leadingIcon={RiArrowLeftSLine}
             onClick={onBackToPrompt}
-            className="flex items-center gap-0.5 overflow-hidden rounded-lg bg-white p-1.5 shadow-[0px_1px_3px_0px_rgba(14,18,27,0.12),0px_0px_0px_1px_#e1e4ea] transition-colors hover:bg-neutral-50"
           >
-            <RiArrowLeftSLine className="size-4" />
-            <div className="flex items-center justify-center px-1 py-0">
-              <span className="text-xs font-medium leading-4 text-[#525866]">Back to prompt</span>
-            </div>
-          </button>
+            Back to prompt
+          </Button>
         </div>
       </div>
     </div>

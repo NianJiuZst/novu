@@ -1,4 +1,6 @@
 import { AiWorkflowContext, GenerateContentResponse } from '@/api/ai';
+import { Button } from '@/components/primitives/button';
+import { CompactButton } from '@/components/primitives/button-compact';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/primitives/dialog';
 import { useGenerateAiContent } from '@/hooks/use-generate-ai-content';
 import { StepTypeEnum } from '@novu/shared';
@@ -102,13 +104,7 @@ export function AiSuggestionsDialog({
                 </span>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={handleClose}
-              className="flex size-8 items-center justify-center rounded-md text-[#99a0ae] transition-colors hover:bg-[#f2f5f8] hover:text-[#525866]"
-            >
-              <RiCloseLine className="size-4" />
-            </button>
+            <CompactButton variant="ghost" size="lg" icon={RiCloseLine} onClick={handleClose} />
           </div>
           <DialogDescription className="sr-only">Generate step content with AI</DialogDescription>
         </DialogHeader>
@@ -144,28 +140,22 @@ export function AiSuggestionsDialog({
           <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[#f2f5f8] px-3 py-1.5">
             {/* Show "Keep editing" for loading, error, or success states */}
             {(isLoading || isError || hasResponse) && (
-              <button
-                type="button"
-                onClick={reset}
-                className="flex items-center gap-0.5 rounded-lg bg-white px-2 py-1.5 text-xs font-medium text-[#525866] shadow-[0px_1px_3px_0px_rgba(14,18,27,0.12),0px_0px_0px_1px_#e1e4ea] transition-colors hover:bg-neutral-50"
-              >
+              <Button variant="secondary" className="h-[26px]" mode="outline" size="2xs" onClick={reset}>
                 Keep editing
-              </button>
+              </Button>
             )}
             {/* Show "Replace/Insert content" only on success */}
             {hasResponse && !isLoading && (
-              <button
-                type="button"
+              <Button
+                variant="primary"
+                mode="gradient"
+                size="2xs"
+                className="h-[26px]"
+                trailingIcon={RiCornerDownLeftLine}
                 onClick={handleInsert}
-                className="flex items-center gap-1 rounded-lg border border-[rgba(255,255,255,0.12)] px-1 py-1.5 text-xs font-medium text-white shadow-[0px_1px_2px_0px_rgba(14,18,27,0.24),0px_0px_0px_1px_#dd2450] transition-colors hover:opacity-90"
-                style={{
-                  backgroundImage:
-                    'linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 100%), linear-gradient(90deg, #dd2450 0%, #dd2450 100%)',
-                }}
               >
-                <span className="px-1">{hasExistingContent ? 'Replace content' : 'Insert content'}</span>
-                <RiCornerDownLeftLine className="size-4" />
-              </button>
+                {hasExistingContent ? 'Replace content' : 'Insert content'}
+              </Button>
             )}
           </div>
         )}

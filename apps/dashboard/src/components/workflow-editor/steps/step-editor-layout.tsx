@@ -17,7 +17,7 @@ import { useFetchWorkflowTestData } from '@/hooks/use-fetch-workflow-test-data';
 import { useIsTranslationEnabled } from '@/hooks/use-is-translation-enabled';
 import { LocalizationResourceEnum } from '@/types/translations';
 import { cn } from '@/utils/ui';
-import { PermissionsEnum, StepResponseDto, StepTypeEnum, WorkflowResponseDto } from '@novu/shared';
+import { PermissionsEnum, StepResponseDto, WorkflowResponseDto } from '@novu/shared';
 import { useState } from 'react';
 import { RiCodeBlock, RiEdit2Line, RiEyeLine, RiPlayCircleLine, RiSparklingLine } from 'react-icons/ri';
 import { useParams } from 'react-router-dom';
@@ -152,20 +152,22 @@ function StepEditorContent() {
       {showAiButton && (
         <>
           <div className="fixed bottom-6 right-6 z-50">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              mode="outline"
+              size="xs"
+              leadingIcon={RiSparklingLine}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 setIsAiDialogOpen(true);
               }}
-              className="flex items-center justify-center gap-1 overflow-hidden rounded-full border border-[#ff884d] py-2 pl-2 pr-2.5 shadow-[0px_18px_88px_-4px_rgba(28,40,64,0.14),0px_1px_2px_0px_rgba(0,0,0,0.05)] transition-all hover:shadow-xl"
+              className="rounded-full border-[#ff884d] bg-white py-2 pl-2 pr-2.5 shadow-[0px_18px_88px_-4px_rgba(28,40,64,0.14),0px_1px_2px_0px_rgba(0,0,0,0.05)] transition-all hover:shadow-xl [&>svg]:text-[#ff884d]"
               style={{
                 background:
                   'linear-gradient(113.916deg, rgba(0, 0, 0, 0) 12.861%, rgba(0, 0, 0, 0.02) 117.52%), linear-gradient(90deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%)',
               }}
             >
-              <RiSparklingLine className="size-4" style={{ color: '#ff884d' }} />
               <span
                 className="bg-clip-text text-xs font-medium leading-4"
                 style={{
@@ -177,12 +179,12 @@ function StepEditorContent() {
               >
                 Compose with AI
               </span>
-            </button>
+            </Button>
           </div>
           <AiSuggestionsDialog
             open={isAiDialogOpen}
             onOpenChange={setIsAiDialogOpen}
-            stepType={step.type as StepTypeEnum}
+            stepType={step.type}
             context={aiContext}
             previewPayload={editorValue}
             hasExistingContent={hasExistingContent}
