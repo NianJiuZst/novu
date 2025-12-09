@@ -1,4 +1,5 @@
 import { Button } from '@/components/primitives/button';
+import { Textarea } from '@/components/primitives/textarea';
 import { StepTypeEnum } from '@novu/shared';
 import { RiCornerDownLeftLine, RiLoopLeftLine, RiSparklingLine } from 'react-icons/ri';
 import { PROMPT_SUGGESTIONS_BY_STEP } from './constants';
@@ -72,20 +73,19 @@ export function InitialState({
           )}
         </div>
 
-        <div className="h-[125px] min-h-[125px] overflow-hidden rounded-xl border border-[#e1e4ea] bg-white p-px shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]">
-          <textarea
-            value={prompt}
-            onChange={(e) => onPromptChange(e.target.value)}
-            placeholder={placeholderText}
-            className="h-full w-full resize-none border-0 bg-transparent p-3 text-xs font-normal leading-4 text-[#0e121b] outline-none placeholder:text-[#99a0ae]"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey && prompt.trim()) {
-                e.preventDefault();
-                onSubmit();
-              }
-            }}
-          />
-        </div>
+        <Textarea
+          simple
+          value={prompt}
+          onChange={(e) => onPromptChange(e.target.value)}
+          placeholder={placeholderText}
+          className="min-h-[125px]"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey && prompt.trim()) {
+              e.preventDefault();
+              onSubmit();
+            }
+          }}
+        />
 
         <div className="flex items-center justify-end gap-2">
           <Button

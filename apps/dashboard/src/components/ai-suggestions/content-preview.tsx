@@ -1,4 +1,5 @@
 import { GenerateContentResponse } from '@/api/ai';
+import { Hint } from '@/components/primitives/hint';
 import { ChatPreview } from '@/components/workflow-editor/steps/chat/chat-preview';
 import { InboxPreview } from '@/components/workflow-editor/steps/in-app/inbox-preview';
 import { EmailCorePreview } from '@/components/workflow-editor/steps/preview/previews/email-preview-wrapper';
@@ -160,9 +161,7 @@ export function ContentPreview({ stepType, content, previewPayload, suggestedPay
         <div className="h-full w-full max-w-4xl">{renderPreview()}</div>
       </div>
       <div className="flex shrink-0 flex-col items-center pt-4">
-        <p className="text-center text-xs font-medium leading-4 text-[#99a0ae]">
-          You can always edit your content once inserted into the step editor
-        </p>
+        <Hint className="text-center">You can always edit your content once inserted into the step editor</Hint>
       </div>
     </div>
   );
