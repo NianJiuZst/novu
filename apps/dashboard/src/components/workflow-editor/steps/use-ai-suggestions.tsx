@@ -5,6 +5,7 @@ import { FeatureFlagsKeysEnum, StepResponseDto, StepTypeEnum, WorkflowResponseDt
 import { useCallback, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { v4 as uuidv4 } from 'uuid';
+import { useSaveForm } from './save-form-context';
 
 const AI_SUPPORTED_STEP_TYPES = [
   StepTypeEnum.EMAIL,
@@ -14,7 +15,7 @@ const AI_SUPPORTED_STEP_TYPES = [
   StepTypeEnum.CHAT,
 ];
 
-function inferTypeFromValue(value: any): 'string' | 'number' | 'boolean' | 'object' | 'array' {
+function inferTypeFromValue(value: unknown): 'string' | 'number' | 'boolean' | 'object' | 'array' {
   if (typeof value === 'string') return 'string';
   if (typeof value === 'number') return 'number';
   if (typeof value === 'boolean') return 'boolean';
@@ -56,7 +57,8 @@ interface UseAiSuggestionsProps {
 export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }: UseAiSuggestionsProps) {
   const form = useFormContext();
   const [isAiDialogOpen, setIsAiDialogOpen] = useState(false);
-  const { addProperty, getSchemaPropertyByKey, isPayloadSchemaEnabled } = useWorkflowSchema();
+  const { addProperty, getSchemaPropertyByKey, isPayloadSchemaEnabled, handleSaveChanges } = useWorkflowSchema();
+  const { saveForm } = useSaveForm();
   const isAiStepGenerationEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_AI_STEP_GENERATION_ENABLED);
 
   const showAiButton = isAiStepGenerationEnabled && AI_SUPPORTED_STEP_TYPES.includes(step.type as StepTypeEnum);
@@ -81,7 +83,7 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
   }, [watchedSubject, watchedBody, step.type]);
 
   const handleAiInsert = useCallback(
-    (content: GenerateContentResponse['content'], suggestedPayload?: Record<string, string>) => {
+    async (content: GenerateContentResponse['content'], suggestedPayload?: Record<string, string>) => {
       // Insert content into form
       switch (step.type) {
         case StepTypeEnum.EMAIL:
@@ -194,6 +196,7 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
           setEditorValue(JSON.stringify(mergedPayload, null, 2));
 
           if (isPayloadSchemaEnabled) {
+            let hasNewProperties = false;
             for (const [key, value] of Object.entries(newPayloadKeys)) {
               const existingProperty = getSchemaPropertyByKey(key);
 
@@ -210,7 +213,13 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
                   isRequired: false,
                   isNullable: false,
                 });
+                hasNewProperties = true;
               }
+            }
+
+            // Save the schema if we added new properties
+            if (hasNewProperties) {
+              await handleSaveChanges();
             }
           }
         }
@@ -219,8 +228,21 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
       }
 
       setIsAiDialogOpen(false);
+
+      // Save the workflow form with the inserted content
+      await saveForm({ forceSubmit: true });
     },
-    [form, step.type, editorValue, setEditorValue, isPayloadSchemaEnabled, addProperty, getSchemaPropertyByKey]
+    [
+      form,
+      step.type,
+      editorValue,
+      setEditorValue,
+      isPayloadSchemaEnabled,
+      addProperty,
+      getSchemaPropertyByKey,
+      handleSaveChanges,
+      saveForm,
+    ]
   );
 
   return {
