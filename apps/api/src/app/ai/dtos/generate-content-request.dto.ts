@@ -3,13 +3,18 @@ import { StepTypeEnum } from '@novu/shared';
 import { Type } from 'class-transformer';
 import { IsArray, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 
+export enum MessageRole {
+  USER = 'user',
+  ASSISTANT = 'assistant',
+}
+
 export class MessageDto {
   @ApiProperty({
     description: 'Role of the message sender',
-    enum: ['user', 'assistant'],
+    enum: MessageRole,
   })
-  @IsEnum(['user', 'assistant'])
-  role: 'user' | 'assistant';
+  @IsEnum(MessageRole)
+  role: MessageRole;
 
   @ApiProperty({
     description: 'Content of the message',
