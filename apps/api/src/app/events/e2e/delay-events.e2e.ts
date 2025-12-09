@@ -626,6 +626,7 @@ describe('Trigger event - Delay triggered events - /v1/events/trigger (POST) #no
 
       await session.waitForWorkflowQueueCompletion();
       await session.waitForSubscriberQueueCompletion();
+      await session.waitForStandardQueueCompletion();
 
       const delayedJobs = await jobRepository.find({
         _environmentId: session.environment._id,
