@@ -161,15 +161,21 @@ export const chatContentSchema = z.object({
 });
 
 export const responseWrapperSchema = (contentSchema: z.ZodTypeAny) =>
-  z.object({
-    aiMessage: z
-      .string()
-      .describe('A brief, friendly message explaining what you generated and any suggestions for the user'),
-    content: contentSchema,
-    suggestedPayload: z
-      .record(z.string(), z.string())
-      .optional()
-      .describe(
-        'Sample values ONLY for {{payload.*}} variables used in the content. Keys should be the variable name WITHOUT the "payload." prefix (e.g., for {{payload.link}} use key "link"). NEVER include subscriber variables here - subscriber.firstName, subscriber.email etc are provided by the system.'
-      ),
-  });
+  z
+    .object({
+      aiMessage: z
+        .string()
+        .describe(
+          'A brief, friendly message explaining what you generated and any suggestions for the user. This field must be at the root level of your response.'
+        ),
+      content: contentSchema.describe('The actual notification content object. This field must be at the root level.'),
+      suggestedPayload: z
+        .record(z.string(), z.string())
+        .optional()
+        .describe(
+          'Sample values ONLY for {{payload.*}} variables used in the content. Keys should be the variable name WITHOUT the "payload." prefix (e.g., for {{payload.link}} use key "link"). NEVER include subscriber variables here - subscriber.firstName, subscriber.email etc are provided by the system. This field is optional and must be at the root level if included.'
+        ),
+    })
+    .describe(
+      'Response object with aiMessage, content, and optional suggestedPayload fields at the root level. Do not wrap in type/properties structure.'
+    );

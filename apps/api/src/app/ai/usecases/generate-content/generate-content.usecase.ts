@@ -52,24 +52,53 @@ export class GenerateContentUseCase {
 
   private async generateContent(
     command: GenerateContentCommand,
-    editorType?: string
+    editorType?: string,
+    retryCount = 0
   ): Promise<GenerateContentResponseDto> {
     const schema = this.getSchemaForStepType(command.stepType, editorType);
     const systemPrompt = this.buildSystemPrompt(command.stepType, editorType, command.context);
 
-    const result = await generateObject({
-      model: openai('gpt-4o'),
-      schema,
-      system: systemPrompt,
-      messages: command.messages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
-    });
+    try {
+      const result = await generateObject({
+        model: openai('gpt-4o'),
+        schema,
+        schemaName: 'NotificationContent',
+        schemaDescription:
+          'Generate notification content with an AI message, the actual content, and optional suggested payload values. Return a flat JSON object directly without wrapping it in type/properties structure.',
+        system: systemPrompt,
+        messages: command.messages.map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+        temperature: 0.7,
+      });
 
-    this.logger.info(`Successfully generated ${command.stepType} content`);
+      this.logger.info(`Successfully generated ${command.stepType} content`);
 
-    return result.object as GenerateContentResponseDto;
+      return result.object as GenerateContentResponseDto;
+    } catch (error) {
+      if (retryCount < 2 && error?.name === 'AI_NoObjectGeneratedError') {
+        this.logger.warn(`Schema validation failed, retrying... (attempt ${retryCount + 1}/2)`, {
+          stepType: command.stepType,
+          editorType,
+          errorName: error.name,
+          errorMessage: error.message,
+          responseText: error.text?.substring(0, 500),
+        });
+
+        return await this.generateContent(command, editorType, retryCount + 1);
+      }
+
+      this.logger.error(`Failed to generate ${command.stepType} content after retries`, {
+        stepType: command.stepType,
+        editorType,
+        errorName: error?.name,
+        errorMessage: error?.message,
+        responseText: error?.text?.substring(0, 500),
+      });
+
+      throw error;
+    }
   }
 
   private async handleGenerationError(
