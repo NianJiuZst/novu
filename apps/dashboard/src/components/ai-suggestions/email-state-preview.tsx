@@ -1,9 +1,9 @@
-import { IconType-icons';react-icons
-import { RiArrowLeftSLine, RiMailCloseLinewLeftSLinreact-iconsorict-icons/ri';
-import { RxCrossCircledircled } react-iconsrrx
-import { Avatar, AvatarFallbackAvatarFal@/components/primitives/avatarm '@/components/primitives/avatar';
-import { Buttontives/but@/componentsprimitives/button
-import { Skeletonm '@/comp@/components/primitivesiskeletonves/skeleton';
+import { Avatar, AvatarFallback } from '@/components/primitives/avatar';
+import { Button } from '@/components/primitives/button';
+import { Skeleton } from '@/components/primitives/skeleton';
+import { IconType } from 'react-icons';
+import { RiArrowLeftSLine, RiMailCloseLine } from 'react-icons/ri';
+import { RxCrossCircled } from 'react-icons/rx';
 
 type EmailStatePreviewProps = {
   variant: 'loading' | 'error';
