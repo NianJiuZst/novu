@@ -146,8 +146,8 @@ export function ContentPreview({ stepType, content, previewPayload, suggestedPay
         return <ChatPreview previewData={previewData} isPreviewPending={false} />;
       default:
         return (
-          <div className="max-w-md rounded-lg border border-[#e1e4ea] bg-[#fbfbfb] p-4">
-            <pre className="whitespace-pre-wrap text-left text-xs text-[#525866]">
+          <div className="max-w-md rounded-lg border border-stroke-soft bg-bg-weak p-4">
+            <pre className="whitespace-pre-wrap text-left text-xs text-text-sub">
               {JSON.stringify(content, null, 2)}
             </pre>
           </div>

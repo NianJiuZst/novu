@@ -1,4 +1,5 @@
 import { Button } from '@/components/primitives/button';
+import { Hint } from '@/components/primitives/hint';
 import { ChatPreview } from '@/components/workflow-editor/steps/chat/chat-preview';
 import { InboxPreview } from '@/components/workflow-editor/steps/in-app/inbox-preview';
 import { PushPreview } from '@/components/workflow-editor/steps/push/push-preview';
@@ -38,7 +39,9 @@ export function ErrorState({ stepType, onBackToPrompt }: ErrorStateProps) {
         <div className="w-full">{renderLoadingPreview()}</div>
 
         <div className="flex flex-col items-center gap-3">
-          <p className="text-center text-xs font-medium leading-4 text-[#fb3748]">Well… that didn't work.</p>
+          <Hint hasError className="text-center">
+            Well… that didn't work.
+          </Hint>
           <Button
             variant="secondary"
             className="h-[26px]"

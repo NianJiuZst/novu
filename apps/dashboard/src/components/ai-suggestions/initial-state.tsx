@@ -34,12 +34,12 @@ export function InitialState({
     <div className="flex flex-1 flex-col items-center justify-center">
       <div className="flex w-[500px] flex-col gap-2">
         <div className="flex flex-col gap-2 py-6">
-          <RiSparklingLine className="size-8 text-[#0e121b]" />
+          <RiSparklingLine className="size-8 text-text-strong" />
           <div className="flex flex-col gap-1">
-            <h3 className="text-base font-medium leading-6 tracking-[-0.176px] text-[#0e121b]">
+            <h3 className="text-base font-medium leading-6 tracking-tight text-text-strong">
               Generate step content with AI
             </h3>
-            <p className="text-xs font-medium leading-4 text-[#99a0ae]">
+            <p className="text-xs font-medium leading-4 text-text-soft">
               Tell AI the intent, and we'll draft a channel-ready message, tailored to your workflow.
             </p>
           </div>
@@ -64,7 +64,7 @@ export function InitialState({
               variant="secondary"
               mode="ghost"
               size="2xs"
-              className="h-auto px-2 text-[#99a0ae] hover:text-[#525866]"
+              className="h-auto px-2"
               trailingIcon={RiLoopLeftLine}
               onClick={onLoadMore}
             >

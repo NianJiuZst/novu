@@ -1,4 +1,5 @@
 import { AiWorkflowContext, GenerateContentResponse } from '@/api/ai';
+import { Badge } from '@/components/primitives/badge';
 import { Button } from '@/components/primitives/button';
 import { CompactButton } from '@/components/primitives/button-compact';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/primitives/dialog';
@@ -89,20 +90,18 @@ export function AiSuggestionsDialog({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className="flex h-[80vh] w-[80vw] max-w-none flex-col gap-0 rounded-2xl border-0 bg-white p-0 shadow-[0px_8px_28px_-6px_rgba(28,40,64,0.12),0px_18px_88px_-4px_rgba(28,40,64,0.14)]"
+        className="flex h-[80vh] w-[80vw] max-w-none flex-col gap-0 rounded-20 border-0 bg-white p-0 shadow-md"
         hideCloseButton
       >
-        <DialogHeader className="shrink-0 space-y-0 border-b border-[#f2f5f8] px-3 py-1.5">
+        <DialogHeader className="shrink-0 space-y-0 border-b border-stroke-weak px-3 py-1.5">
           <div className="flex w-full items-center justify-between py-2">
             <div className="flex items-center gap-1.5">
-              <DialogTitle className="text-base font-medium leading-6 tracking-[-0.176px] text-[#0e121b]">
+              <DialogTitle className="text-base font-medium leading-6 tracking-tight text-text-strong">
                 AI suggestions
               </DialogTitle>
-              <div className="rounded-lg bg-[#f2f5f8] px-2 py-0.5">
-                <span className="text-[11px] font-medium uppercase leading-3 tracking-[0.22px] text-[#717784]">
-                  BETA
-                </span>
-              </div>
+              <Badge variant="lighter" color="gray" size="sm">
+                BETA
+              </Badge>
             </div>
             <CompactButton variant="ghost" size="lg" icon={RiCloseLine} onClick={handleClose} />
           </div>
@@ -137,7 +136,7 @@ export function AiSuggestionsDialog({
 
         {/* Footer - Only show when loading, error, or has response */}
         {(isLoading || isError || hasResponse) && (
-          <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[#f2f5f8] px-3 py-1.5">
+          <div className="flex shrink-0 items-center justify-end gap-2 border-t border-stroke-weak px-3 py-1.5">
             {/* Show "Keep editing" for loading, error, or success states */}
             {(isLoading || isError || hasResponse) && (
               <Button variant="secondary" className="h-[26px]" mode="outline" size="2xs" onClick={reset}>

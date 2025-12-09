@@ -1,8 +1,9 @@
-import { Button } from '@/components/primitives/button';
-import { Skeleton } from '@/components/primitives/skeleton';
-import { IconType } from 'react-icons';
-import { RiArrowLeftSLine, RiMailCloseLine } from 'react-icons/ri';
-import { RxCrossCircled } from 'react-icons/rx';
+import { IconType-icons';react-icons
+import { RiArrowLeftSLine, RiMailCloseLinewLeftSLinreact-iconsorict-icons/ri';
+import { RxCrossCircledircled } react-iconsrrx
+import { Avatar, AvatarFallbackAvatarFal@/components/primitives/avatarm '@/components/primitives/avatar';
+import { Buttontives/but@/componentsprimitives/button
+import { Skeletonm '@/comp@/components/primitivesiskeletonves/skeleton';
 
 type EmailStatePreviewProps = {
   variant: 'loading' | 'error';
@@ -21,7 +22,11 @@ export function EmailStatePreview({ variant, message, onBackToPrompt }: EmailSta
           {/* Email Header */}
           <div className="flex flex-col gap-2 border-b border-stroke-weak p-3">
             <div className="flex items-center gap-3">
-              <Skeleton className="size-8 rounded-full" />
+              <Avatar className="size-8">
+                <AvatarFallback>
+                  <Skeleton className="size-full rounded-full" />
+                </AvatarFallback>
+              </Avatar>
               <div className="flex flex-1 flex-col">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -54,7 +59,11 @@ export function EmailStatePreview({ variant, message, onBackToPrompt }: EmailSta
                 <div className="w-[197px] overflow-hidden rounded-md border border-stroke-soft bg-white">
                   {/* Card header */}
                   <div className="flex items-center gap-1 border-b border-stroke-soft p-2">
-                    <Skeleton className="size-4 rounded-full" />
+                    <Avatar className="size-4">
+                      <AvatarFallback>
+                        <Skeleton className="size-full rounded-full" />
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="flex flex-col gap-0.5">
                       <Skeleton className="h-[5px] w-[44px] rounded-full" />
                       <Skeleton className="h-[5px] w-[77px] rounded-full" />
