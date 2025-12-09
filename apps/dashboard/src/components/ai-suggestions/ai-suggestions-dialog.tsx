@@ -21,7 +21,12 @@ type AiSuggestionsDialogProps = {
   context?: AiWorkflowContext;
   previewPayload?: string;
   hasExistingContent?: boolean;
-  onInsert: (content: GenerateContentResponse['content'], suggestedPayload?: Record<string, string>) => void;
+  editorType?: string;
+  onInsert: (
+    content: GenerateContentResponse['content'],
+    suggestedPayload?: Record<string, string>,
+    generatedEditorType?: 'html' | 'block'
+  ) => void;
 };
 
 export function AiSuggestionsDialog({
@@ -31,6 +36,7 @@ export function AiSuggestionsDialog({
   context,
   previewPayload,
   hasExistingContent = false,
+  editorType,
   onInsert,
 }: AiSuggestionsDialogProps) {
   const [prompt, setPrompt] = useState('');
@@ -38,6 +44,7 @@ export function AiSuggestionsDialog({
   const { isLoading, isError, lastResponse, generate, reset } = useGenerateAiContent({
     stepType,
     context,
+    editorType,
   });
   const hasResponse = !!lastResponse;
   const parsedPayload = useMemo(() => (previewPayload ? safeParseJson(previewPayload) : undefined), [previewPayload]);
@@ -82,7 +89,7 @@ export function AiSuggestionsDialog({
 
   const handleInsert = useCallback(() => {
     if (lastResponse?.content) {
-      onInsert(lastResponse.content, lastResponse.suggestedPayload);
+      onInsert(lastResponse.content, lastResponse.suggestedPayload, lastResponse.generatedEditorType);
       handleClose();
     }
   }, [lastResponse, onInsert, handleClose]);

@@ -7,12 +7,13 @@ import { useCallback, useState } from 'react';
 type UseGenerateAiContentOptions = {
   stepType: StepTypeEnum;
   context?: AiWorkflowContext;
+  editorType?: string;
   onSuccess?: (response: GenerateContentResponse) => void;
   onError?: (error: Error) => void;
 };
 
 export function useGenerateAiContent(options: UseGenerateAiContentOptions) {
-  const { stepType, context, onSuccess, onError } = options;
+  const { stepType, context, editorType, onSuccess, onError } = options;
   const { currentEnvironment } = useEnvironment();
   const [messages, setMessages] = useState<AiMessage[]>([]);
   const [lastResponse, setLastResponse] = useState<GenerateContentResponse | null>(null);
@@ -26,6 +27,7 @@ export function useGenerateAiContent(options: UseGenerateAiContentOptions) {
         stepType,
         messages: newMessages,
         context,
+        editorType,
         environment,
       });
 

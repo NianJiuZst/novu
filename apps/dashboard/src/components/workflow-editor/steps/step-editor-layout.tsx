@@ -42,7 +42,7 @@ function StepEditorContent() {
   });
 
   // AI Suggestions
-  const { showAiButton, isAiDialogOpen, setIsAiDialogOpen, hasExistingContent, handleAiInsert, aiContext } =
+  const { showAiButton, isAiDialogOpen, setIsAiDialogOpen, hasExistingContent, handleAiInsert, aiContext, editorType } =
     useAiSuggestions({
       workflow,
       step,
@@ -188,6 +188,7 @@ function StepEditorContent() {
             context={aiContext}
             previewPayload={editorValue}
             hasExistingContent={hasExistingContent}
+            editorType={editorType}
             onInsert={handleAiInsert}
           />
         </>

@@ -84,9 +84,14 @@ const mailyBodySchema = z.object({
   content: z.array(mailyNodeSchema).describe('Array of content nodes that make up the email body'),
 });
 
-const emailContentSchema = z.object({
+const emailBlockContentSchema = z.object({
   subject: z.string().describe('Email subject line - concise and engaging, under 60 characters'),
   body: mailyBodySchema.describe('Email body in Maily TipTap JSON format'),
+});
+
+const emailHtmlContentSchema = z.object({
+  subject: z.string().describe('Email subject line - concise and engaging, under 60 characters'),
+  body: z.string().describe('Email body in HTML format - use semantic HTML with inline styles'),
 });
 
 const smsContentSchema = z.object({
@@ -141,10 +146,14 @@ export class GenerateContentUseCase {
     this.logger.setContext(GenerateContentUseCase.name);
   }
 
-  private getSchemaForStepType(stepType: StepTypeEnum) {
+  private getSchemaForStepType(stepType: StepTypeEnum, editorType?: string) {
     switch (stepType) {
-      case StepTypeEnum.EMAIL:
-        return responseWrapperSchema(emailContentSchema);
+      case StepTypeEnum.EMAIL: {
+        // Use HTML schema for html editor, block schema otherwise
+        const emailSchema = editorType === 'html' ? emailHtmlContentSchema : emailBlockContentSchema;
+
+        return responseWrapperSchema(emailSchema);
+      }
       case StepTypeEnum.SMS:
         return responseWrapperSchema(smsContentSchema);
       case StepTypeEnum.PUSH:
@@ -158,7 +167,11 @@ export class GenerateContentUseCase {
     }
   }
 
-  private getSystemPrompt(stepType: StepTypeEnum, context?: GenerateContentCommand['context']): string {
+  private getSystemPrompt(
+    stepType: StepTypeEnum,
+    editorType?: string,
+    context?: GenerateContentCommand['context']
+  ): string {
     const basePrompt = `You are a notification content expert for Novu, a notification infrastructure platform.
 Your task is to generate high-quality notification content based on user requests.
 
@@ -169,8 +182,21 @@ Guidelines:
 - Follow best practices for the specific notification channel`;
 
     const channelGuidelines: Record<string, string> = {
-      [StepTypeEnum.EMAIL]: `
-Email-specific guidelines:
+      [StepTypeEnum.EMAIL]:
+        editorType === 'html'
+          ? `
+Email-specific guidelines (HTML):
+- Subject lines should be compelling and under 60 characters
+- Body must be valid HTML with inline styles for email client compatibility
+- Use semantic HTML: <h1>, <h2>, <p>, <a>, <table> for layout
+- Add inline styles for colors, spacing, fonts (e.g., style="color: #333; margin: 16px 0;")
+- Include variables using Liquid syntax: {{subscriber.firstName}}, {{payload.variableName}}
+- Use tables for layout to ensure compatibility across email clients
+- Keep paragraphs short and scannable
+- Use clear call-to-action links or buttons
+- Structure: greeting -> main content -> CTA -> closing`
+          : `
+Email-specific guidelines (Block Editor):
 - Subject lines should be compelling and under 60 characters
 - Body must be in Maily TipTap JSON format with proper node structure
 - Use heading nodes for titles (level 1 for main, 2 for sections)
@@ -227,26 +253,63 @@ Chat message guidelines:
   async execute(command: GenerateContentCommand): Promise<GenerateContentResponseDto> {
     this.logger.info(`Generating ${command.stepType} content for user: ${command.userId}`);
 
-    const schema = this.getSchemaForStepType(command.stepType);
-    const systemPrompt = this.getSystemPrompt(command.stepType, command.context);
+    let editorType = command.editorType;
+    let response: GenerateContentResponseDto;
 
-    const result = await generateObject({
-      model: openai('gpt-4o'),
-      schema,
-      system: systemPrompt,
-      messages: command.messages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
-    });
+    try {
+      const schema = this.getSchemaForStepType(command.stepType, editorType);
+      const systemPrompt = this.getSystemPrompt(command.stepType, editorType, command.context);
 
-    this.logger.info(`Successfully generated ${command.stepType} content`);
+      const result = await generateObject({
+        model: openai('gpt-4o'),
+        schema,
+        system: systemPrompt,
+        messages: command.messages.map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+      });
 
-    const response = result.object as GenerateContentResponseDto;
+      this.logger.info(`Successfully generated ${command.stepType} content`);
+      response = result.object as GenerateContentResponseDto;
+    } catch (error) {
+      // For email block editor, fallback to HTML if generation fails
+      if (command.stepType === StepTypeEnum.EMAIL && editorType !== 'html') {
+        this.logger.warn('Block editor content generation failed, falling back to HTML', error);
 
-    // For email, generate HTML from TipTap JSON
+        editorType = 'html';
+        const schema = this.getSchemaForStepType(command.stepType, editorType);
+        const systemPrompt = this.getSystemPrompt(command.stepType, editorType, command.context);
+
+        const result = await generateObject({
+          model: openai('gpt-4o'),
+          schema,
+          system: systemPrompt,
+          messages: command.messages.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+          })),
+        });
+
+        this.logger.info('Successfully generated HTML content as fallback');
+        response = result.object as GenerateContentResponseDto;
+      } else {
+        throw error;
+      }
+    }
+
+    // Set generatedEditorType for email steps
+    if (command.stepType === StepTypeEnum.EMAIL) {
+      response.generatedEditorType = editorType === 'html' ? 'html' : 'block';
+    }
+
+    // For email block editor, generate HTML from TipTap JSON
     if (command.stepType === StepTypeEnum.EMAIL && response.content) {
-      const emailContent = response.content as any;
+      const emailContent = response.content as {
+        subject: string;
+        body: string | Record<string, unknown>;
+        bodyHtml?: string;
+      };
       if (emailContent.body && typeof emailContent.body === 'object') {
         try {
           const html = await mailyRender(emailContent.body);

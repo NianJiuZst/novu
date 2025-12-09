@@ -3,7 +3,7 @@ import { useWorkflowSchema } from '@/components/workflow-editor/workflow-schema-
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { FeatureFlagsKeysEnum, StepResponseDto, StepTypeEnum, WorkflowResponseDto } from '@novu/shared';
 import { useCallback, useMemo, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { v4 as uuidv4 } from 'uuid';
 import { useSaveForm } from './save-form-context';
 
@@ -60,6 +60,7 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
   const { addProperty, getSchemaPropertyByKey, isPayloadSchemaEnabled, handleSaveChanges } = useWorkflowSchema();
   const { saveForm } = useSaveForm();
   const isAiStepGenerationEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_AI_STEP_GENERATION_ENABLED);
+  const editorType = useWatch({ name: 'editorType', control: form.control });
 
   const showAiButton = isAiStepGenerationEnabled && AI_SUPPORTED_STEP_TYPES.includes(step.type as StepTypeEnum);
 
@@ -83,7 +84,11 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
   }, [watchedSubject, watchedBody, step.type]);
 
   const handleAiInsert = useCallback(
-    async (content: GenerateContentResponse['content'], suggestedPayload?: Record<string, string>) => {
+    async (
+      content: GenerateContentResponse['content'],
+      suggestedPayload?: Record<string, string>,
+      generatedEditorType?: 'html' | 'block'
+    ) => {
       // Insert content into form
       switch (step.type) {
         case StepTypeEnum.EMAIL:
@@ -91,6 +96,11 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
             const emailContent = content as EmailContent;
             const bodyStr =
               typeof emailContent.body === 'object' ? JSON.stringify(emailContent.body) : emailContent.body;
+
+            // If generated as HTML but we're on block editor, switch to HTML editor
+            if (generatedEditorType === 'html' && editorType !== 'html') {
+              form.setValue('editorType', 'html', { shouldDirty: true, shouldTouch: true });
+            }
 
             form.setValue('subject', emailContent.subject, { shouldDirty: true, shouldTouch: true });
             form.setValue('body', bodyStr, { shouldDirty: true, shouldTouch: true });
@@ -229,6 +239,7 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
       form,
       step.type,
       editorValue,
+      editorType,
       setEditorValue,
       isPayloadSchemaEnabled,
       addProperty,
@@ -244,6 +255,7 @@ export function useAiSuggestions({ workflow, step, editorValue, setEditorValue }
     setIsAiDialogOpen,
     hasExistingContent,
     handleAiInsert,
+    editorType: step.type === StepTypeEnum.EMAIL ? editorType : undefined,
     aiContext: {
       workflowName: workflow.name,
       workflowDescription: workflow.description,

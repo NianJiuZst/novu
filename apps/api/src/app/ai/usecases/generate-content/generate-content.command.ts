@@ -22,6 +22,10 @@ export class GenerateContentCommand extends BaseCommand {
     variables?: string[];
   };
 
+  @IsOptional()
+  @IsString()
+  readonly editorType?: string;
+
   @IsString()
   @IsNotEmpty()
   readonly organizationId: string;

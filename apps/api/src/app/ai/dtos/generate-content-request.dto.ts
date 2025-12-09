@@ -75,4 +75,11 @@ export class GenerateContentRequestDto {
   @ValidateNested()
   @Type(() => WorkflowContextDto)
   context?: WorkflowContextDto;
+
+  @ApiPropertyOptional({
+    description: 'Editor type for email content: "html" for HTML editor, "block" or undefined for block editor',
+  })
+  @IsOptional()
+  @IsString()
+  editorType?: string;
 }

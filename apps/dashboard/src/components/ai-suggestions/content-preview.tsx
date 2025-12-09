@@ -25,8 +25,13 @@ export function ContentPreview({ stepType, content, previewPayload, suggestedPay
 
     switch (stepType) {
       case StepTypeEnum.EMAIL: {
-        const emailContent = content as { subject: string; body: string | object; bodyHtml: string };
-        const parsedBody = parse(emailContent.bodyHtml || '');
+        const emailContent = content as { subject: string; body: string | object; bodyHtml?: string };
+
+        // For HTML editor: body is a string (HTML)
+        // For block editor: body is TipTap JSON, bodyHtml is the rendered HTML
+        const htmlToPreview = typeof emailContent.body === 'string' ? emailContent.body : emailContent.bodyHtml || '';
+
+        const parsedBody = parse(htmlToPreview);
 
         return {
           ...basePayload,

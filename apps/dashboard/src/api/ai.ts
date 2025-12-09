@@ -18,6 +18,7 @@ export type GenerateContentRequest = {
   stepType: StepTypeEnum;
   messages: AiMessage[];
   context?: AiWorkflowContext;
+  editorType?: string;
   environment: IEnvironment;
 };
 
@@ -56,6 +57,7 @@ export type GenerateContentResponse = {
   aiMessage: string;
   content: EmailContent | SmsContent | PushContent | InAppContent | ChatContent;
   suggestedPayload?: Record<string, string>;
+  generatedEditorType?: 'html' | 'block';
 };
 
 export async function generateAiContent(request: GenerateContentRequest): Promise<GenerateContentResponse> {

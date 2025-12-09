@@ -66,4 +66,9 @@ export class GenerateContentResponseDto {
     additionalProperties: { type: 'string' },
   })
   suggestedPayload?: Record<string, string>;
+
+  @ApiPropertyOptional({
+    description: 'Email editor type used for generation: "html" or "block" (only present for email steps)',
+  })
+  generatedEditorType?: 'html' | 'block';
 }

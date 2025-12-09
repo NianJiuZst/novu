@@ -31,6 +31,7 @@ export class AiController {
         stepType: body.stepType,
         messages: body.messages,
         context: body.context,
+        editorType: body.editorType,
         organizationId: user.organizationId,
         environmentId: user.environmentId,
         userId: user._id,
