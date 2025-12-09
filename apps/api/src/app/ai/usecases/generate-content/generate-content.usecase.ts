@@ -7,138 +7,22 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 import { GenerateContentResponseDto } from '../../dtos';
 import { GenerateContentCommand } from './generate-content.command';
+import { BASE_SYSTEM_PROMPT, CHANNEL_GUIDELINES } from './generate-content.constants';
+import {
+  chatContentSchema,
+  emailBlockContentSchema,
+  emailHtmlContentSchema,
+  inAppContentSchema,
+  pushContentSchema,
+  responseWrapperSchema,
+  smsContentSchema,
+} from './generate-content.schemas';
 
-const mailyTextNodeSchema = z.object({
-  type: z.literal('text'),
-  text: z.string(),
-  marks: z
-    .array(
-      z.object({
-        type: z.enum(['bold', 'italic', 'underline', 'strike']),
-      })
-    )
-    .optional(),
-});
-
-const mailyVariableNodeSchema = z.object({
-  type: z.literal('variable'),
-  attrs: z.object({
-    id: z.string().describe('Variable name like subscriber.firstName or payload.companyName'),
-    fallback: z.string().nullable().optional(),
-  }),
-});
-
-const mailyParagraphSchema = z.object({
-  type: z.literal('paragraph'),
-  attrs: z.object({ textAlign: z.enum(['left', 'center', 'right']).nullable().optional() }).optional(),
-  content: z.array(z.union([mailyTextNodeSchema, mailyVariableNodeSchema])).optional(),
-});
-
-const mailyHeadingSchema = z.object({
-  type: z.literal('heading'),
-  attrs: z.object({
-    level: z
-      .union([z.literal(1), z.literal(2), z.literal(3)])
-      .describe('Heading level: 1 for main title, 2 for section, 3 for subsection'),
-    textAlign: z.enum(['left', 'center', 'right']).nullable().optional(),
-  }),
-  content: z.array(z.union([mailyTextNodeSchema, mailyVariableNodeSchema])).optional(),
-});
-
-const mailyButtonSchema = z.object({
-  type: z.literal('button'),
-  attrs: z.object({
-    text: z.string().describe('Button label text'),
-    url: z.string().optional().describe('Button link URL'),
-    isTextVariable: z.literal(false).optional(),
-    isUrlVariable: z.literal(false).optional(),
-    alignment: z.enum(['left', 'center', 'right']).optional(),
-    variant: z.enum(['filled', 'outline']).optional(),
-    borderRadius: z.enum(['smooth', 'sharp', 'round']).optional(),
-    buttonColor: z.string().optional().describe('Hex color like #000000'),
-    textColor: z.string().optional().describe('Hex color like #ffffff'),
-  }),
-});
-
-const mailySpacerSchema = z.object({
-  type: z.literal('spacer'),
-  attrs: z.object({
-    height: z.number().describe('Height in pixels, typically 8, 16, 24, or 32'),
-  }),
-});
-
-const mailyDividerSchema = z.object({
-  type: z.literal('horizontalRule'),
-});
-
-const mailyNodeSchema = z.union([
-  mailyParagraphSchema,
-  mailyHeadingSchema,
-  mailyButtonSchema,
-  mailySpacerSchema,
-  mailyDividerSchema,
-]);
-
-const mailyBodySchema = z.object({
-  type: z.literal('doc'),
-  content: z.array(mailyNodeSchema).describe('Array of content nodes that make up the email body'),
-});
-
-const emailBlockContentSchema = z.object({
-  subject: z.string().describe('Email subject line - concise and engaging, under 60 characters'),
-  body: mailyBodySchema.describe('Email body in Maily TipTap JSON format'),
-});
-
-const emailHtmlContentSchema = z.object({
-  subject: z.string().describe('Email subject line - concise and engaging, under 60 characters'),
-  body: z.string().describe('Email body in HTML format - use semantic HTML with inline styles'),
-});
-
-const smsContentSchema = z.object({
-  body: z.string().max(160).describe('SMS message body - keep under 160 characters'),
-});
-
-const pushContentSchema = z.object({
-  subject: z.string().max(50).describe('Push notification title - keep under 50 characters'),
-  body: z.string().max(150).describe('Push notification body - keep under 150 characters'),
-});
-
-const inAppContentSchema = z.object({
-  subject: z.string().optional().describe('In-app notification subject/title'),
-  body: z.string().describe('In-app notification body content'),
-  primaryAction: z
-    .object({
-      label: z.string().describe('Primary button label'),
-      url: z.string().optional().describe('URL to navigate to when clicked'),
-    })
-    .optional()
-    .describe('Primary action button'),
-  secondaryAction: z
-    .object({
-      label: z.string().describe('Secondary button label'),
-      url: z.string().optional().describe('URL to navigate to when clicked'),
-    })
-    .optional()
-    .describe('Secondary action button'),
-});
-
-const chatContentSchema = z.object({
-  body: z.string().describe('Chat message content'),
-});
-
-const responseWrapperSchema = (contentSchema: z.ZodTypeAny) =>
-  z.object({
-    aiMessage: z
-      .string()
-      .describe('A brief, friendly message explaining what you generated and any suggestions for the user'),
-    content: contentSchema,
-    suggestedPayload: z
-      .record(z.string(), z.string())
-      .optional()
-      .describe(
-        'Sample values ONLY for {{payload.*}} variables used in the content. Keys should be the variable name WITHOUT the "payload." prefix (e.g., for {{payload.link}} use key "link"). NEVER include subscriber variables here - subscriber.firstName, subscriber.email etc are provided by the system.'
-      ),
-  });
+type EmailContent = {
+  subject: string;
+  body: string | Record<string, unknown>;
+  bodyHtml?: string;
+};
 
 @Injectable()
 export class GenerateContentUseCase {
@@ -146,10 +30,82 @@ export class GenerateContentUseCase {
     this.logger.setContext(GenerateContentUseCase.name);
   }
 
-  private getSchemaForStepType(stepType: StepTypeEnum, editorType?: string) {
+  async execute(command: GenerateContentCommand): Promise<GenerateContentResponseDto> {
+    this.logger.info(`Generating ${command.stepType} content for user: ${command.userId}`);
+
+    const editorType = command.editorType;
+    let response: GenerateContentResponseDto;
+
+    try {
+      response = await this.generateContent(command, editorType);
+    } catch (error) {
+      response = await this.handleGenerationError(command, error, editorType);
+    }
+
+    if (command.stepType === StepTypeEnum.EMAIL) {
+      response.generatedEditorType = editorType === 'html' ? 'html' : 'block';
+      await this.enrichEmailWithHtml(response, command.stepType);
+    }
+
+    return response;
+  }
+
+  private async generateContent(
+    command: GenerateContentCommand,
+    editorType?: string
+  ): Promise<GenerateContentResponseDto> {
+    const schema = this.getSchemaForStepType(command.stepType, editorType);
+    const systemPrompt = this.buildSystemPrompt(command.stepType, editorType, command.context);
+
+    const result = await generateObject({
+      model: openai('gpt-4o'),
+      schema,
+      system: systemPrompt,
+      messages: command.messages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      })),
+    });
+
+    this.logger.info(`Successfully generated ${command.stepType} content`);
+
+    return result.object as GenerateContentResponseDto;
+  }
+
+  private async handleGenerationError(
+    command: GenerateContentCommand,
+    error: unknown,
+    editorType?: string
+  ): Promise<GenerateContentResponseDto> {
+    if (command.stepType === StepTypeEnum.EMAIL && editorType !== 'html') {
+      this.logger.warn('Block editor content generation failed, falling back to HTML', error);
+
+      return await this.generateContent(command, 'html');
+    }
+
+    throw error;
+  }
+
+  private async enrichEmailWithHtml(response: GenerateContentResponseDto, stepType: StepTypeEnum): Promise<void> {
+    if (stepType !== StepTypeEnum.EMAIL || !response.content) {
+      return;
+    }
+
+    const emailContent = response.content as EmailContent;
+    if (emailContent.body && typeof emailContent.body === 'object') {
+      try {
+        const html = await mailyRender(emailContent.body);
+        emailContent.bodyHtml = html;
+      } catch (error) {
+        this.logger.error('Failed to render email HTML from TipTap JSON', error);
+        emailContent.bodyHtml = '';
+      }
+    }
+  }
+
+  private getSchemaForStepType(stepType: StepTypeEnum, editorType?: string): z.ZodTypeAny {
     switch (stepType) {
       case StepTypeEnum.EMAIL: {
-        // Use HTML schema for html editor, block schema otherwise
         const emailSchema = editorType === 'html' ? emailHtmlContentSchema : emailBlockContentSchema;
 
         return responseWrapperSchema(emailSchema);
@@ -167,161 +123,45 @@ export class GenerateContentUseCase {
     }
   }
 
-  private getSystemPrompt(
+  private buildSystemPrompt(
     stepType: StepTypeEnum,
     editorType?: string,
     context?: GenerateContentCommand['context']
   ): string {
-    const basePrompt = `You are a notification content expert for Novu, a notification infrastructure platform.
-Your task is to generate high-quality notification content based on user requests.
+    let prompt = BASE_SYSTEM_PROMPT;
 
-Guidelines:
-- Be concise and engaging
-- Use professional but friendly tone
-- Include personalization placeholders where appropriate using Liquid syntax: {{subscriber.firstName}}, {{payload.variableName}}
-- Follow best practices for the specific notification channel`;
-
-    const channelGuidelines: Record<string, string> = {
-      [StepTypeEnum.EMAIL]:
-        editorType === 'html'
-          ? `
-Email-specific guidelines (HTML):
-- Subject lines should be compelling and under 60 characters
-- Body must be valid HTML with inline styles for email client compatibility
-- Use semantic HTML: <h1>, <h2>, <p>, <a>, <table> for layout
-- Add inline styles for colors, spacing, fonts (e.g., style="color: #333; margin: 16px 0;")
-- Include variables using Liquid syntax: {{subscriber.firstName}}, {{payload.variableName}}
-- Use tables for layout to ensure compatibility across email clients
-- Keep paragraphs short and scannable
-- Use clear call-to-action links or buttons
-- Structure: greeting -> main content -> CTA -> closing`
-          : `
-Email-specific guidelines (Block Editor):
-- Subject lines should be compelling and under 60 characters
-- Body must be in Maily TipTap JSON format with proper node structure
-- Use heading nodes for titles (level 1 for main, 2 for sections)
-- Use paragraph nodes for body text
-- Use spacer nodes between sections (height: 16 or 24)
-- Use button nodes for CTAs with good contrast colors
-- Include variables using variable nodes with id like "subscriber.firstName" or "payload.variableName"
-- Keep paragraphs short and scannable
-- Structure: greeting -> main content -> CTA button -> closing`,
-      [StepTypeEnum.SMS]: `
-SMS-specific guidelines:
-- Keep messages under 160 characters to avoid splitting
-- Be direct and actionable
-- Include essential information only
-- Avoid special characters that might not render properly`,
-      [StepTypeEnum.PUSH]: `
-Push notification guidelines:
-- Title should be under 50 characters
-- Body should be under 150 characters
-- Create urgency or value proposition
-- Be specific about what the user should do`,
-      [StepTypeEnum.IN_APP]: `
-In-app notification guidelines:
-- Can be slightly longer than push notifications
-- Include action buttons when appropriate
-- Be contextual to the user's current state
-- Use clear, actionable language`,
-      [StepTypeEnum.CHAT]: `
-Chat message guidelines:
-- Keep messages conversational
-- Be friendly but professional
-- Include relevant context
-- Make it easy to respond or take action`,
-    };
-
-    let prompt = basePrompt + (channelGuidelines[stepType] || '');
+    const guidelineGetter = CHANNEL_GUIDELINES[stepType];
+    if (guidelineGetter) {
+      const guidelines = typeof guidelineGetter === 'function' ? guidelineGetter(editorType) : guidelineGetter;
+      prompt += guidelines;
+    }
 
     if (context) {
-      prompt += '\n\nContext:';
-      if (context.workflowName) {
-        prompt += `\n- Workflow: ${context.workflowName}`;
-      }
-      if (context.workflowDescription) {
-        prompt += `\n- Purpose: ${context.workflowDescription}`;
-      }
-      if (context.variables && context.variables.length > 0) {
-        prompt += `\n- Available variables: ${context.variables.join(', ')}`;
-      }
+      prompt += this.buildContextSection(context);
     }
 
     return prompt;
   }
 
-  async execute(command: GenerateContentCommand): Promise<GenerateContentResponseDto> {
-    this.logger.info(`Generating ${command.stepType} content for user: ${command.userId}`);
-
-    let editorType = command.editorType;
-    let response: GenerateContentResponseDto;
-
-    try {
-      const schema = this.getSchemaForStepType(command.stepType, editorType);
-      const systemPrompt = this.getSystemPrompt(command.stepType, editorType, command.context);
-
-      const result = await generateObject({
-        model: openai('gpt-4o'),
-        schema,
-        system: systemPrompt,
-        messages: command.messages.map((msg) => ({
-          role: msg.role,
-          content: msg.content,
-        })),
-      });
-
-      this.logger.info(`Successfully generated ${command.stepType} content`);
-      response = result.object as GenerateContentResponseDto;
-    } catch (error) {
-      // For email block editor, fallback to HTML if generation fails
-      if (command.stepType === StepTypeEnum.EMAIL && editorType !== 'html') {
-        this.logger.warn('Block editor content generation failed, falling back to HTML', error);
-
-        editorType = 'html';
-        const schema = this.getSchemaForStepType(command.stepType, editorType);
-        const systemPrompt = this.getSystemPrompt(command.stepType, editorType, command.context);
-
-        const result = await generateObject({
-          model: openai('gpt-4o'),
-          schema,
-          system: systemPrompt,
-          messages: command.messages.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-        });
-
-        this.logger.info('Successfully generated HTML content as fallback');
-        response = result.object as GenerateContentResponseDto;
-      } else {
-        throw error;
-      }
+  private buildContextSection(context: GenerateContentCommand['context']): string {
+    if (!context) {
+      return '';
     }
 
-    // Set generatedEditorType for email steps
-    if (command.stepType === StepTypeEnum.EMAIL) {
-      response.generatedEditorType = editorType === 'html' ? 'html' : 'block';
+    const sections: string[] = ['\n\nContext:'];
+
+    if (context.workflowName) {
+      sections.push(`\n- Workflow: ${context.workflowName}`);
     }
 
-    // For email block editor, generate HTML from TipTap JSON
-    if (command.stepType === StepTypeEnum.EMAIL && response.content) {
-      const emailContent = response.content as {
-        subject: string;
-        body: string | Record<string, unknown>;
-        bodyHtml?: string;
-      };
-      if (emailContent.body && typeof emailContent.body === 'object') {
-        try {
-          const html = await mailyRender(emailContent.body);
-          emailContent.bodyHtml = html;
-        } catch (error) {
-          this.logger.error('Failed to render email HTML from TipTap JSON', error);
-          // Fallback: set bodyHtml to empty string
-          emailContent.bodyHtml = '';
-        }
-      }
+    if (context.workflowDescription) {
+      sections.push(`\n- Purpose: ${context.workflowDescription}`);
     }
 
-    return response;
+    if (context.variables && context.variables.length > 0) {
+      sections.push(`\n- Available variables: ${context.variables.join(', ')}`);
+    }
+
+    return sections.join('');
   }
 }
