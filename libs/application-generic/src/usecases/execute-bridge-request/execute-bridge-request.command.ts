@@ -7,6 +7,7 @@ import {
   HealthCheck,
   HttpQueryKeysEnum,
   PostActionEnum,
+  Workflow,
 } from '@novu/framework/internal';
 import { ResourceOriginEnum } from '@novu/shared';
 import { IsDefined, IsOptional } from 'class-validator';
@@ -44,6 +45,9 @@ export class ExecuteBridgeRequestCommand extends EnvironmentLevelCommand {
 
   @IsOptional()
   statelessBridgeUrl?: string;
+
+  @IsOptional()
+  localWorkflow?: Workflow;
 }
 
 // will generate the output type based on the action

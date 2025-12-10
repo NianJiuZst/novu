@@ -1,7 +1,8 @@
 import { createHmac } from 'node:crypto';
-import { BadRequestException, HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { EnvironmentRepository } from '@novu/dal';
 import {
+  Event,
   GetActionEnum,
   HttpHeaderKeysEnum,
   HttpQueryKeysEnum,
@@ -24,6 +25,7 @@ import got, {
 import { HttpRequestHeaderKeysEnum } from '../../http';
 import { Instrument, InstrumentUsecase } from '../../instrumentation';
 import { PinoLogger } from '../../logging';
+import { LocalWorkflowExecutor } from '../../services/local-workflow-registry';
 import { BRIDGE_EXECUTION_ERROR } from '../../utils';
 import { GetDecryptedSecretKey, GetDecryptedSecretKeyCommand } from '../get-decrypted-secret-key';
 import { BridgeError, ExecuteBridgeRequestCommand, ExecuteBridgeRequestDto } from './execute-bridge-request.command';
@@ -58,8 +60,6 @@ export const RETRYABLE_ERROR_CODES: string[] = [
   'BridgeRequestTimeout',
 ];
 
-const LOG_CONTEXT = 'ExecuteBridgeRequest';
-
 /*
  * The error code returned by the tunneling service.
  * TODO: replace with a constant from the tunneling client.
@@ -75,7 +75,7 @@ type TunnelResponseError = {
  * A wrapper around the BridgeError that is thrown by the ExecuteBridgeRequest usecase.
  */
 class BridgeRequestError extends HttpException {
-  constructor(private bridgeError: BridgeError) {
+  constructor(bridgeError: BridgeError) {
     super(
       {
         message: bridgeError.message,
@@ -92,18 +92,28 @@ class BridgeRequestError extends HttpException {
 
 @Injectable()
 export class ExecuteBridgeRequest {
+  private localWorkflowExecutor: LocalWorkflowExecutor;
+
   constructor(
     private environmentRepository: EnvironmentRepository,
     private getDecryptedSecretKey: GetDecryptedSecretKey,
     private logger: PinoLogger
   ) {
     this.logger.setContext(this.constructor.name);
+    this.localWorkflowExecutor = new LocalWorkflowExecutor();
   }
 
   @InstrumentUsecase()
   async execute<T extends PostActionEnum | GetActionEnum>(
     command: ExecuteBridgeRequestCommand
   ): Promise<ExecuteBridgeRequestDto<T>> {
+    const workflowId = command.searchParams?.[HttpQueryKeysEnum.WORKFLOW_ID];
+
+    const localExecutionResult = await this.tryLocalExecution<T>(command, workflowId);
+    if (localExecutionResult !== null) {
+      return localExecutionResult;
+    }
+
     const environment = await this.environmentRepository.findOne({
       _id: command.environmentId,
     });
@@ -127,9 +137,9 @@ export class ExecuteBridgeRequest {
     const retriesLimit = command.retriesLimit || DEFAULT_RETRIES_LIMIT;
     const bridgeActionUrl = new URL(bridgeUrl);
     bridgeActionUrl.searchParams.set(HttpQueryKeysEnum.ACTION, command.action);
-    Object.entries(command.searchParams || {}).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(command.searchParams || {})) {
       bridgeActionUrl.searchParams.set(key, value);
-    });
+    }
 
     const url = bridgeActionUrl.toString();
     const timeOut = bridgeUrl?.includes(process.env.API_INTERNAL_ORIGIN) ? 60_000 : DEFAULT_TIMEOUT;
@@ -192,6 +202,59 @@ export class ExecuteBridgeRequest {
       }).json();
     } catch (error) {
       await this.handleResponseError(error, bridgeUrl, command.processError);
+    }
+  }
+
+  @Instrument()
+  private async tryLocalExecution<T extends PostActionEnum | GetActionEnum>(
+    command: ExecuteBridgeRequestCommand,
+    workflowId?: string
+  ): Promise<ExecuteBridgeRequestDto<T> | null> {
+    if (!command.localWorkflow || !workflowId || command.workflowOrigin !== ResourceOriginEnum.NOVU_CLOUD) {
+      return null;
+    }
+
+    const isExecuteOrPreview = [PostActionEnum.EXECUTE, PostActionEnum.PREVIEW].includes(
+      command.action as PostActionEnum
+    );
+
+    if (!isExecuteOrPreview) {
+      return null;
+    }
+
+    this.logger.info(`Executing workflow '${workflowId}' locally (bypassing HTTP)`);
+
+    const stepId = command.searchParams?.[HttpQueryKeysEnum.STEP_ID] || '';
+
+    const event: Event = {
+      ...(command.event as Omit<Event, 'workflowId' | 'stepId' | 'action'>),
+      workflowId,
+      stepId,
+      action: command.action as PostActionEnum.EXECUTE | PostActionEnum.PREVIEW,
+    };
+
+    try {
+      const result =
+        command.action === PostActionEnum.PREVIEW
+          ? await this.localWorkflowExecutor.previewWorkflow(command.localWorkflow, event)
+          : await this.localWorkflowExecutor.executeWorkflow(command.localWorkflow, event);
+
+      return result as ExecuteBridgeRequestDto<T>;
+    } catch (error) {
+      this.logger.error({ err: error }, `Local workflow execution failed for '${workflowId}'`);
+
+      if (command.processError) {
+        const bridgeError: BridgeError = {
+          url: 'local://executor',
+          code: 'LOCAL_EXECUTION_ERROR',
+          message: error instanceof Error ? error.message : 'Unknown local execution error',
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          cause: error,
+        };
+        await command.processError(bridgeError);
+      }
+
+      throw error;
     }
   }
 
@@ -312,8 +375,7 @@ export class ExecuteBridgeRequest {
       let body: Record<string, unknown>;
       try {
         body = JSON.parse(error.response.body as string);
-      } catch (e) {
-        // If the body is not valid JSON, we'll just use an empty object.
+      } catch {
         body = {};
       }
 

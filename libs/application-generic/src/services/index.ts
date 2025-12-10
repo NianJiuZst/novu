@@ -19,6 +19,7 @@ export * from './content.service';
 export * from './cron';
 export * from './feature-flags';
 export * from './in-memory-provider';
+export * from './local-workflow-registry';
 export {
   MessageInteractionResult,
   MessageInteractionService,
