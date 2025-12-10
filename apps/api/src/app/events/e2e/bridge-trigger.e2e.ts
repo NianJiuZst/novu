@@ -1998,7 +1998,7 @@ describe('Novu-Hosted Bridge Trigger #novu-v2', () => {
     console.log(
       `[Test] Start Wait For Job Completion - Queue breakdown - Workflow: ${currentMetrics.activeWorkflowJobsCount + currentMetrics.waitingWorkflowJobsCount}, Subscriber: ${currentMetrics.activeSubscriberJobsCount + currentMetrics.waitingSubscriberJobsCount}, Standard: ${currentMetrics.activeStandardJobsCount + currentMetrics.waitingStandardJobsCount}`
     );
-    await session.waitForJobCompletion();
+    await session.waitForJobCompletion(undefined, undefined, 30000);
     currentMetrics = await (jobsService as any).getQueueMetrics();
     console.log(
       `[Test] End Wait For Job Completion - Queue breakdown - Workflow: ${currentMetrics.activeWorkflowJobsCount + currentMetrics.waitingWorkflowJobsCount}, Subscriber: ${currentMetrics.activeSubscriberJobsCount + currentMetrics.waitingSubscriberJobsCount}, Standard: ${currentMetrics.activeStandardJobsCount + currentMetrics.waitingStandardJobsCount}`
