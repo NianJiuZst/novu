@@ -7,12 +7,12 @@ import {
   UpdateWorkflowDto,
   WorkflowResponseDto,
 } from '@novu/shared';
-import { FilesIcon } from 'lucide-react';
-import { motion } from 'motion/react';
+import { ChevronsUpDown, FilesIcon } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { LuBookUp2 } from 'react-icons/lu';
 import {
+  RiAddLine,
   RiArrowRightSLine,
   RiCodeSSlashLine,
   RiDeleteBin2Line,
@@ -29,6 +29,7 @@ import { DeleteWorkflowDialog } from '@/components/delete-workflow-dialog';
 import { RouteFill } from '@/components/icons/route-fill';
 import { PageMeta } from '@/components/page-meta';
 import { PAUSE_MODAL_TITLE, PauseModalDescription } from '@/components/pause-workflow-dialog';
+import { Badge, Dot as BadgeDot } from '@/components/primitives/badge';
 import { Button } from '@/components/primitives/button';
 import { CompactButton } from '@/components/primitives/button-compact';
 import { CopyButton } from '@/components/primitives/copy-button';
@@ -37,22 +38,10 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/primitives/dropdown-menu';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormRoot,
-} from '@/components/primitives/form/form';
+import { Form, FormField, FormItem, FormMessage, FormRoot } from '@/components/primitives/form/form';
 import { Input } from '@/components/primitives/input';
 import { Separator } from '@/components/primitives/separator';
 import { ToastIcon } from '@/components/primitives/sonner';
@@ -60,13 +49,11 @@ import { showToast } from '@/components/primitives/sonner-helpers';
 import { Switch } from '@/components/primitives/switch';
 import { TagInput } from '@/components/primitives/tag-input';
 import { Textarea } from '@/components/primitives/textarea';
-import { Tooltip, TooltipContent, TooltipPortal, TooltipTrigger } from '@/components/primitives/tooltip';
 import { usePromotionalBanner } from '@/components/promotional/coming-soon-banner';
 import { SidebarContent, SidebarHeader } from '@/components/side-navigation/sidebar';
 import { workflowSchema } from '@/components/workflow-editor/schema';
 import { UpdateWorkflowFn } from '@/components/workflow-editor/workflow-provider';
-import { useAuth } from '@/context/auth/hooks';
-import { useEnvironment, useFetchEnvironments } from '@/context/environment/hooks';
+import { useEnvironment } from '@/context/environment/hooks';
 import { useDeleteWorkflow } from '@/hooks/use-delete-workflow';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { useSyncWorkflow } from '@/hooks/use-sync-workflow';
@@ -97,11 +84,12 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
   const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isPayloadSchemaDrawerOpen, setIsPayloadSchemaDrawerOpen] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isAddingTag, setIsAddingTag] = useState(false);
 
   const { tags } = useTags();
   const { currentEnvironment } = useEnvironment();
-  const { currentOrganization } = useAuth();
-  const { environments = [] } = useFetchEnvironments({ organizationId: currentOrganization?._id });
   const { isSyncable, PromoteConfirmModal } = useSyncWorkflow(workflow);
 
   const { show: showComingSoonBanner } = usePromotionalBanner({
@@ -195,7 +183,6 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
     });
   }, []);
 
-  const otherEnvironments = environments.filter((env) => env._id !== currentEnvironment?._id);
   const isDuplicable = useMemo(() => workflow.origin === ResourceOriginEnum.NOVU_CLOUD, [workflow.origin]);
 
   return (
@@ -294,120 +281,248 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
         </SidebarHeader>
         <Form {...form}>
           <FormRoot onBlur={onBlur}>
-            <SidebarContent size="md">
+            <SidebarContent size="md" className="space-y-2 py-2">
+              {/* STATUS Section */}
               <FormField
                 control={form.control}
                 name="active"
                 render={({ field }) => (
-                  <FormItem className="flex w-full items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div
-                        className="bg-success/60 data-[active=false]:shadow-neutral-alpha-100 ml-2 h-1.5 w-1.5 rounded-full [--pulse-color:var(--success)] data-[active=true]:animate-[pulse-shadow_1s_ease-in-out_infinite] data-[active=false]:bg-neutral-300 data-[active=false]:shadow-[0_0px_0px_5px_var(--neutral-alpha-200),0_0px_0px_9px_var(--neutral-alpha-100)]"
-                        data-active={field.value}
-                      />
-                      <FormLabel>Active Workflow</FormLabel>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={(checked) => {
-                          if (!checked) {
-                            setIsPauseModalOpen(true);
-                            return;
-                          }
+                  <FormItem>
+                    <div className="group flex items-center justify-between">
+                      <span className="text-text-soft font-code text-xs font-medium">STATUS</span>
+                      <div className="flex items-center gap-3">
+                        {field.value ? (
+                          <motion.div
+                            initial={false}
+                            animate={{
+                              scale: [1, 1.02, 1],
+                            }}
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                              ease: 'easeInOut',
+                            }}
+                          >
+                            <Badge
+                              variant="light"
+                              color="green"
+                              size="md"
+                              className="bg-success-lighter text-success-base gap-1.5"
+                            >
+                              <BadgeDot />
+                              <span className="font-code text-xs uppercase text-success">Active</span>
+                            </Badge>
+                          </motion.div>
+                        ) : (
+                          <Badge variant="light" color="gray" size="md" className="gap-1.5">
+                            <BadgeDot />
+                            <span className="font-code text-xs uppercase text-faded">Inactive</span>
+                          </Badge>
+                        )}
+                        <motion.div whileTap={{ scale: 0.95 }} transition={{ duration: 0.1 }}>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={(checked) => {
+                              if (!checked) {
+                                setIsPauseModalOpen(true);
+                                return;
+                              }
 
-                          onPauseWorkflow(checked);
-                        }}
-                        disabled={isReadOnly}
-                      />
-                    </FormControl>
+                              onPauseWorkflow(checked);
+                            }}
+                            disabled={isReadOnly}
+                          />
+                        </motion.div>
+                      </div>
+                    </div>
                   </FormItem>
                 )}
               />
-            </SidebarContent>
-            <Separator />
-            <SidebarContent>
+
+              {/* WORKFLOW Section */}
               <FormField
                 control={form.control}
                 name="name"
                 defaultValue=""
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel required>Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="New workflow"
-                        {...field}
-                        disabled={isReadOnly}
-                        hasError={!!fieldState.error}
-                      />
-                    </FormControl>
-                    <FormMessage />
+                    <div className="group flex items-center justify-between">
+                      <span className="text-text-soft font-code text-xs font-medium">WORKFLOW</span>
+                      <div className="relative flex items-center gap-2 min-w-0 flex-1 justify-end">
+                        {isEditingName && !isReadOnly ? (
+                          <Input
+                            placeholder="New workflow"
+                            value={field.value}
+                            onChange={field.onChange}
+                            hasError={!!fieldState.error}
+                            className="min-w-[200px] [&>div]:before:hidden [&>div]:shadow-none [&>div]:focus-within:ring-1 [&>div]:focus-within:ring-stroke-soft [&>div]:focus-within:ring-offset-0 [&>div]:focus-within:border-stroke-soft"
+                            size="xs"
+                            autoFocus
+                            onBlur={() => {
+                              field.onBlur();
+                              setIsEditingName(false);
+                              saveForm();
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.currentTarget.blur();
+                              }
+                              if (e.key === 'Escape') {
+                                form.resetField('name');
+                                setIsEditingName(false);
+                              }
+                            }}
+                          />
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => !isReadOnly && setIsEditingName(true)}
+                            disabled={isReadOnly}
+                            className={cn(
+                              'text-foreground-600 text-right text-xs transition-colors',
+                              !isReadOnly && 'hover:text-foreground-800 cursor-pointer',
+                              isReadOnly && 'cursor-default'
+                            )}
+                          >
+                            {field.value || 'Untitled workflow'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <FormMessage className="mt-1" />
                   </FormItem>
                 )}
               />
+
+              {/* ID Section */}
               <FormField
                 control={form.control}
                 name="workflowId"
                 defaultValue=""
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Identifier</FormLabel>
-                    <FormControl>
-                      <Input
-                        size="xs"
-                        trailingNode={<CopyButton valueToCopy={field.value} />}
-                        placeholder="Untitled"
-                        className="cursor-default"
-                        {...field}
-                        readOnly
-                      />
-                    </FormControl>
-                    <FormMessage />
+                    <div className="group flex items-center justify-between">
+                      <span className="text-text-soft font-code text-xs font-medium">ID</span>
+                      <div className="relative flex items-center gap-2">
+                        <div className="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                          <CopyButton valueToCopy={field.value} size="2xs" className="h-1 p-0.5" />
+                        </div>
+                        <motion.span
+                          whileHover={{ x: -2 }}
+                          transition={{ duration: 0.15 }}
+                          className="text-foreground-600 font-mono text-xs"
+                        >
+                          {field.value}
+                        </motion.span>
+                      </div>
+                    </div>
                   </FormItem>
                 )}
               />
+
+              {/* DESCRIPTION Section */}
               <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        className="min-h-36"
-                        placeholder="Describe what this workflow does"
-                        {...field}
-                        maxLength={MAX_DESCRIPTION_LENGTH}
-                        showCounter
-                        disabled={isReadOnly}
-                      />
-                    </FormControl>
-                    <FormMessage />
+                    <button
+                      type="button"
+                      onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                      className="group flex w-full items-center justify-between"
+                    >
+                      <span className="text-text-soft font-code text-xs font-medium">DESCRIPTION</span>
+                      <div className="relative flex items-center gap-2">
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          transition={{ duration: 0.15 }}
+                          className="text-foreground-400 group-hover:text-foreground-600 rounded p-1 transition-colors"
+                        >
+                          <ChevronsUpDown
+                            className={cn(
+                              'size-4 transition-transform duration-200',
+                              isDescriptionExpanded && 'rotate-180'
+                            )}
+                          />
+                        </motion.div>
+                      </div>
+                    </button>
+                    {isDescriptionExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2, ease: 'easeInOut' }}
+                        className="mt-2 overflow-hidden"
+                      >
+                        <Textarea
+                          className="min-h-24 text-sm"
+                          placeholder="Describe what this workflow does"
+                          value={field.value}
+                          onChange={field.onChange}
+                          maxLength={MAX_DESCRIPTION_LENGTH}
+                          showCounter
+                          disabled={isReadOnly}
+                          onBlur={() => {
+                            field.onBlur();
+                            saveForm();
+                          }}
+                        />
+                      </motion.div>
+                    )}
+                    <FormMessage className="mt-1" />
                   </FormItem>
                 )}
               />
+
+              {/* TAGS Section */}
               <FormField
                 control={form.control}
                 name="tags"
                 render={({ field }) => (
-                  <FormItem className="group" tabIndex={-1}>
-                    <div className="flex items-center gap-1">
-                      <FormLabel>Tags</FormLabel>
+                  <FormItem>
+                    <div className="group flex items-center justify-between">
+                      <span className="text-text-soft font-code text-xs font-medium">TAGS</span>
+                      <div className="relative flex items-center gap-2">
+                        {!isReadOnly && (
+                          <motion.button
+                            type="button"
+                            onClick={() => setIsAddingTag(!isAddingTag)}
+                            whileHover={{ scale: 1.05, rotate: 90 }}
+                            whileTap={{ scale: 0.95 }}
+                            transition={{ duration: 0.15 }}
+                            className="bg-bg-white hover:bg-bg-weak text-foreground-600 hover:text-foreground-800 flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors"
+                          >
+                            <RiAddLine className="size-3.5" />
+                          </motion.button>
+                        )}
+                      </div>
                     </div>
-                    <FormControl className="text-xs text-neutral-600">
-                      <TagInput
-                        {...field}
-                        onChange={(tags) => {
-                          form.setValue('tags', tags, { shouldValidate: true, shouldDirty: true });
-                          saveForm();
-                        }}
-                        disabled={isReadOnly}
-                        value={field.value ?? []}
-                        suggestions={tags.map((tag) => tag.name)}
-                      />
-                    </FormControl>
-                    <FormMessage />
+                    <AnimatePresence>
+                      {isAddingTag && !isReadOnly && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2, ease: 'easeInOut' }}
+                          className="mt-2 overflow-hidden"
+                        >
+                          <TagInput
+                            value={field.value ?? []}
+                            onChange={(newTags) => {
+                              form.setValue('tags', newTags, { shouldValidate: true, shouldDirty: true });
+                              saveForm();
+                            }}
+                            disabled={isReadOnly}
+                            suggestions={tags.map((tag) => tag.name)}
+                            onBlur={() => setIsAddingTag(false)}
+                            className="h-6 text-xs"
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <FormMessage className="mt-1" />
                   </FormItem>
                 )}
               />
