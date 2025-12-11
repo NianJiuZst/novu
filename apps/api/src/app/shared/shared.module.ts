@@ -26,6 +26,7 @@ import {
   CommunityMemberRepository,
   CommunityOrganizationRepository,
   CommunityUserRepository,
+  ContextRepository,
   ControlValuesRepository,
   DalService,
   EnvironmentRepository,

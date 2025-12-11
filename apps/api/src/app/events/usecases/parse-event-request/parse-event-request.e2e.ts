@@ -8,7 +8,7 @@ import {
   TriggerMulticast,
   VerifyPayload,
 } from '@novu/application-generic';
-import { NotificationTemplateEntity, SubscriberRepository } from '@novu/dal';
+import { ContextRepository, NotificationTemplateEntity, SubscriberRepository } from '@novu/dal';
 import { AddressingTypeEnum, TriggerRecipients, TriggerRequestCategoryEnum } from '@novu/shared';
 import { SubscribersService, UserSession } from '@novu/testing';
 import { expect } from 'chai';
@@ -29,6 +29,7 @@ describe('ParseEventRequest Usecase - Payload Validation - #novu-v2', () => {
     const moduleRef = await Test.createTestingModule({
       imports: [SharedModule, EventsModule],
       providers: [
+        ContextRepository,
         TriggerEvent,
         CreateOrUpdateSubscriberUseCase,
         ProcessTenant,

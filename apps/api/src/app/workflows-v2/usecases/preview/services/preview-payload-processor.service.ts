@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { JobStatusEnum, StepTypeEnum } from '@novu/shared';
+import { JobStatusEnum } from '@novu/shared';
 import _ from 'lodash';
 import { FrameworkPreviousStepsOutputState } from '../../../../bridge/usecases/preview-step/preview-step.command';
-import { PreviewPayloadDto, StepResponseDto } from '../../../dtos';
+import { PreviewPayloadDto } from '../../../dtos';
 
 @Injectable()
 export class PreviewPayloadProcessorService {
@@ -58,7 +58,7 @@ export class PreviewPayloadProcessorService {
         });
     }
 
-    return preparedPayload;
+    return preparedPayload as Record<string, Record<string, unknown>>;
   }
 
   buildState(steps: Record<string, unknown> | undefined): FrameworkPreviousStepsOutputState[] {
