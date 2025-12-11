@@ -33,10 +33,7 @@ import {
   TriggerEventStatusEnum,
   TriggerRecipientsPayload,
 } from '@novu/shared';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
 import { generateTransactionId } from '../../../shared/helpers/generate-transaction-id';
-import { PayloadValidationException } from '../../exceptions/payload-validation-exception';
 import { RecipientSchema, RecipientsSchema } from '../../utils/trigger-recipient-validation';
 import {
   ParseEventRequestBroadcastCommand,
@@ -111,27 +108,6 @@ export class ParseEventRequest {
         throw new UnprocessableEntityException('workflow_not_found');
       }
 
-      if (template.validatePayload && template.payloadSchema) {
-        try {
-          const validatedPayload = this.validateAndApplyPayloadDefaults(command.payload, template.payloadSchema);
-          // eslint-disable-next-line no-param-reassign
-          command.payload = validatedPayload;
-        } catch (error) {
-          if (error instanceof PayloadValidationException) {
-            await this.createRequestTrace({
-              requestId,
-              command,
-              eventType: 'request_payload_validation_failed',
-              transactionId,
-              status: 'error',
-              message: 'Payload validation failed',
-              rawData: { validationErrors: error.message, payload: command.payload },
-            });
-          }
-          throw error;
-        }
-      }
-
       let tenant: TenantEntity | null = null;
       if (command.tenant) {
         tenant = await this.tenantRepository.findOne({
@@ -197,6 +173,7 @@ export class ParseEventRequest {
     }
   }
 
+  @Instrument()
   private async createRequestTrace({
     requestId,
     command,
@@ -274,6 +251,7 @@ export class ParseEventRequest {
     return discover?.workflows?.find((findWorkflow) => findWorkflow.workflowId === command.identifier) || null;
   }
 
+  @Instrument()
   private async dispatchEventToWorkflowQueue({
     requestId,
     command,
@@ -379,6 +357,7 @@ export class ParseEventRequest {
     );
   }
 
+  @Instrument()
   private modifyAttachments(command: ParseEventRequestCommand): void {
     // eslint-disable-next-line no-param-reassign
     command.payload.attachments = command.payload.attachments.map((attachment) => {
@@ -425,6 +404,7 @@ export class ParseEventRequest {
    * @param input - The input to parse and validate. Can be a single recipient or an array of recipients.
    * @returns The object containing valid and invalid values.
    */
+  @Instrument()
   private parseRecipients(input: unknown) {
     const invalidValues: unknown[] = [];
 
@@ -445,25 +425,5 @@ export class ParseEventRequest {
     const validItem = this.validateItem(input, invalidValues);
 
     return { validRecipients: validItem, invalidRecipients: invalidValues };
-  }
-
-  private validateAndApplyPayloadDefaults(payload: any, schema: any): any {
-    const ajv = new Ajv({
-      allErrors: true,
-      useDefaults: true,
-    });
-    addFormats(ajv);
-
-    const validate = ajv.compile(schema);
-
-    // Create a deep copy of the payload to avoid mutating the original
-    const payloadWithDefaults = JSON.parse(JSON.stringify(payload));
-    const valid = validate(payloadWithDefaults);
-
-    if (!valid && validate.errors) {
-      throw PayloadValidationException.fromAjvErrors(validate.errors, payload, schema);
-    }
-
-    return payloadWithDefaults;
   }
 }

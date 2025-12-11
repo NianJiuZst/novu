@@ -18,6 +18,8 @@ import {
   TriggerTenantContext,
 } from '@novu/shared';
 import { addBreadcrumb } from '@sentry/node';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 import { toMerged } from 'es-toolkit';
 import { Instrument, InstrumentUsecase } from '../../instrumentation';
 import { PinoLogger } from '../../logging';
@@ -25,6 +27,7 @@ import { FeatureFlagsService } from '../../services';
 import type { EventType, Trace } from '../../services/analytic-logs';
 import { LogRepository, mapEventTypeToTitle, TraceLogRepository } from '../../services/analytic-logs';
 import { AnalyticsService } from '../../services/analytics.service';
+import { PayloadValidationException } from '../../utils/exceptions';
 import { CreateOrUpdateSubscriberCommand, CreateOrUpdateSubscriberUseCase } from '../create-or-update-subscriber';
 import { ProcessTenant, ProcessTenantCommand } from '../process-tenant';
 import { TriggerBroadcastCommand } from '../trigger-broadcast/trigger-broadcast.command';
@@ -36,6 +39,12 @@ import { TriggerEventCommand } from './trigger-event.command';
 function getActiveWorker() {
   return process.env.ACTIVE_WORKER;
 }
+
+const ajv = new Ajv({
+  allErrors: true,
+  useDefaults: true,
+});
+addFormats(ajv);
 
 @Injectable()
 export class TriggerEvent {
@@ -70,6 +79,25 @@ export class TriggerEvent {
           organizationId: command.organizationId,
           userId: command.userId,
         });
+      }
+
+      if (storedWorkflow?.validatePayload && storedWorkflow?.payloadSchema) {
+        try {
+          const validatedPayload = this.validateAndApplyPayloadDefaults(command.payload, storedWorkflow.payloadSchema);
+          command.payload = validatedPayload;
+        } catch (error) {
+          if (error instanceof PayloadValidationException) {
+            await this.createWorkflowTrace({
+              command,
+              eventType: 'request_payload_validation_failed',
+              status: 'error',
+              message: 'Payload validation failed',
+              rawData: { validationErrors: error.message, payload: command.payload },
+              workflowId: storedWorkflow?._id,
+            });
+          }
+          throw error;
+        }
       }
 
       if (storedWorkflow) {
@@ -463,5 +491,19 @@ export class TriggerEvent {
         `Failed to resolve context: ${error instanceof Error ? error.message : String(error)} | Context: ${JSON.stringify(command.context)}`
       );
     }
+  }
+
+  @Instrument()
+  private validateAndApplyPayloadDefaults(payload: any, schema: any): any {
+    const validate = ajv.compile(schema);
+
+    const payloadWithDefaults = JSON.parse(JSON.stringify(payload));
+    const valid = validate(payloadWithDefaults);
+
+    if (!valid && validate.errors) {
+      throw PayloadValidationException.fromAjvErrors(validate.errors, payload, schema);
+    }
+
+    return payloadWithDefaults;
   }
 }
