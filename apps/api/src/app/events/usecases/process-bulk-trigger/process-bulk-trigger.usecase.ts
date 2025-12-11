@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IWorkflowBulkJobDto, WorkflowQueueService } from '@novu/application-generic';
-import { NotificationTemplateRepository } from '@novu/dal';
+import { NotificationTemplateEntity, NotificationTemplateRepository } from '@novu/dal';
 import { AddressingTypeEnum, TriggerEventStatusEnum, TriggerRequestCategoryEnum } from '@novu/shared';
 import { TriggerEventResponseDto } from '../../dtos';
 import { ParseEventRequestMulticastCommand } from '../parse-event-request/parse-event-request.command';
@@ -19,11 +19,16 @@ export class ProcessBulkTrigger {
     // Extract unique workflow identifiers from all events
     const uniqueWorkflowIdentifiers = [...new Set(command.events.map((event) => event.name))];
 
-    // Fetch all unique workflows in a single batch operation
-    const workflows = await this.notificationTemplateRepository.findByTriggerIdentifierBulk(
-      command.environmentId,
-      uniqueWorkflowIdentifiers
-    );
+    // Fetch all unique workflows in a single batch operation with only required fields
+    const workflows: Pick<NotificationTemplateEntity, '_id' | 'active' | 'triggers'>[] =
+      await this.notificationTemplateRepository.find(
+        {
+          _environmentId: command.environmentId,
+          'triggers.identifier': { $in: uniqueWorkflowIdentifiers },
+        },
+        '_id active triggers',
+        { readPreference: 'secondaryPreferred' }
+      );
 
     // Create a map for quick lookup
     const workflowMap = new Map();

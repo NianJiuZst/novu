@@ -89,7 +89,7 @@ export class ParseEventRequest {
         });
       }
 
-      const template: Pick<NotificationTemplateEntity, '_id' | 'active' | 'payloadSchema' | 'validatePayload'> | null =
+      const template: Pick<NotificationTemplateEntity, '_id' | 'active'> | null =
         command.workflow ||
         (await this.getNotificationTemplateByTriggerIdentifier({
           environmentId: command.environmentId,
@@ -346,13 +346,13 @@ export class ParseEventRequest {
   private async getNotificationTemplateByTriggerIdentifier(command: {
     triggerIdentifier: string;
     environmentId: string;
-  }): Promise<Pick<NotificationTemplateEntity, '_id' | 'active' | 'payloadSchema' | 'validatePayload'> | null> {
+  }): Promise<Pick<NotificationTemplateEntity, '_id' | 'active'> | null> {
     return await this.notificationTemplateRepository.findOne(
       {
         _environmentId: command.environmentId,
         'triggers.identifier': command.triggerIdentifier,
       },
-      '_id active payloadSchema validatePayload',
+      '_id active ',
       { readPreference: 'secondaryPreferred' }
     );
   }

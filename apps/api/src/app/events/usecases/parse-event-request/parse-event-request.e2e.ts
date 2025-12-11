@@ -1,11 +1,16 @@
 import { Test } from '@nestjs/testing';
 import {
   CreateOrUpdateSubscriberUseCase,
+  CreateTenant,
   ProcessTenant,
+  SubscriberProcessQueueService,
   TriggerBroadcast,
   TriggerEvent,
   TriggerEventMulticastCommand,
   TriggerMulticast,
+  UpdateSubscriber,
+  UpdateSubscriberChannel,
+  UpdateTenant,
   VerifyPayload,
 } from '@novu/application-generic';
 import { ContextRepository, NotificationTemplateEntity, SubscriberRepository } from '@novu/dal';
@@ -36,6 +41,11 @@ describe('ParseEventRequest Usecase - Payload Validation - #novu-v2', () => {
         TriggerBroadcast,
         TriggerMulticast,
         VerifyPayload,
+        UpdateSubscriber,
+        UpdateSubscriberChannel,
+        UpdateTenant,
+        CreateTenant,
+        SubscriberProcessQueueService,
       ],
     }).compile();
 
