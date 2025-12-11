@@ -290,7 +290,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                   <FormItem>
                     <div className="group flex items-center justify-between">
                       <span className="text-text-soft font-code text-xs font-medium">STATUS</span>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         {field.value ? (
                           <Badge variant="lighter" color="green" size="md" className="text-success-base gap-1.5">
                             <AnimatedBadgeDot size="md" variant="lighter" color="green" />
@@ -347,17 +347,24 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                                 value={field.value}
                                 onChange={field.onChange}
                                 hasError={!!fieldState.error}
-                                className="w-full [&>div]:before:hidden [&>div]:shadow-none [&>div]:focus-within:ring-1 [&>div]:focus-within:ring-stroke-soft [&>div]:focus-within:ring-offset-0 [&>div]:focus-within:border-stroke-soft [&_input]:text-right"
+                                maxLength={64}
+                                className="w-full [&>div]:before:hidden [&>div]:shadow-none [&>div]:focus-within:ring-1 [&>div]:focus-within:ring-stroke-soft [&>div]:focus-within:ring-offset-0 [&>div]:focus-within:border-stroke-soft [&_input]:text-right [&_input]:whitespace-nowrap [&_input]:[mask-image:linear-gradient(to_right,transparent,black_1rem,black_calc(100%-1rem),transparent)]"
                                 size="xs"
                                 autoFocus
                                 onBlur={() => {
                                   field.onBlur();
                                   setIsEditingName(false);
-                                  saveForm();
+                                  if (field.value?.trim()) {
+                                    saveForm();
+                                  }
                                 }}
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter') {
-                                    e.currentTarget.blur();
+                                    if (field.value?.trim()) {
+                                      e.currentTarget.blur();
+                                    } else {
+                                      form.setFocus('name');
+                                    }
                                   }
                                   if (e.key === 'Escape') {
                                     form.resetField('name');
@@ -379,12 +386,12 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                               whileHover={!isReadOnly ? { x: 2 } : {}}
                               whileTap={!isReadOnly ? { scale: 0.98 } : {}}
                               className={cn(
-                                'text-foreground-600 text-right text-label-xs transition-colors h-8 flex items-center justify-end w-full',
+                                'text-foreground-600 text-right text-label-xs transition-colors h-8 flex items-center justify-end w-full min-w-0',
                                 !isReadOnly && 'hover:text-foreground-800 cursor-pointer',
                                 isReadOnly && 'cursor-default'
                               )}
                             >
-                              {field.value || 'Untitled workflow'}
+                              <span className="truncate max-w-full">{field.value || 'Untitled workflow'}</span>
                             </motion.button>
                           )}
                         </AnimatePresence>
@@ -411,7 +418,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                         <motion.span
                           whileHover={{ x: -2 }}
                           transition={{ duration: 0.15 }}
-                          className="text-foreground-600 font-mono text-xs"
+                          className="text-foreground-600 text-right text-label-xs"
                         >
                           {field.value}
                         </motion.span>
