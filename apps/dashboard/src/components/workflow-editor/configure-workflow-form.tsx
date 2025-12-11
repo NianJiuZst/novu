@@ -426,7 +426,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                               whileHover={!isReadOnly ? { x: 2 } : {}}
                               whileTap={!isReadOnly ? { scale: 0.98 } : {}}
                               className={cn(
-                                'text-foreground-600 flex min-w-0 w-full items-center justify-end text-right text-label-xs transition-colors',
+                                'text-foreground-600 flex h-8 min-w-0 w-full items-center justify-end text-right text-label-xs transition-colors',
                                 !isReadOnly && 'hover:text-foreground-800 cursor-pointer',
                                 isReadOnly && 'cursor-default'
                               )}
