@@ -1,88 +1,66 @@
-import { Test } from '@nestjs/testing';
-import {
-  CreateOrUpdateSubscriberUseCase,
-  CreateTenant,
-  ProcessTenant,
-  SubscriberProcessQueueService,
-  TriggerBroadcast,
-  TriggerEvent,
-  TriggerEventMulticastCommand,
-  TriggerMulticast,
-  UpdateSubscriber,
-  UpdateSubscriberChannel,
-  UpdateTenant,
-  VerifyPayload,
-} from '@novu/application-generic';
-import { ContextRepository, NotificationTemplateEntity, SubscriberRepository } from '@novu/dal';
-import { AddressingTypeEnum, TriggerRecipients, TriggerRequestCategoryEnum } from '@novu/shared';
+import { Novu } from '@novu/api';
+import { MessageRepository, SubscriberEntity, SubscriberRepository } from '@novu/dal';
+import { StepTypeEnum, WorkflowCreationSourceEnum } from '@novu/shared';
 import { SubscribersService, UserSession } from '@novu/testing';
 import { expect } from 'chai';
-import { v4 as uuid } from 'uuid';
-import { SharedModule } from '../../../shared/shared.module';
-import { EventsModule } from '../../events.module';
-import { ParseEventRequestCommand, ParseEventRequestMulticastCommand } from './parse-event-request.command';
-import { ParseEventRequest } from './parse-event-request.usecase';
+import { initNovuClassSdk } from '../../../shared/helpers/e2e/sdk/e2e-sdk.helper';
 
-describe('ParseEventRequest Usecase - Payload Validation - #novu-v2', () => {
+describe('Trigger Event - Payload Validation - #novu-v2', () => {
   let session: UserSession;
   let subscribersService: SubscribersService;
-  let parseEventRequestUsecase: ParseEventRequest;
-  let triggerEventUsecase: TriggerEvent;
-  let template: NotificationTemplateEntity;
+  let subscriber: SubscriberEntity;
+  let novuClient: Novu;
+  const messageRepository = new MessageRepository();
 
   beforeEach(async () => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [SharedModule, EventsModule],
-      providers: [
-        ContextRepository,
-        TriggerEvent,
-        CreateOrUpdateSubscriberUseCase,
-        ProcessTenant,
-        TriggerBroadcast,
-        TriggerMulticast,
-        VerifyPayload,
-        UpdateSubscriber,
-        UpdateSubscriberChannel,
-        UpdateTenant,
-        CreateTenant,
-        SubscriberProcessQueueService,
-      ],
-    }).compile();
-
     session = new UserSession();
     await session.initialize();
 
-    template = await session.createTemplate();
-    parseEventRequestUsecase = moduleRef.get<ParseEventRequest>(ParseEventRequest);
-    triggerEventUsecase = moduleRef.get<TriggerEvent>(TriggerEvent);
     subscribersService = new SubscribersService(session.organization._id, session.environment._id);
+    subscriber = await subscribersService.createSubscriber();
+    novuClient = initNovuClassSdk(session);
   });
 
   it('should throw exception when subscriber id sent as array', async () => {
-    const transactionId = uuid();
+    const { result: workflow } = await novuClient.workflows.create({
+      name: 'Test Workflow - Array Validation',
+      workflowId: `test-array-validation-${Date.now()}`,
+      source: WorkflowCreationSourceEnum.DASHBOARD,
+      active: true,
+      steps: [
+        {
+          name: 'Email Step',
+          type: StepTypeEnum.EMAIL,
+          controlValues: {
+            subject: 'Test email',
+            body: 'Test body',
+          },
+        },
+      ],
+    });
+
     const subscriberId = [SubscriberRepository.createObjectId()];
 
-    const command = buildCommand(
-      session,
-      transactionId,
-      [{ subscriberId } as unknown as string],
-      template.triggers[0].identifier
-    );
-
     try {
-      await parseEventRequestUsecase.execute(command);
-    } catch (error) {
-      expect(error.message).to.be.eql(
+      await novuClient.trigger({
+        workflowId: workflow.workflowId,
+        to: [{ subscriberId } as unknown as string],
+        payload: {},
+      });
+      expect.fail('Should have thrown validation error');
+    } catch (error: any) {
+      expect(error.message).to.include(
         'subscriberId under property to is type array, which is not allowed please make sure all subscribers ids are strings'
       );
     }
   });
 
   it('should validate payload against schema when validatePayload is enabled', async () => {
-    const transactionId = uuid();
-    const subscriber = await subscribersService.createSubscriber();
-
-    const templateWithSchema = await session.createTemplate({
+    const { result: workflow } = await novuClient.workflows.create({
+      name: 'Test Workflow - Payload Validation',
+      workflowId: `test-payload-validation-${Date.now()}`,
+      source: WorkflowCreationSourceEnum.DASHBOARD,
+      active: true,
       validatePayload: true,
       payloadSchema: {
         type: 'object',
@@ -92,37 +70,43 @@ describe('ParseEventRequest Usecase - Payload Validation - #novu-v2', () => {
         },
         required: ['name'],
       },
+      steps: [
+        {
+          name: 'Email Step',
+          type: StepTypeEnum.EMAIL,
+          controlValues: {
+            subject: 'Hello {{payload.name}}',
+            body: 'You are {{payload.age}} years old',
+          },
+        },
+      ],
     });
 
-    const command = buildTriggerEventCommand(
-      session,
-      transactionId,
-      [{ subscriberId: subscriber.subscriberId }],
-      templateWithSchema.triggers[0].identifier
-    );
-
-    command.payload = { age: 25 };
-
     try {
-      await triggerEventUsecase.execute(command);
+      await novuClient.trigger({
+        workflowId: workflow.workflowId,
+        to: [subscriber.subscriberId],
+        payload: { age: 25 },
+      });
       expect.fail('Should have thrown validation error');
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).to.include('Payload validation failed');
-      expect(error.response).to.exist;
-      expect(error.response.type).to.equal('PAYLOAD_VALIDATION_ERROR');
-      expect(error.response.errors).to.be.an('array');
-      expect(error.response.errors).to.have.length.greaterThan(0);
-      expect(error.response.errors[0]).to.have.property('field');
-      expect(error.response.errors[0]).to.have.property('message');
-      expect(error.response.errors[0].field).to.include('name');
+      expect(error.body).to.exist;
+      expect(error.body.type).to.equal('PAYLOAD_VALIDATION_ERROR');
+      expect(error.body.errors).to.be.an('array');
+      expect(error.body.errors).to.have.length.greaterThan(0);
+      expect(error.body.errors[0]).to.have.property('field');
+      expect(error.body.errors[0]).to.have.property('message');
+      expect(error.body.errors[0].field).to.include('name');
     }
   });
 
   it('should pass validation when payload matches schema', async () => {
-    const transactionId = uuid();
-    const subscriber = await subscribersService.createSubscriber();
-
-    const templateWithSchema = await session.createTemplate({
+    const { result: workflow } = await novuClient.workflows.create({
+      name: 'Test Workflow - Valid Payload',
+      workflowId: `test-valid-payload-${Date.now()}`,
+      source: WorkflowCreationSourceEnum.DASHBOARD,
+      active: true,
       validatePayload: true,
       payloadSchema: {
         type: 'object',
@@ -132,25 +116,35 @@ describe('ParseEventRequest Usecase - Payload Validation - #novu-v2', () => {
         },
         required: ['name'],
       },
+      steps: [
+        {
+          name: 'Email Step',
+          type: StepTypeEnum.EMAIL,
+          controlValues: {
+            subject: 'Hello {{payload.name}}',
+            body: 'You are {{payload.age}} years old',
+          },
+        },
+      ],
     });
 
-    const command = buildTriggerEventCommand(
-      session,
-      transactionId,
-      [{ subscriberId: subscriber.subscriberId }],
-      templateWithSchema.triggers[0].identifier
-    );
+    const response = await novuClient.trigger({
+      workflowId: workflow.workflowId,
+      to: [subscriber.subscriberId],
+      payload: { name: 'John Doe', age: 25 },
+    });
 
-    command.payload = { name: 'John Doe', age: 25 };
-
-    await triggerEventUsecase.execute(command);
+    expect(response).to.exist;
+    expect(response.result.acknowledged).to.be.true;
+    expect(response.result.status).to.equal('processed');
   });
 
   it('should skip validation when validatePayload is disabled', async () => {
-    const transactionId = uuid();
-    const subscriber = await subscribersService.createSubscriber();
-
-    const templateWithoutValidation = await session.createTemplate({
+    const { result: workflow } = await novuClient.workflows.create({
+      name: 'Test Workflow - No Validation',
+      workflowId: `test-no-validation-${Date.now()}`,
+      source: WorkflowCreationSourceEnum.DASHBOARD,
+      active: true,
       validatePayload: false,
       payloadSchema: {
         type: 'object',
@@ -159,25 +153,34 @@ describe('ParseEventRequest Usecase - Payload Validation - #novu-v2', () => {
         },
         required: ['name'],
       },
+      steps: [
+        {
+          name: 'Email Step',
+          type: StepTypeEnum.EMAIL,
+          controlValues: {
+            subject: 'Test email',
+            body: 'Test body',
+          },
+        },
+      ],
     });
 
-    const command = buildTriggerEventCommand(
-      session,
-      transactionId,
-      [{ subscriberId: subscriber.subscriberId }],
-      templateWithoutValidation.triggers[0].identifier
-    );
+    const response = await novuClient.trigger({
+      workflowId: workflow.workflowId,
+      to: [subscriber.subscriberId],
+      payload: { invalidField: 'value' },
+    });
 
-    command.payload = { invalidField: 'value' };
-
-    await triggerEventUsecase.execute(command);
+    expect(response).to.exist;
+    expect(response.result.acknowledged).to.be.true;
   });
 
   it('should apply default values from schema when validatePayload is enabled', async () => {
-    const transactionId = uuid();
-    const subscriber = await subscribersService.createSubscriber();
-
-    const templateWithDefaults = await session.createTemplate({
+    const { result: workflow } = await novuClient.workflows.create({
+      name: 'Test Workflow - Default Values',
+      workflowId: `test-default-values-${Date.now()}`,
+      source: WorkflowCreationSourceEnum.DASHBOARD,
+      active: true,
       validatePayload: true,
       payloadSchema: {
         type: 'object',
@@ -185,41 +188,49 @@ describe('ParseEventRequest Usecase - Payload Validation - #novu-v2', () => {
           name: { type: 'string', default: 'Default Name' },
           age: { type: 'number', default: 30 },
           isActive: { type: 'boolean', default: true },
-          settings: {
-            type: 'object',
-            properties: {
-              theme: { type: 'string', default: 'dark' },
-              notifications: { type: 'boolean', default: false },
-            },
-            default: {},
-          },
         },
         required: [],
       },
+      steps: [
+        {
+          name: 'Email Step',
+          type: StepTypeEnum.EMAIL,
+          controlValues: {
+            subject: 'Hello {{payload.name}}',
+            body: 'Age: {{payload.age}}, Active: {{payload.isActive}}',
+          },
+        },
+      ],
     });
 
-    const command = buildTriggerEventCommand(
-      session,
-      transactionId,
-      [{ subscriberId: subscriber.subscriberId }],
-      templateWithDefaults.triggers[0].identifier
-    );
+    const response = await novuClient.trigger({
+      workflowId: workflow.workflowId,
+      to: [subscriber.subscriberId],
+      payload: { name: 'John Doe' },
+    });
 
-    command.payload = { name: 'John Doe' };
+    expect(response).to.exist;
+    expect(response.result.acknowledged).to.be.true;
 
-    await triggerEventUsecase.execute(command);
+    await session.waitForJobCompletion(workflow.id);
 
-    expect(command.payload.name).to.equal('John Doe');
-    expect(command.payload.age).to.equal(30);
-    expect(command.payload.isActive).to.equal(true);
-    expect(command.payload.settings).to.deep.equal({ theme: 'dark', notifications: false });
+    const messages = await messageRepository.find({
+      _environmentId: session.environment._id,
+      _subscriberId: subscriber._id,
+    });
+
+    expect(messages.length).to.equal(1);
+    expect(messages[0].subject).to.equal('Hello John Doe');
+    expect(messages[0].content).to.include('Age: 30');
+    expect(messages[0].content).to.include('Active: true');
   });
 
   it('should not override provided values with defaults', async () => {
-    const transactionId = uuid();
-    const subscriber = await subscribersService.createSubscriber();
-
-    const templateWithDefaults = await session.createTemplate({
+    const { result: workflow } = await novuClient.workflows.create({
+      name: 'Test Workflow - No Override',
+      workflowId: `test-no-override-${Date.now()}`,
+      source: WorkflowCreationSourceEnum.DASHBOARD,
+      active: true,
       validatePayload: true,
       payloadSchema: {
         type: 'object',
@@ -230,62 +241,37 @@ describe('ParseEventRequest Usecase - Payload Validation - #novu-v2', () => {
         },
         required: [],
       },
+      steps: [
+        {
+          name: 'Email Step',
+          type: StepTypeEnum.EMAIL,
+          controlValues: {
+            subject: 'Hello {{payload.name}}',
+            body: 'Age: {{payload.age}}, Active: {{payload.isActive}}',
+          },
+        },
+      ],
     });
 
-    const command = buildTriggerEventCommand(
-      session,
-      transactionId,
-      [{ subscriberId: subscriber.subscriberId }],
-      templateWithDefaults.triggers[0].identifier
-    );
+    const response = await novuClient.trigger({
+      workflowId: workflow.workflowId,
+      to: [subscriber.subscriberId],
+      payload: { name: 'Jane Doe', age: 25, isActive: false },
+    });
 
-    command.payload = { name: 'Jane Doe', age: 25, isActive: false };
+    expect(response).to.exist;
+    expect(response.result.acknowledged).to.be.true;
 
-    await triggerEventUsecase.execute(command);
+    await session.waitForJobCompletion(workflow.id);
 
-    expect(command.payload.name).to.equal('Jane Doe');
-    expect(command.payload.age).to.equal(25);
-    expect(command.payload.isActive).to.equal(false);
+    const messages = await messageRepository.find({
+      _environmentId: session.environment._id,
+      _subscriberId: subscriber._id,
+    });
+
+    expect(messages.length).to.equal(1);
+    expect(messages[0].subject).to.equal('Hello Jane Doe');
+    expect(messages[0].content).to.include('Age: 25');
+    expect(messages[0].content).to.include('Active: false');
   });
 });
-
-const buildCommand = (
-  session: UserSession,
-  transactionId: string,
-  to: TriggerRecipients,
-  identifier: string
-): ParseEventRequestCommand => {
-  return ParseEventRequestMulticastCommand.create({
-    organizationId: session.organization._id,
-    environmentId: session.environment._id,
-    to,
-    transactionId,
-    userId: session.user._id,
-    identifier,
-    payload: {},
-    overrides: {},
-    addressingType: AddressingTypeEnum.MULTICAST,
-    requestCategory: TriggerRequestCategoryEnum.SINGLE,
-    requestId: uuid(),
-  });
-};
-
-const buildTriggerEventCommand = (
-  session: UserSession,
-  transactionId: string,
-  to: TriggerRecipients,
-  identifier: string
-): TriggerEventMulticastCommand => {
-  return TriggerEventMulticastCommand.create({
-    organizationId: session.organization._id,
-    environmentId: session.environment._id,
-    to,
-    transactionId,
-    userId: session.user._id,
-    identifier,
-    payload: {},
-    overrides: {},
-    addressingType: AddressingTypeEnum.MULTICAST,
-    requestId: uuid(),
-  });
-};
