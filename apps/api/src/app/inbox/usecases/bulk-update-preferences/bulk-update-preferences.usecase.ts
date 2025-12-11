@@ -93,12 +93,22 @@ export class BulkUpdatePreferences {
 
     const updatePromises = Array.from(workflowPreferencesMap.entries()).map(
       async ([workflowId, { preference, workflow }]) => {
+        const isUpdatingSubscriptionPreference =
+          preference.subscriptionIdOrIdentifier &&
+          (typeof preference.enabled !== 'undefined' || typeof preference.condition !== 'undefined');
         return this.updatePreferencesUsecase.execute(
           UpdatePreferencesCommand.create({
             organizationId: command.organizationId,
             subscriberId: command.subscriberId,
             environmentId: command.environmentId,
             level: PreferenceLevelEnum.TEMPLATE,
+            subscriptionIdOrIdentifier: preference.subscriptionIdOrIdentifier,
+            ...(isUpdatingSubscriptionPreference && {
+              all: {
+                ...(typeof preference.enabled !== 'undefined' && { enabled: preference.enabled }),
+                ...(typeof preference.condition !== 'undefined' && { condition: preference.condition }),
+              },
+            }),
             chat: preference.chat,
             email: preference.email,
             in_app: preference.in_app,

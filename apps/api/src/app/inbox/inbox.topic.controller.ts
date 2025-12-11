@@ -1,7 +1,6 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiExcludeController } from '@nestjs/swagger';
-import { PreferenceLevelEnum } from '@novu/shared';
 import {
   GroupPreferenceFilterDto,
   WorkflowPreferenceRequestDto,
@@ -14,16 +13,12 @@ import { CreateSubscriptionsCommand, CreateSubscriptionsUsecase } from '../subsc
 import { UpdateSubscriptionCommand, UpdateSubscriptionUsecase } from '../subscriptions/usecases/update-subscription';
 import { CreateTopicSubscriptionRequestDto } from './dtos/create-topic-subscription-request.dto';
 import { TopicSubscriptionDetailsResponseDto } from './dtos/get-topic-subscriptions-response.dto';
-import { UpdateSubscriptionPreferencesRequestDto } from './dtos/update-subscription-preferences-request.dto';
-import { DeleteTopicSubscriptionCommand } from './usecases/delete-topic-subscription/delete-topic-subscription.command';
-import { DeleteTopicSubscription } from './usecases/delete-topic-subscription/delete-topic-subscription.usecase';
+import { DeleteTopicSubscriptionCommand } from './usecases/delete-subscription/delete-subscription.command';
+import { DeleteTopicSubscription } from './usecases/delete-subscription/delete-subscription.usecase';
 import { GetTopicSubscriptionCommand } from './usecases/get-topic-subscription/get-topic-subscription.command';
 import { GetTopicSubscription } from './usecases/get-topic-subscription/get-topic-subscription.usecase';
 import { GetTopicSubscriptionsCommand } from './usecases/get-topic-subscriptions/get-topic-subscriptions.command';
 import { GetTopicSubscriptions } from './usecases/get-topic-subscriptions/get-topic-subscriptions.usecase';
-import { UpdatePreferencesCommand } from './usecases/update-preferences/update-preferences.command';
-import { UpdatePreferences } from './usecases/update-preferences/update-preferences.usecase';
-import { InboxPreference } from './utils/types';
 
 @ApiCommonResponses()
 @Controller('/inbox')
@@ -35,8 +30,7 @@ export class InboxTopicController {
     private getTopicSubscriptionUsecase: GetTopicSubscription,
     private createSubscriptionsUsecase: CreateSubscriptionsUsecase,
     private updateSubscriptionUsecase: UpdateSubscriptionUsecase,
-    private deleteTopicSubscriptionUsecase: DeleteTopicSubscription,
-    private updatePreferencesUsecase: UpdatePreferences
+    private deleteTopicSubscriptionUsecase: DeleteTopicSubscription
   ) {}
 
   @UseGuards(AuthGuard('subscriberJwt'))
@@ -57,11 +51,11 @@ export class InboxTopicController {
   }
 
   @UseGuards(AuthGuard('subscriberJwt'))
-  @Get('/topics/:topicKey/subscriptions/:subscriptionId')
+  @Get('/topics/:topicKey/subscriptions/:subscriptionIdOrIdentifier')
   async getTopicSubscription(
     @SubscriberSession() subscriberSession: SubscriberSession,
     @Param('topicKey') topicKey: string,
-    @Param('subscriptionId') subscriptionId: string
+    @Param('subscriptionIdOrIdentifier') subscriptionIdOrIdentifier: string
   ): Promise<TopicSubscriptionDetailsResponseDto> {
     return await this.getTopicSubscriptionUsecase.execute(
       GetTopicSubscriptionCommand.create({
@@ -69,7 +63,7 @@ export class InboxTopicController {
         organizationId: subscriberSession._organizationId,
         subscriberId: subscriberSession.subscriberId,
         topicKey,
-        subscriptionId,
+        subscriptionIdOrIdentifier,
         _subscriberId: subscriberSession._id,
       })
     );
@@ -119,11 +113,11 @@ export class InboxTopicController {
   }
 
   @UseGuards(AuthGuard('subscriberJwt'))
-  @Patch('/topics/:topicKey/subscriptions/:subscriptionId')
+  @Patch('/topics/:topicKey/subscriptions/:subscriptionIdOrIdentifier')
   async updateTopicSubscription(
     @SubscriberSession() subscriberSession: SubscriberSession,
     @Param('topicKey') topicKey: string,
-    @Param('subscriptionId') subscriptionId: string,
+    @Param('subscriptionIdOrIdentifier') subscriptionIdOrIdentifier: string,
     @Body() body: UpdateSubscriptionRequestDto
   ): Promise<TopicSubscriptionDetailsResponseDto> {
     const subscription = await this.updateSubscriptionUsecase.execute(
@@ -132,7 +126,7 @@ export class InboxTopicController {
         organizationId: subscriberSession._organizationId,
         userId: subscriberSession._id,
         topicKey,
-        subscriptionId,
+        subscriptionIdOrIdentifier,
         name: body.name,
         preferences: body.preferences ? this.convertPreferencesToGroupFilters(body.preferences) : undefined,
       })
@@ -147,43 +141,20 @@ export class InboxTopicController {
   }
 
   @UseGuards(AuthGuard('subscriberJwt'))
-  @Delete('/subscriptions/:subscriptionId')
+  @Delete('/topics/:topicKey/subscriptions/:subscriptionIdOrIdentifier')
   async deleteTopicSubscription(
     @SubscriberSession() subscriberSession: SubscriberSession,
-    @Param('subscriptionId') subscriptionId: string
+    @Param('topicKey') topicKey: string,
+    @Param('subscriptionIdOrIdentifier') subscriptionIdOrIdentifier: string
   ): Promise<{ success: boolean }> {
     return await this.deleteTopicSubscriptionUsecase.execute(
       DeleteTopicSubscriptionCommand.create({
         environmentId: subscriberSession._environmentId,
         organizationId: subscriberSession._organizationId,
         subscriberId: subscriberSession.subscriberId,
-        subscriptionId,
-        _subscriberId: subscriberSession._id,
-      })
-    );
-  }
-
-  @UseGuards(AuthGuard('subscriberJwt'))
-  @Patch('/preferences/:subscriptionIdOrIdentifier/:workflowIdOrIdentifier')
-  async updateSubscriptionWorkflowPreference(
-    @SubscriberSession() subscriberSession: SubscriberSession,
-    @Param('workflowIdOrIdentifier') workflowIdOrIdentifier: string,
-    @Param('subscriptionIdOrIdentifier') subscriptionIdOrIdentifier: string,
-    @Body() body: UpdateSubscriptionPreferencesRequestDto
-  ): Promise<InboxPreference> {
-    return await this.updatePreferencesUsecase.execute(
-      UpdatePreferencesCommand.create({
-        organizationId: subscriberSession._organizationId,
-        subscriberId: subscriberSession.subscriberId,
-        environmentId: subscriberSession._environmentId,
-        level: PreferenceLevelEnum.TEMPLATE,
-        workflowIdOrIdentifier,
+        topicKey,
         subscriptionIdOrIdentifier,
-        includeInactiveChannels: false,
-        all: {
-          enabled: body.enabled,
-          condition: body.condition,
-        },
+        _subscriberId: subscriberSession._id,
       })
     );
   }

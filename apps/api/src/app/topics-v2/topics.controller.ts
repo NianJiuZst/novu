@@ -37,7 +37,10 @@ import { UpdateSubscriptionCommand, UpdateSubscriptionUsecase } from '../subscri
 import { CreateTopicSubscriptionsRequestDto } from './dtos/create-topic-subscriptions.dto';
 import { CreateUpdateTopicRequestDto } from './dtos/create-update-topic.dto';
 import { DeleteTopicResponseDto } from './dtos/delete-topic-response.dto';
-import { DeleteTopicSubscriptionsRequestDto } from './dtos/delete-topic-subscriptions.dto';
+import {
+  DeleteTopicSubscriberIdentifierDto,
+  DeleteTopicSubscriptionsRequestDto,
+} from './dtos/delete-topic-subscriptions.dto';
 import { DeleteTopicSubscriptionsResponseDto } from './dtos/delete-topic-subscriptions-response.dto';
 import { ListTopicSubscriptionsQueryDto } from './dtos/list-topic-subscriptions-query.dto';
 import { ListTopicSubscriptionsResponseDto } from './dtos/list-topic-subscriptions-response.dto';
@@ -338,7 +341,7 @@ export class TopicsController {
         organizationId: user.organizationId,
         userId: user._id,
         topicKey,
-        subscriberIds: body.subscriberIds,
+        subscriptions: this.mapDeleteSubscriptions(body.subscriptions || body.subscriberIds || []),
       })
     );
 
@@ -362,22 +365,26 @@ export class TopicsController {
     return typeSafeResult;
   }
 
-  @Patch('/:topicKey/subscriptions/:subscriptionId')
+  @Patch('/:topicKey/subscriptions/:subscriptionIdOrIdentifier')
   @ExternalApiAccessible()
   @SdkGroupName('Topics.Subscriptions')
   @SdkMethodName('update')
   @ApiOperation({
     summary: 'Update a topic subscription',
-    description: `Update a subscription by its unique identifier **subscriptionId** for a topic. You can update the preferences and name associated with the subscription.`,
+    description: `Update a subscription by its unique identifier **subscriptionIdOrIdentifier** for a topic. You can update the preferences and name associated with the subscription.`,
   })
   @ApiParam({ name: 'topicKey', description: 'The key identifier of the topic', type: String })
-  @ApiParam({ name: 'subscriptionId', description: 'The unique identifier of the subscription', type: String })
+  @ApiParam({
+    name: 'subscriptionIdOrIdentifier',
+    description: 'The unique identifier of the subscription',
+    type: String,
+  })
   @ApiResponse(SubscriptionResponseDto, 200)
   @RequirePermissions(PermissionsEnum.TOPIC_WRITE)
   async updateTopicSubscription(
     @UserSession() user: UserSessionData,
     @Param('topicKey') topicKey: string,
-    @Param('subscriptionId') subscriptionId: string,
+    @Param('subscriptionIdOrIdentifier') subscriptionIdOrIdentifier: string,
     @Body() body: UpdateTopicSubscriptionRequestDto
   ): Promise<SubscriptionResponseDto> {
     return await this.updateSubscriptionUsecase.execute(
@@ -386,7 +393,7 @@ export class TopicsController {
         organizationId: user.organizationId,
         userId: user._id,
         topicKey,
-        subscriptionId,
+        subscriptionIdOrIdentifier,
         name: body.name,
         preferences: body.preferences ? this.convertPreferencesToGroupFilters(body.preferences) : undefined,
       })
@@ -396,6 +403,20 @@ export class TopicsController {
   private mapSubscriptions(
     subscriptions: Array<string | { identifier: string; subscriberId: string; name?: string }>
   ): Array<{ identifier?: string; subscriberId: string; name?: string }> {
+    return subscriptions.map((subscription) => {
+      if (typeof subscription === 'string') {
+        return {
+          subscriberId: subscription,
+        };
+      }
+
+      return subscription;
+    });
+  }
+
+  private mapDeleteSubscriptions(
+    subscriptions: Array<string | DeleteTopicSubscriberIdentifierDto>
+  ): Array<{ identifier?: string; subscriberId?: string; name?: string }> {
     return subscriptions.map((subscription) => {
       if (typeof subscription === 'string') {
         return {

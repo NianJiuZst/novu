@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import type { EventType, Trace } from '@novu/application-generic';
 import {
@@ -29,19 +29,15 @@ import {
 import { DiscoverWorkflowOutput, GetActionEnum } from '@novu/framework/internal';
 import {
   FeatureFlagsKeysEnum,
-  ReservedVariablesMap,
   ResourceOriginEnum,
-  TriggerContextTypeEnum,
   TriggerEventStatusEnum,
   TriggerRecipientsPayload,
 } from '@novu/shared';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { toMerged } from 'es-toolkit';
 import { generateTransactionId } from '../../../shared/helpers/generate-transaction-id';
 import { PayloadValidationException } from '../../exceptions/payload-validation-exception';
 import { RecipientSchema, RecipientsSchema } from '../../utils/trigger-recipient-validation';
-import { VerifyPayload, VerifyPayloadCommand } from '../verify-payload';
 import {
   ParseEventRequestBroadcastCommand,
   ParseEventRequestCommand,
@@ -52,7 +48,6 @@ import {
 export class ParseEventRequest {
   constructor(
     private notificationTemplateRepository: NotificationTemplateRepository,
-    private verifyPayload: VerifyPayload,
     private storageHelperService: StorageHelperService,
     private workflowQueueService: WorkflowQueueService,
     private tenantRepository: TenantRepository,
@@ -97,7 +92,7 @@ export class ParseEventRequest {
         });
       }
 
-      const template =
+      const template: Pick<NotificationTemplateEntity, '_id' | 'active' | 'payloadSchema' | 'validatePayload'> | null =
         command.workflow ||
         (await this.getNotificationTemplateByTriggerIdentifier({
           environmentId: command.environmentId,
@@ -115,9 +110,6 @@ export class ParseEventRequest {
         });
         throw new UnprocessableEntityException('workflow_not_found');
       }
-
-      const reservedVariablesTypes = this.getReservedVariablesTypes(template);
-      this.validateTriggerContext(command, reservedVariablesTypes);
 
       if (template.validatePayload && template.payloadSchema) {
         try {
@@ -175,20 +167,6 @@ export class ParseEventRequest {
         };
       }
 
-      if (!template.steps?.length) {
-        return {
-          acknowledged: true,
-          status: TriggerEventStatusEnum.NO_WORKFLOW_STEPS,
-        };
-      }
-
-      if (!template.steps?.some((step) => step.active)) {
-        return {
-          acknowledged: true,
-          status: TriggerEventStatusEnum.NO_WORKFLOW_ACTIVE_STEPS,
-        };
-      }
-
       // Modify Attachment Key Name, Upload attachments to Storage Provider and Remove file from payload
       if (command.payload && Array.isArray(command.payload.attachments)) {
         this.modifyAttachments(command);
@@ -196,15 +174,6 @@ export class ParseEventRequest {
         // eslint-disable-next-line no-param-reassign
         command.payload.attachments = command.payload.attachments.map(({ file, ...attachment }) => attachment);
       }
-
-      const defaultPayload = this.verifyPayload.execute(
-        VerifyPayloadCommand.create({
-          payload: command.payload,
-          template,
-        })
-      );
-      // eslint-disable-next-line no-param-reassign
-      command.payload = toMerged(defaultPayload, command.payload);
 
       const result = await this.dispatchEventToWorkflowQueue({
         requestId,
@@ -399,41 +368,15 @@ export class ParseEventRequest {
   private async getNotificationTemplateByTriggerIdentifier(command: {
     triggerIdentifier: string;
     environmentId: string;
-  }) {
-    return await this.notificationTemplateRepository.findByTriggerIdentifier(
-      command.environmentId,
-      command.triggerIdentifier,
-      undefined,
-      false
+  }): Promise<Pick<NotificationTemplateEntity, '_id' | 'active' | 'payloadSchema' | 'validatePayload'> | null> {
+    return await this.notificationTemplateRepository.findOne(
+      {
+        _environmentId: command.environmentId,
+        'triggers.identifier': command.triggerIdentifier,
+      },
+      '_id active payloadSchema validatePayload',
+      { readPreference: 'secondaryPreferred' }
     );
-  }
-
-  @Instrument()
-  private validateTriggerContext(
-    command: ParseEventRequestCommand,
-    reservedVariablesTypes: TriggerContextTypeEnum[]
-  ): void {
-    const invalidKeys: string[] = [];
-
-    for (const reservedVariableType of reservedVariablesTypes) {
-      const payload = command[reservedVariableType];
-      if (!payload) {
-        invalidKeys.push(`${reservedVariableType} object`);
-        continue;
-      }
-      const reservedVariableFields = ReservedVariablesMap[reservedVariableType].map((variable) => variable.name);
-      for (const variableName of reservedVariableFields) {
-        const variableNameExists = payload[variableName];
-
-        if (!variableNameExists) {
-          invalidKeys.push(`${variableName} property of ${reservedVariableType}`);
-        }
-      }
-    }
-
-    if (invalidKeys.length) {
-      throw new BadRequestException(`Trigger is missing: ${invalidKeys.join(', ')}`);
-    }
   }
 
   private modifyAttachments(command: ParseEventRequestCommand): void {
@@ -448,12 +391,6 @@ export class ParseEventRequest {
         storagePath: `${command.organizationId}/${command.environmentId}/${randomId}/${attachment.name}`,
       };
     });
-  }
-
-  private getReservedVariablesTypes(template: NotificationTemplateEntity): TriggerContextTypeEnum[] {
-    const { reservedVariables } = template.triggers[0];
-
-    return reservedVariables?.map((reservedVariable) => reservedVariable.type) || [];
   }
 
   /**

@@ -5,6 +5,8 @@
 import * as z from 'zod/v3';
 import { remap as remap$ } from '../../lib/primitives.js';
 import { safeParse } from '../../lib/schemas.js';
+import * as discriminatedUnionTypes from '../../types/discriminatedUnion.js';
+import { discriminatedUnion } from '../../types/discriminatedUnion.js';
 import { Result as SafeParseResult } from '../../types/fp.js';
 import { SDKValidationError } from '../errors/sdkvalidationerror.js';
 import { ChatStepResponseDto, ChatStepResponseDto$inboundSchema } from './chatstepresponsedto.js';
@@ -70,15 +72,16 @@ export type LastPublishedBy = {
 };
 
 export type WorkflowResponseDtoSteps =
-  | (InAppStepResponseDto & { type: 'in_app' })
-  | (EmailStepResponseDto & { type: 'email' })
-  | (SmsStepResponseDto & { type: 'sms' })
-  | (PushStepResponseDto & { type: 'push' })
-  | (ChatStepResponseDto & { type: 'chat' })
-  | (DelayStepResponseDto & { type: 'delay' })
-  | (DigestStepResponseDto & { type: 'digest' })
-  | (CustomStepResponseDto & { type: 'custom' })
-  | (ThrottleStepResponseDto & { type: 'throttle' });
+  | InAppStepResponseDto
+  | EmailStepResponseDto
+  | SmsStepResponseDto
+  | PushStepResponseDto
+  | ChatStepResponseDto
+  | DelayStepResponseDto
+  | DigestStepResponseDto
+  | CustomStepResponseDto
+  | ThrottleStepResponseDto
+  | discriminatedUnionTypes.Unknown<'type'>;
 
 export type WorkflowResponseDto = {
   /**
@@ -145,15 +148,16 @@ export type WorkflowResponseDto = {
    * Steps of the workflow
    */
   steps: Array<
-    | (InAppStepResponseDto & { type: 'in_app' })
-    | (EmailStepResponseDto & { type: 'email' })
-    | (SmsStepResponseDto & { type: 'sms' })
-    | (PushStepResponseDto & { type: 'push' })
-    | (ChatStepResponseDto & { type: 'chat' })
-    | (DelayStepResponseDto & { type: 'delay' })
-    | (DigestStepResponseDto & { type: 'digest' })
-    | (CustomStepResponseDto & { type: 'custom' })
-    | (ThrottleStepResponseDto & { type: 'throttle' })
+    | InAppStepResponseDto
+    | EmailStepResponseDto
+    | SmsStepResponseDto
+    | PushStepResponseDto
+    | ChatStepResponseDto
+    | DelayStepResponseDto
+    | DigestStepResponseDto
+    | CustomStepResponseDto
+    | ThrottleStepResponseDto
+    | discriminatedUnionTypes.Unknown<'type'>
   >;
   /**
    * Origin of the layout
@@ -237,17 +241,17 @@ export function lastPublishedByFromJSON(jsonString: string): SafeParseResult<Las
 
 /** @internal */
 export const WorkflowResponseDtoSteps$inboundSchema: z.ZodType<WorkflowResponseDtoSteps, z.ZodTypeDef, unknown> =
-  z.union([
-    InAppStepResponseDto$inboundSchema.and(z.object({ type: z.literal('in_app') })),
-    EmailStepResponseDto$inboundSchema.and(z.object({ type: z.literal('email') })),
-    SmsStepResponseDto$inboundSchema.and(z.object({ type: z.literal('sms') })),
-    PushStepResponseDto$inboundSchema.and(z.object({ type: z.literal('push') })),
-    ChatStepResponseDto$inboundSchema.and(z.object({ type: z.literal('chat') })),
-    DelayStepResponseDto$inboundSchema.and(z.object({ type: z.literal('delay') })),
-    DigestStepResponseDto$inboundSchema.and(z.object({ type: z.literal('digest') })),
-    CustomStepResponseDto$inboundSchema.and(z.object({ type: z.literal('custom') })),
-    ThrottleStepResponseDto$inboundSchema.and(z.object({ type: z.literal('throttle') })),
-  ]);
+  discriminatedUnion('type', {
+    in_app: InAppStepResponseDto$inboundSchema,
+    email: EmailStepResponseDto$inboundSchema,
+    sms: SmsStepResponseDto$inboundSchema,
+    push: PushStepResponseDto$inboundSchema,
+    chat: ChatStepResponseDto$inboundSchema,
+    delay: DelayStepResponseDto$inboundSchema,
+    digest: DigestStepResponseDto$inboundSchema,
+    custom: CustomStepResponseDto$inboundSchema,
+    throttle: ThrottleStepResponseDto$inboundSchema,
+  });
 
 export function workflowResponseDtoStepsFromJSON(
   jsonString: string
@@ -278,17 +282,17 @@ export const WorkflowResponseDto$inboundSchema: z.ZodType<WorkflowResponseDto, z
     lastPublishedAt: z.nullable(z.string()).optional(),
     lastPublishedBy: z.nullable(z.lazy(() => LastPublishedBy$inboundSchema)).optional(),
     steps: z.array(
-      z.union([
-        InAppStepResponseDto$inboundSchema.and(z.object({ type: z.literal('in_app') })),
-        EmailStepResponseDto$inboundSchema.and(z.object({ type: z.literal('email') })),
-        SmsStepResponseDto$inboundSchema.and(z.object({ type: z.literal('sms') })),
-        PushStepResponseDto$inboundSchema.and(z.object({ type: z.literal('push') })),
-        ChatStepResponseDto$inboundSchema.and(z.object({ type: z.literal('chat') })),
-        DelayStepResponseDto$inboundSchema.and(z.object({ type: z.literal('delay') })),
-        DigestStepResponseDto$inboundSchema.and(z.object({ type: z.literal('digest') })),
-        CustomStepResponseDto$inboundSchema.and(z.object({ type: z.literal('custom') })),
-        ThrottleStepResponseDto$inboundSchema.and(z.object({ type: z.literal('throttle') })),
-      ])
+      discriminatedUnion('type', {
+        in_app: InAppStepResponseDto$inboundSchema,
+        email: EmailStepResponseDto$inboundSchema,
+        sms: SmsStepResponseDto$inboundSchema,
+        push: PushStepResponseDto$inboundSchema,
+        chat: ChatStepResponseDto$inboundSchema,
+        delay: DelayStepResponseDto$inboundSchema,
+        digest: DigestStepResponseDto$inboundSchema,
+        custom: CustomStepResponseDto$inboundSchema,
+        throttle: ThrottleStepResponseDto$inboundSchema,
+      })
     ),
     origin: ResourceOriginEnum$inboundSchema,
     preferences: WorkflowPreferencesResponseDto$inboundSchema,
