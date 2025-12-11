@@ -11,6 +11,7 @@ import { ChevronsUpDown, FilesIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { LuCross, LuPlus, LuX } from 'react-icons/lu';
 import {
   RiAddLine,
   RiArrowRightSLine,
@@ -20,7 +21,6 @@ import {
   RiMore2Fill,
   RiSettingsLine,
 } from 'react-icons/ri';
-
 import { Link, useNavigate } from 'react-router-dom';
 import type { ExternalToast } from 'sonner';
 import { z } from 'zod';
@@ -29,7 +29,7 @@ import { DeleteWorkflowDialog } from '@/components/delete-workflow-dialog';
 import { RouteFill } from '@/components/icons/route-fill';
 import { PageMeta } from '@/components/page-meta';
 import { PAUSE_MODAL_TITLE, PauseModalDescription } from '@/components/pause-workflow-dialog';
-import { Badge, Dot as BadgeDot } from '@/components/primitives/badge';
+import { AnimatedBadgeDot, Badge, Dot as BadgeDot } from '@/components/primitives/badge';
 import { Button } from '@/components/primitives/button';
 import { CompactButton } from '@/components/primitives/button-compact';
 import { CopyButton } from '@/components/primitives/copy-button';
@@ -281,7 +281,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
         </SidebarHeader>
         <Form {...form}>
           <FormRoot onBlur={onBlur}>
-            <SidebarContent size="md" className="space-y-2 py-2">
+            <SidebarContent size="md">
               {/* STATUS Section */}
               <FormField
                 control={form.control}
@@ -292,31 +292,14 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                       <span className="text-text-soft font-code text-xs font-medium">STATUS</span>
                       <div className="flex items-center gap-3">
                         {field.value ? (
-                          <motion.div
-                            initial={false}
-                            animate={{
-                              scale: [1, 1.02, 1],
-                            }}
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                              ease: 'easeInOut',
-                            }}
-                          >
-                            <Badge
-                              variant="light"
-                              color="green"
-                              size="md"
-                              className="bg-success-lighter text-success-base gap-1.5"
-                            >
-                              <BadgeDot />
-                              <span className="font-code text-xs uppercase text-success">Active</span>
-                            </Badge>
-                          </motion.div>
+                          <Badge variant="lighter" color="green" size="md" className="text-success-base gap-1.5">
+                            <AnimatedBadgeDot size="md" variant="lighter" color="green" />
+                            <span className="font-code text-xs uppercase">Active</span>
+                          </Badge>
                         ) : (
-                          <Badge variant="light" color="gray" size="md" className="gap-1.5">
+                          <Badge variant="lighter" color="gray" size="md" className="gap-1.5">
                             <BadgeDot />
-                            <span className="font-code text-xs uppercase text-faded">Inactive</span>
+                            <span className="font-code text-xs uppercase">Inactive</span>
                           </Badge>
                         )}
                         <motion.div whileTap={{ scale: 0.95 }} transition={{ duration: 0.1 }}>
@@ -346,50 +329,68 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                 defaultValue=""
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <div className="group flex items-center justify-between">
+                    <div className="group flex items-center justify-between gap-6">
                       <span className="text-text-soft font-code text-xs font-medium">WORKFLOW</span>
-                      <div className="relative flex items-center gap-2 min-w-0 flex-1 justify-end">
-                        {isEditingName && !isReadOnly ? (
-                          <Input
-                            placeholder="New workflow"
-                            value={field.value}
-                            onChange={field.onChange}
-                            hasError={!!fieldState.error}
-                            className="min-w-[200px] [&>div]:before:hidden [&>div]:shadow-none [&>div]:focus-within:ring-1 [&>div]:focus-within:ring-stroke-soft [&>div]:focus-within:ring-offset-0 [&>div]:focus-within:border-stroke-soft"
-                            size="xs"
-                            autoFocus
-                            onBlur={() => {
-                              field.onBlur();
-                              setIsEditingName(false);
-                              saveForm();
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.currentTarget.blur();
-                              }
-                              if (e.key === 'Escape') {
-                                form.resetField('name');
-                                setIsEditingName(false);
-                              }
-                            }}
-                          />
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => !isReadOnly && setIsEditingName(true)}
-                            disabled={isReadOnly}
-                            className={cn(
-                              'text-foreground-600 text-right text-xs transition-colors',
-                              !isReadOnly && 'hover:text-foreground-800 cursor-pointer',
-                              isReadOnly && 'cursor-default'
-                            )}
-                          >
-                            {field.value || 'Untitled workflow'}
-                          </button>
-                        )}
+                      <div className="relative flex items-center min-w-0 flex-1 justify-end h-8">
+                        <AnimatePresence mode="wait">
+                          {isEditingName && !isReadOnly ? (
+                            <motion.div
+                              key="input"
+                              initial={{ opacity: 0, scale: 0.98 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.98 }}
+                              transition={{ duration: 0.15, ease: 'easeOut' }}
+                              className="absolute inset-0 flex items-center"
+                            >
+                              <Input
+                                placeholder="Workflow name"
+                                value={field.value}
+                                onChange={field.onChange}
+                                hasError={!!fieldState.error}
+                                className="w-full [&>div]:before:hidden [&>div]:shadow-none [&>div]:focus-within:ring-1 [&>div]:focus-within:ring-stroke-soft [&>div]:focus-within:ring-offset-0 [&>div]:focus-within:border-stroke-soft [&_input]:text-right"
+                                size="xs"
+                                autoFocus
+                                onBlur={() => {
+                                  field.onBlur();
+                                  setIsEditingName(false);
+                                  saveForm();
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.currentTarget.blur();
+                                  }
+                                  if (e.key === 'Escape') {
+                                    form.resetField('name');
+                                    setIsEditingName(false);
+                                  }
+                                }}
+                              />
+                            </motion.div>
+                          ) : (
+                            <motion.button
+                              key="button"
+                              type="button"
+                              onClick={() => !isReadOnly && setIsEditingName(true)}
+                              disabled={isReadOnly}
+                              initial={{ opacity: 0, scale: 0.98 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.98 }}
+                              transition={{ duration: 0.15, ease: 'easeOut' }}
+                              whileHover={!isReadOnly ? { x: 2 } : {}}
+                              whileTap={!isReadOnly ? { scale: 0.98 } : {}}
+                              className={cn(
+                                'text-foreground-600 text-right text-label-xs transition-colors h-8 flex items-center justify-end w-full',
+                                !isReadOnly && 'hover:text-foreground-800 cursor-pointer',
+                                isReadOnly && 'cursor-default'
+                              )}
+                            >
+                              {field.value || 'Untitled workflow'}
+                            </motion.button>
+                          )}
+                        </AnimatePresence>
                       </div>
                     </div>
-                    <FormMessage className="mt-1" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -434,14 +435,14 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                       <span className="text-text-soft font-code text-xs font-medium">DESCRIPTION</span>
                       <div className="relative flex items-center gap-2">
                         <motion.div
-                          whileHover={{ scale: 1.1 }}
+                          whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           transition={{ duration: 0.15 }}
-                          className="text-foreground-400 group-hover:text-foreground-600 rounded p-1 transition-colors"
+                          className="bg-bg-white hover:bg-bg-weak text-foreground-400 hover:text-foreground-600 flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors"
                         >
                           <ChevronsUpDown
                             className={cn(
-                              'size-4 transition-transform duration-200',
+                              'size-3.5 transition-transform duration-200',
                               isDescriptionExpanded && 'rotate-180'
                             )}
                           />
@@ -489,12 +490,12 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                           <motion.button
                             type="button"
                             onClick={() => setIsAddingTag(!isAddingTag)}
-                            whileHover={{ scale: 1.05, rotate: 90 }}
+                            whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             transition={{ duration: 0.15 }}
-                            className="bg-bg-white hover:bg-bg-weak text-foreground-600 hover:text-foreground-800 flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors"
+                            className="bg-bg-white hover:bg-bg-weak text-foreground-400 hover:text-foreground-600 flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors"
                           >
-                            <RiAddLine className="size-3.5" />
+                            {isAddingTag ? <LuX className="size-3.5" /> : <LuPlus className="size-3.5" />}
                           </motion.button>
                         )}
                       </div>
