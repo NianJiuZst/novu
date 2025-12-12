@@ -1,3 +1,6 @@
+/**
+ * biome-ignore-all lint/correctness/useUniqueElementIds: expected
+ */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IEnvironment } from '@novu/shared';
 import { useEffect } from 'react';
@@ -17,12 +20,8 @@ import {
 } from '@/components/primitives/sheet';
 import { ExternalLink } from '@/components/shared/external-link';
 import { useUpdateEnvironment } from '@/hooks/use-environments';
-import {
-  EnvironmentFormData,
-  EnvironmentFormFields,
-  environmentFormSchema,
-} from './environment-form';
 import { showErrorToast, showSuccessToast } from '../primitives/sonner-helpers';
+import { EnvironmentFormData, EnvironmentFormFields, environmentFormSchema } from './environment-form';
 
 interface EditEnvironmentSheetProps {
   environment?: IEnvironment;

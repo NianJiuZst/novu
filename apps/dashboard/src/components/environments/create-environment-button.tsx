@@ -1,3 +1,6 @@
+/**
+ * biome-ignore-all lint/correctness/useUniqueElementIds: expected
+ */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type IEnvironment, PermissionsEnum } from '@novu/shared';
 import { type ComponentProps, useState } from 'react';
@@ -7,27 +10,15 @@ import { Button } from '@/components/primitives/button';
 import { Form, FormRoot } from '@/components/primitives/form/form';
 import { PermissionButton } from '@/components/primitives/permission-button';
 import { Separator } from '@/components/primitives/separator';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetMain,
-  SheetTitle,
-} from '@/components/primitives/sheet';
+import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetMain, SheetTitle } from '@/components/primitives/sheet';
 import { useAuth } from '@/context/auth/hooks';
 import { useFetchEnvironments } from '@/context/environment/hooks';
 import { useCreateEnvironment } from '@/hooks/use-environments';
-import {
-  EnvironmentFormData,
-  EnvironmentFormFields,
-  environmentFormSchema,
-} from './environment-form';
 import { useTelemetry } from '../../hooks/use-telemetry';
 import { TelemetryEvent } from '../../utils/telemetry';
 import { InlineToast } from '../primitives/inline-toast';
 import { showErrorToast, showSuccessToast } from '../primitives/sonner-helpers';
+import { EnvironmentFormData, EnvironmentFormFields, environmentFormSchema } from './environment-form';
 
 const ENVIRONMENT_COLORS = [
   '#FF6B6B', // Vibrant Coral

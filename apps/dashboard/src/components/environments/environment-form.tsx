@@ -1,13 +1,6 @@
-import { z } from 'zod';
 import { UseFormReturn } from 'react-hook-form';
-import {
-  FormControl,
-  FormField,
-  FormInput,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/primitives/form/form';
+import { z } from 'zod';
+import { FormControl, FormField, FormInput, FormItem, FormLabel, FormMessage } from '@/components/primitives/form/form';
 import { ColorPicker } from '../primitives/color-picker';
 
 export const environmentFormSchema = z.object({
@@ -23,11 +16,7 @@ type EnvironmentFormFieldsProps = {
   autoFocusName?: boolean;
 };
 
-export function EnvironmentFormFields({
-  form,
-  colorHelperText,
-  autoFocusName = true,
-}: EnvironmentFormFieldsProps) {
+export function EnvironmentFormFields({ form, colorHelperText, autoFocusName = true }: EnvironmentFormFieldsProps) {
   return (
     <>
       <FormField
@@ -37,10 +26,7 @@ export function EnvironmentFormFields({
           <FormItem>
             <FormLabel required>Name</FormLabel>
             <FormControl>
-              <FormInput
-                {...field}
-                autoFocus={autoFocusName}
-              />
+              <FormInput {...field} autoFocus={autoFocusName} />
             </FormControl>
             <FormMessage />
           </FormItem>
