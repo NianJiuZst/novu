@@ -55,8 +55,8 @@ export function TranslationToggleSection({
 
   if (needsOnboarding) {
     return (
-      <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
-        <div className="flex flex-col gap-2">
+      <div className="flex flex-col border-t border-neutral-100 pt-4">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-label-xs text-text-strong">
               Enable Translations{' '}
@@ -77,20 +77,20 @@ export function TranslationToggleSection({
               </TooltipPortal>
             </Tooltip>
           </div>
-          <p className="text-foreground-400 text-2xs mb-1">Set up your target locales first to enable translations</p>
-        </div>
 
-        <motion.div whileHover={{ x: 2 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
-          <Button
-            variant="secondary"
-            mode="ghost"
-            size="xs"
-            onClick={() => navigate(translationsUrl)}
-            trailingIcon={RiArrowRightSLine}
-          >
-            Setup
-          </Button>
-        </motion.div>
+          <motion.div whileHover={{ x: 2 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+            <Button
+              variant="secondary"
+              mode="ghost"
+              size="xs"
+              onClick={() => navigate(translationsUrl)}
+              trailingIcon={RiArrowRightSLine}
+            >
+              Setup
+            </Button>
+          </motion.div>
+        </div>
+        <p className="text-foreground-400 text-xs">Set up your target locales first to enable translations</p>
       </div>
     );
   }
