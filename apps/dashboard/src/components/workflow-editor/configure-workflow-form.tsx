@@ -32,6 +32,7 @@ import { PAUSE_MODAL_TITLE, PauseModalDescription } from '@/components/pause-wor
 import { AnimatedBadgeDot, Badge, Dot as BadgeDot } from '@/components/primitives/badge';
 import { Button } from '@/components/primitives/button';
 import { CompactButton } from '@/components/primitives/button-compact';
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/primitives/command';
 import { CopyButton } from '@/components/primitives/copy-button';
 import {
   DropdownMenu,
@@ -43,11 +44,12 @@ import {
 } from '@/components/primitives/dropdown-menu';
 import { Form, FormField, FormItem, FormMessage, FormRoot } from '@/components/primitives/form/form';
 import { Input } from '@/components/primitives/input';
+import { Popover, PopoverAnchor, PopoverContent } from '@/components/primitives/popover';
 import { Separator } from '@/components/primitives/separator';
 import { ToastIcon } from '@/components/primitives/sonner';
 import { showToast } from '@/components/primitives/sonner-helpers';
 import { Switch } from '@/components/primitives/switch';
-import { TagInput } from '@/components/primitives/tag-input';
+import { Tag } from '@/components/primitives/tag';
 import { Textarea } from '@/components/primitives/textarea';
 import { usePromotionalBanner } from '@/components/promotional/coming-soon-banner';
 import { SidebarContent, SidebarHeader } from '@/components/side-navigation/sidebar';
@@ -77,6 +79,119 @@ const toastOptions: ExternalToast = {
     toast: 'mb-4 right-0',
   },
 };
+
+type TagInputFieldProps = {
+  currentTags: string[];
+  suggestions: string[];
+  onAddTag: (tag: string) => void;
+  onBlur: () => void;
+};
+
+function TagInputField({ currentTags, suggestions, onAddTag, onBlur }: TagInputFieldProps) {
+  const [inputValue, setInputValue] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+
+  const validSuggestions = suggestions.filter((suggestion) => !currentTags.includes(suggestion));
+
+  const handleAddTag = (tag: string) => {
+    const trimmedTag = tag.trim();
+    if (trimmedTag === '' || currentTags.includes(trimmedTag)) {
+      return;
+    }
+    onAddTag(trimmedTag);
+    setInputValue('');
+    setIsOpen(false);
+  };
+
+  return (
+    <motion.div
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: 'auto', opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+      transition={{ duration: 0.2, ease: 'easeInOut' }}
+      className="mt-2 overflow-hidden"
+    >
+      <Popover open={isOpen}>
+        <Command loop>
+          <PopoverAnchor asChild>
+            <CommandInput
+              autoComplete="off"
+              value={inputValue}
+              className="h-6 text-xs"
+              placeholder="Type a tag and press Enter"
+              onValueChange={(value) => {
+                setInputValue(value);
+                if (value) {
+                  setIsOpen(true);
+                }
+              }}
+              onClick={() => setIsOpen(true)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && inputValue.trim()) {
+                  e.preventDefault();
+                  handleAddTag(inputValue);
+                }
+                if (e.key === 'Escape') {
+                  setIsOpen(false);
+                  setInputValue('');
+                }
+              }}
+              onBlur={() => {
+                onBlur();
+                setIsOpen(false);
+              }}
+            />
+          </PopoverAnchor>
+          <CommandList>
+            {(validSuggestions.length > 0 || inputValue !== '') && (
+              <PopoverContent
+                className="max-h-64 w-32 p-1"
+                portal={false}
+                onOpenAutoFocus={(e) => {
+                  e.preventDefault();
+                }}
+                align="start"
+                sideOffset={4}
+                onPointerDownOutside={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (!target.closest('[cmdk-input-wrapper]')) {
+                    setIsOpen(false);
+                  }
+                }}
+              >
+                <CommandGroup>
+                  {inputValue !== '' && !validSuggestions.includes(inputValue) && (
+                    <CommandItem
+                      value={inputValue}
+                      onSelect={() => {
+                        handleAddTag(inputValue);
+                      }}
+                      className="gap-1"
+                      disabled={inputValue === '' || currentTags.includes(inputValue)}
+                    >
+                      <span className="truncate">{inputValue}</span>
+                    </CommandItem>
+                  )}
+                  {validSuggestions.map((tag) => (
+                    <CommandItem
+                      key={tag}
+                      value={`${tag}-suggestion`}
+                      onSelect={() => {
+                        handleAddTag(tag);
+                      }}
+                    >
+                      <span className="truncate">{tag}</span>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </PopoverContent>
+            )}
+          </CommandList>
+        </Command>
+      </Popover>
+    </motion.div>
+  );
+}
 
 export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
   const { workflow, update } = props;
@@ -437,7 +552,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                     <button
                       type="button"
                       onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                      className="group flex w-full items-center justify-between"
+                      className="group flex w-full cursor-pointer items-center justify-between transition-colors hover:text-foreground-800"
                     >
                       <span className="text-text-soft font-code text-xs font-medium">DESCRIPTION</span>
                       <div className="relative flex items-center gap-2">
@@ -488,51 +603,97 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
               <FormField
                 control={form.control}
                 name="tags"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="group flex items-center justify-between">
-                      <span className="text-text-soft font-code text-xs font-medium">TAGS</span>
-                      <div className="relative flex items-center gap-2">
-                        {!isReadOnly && (
-                          <motion.button
-                            type="button"
-                            onClick={() => setIsAddingTag(!isAddingTag)}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            transition={{ duration: 0.15 }}
-                            className="bg-bg-white hover:bg-bg-weak text-foreground-400 hover:text-foreground-600 flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors"
-                          >
-                            {isAddingTag ? <LuX className="size-3.5" /> : <LuPlus className="size-3.5" />}
-                          </motion.button>
-                        )}
-                      </div>
-                    </div>
-                    <AnimatePresence>
-                      {isAddingTag && !isReadOnly && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2, ease: 'easeInOut' }}
-                          className="mt-2 overflow-hidden"
+                render={({ field }) => {
+                  const currentTags = field.value ?? [];
+                  const availableSuggestions = tags.map((tag) => tag.name).filter((tag) => !currentTags.includes(tag));
+
+                  const handleRemoveTag = (tagToRemove: string) => {
+                    const newTags = currentTags.filter((tag) => tag !== tagToRemove);
+                    form.setValue('tags', newTags, { shouldValidate: true, shouldDirty: true });
+                    saveForm();
+                  };
+
+                  const handleAddTag = (newTag: string) => {
+                    const trimmedTag = newTag.trim();
+                    if (trimmedTag === '' || currentTags.includes(trimmedTag)) {
+                      return;
+                    }
+                    const newTags = [...currentTags, trimmedTag];
+                    form.setValue('tags', newTags, { shouldValidate: true, shouldDirty: true });
+                    saveForm();
+                  };
+
+                  return (
+                    <FormItem>
+                      {!isReadOnly ? (
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingTag(!isAddingTag)}
+                          className="group flex w-full cursor-pointer items-center justify-between transition-colors hover:text-foreground-800"
                         >
-                          <TagInput
-                            value={field.value ?? []}
-                            onChange={(newTags) => {
-                              form.setValue('tags', newTags, { shouldValidate: true, shouldDirty: true });
-                              saveForm();
-                            }}
-                            disabled={isReadOnly}
-                            suggestions={tags.map((tag) => tag.name)}
-                            onBlur={() => setIsAddingTag(false)}
-                            className="h-6 text-xs"
-                          />
-                        </motion.div>
+                          <span className="text-text-soft font-code text-xs font-medium">TAGS</span>
+                          <div className="relative flex items-center gap-2">
+                            <motion.div
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              transition={{ duration: 0.15 }}
+                              className="bg-bg-white hover:bg-bg-weak text-foreground-400 hover:text-foreground-600 flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors"
+                            >
+                              {isAddingTag ? <LuX className="size-3.5" /> : <LuPlus className="size-3.5" />}
+                            </motion.div>
+                          </div>
+                        </button>
+                      ) : (
+                        <div className="group flex items-center justify-between">
+                          <span className="text-text-soft font-code text-xs font-medium">TAGS</span>
+                        </div>
                       )}
-                    </AnimatePresence>
-                    <FormMessage className="mt-1" />
-                  </FormItem>
-                )}
+
+                      {currentTags.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {currentTags.map((tag, index) => (
+                            <Tag
+                              key={index}
+                              variant="stroke"
+                              className="max-w-[12rem] shrink-0"
+                              onDismiss={
+                                !isReadOnly
+                                  ? (e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleRemoveTag(tag);
+                                    }
+                                  : undefined
+                              }
+                              dismissTestId={`tags-badge-remove-${tag}`}
+                            >
+                              <span
+                                className="block max-w-full truncate"
+                                style={{ wordBreak: 'break-all' }}
+                                data-testid="tags-badge-value"
+                                title={tag}
+                              >
+                                {tag}
+                              </span>
+                            </Tag>
+                          ))}
+                        </div>
+                      )}
+
+                      <AnimatePresence>
+                        {isAddingTag && !isReadOnly && (
+                          <TagInputField
+                            currentTags={currentTags}
+                            suggestions={availableSuggestions}
+                            onAddTag={handleAddTag}
+                            onBlur={() => setIsAddingTag(false)}
+                          />
+                        )}
+                      </AnimatePresence>
+                      <FormMessage className="mt-1" />
+                    </FormItem>
+                  );
+                }}
               />
             </SidebarContent>
           </FormRoot>
