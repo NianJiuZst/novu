@@ -7,7 +7,7 @@ import {
   UpdateWorkflowDto,
   WorkflowResponseDto,
 } from '@novu/shared';
-import { ChevronsUpDown, CircleDot, FileText, FilesIcon, Hash, Tags } from 'lucide-react';
+import { ChevronsUpDown, CircleDot, FilesIcon, FileText, Hash, Tags } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -371,7 +371,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                         <RouteFill className="text-text-soft h-3.5 w-3.5 shrink-0" />
                         <span className="text-text-soft font-code text-xs font-medium">WORKFLOW</span>
                       </div>
-                      <div className="relative flex min-w-0 flex-1 items-center justify-end">
+                      <div className="relative flex h-8 min-w-0 flex-1 items-center justify-end">
                         <AnimatePresence mode="wait">
                           {isEditingName && !isReadOnly ? (
                             <motion.div
@@ -592,7 +592,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                             <Tag
                               key={index}
                               variant="stroke"
-                              className="max-w-[12rem] shrink-0"
+                              className="max-w-48 shrink-0"
                               onDismiss={
                                 !isReadOnly
                                   ? (e) => {

@@ -12,7 +12,7 @@ import {
   WorkflowResponseDto,
   getFeatureForTierAsNumber,
 } from '@novu/shared';
-import { FileCode2 } from 'lucide-react';
+import { FileCode2, Hash } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { HTMLAttributes, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -23,15 +23,7 @@ import { PageMeta } from '@/components/page-meta';
 import { Button } from '@/components/primitives/button';
 import { CompactButton } from '@/components/primitives/button-compact';
 import { CopyButton } from '@/components/primitives/copy-button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormRoot,
-} from '@/components/primitives/form/form';
+import { Form, FormField, FormItem, FormMessage, FormRoot } from '@/components/primitives/form/form';
 import { Input } from '@/components/primitives/input';
 import { Separator } from '@/components/primitives/separator';
 import { SidebarContent, SidebarFooter, SidebarHeader } from '@/components/side-navigation/sidebar';
@@ -71,6 +63,8 @@ import {
 import { getControlsDefaultValues } from '@/utils/default-values';
 import { StepTypeEnum } from '@/utils/enums';
 import { buildRoute, ROUTES } from '@/utils/routes';
+import { cn } from '@/utils/ui';
+import { DEFAULT_STEP_ICON, STEP_TYPE_ICONS } from './constants/preview-context.constants';
 
 const STEP_TYPE_TO_INLINE_CONTROL_VALUES: Record<StepTypeEnum, () => React.JSX.Element | null> = {
   [StepTypeEnum.DELAY]: DelayControlValues,
@@ -112,6 +106,7 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
   const navigate = useNavigate();
   const isActionStepResolverEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_ACTION_STEP_RESOLVER_ENABLED);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
   const { subscription, isLoading: isSubscriptionLoading } = useFetchSubscription();
   const { data: stepResolversCountData, isLoading: isCountLoading } = useStepResolversCount();
   const supportedStepTypes = [
@@ -288,7 +283,13 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
                 <span className="sr-only">Back</span>
               </CompactButton>
             </Link>
-            <span>Configure Step</span>
+            <div className="flex items-center gap-1.5">
+              {(() => {
+                const StepIcon = STEP_TYPE_ICONS[step.type] || DEFAULT_STEP_ICON;
+                return <StepIcon className="h-4 w-4 shrink-0" />;
+              })()}
+              <span>Configure Step</span>
+            </div>
             <Link
               to={buildRoute(ROUTES.EDIT_WORKFLOW, {
                 environmentSlug: environment.slug!,
@@ -311,42 +312,118 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
           <Form {...form}>
             <FormRoot onBlur={onBlur}>
               <SaveFormContext.Provider value={value}>
-                <SidebarContent>
+                <SidebarContent size="md">
+                  {/* STEP Section */}
                   <FormField
                     control={form.control}
                     name="name"
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <FormLabel required>Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Untitled"
-                            {...field}
-                            disabled={isReadOnly}
-                            hasError={!!fieldState.error}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    defaultValue=""
+                    render={({ field, fieldState }) => {
+                      const StepIcon = STEP_TYPE_ICONS[step.type] || DEFAULT_STEP_ICON;
+                      return (
+                        <FormItem>
+                          <div className="group flex items-center justify-between gap-6">
+                            <div className="flex items-center gap-1.5">
+                              <StepIcon className="text-text-soft h-3.5 w-3.5 shrink-0" />
+                              <span className="text-text-soft font-code text-xs font-medium">STEP</span>
+                            </div>
+                            <div className="relative flex items-center min-w-0 flex-1 justify-end h-8">
+                              <AnimatePresence mode="wait">
+                                {isEditingName && !isReadOnly ? (
+                                  <motion.div
+                                    key="input"
+                                    initial={{ opacity: 0, scale: 0.98 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.98 }}
+                                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                                    className="absolute inset-0 flex items-center"
+                                  >
+                                    <Input
+                                      placeholder="Step name"
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      hasError={!!fieldState.error}
+                                      maxLength={64}
+                                      className="w-full [&>div]:before:hidden [&>div]:shadow-none [&>div]:focus-within:ring-1 [&>div]:focus-within:ring-stroke-soft [&>div]:focus-within:ring-offset-0 [&>div]:focus-within:border-stroke-soft [&_input]:text-right [&_input]:whitespace-nowrap [&_input]:[mask-image:linear-gradient(to_right,transparent,black_1rem,black_calc(100%-1rem),transparent)]"
+                                      size="xs"
+                                      autoFocus
+                                      onBlur={() => {
+                                        field.onBlur();
+                                        setIsEditingName(false);
+                                        if (field.value?.trim()) {
+                                          saveForm();
+                                        }
+                                      }}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          if (field.value?.trim()) {
+                                            e.currentTarget.blur();
+                                          } else {
+                                            form.setFocus('name');
+                                          }
+                                        }
+                                        if (e.key === 'Escape') {
+                                          form.resetField('name');
+                                          setIsEditingName(false);
+                                        }
+                                      }}
+                                    />
+                                  </motion.div>
+                                ) : (
+                                  <motion.button
+                                    key="button"
+                                    type="button"
+                                    onClick={() => !isReadOnly && setIsEditingName(true)}
+                                    disabled={isReadOnly}
+                                    initial={{ opacity: 0, scale: 0.98 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.98 }}
+                                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                                    whileHover={!isReadOnly ? { x: 2 } : {}}
+                                    whileTap={!isReadOnly ? { scale: 0.98 } : {}}
+                                    className={cn(
+                                      'text-foreground-600 text-right text-label-xs transition-colors h-8 flex items-center justify-end w-full min-w-0',
+                                      !isReadOnly && 'hover:text-foreground-800 cursor-pointer',
+                                      isReadOnly && 'cursor-default'
+                                    )}
+                                  >
+                                    <span className="truncate max-w-full">{field.value || 'Untitled step'}</span>
+                                  </motion.button>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
+
+                  {/* ID Section */}
                   <FormField
                     control={form.control}
-                    name={'stepId'}
+                    name="stepId"
+                    defaultValue=""
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>Identifier</FormLabel>
-                        <FormControl>
-                          <Input
-                            trailingNode={<CopyButton valueToCopy={field.value} />}
-                            placeholder="Untitled"
-                            className="cursor-default"
-                            {...field}
-                            readOnly
-                          />
-                        </FormControl>
-
-                        <FormMessage />
+                        <div className="group flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <Hash className="text-text-soft h-3.5 w-3.5 shrink-0" />
+                            <span className="text-text-soft font-code text-xs font-medium">ID</span>
+                          </div>
+                          <div className="relative flex items-center gap-2">
+                            <div className="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                              <CopyButton valueToCopy={field.value} size="2xs" className="h-1 p-0.5" />
+                            </div>
+                            <motion.span
+                              whileHover={{ x: -2 }}
+                              transition={{ duration: 0.15 }}
+                              className="text-foreground-600 text-right text-label-xs"
+                            >
+                              {field.value}
+                            </motion.span>
+                          </div>
+                        </div>
                       </FormItem>
                     )}
                   />
