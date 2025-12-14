@@ -7,7 +7,7 @@ import {
   UpdateWorkflowDto,
   WorkflowResponseDto,
 } from '@novu/shared';
-import { ChevronsUpDown, FilesIcon } from 'lucide-react';
+import { ChevronsUpDown, CircleDot, FilesIcon, FileText, Hash, Tags } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -404,7 +404,10 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <div className="group flex items-center justify-between">
-                      <span className="text-text-soft font-code text-xs font-medium">STATUS</span>
+                      <div className="flex items-center gap-1.5">
+                        <CircleDot className="text-text-soft h-3.5 w-3.5 shrink-0" />
+                        <span className="text-text-soft font-code text-xs font-medium">STATUS</span>
+                      </div>
                       <div className="flex items-center gap-2">
                         {field.value ? (
                           <Badge variant="lighter" color="green" size="md" className="text-success-base gap-1.5">
@@ -445,7 +448,10 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                 render={({ field, fieldState }) => (
                   <FormItem>
                     <div className="group flex items-center justify-between gap-6">
-                      <span className="text-text-soft font-code text-xs font-medium">WORKFLOW</span>
+                      <div className="flex items-center gap-1.5">
+                        <RouteFill className="text-text-soft h-3.5 w-3.5 shrink-0" />
+                        <span className="text-text-soft font-code text-xs font-medium">WORKFLOW</span>
+                      </div>
                       <div className="relative flex items-center min-w-0 flex-1 justify-end h-8">
                         <AnimatePresence mode="wait">
                           {isEditingName && !isReadOnly ? (
@@ -525,7 +531,10 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <div className="group flex items-center justify-between">
-                      <span className="text-text-soft font-code text-xs font-medium">ID</span>
+                      <div className="flex items-center gap-1.5">
+                        <Hash className="text-text-soft h-3.5 w-3.5 shrink-0" />
+                        <span className="text-text-soft font-code text-xs font-medium">ID</span>
+                      </div>
                       <div className="relative flex items-center gap-2">
                         <div className="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                           <CopyButton valueToCopy={field.value} size="2xs" className="h-1 p-0.5" />
@@ -554,7 +563,10 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                       onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
                       className="group flex w-full cursor-pointer items-center justify-between transition-colors hover:text-foreground-800"
                     >
-                      <span className="text-text-soft font-code text-xs font-medium">DESCRIPTION</span>
+                      <div className="flex items-center gap-1.5">
+                        <FileText className="text-text-soft h-3.5 w-3.5 shrink-0" />
+                        <span className="text-text-soft font-code text-xs font-medium">DESCRIPTION</span>
+                      </div>
                       <div className="relative flex items-center gap-2">
                         <motion.div
                           whileHover={{ scale: 1.05 }}
@@ -631,7 +643,10 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                           onClick={() => setIsAddingTag(!isAddingTag)}
                           className="group flex w-full cursor-pointer items-center justify-between transition-colors hover:text-foreground-800"
                         >
-                          <span className="text-text-soft font-code text-xs font-medium">TAGS</span>
+                          <div className="flex items-center gap-1.5">
+                            <Tags className="text-text-soft h-3.5 w-3.5 shrink-0" />
+                            <span className="text-text-soft font-code text-xs font-medium">TAGS</span>
+                          </div>
                           <div className="relative flex items-center gap-2">
                             <motion.div
                               whileHover={{ scale: 1.05 }}
@@ -645,7 +660,10 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                         </button>
                       ) : (
                         <div className="group flex items-center justify-between">
-                          <span className="text-text-soft font-code text-xs font-medium">TAGS</span>
+                          <div className="flex items-center gap-1.5">
+                            <Tags className="text-text-soft h-3.5 w-3.5 shrink-0" />
+                            <span className="text-text-soft font-code text-xs font-medium">TAGS</span>
+                          </div>
                         </div>
                       )}
 
