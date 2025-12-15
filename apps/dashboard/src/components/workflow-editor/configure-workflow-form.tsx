@@ -101,7 +101,9 @@ function TagInputField({ currentTags, suggestions, onAddTag, onBlur }: TagInputF
         <TagInput
           value={currentTags}
           suggestions={suggestions}
-          onChange={() => {}}
+          onChange={() => {
+            // No-op since we use onAddTag instead
+          }}
           onAddTag={onAddTag}
           onBlur={onBlur}
           hideTags
