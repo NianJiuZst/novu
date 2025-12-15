@@ -162,7 +162,7 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
               e.preventDefault();
             }}
             align="start"
-            sideOffset={4}
+            sideOffset={1}
             onPointerDownOutside={(e) => {
               const target = e.target as HTMLElement;
               if (!target.closest('[cmdk-input-wrapper]')) {
