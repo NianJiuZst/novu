@@ -91,76 +91,78 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-visible">
       <Popover open={shouldShowPopover}>
-        <Command loop shouldFilter={false}>
-          <div className="flex flex-col gap-2 pb-0.5">
-            <PopoverAnchor asChild>
-              <CommandInput
-                ref={ref}
-                autoComplete="off"
-                value={inputValue || ''}
-                className={cn('flex-grow', className)}
-                placeholder="Type a tag and press Enter"
-                onValueChange={(value) => {
-                  setInputValue(value || '');
-                  if (value) {
-                    setIsOpen(true);
-                  } else {
-                    setIsOpen(false);
-                  }
-                }}
-                onClick={() => setIsOpen(true)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Escape') {
-                    setIsOpen(false);
-                  }
-                }}
-                onBlur={(e) => {
-                  setTimeout(() => {
-                    setIsOpen(false);
-                    onBlur?.(e);
-                  }, 150);
-                }}
-                {...rest}
-              />
-            </PopoverAnchor>
-            {!hideTags && (
-              <div className="flex flex-wrap gap-2">
-                {(tags || []).map((tag, index) => (
-                  <Tag
-                    key={index}
-                    variant="stroke"
-                    className="max-w-[12rem] shrink-0"
-                    onDismiss={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-
-                      removeTag(tag);
-                    }}
-                    dismissTestId={`tags-badge-remove-${tag}`}
-                  >
-                    <span
-                      className="block max-w-full truncate"
-                      style={{ wordBreak: 'break-all' }}
-                      data-testid="tags-badge-value"
-                      title={tag}
-                    >
-                      {tag}
-                    </span>
-                  </Tag>
-                ))}
+        <Command loop shouldFilter={false} className="overflow-visible">
+          <PopoverAnchor asChild>
+            <div className="flex flex-col gap-2 pb-0.5 overflow-visible">
+              <div className="p-1 -m-1 mb-0">
+                <CommandInput
+                  ref={ref}
+                  autoComplete="off"
+                  value={inputValue || ''}
+                  className={cn('flex-grow', className)}
+                  placeholder="Type a tag and press Enter"
+                  onValueChange={(value) => {
+                    setInputValue(value || '');
+                    if (value) {
+                      setIsOpen(true);
+                    } else {
+                      setIsOpen(false);
+                    }
+                  }}
+                  onClick={() => setIsOpen(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setIsOpen(false);
+                    }
+                  }}
+                  onBlur={(e) => {
+                    setTimeout(() => {
+                      setIsOpen(false);
+                      onBlur?.(e);
+                    }, 150);
+                  }}
+                  {...rest}
+                />
               </div>
-            )}
-          </div>
+              {!hideTags && (
+                <div className="flex flex-wrap gap-2">
+                  {(tags || []).map((tag, index) => (
+                    <Tag
+                      key={index}
+                      variant="stroke"
+                      className="max-w-[12rem] shrink-0"
+                      onDismiss={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        removeTag(tag);
+                      }}
+                      dismissTestId={`tags-badge-remove-${tag}`}
+                    >
+                      <span
+                        className="block max-w-full truncate"
+                        style={{ wordBreak: 'break-all' }}
+                        data-testid="tags-badge-value"
+                        title={tag}
+                      >
+                        {tag}
+                      </span>
+                    </Tag>
+                  ))}
+                </div>
+              )}
+            </div>
+          </PopoverAnchor>
           <PopoverContent
-            className="bg-background text-foreground-600 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 relative z-50 max-h-96 min-w-[8rem] w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-md border shadow-md p-1"
+            className="bg-background text-foreground-600 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 relative z-50 max-h-96 w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-md border shadow-md p-1"
             portal={false}
             onOpenAutoFocus={(e) => {
               e.preventDefault();
             }}
             align="start"
-            sideOffset={12}
+            sideOffset={4}
             onPointerDownOutside={(e) => {
               const target = e.target as HTMLElement;
               if (!target.closest('[cmdk-input-wrapper]')) {
@@ -177,12 +179,12 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
                       addTag(inputValue);
                     }}
                   >
-                    <span className="text-foreground-400 text-xs font-medium">create: </span>
+                    <span className="text-foreground-400 text-xs font-medium">Create: </span>
                     <span className="truncate font-mono text-xs">{inputValue.trim()}</span>
                   </CommandItem>
                 )}
 
-                {isNewTag && filteredSuggestions.length > 0 && <div className="bg-muted my-1 h-px" />}
+                {isNewTag && filteredSuggestions.length > 0 && <div className="bg-muted  h-px" />}
 
                 {filteredSuggestions.map((tag) => (
                   <CommandItem

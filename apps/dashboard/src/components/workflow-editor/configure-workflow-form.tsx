@@ -93,18 +93,20 @@ function TagInputField({ currentTags, suggestions, onAddTag, onBlur }: TagInputF
       transition={{ duration: 0.2, ease: 'easeInOut' }}
       className="mt-2"
     >
-      <TagInput
-        value={currentTags}
-        suggestions={suggestions}
-        onChange={() => {
-          // No-op since we use onAddTag instead
-        }}
-        onAddTag={onAddTag}
-        onBlur={onBlur}
-        hideTags
-        size="xs"
-        placeholder="Type a tag and press Enter"
-      />
+      <div className="p-1 -m-1">
+        <TagInput
+          value={currentTags}
+          suggestions={suggestions}
+          onChange={() => {
+            // No-op since we use onAddTag instead
+          }}
+          onAddTag={onAddTag}
+          onBlur={onBlur}
+          hideTags
+          size="xs"
+          placeholder="Type a tag and press Enter"
+        />
+      </div>
     </motion.div>
   );
 }
