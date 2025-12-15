@@ -44,6 +44,13 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
     );
   }, [inputValue, suggestions, tags]);
 
+  const shouldShowPopover = useMemo(() => {
+    if (!isOpen) return false;
+    const trimmed = (inputValue || '').trim();
+    if (!trimmed) return validSuggestions.length > 0;
+    return filteredSuggestions.length > 0 || isNewTag;
+  }, [isOpen, inputValue, validSuggestions.length, filteredSuggestions.length, isNewTag]);
+
   useEffect(() => {
     setTags(value || []);
   }, [value]);
@@ -85,7 +92,7 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
 
   return (
     <div className="w-full">
-      <Popover open={isOpen}>
+      <Popover open={shouldShowPopover}>
         <Command loop shouldFilter={false}>
           <div className="flex flex-col gap-2 pb-0.5">
             <PopoverAnchor asChild>
@@ -99,6 +106,8 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
                   setInputValue(value || '');
                   if (value) {
                     setIsOpen(true);
+                  } else {
+                    setIsOpen(false);
                   }
                 }}
                 onClick={() => setIsOpen(true)}
@@ -144,53 +153,51 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
               </div>
             )}
           </div>
-          <CommandList>
-            {(filteredSuggestions.length > 0 || isNewTag || inputValue === '') && (
-              <PopoverContent
-                className="max-h-64 w-[var(--radix-popover-trigger-width)] overflow-hidden p-1"
-                portal={false}
-                onOpenAutoFocus={(e) => {
-                  e.preventDefault();
-                }}
-                align="start"
-                sideOffset={4}
-                onPointerDownOutside={(e) => {
-                  const target = e.target as HTMLElement;
-                  if (!target.closest('[cmdk-input-wrapper]')) {
-                    setIsOpen(false);
-                  }
-                }}
-              >
-                <CommandGroup>
-                  {isNewTag && (
-                    <CommandItem
-                      value={inputValue.trim()}
-                      onSelect={() => {
-                        addTag(inputValue);
-                      }}
-                    >
-                      <span className="text-foreground-400 text-xs font-medium">create: </span>
-                      <span className="truncate font-mono text-xs">{inputValue.trim()}</span>
-                    </CommandItem>
-                  )}
+          <PopoverContent
+            className="bg-background text-foreground-600 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 relative z-50 max-h-96 min-w-[8rem] w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-md border shadow-md p-1"
+            portal={false}
+            onOpenAutoFocus={(e) => {
+              e.preventDefault();
+            }}
+            align="start"
+            sideOffset={12}
+            onPointerDownOutside={(e) => {
+              const target = e.target as HTMLElement;
+              if (!target.closest('[cmdk-input-wrapper]')) {
+                setIsOpen(false);
+              }
+            }}
+          >
+            <CommandList className="max-h-[inherit] overflow-auto">
+              <CommandGroup className="!p-0">
+                {isNewTag && (
+                  <CommandItem
+                    value={inputValue.trim()}
+                    onSelect={() => {
+                      addTag(inputValue);
+                    }}
+                  >
+                    <span className="text-foreground-400 text-xs font-medium">create: </span>
+                    <span className="truncate font-mono text-xs">{inputValue.trim()}</span>
+                  </CommandItem>
+                )}
 
-                  {isNewTag && filteredSuggestions.length > 0 && <div className="bg-muted -mx-1 my-1 h-px" />}
+                {isNewTag && filteredSuggestions.length > 0 && <div className="bg-muted my-1 h-px" />}
 
-                  {filteredSuggestions.map((tag) => (
-                    <CommandItem
-                      key={tag}
-                      value={`${tag}-suggestion`}
-                      onSelect={() => {
-                        addTag(tag);
-                      }}
-                    >
-                      <span className="truncate">{tag}</span>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </PopoverContent>
-            )}
-          </CommandList>
+                {filteredSuggestions.map((tag) => (
+                  <CommandItem
+                    key={tag}
+                    value={`${tag}-suggestion`}
+                    onSelect={() => {
+                      addTag(tag);
+                    }}
+                  >
+                    <span className="truncate">{tag}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </PopoverContent>
         </Command>
       </Popover>
     </div>
