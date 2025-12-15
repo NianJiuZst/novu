@@ -50,6 +50,7 @@ import { ToastIcon } from '@/components/primitives/sonner';
 import { showToast } from '@/components/primitives/sonner-helpers';
 import { Switch } from '@/components/primitives/switch';
 import { Tag } from '@/components/primitives/tag';
+import { TagInput } from '@/components/primitives/tag-input';
 import { Textarea } from '@/components/primitives/textarea';
 import { usePromotionalBanner } from '@/components/promotional/coming-soon-banner';
 import { SidebarContent, SidebarHeader } from '@/components/side-navigation/sidebar';
@@ -88,21 +89,6 @@ type TagInputFieldProps = {
 };
 
 function TagInputField({ currentTags, suggestions, onAddTag, onBlur }: TagInputFieldProps) {
-  const [inputValue, setInputValue] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-
-  const validSuggestions = suggestions.filter((suggestion) => !currentTags.includes(suggestion));
-
-  const handleAddTag = (tag: string) => {
-    const trimmedTag = tag.trim();
-    if (trimmedTag === '' || currentTags.includes(trimmedTag)) {
-      return;
-    }
-    onAddTag(trimmedTag);
-    setInputValue('');
-    setIsOpen(false);
-  };
-
   return (
     <motion.div
       initial={{ height: 0, opacity: 0 }}
@@ -111,84 +97,18 @@ function TagInputField({ currentTags, suggestions, onAddTag, onBlur }: TagInputF
       transition={{ duration: 0.2, ease: 'easeInOut' }}
       className="mt-2 overflow-hidden"
     >
-      <Popover open={isOpen}>
-        <Command loop>
-          <PopoverAnchor asChild>
-            <CommandInput
-              autoComplete="off"
-              value={inputValue}
-              className="h-6 text-xs"
-              placeholder="Type a tag and press Enter"
-              onValueChange={(value) => {
-                setInputValue(value);
-                if (value) {
-                  setIsOpen(true);
-                }
-              }}
-              onClick={() => setIsOpen(true)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && inputValue.trim()) {
-                  e.preventDefault();
-                  handleAddTag(inputValue);
-                }
-                if (e.key === 'Escape') {
-                  setIsOpen(false);
-                  setInputValue('');
-                }
-              }}
-              onBlur={() => {
-                onBlur();
-                setIsOpen(false);
-              }}
-            />
-          </PopoverAnchor>
-          <CommandList>
-            {(validSuggestions.length > 0 || inputValue !== '') && (
-              <PopoverContent
-                className="max-h-64 w-32 p-1"
-                portal={false}
-                onOpenAutoFocus={(e) => {
-                  e.preventDefault();
-                }}
-                align="start"
-                sideOffset={4}
-                onPointerDownOutside={(e) => {
-                  const target = e.target as HTMLElement;
-                  if (!target.closest('[cmdk-input-wrapper]')) {
-                    setIsOpen(false);
-                  }
-                }}
-              >
-                <CommandGroup>
-                  {inputValue !== '' && !validSuggestions.includes(inputValue) && (
-                    <CommandItem
-                      value={inputValue}
-                      onSelect={() => {
-                        handleAddTag(inputValue);
-                      }}
-                      className="gap-1"
-                      disabled={inputValue === '' || currentTags.includes(inputValue)}
-                    >
-                      <span className="truncate">{inputValue}</span>
-                    </CommandItem>
-                  )}
-                  {validSuggestions.map((tag) => (
-                    <CommandItem
-                      key={tag}
-                      value={`${tag}-suggestion`}
-                      onSelect={() => {
-                        handleAddTag(tag);
-                      }}
-                    >
-                      <span className="truncate">{tag}</span>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </PopoverContent>
-            )}
-          </CommandList>
-        </Command>
-      </Popover>
+      <TagInput
+        value={currentTags}
+        suggestions={suggestions}
+        onChange={() => {
+          // No-op since we use onAddTag instead
+        }}
+        onAddTag={onAddTag}
+        onBlur={onBlur}
+        hideTags
+        className="h-6 text-xs"
+        placeholder="Type a tag and press Enter"
+      />
     </motion.div>
   );
 }
