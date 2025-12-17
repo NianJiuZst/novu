@@ -150,7 +150,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
     }
     const env = process.env.NODE_ENV;
 
-    return `${env}-${user.organizationId}-${this.getIdempotencyKey(context)}`;
+    return `${env}-${user.environmentId}-${this.getIdempotencyKey(context)}`;
   }
 
   async setCache(

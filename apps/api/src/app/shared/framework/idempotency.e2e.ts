@@ -73,7 +73,7 @@ describe('Idempotency Test', async () => {
   it('should return cached and use correct cache key when apiKey is used', async () => {
     const key = `IdempotencyKey2`;
     const res1 = await testIdempotencyPost(IDEMPOTENCE_IMMEDIATE_RESPONSE, key);
-    const cacheKey = `test-${session.organization._id}-${key}`;
+    const cacheKey = `test-${session.environment._id}-${key}`;
     session.testServer?.getHttpServer();
 
     const cacheVal = JSON.stringify(JSON.parse(await cacheService?.get(cacheKey)!).data);
@@ -87,7 +87,7 @@ describe('Idempotency Test', async () => {
   it('should return cached and use correct cache key when authToken and apiKey combination is used', async () => {
     const key = `3`;
     const res1 = await testIdempotencyPost(IDEMPOTENCE_IMMEDIATE_RESPONSE, key);
-    const cacheKey = `test-${session.organization._id}-${key}`;
+    const cacheKey = `test-${session.environment._id}-${key}`;
     session.testServer?.getHttpServer();
 
     const cacheVal = JSON.stringify(JSON.parse(await cacheService?.get(cacheKey)!).data);
