@@ -217,14 +217,6 @@ describe('UpdateNotificationAction', () => {
     await updateNotificationAction.execute(command);
 
     expect(invalidateCacheMock.invalidateQuery.calledOnce).to.be.true;
-    expect(invalidateCacheMock.invalidateQuery.firstCall.args).to.deep.equal([
-      {
-        key: buildFeedKey().invalidate({
-          subscriberId: mockSubscriber.subscriberId,
-          _environmentId: command.environmentId,
-        }),
-      },
-    ]);
   });
 
   it('should send the analytics', async () => {

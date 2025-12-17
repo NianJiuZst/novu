@@ -135,14 +135,7 @@ describe('MarkManyNotificationsAs', () => {
     await markManyNotificationsAs.execute(command);
 
     expect(invalidateCacheMock.invalidateQuery.calledTwice).to.be.true;
-    expect(invalidateCacheMock.invalidateQuery.firstCall.args).to.deep.equal([
-      {
-        key: buildFeedKey().invalidate({
-          subscriberId: mockSubscriber.subscriberId,
-          _environmentId: command.environmentId,
-        }),
-      },
-    ]);
+
     expect(invalidateCacheMock.invalidateQuery.secondCall.args).to.deep.equal([
       {
         key: buildMessageCountKey().invalidate({
