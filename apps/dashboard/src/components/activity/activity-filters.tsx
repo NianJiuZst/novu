@@ -72,7 +72,6 @@ export function ActivityFilters({
   const { data: workflowTemplates } = useFetchWorkflows({ limit: 100 });
   const { organization } = useOrganization();
   const { subscription } = useFetchSubscription();
-  const isContextEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_CONTEXT_ENABLED, false);
   const isSubscriptionPreferencesEnabled = useFeatureFlag(
     FeatureFlagsKeysEnum.IS_SUBSCRIPTION_PREFERENCES_ENABLED,
     false
@@ -277,7 +276,7 @@ export function ActivityFilters({
           />
         )}
 
-        {!hide.includes('contextKeys') && isContextEnabled && (
+        {!hide.includes('contextKeys') && (
           <FormField
             control={form.control}
             name="contextKeys"
