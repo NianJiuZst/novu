@@ -8,7 +8,7 @@ export function useNotificationVisibility() {
 
   onMount(() => {
     // Initialize the visibility tracker with the inbox service
-    tracker = new NotificationVisibilityTracker(novu.notifications.inboxService);
+    tracker = new NotificationVisibilityTracker(novu.notifications._inboxService);
 
     onCleanup(() => {
       if (tracker) {

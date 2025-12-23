@@ -1,13 +1,8 @@
-import { Schedule } from 'src/preferences';
-import type { Notification } from '../notifications';
+import type { Notification } from '../notifications/notification';
 import { Novu } from '../novu';
-import {
-  type NotificationFilter,
-  type NovuOptions,
-  type Preference,
-  type UnreadCount,
-  WorkflowCriticalityEnum,
-} from '../types';
+import { Schedule } from '../preferences';
+import type { Preference } from '../preferences/preference';
+import { type NotificationFilter, type NovuOptions, type UnreadCount, WorkflowCriticalityEnum } from '../types';
 import { appearanceKeys } from './config';
 import { Localization } from './context/LocalizationContext';
 
