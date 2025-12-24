@@ -8,12 +8,10 @@ run-name: >
   }}${{
     github.event.inputs.deploy_ws == 'true' && 'ws, ' || ''
   }}${{
-    github.event.inputs.deploy_webhook == 'true' && 'webhook ' || ''
+    github.event.inputs.deploy_webhook == 'true' && 'webhook, ' || ''
+  }}${{
+    github.event.inputs.deploy_dashboard == 'true' && 'dashboard ' || ''
   }}on ${{ github.event.inputs.environment }}
-description: |
-  This workflow deploys the Novu Cloud application to different environments and services based on the selected options.
-  It builds Docker images, pushes them to Amazon ECR, and deploys them to Amazon ECS.
-  Additionally, it creates Sentry releases and New Relic deployment markers.
 
 env:
   NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
@@ -59,6 +57,11 @@ on:
         required: true
         type: boolean
         default: false
+      deploy_dashboard:
+        description: "Deploy Dashboard"
+        required: true
+        type: boolean
+        default: false
 
 jobs:
   prepare-matrix:
@@ -68,13 +71,15 @@ jobs:
       service_matrix: ${{ steps.set-matrix.outputs.service_matrix }}
       deploy_matrix: ${{ steps.set-matrix.outputs.deploy_matrix }}
       nr_matrix: ${{ steps.set-matrix.outputs.nr_matrix }}
+      dashboard_matrix: ${{ steps.set-matrix.outputs.dashboard_matrix }}
     steps:
       - name: Validate Selected Services
         run: |
           if [ "${{ github.event.inputs.deploy_api }}" != "true" ] && \
              [ "${{ github.event.inputs.deploy_worker }}" != "true" ] && \
              [ "${{ github.event.inputs.deploy_ws }}" != "true" ] && \
-             [ "${{ github.event.inputs.deploy_webhook }}" != "true" ]; then
+             [ "${{ github.event.inputs.deploy_webhook }}" != "true" ] && \
+             [ "${{ github.event.inputs.deploy_dashboard }}" != "true" ]; then
             echo "Error: At least one service must be selected for deployment."
             exit 1
           fi
@@ -89,6 +94,7 @@ jobs:
           services=()
           deploy_matrix=()
           nr=()
+          dashboard_envs=()
 
           # Collect selected environments
           if [ "${{ github.event.inputs.environment }}" == "staging" ]; then
@@ -128,6 +134,23 @@ jobs:
             envs+=("\"prod-ew2\"")
             envs+=("\"prod-apne1\"")
             envs+=("\"prod-apne2\"")
+          fi
+
+          # Collect dashboard environments (only US and EU regions)
+          if [ "${{ github.event.inputs.deploy_dashboard }}" == "true" ]; then
+            if [ "${{ github.event.inputs.environment }}" == "staging" ]; then
+              dashboard_envs+=("\"staging-eu\"")
+            fi
+            if [ "${{ github.event.inputs.environment }}" == "production-us" ]; then
+              dashboard_envs+=("\"prod-us\"")
+            fi
+            if [ "${{ github.event.inputs.environment }}" == "production-eu" ]; then
+              dashboard_envs+=("\"prod-eu\"")
+            fi
+            if [ "${{ github.event.inputs.environment }}" == "production-us-and-eu" ]; then
+              dashboard_envs+=("\"prod-us\"")
+              dashboard_envs+=("\"prod-eu\"")
+            fi
           fi
 
           # Collect selected services
@@ -238,10 +261,14 @@ jobs:
           nr_matrix="[$(
             IFS=','; echo "${nr[*]}"
           )]"
+          dashboard_matrix="{\"environment\": [$(
+            IFS=','; echo "${dashboard_envs[*]}"
+          )]}"
           echo "env_matrix=$env_matrix" >> $GITHUB_OUTPUT
           echo "service_matrix=$service_matrix" >> $GITHUB_OUTPUT
           echo "deploy_matrix=$deploy_matrix" >> $GITHUB_OUTPUT
           echo "nr_matrix=$nr_matrix" >> $GITHUB_OUTPUT
+          echo "dashboard_matrix=$dashboard_matrix" >> $GITHUB_OUTPUT
 
   run-clickhouse-migrations:
     needs: prepare-matrix
@@ -496,3 +523,22 @@ jobs:
             -H "Content-Type: application/json" \
             -H "x-api-key: ${{ secrets.BUG0_SECRET_KEY }}" \
             -d '{"url": "https://eu.dashboard.novu.co", "source": "novuhq-novu", "prod": "true"}'
+
+  deploy_dashboard:
+    needs: [prepare-matrix, deploy]
+    runs-on: ubuntu-latest
+    if: |
+      github.event.inputs.deploy_dashboard == 'true' &&
+      fromJson(needs.prepare-matrix.outputs.dashboard_matrix).environment != '[]' &&
+      fromJson(needs.prepare-matrix.outputs.dashboard_matrix).environment[0] != null &&
+      always() && 
+      (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
+    strategy:
+      matrix:
+        env: ${{ fromJson(needs.prepare-matrix.outputs.dashboard_matrix).environment }}
+    environment: ${{ matrix.env }}
+
+    steps:
+      - name: Trigger Netlify Deploy
+        run: |
+          curl -X POST -d {} ${{ secrets.NETLIFY_BUILD_HOOK_URL }}
