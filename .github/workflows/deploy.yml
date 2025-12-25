@@ -321,6 +321,11 @@ jobs:
 
   build:
     needs: [prepare-matrix, run-clickhouse-migrations]
+    if: |
+      (github.event.inputs.deploy_api == 'true' || 
+       github.event.inputs.deploy_worker == 'true' || 
+       github.event.inputs.deploy_ws == 'true' || 
+       github.event.inputs.deploy_webhook == 'true')
     timeout-minutes: 60
     runs-on: ubuntu-latest
     environment: ${{ fromJson(needs.prepare-matrix.outputs.env_matrix).environment[0] }}
@@ -391,6 +396,11 @@ jobs:
 
   deploy:
     needs: [build, prepare-matrix, run-clickhouse-migrations]
+    if: |
+      (github.event.inputs.deploy_api == 'true' || 
+       github.event.inputs.deploy_worker == 'true' || 
+       github.event.inputs.deploy_ws == 'true' || 
+       github.event.inputs.deploy_webhook == 'true')
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -433,6 +443,11 @@ jobs:
 
   sentry_release:
     needs: [deploy, prepare-matrix]
+    if: |
+      (github.event.inputs.deploy_api == 'true' || 
+       github.event.inputs.deploy_worker == 'true' || 
+       github.event.inputs.deploy_ws == 'true' || 
+       github.event.inputs.deploy_webhook == 'true')
     runs-on: ubuntu-latest
     strategy:
       matrix:
