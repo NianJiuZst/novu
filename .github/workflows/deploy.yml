@@ -272,6 +272,11 @@ jobs:
 
   run-clickhouse-migrations:
     needs: prepare-matrix
+    if: |
+      (github.event.inputs.deploy_api == 'true' || 
+       github.event.inputs.deploy_worker == 'true' || 
+       github.event.inputs.deploy_ws == 'true' || 
+       github.event.inputs.deploy_webhook == 'true')
     runs-on: ubuntu-latest
     strategy:
       matrix:
