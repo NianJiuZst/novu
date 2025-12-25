@@ -583,20 +583,20 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Create Environment Variables
-        working-directory: apps/dashboard
         shell: bash
         run: |
-          echo "Creating .env file with environment variables..."
+          echo "Setting up environment variables..."
 
-          # Create empty .env file
-          touch .env
-
-          # Append environment variables if provided (pipe-delimited)
+          # Export environment variables if provided (pipe-delimited)
           if [ -n "${{ secrets.DASHBOARD_ENV_VARIABLES }}" ]; then
             echo "Adding environment variables from secrets..."
             IFS='|' read -ra VARS <<< "${{ secrets.DASHBOARD_ENV_VARIABLES }}"
             for var in "${VARS[@]}"; do
-              echo "$var" >> .env
+              # Export to GitHub environment for subsequent steps
+              echo "$var" >> $GITHUB_ENV
+              
+              # Also write to .env file in dashboard directory
+              echo "$var" >> apps/dashboard/.env
             done
             echo "Environment variables added successfully"
           else
