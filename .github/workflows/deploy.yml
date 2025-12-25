@@ -539,6 +539,62 @@ jobs:
     environment: ${{ matrix.env }}
 
     steps:
-      - name: Trigger Netlify Deploy
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: true
+          fetch-depth: 0
+          token: ${{ secrets.SUBMODULES_TOKEN }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.16.1
+          run_install: false
+
+      - name: Setup Node Version
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        shell: bash
+        run: pnpm install --frozen-lockfile
+
+      - name: Create Environment Variables
+        working-directory: apps/dashboard
+        shell: bash
         run: |
-          curl -X POST -d {} ${{ secrets.NETLIFY_BUILD_HOOK_URL }}
+          echo "Creating .env file with environment variables..."
+
+          # Create empty .env file
+          touch .env
+
+          # Append environment variables if provided (pipe-delimited)
+          if [ -n "${{ secrets.DASHBOARD_ENV_VARIABLES }}" ]; then
+            echo "Adding environment variables from secrets..."
+            IFS='|' read -ra VARS <<< "${{ secrets.DASHBOARD_ENV_VARIABLES }}"
+            for var in "${VARS[@]}"; do
+              echo "$var" >> .env
+            done
+            echo "Environment variables added successfully"
+          else
+            echo "No extra environment variables provided"
+          fi
+
+      - name: Build Dashboard
+        run: pnpm run build:dashboard --skip-nx-cache
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          publish-dir: "apps/dashboard/dist"
+          production-deploy: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy from GitHub Actions - ${{ github.sha }}"
+          enable-pull-request-comment: false
+          enable-commit-comment: false
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
