@@ -370,7 +370,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                         <RouteFill className="text-text-soft h-3.5 w-3.5 shrink-0" />
                         <span className="text-text-soft font-code text-xs font-medium">WORKFLOW</span>
                       </div>
-                      <div className="relative flex h-8 min-w-0 flex-1 items-center justify-end">
+                      <div className="relative flex min-w-0 flex-1 items-center justify-end">
                         <AnimatePresence mode="wait">
                           {isEditingName && !isReadOnly ? (
                             <motion.div
@@ -425,7 +425,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                               whileHover={!isReadOnly ? { x: 2 } : {}}
                               whileTap={!isReadOnly ? { scale: 0.98 } : {}}
                               className={cn(
-                                'text-foreground-600 flex h-8 min-w-0 w-full items-center justify-end text-right text-label-xs transition-colors',
+                                'text-foreground-600 flex min-w-0 w-full items-center justify-end text-right text-label-xs transition-colors',
                                 !isReadOnly && 'hover:text-foreground-800 cursor-pointer',
                                 isReadOnly && 'cursor-default'
                               )}
