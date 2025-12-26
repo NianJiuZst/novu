@@ -5,17 +5,29 @@ import { Popover, PopoverAnchor, PopoverContent } from '@/components/primitives/
 import { cn } from '@/utils/ui';
 import { Tag } from './tag';
 
-type TagInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> & {
+type TagInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size'> & {
   value: string[];
   suggestions: string[];
   onChange: (tags: string[]) => void;
   size?: 'sm' | 'md' | 'xs';
   hideTags?: boolean;
   onAddTag?: (tag: string) => void;
+  hasError?: boolean;
 };
 
 const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
-  const { className, suggestions = [], value = [], onChange, onBlur, hideTags = false, onAddTag, ...rest } = props;
+  const {
+    className,
+    suggestions = [],
+    value = [],
+    onChange,
+    onBlur,
+    hideTags = false,
+    onAddTag,
+    size = 'xs',
+    hasError,
+    ...rest
+  } = props;
   const [tags, setTags] = useState<string[]>(Array.isArray(value) ? value : []);
   const [inputValue, setInputValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -156,7 +168,8 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
                   autoComplete="off"
                   value={inputValue}
                   className={cn('flex-grow', className)}
-                  placeholder="Type a tag and press Enter"
+                  size={size}
+                  hasError={hasError}
                   onValueChange={(value) => {
                     setInputValue(value);
                     if (value) {

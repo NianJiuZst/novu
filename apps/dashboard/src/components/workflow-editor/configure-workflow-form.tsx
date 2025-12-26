@@ -107,7 +107,7 @@ function TagInputField({ currentTags, suggestions, onAddTag, onBlur }: TagInputF
           onAddTag={onAddTag}
           onBlur={onBlur}
           hideTags
-          className="h-6 text-xs"
+          size="xs"
           placeholder="Type a tag and press Enter"
         />
       </div>
@@ -325,7 +325,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                 name="active"
                 render={({ field }) => (
                   <FormItem>
-                    <div className="group flex items-center justify-between">
+                    <div className="group flex h-6 items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <CircleDot className="text-text-soft h-3.5 w-3.5 shrink-0" />
                         <span className="text-text-soft font-code text-xs font-medium">STATUS</span>
@@ -369,12 +369,12 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                 defaultValue=""
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <div className="group flex items-center justify-between gap-6">
+                    <div className="group flex h-6 items-center justify-between gap-6">
                       <div className="flex items-center gap-1.5">
                         <RouteFill className="text-text-soft h-3.5 w-3.5 shrink-0" />
                         <span className="text-text-soft font-code text-xs font-medium">WORKFLOW</span>
                       </div>
-                      <div className="relative flex items-center min-w-0 flex-1 justify-end h-8">
+                      <div className="relative flex min-w-0 flex-1 items-center justify-end">
                         <AnimatePresence mode="wait">
                           {isEditingName && !isReadOnly ? (
                             <motion.div
@@ -429,7 +429,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                               whileHover={!isReadOnly ? { x: 2 } : {}}
                               whileTap={!isReadOnly ? { scale: 0.98 } : {}}
                               className={cn(
-                                'text-foreground-600 text-right text-label-xs transition-colors h-8 flex items-center justify-end w-full min-w-0',
+                                'text-foreground-600 flex min-w-0 w-full items-center justify-end text-right text-label-xs transition-colors',
                                 !isReadOnly && 'hover:text-foreground-800 cursor-pointer',
                                 isReadOnly && 'cursor-default'
                               )}
@@ -452,7 +452,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                 defaultValue=""
                 render={({ field }) => (
                   <FormItem>
-                    <div className="group flex items-center justify-between">
+                    <div className="group flex h-6 items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <Hash className="text-text-soft h-3.5 w-3.5 shrink-0" />
                         <span className="text-text-soft font-code text-xs font-medium">ID</span>
@@ -483,7 +483,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                     <button
                       type="button"
                       onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                      className="group flex w-full cursor-pointer items-center justify-between transition-colors hover:text-foreground-800"
+                      className="group flex h-6 w-full cursor-pointer items-center justify-between transition-colors hover:text-foreground-800"
                     >
                       <div className="flex items-center gap-1.5">
                         <FileText className="text-text-soft h-3.5 w-3.5 shrink-0" />
@@ -563,7 +563,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                         <button
                           type="button"
                           onClick={() => setIsAddingTag(!isAddingTag)}
-                          className="group flex w-full cursor-pointer items-center justify-between transition-colors hover:text-foreground-800"
+                          className="group flex h-6 w-full cursor-pointer items-center justify-between transition-colors hover:text-foreground-800"
                         >
                           <div className="flex items-center gap-1.5">
                             <Tags className="text-text-soft h-3.5 w-3.5 shrink-0" />
@@ -581,7 +581,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                           </div>
                         </button>
                       ) : (
-                        <div className="group flex items-center justify-between">
+                        <div className="group flex h-6 items-center justify-between">
                           <div className="flex items-center gap-1.5">
                             <Tags className="text-text-soft h-3.5 w-3.5 shrink-0" />
                             <span className="text-text-soft font-code text-xs font-medium">TAGS</span>
