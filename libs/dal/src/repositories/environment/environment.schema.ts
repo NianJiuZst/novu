@@ -105,6 +105,15 @@ environmentSchema.index(
   }
 );
 
+environmentSchema.index({
+  _parentId: 1,
+});
+
+environmentSchema.index({
+  _id: 1,
+  _organizationId: 1,
+});
+
 // To provide backward compatibility with environments created before the type field was added
 environmentSchema.post(['find', 'findOne', 'findOneAndUpdate'], (docs) => {
   const processDoc = (document: any) => {

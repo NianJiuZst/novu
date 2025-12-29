@@ -43,5 +43,10 @@ tenantSchema.index({
   createdAt: -1,
 });
 
+tenantSchema.index({
+  _environmentId: 1,
+  identifier: 1,
+});
+
 export const Tenant =
   (mongoose.models.Tenant as mongoose.Model<TenantDBModel>) || mongoose.model<TenantDBModel>('Tenant', tenantSchema);

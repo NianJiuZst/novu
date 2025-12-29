@@ -202,6 +202,11 @@ notificationSchema.index(
  */
 notificationSchema.index({ createdAt: 1 });
 
+notificationSchema.index({
+  _subscriberId: 1,
+  _environmentId: 1,
+});
+
 export const Notification =
   (mongoose.models.Notification as mongoose.Model<NotificationDBModel>) ||
   mongoose.model<NotificationDBModel>('Notification', notificationSchema);

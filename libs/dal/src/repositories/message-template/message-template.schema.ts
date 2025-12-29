@@ -95,6 +95,16 @@ messageTemplateSchema.index({
   _parentId: 1,
 });
 
+messageTemplateSchema.index({
+  _environmentId: 1,
+});
+
+messageTemplateSchema.index({
+  _organizationId: 1,
+  deleted: 1,
+  _parentId: 1,
+});
+
 messageTemplateSchema.plugin(mongooseDelete, { deletedAt: true, deletedBy: true, overrideMethods: 'all' });
 
 export const MessageTemplate =

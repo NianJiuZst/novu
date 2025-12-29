@@ -79,6 +79,24 @@ if (process.env.NOVU_ENTERPRISE !== 'true') {
   );
 }
 
+organizationSchema.index({
+  _id: 1,
+  defaultLocale: 1,
+});
+
+organizationSchema.index({
+  externalId: 1,
+});
+
+organizationSchema.index({
+  'partnerConfigurations.teamId': 1,
+});
+
+organizationSchema.index({
+  _id: 1,
+  apiServiceLevel: 1,
+});
+
 export const Organization =
   (mongoose.models.Organization as mongoose.Model<OrganizationDBModel>) ||
   mongoose.model<OrganizationDBModel>('Organization', organizationSchema);

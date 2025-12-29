@@ -81,5 +81,9 @@ layoutSchema.index({
   _environmentId: 1,
 });
 
+layoutSchema.index({
+  _organizationId: 1,
+});
+
 export const Layout =
   (mongoose.models.Layout as mongoose.Model<LayoutDBModel>) || mongoose.model<LayoutDBModel>('Layout', layoutSchema);

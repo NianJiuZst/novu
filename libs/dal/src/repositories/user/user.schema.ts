@@ -53,5 +53,17 @@ if (process.env.SELF_HOSTED === 'true') {
   );
 }
 
+userSchema.index({
+  externalId: 1,
+});
+
+userSchema.index({
+  _id: 1,
+  firstName: 1,
+  lastName: 1,
+  email: 1,
+  profilePicture: 1,
+});
+
 export const User =
   (mongoose.models.User as mongoose.Model<UserDBModel>) || mongoose.model<UserDBModel>('User', userSchema);

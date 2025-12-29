@@ -9,7 +9,6 @@ const memberSchema = new Schema<MemberDBModel>(
       email: Schema.Types.String,
       token: {
         type: Schema.Types.String,
-        index: true,
       },
       invitationDate: Schema.Types.Date,
       answerDate: Schema.Types.Date,
@@ -48,6 +47,12 @@ memberSchema.index({
 
 memberSchema.index({
   'organizationId._userId._id': 1,
+});
+
+memberSchema.index({
+  _organizationId: 1,
+  _userId: 1,
+  _id: 1,
 });
 
 export const Member =

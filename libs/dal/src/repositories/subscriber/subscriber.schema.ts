@@ -208,6 +208,12 @@ subscriberSchema.index(
   { name: 'unique_subscriber_per_environment', unique: true, partialFilterExpression: { deleted: false } }
 );
 
+subscriberSchema.index({
+  subscriberId: 1,
+  _environmentId: 1,
+  _id: 1,
+});
+
 subscriberSchema.plugin(mongooseDelete, {
   deletedAt: true,
   deletedBy: true,

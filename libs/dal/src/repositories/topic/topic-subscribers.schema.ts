@@ -67,6 +67,23 @@ topicSubscribersSchema.index({
   topicKey: 1,
 });
 
+topicSubscribersSchema.index({
+  _environmentId: 1,
+  topicKey: 1,
+  externalSubscriberId: 1,
+});
+
+topicSubscribersSchema.index({
+  _environmentId: 1,
+  externalSubscriberId: 1,
+});
+
+topicSubscribersSchema.index({
+  _environmentId: 1,
+  _topicId: 1,
+  identifier: 1,
+});
+
 export const TopicSubscribers =
   (mongoose.models.TopicSubscribers as mongoose.Model<TopicSubscribersDBModel>) ||
   mongoose.model<TopicSubscribersDBModel>('TopicSubscribers', topicSubscribersSchema);

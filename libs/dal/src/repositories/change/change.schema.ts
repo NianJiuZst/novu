@@ -16,17 +16,15 @@ const changeSchema = new Schema<ChangeDBModel>(
     _environmentId: {
       type: Schema.Types.ObjectId,
       ref: 'Environment',
-      index: true,
     },
     _organizationId: {
       type: Schema.Types.ObjectId,
       ref: 'Organization',
     },
-    _entityId: { type: Schema.Types.ObjectId, index: true },
+    _entityId: { type: Schema.Types.ObjectId },
     _creatorId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      index: true,
     },
     _parentId: {
       type: Schema.Types.ObjectId,
