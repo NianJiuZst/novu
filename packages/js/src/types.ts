@@ -1,7 +1,8 @@
 import type { RulesLogic } from 'json-logic-js';
 import { NovuError } from './utils/errors';
 
-export type { FiltersCountResponse, ListNotificationsResponse, Notification } from './notifications';
+export type { FiltersCountResponse, ListNotificationsResponse } from './notifications';
+export type { Notification } from './notifications/notification';
 export type { Preference } from './preferences/preference';
 export type { Schedule } from './preferences/schedule';
 export type { NovuError } from './utils/errors';
@@ -252,7 +253,7 @@ export type SubscriptionResponse = {
   id: string;
   identifier: string;
   name?: string;
-  preferences: Array<SubscriptionPreferenceResponse>;
+  preferences?: Array<SubscriptionPreferenceResponse>;
 };
 
 export type TODO = any;
@@ -298,5 +299,3 @@ export type StandardNovuOptions = {
 export type NovuOptions = KeylessNovuOptions | StandardNovuOptions;
 
 export type Prettify<T> = { [K in keyof T]: T[K] } & {};
-
-export type NonEmptyArray<T> = [T, ...T[]];

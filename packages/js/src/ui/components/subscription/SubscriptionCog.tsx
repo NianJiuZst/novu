@@ -2,7 +2,6 @@ import { OffsetOptions, Placement } from '@floating-ui/dom';
 import { createMemo, Show } from 'solid-js';
 import { Motion, Presence } from 'solid-motionone';
 import { TopicSubscription } from '../../../subscriptions';
-import { NonEmptyArray } from '../../../types';
 import { useStyle } from '../../helpers/useStyle';
 import { Cogs } from '../../icons';
 import { SubscriptionAppearanceCallback } from '../../types';
@@ -23,14 +22,20 @@ export const SubscriptionCog = (props: {
   isOpen: boolean;
   placement: Placement;
   placementOffset?: OffsetOptions;
-  preferences: NonEmptyArray<UIPreference>;
+  preferences: Array<UIPreference> | undefined;
   onOpenChange?: (isOpen: boolean) => void;
   onSubscribeClick: () => void;
   renderPreferences?: SubscriptionPreferencesRenderer;
 }) => {
   const style = useStyle();
   const subscription = createMemo(() => props.subscription ?? undefined);
+  const preferences = createMemo(() => props.preferences);
   const hasSubscription = createMemo(() => !!subscription());
+  const hasPreferences = createMemo(() => {
+    const prefs = preferences();
+
+    return prefs !== undefined && prefs.length > 0;
+  });
 
   const containerClass = createMemo(() =>
     style({
@@ -64,7 +69,7 @@ export const SubscriptionCog = (props: {
 
   const renderTrigger = (triggerProps: { ref: (el: HTMLElement) => void; onClick: (e: MouseEvent) => void }) => (
     <Presence exitBeforeEnter>
-      <Show when={hasSubscription()}>
+      <Show when={hasSubscription() && hasPreferences()}>
         <Motion.span
           initial={ANIMATION_CONFIG.initial}
           animate={ANIMATION_CONFIG.animate}
@@ -107,7 +112,7 @@ export const SubscriptionCog = (props: {
             }
           >
             <SubscriptionPreferences
-              preferences={props.preferences}
+              preferences={preferences()}
               renderPreferences={props.renderPreferences}
               subscription={subscription()}
               loading={props.loading}

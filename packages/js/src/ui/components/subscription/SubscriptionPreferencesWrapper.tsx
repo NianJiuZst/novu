@@ -1,13 +1,12 @@
-import type { PreferenceFilter, TopicSubscription } from '../../../subscriptions';
-import { NonEmptyArray } from '../../../types';
+import type { TopicSubscription } from '../../../subscriptions';
 import { useSubscription } from '../../api/hooks/useSubscription';
-import { UIPreference } from './Subscription';
+import { extractTags, extractWorkflowIds, UIPreference } from './Subscription';
 import { SubscriptionPreferences } from './SubscriptionPreferences';
 
 export type SubscriptionPreferencesWrapperProps = {
   topicKey: string;
   identifier?: string;
-  preferences: NonEmptyArray<UIPreference>;
+  preferences: Array<UIPreference> | undefined;
   onClick?: (args: { subscription?: TopicSubscription }) => void;
   onDeleteError?: (error: unknown) => void;
   onDeleteSuccess?: () => void;
@@ -16,9 +15,13 @@ export type SubscriptionPreferencesWrapperProps = {
 };
 
 export const SubscriptionPreferencesWrapper = (props: SubscriptionPreferencesWrapperProps) => {
+  const workflowIds = extractWorkflowIds(props.preferences ?? []);
+  const tags = extractTags(props.preferences ?? []);
   const { subscription, loading, create, remove } = useSubscription({
     topicKey: props.topicKey,
     identifier: props.identifier,
+    workflowIds,
+    tags,
   });
 
   const onSubscribeClick = async () => {
@@ -29,11 +32,12 @@ export const SubscriptionPreferencesWrapper = (props: SubscriptionPreferencesWra
       const { error } = await remove({ subscription: currentSubscription });
       if (error) {
         props.onDeleteError?.(error);
+
         return;
       }
       props.onDeleteSuccess?.();
     } else {
-      const preferences = props.preferences.map((preference) => {
+      const preferences = props.preferences?.map((preference) => {
         if (typeof preference === 'object' && 'workflowId' in preference && preference.workflowId) {
           return { workflowId: preference.workflowId, enabled: preference.enabled };
         } else if (typeof preference === 'object' && 'filter' in preference && preference.filter) {
@@ -41,7 +45,7 @@ export const SubscriptionPreferencesWrapper = (props: SubscriptionPreferencesWra
         }
 
         return preference;
-      }) as NonEmptyArray<PreferenceFilter>;
+      });
       const { data, error } = await create({
         topicKey: props.topicKey,
         identifier: props.identifier,
@@ -49,6 +53,7 @@ export const SubscriptionPreferencesWrapper = (props: SubscriptionPreferencesWra
       });
       if (data) {
         props.onCreateSuccess?.({ subscription: data });
+
         return;
       }
       props.onCreateError?.(error);

@@ -1,5 +1,5 @@
-import { SubscriptionsCache } from 'src/cache/subscriptions-cache';
 import type { InboxService } from '../api';
+import { SubscriptionsCache } from '../cache/subscriptions-cache';
 import type { NovuEventEmitter } from '../event-emitter';
 import type { Result, SubscriptionResponse } from '../types';
 import { NovuError } from '../utils/errors';
@@ -29,7 +29,7 @@ export class TopicSubscription {
   readonly id: string;
   readonly identifier: string;
   readonly topicKey: string;
-  readonly preferences: Array<SubscriptionPreference>;
+  readonly preferences?: Array<SubscriptionPreference> | undefined;
 
   constructor(
     subscription: SubscriptionResponse & { topicKey: string },
@@ -45,7 +45,7 @@ export class TopicSubscription {
     this.id = subscription.id;
     this.identifier = subscription.identifier;
     this.topicKey = subscription.topicKey;
-    this.preferences = subscription.preferences.map(
+    this.preferences = subscription.preferences?.map(
       (pref) => new SubscriptionPreference({ ...pref }, this.#emitter, this.#inboxService, this.#cache, this.#useCache)
     );
   }
@@ -76,7 +76,7 @@ export class TopicSubscription {
       apiService: this.#inboxService,
       cache: this.#cache,
       useCache: this.#useCache,
-      args: { ...args, subscriptionId: this.id },
+      args: { ...args, subscriptionId: this.identifier },
     });
   }
 
@@ -94,7 +94,7 @@ export class TopicSubscription {
       apiService: this.#inboxService,
       cache: this.#cache,
       useCache: this.#useCache,
-      args: args.map((arg) => ({ ...arg, subscriptionId: this.id })),
+      args: args.map((arg) => ({ ...arg, subscriptionId: this.identifier })),
     });
   }
 
