@@ -383,8 +383,8 @@ importers:
         specifier: ^3.0.0
         version: 3.1.0
       jsonwebtoken:
-        specifier: 9.0.0
-        version: 9.0.0
+        specifier: 9.0.3
+        version: 9.0.3
       liquidjs:
         specifier: ^10.20.0
         version: 10.20.1
@@ -1591,8 +1591,8 @@ importers:
         specifier: ^8.0.0
         version: 8.0.0
       jsonwebtoken:
-        specifier: 9.0.0
-        version: 9.0.0
+        specifier: 9.0.3
+        version: 9.0.3
       lodash:
         specifier: ^4.17.15
         version: 4.17.21
@@ -1981,8 +1981,8 @@ importers:
         specifier: 5.3.2
         version: 5.3.2
       jsonwebtoken:
-        specifier: 9.0.0
-        version: 9.0.0
+        specifier: 9.0.3
+        version: 9.0.3
       lodash:
         specifier: ^4.17.15
         version: 4.17.21
@@ -2651,8 +2651,8 @@ importers:
         specifier: ^2.0.5
         version: 2.0.5
       jsonwebtoken:
-        specifier: 9.0.0
-        version: 9.0.0
+        specifier: 9.0.3
+        version: 9.0.3
       lodash:
         specifier: ^4.17.15
         version: 4.17.21
@@ -3473,8 +3473,8 @@ importers:
         specifier: ^6.0.1
         version: 6.1.0
       jsonwebtoken:
-        specifier: 9.0.0
-        version: 9.0.0
+        specifier: 9.0.3
+        version: 9.0.3
       ng-intercom:
         specifier: ^8.0.2
         version: 8.0.2
@@ -22945,6 +22945,10 @@ packages:
     resolution: {integrity: sha512-PRp66vJ865SSqOlgqS8hujT5U4AOgMfhrwYIuIhfKaoSCZcirrmASQr8CX7cUg+RMih+hgznrjp99o+W4pJLHQ==}
     engines: {node: '>=12', npm: '>=6'}
 
+  jsonwebtoken@9.0.3:
+    resolution: {integrity: sha512-MT/xP0CrubFRNLNKvxJ2BYfy53Zkm++5bX9dtuPbqAeQpTVe0MQTFhao8+Cp//EmJp244xt6Drw/GVEGCUj40g==}
+    engines: {node: '>=12', npm: '>=6'}
+
   jsprim@2.0.2:
     resolution: {integrity: sha512-gqXddjPqQ6G40VdnI6T6yObEC+pDNvyP95wdQhkWkg7crHH3km5qP1FsOXEkzEQwnz6gz5qGTn1c2Y52wP3OyQ==}
     engines: {'0': node >=0.6.0}
@@ -22967,6 +22971,9 @@ packages:
   jwa@2.0.0:
     resolution: {integrity: sha512-jrZ2Qx916EA+fq9cEAeCROWPTfCwi1IVHqT2tapuqLEVVDKFDENFw1oL+MwrTvH6msKxsd1YTDVw6uKEcsrLEA==}
 
+  jwa@2.0.1:
+    resolution: {integrity: sha512-hRF04fqJIP8Abbkq5NKGN0Bbr3JxlQ+qhZufXVr0DvujKy93ZCbXZMHDL4EOtodSbCWxOqR8MS1tXA5hwqCXDg==}
+
   jwks-rsa@3.1.0:
     resolution: {integrity: sha512-v7nqlfezb9YfHHzYII3ef2a2j1XnGeSE/bK3WfumaYCqONAIstJbrEGapz4kadScZzEt7zYCN7bucj8C0Mv/Rg==}
     engines: {node: '>=14'}
@@ -22976,6 +22983,9 @@ packages:
 
   jws@4.0.0:
     resolution: {integrity: sha512-KDncfTmOZoOMTFG4mBlG0qUIOlc03fmzH+ru6RgYVZhPkyiy/92Owlt/8UEN+a4TXR1FQetfIpJE8ApdvdVxTg==}
+
+  jws@4.0.1:
+    resolution: {integrity: sha512-EKI/M/yqPncGUUh44xz0PxSidXFr/+r0pA70+gIYhjv+et7yxM+s29Y+VGDkovRofQem0fs7Uvf4+YmAdyRduA==}
 
   jwt-decode@2.2.0:
     resolution: {integrity: sha512-86GgN2vzfUu7m9Wcj63iUkuDzFNYFVmjeDm2GzWpUk+opB0pEpMsw6ePCMrhYkumz2C1ihqtZzOMAg7FiXcNoQ==}
@@ -39183,7 +39193,7 @@ snapshots:
       nopt: 5.0.0
       npmlog: 5.0.1
       rimraf: 3.0.2
-      semver: 7.6.3
+      semver: 7.7.2
       tar: 7.1.0
     transitivePeerDependencies:
       - encoding
@@ -40983,7 +40993,7 @@ snapshots:
       '@opentelemetry/core': 1.26.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.53.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.27.0
-      semver: 7.6.3
+      semver: 7.7.2
     transitivePeerDependencies:
       - supports-color
 
@@ -41337,7 +41347,7 @@ snapshots:
       '@types/shimmer': 1.2.0
       import-in-the-middle: 1.11.2
       require-in-the-middle: 7.4.0
-      semver: 7.6.3
+      semver: 7.7.2
       shimmer: 1.2.1
     transitivePeerDependencies:
       - supports-color
@@ -41982,7 +41992,7 @@ snapshots:
       pm2-axon: 4.0.1
       pm2-axon-rpc: 0.7.1
       proxy-agent: 6.3.0
-      semver: 7.6.3
+      semver: 7.7.2
       ws: 7.5.10
     transitivePeerDependencies:
       - bufferutil
@@ -48271,7 +48281,7 @@ snapshots:
   '@vonage/jwt@1.7.0':
     dependencies:
       debug: 4.4.0(supports-color@8.1.1)
-      jsonwebtoken: 9.0.2
+      jsonwebtoken: 9.0.3
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -49362,7 +49372,7 @@ snapshots:
       prompts: 2.4.2
       rehype: 13.0.1
       resolve: 1.22.8
-      semver: 7.6.3
+      semver: 7.7.2
       server-destroy: 1.0.1
       shikiji: 0.9.19
       shikiji-core: 0.9.19
@@ -51327,7 +51337,7 @@ snapshots:
       postcss-modules-scope: 3.0.0(postcss@8.4.47)
       postcss-modules-values: 4.0.0(postcss@8.4.47)
       postcss-value-parser: 4.2.0
-      semver: 7.6.3
+      semver: 7.7.2
       webpack: 5.94.0(@swc/core@1.7.26(@swc/helpers@0.5.15))(esbuild@0.23.1)
 
   css-minimizer-webpack-plugin@3.4.1(esbuild@0.23.1)(webpack@5.94.0(@swc/core@1.7.26(@swc/helpers@0.5.15))(esbuild@0.23.1)):
@@ -51762,7 +51772,6 @@ snapshots:
       ms: 2.1.3
     optionalDependencies:
       supports-color: 8.1.1
-    optional: true
 
   debug@4.3.1(supports-color@8.1.1):
     dependencies:
@@ -52881,7 +52890,7 @@ snapshots:
 
   eslint-import-resolver-node@0.3.9:
     dependencies:
-      debug: 3.2.7(supports-color@5.5.0)
+      debug: 3.2.7(supports-color@8.1.1)
       is-core-module: 2.15.1
       resolve: 1.22.8
     transitivePeerDependencies:
@@ -52889,7 +52898,7 @@ snapshots:
 
   eslint-module-utils@2.8.2(@typescript-eslint/parser@5.62.0(eslint@9.19.0(jiti@2.4.2))(typescript@5.6.2))(eslint-import-resolver-node@0.3.9)(eslint@9.19.0(jiti@2.4.2)):
     dependencies:
-      debug: 3.2.7(supports-color@5.5.0)
+      debug: 3.2.7(supports-color@8.1.1)
     optionalDependencies:
       '@typescript-eslint/parser': 5.62.0(eslint@9.19.0(jiti@2.4.2))(typescript@5.6.2)
       eslint: 9.19.0(jiti@2.4.2)
@@ -52911,7 +52920,7 @@ snapshots:
       array.prototype.findlastindex: 1.2.5
       array.prototype.flat: 1.3.2
       array.prototype.flatmap: 1.3.2
-      debug: 3.2.7(supports-color@5.5.0)
+      debug: 3.2.7(supports-color@8.1.1)
       doctrine: 2.1.0
       eslint: 9.19.0(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
@@ -53846,7 +53855,7 @@ snapshots:
       '@types/node': 22.15.13
       farmhash-modern: 1.1.0
       google-auth-library: 9.15.1(encoding@0.1.13)
-      jsonwebtoken: 9.0.0
+      jsonwebtoken: 9.0.3
       jwks-rsa: 3.1.0
       node-forge: 1.3.1
       uuid: 11.1.0
@@ -57408,7 +57417,7 @@ snapshots:
       jws: 3.2.2
       lodash: 4.17.21
       ms: 2.1.3
-      semver: 7.6.2
+      semver: 7.7.2
 
   jsonwebtoken@9.0.2:
     dependencies:
@@ -57421,7 +57430,20 @@ snapshots:
       lodash.isstring: 4.0.1
       lodash.once: 4.1.1
       ms: 2.1.3
-      semver: 7.6.3
+      semver: 7.7.2
+
+  jsonwebtoken@9.0.3:
+    dependencies:
+      jws: 4.0.1
+      lodash.includes: 4.3.0
+      lodash.isboolean: 3.0.3
+      lodash.isinteger: 4.0.4
+      lodash.isnumber: 3.0.3
+      lodash.isplainobject: 4.0.6
+      lodash.isstring: 4.0.1
+      lodash.once: 4.1.1
+      ms: 2.1.3
+      semver: 7.7.2
 
   jsprim@2.0.2:
     dependencies:
@@ -57460,6 +57482,12 @@ snapshots:
       ecdsa-sig-formatter: 1.0.11
       safe-buffer: 5.2.1
 
+  jwa@2.0.1:
+    dependencies:
+      buffer-equal-constant-time: 1.0.1
+      ecdsa-sig-formatter: 1.0.11
+      safe-buffer: 5.2.1
+
   jwks-rsa@3.1.0:
     dependencies:
       '@types/express': 4.17.17
@@ -57479,6 +57507,11 @@ snapshots:
   jws@4.0.0:
     dependencies:
       jwa: 2.0.0
+      safe-buffer: 5.2.1
+
+  jws@4.0.1:
+    dependencies:
+      jwa: 2.0.1
       safe-buffer: 5.2.1
 
   jwt-decode@2.2.0: {}
@@ -59444,7 +59477,7 @@ snapshots:
 
   needle@2.4.0:
     dependencies:
-      debug: 3.2.7(supports-color@5.5.0)
+      debug: 3.2.7(supports-color@8.1.1)
       iconv-lite: 0.4.24
       sax: 1.4.1
     transitivePeerDependencies:
@@ -59452,7 +59485,7 @@ snapshots:
 
   needle@3.2.0:
     dependencies:
-      debug: 3.2.7(supports-color@5.5.0)
+      debug: 3.2.7(supports-color@8.1.1)
       iconv-lite: 0.6.3
       sax: 1.2.4
     transitivePeerDependencies:
@@ -59710,7 +59743,7 @@ snapshots:
 
   node-abi@3.65.0:
     dependencies:
-      semver: 7.6.3
+      semver: 7.7.2
 
   node-abort-controller@3.1.1: {}
 
@@ -60565,7 +60598,7 @@ snapshots:
 
   passport-jwt@4.0.1:
     dependencies:
-      jsonwebtoken: 9.0.0
+      jsonwebtoken: 9.0.3
       passport-strategy: 1.0.0
 
   passport-oauth2@1.8.0:
@@ -60879,7 +60912,7 @@ snapshots:
       form-data: 4.0.0
       https-proxy-agent: 5.0.1
       joi: 17.11.0
-      jsonwebtoken: 9.0.0
+      jsonwebtoken: 9.0.3
       lodash: 4.17.21
       querystring: 0.2.1
       uri-parser: 1.0.1
@@ -60978,7 +61011,7 @@ snapshots:
   portfinder@1.0.32:
     dependencies:
       async: 2.6.4
-      debug: 3.2.7(supports-color@5.5.0)
+      debug: 3.2.7(supports-color@8.1.1)
       mkdirp: 0.5.6
     transitivePeerDependencies:
       - supports-color
@@ -61317,7 +61350,7 @@ snapshots:
       cosmiconfig: 7.1.0
       klona: 2.0.6
       postcss: 8.4.47
-      semver: 7.6.3
+      semver: 7.7.2
       webpack: 5.94.0(@swc/core@1.7.26(@swc/helpers@0.5.15))(esbuild@0.23.1)
 
   postcss-logical@5.0.4(postcss@8.4.47):
@@ -64523,7 +64556,7 @@ snapshots:
 
   simple-update-notifier@2.0.0:
     dependencies:
-      semver: 7.6.3
+      semver: 7.7.2
 
   sinon@9.2.4:
     dependencies:
@@ -66563,7 +66596,7 @@ snapshots:
       axios: 1.9.0
       dayjs: 1.11.9
       https-proxy-agent: 5.0.1
-      jsonwebtoken: 9.0.0
+      jsonwebtoken: 9.0.3
       qs: 6.14.0
       scmp: 2.1.0
       url-parse: 1.5.10
