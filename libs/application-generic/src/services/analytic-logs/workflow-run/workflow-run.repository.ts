@@ -18,6 +18,12 @@ import { ClickHouseService, InsertOptions } from '../clickhouse.service';
 import { LogRepository, SchemaKeys, Where } from '../log.repository';
 import { getInsertOptions } from '../shared';
 import { ORDER_BY, TABLE_NAME, WorkflowRun, WorkflowRunStatusEnum, workflowRunSchema } from './workflow-run.schema';
+import {
+  getWorkflowRunsDailyMaterializedViewSQL,
+  TABLE_NAME_DAILY,
+  WORKFLOW_RUNS_DAILY_MV_NAME,
+  workflowRunDailySchema,
+} from './workflow-run-daily.schema';
 
 type WorkflowRunInsertData = Omit<WorkflowRun, 'id' | 'expires_at'>;
 type QueryNotificationEntity = Pick<
@@ -75,6 +81,25 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
   ) {
     super(clickhouseService, logger, workflowRunSchema, ORDER_BY, featureFlagsService);
     this.logger.setContext(this.constructor.name);
+    this.initializeMaterializedViews();
+  }
+
+  private async initializeMaterializedViews() {
+    if (process.env.NODE_ENV !== 'local' && process.env.NODE_ENV !== 'test') {
+      return;
+    }
+
+    try {
+      const dailyTableQuery = workflowRunDailySchema.GetCreateTableQuery();
+      await this.clickhouseService.exec({ query: dailyTableQuery });
+      console.log(`Daily aggregation table "${TABLE_NAME_DAILY}" created or verified`);
+
+      const mvQuery = getWorkflowRunsDailyMaterializedViewSQL();
+      await this.clickhouseService.exec({ query: mvQuery });
+      console.log(`Materialized view "${WORKFLOW_RUNS_DAILY_MV_NAME}" created or verified`);
+    } catch (error) {
+      this.logger.error('Failed to create workflow_runs daily materialized views', error);
+    }
   }
 
   async create(
@@ -510,14 +535,20 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
     const query = `
       SELECT 
         workflow_name,
-        count(*) as count
-      FROM workflow_runs FINAL
-      WHERE 
-        environment_id = {environmentId:String} 
-        AND organization_id = {organizationId:String}
-        AND created_at >= {startDate:DateTime64(3)}
-        AND created_at <= {endDate:DateTime64(3)}
-        ${workflowFilter}
+        count() as count
+      FROM (
+        SELECT 
+          workflow_name,
+          workflow_run_id
+        FROM ${TABLE_NAME_DAILY}
+        WHERE 
+          environment_id = {environmentId:String} 
+          AND organization_id = {organizationId:String}
+          AND date >= toDate({startDate:DateTime64(3)})
+          AND date <= toDate({endDate:DateTime64(3)})
+          ${workflowFilter}
+        GROUP BY workflow_name, workflow_run_id
+      )
       GROUP BY workflow_name
       ORDER BY count DESC
       LIMIT 5
@@ -557,27 +588,25 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
     const workflowFilter =
       workflowIds && workflowIds.length > 0 ? 'AND workflow_id IN {workflowIds:Array(String)}' : '';
 
-    // Query for current period
     const currentPeriodQuery = `
-      SELECT count(DISTINCT external_subscriber_id) as count
-      FROM workflow_runs FINAL
+      SELECT uniqMerge(unique_subscribers) as count
+      FROM ${TABLE_NAME_DAILY}
       WHERE 
         environment_id = {environmentId:String} 
         AND organization_id = {organizationId:String}
-        AND created_at >= {startDate:DateTime64(3)}
-        AND created_at <= {endDate:DateTime64(3)}
+        AND date >= toDate({startDate:DateTime64(3)})
+        AND date <= toDate({endDate:DateTime64(3)})
         ${workflowFilter}
     `;
 
-    // Query for previous period
     const previousPeriodQuery = `
-      SELECT count(DISTINCT external_subscriber_id) as count
-      FROM workflow_runs FINAL
+      SELECT uniqMerge(unique_subscribers) as count
+      FROM ${TABLE_NAME_DAILY}
       WHERE 
         environment_id = {environmentId:String} 
         AND organization_id = {organizationId:String}
-        AND created_at >= {previousStartDate:DateTime64(3)}
-        AND created_at <= {previousEndDate:DateTime64(3)}
+        AND date >= toDate({previousStartDate:DateTime64(3)})
+        AND date <= toDate({previousEndDate:DateTime64(3)})
         ${workflowFilter}
     `;
 
@@ -630,28 +659,34 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
     const workflowFilter =
       workflowIds && workflowIds.length > 0 ? 'AND workflow_id IN {workflowIds:Array(String)}' : '';
 
-    // Query for current period
     const currentPeriodQuery = `
-      SELECT count(*) as count
-      FROM workflow_runs FINAL
-      WHERE
-        environment_id = {environmentId:String}
-        AND organization_id = {organizationId:String}
-        AND created_at >= {startDate:DateTime64(3)}
-        AND created_at <= {endDate:DateTime64(3)}
-        ${workflowFilter}
+      SELECT count() as count
+      FROM (
+        SELECT workflow_run_id
+        FROM ${TABLE_NAME_DAILY}
+        WHERE
+          environment_id = {environmentId:String}
+          AND organization_id = {organizationId:String}
+          AND date >= toDate({startDate:DateTime64(3)})
+          AND date <= toDate({endDate:DateTime64(3)})
+          ${workflowFilter}
+        GROUP BY workflow_run_id
+      )
     `;
 
-    // Query for previous period
     const previousPeriodQuery = `
-      SELECT count(*) as count
-      FROM workflow_runs FINAL
-      WHERE
-        environment_id = {environmentId:String}
-        AND organization_id = {organizationId:String}
-        AND created_at >= {previousStartDate:DateTime64(3)}
-        AND created_at <= {previousEndDate:DateTime64(3)}
-        ${workflowFilter}
+      SELECT count() as count
+      FROM (
+        SELECT workflow_run_id
+        FROM ${TABLE_NAME_DAILY}
+        WHERE
+          environment_id = {environmentId:String}
+          AND organization_id = {organizationId:String}
+          AND date >= toDate({previousStartDate:DateTime64(3)})
+          AND date <= toDate({previousEndDate:DateTime64(3)})
+          ${workflowFilter}
+        GROUP BY workflow_run_id
+      )
     `;
 
     const baseParams: Record<string, unknown> = {
@@ -703,17 +738,24 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
 
     const query = `
       SELECT 
-        toDate(created_at) as date,
-        status,
-        count(*) as count
-      FROM workflow_runs FINAL
-      WHERE 
-        environment_id = {environmentId:String} 
-        AND organization_id = {organizationId:String}
-        AND created_at >= {startDate:DateTime64(3)}
-        AND created_at <= {endDate:DateTime64(3)}
-        ${workflowFilter}
-      GROUP BY date, status
+        date,
+        final_status as status,
+        count() as count
+      FROM (
+        SELECT 
+          date,
+          workflow_run_id,
+          argMaxMerge(latest_status) as final_status
+        FROM ${TABLE_NAME_DAILY}
+        WHERE 
+          environment_id = {environmentId:String} 
+          AND organization_id = {organizationId:String}
+          AND date >= toDate({startDate:DateTime64(3)})
+          AND date <= toDate({endDate:DateTime64(3)})
+          ${workflowFilter}
+        GROUP BY date, workflow_run_id
+      )
+      GROUP BY date, final_status
       ORDER BY date, status
     `;
 
@@ -752,14 +794,14 @@ export class WorkflowRunRepository extends LogRepository<typeof workflowRunSchem
 
     const query = `
       SELECT 
-        toDate(created_at) as date,
-        count(DISTINCT external_subscriber_id) as count
-      FROM workflow_runs FINAL
+        date,
+        uniqMerge(unique_subscribers) as count
+      FROM ${TABLE_NAME_DAILY}
       WHERE 
         environment_id = {environmentId:String} 
         AND organization_id = {organizationId:String}
-        AND created_at >= {startDate:DateTime64(3)}
-        AND created_at <= {endDate:DateTime64(3)}
+        AND date >= toDate({startDate:DateTime64(3)})
+        AND date <= toDate({endDate:DateTime64(3)})
         ${workflowFilter}
       GROUP BY date
       ORDER BY date

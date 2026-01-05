@@ -8,6 +8,12 @@ import { ClickHouseService, InsertOptions } from '../clickhouse.service';
 import { LogRepository, SchemaKeys } from '../log.repository';
 import { getInsertOptions } from '../shared';
 import { ORDER_BY, StepRun, stepRunSchema, TABLE_NAME } from './step-run.schema';
+import {
+  getStepRunsDailyMaterializedViewSQL,
+  STEP_RUNS_DAILY_MV_NAME,
+  stepRunDailySchema,
+  TABLE_NAME_DAILY,
+} from './step-run-daily.schema';
 
 type StepRunInsertData = Omit<StepRun, 'id' | 'expires_at'>;
 
@@ -37,6 +43,25 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
   ) {
     super(clickhouseService, logger, stepRunSchema, ORDER_BY, featureFlagsService);
     this.logger.setContext(this.constructor.name);
+    this.initializeMaterializedViews();
+  }
+
+  private async initializeMaterializedViews() {
+    if (process.env.NODE_ENV !== 'local' && process.env.NODE_ENV !== 'test') {
+      return;
+    }
+
+    try {
+      const dailyTableQuery = stepRunDailySchema.GetCreateTableQuery();
+      await this.clickhouseService.exec({ query: dailyTableQuery });
+      console.log(`Daily aggregation table "${TABLE_NAME_DAILY}" created or verified`);
+
+      const mvQuery = getStepRunsDailyMaterializedViewSQL();
+      await this.clickhouseService.exec({ query: mvQuery });
+      console.log(`Materialized view "${STEP_RUNS_DAILY_MV_NAME}" created or verified`);
+    } catch (error) {
+      this.logger.error('Failed to create step_runs daily materialized views', error);
+    }
   }
 
   private mapStepTypeEnumToStepType(stepType: StepTypeEnum | undefined): StepType | null {
@@ -172,20 +197,18 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
     const workflowFilter =
       workflowIds && workflowIds.length > 0 ? `AND workflow_id IN {workflowIds:Array(String)}` : '';
 
-    // Use ClickHouse aggregation query to get counts by date and step_type
     const query = `
       SELECT 
-        toDate(created_at) as date,
+        date,
         step_type,
-        count(*) as count
-      FROM step_runs FINAL
+        countMerge(completed_count) as count
+      FROM ${TABLE_NAME_DAILY}
       WHERE 
         environment_id = {environmentId:String} 
         AND organization_id = {organizationId:String}
-        AND created_at >= {startDate:DateTime64(3)}
-        AND created_at <= {endDate:DateTime64(3)}
+        AND date >= toDate({startDate:DateTime64(3)})
+        AND date <= toDate({endDate:DateTime64(3)})
         AND step_type IN ('in_app', 'email', 'sms', 'chat', 'push')
-        AND status = 'completed'
         ${workflowFilter}
       GROUP BY date, step_type
       ORDER BY date, step_type
@@ -226,31 +249,27 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
     const workflowFilter =
       workflowIds && workflowIds.length > 0 ? `AND workflow_id IN {workflowIds:Array(String)}` : '';
 
-    // Query for current period
     const currentPeriodQuery = `
-      SELECT count(*) as count
-      FROM step_runs FINAL
+      SELECT countMerge(completed_count) as count
+      FROM ${TABLE_NAME_DAILY}
       WHERE 
         environment_id = {environmentId:String} 
         AND organization_id = {organizationId:String}
-        AND created_at >= {startDate:DateTime64(3)}
-        AND created_at <= {endDate:DateTime64(3)}
+        AND date >= toDate({startDate:DateTime64(3)})
+        AND date <= toDate({endDate:DateTime64(3)})
         AND step_type IN ('in_app', 'email', 'sms', 'chat', 'push')
-        AND status = 'completed'
         ${workflowFilter}
     `;
 
-    // Query for previous period
     const previousPeriodQuery = `
-      SELECT count(*) as count
-      FROM step_runs FINAL
+      SELECT countMerge(completed_count) as count
+      FROM ${TABLE_NAME_DAILY}
       WHERE 
         environment_id = {environmentId:String} 
         AND organization_id = {organizationId:String}
-        AND created_at >= {previousStartDate:DateTime64(3)}
-        AND created_at <= {previousEndDate:DateTime64(3)}
+        AND date >= toDate({previousStartDate:DateTime64(3)})
+        AND date <= toDate({previousEndDate:DateTime64(3)})
         AND step_type IN ('in_app', 'email', 'sms', 'chat', 'push')
-        AND status = 'completed'
         ${workflowFilter}
     `;
 
@@ -303,35 +322,31 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
     const workflowFilter =
       workflowIds && workflowIds.length > 0 ? `AND workflow_id IN {workflowIds:Array(String)}` : '';
 
-    // Query for current period average
     const currentPeriodQuery = `
       SELECT 
-        count(*) as total_step_runs,
-        count(DISTINCT external_subscriber_id) as unique_subscribers
-      FROM step_runs FINAL
+        countMerge(completed_count) as total_step_runs,
+        uniqMerge(unique_subscribers) as unique_subscribers
+      FROM ${TABLE_NAME_DAILY}
       WHERE 
         environment_id = {environmentId:String} 
         AND organization_id = {organizationId:String}
-        AND created_at >= {startDate:DateTime64(3)}
-        AND created_at <= {endDate:DateTime64(3)}
+        AND date >= toDate({startDate:DateTime64(3)})
+        AND date <= toDate({endDate:DateTime64(3)})
         AND step_type IN ('in_app', 'email', 'sms', 'chat', 'push')
-        AND status = 'completed'
         ${workflowFilter}
     `;
 
-    // Query for previous period average
     const previousPeriodQuery = `
       SELECT 
-        count(*) as total_step_runs,
-        count(DISTINCT external_subscriber_id) as unique_subscribers
-      FROM step_runs FINAL
+        countMerge(completed_count) as total_step_runs,
+        uniqMerge(unique_subscribers) as unique_subscribers
+      FROM ${TABLE_NAME_DAILY}
       WHERE 
         environment_id = {environmentId:String} 
         AND organization_id = {organizationId:String}
-        AND created_at >= {previousStartDate:DateTime64(3)}
-        AND created_at <= {previousEndDate:DateTime64(3)}
+        AND date >= toDate({previousStartDate:DateTime64(3)})
+        AND date <= toDate({previousEndDate:DateTime64(3)})
         AND step_type IN ('in_app', 'email', 'sms', 'chat', 'push')
-        AND status = 'completed'
         ${workflowFilter}
     `;
 
@@ -391,15 +406,14 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
     const query = `
       SELECT 
         provider_id,
-        count(*) as count
-      FROM step_runs FINAL
+        countMerge(completed_count) as count
+      FROM ${TABLE_NAME_DAILY}
       WHERE 
         environment_id = {environmentId:String} 
         AND organization_id = {organizationId:String}
-        AND created_at >= {startDate:DateTime64(3)}
-        AND created_at <= {endDate:DateTime64(3)}
+        AND date >= toDate({startDate:DateTime64(3)})
+        AND date <= toDate({endDate:DateTime64(3)})
         AND step_type IN ('in_app', 'email', 'sms', 'chat', 'push')
-        AND status = 'completed'
         ${workflowFilter}
       GROUP BY provider_id
       ORDER BY count DESC

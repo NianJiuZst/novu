@@ -6,6 +6,12 @@ import { ClickHouseService, InsertOptions } from '../clickhouse.service';
 import { LogRepository } from '../log.repository';
 import { getInsertOptions } from '../shared';
 import { EventType, ORDER_BY, TABLE_NAME, Trace, traceLogSchema } from './trace-log.schema';
+import {
+  getTracesDailyMaterializedViewSQL,
+  TABLE_NAME_DAILY,
+  TRACES_DAILY_MV_NAME,
+  traceLogDailySchema,
+} from './trace-log-daily.schema';
 
 const TRACE_INSERT_OPTIONS: InsertOptions = getInsertOptions(
   process.env.TRACES_ASYNC_INSERT,
@@ -24,6 +30,25 @@ export class TraceLogRepository extends LogRepository<typeof traceLogSchema, Tra
   ) {
     super(clickhouseService, logger, traceLogSchema, ORDER_BY, featureFlagsService);
     this.logger.setContext(this.constructor.name);
+    this.initializeMaterializedViews();
+  }
+
+  private async initializeMaterializedViews() {
+    if (process.env.NODE_ENV !== 'local' && process.env.NODE_ENV !== 'test') {
+      return;
+    }
+
+    try {
+      const dailyTableQuery = traceLogDailySchema.GetCreateTableQuery();
+      await this.clickhouseService.exec({ query: dailyTableQuery });
+      console.log(`Daily aggregation table "${TABLE_NAME_DAILY}" created or verified`);
+
+      const mvQuery = getTracesDailyMaterializedViewSQL();
+      await this.clickhouseService.exec({ query: mvQuery });
+      console.log(`Materialized view "${TRACES_DAILY_MV_NAME}" created or verified`);
+    } catch (error) {
+      this.logger.error('Failed to create traces daily materialized views', error);
+    }
   }
 
   private async createMany(traceDataArray: Omit<Trace, 'id' | 'expires_at'>[]): Promise<void> {
@@ -106,24 +131,23 @@ export class TraceLogRepository extends LogRepository<typeof traceLogSchema, Tra
     workflowIds?: string[]
   ): Promise<Array<{ date: string; event_type: string; count: string }>> {
     const workflowFilter =
-      workflowIds && workflowIds.length > 0 ? `AND traces.workflow_id IN {workflowIds:Array(String)}` : '';
+      workflowIds && workflowIds.length > 0 ? `AND workflow_id IN {workflowIds:Array(String)}` : '';
 
     const query = `
       SELECT 
-        toDate(traces.created_at) as date,
-        traces.event_type,
-        count(*) as count
-      FROM traces
+        date,
+        event_type,
+        countMerge(total_count) as count
+      FROM ${TABLE_NAME_DAILY}
       WHERE 
-        traces.environment_id = {environmentId:String} 
-        AND traces.organization_id = {organizationId:String}
-        AND traces.entity_type = 'step_run'
-        AND traces.created_at >= {startDate:DateTime64(3)}
-        AND traces.created_at <= {endDate:DateTime64(3)}
-        AND traces.event_type IN ('message_seen', 'message_read', 'message_snoozed', 'message_archived')
+        environment_id = {environmentId:String} 
+        AND organization_id = {organizationId:String}
+        AND date >= toDate({startDate:DateTime64(3)})
+        AND date <= toDate({endDate:DateTime64(3)})
+        AND event_type IN ('message_seen', 'message_read', 'message_snoozed', 'message_archived')
         ${workflowFilter}
-      GROUP BY date, traces.event_type
-      ORDER BY date, traces.event_type
+      GROUP BY date, event_type
+      ORDER BY date, event_type
     `;
 
     const params: Record<string, unknown> = {
@@ -162,27 +186,25 @@ export class TraceLogRepository extends LogRepository<typeof traceLogSchema, Tra
       workflowIds && workflowIds.length > 0 ? `AND workflow_id IN {workflowIds:Array(String)}` : '';
 
     const currentQuery = `
-      SELECT count(*) as count
-      FROM traces
+      SELECT countMerge(total_count) as count
+      FROM ${TABLE_NAME_DAILY}
       WHERE 
         environment_id = {environmentId:String} 
         AND organization_id = {organizationId:String}
-        AND created_at >= {startDate:DateTime64(3)}
-        AND created_at <= {endDate:DateTime64(3)}
-        AND entity_type = 'step_run'
+        AND date >= toDate({startDate:DateTime64(3)})
+        AND date <= toDate({endDate:DateTime64(3)})
         AND event_type IN ('message_seen', 'message_read', 'message_snoozed', 'message_archived')
         ${workflowFilter}
     `;
 
     const previousQuery = `
-      SELECT count(*) as count
-      FROM traces
+      SELECT countMerge(total_count) as count
+      FROM ${TABLE_NAME_DAILY}
       WHERE 
         environment_id = {environmentId:String} 
         AND organization_id = {organizationId:String}
-        AND created_at >= {previousStartDate:DateTime64(3)}
-        AND created_at <= {previousEndDate:DateTime64(3)}
-        AND entity_type = 'step_run'
+        AND date >= toDate({previousStartDate:DateTime64(3)})
+        AND date <= toDate({previousEndDate:DateTime64(3)})
         AND event_type IN ('message_seen', 'message_read', 'message_snoozed', 'message_archived')
         ${workflowFilter}
     `;

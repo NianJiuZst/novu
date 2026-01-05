@@ -142,4 +142,23 @@ export class ClickHouseService implements OnModuleDestroy {
       query_params: params,
     });
   }
+
+  public async createMaterializedViews(schemas: Array<{ name: string; sql: string }>): Promise<void> {
+    if (!this._client) {
+      return;
+    }
+
+    if (process.env.NODE_ENV !== 'local' && process.env.NODE_ENV !== 'test') {
+      return;
+    }
+
+    for (const schema of schemas) {
+      try {
+        await this._client.exec({ query: schema.sql });
+        console.log(`Materialized view "${schema.name}" created or verified`);
+      } catch (error) {
+        console.error(`Failed to create materialized view "${schema.name}":`, error);
+      }
+    }
+  }
 }
