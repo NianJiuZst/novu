@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
+  FeatureFlagsService,
   GetPreferences,
   GetSubscriberTemplatePreference,
   GetSubscriberTemplatePreferenceCommand,
@@ -21,6 +22,7 @@ import {
 } from '@novu/dal';
 import {
   buildWorkflowPreferences,
+  FeatureFlagsKeysEnum,
   IPreferenceChannels,
   PreferenceLevelEnum,
   PreferencesTypeEnum,
@@ -48,7 +50,8 @@ export class UpdatePreferences {
     private getWorkflowByIdsUsecase: GetWorkflowByIdsUseCase,
     private sendWebhookMessage: SendWebhookMessage,
     private topicSubscribersRepository: TopicSubscribersRepository,
-    private preferencesRepository: PreferencesRepository
+    private preferencesRepository: PreferencesRepository,
+    private featureFlagsService: FeatureFlagsService
   ) {}
 
   @InstrumentUsecase()
@@ -61,11 +64,20 @@ export class UpdatePreferences {
     const workflow = await this.getWorkflow(command);
     const internalSubscriptionId = await this.getSubscriptionId(command);
 
+    const isActiveChannelsOnly = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.IS_PREFERENCE_ACTIVE_CHANNELS_ONLY_ENABLED,
+      defaultValue: false,
+      organization: { _id: command.organizationId },
+      environment: { _id: command.environmentId },
+    });
+
+    const includeInactiveChannels = isActiveChannelsOnly ? false : command.includeInactiveChannels;
+
     let newPreference: InboxPreference | null = null;
 
     await this.updateSubscriberPreference(command, subscriber, workflow?._id, internalSubscriptionId);
 
-    newPreference = await this.findPreference(command, subscriber, workflow, internalSubscriptionId);
+    newPreference = await this.findPreference(command, subscriber, workflow, internalSubscriptionId, includeInactiveChannels);
 
     await this.sendWebhookMessage.execute({
       eventType: WebhookEventEnum.PREFERENCE_UPDATED,
@@ -153,7 +165,8 @@ export class UpdatePreferences {
     command: UpdatePreferencesCommand,
     subscriber: Pick<SubscriberEntity, '_id'>,
     workflow: NotificationTemplateEntity | undefined,
-    internalSubscriptionId?: string
+    internalSubscriptionId: string | undefined,
+    includeInactiveChannels: boolean
   ): Promise<InboxPreference> {
     if (
       command.level === PreferenceLevelEnum.TEMPLATE &&
@@ -198,7 +211,7 @@ export class UpdatePreferences {
           environmentId: command.environmentId,
           template: workflow,
           subscriber,
-          includeInactiveChannels: command.includeInactiveChannels,
+          includeInactiveChannels,
           subscriptionId: internalSubscriptionId,
         })
       );
@@ -224,7 +237,7 @@ export class UpdatePreferences {
         organizationId: command.organizationId,
         environmentId: command.environmentId,
         subscriberId: command.subscriberId,
-        includeInactiveChannels: command.includeInactiveChannels,
+        includeInactiveChannels,
       })
     );
 

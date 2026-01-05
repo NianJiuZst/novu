@@ -28,12 +28,21 @@ export class GetPreferencesByLevel {
       throw new ServiceUnavailableException('Get preferences service is currently unavailable');
     }
 
+    const isActiveChannelsOnly = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.IS_PREFERENCE_ACTIVE_CHANNELS_ONLY_ENABLED,
+      defaultValue: false,
+      organization: { _id: command.organizationId },
+      environment: { _id: command.environmentId },
+    });
+
+    const includeInactiveChannels = isActiveChannelsOnly ? false : command.includeInactiveChannels;
+
     if (command.level === PreferenceLevelEnum.GLOBAL) {
       const globalPreferenceCommand = GetSubscriberGlobalPreferenceCommand.create({
         organizationId: command.organizationId,
         environmentId: command.environmentId,
         subscriberId: command.subscriberId,
-        includeInactiveChannels: command.includeInactiveChannels,
+        includeInactiveChannels,
       });
       const globalPreferences = await this.getSubscriberGlobalPreference.execute(globalPreferenceCommand);
 
@@ -44,7 +53,7 @@ export class GetPreferencesByLevel {
       organizationId: command.organizationId,
       environmentId: command.environmentId,
       subscriberId: command.subscriberId,
-      includeInactiveChannels: command.includeInactiveChannels,
+      includeInactiveChannels,
       criticality: WorkflowCriticalityEnum.NON_CRITICAL,
     });
 

@@ -1,4 +1,5 @@
 import {
+  FeatureFlagsService,
   GetSubscriberTemplatePreference,
   GetWorkflowByIdsUseCase,
   SendWebhookMessage,
@@ -54,6 +55,8 @@ describe('UpdatePreferences', () => {
   let sendWebhookMessageMock: sinon.SinonStubbedInstance<SendWebhookMessage>;
   let topicSubscribersRepositoryMock: sinon.SinonStubbedInstance<TopicSubscribersRepository>;
   let preferencesRepositoryMock: sinon.SinonStubbedInstance<PreferencesRepository>;
+  let featureFlagsServiceMock: sinon.SinonStubbedInstance<FeatureFlagsService>;
+
   beforeEach(() => {
     subscriberRepositoryMock = sinon.createStubInstance(SubscriberRepository);
     getSubscriberGlobalPreferenceMock = sinon.createStubInstance(GetSubscriberGlobalPreference);
@@ -63,6 +66,8 @@ describe('UpdatePreferences', () => {
     sendWebhookMessageMock = sinon.createStubInstance(SendWebhookMessage);
     topicSubscribersRepositoryMock = sinon.createStubInstance(TopicSubscribersRepository);
     preferencesRepositoryMock = sinon.createStubInstance(PreferencesRepository);
+    featureFlagsServiceMock = sinon.createStubInstance(FeatureFlagsService);
+    featureFlagsServiceMock.getFlag.resolves(false);
 
     updatePreferences = new UpdatePreferences(
       subscriberRepositoryMock as any,
@@ -72,7 +77,8 @@ describe('UpdatePreferences', () => {
       getWorkflowByIdsUsecase as any,
       sendWebhookMessageMock as any,
       topicSubscribersRepositoryMock as any,
-      preferencesRepositoryMock as any
+      preferencesRepositoryMock as any,
+      featureFlagsServiceMock as any
     );
   });
 
