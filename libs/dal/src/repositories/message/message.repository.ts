@@ -18,6 +18,7 @@ import { Message } from './message.schema';
 type MessageQuery = FilterQuery<MessageDBModel>;
 
 const MAX_PAYLOAD_QUERY_DEPTH = 3;
+const MAX_IN_CHUNK_SIZE = 100;
 
 const DANGEROUS_KEYS = ['__proto__', 'constructor', 'prototype'];
 
@@ -55,6 +56,15 @@ const getEntries = (obj: object, prefix = '', currentDepth = 0, maxDepth: number
 const getFlatObject = (obj: object) => {
   return Object.fromEntries(getEntries(obj, '', 0, MAX_PAYLOAD_QUERY_DEPTH));
 };
+
+function chunkArray<T>(array: T[], chunkSize: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    chunks.push(array.slice(i, i + chunkSize));
+  }
+
+  return chunks;
+}
 
 export class MessageRepository extends BaseRepository<MessageDBModel, MessageEntity, EnforceEnvId> {
   private feedRepository = new FeedRepository();
@@ -544,20 +554,31 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     // Extract IDs for targeted update
     const documentIds = documentsToUpdate.map((doc) => doc._id);
 
-    // Perform the update using document IDs
-    await this.update(
-      {
-        _id: { $in: documentIds },
-        _environmentId: environmentId,
-      },
-      { $set: updatePayload }
-    );
+    // Chunk the IDs to avoid large $in queries
+    const idChunks = chunkArray(documentIds, MAX_IN_CHUNK_SIZE);
 
-    // Fetch and return the updated documents
-    return this.find({
-      _id: { $in: documentIds },
-      _environmentId: environmentId,
-    });
+    // Perform the update using document IDs in chunks
+    for (const idChunk of idChunks) {
+      await this.update(
+        {
+          _id: { $in: idChunk },
+          _environmentId: environmentId,
+        },
+        { $set: updatePayload }
+      );
+    }
+
+    // Fetch and return the updated documents in chunks
+    const updatedMessages: MessageEntity[] = [];
+    for (const idChunk of idChunks) {
+      const chunkResults = await this.find({
+        _id: { $in: idChunk },
+        _environmentId: environmentId,
+      });
+      updatedMessages.push(...chunkResults);
+    }
+
+    return updatedMessages;
   }
 
   async updateFeedByMessageTemplateId(environmentId: string, messageId: string, feedId?: string | null) {
@@ -845,40 +866,50 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
 
     // Extract IDs for targeted update
     const documentIds = documentsToUpdate.map((doc) => doc._id);
-    const idQuery = { _id: { $in: documentIds }, _environmentId: query._environmentId };
+
+    // Chunk the IDs to avoid large $in queries
+    const idChunks = chunkArray(documentIds, MAX_IN_CHUNK_SIZE);
 
     // Handle firstSeenDate logic separately for operations that mark as seen
     const shouldMarkAsSeen = isUpdatingArchived || isUpdatingRead || (isUpdatingSeen && seen) || isUpdatingSnoozed;
 
-    if (shouldMarkAsSeen) {
-      // First, update all matching documents with the main update
-      await this.update(
-        idQuery,
-        { $set: updatePayload },
-        {
-          writeConcern: { w: 1 },
-        }
-      );
+    // Process updates in chunks
+    for (const idChunk of idChunks) {
+      const chunkIdQuery = { _id: { $in: idChunk }, _environmentId: query._environmentId };
 
-      // Then, set firstSeenDate only for documents that don't already have it
-      await this.update(
-        {
-          ...idQuery,
-          firstSeenDate: { $exists: false },
-        },
-        {
-          $set: { firstSeenDate: new Date() },
-        },
-        {
-          writeConcern: { w: 1 },
-        }
-      );
-    } else {
-      // For non-seen operations, just do the regular update
-      await this.update(idQuery, { $set: updatePayload });
+      if (shouldMarkAsSeen) {
+        // First, update all matching documents with the main update
+        await this.update(
+          chunkIdQuery,
+          { $set: updatePayload },
+          {
+            writeConcern: { w: 1 },
+          }
+        );
+
+        // Then, set firstSeenDate only for documents that don't already have it
+        await this.update(
+          {
+            ...chunkIdQuery,
+            firstSeenDate: { $exists: false },
+          },
+          {
+            $set: { firstSeenDate: new Date() },
+          },
+          {
+            writeConcern: { w: 1 },
+          }
+        );
+      } else {
+        // For non-seen operations, just do the regular update
+        await this.update(chunkIdQuery, { $set: updatePayload });
+      }
     }
 
-    return this.find(idQuery, undefined, { limit: 100 });
+    // Fetch and return the updated documents (limit to 100 as before)
+    const firstChunk = idChunks[0] || [];
+
+    return this.find({ _id: { $in: firstChunk }, _environmentId: query._environmentId }, undefined, { limit: 100 });
   }
 
   async updateActionStatus({
