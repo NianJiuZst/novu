@@ -2,6 +2,15 @@ import { PayloadTooLargeException } from '@nestjs/common';
 import { FeatureFlagsService, SYSTEM_LIMITS } from '@novu/application-generic';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
 
+/**
+ * Validates the size of the payload.
+ * @param featureFlagsService - The feature flags service.
+ * @param payload - The payload to validate.
+ * @param organizationId - The organization ID.
+ * @param context - The context of the payload.
+ * @returns void.
+ */
+
 export async function validatePayloadSize(
   featureFlagsService: FeatureFlagsService,
   payload: Record<string, unknown>,
