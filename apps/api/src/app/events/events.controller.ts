@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Param, Post, Req, Scope } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { RequirePermissions, ResourceCategory } from '@novu/application-generic';
+import { FeatureFlagsService, RequirePermissions, ResourceCategory } from '@novu/application-generic';
 import {
   AddressingTypeEnum,
   ApiRateLimitCategoryEnum,
@@ -11,7 +11,7 @@ import {
   UserSessionData,
 } from '@novu/shared';
 import { v4 as uuidv4 } from 'uuid';
-import { PayloadValidationExceptionDto } from '../../error-dto';
+import { PayloadTooLargeExceptionDto, PayloadValidationExceptionDto } from '../../error-dto';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
 import { ExternalApiAccessible } from '../auth/framework/external-api.decorator';
 import { ThrottlerCategory, ThrottlerCost } from '../rate-limiting/guards';
@@ -38,6 +38,7 @@ import { ParseEventRequest, ParseEventRequestMulticastCommand } from './usecases
 import { ProcessBulkTrigger, ProcessBulkTriggerCommand } from './usecases/process-bulk-trigger';
 import { SendTestEmail, SendTestEmailCommand } from './usecases/send-test-email';
 import { TriggerEventToAll, TriggerEventToAllCommand } from './usecases/trigger-event-to-all';
+import { validatePayloadSize } from './utils/validate-payload-size';
 
 function RequestAnalytics(strategy: AnalyticsStrategyEnum = AnalyticsStrategyEnum.BASIC) {
   return (_target: any, _propertyKey: string, descriptor: PropertyDescriptor) => {
@@ -64,7 +65,8 @@ export class EventsController {
     private triggerEventToAll: TriggerEventToAll,
     private sendTestEmail: SendTestEmail,
     private parseEventRequest: ParseEventRequest,
-    private processBulkTriggerUsecase: ProcessBulkTrigger
+    private processBulkTriggerUsecase: ProcessBulkTrigger,
+    private featureFlagsService: FeatureFlagsService
   ) {}
 
   @KeylessAccessible()
@@ -75,6 +77,9 @@ export class EventsController {
   @ApiResponse(TriggerEventResponseDto, 201)
   @ApiResponse(PayloadValidationExceptionDto, 400, false, false, {
     description: 'Payload validation failed - returned when payload does not match the workflow schema',
+  })
+  @ApiResponse(PayloadTooLargeExceptionDto, 413, false, false, {
+    description: 'Payload size exceeds the maximum allowed limit (512KB by default, excluding attachments)',
   })
   @ApiOperation({
     summary: 'Trigger event',
@@ -91,6 +96,8 @@ export class EventsController {
     @Req() req: RequestWithReqId,
     @Body() body: TriggerEventRequestDto
   ): Promise<TriggerEventResponseDto> {
+    await validatePayloadSize(this.featureFlagsService, body.payload || {}, user.organizationId);
+
     const result = await this.parseEventRequest.execute(
       ParseEventRequestMulticastCommand.create({
         userId: user._id,
@@ -127,6 +134,9 @@ export class EventsController {
   @ApiResponse(PayloadValidationExceptionDto, 400, false, false, {
     description: 'Payload validation failed - returned when any event payload does not match the workflow schema',
   })
+  @ApiResponse(String, 413, false, false, {
+    description: 'Payload size exceeds the maximum allowed limit (512KB by default, excluding attachments). Each event in the bulk request is validated individually.',
+  })
   @ApiOperation({
     summary: 'Bulk trigger event',
     description: `
@@ -140,6 +150,14 @@ export class EventsController {
     @Body() body: BulkTriggerEventDto,
     @Req() req: RequestWithReqId
   ): Promise<TriggerEventResponseDto[]> {
+    for (let i = 0; i < body.events.length; i++) {
+      const event = body.events[i];
+      await validatePayloadSize(this.featureFlagsService, event.payload || {}, user.organizationId, {
+        index: i,
+        workflowName: event.name,
+      });
+    }
+
     return this.processBulkTriggerUsecase.execute(
       ProcessBulkTriggerCommand.create({
         userId: user._id,
@@ -160,6 +178,9 @@ export class EventsController {
   @ApiResponse(PayloadValidationExceptionDto, 400, false, false, {
     description: 'Payload validation failed - returned when payload does not match the workflow schema',
   })
+  @ApiResponse(PayloadTooLargeExceptionDto, 413, false, false, {
+    description: 'Payload size exceeds the maximum allowed limit (512KB by default, excluding attachments)',
+  })
   @SdkMethodName('triggerBroadcast')
   @SdkUsageExample('Broadcast Event to All')
   @SdkGroupName('')
@@ -178,6 +199,8 @@ export class EventsController {
     @Body() body: TriggerEventToAllRequestDto,
     @Req() req: RequestWithReqId
   ): Promise<TriggerEventResponseDto> {
+    await validatePayloadSize(this.featureFlagsService, body.payload || {}, user.organizationId);
+
     const transactionId = body.transactionId || uuidv4();
 
     return this.triggerEventToAll.execute(

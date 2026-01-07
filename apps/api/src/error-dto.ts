@@ -187,3 +187,11 @@ export class ValidationErrorDto extends ErrorDto {
   })
   errors: Record<string, ConstraintValidation>;
 }
+
+export class PayloadTooLargeExceptionDto extends ErrorDto {
+  @ApiProperty({
+    description: 'Error type name',
+    example: 'Payload Too Large',
+  })
+  error: string;
+}
