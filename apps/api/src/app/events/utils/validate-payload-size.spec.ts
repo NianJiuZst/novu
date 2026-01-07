@@ -359,7 +359,7 @@ describe('validatePayloadSize', () => {
 
       try {
         await validatePayloadSize(featureFlagsService as any, payload, organizationId);
-        expect.fail('Should have thrown BadRequestException');
+        expect.fail('Should have thrown PayloadTooLargeException');
       } catch (error) {
         expect(error.message).to.include('512KB');
       }
@@ -373,7 +373,7 @@ describe('validatePayloadSize', () => {
 
       try {
         await validatePayloadSize(featureFlagsService as any, payload, organizationId);
-        expect.fail('Should have thrown BadRequestException');
+        expect.fail('Should have thrown PayloadTooLargeException');
       } catch (error) {
         expect(error.message).to.include('488KB');
       }
