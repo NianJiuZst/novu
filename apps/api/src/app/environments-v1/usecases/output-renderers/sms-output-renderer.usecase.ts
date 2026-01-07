@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { InstrumentUsecase, PinoLogger } from '@novu/application-generic';
 import { LocalizationResourceEnum, NotificationTemplateEntity } from '@novu/dal';
@@ -22,7 +22,7 @@ export class SmsOutputRendererUsecase extends BaseTranslationRendererUsecase {
 
   @InstrumentUsecase()
   async execute(renderCommand: SmsOutputRendererCommand): Promise<SmsRenderOutput> {
-    const outputControls = renderCommand.controlValues ?? {};
+    const { skip: _skip, ...outputControls } = renderCommand.controlValues ?? {};
     const { _environmentId, _organizationId, _id: workflowId } = renderCommand.dbWorkflow;
 
     const translatedControls = await this.processTranslations({
@@ -37,6 +37,12 @@ export class SmsOutputRendererUsecase extends BaseTranslationRendererUsecase {
       organization: renderCommand.organization,
     });
 
-    return translatedControls as SmsRenderOutput;
+    const body = translatedControls['body'];
+
+    if (typeof body !== 'string') {
+      throw new InternalServerErrorException('SMS render output is missing a valid "body"');
+    }
+
+    return { body };
   }
 }
