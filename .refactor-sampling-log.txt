@@ -1,0 +1,8 @@
+# Refactor Sampling Log
+# Format: YYYY-MM-DD HH:MM - filepath
+
+2026-01-07 15:00 - apps/api/src/app/topics-v1/use-cases/get-topic/get-topic.use-case.ts
+2026-01-07 15:00 - apps/api/src/app/workflows-v2/shared/parse-payload-schema.ts
+2026-01-07 15:00 - apps/api/src/app/internal/internal.controller.ts
+2026-01-07 15:00 - apps/dashboard/src/components/workflow-editor/create-workflow-form.tsx
+2026-01-07 15:00 - apps/dashboard/src/routes/auth.tsx
