@@ -23,7 +23,6 @@ export class SmsOutputRendererUsecase extends BaseTranslationRendererUsecase {
   @InstrumentUsecase()
   async execute(renderCommand: SmsOutputRendererCommand): Promise<SmsRenderOutput> {
     const outputControls = renderCommand.controlValues ?? {};
-    delete outputControls['skip'];
     const { _environmentId, _organizationId, _id: workflowId } = renderCommand.dbWorkflow;
 
     const translatedControls = await this.processTranslations({
@@ -38,10 +37,6 @@ export class SmsOutputRendererUsecase extends BaseTranslationRendererUsecase {
       organization: renderCommand.organization,
     });
 
-    const body = translatedControls['body'];
-
-    return {
-      body: typeof body === 'string' ? body : '',
-    };
+    return translatedControls as SmsRenderOutput;
   }
 }
