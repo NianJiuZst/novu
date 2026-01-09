@@ -138,6 +138,85 @@ export class GetPreferences {
   }
 
   private async getPreferencesFromDb(command: GetPreferencesCommand): Promise<PreferenceSet> {
+    const isOptimizedQueryEnabled = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.IS_OPTIMIZED_PREFERENCES_QUERY_ENABLED,
+      defaultValue: false,
+      environment: { _id: command.environmentId },
+      organization: { _id: command.organizationId },
+    });
+
+    if (isOptimizedQueryEnabled) {
+      return this.getPreferencesFromDbOptimized(command);
+    }
+
+    return this.getPreferencesFromDbLegacy(command);
+  }
+
+  private async getPreferencesFromDbOptimized(command: GetPreferencesCommand): Promise<PreferenceSet> {
+    const baseQuery = {
+      _environmentId: command.environmentId,
+      _organizationId: command.organizationId,
+    };
+
+    const queryOptions = { readPreference: 'secondaryPreferred' as const };
+    const projection = { _id: 1, type: 1, preferences: 1, schedule: 1 };
+
+    const workflowPreferencesPromise = this.preferencesRepository.find(
+      {
+        ...baseQuery,
+        _templateId: command.templateId,
+        type: { $in: [PreferencesTypeEnum.WORKFLOW_RESOURCE, PreferencesTypeEnum.USER_WORKFLOW] },
+      },
+      projection,
+      queryOptions
+    );
+
+    let subscriberPreferencesPromise: Promise<PreferencesEntity[]> | null = null;
+
+    if (command.subscriberId) {
+      const contextQuery = await this.buildContextExactMatchQuery(command.contextKeys, command.organizationId);
+
+      subscriberPreferencesPromise = this.preferencesRepository.find(
+        {
+          ...baseQuery,
+          _subscriberId: command.subscriberId,
+          $or: [
+            { _templateId: command.templateId, type: PreferencesTypeEnum.SUBSCRIBER_WORKFLOW, ...contextQuery },
+            { type: PreferencesTypeEnum.SUBSCRIBER_GLOBAL },
+          ],
+        },
+        projection,
+        queryOptions
+      );
+    }
+
+    const [workflowPreferences, subscriberPreferences] = await Promise.all([
+      workflowPreferencesPromise,
+      subscriberPreferencesPromise ?? Promise.resolve([]),
+    ]);
+
+    const result: PreferenceSet = {};
+
+    for (const pref of workflowPreferences) {
+      if (pref.type === PreferencesTypeEnum.WORKFLOW_RESOURCE) {
+        result.workflowResourcePreference = pref as PreferenceSet['workflowResourcePreference'];
+      } else if (pref.type === PreferencesTypeEnum.USER_WORKFLOW) {
+        result.workflowUserPreference = pref as PreferenceSet['workflowUserPreference'];
+      }
+    }
+
+    for (const pref of subscriberPreferences) {
+      if (pref.type === PreferencesTypeEnum.SUBSCRIBER_WORKFLOW) {
+        result.subscriberWorkflowPreference = pref as PreferenceSet['subscriberWorkflowPreference'];
+      } else if (pref.type === PreferencesTypeEnum.SUBSCRIBER_GLOBAL) {
+        result.subscriberGlobalPreference = pref as PreferenceSet['subscriberGlobalPreference'];
+      }
+    }
+
+    return result;
+  }
+
+  private async getPreferencesFromDbLegacy(command: GetPreferencesCommand): Promise<PreferenceSet> {
     const baseQuery = {
       _environmentId: command.environmentId,
       _organizationId: command.organizationId,
