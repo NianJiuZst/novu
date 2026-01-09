@@ -51,7 +51,19 @@ export class PromoteChangeToEnvironment {
       userId: command.userId,
     });
 
-    switch (command.type as ChangeEntityTypeEnum) {
+    type PromoteableChangeEntityType =
+      | ChangeEntityTypeEnum.NOTIFICATION_TEMPLATE
+      | ChangeEntityTypeEnum.MESSAGE_TEMPLATE
+      | ChangeEntityTypeEnum.NOTIFICATION_GROUP
+      | ChangeEntityTypeEnum.FEED
+      | ChangeEntityTypeEnum.LAYOUT
+      | ChangeEntityTypeEnum.DEFAULT_LAYOUT
+      | ChangeEntityTypeEnum.TRANSLATION
+      | ChangeEntityTypeEnum.TRANSLATION_GROUP;
+
+    const changeType = (command.type as ChangeEntityTypeEnum) as PromoteableChangeEntityType;
+
+    switch (changeType) {
       case ChangeEntityTypeEnum.NOTIFICATION_TEMPLATE:
         await this.promoteNotificationTemplateChange.execute(typeCommand);
         break;
@@ -75,7 +87,7 @@ export class PromoteChangeToEnvironment {
         await this.promoteTranslationGroupChange.execute(typeCommand);
         break;
       default:
-        const _exhaustiveCheck: never = command.type;
+        const _exhaustiveCheck: never = changeType;
         this.logger.error(
           `Change with type ${_exhaustiveCheck} could not be enabled from environment ${command.environmentId}`
         );
