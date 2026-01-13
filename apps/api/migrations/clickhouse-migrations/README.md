@@ -9,6 +9,18 @@ Migrations are managed using the `clickhouse-migrations` npm package, which prov
 - Idempotent execution - each migration runs only once per database
 - Simple CLI interface with environment variable support
 
+### Automatic Migrations in Local/Test Environments
+
+**Migrations run automatically** when the API or Worker application starts in `local` or `test` environments. The `ClickHouseService` executes all pending migrations during initialization, ensuring your local database schema is always up to date.
+
+This means:
+- ✅ **No manual migration step required** when pulling new code with migrations
+- ✅ **Developers automatically get schema updates** when starting the app
+- ✅ **Both API and Worker apps** run migrations on startup (first one to start applies them)
+- ✅ **Safe concurrent execution** - migrations are idempotent and tracked in the database
+
+You only need to run migrations manually if you want to apply them before starting the application.
+
 ## Creating New Migrations
 
 ### Naming Convention
@@ -57,14 +69,26 @@ The number prefix determines execution order. Migrations are applied in ascendin
 
 ## Running Migrations Locally
 
-### Prerequisites
+### Automatic Execution (Recommended)
+
+Migrations run automatically when you start the API or Worker in local/test mode:
+```bash
+# Migrations will run automatically during startup
+pnpm run start:dev
+```
+
+### Manual Execution (Optional)
+
+If you want to run migrations before starting the application, you can execute them manually:
+
+#### Prerequisites
 Ensure ClickHouse is running locally (via Docker Compose):
 ```bash
 cd /path/to/novu
 docker-compose -f docker/local/docker-compose.yml up -d clickhouse
 ```
 
-### Run Migrations
+#### Run Migrations Manually
 ```bash
 cd apps/api
 pnpm run clickhouse:migrate
@@ -133,8 +157,9 @@ To reset your local ClickHouse and re-run all migrations:
 # Drop the database
 docker exec -it clickhouse_main clickhouse-client --query "DROP DATABASE IF EXISTS \`novu-local\`"
 
-# Recreate and run migrations
-pnpm run clickhouse:migrate
+# Migrations will run automatically when you restart the app
+# Or run them manually:
+cd apps/api && pnpm run clickhouse:migrate
 ```
 
 ### Check Migration Status

@@ -1,0 +1,33 @@
+{
+  "name": "@novu/analytics-dal",
+  "version": "0.0.1",
+  "description": "Analytics data access layer for ClickHouse",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "cross-env node_modules/.bin/tsc -p tsconfig.build.json",
+    "build:watch": "cross-env node_modules/.bin/tsc -p tsconfig.build.json -w --preserveWatchOutput",
+    "check": "biome check .",
+    "check:fix": "biome check --write ."
+  },
+  "peerDependencies": {
+    "@nestjs/common": "10.4.18"
+  },
+  "dependencies": {
+    "@clickhouse/client": "^1.11.2",
+    "@novu/application-generic": "workspace:*",
+    "@novu/shared": "workspace:*",
+    "clickhouse-schema": "^2.0.1",
+    "date-fns": "^2.29.2",
+    "nanoid": "^3.1.20",
+    "nestjs-pino": "4.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.15.0",
+    "cross-env": "^7.0.3",
+    "rimraf": "^3.0.2",
+    "typescript": "5.6.2"
+  }
+}
