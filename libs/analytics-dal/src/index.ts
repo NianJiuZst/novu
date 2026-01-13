@@ -1,3 +1,4 @@
+export * from './schema';
 export * from './services/clickhouse.service';
 export * from './services/log.repository';
 export * from './services/shared';

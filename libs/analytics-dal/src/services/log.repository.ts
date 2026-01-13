@@ -1,8 +1,8 @@
 import { FeatureFlagsService } from '@novu/application-generic';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
-import { ClickhouseSchema, InferClickhouseSchemaType } from 'clickhouse-schema';
 import { addDays } from 'date-fns';
 import { PinoLogger } from 'nestjs-pino';
+import { ClickHouseSchema, InferSchemaType } from '../schema';
 import { generateObjectId } from '../utils/generate-id';
 import { Prettify } from '../utils/prettify.type';
 import { ClickHouseService, InsertOptions } from './clickhouse.service';
@@ -80,11 +80,9 @@ export interface UnsafeWhere<T> {
 
 export type Where<T> = EnforcedWhere<T> | UnsafeWhere<T>;
 
-// biome-ignore lint/suspicious/noExplicitAny: ChSchemaDefinition is not exported from clickhouse-schema package
-export type SchemaKeys<T extends ClickhouseSchema<any>> = keyof InferClickhouseSchemaType<T>;
+export type SchemaKeys<T extends ClickHouseSchema<any>> = keyof InferSchemaType<T>;
 
-// biome-ignore lint/suspicious/noExplicitAny: ChSchemaDefinition is not exported from clickhouse-schema package
-export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnhancedType> {
+export abstract class LogRepository<TSchema extends ClickHouseSchema<any>, TEnhancedType> {
   readonly table: string;
   readonly identifierPrefix: string;
 
@@ -97,15 +95,18 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
   ) {}
 
   private getColumnType(column: string): string {
-    return this.schema.schema[column]?.type?.toString() || 'String';
+    if (!this.schema.hasColumn(column)) return 'String';
+
+    return this.schema.getColumnType(column);
   }
 
   private isArrayColumn(column: string): boolean {
-    const typeString = this.getColumnType(column);
-    return typeString.startsWith('Array(');
+    if (!this.schema.hasColumn(column)) return false;
+
+    return this.schema.isArrayColumn(column);
   }
 
-  private validateColumnName(columnName: SchemaKeys<TSchema>): void {
+  private validateColumnName(columnName: string): void {
     if (!columnName || typeof columnName !== 'string') {
       throw new Error('Invalid column name: must be a non-empty string');
     }
@@ -114,7 +115,7 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
       throw new Error(`Invalid column name format: ${columnName}`);
     }
 
-    if (!this.schema.schema[columnName]) {
+    if (!this.schema.hasColumn(columnName)) {
       throw new Error(`Column '${columnName}' does not exist in schema`);
     }
   }
@@ -163,8 +164,8 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
     clause: string;
     params: Record<string, unknown>;
   } {
-    const rawWhere = where as unknown as Where<InferClickhouseSchemaType<TSchema>>;
-    let allConditions: WhereCondition<InferClickhouseSchemaType<TSchema>>[] = [];
+    const rawWhere = where as unknown as Where<InferSchemaType<TSchema>>;
+    let allConditions: WhereCondition<InferSchemaType<TSchema>>[] = [];
 
     if ('__unsafe' in rawWhere) {
       this.logger.warn('Using unsafe WHERE clause without tenant enforcement', {
@@ -180,26 +181,26 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
     return this.buildWhereClauseFromConditions(allConditions);
   }
 
-  private buildEnforcedConditions(enforced: EnforcedContext): WhereCondition<InferClickhouseSchemaType<TSchema>>[] {
+  private buildEnforcedConditions(enforced: EnforcedContext): WhereCondition<InferSchemaType<TSchema>>[] {
     const condition = {
-      field: 'environment_id' as keyof InferClickhouseSchemaType<TSchema>,
+      field: 'environment_id' as keyof InferSchemaType<TSchema>,
       operator: '=' as const,
-      value: enforced.environmentId,
+      value: enforced.environmentId as InferSchemaType<TSchema>[keyof InferSchemaType<TSchema>],
     };
 
-    const conditions: WhereCondition<InferClickhouseSchemaType<TSchema>>[] = [condition];
+    const conditions: WhereCondition<InferSchemaType<TSchema>>[] = [condition];
 
     return conditions;
   }
 
-  private buildWhereClauseFromConditions(conditions: WhereCondition<InferClickhouseSchemaType<TSchema>>[]): {
+  private buildWhereClauseFromConditions(conditions: WhereCondition<InferSchemaType<TSchema>>[]): {
     clause: string;
     params: Record<string, unknown>;
   } {
     const params: Record<string, unknown> = {};
     let paramIndex = 0;
 
-    const buildSingleCondition = (condition: WhereCondition<InferClickhouseSchemaType<TSchema>>): string => {
+    const buildSingleCondition = (condition: WhereCondition<InferSchemaType<TSchema>>): string => {
       if ('$or' in condition) {
         if (!Array.isArray(condition.$or)) {
           throw new Error('$or condition must contain an array of conditions');
@@ -215,7 +216,7 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
 
       const { field, operator } = condition;
       const value = 'value' in condition ? condition.value : undefined;
-      this.validateColumnName(field as SchemaKeys<TSchema>);
+      this.validateColumnName(String(field));
       this.validateOperator(operator);
 
       const nullOperators: NullOperators[] = ['IS NULL', 'IS NOT NULL'];
@@ -289,7 +290,7 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
     );
   }
 
-  async find<T extends readonly (keyof InferClickhouseSchemaType<TSchema>)[]>(options: {
+  async find<T extends readonly (keyof TEnhancedType)[]>(options: {
     where: Where<TEnhancedType>;
     limit?: number;
     offset?: number;
@@ -315,7 +316,7 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
     rows: number;
   }>;
 
-  async find<T extends readonly (keyof InferClickhouseSchemaType<TSchema>)[] | '*'>(options: {
+  async find<T extends readonly (keyof TEnhancedType)[] | '*'>(options: {
     where: Where<TEnhancedType>;
     limit?: number;
     offset?: number;
@@ -381,7 +382,7 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
     };
   }
 
-  async findOne<T extends readonly (keyof InferClickhouseSchemaType<TSchema>)[]>(options: {
+  async findOne<T extends readonly (keyof TEnhancedType)[]>(options: {
     where: Where<TEnhancedType>;
     limit?: number;
     offset?: number;
@@ -407,7 +408,7 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
     rows: number;
   }>;
 
-  async findOne<T extends readonly (keyof InferClickhouseSchemaType<TSchema>)[] | '*'>(options: {
+  async findOne<T extends readonly (keyof TEnhancedType)[] | '*'>(options: {
     where: Where<TEnhancedType>;
     limit?: number;
     offset?: number;
@@ -435,7 +436,7 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
     const result = await this.find({
       ...options,
       limit: 1,
-      select: options.select as T extends readonly (keyof InferClickhouseSchemaType<TSchema>)[] ? T : never,
+      select: options.select as T extends readonly (keyof TEnhancedType)[] ? T : never,
     } as Parameters<typeof this.find>[0]);
 
     return { data: result.data[0], rows: result.rows };

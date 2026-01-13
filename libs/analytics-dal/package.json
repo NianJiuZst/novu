@@ -19,10 +19,10 @@
     "@clickhouse/client": "^1.11.2",
     "@novu/application-generic": "workspace:*",
     "@novu/shared": "workspace:*",
-    "clickhouse-schema": "^2.0.1",
     "date-fns": "^2.29.2",
     "nanoid": "^3.1.20",
-    "nestjs-pino": "4.2.0"
+    "nestjs-pino": "4.2.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.15.0",
