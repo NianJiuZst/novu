@@ -1,7 +1,10 @@
 import type { InboxService } from '../api';
 import { NovuEventEmitter } from '../event-emitter';
 import { isBrowser } from '../utils/is-browser';
+import { renderNovuBrandingInConsole } from '../utils/novu-branding';
 import { InitializeSessionArgs } from './types';
+
+let wasSessionInitialized = false;
 
 export class Session {
   #emitter: NovuEventEmitter;
@@ -121,6 +124,11 @@ export class Session {
       if (!response?.applicationIdentifier?.startsWith('pk_keyless_')) {
         this.handleApplicationIdentifier('delete');
       }
+
+      if (!wasSessionInitialized && !response.removeNovuBranding) {
+        renderNovuBrandingInConsole();
+      }
+      wasSessionInitialized = true;
 
       this.#emitter.emit('session.initialize.resolved', { args: this.#options, data: response });
     } catch (error) {

@@ -60,10 +60,12 @@ import { VercelIntegrationPage } from './pages/vercel-integration-page';
 import { AuthRoute, CatchAllRoute, DashboardRoute, RootRoute } from './routes';
 import { OnboardingParentRoute } from './routes/onboarding';
 import { ProtectedRoute } from './routes/protected-route';
+import { renderNovuBrandingInConsole } from './utils/novu-branding';
 import { ROUTES } from './utils/routes';
 import { initializeSentry } from './utils/sentry';
 import { overrideZodErrorMap } from './utils/validation';
 
+renderNovuBrandingInConsole();
 initializeSentry();
 overrideZodErrorMap();
 
