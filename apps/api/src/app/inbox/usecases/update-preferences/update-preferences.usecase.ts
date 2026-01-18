@@ -36,7 +36,7 @@ import {
   WorkflowPreferences,
   WorkflowPreferencesPartial,
 } from '@novu/shared';
-import { FilterQuery } from 'mongoose';
+import { QueryFilter } from 'mongoose';
 import {
   GetSubscriberGlobalPreference,
   GetSubscriberGlobalPreferenceCommand,
@@ -197,7 +197,7 @@ export class UpdatePreferences {
     ) {
       const contextQuery = await this.buildContextExactMatchQuery(command.contextKeys, command.organizationId);
 
-      const query: FilterQuery<PreferencesDBModel> & EnforceEnvOrOrgIds = {
+      const query: QueryFilter<PreferencesDBModel> & EnforceEnvOrOrgIds = {
         _environmentId: command.environmentId,
         _subscriberId: subscriber._id,
         _templateId: workflow._id,

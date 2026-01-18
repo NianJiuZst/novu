@@ -1,6 +1,6 @@
 import { ChannelTypeEnum, SeverityLevelEnum, StepTypeEnum } from '@novu/shared';
 import { subMonths, subWeeks } from 'date-fns';
-import { FilterQuery, QueryWithHelpers, Types } from 'mongoose';
+import { QueryFilter, QueryWithHelpers, Types } from 'mongoose';
 
 import type { EnforceEnvOrOrgIds } from '../../types';
 import { BaseRepository } from '../base-repository';
@@ -42,7 +42,7 @@ export class NotificationRepository extends BaseRepository<
     skip = 0,
     limit = 10
   ): Promise<NotificationFeedItemEntity[]> {
-    const requestQuery: FilterQuery<NotificationDBModel> = {
+    const requestQuery: QueryFilter<NotificationDBModel> = {
       _environmentId: environmentId,
     };
 
@@ -60,8 +60,8 @@ export class NotificationRepository extends BaseRepository<
       requestQuery['topics.preferenceEvaluation.subscriptionIdentifier'] = query.subscriptionId;
     }
 
-    const severityCondition: Array<FilterQuery<NotificationDBModel>> = [];
-    const orConditions: Array<FilterQuery<NotificationDBModel>> = [];
+    const severityCondition: Array<QueryFilter<NotificationDBModel>> = [];
+    const orConditions: Array<QueryFilter<NotificationDBModel>> = [];
 
     if (query.severity && query.severity?.length > 0) {
       if (query.severity.includes(SeverityLevelEnum.NONE)) {
@@ -128,7 +128,7 @@ export class NotificationRepository extends BaseRepository<
     _environmentId: string,
     _organizationId: string
   ): Promise<NotificationFeedItemEntity> {
-    const requestQuery: FilterQuery<NotificationDBModel> = {
+    const requestQuery: QueryFilter<NotificationDBModel> = {
       _id: notificationId,
       _environmentId,
       _organizationId,
@@ -144,7 +144,7 @@ export class NotificationRepository extends BaseRepository<
     _environmentId: string,
     _organizationId: string
   ): Promise<NotificationFeedItemEntity> {
-    const requestQuery: FilterQuery<NotificationDBModel> = {
+    const requestQuery: QueryFilter<NotificationDBModel> = {
       _id: notificationId,
       _environmentId,
       _organizationId,
@@ -160,7 +160,7 @@ export class NotificationRepository extends BaseRepository<
     _environmentId: string,
     _organizationId: string
   ): Promise<NotificationFeedItemEntity> {
-    const requestQuery: FilterQuery<NotificationDBModel> = {
+    const requestQuery: QueryFilter<NotificationDBModel> = {
       _id: notificationId,
       _environmentId,
       _organizationId,

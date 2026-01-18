@@ -6,7 +6,7 @@ import {
   WorkflowPreferences,
   WorkflowPreferencesPartial,
 } from '@novu/shared';
-import { FilterQuery } from 'mongoose';
+import { QueryFilter } from 'mongoose';
 import { Instrument } from '../../instrumentation';
 import { FeatureFlagsService } from '../../services/feature-flags/feature-flags.service';
 import { deepMerge } from '../../utils';
@@ -239,7 +239,7 @@ export class UpsertPreferences {
       command.organizationId
     );
 
-    const query: FilterQuery<PreferencesDBModel> & EnforceEnvOrOrgIds = {
+    const query: QueryFilter<PreferencesDBModel> & EnforceEnvOrOrgIds = {
       _environmentId: command.environmentId,
       _organizationId: command.organizationId,
       _subscriberId: command._subscriberId,

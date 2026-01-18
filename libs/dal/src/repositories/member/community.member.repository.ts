@@ -1,5 +1,5 @@
 import { MemberRoleEnum, MemberStatusEnum } from '@novu/shared';
-import { FilterQuery } from 'mongoose';
+import { QueryFilter } from 'mongoose';
 import type { EnforceOrgId } from '../../types/enforce';
 import { BaseRepository } from '../base-repository';
 import { MemberDBModel, MemberEntity } from './member.entity';
@@ -7,7 +7,7 @@ import { IAddMemberData } from './member.repository';
 import { Member } from './member.schema';
 import { IMemberRepository } from './member-repository.interface';
 
-type MemberQuery = FilterQuery<MemberDBModel> & EnforceOrgId;
+type MemberQuery = QueryFilter<MemberDBModel> & EnforceOrgId;
 
 export class CommunityMemberRepository
   extends BaseRepository<MemberDBModel, MemberEntity, EnforceOrgId>

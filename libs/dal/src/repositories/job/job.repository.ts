@@ -77,8 +77,8 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
   public async setError(organizationId: string, jobId: string, error: any): Promise<void> {
     const result = await this._model.updateOne(
       {
-        _organizationId: this.convertStringToObjectId(organizationId),
-        _id: this.convertStringToObjectId(jobId),
+        _organizationId: organizationId,
+        _id: jobId,
       },
       {
         $set: {
@@ -116,7 +116,7 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
       ],
       _environmentId: environmentId,
       _subscriberId: subscriberId,
-    });
+    } as any);
     const transactionIds = digests.map((job) => job.transactionId);
 
     const result = await this.find({
@@ -132,7 +132,7 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
       transactionId: {
         $nin: transactionIds,
       },
-    });
+    } as any);
 
     const transactionIdsTriggers = result.map((job) => job.transactionId);
 
@@ -154,7 +154,7 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
         transactionId: {
           $in: transactionIdsTriggers,
         },
-      },
+      } as any,
       {
         $set: {
           status: JobStatusEnum.COMPLETED,
@@ -242,7 +242,7 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
       transactionId: { $in: otherDigestJobsWithSameDigestKeyValue.map((job1) => job1.transactionId) },
     });
   }
-  private buildLookBackDigestQuery(metadata: IDigestRegularMetadata | undefined, job: JobEntity) {
+  private buildLookBackDigestQuery(metadata: IDigestRegularMetadata | undefined, job: JobEntity): any {
     return {
       createdAt: {
         $gte: this.getBackoffDate(metadata),

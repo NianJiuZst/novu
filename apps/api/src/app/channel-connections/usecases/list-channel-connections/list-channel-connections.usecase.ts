@@ -7,7 +7,7 @@ import {
   EnforceEnvOrOrgIds,
 } from '@novu/dal';
 import { DirectionEnum } from '@novu/shared';
-import { FilterQuery } from 'mongoose';
+import { QueryFilter } from 'mongoose';
 import { ListChannelConnectionsCommand } from './list-channel-connections.command';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class ListChannelConnections {
 
   @InstrumentUsecase()
   async execute(command: ListChannelConnectionsCommand) {
-    const filter: FilterQuery<ChannelConnectionDBModel> & EnforceEnvOrOrgIds = {
+    const filter: QueryFilter<ChannelConnectionDBModel> & EnforceEnvOrOrgIds = {
       _environmentId: command.user.environmentId,
       _organizationId: command.user.organizationId,
     };

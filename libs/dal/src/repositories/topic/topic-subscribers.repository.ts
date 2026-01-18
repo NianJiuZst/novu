@@ -1,6 +1,6 @@
 import { DirectionEnum, ExternalSubscriberId } from '@novu/shared';
 
-import { FilterQuery, mongo } from 'mongoose';
+import { QueryFilter, mongo } from 'mongoose';
 import { DalException, TopicEntity } from '../..';
 import type { EnforceEnvOrOrgIds } from '../../types/enforce';
 import { BaseRepository } from '../base-repository';
@@ -265,7 +265,7 @@ export class TopicSubscribersRepository extends BaseRepository<
     totalCountCapped: boolean;
   }> {
     // Build query for topic subscriptions
-    const query: FilterQuery<TopicSubscribersDBModel> & EnforceEnvOrOrgIds = {
+    const query: QueryFilter<TopicSubscribersDBModel> & EnforceEnvOrOrgIds = {
       _environmentId: environmentId,
       _organizationId: organizationId,
     };

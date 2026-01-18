@@ -3,7 +3,7 @@ import { InstrumentUsecase } from '@novu/application-generic';
 import type { EnforceEnvOrOrgIds } from '@novu/dal';
 import { ChannelEndpointDBModel, ChannelEndpointEntity, ChannelEndpointRepository } from '@novu/dal';
 import { DirectionEnum } from '@novu/shared';
-import { FilterQuery } from 'mongoose';
+import { QueryFilter } from 'mongoose';
 import { ListChannelEndpointsCommand } from './list-channel-endpoints.command';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class ListChannelEndpoints {
 
   @InstrumentUsecase()
   async execute(command: ListChannelEndpointsCommand) {
-    const filter: FilterQuery<ChannelEndpointDBModel> & EnforceEnvOrOrgIds = {
+    const filter: QueryFilter<ChannelEndpointDBModel> & EnforceEnvOrOrgIds = {
       _environmentId: command.user.environmentId,
       _organizationId: command.user.organizationId,
     };

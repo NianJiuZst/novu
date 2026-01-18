@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ContextEntity, ContextRepository, EnforceEnvOrOrgIds } from '@novu/dal';
 import { DirectionEnum } from '@novu/shared';
-import { FilterQuery } from 'mongoose';
+import { QueryFilter } from 'mongoose';
 import { ListContextsCommand } from './list-contexts.command';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class ListContexts {
   constructor(private contextRepository: ContextRepository) {}
 
   async execute(command: ListContextsCommand) {
-    const filter: FilterQuery<ContextEntity> & EnforceEnvOrOrgIds = {
+    const filter: QueryFilter<ContextEntity> & EnforceEnvOrOrgIds = {
       _environmentId: command.user.environmentId,
       _organizationId: command.user.organizationId,
     };

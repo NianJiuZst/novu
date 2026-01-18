@@ -6,7 +6,7 @@ import {
   MessagesStatusEnum,
   SeverityLevelEnum,
 } from '@novu/shared';
-import { FilterQuery, ProjectionType, Types } from 'mongoose';
+import { QueryFilter, ProjectionType, Types } from 'mongoose';
 
 import { DalException } from '../../shared';
 import { EnforceEnvId } from '../../types/enforce';
@@ -15,7 +15,7 @@ import { FeedRepository } from '../feed';
 import { MessageDBModel, MessageEntity } from './message.entity';
 import { Message } from './message.schema';
 
-type MessageQuery = FilterQuery<MessageDBModel>;
+type MessageQuery = QueryFilter<MessageDBModel>;
 
 const MAX_PAYLOAD_QUERY_DEPTH = 3;
 
@@ -63,7 +63,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
   }
 
   async findOne(
-    query: FilterQuery<MessageDBModel> & EnforceEnvId,
+    query: QueryFilter<MessageDBModel> & EnforceEnvId,
     select?: ProjectionType<MessageEntity>,
     options: {
       readPreference?: 'secondaryPreferred' | 'primary';
@@ -71,13 +71,13 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       session?: any;
     } = {}
   ): Promise<MessageEntity | null> {
-    const transformedQuery = this.transformContextKeysQuery(query) as FilterQuery<MessageDBModel> & EnforceEnvId;
+    const transformedQuery = this.transformContextKeysQuery(query) as QueryFilter<MessageDBModel> & EnforceEnvId;
 
     return super.findOne(transformedQuery, select, options);
   }
 
   async findOneForInbox(
-    query: FilterQuery<MessageDBModel> & EnforceEnvId,
+    query: QueryFilter<MessageDBModel> & EnforceEnvId,
     select?: ProjectionType<MessageEntity>,
     options: {
       readPreference?: 'secondaryPreferred' | 'primary';
@@ -85,7 +85,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       session?: any;
     } = {}
   ): Promise<MessageEntity | null> {
-    const transformedQuery = this.transformContextKeysQuery(query) as FilterQuery<MessageDBModel> & EnforceEnvId;
+    const transformedQuery = this.transformContextKeysQuery(query) as QueryFilter<MessageDBModel> & EnforceEnvId;
 
     return super.findOne(transformedQuery, select, {
       ...options,
@@ -119,8 +119,8 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     createdAt?: {
       $gte: Date;
     }
-  ): Promise<MessageQuery & EnforceEnvId> {
-    let requestQuery: MessageQuery & EnforceEnvId = {
+  ): Promise<any> {
+    let requestQuery: any = {
       _environmentId: environmentId,
       _subscriberId: subscriberId,
       channel,
@@ -637,11 +637,9 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
         _environmentId: environmentId,
         _subscriberId: subscriberId,
         _id: {
-          $in: messageIds.map((id) => {
-            return new Types.ObjectId(id);
-          }),
+          $in: messageIds,
         },
-      },
+      } as any,
       {
         $set: updatePayload,
       }
@@ -650,8 +648,8 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     return this.find({
       _environmentId: environmentId,
       _subscriberId: subscriberId,
-      _id: { $in: messageIds.map((id) => new Types.ObjectId(id)) },
-    });
+      _id: { $in: messageIds },
+    } as any);
   }
 
   /**
@@ -663,7 +661,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     messageIds: string[],
     mark: { seen?: boolean; read?: boolean }
   ) {
-    const requestQuery: FilterQuery<MessageEntity> = {};
+    const requestQuery: any = {};
 
     if (mark.seen != null) {
       requestQuery.seen = mark.seen;
@@ -680,11 +678,9 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
         _environmentId: environmentId,
         _subscriberId: subscriberId,
         _id: {
-          $in: messageIds.map((id) => {
-            return new Types.ObjectId(id);
-          }),
+          $in: messageIds,
         },
-      },
+      } as any,
       {
         $set: requestQuery,
       }
@@ -710,14 +706,12 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     snoozedUntil?: Date | null;
     contextKeys?: string[];
   }): Promise<MessageEntity[]> {
-    const query: MessageQuery & EnforceEnvId = {
+    const query: any = {
       _environmentId: environmentId,
       _subscriberId: subscriberId,
       ...(contextKeys && contextKeys?.length > 0 && { contextKeys: { $in: contextKeys } }),
       _id: {
-        $in: ids.map((id) => {
-          return new Types.ObjectId(id);
-        }),
+        $in: ids,
       },
     };
 
@@ -816,7 +810,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     const isUpdatingArchived = archived !== undefined;
     const isUpdatingSnoozed = snoozedUntil !== undefined;
 
-    let updatePayload: FilterQuery<MessageEntity> = {};
+    let updatePayload: QueryFilter<MessageEntity> = {};
 
     if (isUpdatingArchived) {
       updatePayload = {
@@ -930,7 +924,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
 
     const isUpdatingPrimaryCta = actionType === ButtonTypeEnum.PRIMARY;
     const isUpdatingSecondaryCta = actionType === ButtonTypeEnum.SECONDARY;
-    const updatePayload: FilterQuery<MessageEntity> = !message.read
+    const updatePayload: QueryFilter<MessageEntity> = !message.read
       ? {
           seen: true,
           lastSeenDate: new Date(),
@@ -1036,7 +1030,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       sort?: { [key: string]: number };
     }
   ) {
-    const filterQuery: FilterQuery<MessageEntity> = { ...query };
+    const filterQuery: any = { ...query };
     if (query.transactionId) {
       filterQuery.transactionId = { $in: query.transactionId };
     }
@@ -1073,13 +1067,11 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     subscriberId: string;
     ids: string[];
   }): Promise<MessageEntity[]> {
-    const query: MessageQuery & EnforceEnvId = {
+    const query: any = {
       _environmentId: environmentId,
       _subscriberId: subscriberId,
       _id: {
-        $in: ids.map((id) => {
-          return new Types.ObjectId(id);
-        }),
+        $in: ids,
       },
     };
 
@@ -1110,7 +1102,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
   }): Promise<MessageEntity[]> {
     const flatData = filters.data ? getFlatObject({ data: filters.data }) : {};
 
-    const query: MessageQuery & EnforceEnvId = {
+    const query: any = {
       ...flatData,
       _environmentId: environmentId,
       _subscriberId: subscriberId,
@@ -1144,7 +1136,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     return messagesToDelete;
   }
 
-  private transformContextKeysQuery(query: FilterQuery<MessageDBModel>): FilterQuery<MessageDBModel> {
+  private transformContextKeysQuery(query: QueryFilter<MessageDBModel>): QueryFilter<MessageDBModel> {
     if (!('contextKeys' in query)) {
       return query;
     }

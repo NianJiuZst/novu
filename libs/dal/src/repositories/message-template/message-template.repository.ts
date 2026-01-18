@@ -1,4 +1,4 @@
-import { FilterQuery } from 'mongoose';
+import { QueryFilter } from 'mongoose';
 import { SoftDeleteModel } from 'mongoose-delete';
 import { DalException } from '../../shared';
 import type { EnforceEnvOrOrgIds } from '../../types/enforce';
@@ -6,7 +6,7 @@ import { BaseRepository } from '../base-repository';
 import { MessageTemplateDBModel, MessageTemplateEntity } from './message-template.entity';
 import { MessageTemplate } from './message-template.schema';
 
-type MessageTemplateQuery = FilterQuery<MessageTemplateDBModel>;
+type MessageTemplateQuery = QueryFilter<MessageTemplateDBModel>;
 export interface DeleteMsgByIdQuery {
   _id: string;
   _environmentId: string;

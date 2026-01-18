@@ -1,5 +1,5 @@
 import { ContextData, ContextId, ContextPayload, ContextType, createContextKey } from '@novu/shared';
-import { FilterQuery } from 'mongoose';
+import { QueryFilter } from 'mongoose';
 import type { EnforceEnvOrOrgIds } from '../../types';
 import { BaseRepository } from '../base-repository';
 import { ContextDBModel, ContextEntity } from './context.entity';
@@ -49,7 +49,7 @@ export class ContextRepository extends BaseRepository<ContextDBModel, ContextEnt
       return existingContext;
     }
 
-    const newContext: FilterQuery<ContextDBModel> & EnforceEnvOrOrgIds = {
+    const newContext: QueryFilter<ContextDBModel> & EnforceEnvOrOrgIds = {
       _environmentId: environmentId,
       _organizationId: organizationId,
       id,

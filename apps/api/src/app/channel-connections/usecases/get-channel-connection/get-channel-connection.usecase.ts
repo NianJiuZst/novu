@@ -6,7 +6,7 @@ import {
   ChannelConnectionRepository,
   EnforceEnvOrOrgIds,
 } from '@novu/dal';
-import { FilterQuery } from 'mongoose';
+import { QueryFilter } from 'mongoose';
 import { GetChannelConnectionCommand } from './get-channel-connection.command';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class GetChannelConnection {
 
   @InstrumentUsecase()
   async execute(command: GetChannelConnectionCommand): Promise<ChannelConnectionEntity> {
-    const query: FilterQuery<ChannelConnectionDBModel> & EnforceEnvOrOrgIds = {
+    const query: QueryFilter<ChannelConnectionDBModel> & EnforceEnvOrOrgIds = {
       _organizationId: command.organizationId,
       _environmentId: command.environmentId,
       identifier: command.identifier,

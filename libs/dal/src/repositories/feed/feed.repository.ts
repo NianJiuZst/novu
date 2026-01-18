@@ -1,4 +1,4 @@
-import { FilterQuery } from 'mongoose';
+import { QueryFilter } from 'mongoose';
 import { SoftDeleteModel } from 'mongoose-delete';
 import { DalException } from '../../shared';
 import type { EnforceEnvOrOrgIds } from '../../types/enforce';
@@ -15,7 +15,7 @@ export class FeedRepository extends BaseRepository<FeedDBModel, FeedEntity, Enfo
     this.feed = Feed;
   }
 
-  async delete(query: FilterQuery<FeedEntity>) {
+  async delete(query: any) {
     const feed = await this.findOne({ _id: query._id, _environmentId: query._environmentId });
     if (!feed || !feed?._id) throw new DalException(`Could not find feed with id ${query._id}`);
     const relatedMessages = await this.messageTemplateRepository.getMessageTemplatesByFeed(
@@ -27,7 +27,7 @@ export class FeedRepository extends BaseRepository<FeedDBModel, FeedEntity, Enfo
     return await this.feed.delete({ _id: feed._id, _environmentId: feed._environmentId });
   }
 
-  async findDeleted(query: FilterQuery<FeedEntity>): Promise<FeedEntity> {
+  async findDeleted(query: any): Promise<FeedEntity> {
     const res: FeedEntity = await this.feed.findDeleted(query);
 
     return this.mapEntity(res);

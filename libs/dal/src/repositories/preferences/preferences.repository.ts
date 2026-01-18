@@ -1,4 +1,4 @@
-import { FilterQuery } from 'mongoose';
+import { QueryFilter } from 'mongoose';
 import { SoftDeleteModel } from 'mongoose-delete';
 import { DalException } from '../../shared';
 import type { EnforceEnvOrOrgIds } from '../../types/enforce';
@@ -6,7 +6,7 @@ import { BaseRepository } from '../base-repository';
 import { PreferencesDBModel, PreferencesEntity } from './preferences.entity';
 import { Preferences } from './preferences.schema';
 
-type PreferencesQuery = FilterQuery<PreferencesDBModel> & EnforceEnvOrOrgIds;
+type PreferencesQuery = QueryFilter<PreferencesDBModel> & EnforceEnvOrOrgIds;
 
 export class PreferencesRepository extends BaseRepository<PreferencesDBModel, PreferencesEntity, EnforceEnvOrOrgIds> {
   private preferences: SoftDeleteModel;

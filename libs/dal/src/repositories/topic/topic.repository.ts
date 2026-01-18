@@ -1,5 +1,5 @@
 import { DirectionEnum } from '@novu/shared';
-import { FilterQuery } from 'mongoose';
+import { QueryFilter } from 'mongoose';
 
 import type { EnforceEnvOrOrgIds } from '../../types/enforce';
 import { SortOrder } from '../../types/sort-order';
@@ -57,10 +57,10 @@ export class TopicRepository extends BaseRepository<TopicDBModel, TopicEntity, E
   }
 
   async filterTopics(
-    query: FilterQuery<TopicDBModel>,
+    query: any,
     pagination: { limit: number; skip: number }
   ): Promise<TopicEntity & { subscribers: ExternalSubscriberId[] }[]> {
-    const parsedQuery = { ...query };
+    const parsedQuery: any = { ...query };
     if (query._id) {
       parsedQuery._id = this.convertStringToObjectId(query._id);
     }
@@ -210,7 +210,7 @@ export class TopicRepository extends BaseRepository<TopicDBModel, TopicEntity, E
     const afterCursor = after && topic ? { sortBy: topic[sortBy], paginateField: topic._id } : undefined;
     const beforeCursor = before && topic ? { sortBy: topic[sortBy], paginateField: topic._id } : undefined;
 
-    const query: FilterQuery<TopicDBModel> & EnforceEnvOrOrgIds = {
+    const query: QueryFilter<TopicDBModel> & EnforceEnvOrOrgIds = {
       _environmentId: environmentId,
       _organizationId: organizationId,
     };

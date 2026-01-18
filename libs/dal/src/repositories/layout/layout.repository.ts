@@ -1,5 +1,5 @@
 import { DirectionEnum, ResourceOriginEnum, ResourceTypeEnum } from '@novu/shared';
-import { ClientSession, FilterQuery, ProjectionType, QueryOptions } from 'mongoose';
+import { ClientSession, QueryFilter, ProjectionType, QueryOptions } from 'mongoose';
 import { SoftDeleteModel } from 'mongoose-delete';
 import { DalException } from '../../shared';
 import { EnforceEnvOrOrgIds } from '../../types/enforce';
@@ -8,7 +8,7 @@ import { LayoutDBModel, LayoutEntity } from './layout.entity';
 import { Layout } from './layout.schema';
 import { EnvironmentId, LayoutId, OrderDirectionEnum, OrganizationId } from './types';
 
-type LayoutQuery = FilterQuery<LayoutDBModel> & EnforceEnvOrOrgIds;
+type LayoutQuery = QueryFilter<LayoutDBModel> & EnforceEnvOrOrgIds;
 
 export class LayoutRepository extends BaseRepository<LayoutDBModel, LayoutEntity, EnforceEnvOrOrgIds> {
   private layout: SoftDeleteModel;
@@ -19,7 +19,7 @@ export class LayoutRepository extends BaseRepository<LayoutDBModel, LayoutEntity
   }
 
   async findOne(
-    query: FilterQuery<LayoutDBModel> & EnforceEnvOrOrgIds,
+    query: QueryFilter<LayoutDBModel> & EnforceEnvOrOrgIds,
     select?: ProjectionType<LayoutEntity>,
     options: {
       readPreference?: 'secondaryPreferred' | 'primary';
@@ -145,10 +145,10 @@ export class LayoutRepository extends BaseRepository<LayoutDBModel, LayoutEntity
   ): Promise<LayoutEntity[]> {
     const order = pagination.orderBy ?? OrderDirectionEnum.DESC;
     const sort = pagination.sortBy ? { [pagination.sortBy]: order } : { createdAt: OrderDirectionEnum.DESC };
-    const parsedQuery = { ...query };
+    const parsedQuery: any = { ...query };
 
-    parsedQuery._environmentId = this.convertStringToObjectId(parsedQuery._environmentId);
-    parsedQuery._organizationId = this.convertStringToObjectId(parsedQuery._organizationId);
+    parsedQuery._environmentId = this.convertStringToObjectId(parsedQuery._environmentId as string);
+    parsedQuery._organizationId = this.convertStringToObjectId(parsedQuery._organizationId as string);
 
     const data = await this.aggregate([
       {

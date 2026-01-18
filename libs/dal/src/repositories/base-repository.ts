@@ -2,7 +2,7 @@ import { DirectionEnum } from '@novu/shared';
 import { ClassConstructor, plainToInstance } from 'class-transformer';
 import {
   ClientSession,
-  FilterQuery,
+  QueryFilter,
   Model,
   mongo,
   ProjectionType,
@@ -13,6 +13,14 @@ import {
   UpdateQuery,
 } from 'mongoose';
 import { DalException } from '../shared';
+
+/**
+ * Re-export FilterQuery as an alias to QueryFilter for backward compatibility.
+ * Mongoose 9 renamed FilterQuery to QueryFilter.
+ * @see https://mongoosejs.com/docs/migrating_to_9.html#filterquery-renamed-to-queryfilter
+ * @deprecated Use QueryFilter instead
+ */
+export type FilterQuery<T> = QueryFilter<T>;
 
 export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   public _model: Model<T_DBModel>;
@@ -46,7 +54,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async count(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
+    query: QueryFilter<T_DBModel> & T_Enforcement,
     limit?: number,
     readPreference?: 'secondaryPreferred' | 'primary'
   ): Promise<number> {
@@ -57,7 +65,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   private async getCountWithLimit(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
+    query: QueryFilter<T_DBModel> & T_Enforcement,
     maxLimit: number = 50001
   ): Promise<{ count: number; hasMore: boolean }> {
     const result = await this.count(query, maxLimit, 'secondaryPreferred');
@@ -79,7 +87,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async findOne(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
+    query: QueryFilter<T_DBModel> & T_Enforcement,
     select?: ProjectionType<T_MappedEntity>,
     options: {
       readPreference?: 'secondaryPreferred' | 'primary';
@@ -111,7 +119,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async findOneAndUpdate(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
+    query: QueryFilter<T_DBModel> & T_Enforcement,
     update: UpdateQuery<T_DBModel>,
     options: QueryOptions<T_DBModel> & { session?: ClientSession | null } = {}
   ): Promise<T_MappedEntity | null> {
@@ -130,7 +138,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async delete(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
+    query: QueryFilter<T_DBModel> & T_Enforcement,
     options: { session?: ClientSession | null } = {}
   ): Promise<{
     /** Indicates whether this writes result was acknowledged. If not, then all other members of this result will be undefined. */
@@ -144,7 +152,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     return await this.MongooseModel.deleteMany(query, deleteOptions);
   }
 
-  async findOneAndDelete(query: FilterQuery<T_DBModel> & T_Enforcement): Promise<T_MappedEntity | null> {
+  async findOneAndDelete(query: QueryFilter<T_DBModel> & T_Enforcement): Promise<T_MappedEntity | null> {
     const data = await this.MongooseModel.findOneAndDelete(query).lean();
     if (!data) return null;
 
@@ -152,7 +160,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async find(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
+    query: QueryFilter<T_DBModel> & T_Enforcement,
     select: ProjectionType<T_MappedEntity> = '',
     options: {
       limit?: number;
@@ -182,7 +190,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async *findBatch(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
+    query: QueryFilter<T_DBModel> & T_Enforcement,
     select = '',
     options: { limit?: number; sort?: any; skip?: number } = {},
     batchSize = 500
@@ -207,14 +215,14 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     paginateField?: string;
     after: string;
     queryOrStatements?: object[];
-  }): Promise<FilterQuery<T_DBModel>[]> {
+  }): Promise<QueryFilter<T_DBModel>[]> {
     const afterItem = await this.MongooseModel.findOne({ _id: after });
     if (!afterItem) {
       throw new DalException('Invalid after id');
     }
 
-    let cursorOrStatements: FilterQuery<T_DBModel>[] = [];
-    let enhancedCursorOrStatements: FilterQuery<T_DBModel>[] = [];
+    let cursorOrStatements: QueryFilter<T_DBModel>[] = [];
+    let enhancedCursorOrStatements: QueryFilter<T_DBModel>[] = [];
     if (paginateField && afterItem[paginateField]) {
       const paginatedFieldValue = afterItem[paginateField];
       cursorOrStatements = [
@@ -255,7 +263,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     paginateField,
     enhanceQuery,
   }: {
-    query?: FilterQuery<T_DBModel> & T_Enforcement;
+    query?: QueryFilter<T_DBModel> & T_Enforcement;
     limit: number;
     offset: number;
     after?: string;
@@ -269,19 +277,19 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
 
     let findQueryBuilder = this.MongooseModel.find({
       ...query,
-    });
+    } as any);
     if (isAfterDefined) {
       const orStatements = await this.createCursorBasedOrStatement({
         isSortDesc,
         paginateField,
         after,
-        queryOrStatements: query?.$or,
+        queryOrStatements: (query as any)?.$or,
       });
 
       findQueryBuilder = this.MongooseModel.find({
         ...query,
         $or: orStatements,
-      });
+      } as any);
     }
 
     findQueryBuilder.sort(sort).limit(limit + 1);
@@ -307,7 +315,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async create(
-    data: FilterQuery<T_DBModel> & T_Enforcement,
+    data: QueryFilter<T_DBModel> & T_Enforcement,
     options: IOptions & { session?: ClientSession | null } = {}
   ): Promise<T_MappedEntity> {
     const { session, ...saveOptions } = options;
@@ -324,7 +332,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async insertMany(
-    data: FilterQuery<T_DBModel> & T_Enforcement[],
+    data: QueryFilter<T_DBModel> & T_Enforcement[],
     ordered = false
   ): Promise<{ acknowledged: boolean; insertedCount: number; insertedIds: Types.ObjectId[] }> {
     let result;
@@ -348,7 +356,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async update(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
+    query: QueryFilter<T_DBModel> & T_Enforcement,
     updateBody: UpdateQuery<T_DBModel>,
     options: Omit<mongo.UpdateOptions, 'session'> & {
       timestamps?: boolean;
@@ -372,7 +380,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async updateOne(
-    query: FilterQuery<T_DBModel> & T_Enforcement,
+    query: QueryFilter<T_DBModel> & T_Enforcement,
     updateBody: UpdateQuery<T_DBModel>
   ): Promise<{
     matched: number;
@@ -386,7 +394,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     };
   }
 
-  async upsertMany(data: (FilterQuery<T_DBModel> & T_Enforcement)[]) {
+  async upsertMany(data: (QueryFilter<T_DBModel> & T_Enforcement)[]) {
     const promises = data.map((entry) =>
       this.MongooseModel.findOneAndUpdate(entry, entry, { upsert: true, new: true })
     );
@@ -394,7 +402,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     return await Promise.all(promises);
   }
 
-  async upsert(query: FilterQuery<T_DBModel> & T_Enforcement, data: FilterQuery<T_DBModel> & T_Enforcement) {
+  async upsert(query: QueryFilter<T_DBModel> & T_Enforcement, data: QueryFilter<T_DBModel> & T_Enforcement) {
     return await this.MongooseModel.findOneAndUpdate(query, data, {
       upsert: true,
       new: true,
@@ -443,7 +451,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async findWithCursorBasedPagination({
-    query = {} as FilterQuery<T_DBModel> & T_Enforcement,
+    query = {} as QueryFilter<T_DBModel> & T_Enforcement,
     limit,
     before,
     after,
@@ -453,7 +461,7 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     enhanceQuery,
     includeCursor,
   }: {
-    query?: FilterQuery<T_DBModel> & T_Enforcement;
+    query?: QueryFilter<T_DBModel> & T_Enforcement;
     limit: number;
     before?: { sortBy: string; paginateField: any };
     after?: { sortBy: string; paginateField: any };
