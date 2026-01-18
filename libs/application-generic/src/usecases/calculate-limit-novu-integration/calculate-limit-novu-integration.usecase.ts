@@ -43,7 +43,7 @@ export class CalculateLimitNovuIntegration {
           $gte: startOfMonth(new Date()),
           $lte: endOfMonth(new Date()),
         },
-      },
+      } as any,
       limit
     );
 
