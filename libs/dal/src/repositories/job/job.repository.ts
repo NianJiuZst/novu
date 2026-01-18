@@ -7,7 +7,7 @@ import {
   StepTypeEnum,
 } from '@novu/shared';
 import { sub } from 'date-fns';
-import { ProjectionType } from 'mongoose';
+import { ProjectionType, QueryFilter } from 'mongoose';
 import { DalException } from '../../shared';
 import type { EnforceEnvOrOrgIds, IUpdateResult } from '../../types';
 import { BaseRepository } from '../base-repository';
@@ -102,6 +102,8 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
     digestKey?: string,
     digestValue?: string | number
   ) {
+    type JobQuery = QueryFilter<JobDBModel> & EnforceEnvOrOrgIds;
+
     /**
      * Remove digest jobs that have been completed and currently delayed jobs that have a digest pending.
      */
@@ -116,7 +118,7 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
       ],
       _environmentId: environmentId,
       _subscriberId: subscriberId,
-    } as any);
+    } as unknown as JobQuery);
     const transactionIds = digests.map((job) => job.transactionId);
 
     const result = await this.find({
@@ -132,7 +134,7 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
       transactionId: {
         $nin: transactionIds,
       },
-    } as any);
+    } as unknown as JobQuery);
 
     const transactionIdsTriggers = result.map((job) => job.transactionId);
 
@@ -154,7 +156,7 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
         transactionId: {
           $in: transactionIdsTriggers,
         },
-      } as any,
+      } as unknown as JobQuery,
       {
         $set: {
           status: JobStatusEnum.COMPLETED,
@@ -242,7 +244,10 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
       transactionId: { $in: otherDigestJobsWithSameDigestKeyValue.map((job1) => job1.transactionId) },
     });
   }
-  private buildLookBackDigestQuery(metadata: IDigestRegularMetadata | undefined, job: JobEntity): any {
+  private buildLookBackDigestQuery(
+    metadata: IDigestRegularMetadata | undefined,
+    job: JobEntity
+  ): QueryFilter<JobDBModel> & EnforceEnvOrOrgIds {
     return {
       createdAt: {
         $gte: this.getBackoffDate(metadata),
@@ -256,7 +261,7 @@ export class JobRepository extends BaseRepository<JobDBModel, JobEntity, Enforce
       _environmentId: job._environmentId,
       _subscriberId: job._subscriberId,
       'digest.digestValue': metadata?.digestValue,
-    };
+    } as unknown as QueryFilter<JobDBModel> & EnforceEnvOrOrgIds;
   }
 
   async updateAllChildJobStatus(job: JobEntity, status: JobStatusEnum, activeDigestId: string): Promise<JobEntity[]> {

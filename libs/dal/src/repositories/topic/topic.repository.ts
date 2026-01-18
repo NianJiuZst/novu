@@ -1,5 +1,5 @@
 import { DirectionEnum } from '@novu/shared';
-import { QueryFilter } from 'mongoose';
+import { QueryFilter, Types } from 'mongoose';
 
 import type { EnforceEnvOrOrgIds } from '../../types/enforce';
 import { SortOrder } from '../../types/sort-order';
@@ -7,6 +7,8 @@ import { BaseRepository } from '../base-repository';
 import { TopicDBModel, TopicEntity } from './topic.entity';
 import { Topic } from './topic.schema';
 import { EnvironmentId, ExternalSubscriberId, OrganizationId, TopicId, TopicKey, TopicName } from './types';
+
+type TopicQuery = QueryFilter<TopicDBModel> & EnforceEnvOrOrgIds;
 
 const TOPIC_SUBSCRIBERS_COLLECTION = 'topicsubscribers';
 
@@ -57,16 +59,18 @@ export class TopicRepository extends BaseRepository<TopicDBModel, TopicEntity, E
   }
 
   async filterTopics(
-    query: any,
+    query: TopicQuery,
     pagination: { limit: number; skip: number }
   ): Promise<TopicEntity & { subscribers: ExternalSubscriberId[] }[]> {
-    const parsedQuery: any = { ...query };
-    if (query._id) {
-      parsedQuery._id = this.convertStringToObjectId(query._id);
-    }
+    const parsedQuery: Record<string, unknown> = {
+      ...query,
+      _environmentId: this.convertStringToObjectId(query._environmentId as string),
+      _organizationId: this.convertStringToObjectId(query._organizationId as string),
+    };
 
-    parsedQuery._environmentId = this.convertStringToObjectId(query._environmentId);
-    parsedQuery._organizationId = this.convertStringToObjectId(query._organizationId);
+    if (query._id) {
+      parsedQuery._id = this.convertStringToObjectId(query._id as string);
+    }
 
     const data = await this.aggregate([
       {

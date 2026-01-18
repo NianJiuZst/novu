@@ -319,7 +319,10 @@ export class NotificationTemplateRepository extends BaseRepository<
     tags?: string[],
     status?: string[]
   ): Promise<{ totalCount: number; data: NotificationTemplateEntity[] }> {
-    const searchQuery: QueryFilter<NotificationTemplateDBModel> = {};
+    const searchQuery: Record<string, unknown> = {
+      _environmentId: environmentId,
+      _organizationId: organizationId,
+    };
 
     if (query) {
       searchQuery.$or = [
@@ -340,17 +343,9 @@ export class NotificationTemplateRepository extends BaseRepository<
       searchQuery.status = { $in: status };
     }
 
-    const totalItemsCount = await this.count({
-      _environmentId: environmentId,
-      _organizationId: organizationId,
-      ...searchQuery,
-    } as any);
+    const totalItemsCount = await this.count(searchQuery as NotificationTemplateQuery);
 
-    const mongoQuery = this.MongooseModel.find({
-      _environmentId: environmentId,
-      _organizationId: organizationId,
-      ...searchQuery,
-    })
+    const mongoQuery = this.MongooseModel.find(searchQuery)
       .sort({ [orderBy]: orderDirection === DirectionEnum.ASC ? 1 : -1 })
       .skip(skip)
       .limit(limit)

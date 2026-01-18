@@ -119,8 +119,8 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     createdAt?: {
       $gte: Date;
     }
-  ): Promise<any> {
-    let requestQuery: any = {
+  ): Promise<MessageQuery & EnforceEnvId> {
+    let requestQuery: Record<string, unknown> = {
       _environmentId: environmentId,
       _subscriberId: subscriberId,
       channel,
@@ -188,7 +188,8 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
 
     if (contextKeys !== undefined) {
       const contextQuery = this.buildContextExactMatchQuery(contextKeys);
-      requestQuery.$and = [...(requestQuery.$and ?? []), contextQuery];
+      const existingAnd = (requestQuery.$and as unknown[] | undefined) ?? [];
+      requestQuery.$and = [...existingAnd, contextQuery];
     }
 
     if (createdAt != null) {
@@ -205,7 +206,8 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     }
 
     if (orConditions.length > 0) {
-      requestQuery.$and = [...(requestQuery.$and ?? []), ...orConditions];
+      const existingAnd = (requestQuery.$and as unknown[] | undefined) ?? [];
+      requestQuery.$and = [...existingAnd, ...orConditions];
     }
 
     if (query.payload) {
@@ -222,7 +224,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
       };
     }
 
-    return requestQuery;
+    return requestQuery as MessageQuery & EnforceEnvId;
   }
 
   /**
@@ -632,24 +634,19 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
   }): Promise<MessageEntity[]> {
     const updatePayload = this.getReadSeenUpdatePayload(markAs);
 
-    await this.update(
-      {
-        _environmentId: environmentId,
-        _subscriberId: subscriberId,
-        _id: {
-          $in: messageIds,
-        },
-      } as any,
-      {
-        $set: updatePayload,
-      }
-    );
-
-    return this.find({
+    const query: MessageQuery & EnforceEnvId = {
       _environmentId: environmentId,
       _subscriberId: subscriberId,
-      _id: { $in: messageIds },
-    } as any);
+      _id: {
+        $in: messageIds,
+      },
+    };
+
+    await this.update(query as Parameters<typeof this.update>[0], {
+      $set: updatePayload,
+    });
+
+    return this.find(query as Parameters<typeof this.find>[0]);
   }
 
   /**
@@ -661,30 +658,29 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     messageIds: string[],
     mark: { seen?: boolean; read?: boolean }
   ) {
-    const requestQuery: any = {};
+    const updateFields: Record<string, boolean | Date> = {};
 
     if (mark.seen != null) {
-      requestQuery.seen = mark.seen;
-      requestQuery.lastSeenDate = new Date();
+      updateFields.seen = mark.seen;
+      updateFields.lastSeenDate = new Date();
     }
 
     if (mark.read != null) {
-      requestQuery.read = mark.read;
-      requestQuery.lastReadDate = new Date();
+      updateFields.read = mark.read;
+      updateFields.lastReadDate = new Date();
     }
 
-    await this.update(
-      {
-        _environmentId: environmentId,
-        _subscriberId: subscriberId,
-        _id: {
-          $in: messageIds,
-        },
-      } as any,
-      {
-        $set: requestQuery,
-      }
-    );
+    const query: MessageQuery & EnforceEnvId = {
+      _environmentId: environmentId,
+      _subscriberId: subscriberId,
+      _id: {
+        $in: messageIds,
+      },
+    };
+
+    await this.update(query as Parameters<typeof this.update>[0], {
+      $set: updateFields,
+    });
   }
 
   async updateMessagesStatusByIds({
@@ -706,7 +702,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     snoozedUntil?: Date | null;
     contextKeys?: string[];
   }): Promise<MessageEntity[]> {
-    const query: any = {
+    const query: MessageQuery & EnforceEnvId = {
       _environmentId: environmentId,
       _subscriberId: subscriberId,
       ...(contextKeys && contextKeys?.length > 0 && { contextKeys: { $in: contextKeys } }),

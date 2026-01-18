@@ -7,6 +7,8 @@ import { MessageTemplateRepository } from '../message-template';
 import { FeedDBModel, FeedEntity } from './feed.entity';
 import { Feed } from './feed.schema';
 
+type FeedQuery = QueryFilter<FeedDBModel> & EnforceEnvOrOrgIds;
+
 export class FeedRepository extends BaseRepository<FeedDBModel, FeedEntity, EnforceEnvOrOrgIds> {
   private feed: SoftDeleteModel;
   private messageTemplateRepository = new MessageTemplateRepository();
@@ -15,8 +17,11 @@ export class FeedRepository extends BaseRepository<FeedDBModel, FeedEntity, Enfo
     this.feed = Feed;
   }
 
-  async delete(query: any) {
-    const feed = await this.findOne({ _id: query._id, _environmentId: query._environmentId });
+  async delete(query: FeedQuery) {
+    const feed = await this.findOne({
+      _id: query._id,
+      _environmentId: query._environmentId as string,
+    });
     if (!feed || !feed?._id) throw new DalException(`Could not find feed with id ${query._id}`);
     const relatedMessages = await this.messageTemplateRepository.getMessageTemplatesByFeed(
       feed._environmentId,
@@ -27,7 +32,7 @@ export class FeedRepository extends BaseRepository<FeedDBModel, FeedEntity, Enfo
     return await this.feed.delete({ _id: feed._id, _environmentId: feed._environmentId });
   }
 
-  async findDeleted(query: any): Promise<FeedEntity> {
+  async findDeleted(query: FeedQuery): Promise<FeedEntity> {
     const res: FeedEntity = await this.feed.findDeleted(query);
 
     return this.mapEntity(res);

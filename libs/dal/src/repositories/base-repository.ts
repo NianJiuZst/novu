@@ -215,18 +215,18 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     paginateField?: string;
     after: string;
     queryOrStatements?: object[];
-  }): Promise<QueryFilter<T_DBModel>[]> {
+  }): Promise<Record<string, unknown>[]> {
     const afterItem = await this.MongooseModel.findOne({ _id: after });
     if (!afterItem) {
       throw new DalException('Invalid after id');
     }
 
-    let cursorOrStatements: QueryFilter<T_DBModel>[] = [];
-    let enhancedCursorOrStatements: QueryFilter<T_DBModel>[] = [];
+    let cursorOrStatements: Record<string, unknown>[] = [];
+    let enhancedCursorOrStatements: Record<string, unknown>[] = [];
     if (paginateField && afterItem[paginateField]) {
       const paginatedFieldValue = afterItem[paginateField];
       cursorOrStatements = [
-        { [paginateField]: isSortDesc ? { $lt: paginatedFieldValue } : { $gt: paginatedFieldValue } } as any,
+        { [paginateField]: isSortDesc ? { $lt: paginatedFieldValue } : { $gt: paginatedFieldValue } },
         { [paginateField]: { $eq: paginatedFieldValue }, _id: isSortDesc ? { $lt: after } : { $gt: after } },
       ];
       const firstStatement = (queryOrStatements ?? []).map((item) => ({
@@ -275,21 +275,20 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     const sortKeys = Object.keys(sort ?? {});
     const isSortDesc = sortKeys.length > 0 && sort[sortKeys[0]] === -1;
 
-    let findQueryBuilder = this.MongooseModel.find({
-      ...query,
-    } as any);
+    const queryObj = query as Record<string, unknown> | undefined;
+    let findQueryBuilder = this.MongooseModel.find(queryObj ?? {});
     if (isAfterDefined) {
       const orStatements = await this.createCursorBasedOrStatement({
         isSortDesc,
         paginateField,
         after,
-        queryOrStatements: (query as any)?.$or,
+        queryOrStatements: queryObj?.$or as object[] | undefined,
       });
 
       findQueryBuilder = this.MongooseModel.find({
-        ...query,
+        ...queryObj,
         $or: orStatements,
-      } as any);
+      });
     }
 
     findQueryBuilder.sort(sort).limit(limit + 1);

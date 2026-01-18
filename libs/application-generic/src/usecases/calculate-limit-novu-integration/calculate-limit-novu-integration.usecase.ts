@@ -43,7 +43,7 @@ export class CalculateLimitNovuIntegration {
           $gte: startOfMonth(new Date()),
           $lte: endOfMonth(new Date()),
         },
-      } as any,
+      } as unknown as Parameters<typeof this.messageRepository.count>[0],
       limit
     );
 
