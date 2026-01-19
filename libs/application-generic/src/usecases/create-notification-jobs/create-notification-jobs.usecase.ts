@@ -193,9 +193,15 @@ export class CreateNotificationJobs {
     return {};
   }
 
-  private buildStepForJob(step, command: CreateNotificationJobsCommand) {
+  private buildStepForJob(step: NotificationStepEntity, command: CreateNotificationJobsCommand) {
     return {
-      ...step,
+      _id: step._id,
+      uuid: step.uuid,
+      stepId: step.stepId,
+      _templateId: step._templateId,
+      filters: step.filters,
+      shouldStopOnFail: step.shouldStopOnFail,
+      controlVariables: step.controlVariables,
       ...(command.bridgeUrl ? { bridgeUrl: command.bridgeUrl } : {}),
     };
   }
@@ -217,16 +223,8 @@ export class CreateNotificationJobs {
       overrides: command.overrides,
       tenant: command.tenant,
       step: {
-        bridgeUrl: command.bridgeUrl,
-        template: {
-          _environmentId: command.environmentId,
-          _organizationId: command.organizationId,
-          _creatorId: command.userId,
-          _layoutId: null,
-          type: StepTypeEnum.TRIGGER,
-          content: '',
-        },
         _templateId: notification._templateId,
+        ...(command.bridgeUrl && { bridgeUrl: command.bridgeUrl }),
       },
       ...(command.bridgeUrl && { bridgeUrl: command.bridgeUrl }),
       type: StepTypeEnum.TRIGGER,

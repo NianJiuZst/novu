@@ -166,7 +166,7 @@ export class ExecuteBridgeJob {
 
     if (workflow?.origin === ResourceOriginEnum.NOVU_CLOUD) {
       return controls?.controls
-        ? dashboardSanitizeControlValues(this.logger, controls.controls, command.job?.step?.template?.type)
+        ? dashboardSanitizeControlValues(this.logger, controls.controls, command.job.type)
         : {};
     }
 
