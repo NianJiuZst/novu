@@ -50,8 +50,18 @@ export class InboundEmailParse {
       data: job.payload,
     });
 
+    const apiKey = environment?.apiKeys[0]?.key;
+    if (!apiKey) {
+      this.throwMiddleware(`Missing API key for environment ${environmentId}`);
+    }
+
+    const hmac = createHash(apiKey, subscriber.subscriberId);
+    if (!hmac) {
+      this.throwMiddleware(`Failed to create HMAC for subscriber ${subscriber.subscriberId}`);
+    }
+
     const userPayload: IUserWebhookPayload = {
-      hmac: createHash(environment?.apiKeys[0]?.key, subscriber.subscriberId),
+      hmac: hmac as string,
       transactionId,
       payload: job.payload,
       templateIdentifier: job.identifier,
@@ -86,7 +96,7 @@ export class InboundEmailParse {
     return { domain, transactionId, environmentId };
   }
 
-  private throwMiddleware(error: string) {
+  private throwMiddleware(error: string): never {
     Logger.error(error, LOG_CONTEXT);
 
     throw new BadRequestException(error);
