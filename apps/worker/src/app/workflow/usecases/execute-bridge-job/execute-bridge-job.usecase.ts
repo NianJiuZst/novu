@@ -42,6 +42,7 @@ import {
   ResourceTypeEnum,
 } from '@novu/shared';
 import { LRUCache } from 'lru-cache';
+import { getBridgeUrlFromJob, getStepIdFromJob, getStepIdentifierFromJob, isStatelessBridgeJob } from '../../../shared/utils';
 import { ExecuteBridgeJobCommand } from './execute-bridge-job.command';
 
 type EnvironmentCacheData = Pick<EnvironmentEntity, '_id' | 'echo' | 'apiKeys'>;
@@ -71,9 +72,9 @@ export class ExecuteBridgeJob {
 
   @InstrumentUsecase()
   async execute(command: ExecuteBridgeJobCommand): Promise<ExecuteOutput | null> {
-    const stepId = command.job.step.stepId || command.job.step.uuid;
+    const stepId = getStepIdentifierFromJob(command.job) || command.job.step?.uuid;
 
-    const isStateful = !command.job.step.bridgeUrl;
+    const isStateful = !isStatelessBridgeJob(command.job);
 
     let workflow: NotificationTemplateEntity | null = null;
     if (isStateful) {
@@ -142,7 +143,7 @@ export class ExecuteBridgeJob {
        * Once we backfill the origin field for existing Workflows, we should remove the fallback.
        */
       workflowOrigin: workflow?.origin || ResourceOriginEnum.EXTERNAL,
-      statelessBridgeUrl: command.job.step.bridgeUrl,
+      statelessBridgeUrl: getBridgeUrlFromJob(command.job),
       event: bridgeEvent,
       job: command.job,
       searchParams: {
@@ -159,7 +160,7 @@ export class ExecuteBridgeJob {
     const controls = await this.controlValuesRepository.findOne({
       _organizationId: command.organizationId,
       _workflowId: workflow._id,
-      _stepId: command.job.step._id,
+      _stepId: getStepIdFromJob(command.job),
       level: ControlValuesLevelEnum.STEP_CONTROLS,
     });
 
@@ -334,7 +335,7 @@ export class ExecuteBridgeJob {
     const output = await this.mapOutput(job);
 
     return {
-      stepId: job?.step.stepId || job?.step.uuid || '',
+      stepId: getStepIdentifierFromJob(job) || job?.step?.uuid || '',
       outputs: output ?? {},
       state: {
         status: job?.status,

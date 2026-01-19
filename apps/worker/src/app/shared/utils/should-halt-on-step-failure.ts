@@ -1,9 +1,18 @@
 import { isActionStepType } from '@novu/application-generic';
-import { JobEntity } from '@novu/dal';
+import { JobEntity, NotificationStepEntity } from '@novu/dal';
 
-export const shouldHaltOnStepFailure = (job: JobEntity): boolean => {
+/**
+ * Determines if the workflow should halt on step failure.
+ *
+ * @param job - The job entity
+ * @param step - Optional resolved step entity (if not provided, falls back to job.step)
+ * @returns True if the workflow should halt on step failure
+ */
+export const shouldHaltOnStepFailure = (job: JobEntity, step?: NotificationStepEntity): boolean => {
+  const resolvedStep = step || job.step;
+
   if (!job.type) {
-    return job.step.shouldStopOnFail === true;
+    return resolvedStep?.shouldStopOnFail === true;
   }
 
   /*
@@ -17,5 +26,5 @@ export const shouldHaltOnStepFailure = (job: JobEntity): boolean => {
    * Legacy v1 behavior:
    * Return true if shouldStopOnFail was explicitly enabled by user
    */
-  return job.step.shouldStopOnFail === true;
+  return resolvedStep?.shouldStopOnFail === true;
 };

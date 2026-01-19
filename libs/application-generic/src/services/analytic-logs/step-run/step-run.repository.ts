@@ -430,7 +430,8 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
 
   private mapJobToStepRun(job: JobEntity, options?: StepOptions): StepRunInsertData {
     const now = new Date();
-    const stepType = this.mapStepTypeEnumToStepType(job.type || job.step.template?.type);
+    const stepType = this.mapStepTypeEnumToStepType(job.type || job.step?.template?.type);
+    const stepId = job._stepId || job.stepId || job.step?._id || job.step?.stepId || job._id;
 
     return {
       created_at: LogRepository.formatDateTime64(new Date(job.createdAt)),
@@ -438,7 +439,7 @@ export class StepRunRepository extends LogRepository<typeof stepRunSchema, StepR
 
       // Core step run identification
       step_run_id: job._id,
-      step_id: job.step._id || job.step.stepId || job._id,
+      step_id: stepId,
       workflow_run_id: job._notificationId,
       workflow_id: job._templateId,
 

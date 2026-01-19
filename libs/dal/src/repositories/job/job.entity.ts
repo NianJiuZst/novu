@@ -26,7 +26,24 @@ export class JobEntity {
   identifier: string;
   payload: any;
   overrides: TriggerOverrides;
+  /**
+   * @deprecated Use _stepId and stepId for step identification.
+   * This field is kept for backward compatibility during migration.
+   * Resolve full step data from workflow.steps using resolveStepFromWorkflow().
+   */
   step: NotificationStepEntity;
+  /**
+   * Reference to step._id in workflow template (NotificationStepEntity._id)
+   */
+  _stepId?: string;
+  /**
+   * Human-readable step identifier (NotificationStepEntity.stepId)
+   */
+  stepId?: string;
+  /**
+   * Bridge URL for stateless workflow detection
+   */
+  bridgeUrl?: string;
   tenant?: ITenantDefine;
   transactionId: string;
   _notificationId: string;

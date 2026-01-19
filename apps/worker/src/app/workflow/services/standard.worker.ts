@@ -13,6 +13,7 @@ import {
 } from '@novu/application-generic';
 import { CommunityOrganizationRepository, JobRepository } from '@novu/dal';
 import { JobStatusEnum, ObservabilityBackgroundTransactionEnum } from '@novu/shared';
+import { shouldHaltOnStepFailure } from '../../shared/utils';
 import {
   HandleLastFailedJob,
   HandleLastFailedJobCommand,
@@ -202,10 +203,7 @@ export class StandardWorker extends StandardWorkerService {
             _parentId: minimalData.jobId,
           });
 
-          const shouldHaltOnFailure =
-            jobEntity.step?.shouldStopOnFail === undefined ? true : jobEntity.step.shouldStopOnFail;
-
-          isLastJobInWorkflow = !hasNextJob || shouldHaltOnFailure;
+          isLastJobInWorkflow = !hasNextJob || shouldHaltOnStepFailure(jobEntity);
         }
 
         await this.setJobAsFailed.execute(SetJobAsFailedCommand.create({ ...minimalData, isLastJobInWorkflow }), error);

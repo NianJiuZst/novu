@@ -35,7 +35,13 @@ import { setUser } from '@sentry/node';
 import { differenceInMilliseconds } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { LRUCache } from 'lru-cache';
-import { EXCEPTION_MESSAGE_ON_WEBHOOK_FILTER, PlatformException, shouldHaltOnStepFailure } from '../../../shared/utils';
+import {
+  EXCEPTION_MESSAGE_ON_WEBHOOK_FILTER,
+  getStepIdFromJob,
+  PlatformException,
+  resolveStepFromWorkflow,
+  shouldHaltOnStepFailure,
+} from '../../../shared/utils';
 import { AddJob } from '../add-job';
 import { PartialNotificationEntity } from '../add-job/add-job.command';
 import { ExecuteBridgeJob, ExecuteBridgeJobCommand } from '../execute-bridge-job';
@@ -264,12 +270,14 @@ export class RunJob {
         return;
       }
 
+      const resolvedStep = resolveStepFromWorkflow(workflow, job) || job.step;
+
       const sendMessageResult = await this.sendMessage.execute(
         SendMessageCommand.create({
           identifier: job.identifier,
           payload: job.payload ?? {},
           overrides: job.overrides ?? {},
-          step: job.step,
+          step: resolvedStep,
           transactionId: job.transactionId,
           notificationId: job._notificationId,
           _templateId: job._templateId,
@@ -325,7 +333,7 @@ export class RunJob {
         // Update workflow run delivery lifecycle after step failure
         await this.conditionallyUpdateDeliveryLifecycle(job, WorkflowRunStatusEnum.COMPLETED, workflow);
 
-        if (shouldHaltOnStepFailure(job)) {
+        if (shouldHaltOnStepFailure(job, resolvedStep)) {
           shouldQueueNextJob = false;
           await this.jobRepository.cancelPendingJobs({
             transactionId: job.transactionId,
@@ -673,8 +681,9 @@ export class RunJob {
       return false;
     }
 
-    // Find the current step index in the workflow
-    const currentStepIndex = workflow.steps.findIndex((step) => step._id === job.step?._id);
+    // Find the current step index in the workflow using minimal step reference fields
+    const stepId = getStepIdFromJob(job);
+    const currentStepIndex = workflow.steps.findIndex((step) => step._id === stepId);
 
     if (currentStepIndex === -1) {
       return false;
@@ -693,6 +702,7 @@ export class RunJob {
           step.template.type === StepTypeEnum.THROTTLE
         );
       }
+
       return false;
     });
   }
@@ -705,8 +715,9 @@ export class RunJob {
       return false;
     }
 
-    // Find the current step index in the workflow
-    const currentStepIndex = workflow.steps.findIndex((step) => step._id === job.step?._id);
+    // Find the current step index in the workflow using minimal step reference fields
+    const stepId = getStepIdFromJob(job);
+    const currentStepIndex = workflow.steps.findIndex((step) => step._id === stepId);
 
     if (currentStepIndex === -1) {
       return false;
@@ -756,9 +767,10 @@ export class RunJob {
     const isLastStep = await this.isLastStepInWorkflow(job, workflowWithSteps);
     if (isLastStep) {
       this.logger.trace(
-        { nv: { jobId: job._id, stepId: job.step?._id } },
+        { nv: { jobId: job._id, stepId: getStepIdFromJob(job) } },
         'Skipping delivery lifecycle update for last step in workflow'
       );
+
       return;
     }
 
@@ -766,9 +778,10 @@ export class RunJob {
 
     if (hasActionSteps) {
       this.logger.trace(
-        { nv: { jobId: job._id, stepId: job.step?._id } },
+        { nv: { jobId: job._id, stepId: getStepIdFromJob(job) } },
         'Skipping delivery lifecycle update for step with action type'
       );
+
       return;
     }
 

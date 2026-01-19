@@ -37,6 +37,15 @@ const jobSchema = new Schema<JobDBModel>(
     step: {
       type: Schema.Types.Mixed,
     },
+    _stepId: {
+      type: Schema.Types.String,
+    },
+    stepId: {
+      type: Schema.Types.String,
+    },
+    bridgeUrl: {
+      type: Schema.Types.String,
+    },
     _templateId: {
       type: Schema.Types.String,
       ref: 'NotificationTemplate',

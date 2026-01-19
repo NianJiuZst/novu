@@ -59,6 +59,7 @@ import { parseExpression as parseCronExpression } from 'cron-parser';
 import { differenceInMilliseconds } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import _ from 'lodash';
+import { getStepIdentifierFromJob } from '../../../shared/utils';
 import { ExecuteBridgeJob, ExecuteBridgeJobCommand } from '../execute-bridge-job';
 import { AddJobCommand } from './add-job.command';
 import { MergeOrCreateDigestCommand } from './merge-or-create-digest.command';
@@ -857,7 +858,8 @@ export class AddJob {
     // Validate throttle window duration
     await this.validateThrottleWindow(command, job, windowMs, type);
 
-    if (!job.step.stepId) {
+    const stepIdentifier = getStepIdentifierFromJob(job);
+    if (!stepIdentifier) {
       throw new Error('Step ID is required for throttle reservation');
     }
 
@@ -869,7 +871,7 @@ export class AddJob {
       environmentId: command.environmentId,
       subscriberId: job._subscriberId,
       workflowId: job._templateId,
-      stepId: job.step.stepId,
+      stepId: stepIdentifier,
       jobId: throttleJobId,
       windowMs,
       limit: threshold as number,
