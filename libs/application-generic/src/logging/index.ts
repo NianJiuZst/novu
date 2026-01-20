@@ -10,7 +10,7 @@ export function getErrorInterceptor(): NestInterceptor {
   return new LoggerErrorInterceptor();
 }
 
-const loggingLevelSet = {
+export const loggingLevelSet = {
   trace: 10,
   debug: 20,
   info: 30,
@@ -19,7 +19,7 @@ const loggingLevelSet = {
   fatal: 60,
   none: 70,
 };
-const loggingLevelArr = Object.keys(loggingLevelSet);
+export const loggingLevelArr = Object.keys(loggingLevelSet);
 
 export function getLogLevel() {
   let logLevel = null;
@@ -76,7 +76,7 @@ export function createNestLoggingModuleOptions(settings: {
   return {
     exclude: [
       { path: '*/health-check', method: RequestMethod.GET },
-      { path: '/v1/internal/subscriber-online-state', method: RequestMethod.POST }
+      { path: '/v1/internal/subscriber-online-state', method: RequestMethod.POST },
     ],
     assignResponse: true,
     pinoHttp: {

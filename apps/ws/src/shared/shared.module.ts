@@ -3,6 +3,8 @@ import { JwtModule } from '@nestjs/jwt';
 import {
   AnalyticsService,
   DalServiceHealthIndicator,
+  featureFlagsService,
+  LogLevelService,
   QueuesModule,
   WebSocketsInMemoryProviderService,
 } from '@novu/application-generic';
@@ -37,6 +39,8 @@ const PROVIDERS = [
   analyticsService,
   dalService,
   DalServiceHealthIndicator,
+  featureFlagsService,
+  LogLevelService,
   SubscriberOnlineService,
   WebSocketsInMemoryProviderService,
   ...DAL_MODELS,

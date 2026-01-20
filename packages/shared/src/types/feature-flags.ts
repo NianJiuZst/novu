@@ -88,6 +88,7 @@ export enum FeatureFlagsKeysEnum {
 
   // String flags
   CF_SCHEDULER_MODE = 'CF_SCHEDULER_MODE', // Values: "off" | "shadow" | "live" | "complete"
+  LOG_LEVEL = 'LOG_LEVEL', // Values: "trace" | "debug" | "info" | "warn" | "error" | "fatal" | "none"
 
   // Numeric flags
   MAX_WORKFLOW_LIMIT_NUMBER = 'MAX_WORKFLOW_LIMIT_NUMBER',
