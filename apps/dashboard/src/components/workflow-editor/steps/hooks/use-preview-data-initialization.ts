@@ -30,11 +30,19 @@ export function usePreviewDataInitialization({
   loadPersistedContext,
 }: InitializationProps) {
   const isInitializedRef = useRef(false);
-  const lastValueRef = useRef(value);
+  const lastInitKeyRef = useRef<string>('');
 
   const initializeData = useCallback(() => {
-    // Skip if already initialized or missing required props
-    if (isInitializedRef.current || !workflowId || !stepId || !environmentId) {
+    // Skip if missing required props
+    if (!workflowId || !stepId || !environmentId) {
+      return;
+    }
+
+    // Create a unique key for this workflow/step/environment combination
+    const initKey = `${workflowId}-${stepId}-${environmentId}`;
+
+    // Skip if already initialized for this specific combination
+    if (isInitializedRef.current && lastInitKeyRef.current === initKey) {
       return;
     }
 
@@ -99,9 +107,11 @@ export function usePreviewDataInitialization({
       }
 
       isInitializedRef.current = true;
+      lastInitKeyRef.current = initKey;
     } catch (error) {
       console.warn('Failed to initialize preview context data:', error);
       isInitializedRef.current = true;
+      lastInitKeyRef.current = `${workflowId}-${stepId}-${environmentId}`;
     }
   }, [
     workflowId,
@@ -116,18 +126,18 @@ export function usePreviewDataInitialization({
     onChange,
   ]);
 
+  // Reset initialization when workflow/step/environment changes
+  useEffect(() => {
+    const currentKey = `${workflowId}-${stepId}-${environmentId}`;
+    if (lastInitKeyRef.current !== currentKey) {
+      isInitializedRef.current = false;
+    }
+  }, [workflowId, stepId, environmentId]);
+
   // Initialize data when dependencies are ready
   useEffect(() => {
     initializeData();
   }, [initializeData]);
-
-  // Reset initialization when key props change
-  useEffect(() => {
-    if (value !== lastValueRef.current && value === '{}') {
-      isInitializedRef.current = false;
-      lastValueRef.current = value;
-    }
-  }, [value]);
 
   return { isInitialized: isInitializedRef.current };
 }

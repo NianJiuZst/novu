@@ -60,10 +60,11 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
   const [transactionId, setTransactionId] = useState<string>();
   const [isActivityDrawerOpen, setIsActivityDrawerOpen] = useState(false);
   const [isSubscriberDrawerOpen, setIsSubscriberDrawerOpen] = useState(false);
-  const [payloadData, setPayloadData] = useState<PayloadData>({});
+  const [payloadData, setPayloadData] = useState<PayloadData | null>(null);
   const [subscriberData, setSubscriberData] = useState<PreviewSubscriberData | null>(null);
   const [contextData, setContextData] = useState<ContextPayload | null>(null);
   const [currentFormData, setCurrentFormData] = useState<{ to: unknown; payload: PayloadData } | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Cleanup expired storage data on component mount
   useEffect(() => {
@@ -82,45 +83,40 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
   const { data: apiKeysResponse } = useFetchApiKeys({ enabled: canReadApiKeys });
   const apiKey = canReadApiKeys ? (apiKeysResponse?.data?.[0]?.key ?? 'your-api-key-here') : 'your-api-key-here';
 
-  // Reset state when drawer closes to ensure fresh data on next open
+  // Reset initialization flag when drawer closes to allow fresh load on next open
   useEffect(() => {
     if (!isOpen) {
-      setPayloadData({});
-      setSubscriberData(null);
-      setContextData(null);
+      setIsInitialized(false);
     }
   }, [isOpen]);
 
-  // Initialize data when drawer opens
+  // Initialize data when drawer opens - load from localStorage
   useEffect(() => {
-    if (!isOpen || !workflow?.workflowId || !currentEnvironment?._id) return;
+    if (!isOpen || !workflow?.workflowId || !currentEnvironment?._id || isInitialized) return;
 
-    if (Object.keys(payloadData).length === 0) {
-      const initialData =
-        initialPayload && Object.keys(initialPayload).length > 0
-          ? initialPayload
-          : getInitialPayload(workflow.workflowId, currentEnvironment._id, workflow, isPayloadSchemaEnabled);
-      setPayloadData(initialData);
-    }
+    // Load payload from localStorage or use initialPayload/server defaults
+    const loadedPayload =
+      initialPayload && Object.keys(initialPayload).length > 0
+        ? initialPayload
+        : getInitialPayload(workflow.workflowId, currentEnvironment._id, workflow, isPayloadSchemaEnabled);
+    setPayloadData(loadedPayload);
 
-    if (!subscriberData && currentUser) {
-      const initialSubscriber = getInitialSubscriber(workflow.workflowId, currentEnvironment._id, {
+    // Load subscriber from localStorage or use current user
+    if (currentUser) {
+      const loadedSubscriber = getInitialSubscriber(workflow.workflowId, currentEnvironment._id, {
         _id: currentUser._id,
         firstName: currentUser.firstName ?? undefined,
         lastName: currentUser.lastName ?? undefined,
         email: currentUser.email ?? undefined,
       });
-      if (initialSubscriber) {
-        setSubscriberData(initialSubscriber);
-      }
+      setSubscriberData(loadedSubscriber);
     }
 
-    if (!contextData) {
-      const initialContext = getInitialContext(workflow.workflowId, currentEnvironment._id);
-      if (initialContext) {
-        setContextData(initialContext);
-      }
-    }
+    // Load context from localStorage
+    const loadedContext = getInitialContext(workflow.workflowId, currentEnvironment._id);
+    setContextData(loadedContext);
+
+    setIsInitialized(true);
   }, [
     isOpen,
     workflow?.workflowId,
@@ -129,9 +125,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
     initialPayload,
     isPayloadSchemaEnabled,
     workflow,
-    payloadData,
-    subscriberData,
-    contextData,
+    isInitialized,
   ]);
 
   const subscriberIdToFetch = subscriberData?.subscriberId || '';
@@ -259,7 +253,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
       } = await triggerWorkflow({
         name: workflow?.workflowId ?? '',
         to: subscriberData,
-        payload: payloadData,
+        payload: payloadData ?? {},
         ...getContextSpread(contextData),
       });
 
@@ -286,7 +280,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
       }
 
       setTransactionId(newTransactionId);
-      setCurrentFormData({ to: subscriberData, payload: payloadData });
+      setCurrentFormData({ to: subscriberData, payload: payloadData ?? {} });
       setIsActivityDrawerOpen(true);
     } catch (e) {
       showErrorToast(
@@ -306,7 +300,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
       const curlCommand = generateTriggerCurlCommand({
         workflowId: workflow.workflowId,
         to: subscriberData,
-        payload: payloadData,
+        payload: payloadData ?? {},
         ...getContextSpread(contextData),
         apiKey: apiKey,
       });
@@ -339,7 +333,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
       const postmanCollection = generatePostmanCollection({
         workflowId: workflow.workflowId,
         to: subscriberData,
-        payload: payloadData,
+        payload: payloadData ?? {},
         ...getContextSpread(contextData),
         apiKey,
       });
@@ -412,7 +406,7 @@ export const TestWorkflowDrawer = forwardRef<HTMLDivElement, TestWorkflowDrawerP
         <div className="flex h-full flex-col">
           <TestWorkflowContent
             workflow={workflow}
-            payloadData={payloadData}
+            payloadData={payloadData ?? {}}
             subscriberData={subscriberData}
             contextData={contextData}
             isLoadingSubscriber={isLoadingSubscriber}
