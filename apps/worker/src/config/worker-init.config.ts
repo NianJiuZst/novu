@@ -10,7 +10,8 @@ type WorkerClass =
   | typeof StandardWorker
   | typeof WorkflowWorker
   | typeof SubscriberProcessWorker
-  | typeof InboundParseWorker;
+  | typeof InboundParseWorker
+  | null;
 
 type WorkerModuleTree = { workerClass: WorkerClass; queueDependencies: JobTopicNameEnum[] };
 
@@ -31,6 +32,10 @@ export const WORKER_MAPPING: WorkerDepTree = {
   },
   [JobTopicNameEnum.INBOUND_PARSE_MAIL]: {
     workerClass: InboundParseWorker,
+    queueDependencies: [],
+  },
+  [JobTopicNameEnum.ACTIVE_JOBS_METRIC]: {
+    workerClass: null,
     queueDependencies: [],
   },
 };
