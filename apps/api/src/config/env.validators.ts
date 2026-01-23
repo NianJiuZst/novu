@@ -73,16 +73,27 @@ export const envValidators = {
       CLICK_HOUSE_PASSWORD: str({ default: '' }),
     }),
 
-  // Feature Flags
-  ...Object.keys(FeatureFlagsKeysEnum).reduce(
-    (acc, key) => {
-      return {
-        ...acc,
-        [key as FeatureFlagsKeysEnum]: bool({ default: false }),
-      };
-    },
-    {} as Record<FeatureFlagsKeysEnum, ValidatorSpec<boolean>>
-  ),
+  // Feature Flags - Boolean (start with IS_)
+  ...Object.keys(FeatureFlagsKeysEnum)
+    .filter((key) => key.startsWith('IS_'))
+    .reduce<Record<string, ValidatorSpec<boolean>>>((acc, key) => {
+      acc[key] = bool({ default: false });
+
+      return acc;
+    }, {}),
+
+  // Feature Flags - Numeric (end with _NUMBER)
+  ...Object.keys(FeatureFlagsKeysEnum)
+    .filter((key) => key.endsWith('_NUMBER'))
+    .reduce<Record<string, ValidatorSpec<number | undefined>>>((acc, key) => {
+      acc[key] = num({ default: undefined });
+
+      return acc;
+    }, {}),
+
+  // Feature Flags - String
+  CF_SCHEDULER_MODE_STR: str({ choices: ['off', 'shadow', 'live', 'complete'], default: 'off' }),
+  LOG_LEVEL_STR: str({ choices: ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'none'], default: undefined }),
 
   // Azure validators
   ...(processEnv.STORAGE_SERVICE === 'AZURE' && {

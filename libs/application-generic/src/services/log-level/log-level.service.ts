@@ -5,6 +5,7 @@ import { getLogLevel, loggingLevelArr } from '../../logging';
 import { FeatureFlagsService } from '../feature-flags';
 
 const LOG_CONTEXT = 'LogLevelService';
+const DEFAULT_POLLING_INTERVAL_MS = 60_000; // one minute
 
 @Injectable()
 export class LogLevelService implements OnModuleInit, OnModuleDestroy {
@@ -16,7 +17,7 @@ export class LogLevelService implements OnModuleInit, OnModuleDestroy {
     private featureFlagsService: FeatureFlagsService,
     private logger: PinoLogger
   ) {
-    this.pollingIntervalMs = Number(process.env.LOG_LEVEL_POLLING_INTERVAL_MS) || 30000;
+    this.pollingIntervalMs = Number(process.env.LOG_LEVEL_POLLING_INTERVAL_MS) || DEFAULT_POLLING_INTERVAL_MS;
     this.currentLogLevel = getLogLevel();
   }
 
@@ -66,9 +67,10 @@ export class LogLevelService implements OnModuleInit, OnModuleDestroy {
   private async getLogLevelFromFeatureFlag(): Promise<string | undefined> {
     try {
       const flagValue = await this.featureFlagsService.getFlag<string | undefined>({
-        key: 'LOG_LEVEL' as FeatureFlagsKeysEnum,
+        key: FeatureFlagsKeysEnum.LOG_LEVEL_STR,
         defaultValue: undefined,
-      } as any);
+        user: { _id: 'system' },
+      });
 
       if (flagValue && flagValue !== 'undefined') {
         return flagValue;

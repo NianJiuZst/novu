@@ -46,7 +46,7 @@ export class StandardQueueService extends QueueBaseService {
     }
 
     const schedulerMode = await this.featureFlagsService.getFlag<string>({
-      key: FeatureFlagsKeysEnum.CF_SCHEDULER_MODE,
+      key: FeatureFlagsKeysEnum.CF_SCHEDULER_MODE_STR,
       defaultValue: CloudflareSchedulerMode.OFF,
       organization: { _id: data.data._organizationId, apiServiceLevel: organization.apiServiceLevel },
       environment: { _id: data.data._environmentId },
