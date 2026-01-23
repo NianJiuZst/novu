@@ -155,86 +155,6 @@ export class UpsertPreferences {
   }
 
   private async upsert(command: UpsertPreferencesCommand): Promise<PreferencesEntity | undefined> {
-    const foundPreference = await this.getPreference(command);
-
-    if (foundPreference) {
-      return this.updatePreferences(foundPreference, command);
-    }
-
-    return this.createPreferences(command);
-  }
-
-  private async createPreferences(command: UpsertPreferencesCommand): Promise<PreferencesEntity> {
-    const useContextFiltering = await this.featureFlagsService.getFlag({
-      key: FeatureFlagsKeysEnum.IS_CONTEXT_PREFERENCES_ENABLED,
-      defaultValue: false,
-      organization: { _id: command.organizationId },
-    });
-
-    // Determine contextKeys based on preference type AND feature flag
-    // Non-context-scoped types (universal/workflow-level): undefined (no field)
-    // Context-scoped types (subscriber-level): [] or ["key"]
-    const isContextScoped = [
-      PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
-      PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
-      PreferencesTypeEnum.SUBSCRIBER_GLOBAL,
-    ].includes(command.type);
-
-    return await this.preferencesRepository.create({
-      _subscriberId: command._subscriberId,
-      _userId: command.userId,
-      _environmentId: command.environmentId,
-      _organizationId: command.organizationId,
-      _templateId: command.templateId,
-      _topicSubscriptionId: command.topicSubscriptionId,
-      preferences: command.preferences,
-      type: command.type,
-      schedule: command.schedule,
-      contextKeys: useContextFiltering && isContextScoped ? (command.contextKeys ?? []) : undefined,
-    });
-  }
-
-  private async updatePreferences(
-    foundPreference: PreferencesEntity,
-    command: UpsertPreferencesCommand
-  ): Promise<PreferencesEntity> {
-    const mergedPreferences = deepMerge([
-      foundPreference.preferences,
-      command.preferences as WorkflowPreferencesPartial,
-    ]);
-
-    await this.preferencesRepository.update(
-      {
-        _id: foundPreference._id,
-        _environmentId: command.environmentId,
-      },
-      {
-        $set: {
-          preferences: {
-            ...mergedPreferences,
-            ...(mergedPreferences.all && {
-              all: {
-                ...mergedPreferences.all,
-                ...(command.preferences.all?.condition !== undefined && {
-                  condition: command.preferences.all?.condition,
-                }),
-              },
-            }),
-          },
-          schedule: command.schedule,
-          _userId: command.userId,
-        },
-      }
-    );
-
-    if (command.returnPreference) {
-      return await this.getPreference(command);
-    }
-
-    return undefined;
-  }
-
-  private async getPreference(command: UpsertPreferencesCommand): Promise<PreferencesEntity | undefined> {
     const contextQuery = await this.buildContextExactMatchQuery(
       command.contextKeys,
       command.type,
@@ -251,7 +171,66 @@ export class UpsertPreferences {
       ...contextQuery,
     };
 
-    return await this.preferencesRepository.findOne(query);
+    // Get existing preference for merging
+    const existing = await this.preferencesRepository.findOne(query);
+
+    // Merge preferences if updating, otherwise use command preferences
+    const mergedPreferences = existing
+      ? deepMerge([existing.preferences, command.preferences as WorkflowPreferencesPartial])
+      : command.preferences;
+
+    // Apply condition override if provided
+    const finalPreferences =
+      mergedPreferences.all && command.preferences.all?.condition !== undefined
+        ? {
+            ...mergedPreferences,
+            all: {
+              ...mergedPreferences.all,
+              condition: command.preferences.all.condition,
+            },
+          }
+        : mergedPreferences;
+
+    const useContextFiltering = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.IS_CONTEXT_PREFERENCES_ENABLED,
+      defaultValue: false,
+      organization: { _id: command.organizationId },
+    });
+
+    // Determine contextKeys based on preference type AND feature flag
+    const isContextScoped = [
+      PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
+      PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
+      PreferencesTypeEnum.SUBSCRIBER_GLOBAL,
+    ].includes(command.type);
+
+    // Sort contextKeys for storage
+    const sortedContextKeys =
+      command.contextKeys && command.contextKeys.length > 0 ? [...command.contextKeys].sort() : command.contextKeys;
+
+    // Atomic upsert with simple equality on sorted array
+    const result = await this.preferencesRepository.findOneAndUpdate(
+      query,
+      {
+        $set: {
+          preferences: finalPreferences,
+          schedule: command.schedule,
+          _userId: command.userId,
+        },
+        $setOnInsert: {
+          _subscriberId: command._subscriberId,
+          _environmentId: command.environmentId,
+          _organizationId: command.organizationId,
+          _templateId: command.templateId,
+          _topicSubscriptionId: command.topicSubscriptionId,
+          type: command.type,
+          contextKeys: useContextFiltering && isContextScoped ? (sortedContextKeys ?? []) : undefined,
+        },
+      },
+      { upsert: true, new: true }
+    );
+
+    return command.returnPreference ? result : undefined;
   }
 
   private async buildContextExactMatchQuery(
@@ -276,12 +255,15 @@ export class UpsertPreferences {
       return {};
     }
 
+    // Sort for consistent matching
+    const sortedKeys = contextKeys && [...contextKeys].sort();
+
     // undefined or empty array = match only "no context" preferences
-    if (contextKeys === undefined || contextKeys.length === 0) {
+    if (sortedKeys === undefined || sortedKeys.length === 0) {
       return { $or: [{ contextKeys: { $exists: false } }, { contextKeys: [] }] };
     }
 
-    // Match records with exact same context keys (order-independent)
-    return { contextKeys: { $all: contextKeys, $size: contextKeys.length } };
+    // Simple equality instead of $all/$size
+    return { contextKeys: sortedKeys };
   }
 }

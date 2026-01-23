@@ -89,8 +89,8 @@ preferencesSchema.plugin(mongooseDelete, {
 });
 
 // Subscriber Global Preferences
-// Ensures one global preference per subscriber per context (SUBSCRIBER_GLOBAL type)
-// Includes contextKeys to allow multiple preferences for different contexts
+// Index for querying global preferences per subscriber (SUBSCRIBER_GLOBAL type)
+// Uniqueness is enforced at the application level via atomic upserts
 // Partial filter ensures this only applies to SUBSCRIBER_GLOBAL type,
 // preventing conflicts with other preference types
 preferencesSchema.index(
@@ -98,10 +98,8 @@ preferencesSchema.index(
     _environmentId: 1,
     _subscriberId: 1,
     type: 1,
-    contextKeys: 1,
   },
   {
-    unique: true,
     partialFilterExpression: {
       type: PreferencesTypeEnum.SUBSCRIBER_GLOBAL,
     },
@@ -109,8 +107,8 @@ preferencesSchema.index(
 );
 
 // Subscriber Workflow Preferences
-// Ensures one workflow preference per subscriber per template per context (SUBSCRIBER_WORKFLOW type)
-// Includes contextKeys to allow multiple preferences for different contexts
+// Index for querying workflow preferences per subscriber per template (SUBSCRIBER_WORKFLOW type)
+// Uniqueness is enforced at the application level via atomic upserts
 // Partial filter ensures this only applies to SUBSCRIBER_WORKFLOW type,
 // preventing conflicts with other preference types
 preferencesSchema.index(
@@ -119,10 +117,8 @@ preferencesSchema.index(
     _subscriberId: 1,
     _templateId: 1,
     type: 1,
-    contextKeys: 1,
   },
   {
-    unique: true,
     partialFilterExpression: {
       type: PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
     },
@@ -147,9 +143,10 @@ preferencesSchema.index(
   }
 );
 
-// Ensures one workflow preference per subscriber per template per topic subscription per context (SUBSCRIPTION_SUBSCRIBER_WORKFLOW type)
-// Includes contextKeys to allow multiple preferences for different contexts
-// Only for this type (via partial filter).
+// Topic Subscription Workflow Preferences
+// Index for querying workflow preferences per subscriber per template per topic subscription (SUBSCRIPTION_SUBSCRIBER_WORKFLOW type)
+// Uniqueness is enforced at the application level via atomic upserts
+// Partial filter ensures this only applies to SUBSCRIPTION_SUBSCRIBER_WORKFLOW type
 preferencesSchema.index(
   {
     _environmentId: 1,
@@ -157,10 +154,8 @@ preferencesSchema.index(
     _topicSubscriptionId: 1,
     _templateId: 1,
     type: 1,
-    contextKeys: 1,
   },
   {
-    unique: true,
     partialFilterExpression: {
       type: PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
     },
