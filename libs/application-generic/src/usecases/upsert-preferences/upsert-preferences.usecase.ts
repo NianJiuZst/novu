@@ -171,26 +171,6 @@ export class UpsertPreferences {
       ...contextQuery,
     };
 
-    // Get existing preference for merging
-    const existing = await this.preferencesRepository.findOne(query);
-
-    // Merge preferences if updating, otherwise use command preferences
-    const mergedPreferences = existing
-      ? deepMerge([existing.preferences, command.preferences as WorkflowPreferencesPartial])
-      : command.preferences;
-
-    // Apply condition override if provided
-    const finalPreferences =
-      mergedPreferences.all && command.preferences.all?.condition !== undefined
-        ? {
-            ...mergedPreferences,
-            all: {
-              ...mergedPreferences.all,
-              condition: command.preferences.all.condition,
-            },
-          }
-        : mergedPreferences;
-
     const useContextFiltering = await this.featureFlagsService.getFlag({
       key: FeatureFlagsKeysEnum.IS_CONTEXT_PREFERENCES_ENABLED,
       defaultValue: false,
@@ -208,29 +188,51 @@ export class UpsertPreferences {
     const sortedContextKeys =
       command.contextKeys && command.contextKeys.length > 0 ? [...command.contextKeys].sort() : command.contextKeys;
 
-    // Atomic upsert with simple equality on sorted array
-    const result = await this.preferencesRepository.findOneAndUpdate(
-      query,
-      {
-        $set: {
-          preferences: finalPreferences,
-          schedule: command.schedule,
-          _userId: command.userId,
-        },
-        $setOnInsert: {
-          _subscriberId: command._subscriberId,
-          _environmentId: command.environmentId,
-          _organizationId: command.organizationId,
-          _templateId: command.templateId,
-          _topicSubscriptionId: command.topicSubscriptionId,
-          type: command.type,
-          contextKeys: useContextFiltering && isContextScoped ? (sortedContextKeys ?? []) : undefined,
-        },
-      },
-      { upsert: true, new: true }
-    );
+    return await this.preferencesRepository.withTransaction(async (session) => {
+      // Get existing preference for merging
+      const existing = await this.preferencesRepository.findOne(query, undefined, { session });
 
-    return command.returnPreference ? result : undefined;
+      // Merge preferences if updating, otherwise use command preferences
+      const mergedPreferences = existing
+        ? deepMerge([existing.preferences, command.preferences as WorkflowPreferencesPartial])
+        : command.preferences;
+
+      // Apply condition override if provided
+      const finalPreferences =
+        mergedPreferences.all && command.preferences.all?.condition !== undefined
+          ? {
+              ...mergedPreferences,
+              all: {
+                ...mergedPreferences.all,
+                condition: command.preferences.all.condition,
+              },
+            }
+          : mergedPreferences;
+
+      // Atomic upsert with simple equality on sorted array
+      const result = await this.preferencesRepository.findOneAndUpdate(
+        query,
+        {
+          $set: {
+            preferences: finalPreferences,
+            schedule: command.schedule,
+            _userId: command.userId,
+          },
+          $setOnInsert: {
+            _subscriberId: command._subscriberId,
+            _environmentId: command.environmentId,
+            _organizationId: command.organizationId,
+            _templateId: command.templateId,
+            _topicSubscriptionId: command.topicSubscriptionId,
+            type: command.type,
+            contextKeys: useContextFiltering && isContextScoped ? (sortedContextKeys ?? []) : undefined,
+          },
+        },
+        { upsert: true, new: true, session }
+      );
+
+      return command.returnPreference ? result : undefined;
+    });
   }
 
   private async buildContextExactMatchQuery(
