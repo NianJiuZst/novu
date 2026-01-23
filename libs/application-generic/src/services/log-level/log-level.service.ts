@@ -13,10 +13,7 @@ export class LogLevelService implements OnModuleInit, OnModuleDestroy {
   private currentLogLevel: string;
   private readonly pollingIntervalMs: number;
 
-  constructor(
-    private featureFlagsService: FeatureFlagsService,
-    private logger: PinoLogger
-  ) {
+  constructor(private featureFlagsService: FeatureFlagsService) {
     this.pollingIntervalMs = Number(process.env.LOG_LEVEL_POLLING_INTERVAL_MS) || DEFAULT_POLLING_INTERVAL_MS;
     this.currentLogLevel = getLogLevel();
   }
@@ -93,10 +90,8 @@ export class LogLevelService implements OnModuleInit, OnModuleDestroy {
   }
 
   private setLogLevel(level: string): void {
-    if ((this.logger as any).pinoLogger) {
-      (this.logger as any).pinoLogger.level = level;
-    } else if ((this.logger as any).logger) {
-      (this.logger as any).logger.level = level;
+    if (PinoLogger.root) {
+      PinoLogger.root.level = level;
     }
   }
 }
