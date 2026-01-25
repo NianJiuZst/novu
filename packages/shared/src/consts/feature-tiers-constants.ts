@@ -322,8 +322,8 @@ const novuServiceTiers: Record<FeatureNameEnum, Record<ApiServiceLevelEnum, Feat
   },
   [FeatureNameEnum.PLATFORM_MAX_THROTTLE_WINDOW_TIME]: {
     [ApiServiceLevelEnum.FREE]: { label: '1 hour max throttle window', value: 1, timeSuffix: 'h' },
-    [ApiServiceLevelEnum.PRO]: { label: '24 hours max throttle window', value: 24, timeSuffix: 'h' },
-    [ApiServiceLevelEnum.BUSINESS]: { label: '7 days max throttle window', value: 7, timeSuffix: 'd' },
+    [ApiServiceLevelEnum.PRO]: { label: '7 days max throttle window', value: 7, timeSuffix: 'd' },
+    [ApiServiceLevelEnum.BUSINESS]: { label: '30 days max throttle window', value: 30, timeSuffix: 'd' },
     [ApiServiceLevelEnum.ENTERPRISE]: { label: 'Custom throttle window', value: UNLIMITED_VALUE, timeSuffix: 'd' },
     [ApiServiceLevelEnum.UNLIMITED]: { label: 'Unlimited', value: UNLIMITED_VALUE, timeSuffix: 'd' },
   },
