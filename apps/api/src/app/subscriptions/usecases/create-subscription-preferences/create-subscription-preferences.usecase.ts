@@ -14,9 +14,20 @@ import {
   WorkflowPreferences,
   WorkflowPreferencesPartial,
 } from '@novu/shared';
+import { createHash } from 'crypto';
 import { RulesLogic } from 'json-logic-js';
 import { SubscriptionPreferenceDto } from '../../../shared/dtos/subscriptions/create-subscriptions-response.dto';
 import { CreateSubscriptionPreferencesCommand } from './create-subscription-preferences.command';
+
+function hashContextKeys(contextKeys: string[] | undefined): string | undefined {
+  if (!contextKeys || contextKeys.length === 0) {
+    return undefined;
+  }
+
+  const sorted = [...contextKeys].sort();
+
+  return createHash('sha256').update(JSON.stringify(sorted)).digest('hex').substring(0, 16);
+}
 
 type CreateSubscriptionPreferencesBatchCommand = Omit<
   CreateSubscriptionPreferencesCommand,
@@ -48,6 +59,8 @@ export class CreateSubscriptionPreferencesUsecase {
         continue;
       }
 
+      const sortedContextKeys = command.contextKeys ? [...command.contextKeys].sort() : undefined;
+
       const createdPreference = await this.preferencesRepository.create({
         _environmentId: command.environmentId,
         _organizationId: command.organizationId,
@@ -56,7 +69,8 @@ export class CreateSubscriptionPreferencesUsecase {
         _topicSubscriptionId: command._topicSubscriptionId,
         type: PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
         preferences: workflowPreferences,
-        contextKeys: command.contextKeys,
+        contextKeys: sortedContextKeys,
+        contextKeysHash: hashContextKeys(sortedContextKeys),
       });
 
       if (createdPreference) {
@@ -150,6 +164,7 @@ export class CreateSubscriptionPreferencesUsecase {
       type: PreferencesTypeEnum;
       preferences: WorkflowPreferences;
       contextKeys?: string[];
+      contextKeysHash?: string;
       subscriptionId: string;
       workflow: NotificationTemplateEntity;
     }>
@@ -163,6 +178,7 @@ export class CreateSubscriptionPreferencesUsecase {
       type: PreferencesTypeEnum;
       preferences: WorkflowPreferences;
       contextKeys?: string[];
+      contextKeysHash?: string;
       subscriptionId: string;
       workflow: NotificationTemplateEntity;
     }> = [];
@@ -176,6 +192,8 @@ export class CreateSubscriptionPreferencesUsecase {
         );
 
         if (workflowPreferences) {
+          const sortedContextKeys = command.contextKeys ? [...command.contextKeys].sort() : undefined;
+
           preferencesToCreate.push({
             _environmentId: command.environmentId,
             _organizationId: command.organizationId,
@@ -184,7 +202,8 @@ export class CreateSubscriptionPreferencesUsecase {
             _topicSubscriptionId: subscription._id.toString(),
             type: PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
             preferences: workflowPreferences,
-            contextKeys: command.contextKeys,
+            contextKeys: sortedContextKeys,
+            contextKeysHash: hashContextKeys(sortedContextKeys),
             subscriptionId:
               subscription.identifier ||
               buildDefaultSubscriptionIdentifier(
