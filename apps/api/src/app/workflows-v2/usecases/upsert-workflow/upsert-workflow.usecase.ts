@@ -23,6 +23,7 @@ import {
   NotificationTemplateEntity,
 } from '@novu/dal';
 import {
+  buildWorkflowPreferences,
   ControlValuesLevelEnum,
   DEFAULT_WORKFLOW_PREFERENCES,
   ResourceOriginEnum,
@@ -164,8 +165,10 @@ export class UpsertWorkflowUseCase {
       active: isWorkflowActive,
       description: workflowDto.description || '',
       tags: workflowDto.tags || [],
-      userPreferences: workflowDto.preferences?.user ?? null,
-      defaultPreferences: workflowDto.preferences?.workflow ?? DEFAULT_WORKFLOW_PREFERENCES,
+      userPreferences: workflowDto.preferences?.user ? buildWorkflowPreferences(workflowDto.preferences.user) : null,
+      defaultPreferences: workflowDto.preferences?.workflow
+        ? buildWorkflowPreferences(workflowDto.preferences.workflow)
+        : DEFAULT_WORKFLOW_PREFERENCES,
       triggerIdentifier: preserveWorkflowId ? workflowDto.workflowId : slugify(workflowDto.name),
       status: computeWorkflowStatus(isWorkflowActive, steps),
       payloadSchema: workflowDto.payloadSchema,
@@ -195,8 +198,10 @@ export class UpsertWorkflowUseCase {
       rawData: workflowDto as unknown as Record<string, unknown>,
       type: ResourceTypeEnum.BRIDGE,
       description: workflowDto.description,
-      userPreferences: workflowDto.preferences?.user ?? null,
-      defaultPreferences: workflowDto.preferences?.workflow ?? DEFAULT_WORKFLOW_PREFERENCES,
+      userPreferences: workflowDto.preferences?.user ? buildWorkflowPreferences(workflowDto.preferences.user) : null,
+      defaultPreferences: workflowDto.preferences?.workflow
+        ? buildWorkflowPreferences(workflowDto.preferences.workflow)
+        : DEFAULT_WORKFLOW_PREFERENCES,
       tags: workflowDto.tags,
       active: workflowActive,
       payloadSchema: workflowDto.payloadSchema,

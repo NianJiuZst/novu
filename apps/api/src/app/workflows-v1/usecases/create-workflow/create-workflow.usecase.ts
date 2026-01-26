@@ -370,6 +370,7 @@ export class CreateWorkflow {
         preferences: command.defaultPreferences,
         environmentId: command.environmentId,
         organizationId: command.organizationId,
+        session,
       })
     );
 
@@ -382,6 +383,7 @@ export class CreateWorkflow {
           environmentId: command.environmentId,
           organizationId: command.organizationId,
           userId: command.userId,
+          session,
         })
       );
     }

@@ -1,3 +1,4 @@
+import { ClientSession } from '@novu/dal';
 import {
   ChannelPreference as ChannelPreferenceType,
   ChannelTypeEnum,
@@ -5,7 +6,7 @@ import {
   WorkflowPreferencesPartial,
   WorkflowPreference as WorkflowPreferenceType,
 } from '@novu/shared';
-import { Type } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import { IsBoolean, IsObject, IsOptional, ValidateIf, ValidateNested } from 'class-validator';
 import { EnvironmentCommand } from '../../commands';
 
@@ -76,6 +77,10 @@ export class UpsertPreferencesPartialBaseCommand extends EnvironmentCommand {
   @ValidateNested()
   @Type(() => PreferencesPartial)
   readonly preferences: PreferencesPartial;
+
+  @IsOptional()
+  @Exclude()
+  readonly session?: ClientSession | null;
 }
 
 // FULL PREFERENCES
@@ -136,4 +141,8 @@ export class UpsertPreferencesRequiredBaseCommand extends EnvironmentCommand {
   @ValidateNested()
   @Type(() => PreferencesRequired)
   readonly preferences: PreferencesRequired;
+
+  @IsOptional()
+  @Exclude()
+  readonly session?: ClientSession | null;
 }

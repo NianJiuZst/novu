@@ -189,6 +189,7 @@ export class UpdateWorkflow {
           preferences: command.defaultPreferences,
           environmentId: command.environmentId,
           organizationId: command.organizationId,
+          session,
         })
       );
 
@@ -250,6 +251,7 @@ export class UpdateWorkflow {
               environmentId: command.environmentId,
               organizationId: command.organizationId,
               userId: command.userId,
+              session,
             })
           );
 

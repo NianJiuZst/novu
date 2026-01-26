@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { EnforceEnvOrOrgIds, PreferencesDBModel, PreferencesEntity, PreferencesRepository } from '@novu/dal';
+import {
+  ClientSession,
+  EnforceEnvOrOrgIds,
+  PreferencesDBModel,
+  PreferencesEntity,
+  PreferencesRepository,
+} from '@novu/dal';
 import {
   FeatureFlagsKeysEnum,
   PreferencesTypeEnum,
@@ -33,6 +39,7 @@ type UpsertPreferencesCommand = Omit<
   type: PreferencesTypeEnum;
   preferences: WorkflowPreferencesPartial;
   topicSubscriptionId?: string;
+  session?: ClientSession | null;
 };
 
 @Injectable()
@@ -51,6 +58,7 @@ export class UpsertPreferences {
       preferences: command.preferences,
       type: PreferencesTypeEnum.WORKFLOW_RESOURCE,
       returnPreference: true,
+      session: command.session,
     });
 
     return result as WorkflowPreferencesFull;
@@ -76,6 +84,7 @@ export class UpsertPreferences {
       returnPreference: command.returnPreference,
       schedule: isSubscribersScheduleEnabled ? command.schedule : undefined,
       contextKeys: command.contextKeys,
+      session: command.session,
     });
   }
 
@@ -119,6 +128,7 @@ export class UpsertPreferences {
       templateId: command.templateId,
       type: PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
       returnPreference: command.returnPreference,
+      session: command.session,
     });
   }
 
@@ -134,6 +144,7 @@ export class UpsertPreferences {
       templateId: command.templateId,
       type: PreferencesTypeEnum.USER_WORKFLOW,
       returnPreference: true,
+      session: command.session,
     });
 
     return result as WorkflowPreferencesFull;
@@ -151,46 +162,47 @@ export class UpsertPreferences {
       type: PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
       returnPreference: command.returnPreference,
       contextKeys: command.contextKeys,
+      session: command.session,
     });
   }
 
   private async upsert(command: UpsertPreferencesCommand): Promise<PreferencesEntity | undefined> {
-    const contextQuery = await this.buildContextExactMatchQuery(
-      command.contextKeys,
-      command.type,
-      command.organizationId
-    );
+    const upsertOperation = async (session?: ClientSession | null) => {
+      const contextQuery = await this.buildContextExactMatchQuery(
+        command.contextKeys,
+        command.type,
+        command.organizationId
+      );
 
-    const query: FilterQuery<PreferencesDBModel> & EnforceEnvOrOrgIds = {
-      _environmentId: command.environmentId,
-      _organizationId: command.organizationId,
-      _subscriberId: command._subscriberId,
-      _topicSubscriptionId: command.topicSubscriptionId,
-      _templateId: command.templateId,
-      type: command.type,
-      ...contextQuery,
-    };
+      const query: FilterQuery<PreferencesDBModel> & EnforceEnvOrOrgIds = {
+        _environmentId: command.environmentId,
+        _organizationId: command.organizationId,
+        _subscriberId: command._subscriberId,
+        _topicSubscriptionId: command.topicSubscriptionId,
+        _templateId: command.templateId,
+        type: command.type,
+        ...contextQuery,
+      };
 
-    const useContextFiltering = await this.featureFlagsService.getFlag({
-      key: FeatureFlagsKeysEnum.IS_CONTEXT_PREFERENCES_ENABLED,
-      defaultValue: false,
-      organization: { _id: command.organizationId },
-    });
+      const useContextFiltering = await this.featureFlagsService.getFlag({
+        key: FeatureFlagsKeysEnum.IS_CONTEXT_PREFERENCES_ENABLED,
+        defaultValue: false,
+        organization: { _id: command.organizationId },
+      });
 
-    // Determine contextKeys based on preference type AND feature flag
-    const isContextScoped = [
-      PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
-      PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
-      PreferencesTypeEnum.SUBSCRIBER_GLOBAL,
-    ].includes(command.type);
+      // Determine contextKeys based on preference type AND feature flag
+      const isContextScoped = [
+        PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
+        PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
+        PreferencesTypeEnum.SUBSCRIBER_GLOBAL,
+      ].includes(command.type);
 
-    // Sort contextKeys for storage
-    const sortedContextKeys =
-      command.contextKeys && command.contextKeys.length > 0 ? [...command.contextKeys].sort() : command.contextKeys;
+      // Sort contextKeys for storage
+      const sortedContextKeys =
+        command.contextKeys && command.contextKeys.length > 0 ? [...command.contextKeys].sort() : command.contextKeys;
 
-    return await this.preferencesRepository.withTransaction(async (session) => {
       // Get existing preference for merging
-      const existing = await this.preferencesRepository.findOne(query, undefined, { session });
+      const existing = await this.preferencesRepository.findOne(query, undefined, session ? { session } : undefined);
 
       // Merge preferences if updating, otherwise use command preferences
       const mergedPreferences = existing
@@ -228,10 +240,20 @@ export class UpsertPreferences {
             contextKeys: useContextFiltering && isContextScoped ? (sortedContextKeys ?? []) : undefined,
           },
         },
-        { upsert: true, new: true, session }
+        { upsert: true, new: true, ...(session ? { session } : {}) }
       );
 
       return command.returnPreference ? result : undefined;
+    };
+
+    if (command.session) {
+      // If session is provided, use it (we're already in a transaction)
+      return await upsertOperation(command.session);
+    }
+
+    // If no session, create our own transaction
+    return await this.preferencesRepository.withTransaction(async (session) => {
+      return await upsertOperation(session);
     });
   }
 
