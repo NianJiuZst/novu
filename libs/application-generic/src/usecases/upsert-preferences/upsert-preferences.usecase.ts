@@ -6,6 +6,7 @@ import {
   WorkflowPreferences,
   WorkflowPreferencesPartial,
 } from '@novu/shared';
+import { createHash } from 'crypto';
 import { FilterQuery } from 'mongoose';
 import { Instrument } from '../../instrumentation';
 import { FeatureFlagsService } from '../../services/feature-flags/feature-flags.service';
@@ -14,6 +15,16 @@ import { UpsertSubscriberGlobalPreferencesCommand } from './upsert-subscriber-gl
 import { UpsertSubscriberWorkflowPreferencesCommand } from './upsert-subscriber-workflow-preferences.command';
 import { UpsertUserWorkflowPreferencesCommand } from './upsert-user-workflow-preferences.command';
 import { UpsertWorkflowPreferencesCommand } from './upsert-workflow-preferences.command';
+
+function hashContextKeys(contextKeys: string[] | undefined): string | undefined {
+  if (!contextKeys || contextKeys.length === 0) {
+    return undefined;
+  }
+
+  const sorted = [...contextKeys].sort();
+
+  return createHash('sha256').update(JSON.stringify(sorted)).digest('hex').substring(0, 16);
+}
 
 export type WorkflowPreferencesFull = Omit<PreferencesEntity, 'preferences'> & {
   preferences: WorkflowPreferences;
@@ -180,6 +191,8 @@ export class UpsertPreferences {
       PreferencesTypeEnum.SUBSCRIBER_GLOBAL,
     ].includes(command.type);
 
+    const sortedContextKeys = command.contextKeys ? [...command.contextKeys].sort() : undefined;
+
     return await this.preferencesRepository.create({
       _subscriberId: command._subscriberId,
       _userId: command.userId,
@@ -190,7 +203,8 @@ export class UpsertPreferences {
       preferences: command.preferences,
       type: command.type,
       schedule: command.schedule,
-      contextKeys: useContextFiltering && isContextScoped ? (command.contextKeys ?? []) : undefined,
+      contextKeys: useContextFiltering && isContextScoped ? (sortedContextKeys ?? []) : undefined,
+      contextKeysHash: useContextFiltering && isContextScoped ? hashContextKeys(sortedContextKeys) : undefined,
     });
   }
 

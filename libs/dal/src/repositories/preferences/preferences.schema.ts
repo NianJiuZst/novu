@@ -77,6 +77,10 @@ const preferencesSchema = new Schema<PreferencesDBModel>(
       type: [Schema.Types.String],
       default: undefined,
     },
+    contextKeysHash: {
+      type: Schema.Types.String,
+      default: undefined,
+    },
   },
   { ...schemaOptions, minimize: false }
 );
@@ -90,7 +94,7 @@ preferencesSchema.plugin(mongooseDelete, {
 
 // Subscriber Global Preferences
 // Ensures one global preference per subscriber per context (SUBSCRIBER_GLOBAL type)
-// Includes contextKeys to allow multiple preferences for different contexts
+// Includes contextKeysHash to allow multiple preferences for different contexts
 // Partial filter ensures this only applies to SUBSCRIBER_GLOBAL type,
 // preventing conflicts with other preference types
 preferencesSchema.index(
@@ -98,7 +102,7 @@ preferencesSchema.index(
     _environmentId: 1,
     _subscriberId: 1,
     type: 1,
-    contextKeys: 1,
+    contextKeysHash: 1,
   },
   {
     unique: true,
@@ -110,7 +114,7 @@ preferencesSchema.index(
 
 // Subscriber Workflow Preferences
 // Ensures one workflow preference per subscriber per template per context (SUBSCRIBER_WORKFLOW type)
-// Includes contextKeys to allow multiple preferences for different contexts
+// Includes contextKeysHash to allow multiple preferences for different contexts
 // Partial filter ensures this only applies to SUBSCRIBER_WORKFLOW type,
 // preventing conflicts with other preference types
 preferencesSchema.index(
@@ -119,7 +123,7 @@ preferencesSchema.index(
     _subscriberId: 1,
     _templateId: 1,
     type: 1,
-    contextKeys: 1,
+    contextKeysHash: 1,
   },
   {
     unique: true,
@@ -148,7 +152,7 @@ preferencesSchema.index(
 );
 
 // Ensures one workflow preference per subscriber per template per topic subscription per context (SUBSCRIPTION_SUBSCRIBER_WORKFLOW type)
-// Includes contextKeys to allow multiple preferences for different contexts
+// Includes contextKeysHash to allow multiple preferences for different contexts
 // Only for this type (via partial filter).
 preferencesSchema.index(
   {
@@ -157,7 +161,7 @@ preferencesSchema.index(
     _topicSubscriptionId: 1,
     _templateId: 1,
     type: 1,
-    contextKeys: 1,
+    contextKeysHash: 1,
   },
   {
     unique: true,
