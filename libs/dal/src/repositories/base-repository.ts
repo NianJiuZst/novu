@@ -62,25 +62,29 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
       return {};
     }
 
-    // Match only "no context" (default context) records
-
+    // Match records with no context (default/empty context)
     if (contextKeys === undefined || contextKeys.length === 0) {
-      // for collections created after context was introduced, we always wrote contextKeys: [] so we
-      // dont need to check for $exists: false
+      // For collections created after context was introduced, we always write contextKeys: []
+      // For older collections, the field may not exist (treated as default context)
       if (strictEmpty) {
         return { contextKeys: [] };
       }
 
-      // the $or is here because old records before context was introduced dont have that field and thats counted
-      // as default context. After migration we can simplify the query to check just contextKeys: []
+      // Match both missing field (legacy) and empty array (current)
       return {
         $or: [{ contextKeys: { $exists: false } }, { contextKeys: [] }],
       };
     }
 
-    // order independent matching - after sort migration we can simplify
+    // Sort defensively to ensure consistent matching regardless of input order
+    // This protects against unsorted input and enables future query optimization
+    const sortedKeys = [...contextKeys].sort();
+
+    // Use $all + $size for order-independent array matching
+    // After data migration to guarantee sorted storage, this can be simplified to:
+    // return { contextKeys: sortedKeys };  // Direct equality (faster, uses index)
     return {
-      contextKeys: { $all: contextKeys, $size: contextKeys.length },
+      contextKeys: { $all: sortedKeys, $size: sortedKeys.length },
     };
   }
 
