@@ -112,23 +112,9 @@ export const WorkflowsPage = () => {
   };
 
   useEffect(() => {
-    const subscription = form.watch((value) => {
-      const updates: Partial<{ query: string; tags: string[]; status: string[] }> = {};
-
-      if (value.query !== undefined) {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'query' && value.query !== undefined) {
         debouncedSearch(value.query || '');
-      }
-
-      if (value.tags !== undefined) {
-        updates.tags = value.tags as string[];
-      }
-
-      if (value.status !== undefined) {
-        updates.status = value.status as string[];
-      }
-
-      if (Object.keys(updates).length > 0) {
-        updateSearchParams(updates);
       }
     });
 
@@ -136,7 +122,7 @@ export const WorkflowsPage = () => {
       subscription.unsubscribe();
       debouncedSearch.cancel();
     };
-  }, [form, debouncedSearch, updateSearchParams]);
+  }, [form, debouncedSearch]);
 
   const { quickTemplates, isLoading: isLoadingQuickStart } = useTemplateStore();
 
@@ -224,6 +210,7 @@ export const WorkflowsPage = () => {
                 selected={form.watch('tags')}
                 onSelect={(values) => {
                   form.setValue('tags', values, { shouldDirty: true, shouldTouch: true });
+                  updateSearchParams({ tags: values });
                 }}
               />
               <FacetedFormFilter
@@ -239,6 +226,7 @@ export const WorkflowsPage = () => {
                 selected={form.watch('status')}
                 onSelect={(values) => {
                   form.setValue('status', values, { shouldDirty: true, shouldTouch: true });
+                  updateSearchParams({ status: values });
                 }}
               />
 
