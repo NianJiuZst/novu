@@ -655,6 +655,6 @@ export class CreateSubscriptionsUsecase {
       context
     );
 
-    return contexts.map((ctx) => ctx.key).sort();
+    return contexts.map((ctx) => ctx.key);
   }
 }
