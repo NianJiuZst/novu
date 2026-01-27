@@ -170,7 +170,8 @@ export const LayoutEditorSettingsDrawer = forwardRef<HTMLDivElement, LayoutEdito
       });
     };
 
-    const onSubmit = async (data: LayoutSettingsFormData) => {
+    const onSubmit = async (data: LayoutSettingsFormData, event?: React.BaseSyntheticEvent) => {
+      event?.stopPropagation();
       if (!layout) return;
 
       await updateLayout({

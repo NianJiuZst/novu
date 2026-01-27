@@ -442,7 +442,8 @@ export const LayoutEditorProvider = ({
     }
   }, [blocker]);
 
-  const onSubmit = (formData: Record<string, unknown>) => {
+  const onSubmit = (formData: Record<string, unknown>, event?: React.BaseSyntheticEvent) => {
+    event?.stopPropagation();
     updateLayout({
       layout: {
         name: layout?.name ?? '',
