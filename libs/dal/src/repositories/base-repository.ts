@@ -45,6 +45,45 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     return new Types.ObjectId(value);
   }
 
+  /**
+   * Builds a MongoDB query for exact context key matching in READ operations.
+   * Uses $all and $size operators for order-independent array matching.
+   */
+  public buildContextExactMatchQuery(
+    contextKeys?: string[],
+    options?: {
+      enabled?: boolean;
+      strictEmpty?: boolean;
+    }
+  ): Record<string, unknown> {
+    const { enabled = true, strictEmpty = false } = options ?? {};
+
+    if (!enabled) {
+      return {};
+    }
+
+    // Match only "no context" (default context) records
+
+    if (contextKeys === undefined || contextKeys.length === 0) {
+      // for collections created after context was introduced, we always wrote contextKeys: [] so we
+      // dont need to check for $exists: false
+      if (strictEmpty) {
+        return { contextKeys: [] };
+      }
+
+      // the $or is here because old records before context was introduced dont have that field and thats counted
+      // as default context. After migration we can simplify the query to check just contextKeys: []
+      return {
+        $or: [{ contextKeys: { $exists: false } }, { contextKeys: [] }],
+      };
+    }
+
+    // order independent matching - after sort migration we can simplify
+    return {
+      contextKeys: { $all: contextKeys, $size: contextKeys.length },
+    };
+  }
+
   async count(
     query: FilterQuery<T_DBModel> & T_Enforcement,
     limit?: number,

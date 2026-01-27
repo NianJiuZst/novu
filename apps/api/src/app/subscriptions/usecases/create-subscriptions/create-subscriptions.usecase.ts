@@ -114,7 +114,16 @@ export class CreateSubscriptionsUsecase {
         buildDefaultSubscriptionIdentifier(command.topicKey, sub.subscriberId, contextKeys),
     }));
 
-    const contextQuery = await this.buildContextExactMatchQuery(contextKeys, command.organizationId);
+    const useContextFiltering = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.IS_CONTEXT_PREFERENCES_ENABLED,
+      defaultValue: false,
+      organization: { _id: command.organizationId },
+    });
+
+    const contextQuery = this.topicSubscribersRepository.buildContextExactMatchQuery(contextKeys, {
+      enabled: useContextFiltering,
+    });
+
     const existingSubscriptions = await this.topicSubscribersRepository.find({
       _environmentId: command.environmentId,
       _organizationId: command.organizationId,
@@ -412,7 +421,9 @@ export class CreateSubscriptionsUsecase {
       return undefined;
     }
 
-    const contextQuery = await this.buildContextExactMatchQuery(subscription.contextKeys, command.organizationId);
+    const contextQuery = this.preferencesRepository.buildContextExactMatchQuery(subscription.contextKeys, {
+      enabled: useContextFiltering,
+    });
 
     const preferencesEntities = await this.preferencesRepository.find({
       _environmentId: command.environmentId,
@@ -645,30 +656,5 @@ export class CreateSubscriptionsUsecase {
     );
 
     return contexts.map((ctx) => ctx.key).sort();
-  }
-
-  private async buildContextExactMatchQuery(
-    contextKeys: string[] | undefined,
-    organizationId: string
-  ): Promise<Record<string, unknown>> {
-    const useContextFiltering = await this.featureFlagsService.getFlag({
-      key: FeatureFlagsKeysEnum.IS_CONTEXT_PREFERENCES_ENABLED,
-      defaultValue: false,
-      organization: { _id: organizationId },
-    });
-
-    if (!useContextFiltering) {
-      return {};
-    }
-
-    if (contextKeys === undefined || contextKeys.length === 0) {
-      return {
-        $or: [{ contextKeys: { $exists: false } }, { contextKeys: [] }],
-      };
-    }
-
-    return {
-      contextKeys: { $all: contextKeys, $size: contextKeys.length },
-    };
   }
 }
