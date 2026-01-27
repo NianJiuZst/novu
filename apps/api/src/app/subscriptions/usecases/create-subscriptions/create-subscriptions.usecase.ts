@@ -146,7 +146,12 @@ export class CreateSubscriptionsUsecase {
 
     for (const subscription of existingSubscriptions) {
       const subscriber = foundSubscribers.find((sub) => sub._id.toString() === subscription._subscriberId.toString());
-      const preferences = await this.fetchPreferencesForSubscription(command, subscription, workflows);
+      const preferences = await this.fetchPreferencesForSubscription(
+        command,
+        subscription,
+        workflows,
+        useContextFiltering
+      );
 
       subscriptionData.push({
         _id: subscription._id.toString(),
@@ -246,7 +251,12 @@ export class CreateSubscriptionsUsecase {
       for (const subscription of newSubscriptions.updated) {
         const subscriber = foundSubscribers.find((sub) => sub._id.toString() === subscription._subscriberId.toString());
 
-        const preferences = await this.fetchPreferencesForSubscription(command, subscription, workflows);
+        const preferences = await this.fetchPreferencesForSubscription(
+          command,
+          subscription,
+          workflows,
+          useContextFiltering
+        );
 
         subscriptionData.push({
           _id: subscription._id.toString(),
@@ -415,7 +425,8 @@ export class CreateSubscriptionsUsecase {
   private async fetchPreferencesForSubscription(
     command: CreateSubscriptionsCommand,
     subscription: TopicSubscribersEntity,
-    workflows: NotificationTemplateEntity[]
+    workflows: NotificationTemplateEntity[],
+    useContextFiltering: boolean
   ): Promise<SubscriptionPreferenceDto[] | undefined> {
     if (!command.preferences || command.preferences.length === 0 || workflows.length === 0) {
       return undefined;
