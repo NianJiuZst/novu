@@ -235,7 +235,7 @@ export class TriggerMulticast extends TriggerBase {
       });
 
       const contextQuery = this.preferencesRepository.buildContextExactMatchQuery(command.contextKeys, {
-        enabled: useContextFiltering && !!command.contextKeys,
+        enabled: useContextFiltering,
       });
 
       const subscriptionPreference = await this.preferencesRepository.findOne({

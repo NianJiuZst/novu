@@ -56,13 +56,13 @@ export class CreateSubscriptionsUsecase {
 
   @InstrumentUsecase()
   async execute(command: CreateSubscriptionsCommand): Promise<CreateSubscriptionsResponseDto> {
-    const isContextEnabled = await this.featureFlagsService.getFlag({
+    const useContextFiltering = await this.featureFlagsService.getFlag({
       key: FeatureFlagsKeysEnum.IS_CONTEXT_PREFERENCES_ENABLED,
       defaultValue: false,
       organization: { _id: command.organizationId },
     });
 
-    const contextKeys = isContextEnabled
+    const contextKeys = useContextFiltering
       ? (command.contextKeys ??
         (await this.resolveContexts(command.environmentId, command.organizationId, command.context)))
       : undefined; // FF OFF: always ignore context
@@ -113,12 +113,6 @@ export class CreateSubscriptionsUsecase {
         command.subscriptions.find((s) => s.subscriberId === sub.subscriberId)?.identifier ||
         buildDefaultSubscriptionIdentifier(command.topicKey, sub.subscriberId, contextKeys),
     }));
-
-    const useContextFiltering = await this.featureFlagsService.getFlag({
-      key: FeatureFlagsKeysEnum.IS_CONTEXT_PREFERENCES_ENABLED,
-      defaultValue: false,
-      organization: { _id: command.organizationId },
-    });
 
     const contextQuery = this.topicSubscribersRepository.buildContextExactMatchQuery(contextKeys, {
       enabled: useContextFiltering,
