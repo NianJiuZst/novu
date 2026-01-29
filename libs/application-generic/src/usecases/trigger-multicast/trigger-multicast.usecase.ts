@@ -23,7 +23,7 @@ import jsonLogic from 'json-logic-js';
 
 import { PinoLogger } from 'nestjs-pino';
 import { InstrumentUsecase } from '../../instrumentation';
-import { FeatureFlagsService } from '../../services';
+import { CacheService, FeatureFlagsService } from '../../services';
 import type { EventType } from '../../services/analytic-logs';
 import { LogRepository, mapEventTypeToTitle, TraceLogRepository } from '../../services/analytic-logs';
 import { RequestTraceInput } from '../../services/analytic-logs/trace-log';
@@ -44,11 +44,12 @@ export class TriggerMulticast extends TriggerBase {
     private topicSubscribersRepository: TopicSubscribersRepository,
     private topicRepository: TopicRepository,
     private preferencesRepository: PreferencesRepository,
+    protected cacheService: CacheService,
     private featureFlagsService: FeatureFlagsService,
     protected logger: PinoLogger,
     private traceLogRepository: TraceLogRepository
   ) {
-    super(subscriberProcessQueueService, logger, QUEUE_CHUNK_SIZE);
+    super(subscriberProcessQueueService, cacheService, logger, QUEUE_CHUNK_SIZE);
     this.logger.setContext(this.constructor.name);
   }
 

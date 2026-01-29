@@ -3,6 +3,7 @@ import { NotificationTemplateEntity, SubscriberEntity, TopicWithPreferences } fr
 import {
   ISubscribersDefine,
   ITenantDefine,
+  ResourceEnum,
   StatelessControls,
   SubscriberSourceEnum,
   TriggerOverrides,
@@ -12,6 +13,8 @@ import _ from 'lodash';
 
 import { IProcessSubscriberBulkJobDto } from '../../dtos';
 import { PinoLogger } from '../../logging';
+import { CacheService } from '../../services';
+import { buildUsageKey } from '../../services/cache/key-builders';
 import { SubscriberProcessQueueService } from '../../services/queues/subscriber-process-queue.service';
 import { mapSubscribersToJobs } from '../../utils';
 
@@ -39,6 +42,7 @@ export type BaseTriggerCommand = {
 export abstract class TriggerBase {
   constructor(
     protected subscriberProcessQueueService: SubscriberProcessQueueService,
+    protected cacheService: CacheService,
     protected logger: PinoLogger,
     protected queueChunkSize: number = 100
   ) {}
@@ -50,6 +54,18 @@ export abstract class TriggerBase {
           await this.subscriberProcessQueueService.addBulk(chunk);
         } catch (error) {
           this.logger.warn({ err: error }, 'Failed to add jobs to queue');
+        }
+
+        try {
+          await this.cacheService.incrIfExistsAtomic(
+            buildUsageKey({
+              _organizationId: jobs[0].data.organizationId,
+              resourceType: ResourceEnum.EVENTS,
+            }),
+            chunk.length
+          );
+        } catch (error) {
+          this.logger.warn({ err: error }, 'Failed to increment usage counter');
         }
       })
     );
