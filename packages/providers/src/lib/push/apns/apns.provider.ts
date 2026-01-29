@@ -9,6 +9,13 @@ export class APNSPushProvider extends BaseProvider implements IPushProvider {
   protected casing: CasingEnum = CasingEnum.CAMEL_CASE;
   channelType = ChannelTypeEnum.PUSH as ChannelTypeEnum.PUSH;
 
+  private readonly INVALID_TOKEN_ERRORS = [
+    'BadDeviceToken',
+    'Unregistered',
+    'DeviceTokenNotForTopic',
+    'ExpiredToken',
+  ];
+
   protected override keyCaseObject: Record<string, string> = {
     contentAvailable: 'content-available',
     launchImage: 'launch-image',
@@ -57,19 +64,30 @@ export class APNSPushProvider extends BaseProvider implements IPushProvider {
         ...options.overrides,
       }).body
     );
-    const res = await this.provider.send(notification, options.target);
 
-    if (res.failed.length > 0) {
-      throw new Error(
-        res.failed.map((failed) => `${failed.device} failed for reason: ${failed.response.reason}`).join(',')
-      );
+    let res: apn.Responses;
+    try {
+      res = await this.provider.send(notification, options.target);
+    } finally {
+      this.provider.shutdown();
     }
 
-    this.provider.shutdown();
+    if (res.failed.length > 0) {
+      const errorMessages = res.failed.map((failed) => {
+        const reason = failed.response?.reason || failed.error?.message || 'Unknown error';
+
+        return `${failed.device} failed for reason: ${reason}`;
+      });
+      throw new Error(errorMessages.join(','));
+    }
 
     return {
       ids: res.sent?.map((response) => response.device),
       date: new Date().toISOString(),
     };
+  }
+
+  isTokenInvalid(errorMessage: string): boolean {
+    return this.INVALID_TOKEN_ERRORS.some((error) => errorMessage?.includes(error));
   }
 }
