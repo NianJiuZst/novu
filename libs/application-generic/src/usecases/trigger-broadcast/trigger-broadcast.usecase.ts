@@ -5,7 +5,6 @@ import { SubscriberSourceEnum } from '@novu/shared';
 
 import { PinoLogger } from 'nestjs-pino';
 import { InstrumentUsecase } from '../../instrumentation';
-import { CacheService, FeatureFlagsService } from '../../services';
 import type { EventType, RequestTraceInput } from '../../services/analytic-logs';
 import { LogRepository, mapEventTypeToTitle, TraceLogRepository } from '../../services/analytic-logs';
 import { SubscriberProcessQueueService } from '../../services/queues/subscriber-process-queue.service';
@@ -19,12 +18,10 @@ export class TriggerBroadcast extends TriggerBase {
   constructor(
     private subscriberRepository: SubscriberRepository,
     protected subscriberProcessQueueService: SubscriberProcessQueueService,
-    protected cacheService: CacheService,
-    protected featureFlagsService: FeatureFlagsService,
     protected logger: PinoLogger,
     private traceLogRepository: TraceLogRepository
   ) {
-    super(subscriberProcessQueueService, cacheService, featureFlagsService, logger, QUEUE_CHUNK_SIZE);
+    super(subscriberProcessQueueService, logger, QUEUE_CHUNK_SIZE);
     this.logger.setContext(this.constructor.name);
   }
 
