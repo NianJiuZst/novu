@@ -256,8 +256,6 @@ export type SubscriptionResponse = {
   preferences?: Array<SubscriptionPreferenceResponse>;
 };
 
-export type TODO = any;
-
 export type Options = {
   refetch?: boolean;
   useCache?: boolean;

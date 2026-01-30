@@ -16,7 +16,6 @@ import {
   Result,
   Session,
   Subscriber,
-  TODO,
   WebSocketEvent,
 } from '../types';
 import { NovuError } from '../utils/errors';
@@ -49,7 +48,7 @@ const mapToNotification = ({
   data,
   workflow,
   severity,
-}: TODO): InboxNotification => {
+}: any): InboxNotification => {
   const to: Subscriber = {
     id: subscriber?._id,
     subscriberId: subscriber?.subscriberId,
@@ -149,7 +148,7 @@ export class Socket extends BaseModule implements BaseSocketInterface {
     this.#token = token;
   }
 
-  #notificationReceived = ({ message }: { message: TODO }) => {
+  #notificationReceived = ({ message }: { message: any }) => {
     this.#emitter.emit(NOTIFICATION_RECEIVED, {
       result: new Notification(mapToNotification(message), this.#emitter, this._inboxService),
     });
