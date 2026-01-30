@@ -77,6 +77,10 @@ To keep the setup simple, we made some choices that may not be optimal for produ
 
 We strongly recommend that you decouple your database before deploying.
 
+## Additional Guides
+
+- [Custom Domain Proxy Setup](./CUSTOM-DOMAIN-PROXY.md) - Configure Novu SDKs to use a custom domain or proxy server when Novu's API domains are blocked by corporate firewalls.
+
 ## Next steps
 
 - Got a question? [Ask here](https://discord.gg/novu).
