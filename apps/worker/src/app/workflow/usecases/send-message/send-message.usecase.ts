@@ -56,6 +56,14 @@ import { SendMessageSms } from './send-message-sms.usecase';
 import { SendMessageResult, SendMessageStatus } from './send-message-type.usecase';
 import { Throttle } from './throttle';
 
+const MESSAGE_CHANNELS = [
+  StepTypeEnum.IN_APP,
+  StepTypeEnum.EMAIL,
+  StepTypeEnum.SMS,
+  StepTypeEnum.PUSH,
+  StepTypeEnum.CHAT,
+] as const;
+
 @Injectable()
 export class SendMessage {
   constructor(
@@ -502,9 +510,7 @@ export class SendMessage {
   }
 
   private isActionStep(job: JobEntity) {
-    const channels = [StepTypeEnum.IN_APP, StepTypeEnum.EMAIL, StepTypeEnum.SMS, StepTypeEnum.PUSH, StepTypeEnum.CHAT];
-
-    return !channels.find((channel) => channel === job.type);
+    return !MESSAGE_CHANNELS.includes(job.type as StepTypeEnum);
   }
 
   protected async sendSelectedTenantExecution(job: JobEntity, tenant: TenantEntity) {
@@ -563,5 +569,5 @@ export class SendMessage {
 }
 
 function isChannelStep(stepType: StepTypeEnum | undefined) {
-  return ![StepTypeEnum.DIGEST, StepTypeEnum.DELAY, StepTypeEnum.TRIGGER].includes(stepType as StepTypeEnum);
+  return stepType !== undefined && MESSAGE_CHANNELS.includes(stepType);
 }
