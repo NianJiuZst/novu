@@ -24,61 +24,59 @@ export const isObjectMailyJSONContent = (value: unknown): value is MailyJSONCont
   return true;
 };
 
-export const isRepeatNode = (
-  node: MailyJSONContent
-): node is MailyJSONContent & { attrs: { [MailyAttrsEnum.EACH_KEY]: string } } => {
-  return !!(
-    (node.type === MailyContentTypeEnum.REPEAT || node.type === MailyContentTypeEnum.FOR) &&
-    node.attrs &&
-    node.attrs[MailyAttrsEnum.EACH_KEY] !== undefined &&
-    typeof node.attrs[MailyAttrsEnum.EACH_KEY] === 'string'
-  );
+type NodeTypeGuardPredicate = (node: MailyJSONContent, attrs: Record<string, any>) => boolean;
+
+const createNodeTypeGuard = <T extends MailyJSONContent>(
+  nodeTypes: MailyContentTypeEnum | MailyContentTypeEnum[],
+  attrPredicate: NodeTypeGuardPredicate
+) => {
+  return (node: MailyJSONContent): node is T => {
+    const types = Array.isArray(nodeTypes) ? nodeTypes : [nodeTypes];
+    if (!types.includes(node.type as MailyContentTypeEnum)) return false;
+    if (!node.attrs) return false;
+
+    return attrPredicate(node, node.attrs);
+  };
 };
 
-export const isVariableNode = (
-  node: MailyJSONContent
-): node is MailyJSONContent & { attrs: { [MailyAttrsEnum.ID]: string } } => {
-  return !!(
-    node.type === MailyContentTypeEnum.VARIABLE &&
-    node.attrs &&
-    node.attrs[MailyAttrsEnum.ID] !== undefined &&
-    typeof node.attrs[MailyAttrsEnum.ID] === 'string'
-  );
-};
+export const isRepeatNode = createNodeTypeGuard<
+  MailyJSONContent & { attrs: { [MailyAttrsEnum.EACH_KEY]: string } }
+>(
+  [MailyContentTypeEnum.REPEAT, MailyContentTypeEnum.FOR],
+  (_, attrs) => attrs[MailyAttrsEnum.EACH_KEY] !== undefined && typeof attrs[MailyAttrsEnum.EACH_KEY] === 'string'
+);
 
-export const isButtonNode = (
-  node: MailyJSONContent
-): node is MailyJSONContent & { attrs: { [MailyAttrsEnum.ID]: string } } => {
-  return !!(
-    node.type === MailyContentTypeEnum.BUTTON &&
-    node.attrs &&
-    ((node.attrs[MailyAttrsEnum.TEXT] !== undefined && typeof node.attrs[MailyAttrsEnum.TEXT] === 'string') ||
-      (node.attrs[MailyAttrsEnum.URL] !== undefined && typeof node.attrs[MailyAttrsEnum.URL] === 'string'))
-  );
-};
+export const isVariableNode = createNodeTypeGuard<
+  MailyJSONContent & { attrs: { [MailyAttrsEnum.ID]: string } }
+>(
+  MailyContentTypeEnum.VARIABLE,
+  (_, attrs) => attrs[MailyAttrsEnum.ID] !== undefined && typeof attrs[MailyAttrsEnum.ID] === 'string'
+);
 
-export const isImageNode = (
-  node: MailyJSONContent
-): node is MailyJSONContent & { attrs: { [MailyAttrsEnum.ID]: string } } => {
-  return !!(
-    (node.type === MailyContentTypeEnum.IMAGE || node.type === MailyContentTypeEnum.INLINE_IMAGE) &&
-    node.attrs &&
-    ((node.attrs[MailyAttrsEnum.SRC] !== undefined && typeof node.attrs[MailyAttrsEnum.SRC] === 'string') ||
-      (node.attrs[MailyAttrsEnum.EXTERNAL_LINK] !== undefined &&
-        typeof node.attrs[MailyAttrsEnum.EXTERNAL_LINK] === 'string'))
-  );
-};
+export const isButtonNode = createNodeTypeGuard<
+  MailyJSONContent & { attrs: { [MailyAttrsEnum.ID]: string } }
+>(
+  MailyContentTypeEnum.BUTTON,
+  (_, attrs) =>
+    (attrs[MailyAttrsEnum.TEXT] !== undefined && typeof attrs[MailyAttrsEnum.TEXT] === 'string') ||
+    (attrs[MailyAttrsEnum.URL] !== undefined && typeof attrs[MailyAttrsEnum.URL] === 'string')
+);
 
-export const isLinkNode = (
-  node: MailyJSONContent
-): node is MailyJSONContent & { attrs: { [MailyAttrsEnum.ID]: string } } => {
-  return !!(
-    node.type === MailyContentTypeEnum.LINK &&
-    node.attrs &&
-    node.attrs[MailyAttrsEnum.HREF] !== undefined &&
-    typeof node.attrs[MailyAttrsEnum.HREF] === 'string'
-  );
-};
+export const isImageNode = createNodeTypeGuard<
+  MailyJSONContent & { attrs: { [MailyAttrsEnum.ID]: string } }
+>(
+  [MailyContentTypeEnum.IMAGE, MailyContentTypeEnum.INLINE_IMAGE],
+  (_, attrs) =>
+    (attrs[MailyAttrsEnum.SRC] !== undefined && typeof attrs[MailyAttrsEnum.SRC] === 'string') ||
+    (attrs[MailyAttrsEnum.EXTERNAL_LINK] !== undefined && typeof attrs[MailyAttrsEnum.EXTERNAL_LINK] === 'string')
+);
+
+export const isLinkNode = createNodeTypeGuard<
+  MailyJSONContent & { attrs: { [MailyAttrsEnum.ID]: string } }
+>(
+  MailyContentTypeEnum.LINK,
+  (_, attrs) => attrs[MailyAttrsEnum.HREF] !== undefined && typeof attrs[MailyAttrsEnum.HREF] === 'string'
+);
 
 export const hasShow = (
   node: MailyJSONContent
