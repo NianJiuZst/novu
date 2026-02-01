@@ -4,6 +4,24 @@
 -- This migration creates a new table with the desired schema and a materialized view
 -- to populate it from the existing traces table
 
+-- Step 0: Add workflow run columns to the original traces table
+-- These columns must be added before creating the MV so data flows correctly
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS workflow_name String DEFAULT '';
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS trigger_identifier String DEFAULT '';
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS transaction_id String DEFAULT '';
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS channels String DEFAULT '';
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS subscriber_to String DEFAULT '';
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS payload String DEFAULT '';
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS control_values String DEFAULT '';
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS topics String DEFAULT '';
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS is_digest Bool DEFAULT false;
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS digested_workflow_run_id String DEFAULT '';
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS delivery_lifecycle_status String DEFAULT '';
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS delivery_lifecycle_detail String DEFAULT '';
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS severity String DEFAULT '';
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS critical Bool DEFAULT false;
+ALTER TABLE traces ADD COLUMN IF NOT EXISTS context_keys Array(String) DEFAULT [];
+
 -- Step 1: Create traces_temp table with refactored ORDER BY
 CREATE TABLE IF NOT EXISTS traces_temp (
     -- Core fields
@@ -29,7 +47,7 @@ CREATE TABLE IF NOT EXISTS traces_temp (
     entity_id String,
     
     -- Data retention
-    expires_at DateTime64(3, 'UTC'),
+    expires_at Date,
     
     -- Existing metadata
     step_run_type LowCardinality(String) DEFAULT '',
@@ -61,7 +79,7 @@ CREATE TABLE IF NOT EXISTS traces_temp (
 ENGINE = MergeTree
 PARTITION BY toYYYYMM(created_at)
 ORDER BY (organization_id, environment_id, entity_type, toDate(created_at), entity_id)
-TTL toDateTime(expires_at)
+TTL expires_at
 SETTINGS index_granularity = 8192, async_insert = 1;
 
 -- Step 2: Create materialized view to populate traces_temp from new inserts into traces
@@ -84,28 +102,28 @@ AS SELECT
     status,
     entity_type,
     entity_id,
-    expires_at,
+    toDate(expires_at) AS expires_at,
     step_run_type,
     workflow_run_identifier,
     workflow_id,
     coalesce(provider_id, '') AS provider_id,
-    '' AS workflow_name,
-    '' AS trigger_identifier,
-    '' AS transaction_id,
-    '' AS channels,
-    '' AS subscriber_to,
-    '' AS payload,
-    '' AS control_values,
-    '' AS topics,
-    false AS is_digest,
-    '' AS digested_workflow_run_id,
-    '' AS delivery_lifecycle_status,
-    '' AS delivery_lifecycle_detail,
-    '' AS severity,
-    false AS critical,
-    CAST([] AS Array(String)) AS context_keys
+    workflow_name,
+    trigger_identifier,
+    transaction_id,
+    channels,
+    subscriber_to,
+    payload,
+    control_values,
+    topics,
+    is_digest,
+    digested_workflow_run_id,
+    delivery_lifecycle_status,
+    delivery_lifecycle_detail,
+    severity,
+    critical,
+    context_keys
 FROM traces
-WHERE created_at > toDateTime64('2026-01-26 00:00:00', 3, 'UTC');
+WHERE created_at > toDateTime64('2024-02-01 00:00:00', 3, 'UTC');
 
 -- Step 3: Create delivery_trend_counts_temp table for migration from step_runs to traces
 -- Similar to traces_temp, this allows backfilling historical data separately
