@@ -37,7 +37,7 @@ const schemaDefinition = {
   entity_id: { type: CHString() }, // ID of the related entity, request-> request.id, step_run-> job._id, workflow_run-> notification._id
 
   // Data retention
-  expires_at: { type: CHDate() },
+  expires_at: { type: CHDateTime64(3, 'UTC') },
 
   // Step run metadata
   step_run_type: { type: CHString('') }, // default value is empty string
