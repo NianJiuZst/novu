@@ -1,5 +1,6 @@
 import { Decoration, EditorView, ViewPlugin } from '@uiw/react-codemirror';
 import { VariablePluginView } from './plugin-view';
+import { schemaChangeField } from './schema-change-effect';
 import type { PluginState } from './types';
 
 export function createVariableExtension({
@@ -10,7 +11,7 @@ export function createVariableExtension({
   isDigestEventsVariable,
   getVariableErrorMessage,
 }: PluginState) {
-  return ViewPlugin.fromClass(
+  const plugin = ViewPlugin.fromClass(
     class {
       private view: VariablePluginView;
 
@@ -42,9 +43,12 @@ export function createVariableExtension({
         }),
     }
   );
+
+  return [schemaChangeField, plugin];
 }
 
 export const VARIABLE_PILL_CLASS = 'cm-variable-pill';
 export const FILTERS_CLASS = 'has-filters';
 
+export * from './schema-change-effect';
 export * from './types';

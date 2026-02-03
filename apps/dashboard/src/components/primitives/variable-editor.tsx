@@ -3,7 +3,7 @@ import { EditorView, Extension } from '@uiw/react-codemirror';
 import { JSONSchema7 } from 'json-schema';
 import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Editor, EditorProps } from '@/components/primitives/editor';
-import { createVariableExtension } from '@/components/primitives/variable-plugin';
+import { createVariableExtension, schemaChangeEffect } from '@/components/primitives/variable-plugin';
 import { DEFAULT_VARIABLE_PILL_HEIGHT } from '@/components/primitives/variable-plugin/variable-pill-widget';
 import { variablePillTheme } from '@/components/primitives/variable-plugin/variable-theme';
 import { EditVariablePopover } from '@/components/variable/edit-variable-popover';
@@ -358,6 +358,15 @@ export function VariableEditor({
       setVariableTriggerPosition(null);
     }
   }, [selectedVariable, viewRef, containerRef]);
+
+  // Trigger decoration update when validation function changes (e.g., when schema changes)
+  useEffect(() => {
+    if (viewRef.current) {
+      viewRef.current.dispatch({
+        effects: schemaChangeEffect.of(undefined),
+      });
+    }
+  }, [isAllowedVariable, viewRef]);
 
   return (
     <div ref={containerRef} className={className} onClick={handleContainerClick}>

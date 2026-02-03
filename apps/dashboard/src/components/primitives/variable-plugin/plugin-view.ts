@@ -3,6 +3,7 @@ import { MutableRefObject } from 'react';
 import { parseVariable, VARIABLE_REGEX_STRING } from '@/utils/liquid';
 import { isVariableInLocalContext } from '@/utils/liquid-scope-analyzer';
 import { IsAllowedVariable } from '@/utils/parseStepVariables';
+import { schemaChangeEffect } from './schema-change-effect';
 import { isTypingVariable } from './utils';
 import { VariablePillWidget } from './variable-pill-widget';
 
@@ -27,7 +28,12 @@ export class VariablePluginView {
   }
 
   update(update: any) {
-    if (update.docChanged || update.viewportChanged || update.selectionSet) {
+    // Check if schema changed (via effect) or if document/viewport/selection changed
+    const hasSchemaChangeEffect = update.transactions?.some((tr: any) =>
+      tr.effects?.some((effect: any) => effect.is(schemaChangeEffect))
+    );
+
+    if (update.docChanged || update.viewportChanged || update.selectionSet || hasSchemaChangeEffect) {
       const pos = update.state.selection.main.head;
       const content = update.state.doc.toString();
 
