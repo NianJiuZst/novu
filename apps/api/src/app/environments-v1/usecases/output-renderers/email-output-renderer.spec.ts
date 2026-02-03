@@ -2548,4 +2548,107 @@ describe('EmailOutputRendererUsecase', () => {
       expect(result.body).to.include('<p></p>');
     });
   });
+
+  describe('Subject line handling', () => {
+    it('should not HTML-encode special characters in subject', async () => {
+      const mockTipTapNode: MailyJSONContent = {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Hello World',
+              },
+            ],
+          },
+        ],
+      };
+
+      const renderCommand: EmailOutputRendererCommand = {
+        dbWorkflow: mockDbWorkflow,
+        controlValues: {
+          subject: 'Welcome to I&B monitoring platform!',
+          body: JSON.stringify(mockTipTapNode),
+        },
+        fullPayloadForRender: mockFullPayload,
+        stepId: 'fake_step_id',
+      };
+
+      const result = await emailOutputRendererUsecase.execute(renderCommand);
+
+      expect(result.subject).to.equal('Welcome to I&B monitoring platform!');
+      expect(result.subject).to.not.include('&amp;');
+    });
+
+    it('should preserve special characters in subject with liquid variables', async () => {
+      const mockTipTapNode: MailyJSONContent = {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Hello',
+              },
+            ],
+          },
+        ],
+      };
+
+      const renderCommand: EmailOutputRendererCommand = {
+        dbWorkflow: mockDbWorkflow,
+        controlValues: {
+          subject: 'Order #{{payload.orderId}} - R&D Department',
+          body: JSON.stringify(mockTipTapNode),
+        },
+        fullPayloadForRender: {
+          ...mockFullPayload,
+          payload: { orderId: '12345' },
+        },
+        stepId: 'fake_step_id',
+      };
+
+      const result = await emailOutputRendererUsecase.execute(renderCommand);
+
+      expect(result.subject).to.include('R&D Department');
+      expect(result.subject).to.not.include('&amp;');
+    });
+
+    it('should handle subject with multiple special characters', async () => {
+      const mockTipTapNode: MailyJSONContent = {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Content',
+              },
+            ],
+          },
+        ],
+      };
+
+      const renderCommand: EmailOutputRendererCommand = {
+        dbWorkflow: mockDbWorkflow,
+        controlValues: {
+          subject: 'Tom & Jerry <3 Pizza > Pasta',
+          body: JSON.stringify(mockTipTapNode),
+        },
+        fullPayloadForRender: mockFullPayload,
+        stepId: 'fake_step_id',
+      };
+
+      const result = await emailOutputRendererUsecase.execute(renderCommand);
+
+      expect(result.subject).to.equal('Tom & Jerry <3 Pizza > Pasta');
+      expect(result.subject).to.not.include('&amp;');
+      expect(result.subject).to.not.include('&lt;');
+      expect(result.subject).to.not.include('&gt;');
+    });
+  });
 });

@@ -519,7 +519,7 @@ export class EmailOutputRendererUsecase extends BaseTranslationRendererUsecase {
           organization,
         });
 
-    return decodeHTML(this.unescapeJsonString(translatedSubject));
+    return this.unescapeJsonString(translatedSubject);
   }
 
   private async processMailyTranslations({
