@@ -400,6 +400,7 @@ export class RunJob {
           organizationId: job._organizationId,
           _subscriberId: job._subscriberId,
           notification,
+          currentJob: { type: job.type, _id: job._id },
         });
         // Remove the attachments if the job should not be queued
         await this.storageHelperService.deleteAttachments(job.payload?.attachments);
@@ -498,6 +499,7 @@ export class RunJob {
             organizationId: currentJob._organizationId,
             _subscriberId: currentJob._subscriberId,
             notification,
+            currentJob: { type: currentJob.type, _id: currentJob._id },
           });
 
           return;
@@ -558,6 +560,7 @@ export class RunJob {
             organizationId: nextJob._organizationId,
             _subscriberId: nextJob._subscriberId,
             notification,
+            currentJob: { type: nextJob.type, _id: nextJob._id },
           });
         }
       } catch (error: unknown) {
@@ -571,6 +574,7 @@ export class RunJob {
             organizationId: currentJob._organizationId,
             _subscriberId: currentJob._subscriberId,
             notification,
+            currentJob: { type: currentJob.type, _id: currentJob._id },
           });
 
           return;
@@ -810,6 +814,7 @@ export class RunJob {
       organizationId: job._organizationId,
       _subscriberId: job._subscriberId,
       notification,
+      currentJob: { type: job.type, _id: job._id },
     });
   }
 

@@ -53,6 +53,7 @@ export interface WorkflowStatusUpdateParams {
   deliveryLifecycleStatus?: DeliveryLifecycleStatusEnum;
   deliveryLifecycleDetail?: DeliveryLifecycleDetail;
   notification?: NotificationForTrace | null;
+  currentJob?: Pick<JobEntity, 'type' | '_id'>;
 }
 
 type JobResult = Pick<JobEntity, 'type' | 'status' | 'deliveryLifecycleState' | '_id'>;
@@ -106,6 +107,7 @@ export class WorkflowRunService {
     deliveryLifecycleStatus: providedStatus,
     deliveryLifecycleDetail: providedDetail,
     notification,
+    currentJob,
   }: WorkflowStatusUpdateParams): Promise<void> {
     try {
       let deliveryLifecycleStatus: DeliveryLifecycleStatusEnum;
@@ -145,6 +147,18 @@ export class WorkflowRunService {
       );
 
       if (shouldTrace) {
+        await this.handleDeliveredInAppTrace(
+          deliveryLifecycleStatus,
+          currentJob,
+          jobs,
+          messages,
+          notificationId,
+          workflowStatus,
+          organizationId,
+          environmentId,
+          notification
+        );
+
         await this.createWorkflowRunTraceUpdate(
           notificationId,
           workflowStatus,
@@ -243,6 +257,57 @@ export class WorkflowRunService {
       default:
         return true;
     }
+  }
+
+  /**
+   * Handles creating a SENT trace for in_app notifications when they reach DELIVERED status.
+   *
+   * This is needed because in_app notifications are delivered immediately upon creation
+   * (stored in the database), which means they can skip the SENT lifecycle status.
+   * However, for observability and analytics purposes, we still want to track the SENT event
+   * separately. This ensures we have both SENT and DELIVERED traces for in_app notifications,
+   * providing a complete lifecycle view that matches other channel types.
+   */
+  private async handleDeliveredInAppTrace(
+    deliveryLifecycleStatus: DeliveryLifecycleStatusEnum,
+    currentJob: Pick<JobEntity, 'type' | '_id'> | undefined,
+    jobs: JobResult[],
+    messages: MessageResult[],
+    notificationId: string,
+    workflowStatus: WorkflowRunStatusEnum,
+    organizationId: string,
+    environmentId: string,
+    notification: NotificationForTrace | null | undefined
+  ): Promise<void> {
+    if (deliveryLifecycleStatus === DeliveryLifecycleStatusEnum.DELIVERED) {
+      const isCurrentJobInApp = currentJob?.type === 'in_app';
+
+      if (isCurrentJobInApp && this.hasSentConditionMet(jobs, messages)) {
+        await this.createWorkflowRunTraceUpdate(
+          notificationId,
+          workflowStatus,
+          organizationId,
+          environmentId,
+          DeliveryLifecycleStatusEnum.SENT,
+          undefined,
+          notification
+        );
+      }
+    }
+  }
+
+  /**
+   * Checks if SENT conditions are met (completed channel jobs with messages).
+   * Used to determine if a SENT trace should be emitted.
+   */
+  private hasSentConditionMet(jobs: JobResult[], messages: MessageResult[]): boolean {
+    const channelJobs = jobs.filter((job) => job.type && ['in_app', 'email', 'sms', 'chat', 'push'].includes(job.type));
+
+    return channelJobs.some((job) => {
+      if (job.status !== JobStatusEnum.COMPLETED) return false;
+
+      return messages.some((message) => message._jobId === job._id);
+    });
   }
 
   private async createWorkflowRunTraceUpdate(
