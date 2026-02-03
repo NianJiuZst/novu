@@ -2548,4 +2548,94 @@ describe('EmailOutputRendererUsecase', () => {
       expect(result.body).to.include('<p></p>');
     });
   });
+
+  describe('Subject handling (no HTML sanitization)', () => {
+    beforeEach(() => {
+      getOrganizationSettingsMock.execute.resolves({
+        removeNovuBranding: true,
+        defaultLocale: 'en_US',
+      });
+    });
+
+    it('should preserve ampersand characters in subject without HTML encoding', async () => {
+      const renderCommand: EmailOutputRendererCommand = {
+        dbWorkflow: mockDbWorkflow,
+        controlValues: {
+          subject: 'Welcome to I&B monitoring platform!',
+          body: '<p>Test content</p>',
+        },
+        fullPayloadForRender: mockFullPayload,
+        stepId: 'fake_step_id',
+      };
+
+      const result = await emailOutputRendererUsecase.execute(renderCommand);
+
+      expect(result.subject).to.equal('Welcome to I&B monitoring platform!');
+      expect(result.subject).to.not.include('&amp;');
+    });
+
+    it('should preserve less-than and greater-than characters in subject', async () => {
+      const renderCommand: EmailOutputRendererCommand = {
+        dbWorkflow: mockDbWorkflow,
+        controlValues: {
+          subject: 'Test <important> subject',
+          body: '<p>Test content</p>',
+        },
+        fullPayloadForRender: mockFullPayload,
+        stepId: 'fake_step_id',
+      };
+
+      const result = await emailOutputRendererUsecase.execute(renderCommand);
+
+      expect(result.subject).to.equal('Test <important> subject');
+      expect(result.subject).to.not.include('&lt;');
+      expect(result.subject).to.not.include('&gt;');
+    });
+
+    it('should preserve special characters in subject with variables', async () => {
+      const mockTipTapNode = {
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Test content' }] }],
+      };
+
+      const renderCommand: EmailOutputRendererCommand = {
+        dbWorkflow: mockDbWorkflow,
+        controlValues: {
+          subject: 'Order #{{payload.orderId}} from A&B Corp',
+          body: JSON.stringify(mockTipTapNode),
+        },
+        fullPayloadForRender: {
+          ...mockFullPayload,
+          payload: { orderId: '12345' },
+        },
+        stepId: 'fake_step_id',
+      };
+
+      const result = await emailOutputRendererUsecase.execute(renderCommand);
+
+      expect(result.subject).to.include('A&B Corp');
+      expect(result.subject).to.not.include('&amp;');
+    });
+
+    it('should not apply HTML sanitization to subject even when body is sanitized', async () => {
+      const renderCommand: EmailOutputRendererCommand = {
+        dbWorkflow: mockDbWorkflow,
+        controlValues: {
+          subject: 'Price: $100 & shipping <$10>',
+          body: '<p>Content with & and <script>bad</script></p>',
+          disableOutputSanitization: false,
+        },
+        fullPayloadForRender: mockFullPayload,
+        stepId: 'fake_step_id',
+      };
+
+      const result = await emailOutputRendererUsecase.execute(renderCommand);
+
+      expect(result.subject).to.equal('Price: $100 & shipping <$10>');
+      expect(result.subject).to.not.include('&amp;');
+      expect(result.subject).to.not.include('&lt;');
+      expect(result.subject).to.not.include('&gt;');
+      expect(result.body).to.not.include('<script>');
+    });
+  });
 });
