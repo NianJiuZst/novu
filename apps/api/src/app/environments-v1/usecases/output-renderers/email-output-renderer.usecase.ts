@@ -29,7 +29,7 @@ import {
   LAYOUT_CONTENT_VARIABLE,
   LAYOUT_PREVIEW_EMAIL_STEP,
 } from '@novu/shared';
-import { decodeHTML } from 'entities';
+import { decodeHTML as decodeHTMLEntities } from 'entities';
 import { Liquid } from 'liquidjs';
 import { GetLayoutCommand, GetLayoutUseCase } from '../../../layouts-v2/usecases/get-layout';
 import { GetOrganizationSettingsCommand } from '../../../organization/usecases/get-organization-settings/get-organization-settings.command';
@@ -472,7 +472,7 @@ export class EmailOutputRendererUsecase extends BaseTranslationRendererUsecase {
       });
       const parsedMaily = await this.parseMailyContentByLiquid(translatedMaily, escapedPayloadForJson);
       const renderedMaily = await mailyRender(parsedMaily, { noHtmlWrappingTags });
-      return decodeHTML(renderedMaily);
+      return decodeHTMLEntities(renderedMaily);
     } else {
       const processedHtml = await this.processTextTranslations({
         text: body,
@@ -519,7 +519,7 @@ export class EmailOutputRendererUsecase extends BaseTranslationRendererUsecase {
           organization,
         });
 
-    return decodeHTML(this.unescapeJsonString(translatedSubject));
+    return this.liquidEngine.parseAndRender(this.unescapeJsonString(translatedSubject), unescapedVariables);
   }
 
   private async processMailyTranslations({

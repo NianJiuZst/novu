@@ -132,6 +132,73 @@ describe('EmailOutputRendererUsecase', () => {
   } as any;
 
   describe('general flow', () => {
+    it('should preserve special characters in subject without HTML encoding', async () => {
+      const mockTipTapNode: MailyJSONContent = {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Hello World',
+              },
+            ],
+          },
+        ],
+      };
+
+      const renderCommand: EmailOutputRendererCommand = {
+        dbWorkflow: mockDbWorkflow,
+        controlValues: {
+          subject: 'Welcome to I&B monitoring platform! Let\'s get started!',
+          body: JSON.stringify(mockTipTapNode),
+        },
+        fullPayloadForRender: mockFullPayload,
+        stepId: 'fake_step_id',
+      };
+
+      const result = await emailOutputRendererUsecase.execute(renderCommand);
+
+      expect(result.subject).to.equal('Welcome to I&B monitoring platform! Let\'s get started!');
+      expect(result.subject).to.not.include('&amp;');
+    });
+
+    it('should handle subject with liquid variables and special characters', async () => {
+      const mockTipTapNode: MailyJSONContent = {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Hello World',
+              },
+            ],
+          },
+        ],
+      };
+
+      const renderCommand: EmailOutputRendererCommand = {
+        dbWorkflow: mockDbWorkflow,
+        controlValues: {
+          subject: 'Hello {{payload.name}} & welcome to {{payload.company}}!',
+          body: JSON.stringify(mockTipTapNode),
+        },
+        fullPayloadForRender: {
+          ...mockFullPayload,
+          payload: { name: 'John', company: 'Acme & Co' },
+        },
+        stepId: 'fake_step_id',
+      };
+
+      const result = await emailOutputRendererUsecase.execute(renderCommand);
+
+      expect(result.subject).to.equal('Hello John & welcome to Acme & Co!');
+      expect(result.subject).to.not.include('&amp;');
+    });
+
     it('should return subject and body when body is not string', async () => {
       let renderCommand: EmailOutputRendererCommand = {
         dbWorkflow: mockDbWorkflow,
