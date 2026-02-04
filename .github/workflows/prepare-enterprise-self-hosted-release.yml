@@ -156,6 +156,10 @@ jobs:
         shell: bash
         run: pnpm install --frozen-lockfile
 
+      - name: Symlink Enterprise Packages
+        shell: bash
+        run: pnpm symlink:submodules
+
       - name: Set Up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
