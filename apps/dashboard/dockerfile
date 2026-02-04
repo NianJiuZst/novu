@@ -35,8 +35,13 @@ COPY --from=builder /usr/src/app/apps/dashboard/dist /app/dist
 COPY --from=builder /usr/src/app/apps/dashboard/package.json /app/package.json
 COPY --from=builder /usr/src/app/apps/dashboard/docker-entrypoint.sh /app/docker-entrypoint.sh
 
+# OpenShift compatibility: Set group ownership to 0 (root group) and make group-writable
+# OpenShift runs with arbitrary UIDs but keeps GID 0, allowing write access
+# Make /app/dist writable so sed can create temp files
 RUN chgrp -R 0 /app && \
-    chmod -R g=u /app && \
+    chmod -R g+rwX /app && \
+    chmod 775 /app/dist && \
+    chmod 664 /app/dist/index.html && \
     chmod +x /app/docker-entrypoint.sh
 
 USER 1000
