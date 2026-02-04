@@ -29,14 +29,17 @@ FROM node:20-alpine3.20
 
 RUN npm install -g http-server --loglevel notice
 
-USER 1000
 WORKDIR /app
 
-COPY --chown=1000:1000 --from=builder /usr/src/app/apps/dashboard/dist /app/dist
-COPY --chown=1000:1000 --from=builder /usr/src/app/apps/dashboard/package.json /app/package.json
-COPY --chown=1000:1000 --from=builder /usr/src/app/apps/dashboard/docker-entrypoint.sh /app/docker-entrypoint.sh  
+COPY --from=builder /usr/src/app/apps/dashboard/dist /app/dist
+COPY --from=builder /usr/src/app/apps/dashboard/package.json /app/package.json
+COPY --from=builder /usr/src/app/apps/dashboard/docker-entrypoint.sh /app/docker-entrypoint.sh
 
-RUN chmod +x /app/docker-entrypoint.sh
+RUN chgrp -R 0 /app && \
+    chmod -R g=u /app && \
+    chmod +x /app/docker-entrypoint.sh
+
+USER 1000
 ENTRYPOINT [ "/app/docker-entrypoint.sh" ]
 # Expose the port the app runs on
 EXPOSE 4000
