@@ -152,8 +152,7 @@ export class SendMessageInApp extends SendMessageBase {
       };
     }
 
-    const messagePayload = { ...command.payload };
-    delete messagePayload.attachments;
+    const { attachments, ...messagePayload } = command.payload;
 
     let oldMessage: MessageEntity | null = null;
     /*
