@@ -10,7 +10,6 @@ describe('discoverEmailTemplates', () => {
 
     const validTemplate = templates.find((t) => t.relativePath.includes('valid-template'));
     expect(validTemplate).toBeDefined();
-    expect(validTemplate?.exports).toContain('default');
   });
 
   it('should ignore test files', async () => {
@@ -41,9 +40,6 @@ describe('discoverEmailTemplates', () => {
       const template = templates[0];
       expect(template).toHaveProperty('filePath');
       expect(template).toHaveProperty('relativePath');
-      expect(template).toHaveProperty('exports');
-      expect(Array.isArray(template.exports)).toBe(true);
-      expect(template.exports).toContain('default');
     }
   });
 

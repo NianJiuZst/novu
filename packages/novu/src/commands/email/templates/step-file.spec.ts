@@ -3,61 +3,31 @@ import type { EmailStepConfig } from '../config/schema';
 import { generateStepFile } from './step-file';
 
 describe('generateStepFile', () => {
+  const stepId = 'welcome-email';
   const baseConfig: EmailStepConfig = {
     template: 'emails/welcome.tsx',
     workflowId: 'onboarding',
   };
 
-  it('should generate correct import path', () => {
-    const result = generateStepFile('../emails/welcome', baseConfig);
-
-    expect(result).toContain("import EmailTemplate from '../emails/welcome';");
+  it('should match snapshot', () => {
+    const result = generateStepFile(stepId, '../emails/welcome', baseConfig);
+    expect(result).toMatchSnapshot();
   });
 
-  it('should use config.subject when provided', () => {
+  it('should match snapshot with subject', () => {
     const config: EmailStepConfig = {
       ...baseConfig,
       subject: 'Welcome to Acme!',
     };
-
-    const result = generateStepFile('../emails/welcome', config);
-
-    expect(result).toContain("subject: payload.subject || 'Welcome to Acme!'");
+    const result = generateStepFile(stepId, '../emails/welcome', config);
+    expect(result).toMatchSnapshot('with-subject');
   });
 
-  it('should fallback to No Subject when no subject provided', () => {
-    const result = generateStepFile('../emails/welcome', baseConfig);
+  it('should match snapshot with different import paths', () => {
+    const result1 = generateStepFile(stepId, './emails/welcome', baseConfig);
+    expect(result1).toMatchSnapshot('relative-import');
 
-    expect(result).toContain("subject: payload.subject || 'No Subject'");
-  });
-
-  it('should include all context parameters', () => {
-    const result = generateStepFile('../emails/welcome', baseConfig);
-
-    expect(result).toContain('payload, subscriber, context, steps');
-    expect(result).toContain('{...payload}');
-    expect(result).toContain('subscriber={subscriber}');
-    expect(result).toContain('context={context}');
-    expect(result).toContain('steps={steps}');
-  });
-
-  it('should generate valid TypeScript/JSX syntax', () => {
-    const result = generateStepFile('../emails/welcome', baseConfig);
-
-    expect(result).toContain("import { render } from '@react-email/components';");
-    expect(result).toContain('export default async function');
-    expect(result).toContain('return {');
-    expect(result).toContain('subject:');
-    expect(result).toContain('body:');
-    expect(result).toContain('await render(');
-    expect(result).toContain('<EmailTemplate');
-  });
-
-  it('should handle relative import paths correctly', () => {
-    const result1 = generateStepFile('./emails/welcome', baseConfig);
-    expect(result1).toContain("import EmailTemplate from './emails/welcome';");
-
-    const result2 = generateStepFile('../../src/emails/welcome', baseConfig);
-    expect(result2).toContain("import EmailTemplate from '../../src/emails/welcome';");
+    const result2 = generateStepFile(stepId, '../../src/emails/welcome', baseConfig);
+    expect(result2).toMatchSnapshot('nested-import');
   });
 });

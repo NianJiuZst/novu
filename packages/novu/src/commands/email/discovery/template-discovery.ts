@@ -6,7 +6,6 @@ import ts from 'typescript';
 export type DiscoveredTemplate = {
   filePath: string;
   relativePath: string;
-  exports: string[];
 };
 
 const DEFAULT_IGNORES = [
@@ -51,11 +50,11 @@ export async function discoverEmailTemplates(rootDir: string = process.cwd()): P
     const batchRes = await Promise.all(
       batch.map(async (relativePath) => {
         const filePath = path.join(rootDir, relativePath);
-        const exports = await findReactEmailExportsTsAst(filePath);
-        if (!exports.length) return null;
-        if (!exports.includes('default')) return null;
+        const exportNames = await findReactEmailExportsTsAst(filePath);
+        if (!exportNames.length) return null;
+        if (!exportNames.includes('default')) return null;
 
-        return { filePath, relativePath, exports } satisfies DiscoveredTemplate;
+        return { filePath, relativePath } satisfies DiscoveredTemplate;
       })
     );
     for (const r of batchRes) if (r) out.push(r);

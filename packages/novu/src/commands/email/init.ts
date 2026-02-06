@@ -5,15 +5,15 @@ import { cyan, green, red, yellow } from 'picocolors';
 import prompts from 'prompts';
 import { loadConfig } from './config/loader';
 import type { EmailStepConfig, NovuConfig } from './config/schema';
-import { isInteractive } from './helpers/environment';
-import { discoverEmailTemplates } from './helpers/template-discovery';
+import { discoverEmailTemplates } from './discovery';
+import { generateStepFile } from './templates/step-file';
 import {
   generateStepIdFromFilename,
   generateWorkflowIdFromStepId,
+  isInteractive,
   validateStepId,
   validateWorkflowId,
-} from './helpers/validation';
-import { generateStepFile } from './templates/step-file';
+} from './utils';
 
 interface InitOptions {
   config?: string;
@@ -182,7 +182,7 @@ async function runInitWithConfig(config: NovuConfig, options: InitOptions): Prom
 
     const finalImportPath = importPath.startsWith('.') ? importPath : `./${importPath}`;
 
-    const stepFileContent = generateStepFile(finalImportPath, emailConfig);
+    const stepFileContent = generateStepFile(stepId, finalImportPath, emailConfig);
 
     fs.writeFileSync(stepFilePath, stepFileContent, 'utf8');
 

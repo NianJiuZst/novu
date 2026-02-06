@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import { v4 as uuidv4 } from 'uuid';
 import { DevCommandOptions, devCommand } from './commands';
-import { emailInit } from './commands/email';
+import { emailInit, emailPublish } from './commands/email';
 import { IInitCommandOptions, init } from './commands/init';
 import { sync } from './commands/sync';
 import { pullTranslations, pushTranslations } from './commands/translations';
@@ -155,6 +155,27 @@ emailCommand
       event: 'Email Init Command',
     });
     await emailInit(options);
+  });
+
+emailCommand
+  .command('publish')
+  .description('Bundle and deploy step handlers to Novu')
+  .option('-s, --secret-key <key>', 'Novu API secret key', NOVU_SECRET_KEY || '')
+  .option('-a, --api-url <url>', 'Novu API URL', NOVU_API_URL || 'https://api.novu.co')
+  .option('-c, --config <path>', 'Path to config file')
+  .option('--out <path>', 'Directory containing step handlers')
+  .option('--workflow <id>', 'Deploy only specific workflow')
+  .option('--bundle-out-dir [path]', 'Write bundled workflow artifacts to a directory for debugging')
+  .option('--dry-run', 'Bundle without deploying')
+  .action(async (options) => {
+    analytics.track({
+      identity: {
+        anonymousId,
+      },
+      data: {},
+      event: 'Email Publish Command',
+    });
+    await emailPublish(options);
   });
 
 program.parse(process.argv);
