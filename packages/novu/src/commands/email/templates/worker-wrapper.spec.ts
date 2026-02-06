@@ -38,7 +38,17 @@ describe('generateWorkerWrapper', () => {
   it('should interpolate workflow and environment IDs', () => {
     const result = generateWorkerWrapper(mockSteps, 'my-workflow', 'my-env', '/root');
 
-    expect(result).toContain("workflowId: 'my-workflow'");
-    expect(result).toContain("environmentId: 'my-env'");
+    expect(result).toContain('workflowId: "my-workflow"');
+    expect(result).toContain('environmentId: "my-env"');
+  });
+
+  it('should generate map-based dispatch and invalid JSON handling', () => {
+    const result = generateWorkerWrapper(mockSteps, 'workflow', 'env', '/root');
+
+    expect(result).toContain('const stepHandlers = new Map([');
+    expect(result).toContain('function jsonResponse(body, status, extraHeaders = {})');
+    expect(result).toContain("Allow: 'POST'");
+    expect(result).toContain("error: 'Invalid JSON body'");
+    expect(result).toContain("message: 'Internal server error'");
   });
 });

@@ -7,6 +7,7 @@ const MAX_BUNDLE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
 
 interface BundleBuildOptions {
   minify?: boolean;
+  aliases?: Record<string, string>;
 }
 
 export async function bundleWorkflow(
@@ -20,20 +21,30 @@ export async function bundleWorkflow(
   const wrapperCode = generateWorkerWrapper(steps, workflowId, environmentId, rootDir);
 
   // Get base bundler config
-  const baseConfig = getBundlerConfig({ minify: options.minify });
+  const baseConfig = getBundlerConfig({
+    rootDir,
+    minify: options.minify,
+    aliases: options.aliases,
+  });
 
   // Bundle using esbuild with stdin
-  const result = await esbuild.build({
-    ...baseConfig,
-    stdin: {
-      contents: wrapperCode,
-      loader: 'tsx',
-      resolveDir: rootDir,
-      sourcefile: `${workflowId}-worker.tsx`,
-    },
-    write: false,
-    metafile: true,
-  });
+  let result: esbuild.BuildResult;
+
+  try {
+    result = await esbuild.build({
+      ...baseConfig,
+      stdin: {
+        contents: wrapperCode,
+        loader: 'tsx',
+        resolveDir: rootDir,
+        sourcefile: `${workflowId}-worker.tsx`,
+      },
+      write: false,
+      metafile: true,
+    });
+  } catch (error) {
+    throw formatBundlingError(workflowId, error);
+  }
 
   const outputFile = result.outputFiles?.[0];
 
@@ -90,4 +101,42 @@ export function formatBundleSize(size: number): string {
   } else {
     return `${(size / 1024 / 1024).toFixed(2)} MB`;
   }
+}
+
+function formatBundlingError(workflowId: string, error: unknown): Error {
+  if (isBuildFailure(error)) {
+    const unresolvedImports = error.errors.filter((entry) => entry.text.includes('Could not resolve'));
+    if (unresolvedImports.length > 0) {
+      const details = unresolvedImports
+        .map((entry) => {
+          if (!entry.location) {
+            return entry.text;
+          }
+
+          return `${entry.text} (${entry.location.file}:${entry.location.line}:${entry.location.column})`;
+        })
+        .join('\n  • ');
+
+      return new Error(
+        `Failed to bundle workflow: ${workflowId}\n\n` +
+          `Unresolved imports:\n` +
+          `  • ${details}\n\n` +
+          `Hints:\n` +
+          `  • Add custom path aliases in novu.config.ts under the aliases field\n` +
+          `  • Or define aliases in tsconfig/jsconfig paths and run publish from the matching project root`
+      );
+    }
+
+    return new Error(`Failed to bundle workflow: ${workflowId}\n${error.message}`);
+  }
+
+  if (error instanceof Error) {
+    return new Error(`Failed to bundle workflow: ${workflowId}\n${error.message}`);
+  }
+
+  return new Error(`Failed to bundle workflow: ${workflowId}`);
+}
+
+function isBuildFailure(error: unknown): error is esbuild.BuildFailure {
+  return typeof error === 'object' && error !== null && 'errors' in error && Array.isArray(error.errors);
 }

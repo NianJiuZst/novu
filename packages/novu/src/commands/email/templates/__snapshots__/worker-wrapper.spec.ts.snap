@@ -1,12 +1,13 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`generateWorkerWrapper > should handle empty steps array > empty-steps 1`] = `
-"import React from 'react';
+"const stepHandlers = new Map([
 
+]);
 
-const stepHandlers = {
-
-};
+function asObject(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
 
 export default {
   async fetch(request) {
@@ -38,15 +39,15 @@ export default {
         );
       }
 
-      const step = stepHandlers[stepName];
+      const step = stepHandlers.get(stepName);
       if (!step) {
         return new Response(
           JSON.stringify({ 
             error: 'Step not found',
             stepName,
-            available: Object.keys(stepHandlers),
-            workflowId: 'workflow',
-            environmentId: 'env'
+            available: Array.from(stepHandlers.keys()),
+            workflowId: "workflow",
+            environmentId: "env"
           }),
           { 
             status: 404,
@@ -55,11 +56,34 @@ export default {
         );
       }
 
-      const body = await request.json();
-      const { payload = {}, subscriber = {}, context = {}, steps = {} } = body;
+      let body = {};
+      const rawBody = await request.text();
+      if (rawBody) {
+        try {
+          body = JSON.parse(rawBody);
+        } catch {
+          return new Response(
+            JSON.stringify({
+              error: 'Invalid JSON body',
+              workflowId: "workflow",
+              environmentId: "env"
+            }),
+            {
+              status: 400,
+              headers: { 'Content-Type': 'application/json' }
+            }
+          );
+        }
+      }
+
+      const parsedBody = asObject(body);
+      const payload = asObject(parsedBody.payload);
+      const subscriber = asObject(parsedBody.subscriber);
+      const context = asObject(parsedBody.context);
+      const stepOutputs = asObject(parsedBody.steps);
 
       // Call the user's step handler function
-      const result = await step.handler({ payload, subscriber, context, steps });
+      const result = await step.handler({ payload, subscriber, context, steps: stepOutputs });
 
       return new Response(
         JSON.stringify({
@@ -67,7 +91,7 @@ export default {
           workflowId: step.workflowId,
           subject: result.subject,
           body: result.body,
-          environmentId: 'env'
+          environmentId: "env"
         }),
         {
           status: 200,
@@ -83,8 +107,8 @@ export default {
         JSON.stringify({
           error: 'Step execution failed',
           message: error instanceof Error ? error.message : 'Unknown error',
-          workflowId: 'workflow',
-          environmentId: 'env'
+          workflowId: "workflow",
+          environmentId: "env"
         }),
         {
           status: 500,
@@ -99,16 +123,19 @@ export default {
 `;
 
 exports[`generateWorkerWrapper > should handle single step > single-step 1`] = `
-"import React from 'react';
-import stepHandler0, { stepId as stepId0, workflowId as workflowId0 } from './novu/welcome-email.step';
+"import stepHandler0, { stepId as stepId0, workflowId as workflowId0 } from "./novu/welcome-email.step";
 
-const stepHandlers = {
-  'welcome-email': {
+const stepHandlers = new Map([
+  ["welcome-email", {
     handler: stepHandler0,
     stepId: stepId0,
     workflowId: workflowId0
-  }
-};
+  }]
+]);
+
+function asObject(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
 
 export default {
   async fetch(request) {
@@ -140,15 +167,15 @@ export default {
         );
       }
 
-      const step = stepHandlers[stepName];
+      const step = stepHandlers.get(stepName);
       if (!step) {
         return new Response(
           JSON.stringify({ 
             error: 'Step not found',
             stepName,
-            available: Object.keys(stepHandlers),
-            workflowId: 'workflow',
-            environmentId: 'env'
+            available: Array.from(stepHandlers.keys()),
+            workflowId: "workflow",
+            environmentId: "env"
           }),
           { 
             status: 404,
@@ -157,11 +184,34 @@ export default {
         );
       }
 
-      const body = await request.json();
-      const { payload = {}, subscriber = {}, context = {}, steps = {} } = body;
+      let body = {};
+      const rawBody = await request.text();
+      if (rawBody) {
+        try {
+          body = JSON.parse(rawBody);
+        } catch {
+          return new Response(
+            JSON.stringify({
+              error: 'Invalid JSON body',
+              workflowId: "workflow",
+              environmentId: "env"
+            }),
+            {
+              status: 400,
+              headers: { 'Content-Type': 'application/json' }
+            }
+          );
+        }
+      }
+
+      const parsedBody = asObject(body);
+      const payload = asObject(parsedBody.payload);
+      const subscriber = asObject(parsedBody.subscriber);
+      const context = asObject(parsedBody.context);
+      const stepOutputs = asObject(parsedBody.steps);
 
       // Call the user's step handler function
-      const result = await step.handler({ payload, subscriber, context, steps });
+      const result = await step.handler({ payload, subscriber, context, steps: stepOutputs });
 
       return new Response(
         JSON.stringify({
@@ -169,7 +219,7 @@ export default {
           workflowId: step.workflowId,
           subject: result.subject,
           body: result.body,
-          environmentId: 'env'
+          environmentId: "env"
         }),
         {
           status: 200,
@@ -185,8 +235,8 @@ export default {
         JSON.stringify({
           error: 'Step execution failed',
           message: error instanceof Error ? error.message : 'Unknown error',
-          workflowId: 'workflow',
-          environmentId: 'env'
+          workflowId: "workflow",
+          environmentId: "env"
         }),
         {
           status: 500,
@@ -201,22 +251,25 @@ export default {
 `;
 
 exports[`generateWorkerWrapper > should match snapshot 1`] = `
-"import React from 'react';
-import stepHandler0, { stepId as stepId0, workflowId as workflowId0 } from './novu/welcome-email.step';
-import stepHandler1, { stepId as stepId1, workflowId as workflowId1 } from './novu/verify-email.step';
+"import stepHandler0, { stepId as stepId0, workflowId as workflowId0 } from "./novu/welcome-email.step";
+import stepHandler1, { stepId as stepId1, workflowId as workflowId1 } from "./novu/verify-email.step";
 
-const stepHandlers = {
-  'welcome-email': {
+const stepHandlers = new Map([
+  ["welcome-email", {
     handler: stepHandler0,
     stepId: stepId0,
     workflowId: workflowId0
-  },
-  'verify-email': {
+  }],
+  ["verify-email", {
     handler: stepHandler1,
     stepId: stepId1,
     workflowId: workflowId1
-  }
-};
+  }]
+]);
+
+function asObject(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
 
 export default {
   async fetch(request) {
@@ -248,15 +301,15 @@ export default {
         );
       }
 
-      const step = stepHandlers[stepName];
+      const step = stepHandlers.get(stepName);
       if (!step) {
         return new Response(
           JSON.stringify({ 
             error: 'Step not found',
             stepName,
-            available: Object.keys(stepHandlers),
-            workflowId: 'onboarding',
-            environmentId: 'env-123'
+            available: Array.from(stepHandlers.keys()),
+            workflowId: "onboarding",
+            environmentId: "env-123"
           }),
           { 
             status: 404,
@@ -265,11 +318,34 @@ export default {
         );
       }
 
-      const body = await request.json();
-      const { payload = {}, subscriber = {}, context = {}, steps = {} } = body;
+      let body = {};
+      const rawBody = await request.text();
+      if (rawBody) {
+        try {
+          body = JSON.parse(rawBody);
+        } catch {
+          return new Response(
+            JSON.stringify({
+              error: 'Invalid JSON body',
+              workflowId: "onboarding",
+              environmentId: "env-123"
+            }),
+            {
+              status: 400,
+              headers: { 'Content-Type': 'application/json' }
+            }
+          );
+        }
+      }
+
+      const parsedBody = asObject(body);
+      const payload = asObject(parsedBody.payload);
+      const subscriber = asObject(parsedBody.subscriber);
+      const context = asObject(parsedBody.context);
+      const stepOutputs = asObject(parsedBody.steps);
 
       // Call the user's step handler function
-      const result = await step.handler({ payload, subscriber, context, steps });
+      const result = await step.handler({ payload, subscriber, context, steps: stepOutputs });
 
       return new Response(
         JSON.stringify({
@@ -277,7 +353,7 @@ export default {
           workflowId: step.workflowId,
           subject: result.subject,
           body: result.body,
-          environmentId: 'env-123'
+          environmentId: "env-123"
         }),
         {
           status: 200,
@@ -293,8 +369,8 @@ export default {
         JSON.stringify({
           error: 'Step execution failed',
           message: error instanceof Error ? error.message : 'Unknown error',
-          workflowId: 'onboarding',
-          environmentId: 'env-123'
+          workflowId: "onboarding",
+          environmentId: "env-123"
         }),
         {
           status: 500,

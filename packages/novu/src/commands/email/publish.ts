@@ -56,7 +56,7 @@ export async function emailPublish(options: PublishOptions): Promise<void> {
       console.log(yellow('ℹ Debug bundle mode enabled: generating unminified workflow bundles.'));
       console.log('');
     }
-    const bundles = await bundleWorkflows(workflowSteps, envInfo._id, rootDir, shouldMinifyBundles);
+    const bundles = await bundleWorkflows(workflowSteps, envInfo._id, rootDir, shouldMinifyBundles, config?.aliases);
 
     const bundleOutputDir = resolveBundleOutputDir(options.bundleOutDir, rootDir);
     if (bundleOutputDir) {
@@ -238,12 +238,13 @@ async function bundleWorkflows(
   workflowSteps: Map<string, DiscoveredStep[]>,
   environmentId: string,
   rootDir: string,
-  minify: boolean
+  minify: boolean,
+  aliases?: Record<string, string>
 ): Promise<WorkflowBundle[]> {
   const bundleSpinner = ora('Bundling workflows...').start();
 
   try {
-    const bundles = await bundleAllWorkflows(workflowSteps, environmentId, rootDir, { minify });
+    const bundles = await bundleAllWorkflows(workflowSteps, environmentId, rootDir, { minify, aliases });
     bundleSpinner.succeed('Bundled workflows');
 
     for (const bundle of bundles) {

@@ -1,11 +1,15 @@
 import type { BuildOptions } from 'esbuild';
+import * as path from 'path';
 
 interface BundlerConfigOptions {
+  rootDir: string;
   minify?: boolean;
+  aliases?: Record<string, string>;
 }
 
-export function getBundlerConfig(options: BundlerConfigOptions = {}): BuildOptions {
-  const { minify = true } = options;
+export function getBundlerConfig(options: BundlerConfigOptions): BuildOptions {
+  const { rootDir, minify = true, aliases } = options;
+  const normalizedAliases = normalizeAliases(aliases, rootDir);
 
   return {
     bundle: true,
@@ -18,6 +22,7 @@ export function getBundlerConfig(options: BundlerConfigOptions = {}): BuildOptio
     jsxImportSource: 'react',
     conditions: ['worker', 'browser'],
     mainFields: ['browser', 'module', 'main'],
+    alias: normalizedAliases,
     external: [],
     logLevel: 'warning',
     loader: {
@@ -45,4 +50,62 @@ globalThis.MessageChannel = globalThis.MessageChannel || class MessageChannel {
       `.trim(),
     },
   };
+}
+
+function normalizeAliases(
+  aliases: Record<string, string> | undefined,
+  rootDir: string
+): Record<string, string> | undefined {
+  if (!aliases) {
+    return undefined;
+  }
+
+  const normalizedAliases: Record<string, string> = {};
+
+  for (const [rawAlias, rawTarget] of Object.entries(aliases)) {
+    const alias = normalizeAliasKey(rawAlias);
+    const target = normalizeAliasTarget(rawTarget);
+
+    if (!alias || !target) {
+      continue;
+    }
+
+    normalizedAliases[alias] = path.isAbsolute(target) ? target : path.resolve(rootDir, target);
+  }
+
+  return Object.keys(normalizedAliases).length > 0 ? normalizedAliases : undefined;
+}
+
+function normalizeAliasKey(alias: string): string {
+  const trimmed = alias.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  if (trimmed.endsWith('/*')) {
+    return trimmed.slice(0, -2);
+  }
+
+  if (trimmed.endsWith('/')) {
+    return trimmed.slice(0, -1);
+  }
+
+  return trimmed;
+}
+
+function normalizeAliasTarget(target: string): string {
+  const trimmed = target.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  if (trimmed.endsWith('/*')) {
+    return trimmed.slice(0, -2);
+  }
+
+  if (trimmed.endsWith('/') && trimmed.length > 1) {
+    return trimmed.slice(0, -1);
+  }
+
+  return trimmed;
 }

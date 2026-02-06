@@ -216,6 +216,42 @@ describe('validateConfig', () => {
       expect(() => validateConfig(config)).toThrow('aliases must be an object');
     });
 
+    it('should reject alias target with non-string value', () => {
+      const config = {
+        steps: {
+          email: {
+            'welcome-email': {
+              template: 'emails/welcome.tsx',
+              workflowId: 'onboarding',
+            },
+          },
+        },
+        aliases: {
+          '@emails': 123,
+        },
+      };
+
+      expect(() => validateConfig(config)).toThrow("aliases['@emails'] must be a string");
+    });
+
+    it('should reject alias target with empty string value', () => {
+      const config = {
+        steps: {
+          email: {
+            'welcome-email': {
+              template: 'emails/welcome.tsx',
+              workflowId: 'onboarding',
+            },
+          },
+        },
+        aliases: {
+          '@emails': '   ',
+        },
+      };
+
+      expect(() => validateConfig(config)).toThrow("aliases['@emails'] cannot be empty");
+    });
+
     it('should collect multiple errors', () => {
       const config = {
         steps: {

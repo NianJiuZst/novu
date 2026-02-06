@@ -58,8 +58,21 @@ export function validateConfig(config: unknown): NovuConfig {
     errors.push('apiUrl must be a string');
   }
 
-  if (novuConfig.aliases !== undefined && typeof novuConfig.aliases !== 'object') {
-    errors.push('aliases must be an object');
+  if (novuConfig.aliases !== undefined) {
+    if (typeof novuConfig.aliases !== 'object' || novuConfig.aliases === null) {
+      errors.push('aliases must be an object');
+    } else {
+      for (const [alias, target] of Object.entries(novuConfig.aliases)) {
+        if (typeof target !== 'string') {
+          errors.push(`aliases['${alias}'] must be a string`);
+          continue;
+        }
+
+        if (target.trim().length === 0) {
+          errors.push(`aliases['${alias}'] cannot be empty`);
+        }
+      }
+    }
   }
 
   if (errors.length > 0) {
