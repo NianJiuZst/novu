@@ -67,3 +67,28 @@ export function createLiquidEngine(options?: LiquidOptions): Liquid {
 
   return liquidEngine;
 }
+
+/**
+ * Fixes escaped double quotes inside Liquid tags in a JSON-stringified template string.
+ *
+ * When control values containing Liquid templates with double quotes are passed through
+ * JSON.stringify, the double quotes get escaped as `\"`. This escaped form is not valid
+ * Liquid syntax and causes parsing errors.
+ *
+ * This function unescapes double quotes inside Liquid tags (`{% %}`) and output expressions
+ * (`{{ }}`) to restore valid Liquid syntax.
+ *
+ * @example
+ * // Input (after JSON.stringify):
+ * // {"body":"{% if payload.type == \"reply\" %}Reply{% endif %}"}
+ * // Output:
+ * // {"body":"{% if payload.type == "reply" %}Reply{% endif %}"}
+ *
+ * @param templateString - The JSON-stringified template string
+ * @returns The template string with unescaped double quotes inside Liquid expressions
+ */
+export function fixLiquidDoubleQuotes(templateString: string): string {
+  return templateString.replace(/({%.*?%})|({{.*?}})/gs, (match) => {
+    return match.replace(/\\"/g, '"');
+  });
+}

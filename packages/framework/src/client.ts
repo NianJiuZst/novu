@@ -40,7 +40,7 @@ import type {
 } from './types';
 import { WithPassthrough } from './types/provider.types';
 import { EMOJI, log, resolveApiUrl, resolveSecretKey, sanitizeHtmlInObject } from './utils';
-import { createLiquidEngine } from './utils/liquid.utils';
+import { createLiquidEngine, fixLiquidDoubleQuotes } from './utils/liquid.utils';
 import { normalizeControlData } from './utils/normalize-controls.utils';
 import { deepMerge } from './utils/object.utils';
 import { validateData } from './validators';
@@ -699,6 +699,7 @@ export class Client {
     try {
       let templateString = this.preprocessTranslationPatterns(JSON.stringify(templateControls));
       templateString = this.preprocessFilterTranslationArgs(templateString);
+      templateString = fixLiquidDoubleQuotes(templateString);
       const parsedTemplate = this.templateEngine.parse(templateString);
       const discoveredWorkflow = this.getWorkflow(event.workflowId);
 

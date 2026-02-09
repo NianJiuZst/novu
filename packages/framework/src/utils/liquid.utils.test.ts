@@ -1,6 +1,11 @@
 import { Liquid } from 'liquidjs';
 import { describe, expect, it } from 'vitest';
-import { createLiquidEngine, defaultOutputEscape, stringifyDataStructureWithSingleQuotes } from './liquid.utils';
+import {
+  createLiquidEngine,
+  defaultOutputEscape,
+  fixLiquidDoubleQuotes,
+  stringifyDataStructureWithSingleQuotes,
+} from './liquid.utils';
 
 describe('createLiquidEngine', () => {
   it('should create a Liquid instance with default configuration', () => {
@@ -449,5 +454,132 @@ describe('stringifyDataStructureWithSingleQuotes', () => {
     const myTestUndefined = undefined;
     const converted = stringifyDataStructureWithSingleQuotes(myTestUndefined);
     expect(converted).toStrictEqual('');
+  });
+});
+
+describe('fixLiquidDoubleQuotes', () => {
+  const engine = new Liquid({
+    strictVariables: true,
+    strictFilters: true,
+    greedy: false,
+    catchAllErrors: true,
+  });
+
+  it('should fix escaped double quotes in Liquid if conditions', async () => {
+    const controls = { body: `{% if payload.CommentType == "CommentReply" %}found{% endif %}` };
+    let templateString = JSON.stringify(controls);
+
+    expect(templateString).toBe('{"body":"{% if payload.CommentType == \\"CommentReply\\" %}found{% endif %}"}');
+
+    templateString = fixLiquidDoubleQuotes(templateString);
+
+    expect(templateString).toBe('{"body":"{% if payload.CommentType == "CommentReply" %}found{% endif %}"}');
+
+    const parsed = engine.parse(templateString);
+    const result = await engine.render(parsed, { payload: { CommentType: 'CommentReply' } });
+    const parsedResult = JSON.parse(result);
+
+    expect(parsedResult.body).toBe('found');
+  });
+
+  it('should fix escaped double quotes in Liquid elsif conditions', async () => {
+    const controls = {
+      body: `{% if payload.type == "reply" %}Reply{% elsif payload.type == "mention" %}Mention{% endif %}`,
+    };
+    let templateString = JSON.stringify(controls);
+    templateString = fixLiquidDoubleQuotes(templateString);
+
+    const parsed = engine.parse(templateString);
+    const result = await engine.render(parsed, { payload: { type: 'reply' } });
+    const parsedResult = JSON.parse(result);
+
+    expect(parsedResult.body).toBe('Reply');
+  });
+
+  it('should not break templates with single quotes', async () => {
+    const controls = { body: `{% if payload.type == 'reply' %}Reply{% endif %}` };
+    let templateString = JSON.stringify(controls);
+    templateString = fixLiquidDoubleQuotes(templateString);
+
+    const parsed = engine.parse(templateString);
+    const result = await engine.render(parsed, { payload: { type: 'reply' } });
+    const parsedResult = JSON.parse(result);
+
+    expect(parsedResult.body).toBe('Reply');
+  });
+
+  it('should fix escaped double quotes in Liquid output expressions', async () => {
+    const controls = { body: `Value: "{{payload.value}}"` };
+    let templateString = JSON.stringify(controls);
+    templateString = fixLiquidDoubleQuotes(templateString);
+
+    const parsed = engine.parse(templateString);
+    const result = await engine.render(parsed, { payload: { value: 'test' } });
+    const parsedResult = JSON.parse(result);
+
+    expect(parsedResult.body).toBe('Value: "test"');
+  });
+
+  it('should handle complex templates with mixed single and double quotes', async () => {
+    const controls = {
+      body: `{% if payload.type == "reply" %}{{payload.message}}{% elsif payload.type == 'mention' %}Mentioned{% endif %}`,
+    };
+    let templateString = JSON.stringify(controls);
+    templateString = fixLiquidDoubleQuotes(templateString);
+
+    const parsed = engine.parse(templateString);
+    const result = await engine.render(parsed, { payload: { type: 'reply', message: 'Hello!' } });
+    const parsedResult = JSON.parse(result);
+
+    expect(parsedResult.body).toBe('Hello!');
+  });
+
+  it('should preserve double quotes outside of Liquid tags', async () => {
+    const controls = { body: `Static "text" here` };
+    let templateString = JSON.stringify(controls);
+    templateString = fixLiquidDoubleQuotes(templateString);
+
+    const parsed = engine.parse(templateString);
+    const result = await engine.render(parsed, {});
+    const parsedResult = JSON.parse(result);
+
+    expect(parsedResult.body).toBe('Static "text" here');
+  });
+
+  it('should handle multiline Liquid templates', async () => {
+    const controls = {
+      body: `{% if payload.type == "reply" %}
+        Reply message
+      {% elsif payload.type == "mention" %}
+        Mention message
+      {% endif %}`,
+    };
+    let templateString = JSON.stringify(controls);
+    templateString = fixLiquidDoubleQuotes(templateString);
+
+    const parsed = engine.parse(templateString);
+    const result = await engine.render(parsed, { payload: { type: 'reply' } });
+    const parsedResult = JSON.parse(result);
+
+    expect(parsedResult.body).toContain('Reply message');
+  });
+
+  it('should return unchanged string if no Liquid tags present', () => {
+    const templateString = '{"body":"Hello World"}';
+    const result = fixLiquidDoubleQuotes(templateString);
+
+    expect(result).toBe(templateString);
+  });
+
+  it('should handle contains operator with double quotes', async () => {
+    const controls = { body: `{% if payload.tags contains "important" %}Tagged{% endif %}` };
+    let templateString = JSON.stringify(controls);
+    templateString = fixLiquidDoubleQuotes(templateString);
+
+    const parsed = engine.parse(templateString);
+    const result = await engine.render(parsed, { payload: { tags: ['important', 'urgent'] } });
+    const parsedResult = JSON.parse(result);
+
+    expect(parsedResult.body).toBe('Tagged');
   });
 });

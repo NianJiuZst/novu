@@ -5,7 +5,7 @@ import {
   PinoLogger,
   SanitizationType,
 } from '@novu/application-generic';
-import { actionStepSchemas, channelStepSchemas } from '@novu/framework/internal';
+import { actionStepSchemas, channelStepSchemas, fixLiquidDoubleQuotes } from '@novu/framework/internal';
 import { ResourceOriginEnum } from '@novu/shared';
 import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
@@ -172,7 +172,8 @@ export class ControlValueSanitizerService {
     const parserEngine = buildLiquidParser();
 
     try {
-      parserEngine.parse(JSON.stringify(value));
+      const templateString = fixLiquidDoubleQuotes(JSON.stringify(value));
+      parserEngine.parse(templateString);
 
       return value;
     } catch (error) {
