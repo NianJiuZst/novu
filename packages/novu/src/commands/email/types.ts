@@ -30,7 +30,6 @@ export interface DeploymentResult {
   workflowId: string;
   workerId: string;
   deployedAt: string;
-  version: string;
   stepIds: string[];
 }
 

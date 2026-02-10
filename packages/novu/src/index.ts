@@ -161,7 +161,7 @@ emailCommand
   .command('publish')
   .description('Bundle and deploy step handlers to Novu')
   .option('-s, --secret-key <key>', 'Novu API secret key', NOVU_SECRET_KEY || '')
-  .option('-a, --api-url <url>', 'Novu API URL', NOVU_API_URL || 'https://api.novu.co')
+  .option('-a, --api-url <url>', 'Novu API URL')
   .option('-c, --config <path>', 'Path to config file')
   .option('--out <path>', 'Directory containing step handlers')
   .option('--workflow <id>', 'Deploy only specific workflow')

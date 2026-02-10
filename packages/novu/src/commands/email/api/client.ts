@@ -59,15 +59,11 @@ export class StepResolverClient {
 
   async deployWorkflow(bundle: WorkflowBundle): Promise<DeploymentResult> {
     try {
-      const version = `v-${Date.now()}`;
-
       const response = await axios.post(
         `${this.apiUrl}/v2/step-resolvers/deploy`,
         {
           workflowId: bundle.workflowId,
           code: bundle.code,
-          stepIds: bundle.stepIds,
-          version,
         },
         {
           headers: this.getHeaders(),
@@ -78,9 +74,8 @@ export class StepResolverClient {
 
       return {
         workflowId: bundle.workflowId,
-        workerId: data.workerId || `${bundle.workflowId}-${version}`,
-        deployedAt: new Date().toISOString(),
-        version,
+        workerId: data.workerId || bundle.workflowId,
+        deployedAt: data.deployedAt || new Date().toISOString(),
         stepIds: bundle.stepIds,
       };
     } catch (error) {

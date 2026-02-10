@@ -342,7 +342,7 @@ async function deployBundles(
 
   if (deployments.length > 0) {
     for (const deployment of deployments) {
-      console.log(`   ${green('✓')} ${environmentId}-${deployment.workflowId}-${deployment.version}`);
+      console.log(`   ${green('✓')} ${environmentId}-${deployment.workflowId}`);
     }
     console.log('');
   }
@@ -373,7 +373,6 @@ function printDeploymentErrors(errors: DeploymentError[], deployments: Deploymen
 
 function printSuccessSummary(deployments: DeploymentResult[], steps: DiscoveredStep[]): void {
   console.log(green('✅ Deployment successful!'));
-  console.log(`   Version: ${deployments[0]?.version || 'Unknown'}`);
   console.log(`   Deployed: ${deployments.length} workflow(s), ${steps.length} step(s)`);
   console.log('');
 
