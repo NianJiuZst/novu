@@ -344,7 +344,7 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
   protected getBatchConfig(): { maxBatchSize: number; flushIntervalMs: number } {
     const tableName = this.table.toUpperCase();
     const defaultMaxBatchSize = 500;
-    const defaultFlushIntervalMs = 30000;
+    const defaultFlushIntervalMs = 3000; // 3 seconds
 
     const maxBatchSizeEnv = process.env[`${tableName}_BATCH_SIZE`];
     const parsedMaxBatchSize = maxBatchSizeEnv ? parseInt(maxBatchSizeEnv, 10) : defaultMaxBatchSize;
