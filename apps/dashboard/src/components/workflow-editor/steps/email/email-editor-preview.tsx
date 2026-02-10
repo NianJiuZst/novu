@@ -46,8 +46,7 @@ export const EmailEditorPreview = ({
 }: EmailEditorPreviewProps) => {
   const [activeTab, setActiveTab] = useState('desktop');
 
-  const previewFrom =
-    previewData?.result?.type === ChannelTypeEnum.EMAIL ? previewData.result.preview.from : undefined;
+  const previewFrom = previewData?.result?.type === ChannelTypeEnum.EMAIL ? previewData.result.preview.from : undefined;
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
