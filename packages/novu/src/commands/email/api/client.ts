@@ -1,4 +1,5 @@
 import axios from 'axios';
+import FormData from 'form-data';
 import type { DeploymentResult, EnvironmentInfo, WorkflowBundle } from '../types';
 
 export class StepResolverClient {
@@ -7,9 +8,8 @@ export class StepResolverClient {
     private secretKey: string
   ) {}
 
-  private getHeaders() {
+  private getAuthHeaders() {
     return {
-      'Content-Type': 'application/json',
       Authorization: `ApiKey ${this.secretKey}`,
     };
   }
@@ -17,7 +17,7 @@ export class StepResolverClient {
   async validateConnection(): Promise<void> {
     try {
       await axios.get(`${this.apiUrl}/v1/users/me`, {
-        headers: this.getHeaders(),
+        headers: this.getAuthHeaders(),
       });
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -33,7 +33,7 @@ export class StepResolverClient {
   async getEnvironmentInfo(): Promise<EnvironmentInfo> {
     try {
       const response = await axios.get(`${this.apiUrl}/v1/environments/me`, {
-        headers: this.getHeaders(),
+        headers: this.getAuthHeaders(),
       });
 
       const envData = response.data.data;
@@ -59,16 +59,21 @@ export class StepResolverClient {
 
   async deployWorkflow(bundle: WorkflowBundle): Promise<DeploymentResult> {
     try {
-      const response = await axios.post(
-        `${this.apiUrl}/v2/step-resolvers/deploy`,
-        {
-          workflowId: bundle.workflowId,
-          code: bundle.code,
+      const formData = new FormData();
+      formData.append('workflowId', bundle.workflowId);
+      formData.append('bundle', Buffer.from(bundle.code, 'utf8'), {
+        filename: 'worker.mjs',
+        contentType: 'application/javascript+module',
+      });
+
+      const response = await axios.post(`${this.apiUrl}/v2/step-resolvers/deploy`, formData, {
+        headers: {
+          ...this.getAuthHeaders(),
+          ...formData.getHeaders(),
         },
-        {
-          headers: this.getHeaders(),
-        }
-      );
+        // Limit is enforced on the server side
+        maxBodyLength: Infinity,
+      });
 
       const data = response.data.data;
 
