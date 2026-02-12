@@ -1,10 +1,30 @@
+import type { EnvironmentEntity, NotificationTemplateEntity, OrganizationEntity } from '@novu/dal';
+import type { UserSessionData } from '@novu/shared';
+
 export enum InMemoryLRUCacheStore {
   WORKFLOW = 'workflow',
   ORGANIZATION = 'organization',
   ENVIRONMENT = 'environment',
   API_KEY_USER = 'api-key-user',
   VALIDATOR = 'validator',
+  ACTIVE_WORKFLOWS = 'active-workflows',
 }
+
+export type WorkflowCacheData = NotificationTemplateEntity;
+export type OrganizationCacheData = OrganizationEntity | null;
+export type EnvironmentCacheData = Pick<EnvironmentEntity, '_id' | 'echo' | 'apiKeys'> | null;
+export type ApiKeyUserCacheData = UserSessionData | null;
+export type ValidatorCacheData = unknown;
+export type ActiveWorkflowsCacheData = NotificationTemplateEntity[];
+
+export type CacheStoreDataTypeMap = {
+  [InMemoryLRUCacheStore.WORKFLOW]: WorkflowCacheData;
+  [InMemoryLRUCacheStore.ORGANIZATION]: OrganizationCacheData;
+  [InMemoryLRUCacheStore.ENVIRONMENT]: EnvironmentCacheData;
+  [InMemoryLRUCacheStore.API_KEY_USER]: ApiKeyUserCacheData;
+  [InMemoryLRUCacheStore.VALIDATOR]: ValidatorCacheData;
+  [InMemoryLRUCacheStore.ACTIVE_WORKFLOWS]: ActiveWorkflowsCacheData;
+};
 
 export type StoreConfig = {
   max: number;
@@ -39,5 +59,10 @@ export const STORE_CONFIGS: Record<InMemoryLRUCacheStore, StoreConfig> = {
     ttl: 1000 * 60 * 60,
     featureFlagComponent: 'validator',
     skipFeatureFlag: true,
+  },
+  [InMemoryLRUCacheStore.ACTIVE_WORKFLOWS]: {
+    max: 300,
+    ttl: 1000 * 60,
+    featureFlagComponent: 'active-workflows',
   },
 };

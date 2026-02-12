@@ -487,7 +487,7 @@ export class ParseEventRequest {
 
   private getCompiledValidator(schema: object): ValidateFunction {
     const hash = getSchemaHash(schema);
-    let validate = this.inMemoryLRUCacheService.getIfCached<ValidateFunction>(InMemoryLRUCacheStore.VALIDATOR, hash);
+    let validate = this.inMemoryLRUCacheService.getIfCached(InMemoryLRUCacheStore.VALIDATOR, hash) as ValidateFunction;
 
     if (!validate) {
       validate = ajv.compile(schema);

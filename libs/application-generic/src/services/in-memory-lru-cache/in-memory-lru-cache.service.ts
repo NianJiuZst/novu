@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { LRUCache } from 'lru-cache';
 import { FeatureFlagsService } from '../feature-flags';
-import { InMemoryLRUCacheStore, STORE_CONFIGS, StoreConfig } from './in-memory-lru-cache.store';
+import {
+  CacheStoreDataTypeMap,
+  InMemoryLRUCacheStore,
+  STORE_CONFIGS,
+  StoreConfig,
+} from './in-memory-lru-cache.store';
 
 type EntityStore<T = unknown> = {
   cache: LRUCache<string, T>;
@@ -23,13 +28,13 @@ const STORES = new Map<string, EntityStore>();
 export class InMemoryLRUCacheService {
   constructor(private featureFlagsService: FeatureFlagsService) {}
 
-  async get<T>(
-    storeName: InMemoryLRUCacheStore,
+  async get<TStore extends InMemoryLRUCacheStore>(
+    storeName: TStore,
     key: string,
-    fetchFn: () => Promise<T>,
+    fetchFn: () => Promise<CacheStoreDataTypeMap[TStore]>,
     opts?: GetOptions
-  ): Promise<T> {
-    const store = this.getOrCreateStore<T>(storeName);
+  ): Promise<CacheStoreDataTypeMap[TStore]> {
+    const store = this.getOrCreateStore<CacheStoreDataTypeMap[TStore]>(storeName);
     const isCacheEnabled = await this.isCacheEnabled(store.config, opts);
 
     if (!isCacheEnabled || opts?.skipCache) {
@@ -65,13 +70,16 @@ export class InMemoryLRUCacheService {
     return fetchPromise;
   }
 
-  getIfCached<T>(storeName: InMemoryLRUCacheStore, key: string): T | undefined {
+  getIfCached<TStore extends InMemoryLRUCacheStore>(
+    storeName: TStore,
+    key: string
+  ): CacheStoreDataTypeMap[TStore] | undefined {
     const store = STORES.get(storeName);
     if (!store) {
       return undefined;
     }
 
-    const keyValue = store.cache.get(key) as T | undefined;
+    const keyValue = store.cache.get(key) as CacheStoreDataTypeMap[TStore] | undefined;
 
     return keyValue;
   }
@@ -97,8 +105,12 @@ export class InMemoryLRUCacheService {
     }
   }
 
-  set<T>(storeName: InMemoryLRUCacheStore, key: string, value: T): void {
-    const store = this.getOrCreateStore<T>(storeName);
+  set<TStore extends InMemoryLRUCacheStore>(
+    storeName: TStore,
+    key: string,
+    value: CacheStoreDataTypeMap[TStore]
+  ): void {
+    const store = this.getOrCreateStore<CacheStoreDataTypeMap[TStore]>(storeName);
     store.cache.set(key, value);
   }
 

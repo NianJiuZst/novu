@@ -4,6 +4,8 @@ import {
   filteredPreference,
   GetPreferences,
   GetPreferencesResponseDto,
+  InMemoryLRUCacheService,
+  InMemoryLRUCacheStore,
   Instrument,
   InstrumentUsecase,
   MergePreferences,
@@ -26,6 +28,7 @@ import {
   IPreferenceChannels,
   ISubscriberPreferenceResponse,
   PreferencesTypeEnum,
+  SeverityLevelEnum,
   WorkflowCriticalityEnum,
 } from '@novu/shared';
 import { chunk } from 'es-toolkit';
@@ -37,7 +40,8 @@ export class GetSubscriberPreference {
     private subscriberRepository: SubscriberRepository,
     private notificationTemplateRepository: NotificationTemplateRepository,
     private preferencesRepository: PreferencesRepository,
-    private featureFlagsService: FeatureFlagsService
+    private featureFlagsService: FeatureFlagsService,
+    private inMemoryLRUCacheService: InMemoryLRUCacheService
   ) {}
 
   @InstrumentUsecase()
@@ -51,7 +55,7 @@ export class GetSubscriberPreference {
 
     const workflowList =
       command.workflowList ??
-      (await this.notificationTemplateRepository.filterActive({
+      (await this.getActiveWorkflows({
         organizationId: command.organizationId,
         environmentId: command.environmentId,
         tags: command.tags,
@@ -330,5 +334,47 @@ export class GetSubscriberPreference {
       subscriberWorkflowPreferences,
       subscriberGlobalPreference: subscriberGlobalPreferences[0] ?? null,
     };
+  }
+
+  @Instrument()
+  private async getActiveWorkflows({
+    organizationId,
+    environmentId,
+    tags,
+    severity,
+  }: {
+    organizationId: string;
+    environmentId: string;
+    tags?: string[];
+    severity?: SeverityLevelEnum[];
+  }): Promise<NotificationTemplateEntity[]> {
+    const cacheKey = `${organizationId}:${environmentId}`;
+    const cacheVariant = this.buildCacheVariant(tags, severity);
+
+    return this.inMemoryLRUCacheService.get(
+      InMemoryLRUCacheStore.ACTIVE_WORKFLOWS,
+      cacheKey,
+      () =>
+        this.notificationTemplateRepository.filterActive({
+          organizationId,
+          environmentId,
+          tags,
+          severity,
+        }),
+      {
+        organizationId,
+        environmentId,
+        cacheVariant,
+      }
+    );
+  }
+
+  private buildCacheVariant(tags?: string[], severity?: SeverityLevelEnum[]): string {
+    const filters = {
+      ...(tags && tags.length > 0 && { tags: [...tags].sort() }),
+      ...(severity && severity.length > 0 && { severity: [...severity].sort() }),
+    };
+
+    return Object.keys(filters).length > 0 ? JSON.stringify(filters) : 'default';
   }
 }

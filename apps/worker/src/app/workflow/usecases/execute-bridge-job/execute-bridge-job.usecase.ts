@@ -4,6 +4,7 @@ import {
   CreateExecutionDetailsCommand,
   DetailEnum,
   dashboardSanitizeControlValues,
+  EnvironmentCacheData,
   ExecuteBridgeRequest,
   ExecuteBridgeRequestCommand,
   FeatureFlagsService,
@@ -43,8 +44,6 @@ import {
   ResourceTypeEnum,
 } from '@novu/shared';
 import { ExecuteBridgeJobCommand } from './execute-bridge-job.command';
-
-type EnvironmentCacheData = Pick<EnvironmentEntity, '_id' | 'echo' | 'apiKeys'>;
 
 @Injectable()
 export class ExecuteBridgeJob {

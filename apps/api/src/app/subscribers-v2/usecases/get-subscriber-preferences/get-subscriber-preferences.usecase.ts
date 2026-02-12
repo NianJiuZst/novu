@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InMemoryLRUCacheService, InMemoryLRUCacheStore, Instrument } from '@novu/application-generic';
 import {
   NotificationTemplateEntity,
   NotificationTemplateRepository,
@@ -27,7 +28,8 @@ export class GetSubscriberPreferences {
     private getSubscriberGlobalPreference: GetSubscriberGlobalPreference,
     private getSubscriberPreference: GetSubscriberPreference,
     private subscriberRepository: SubscriberRepository,
-    private notificationTemplateRepository: NotificationTemplateRepository
+    private notificationTemplateRepository: NotificationTemplateRepository,
+    private inMemoryLRUCacheService: InMemoryLRUCacheService
   ) {}
 
   async execute(command: GetSubscriberPreferencesCommand): Promise<GetSubscriberPreferencesDto> {
@@ -42,11 +44,9 @@ export class GetSubscriberPreferences {
       throw new NotFoundException(`Subscriber with id: ${command.subscriberId} not found`);
     }
 
-    const workflowList = await this.notificationTemplateRepository.filterActive({
+    const workflowList = await this.getActiveWorkflows({
       organizationId: command.organizationId,
       environmentId: command.environmentId,
-      tags: undefined,
-      severity: undefined,
       critical: command.criticality === WorkflowCriticalityEnum.CRITICAL ? true : undefined,
     });
 
@@ -119,5 +119,45 @@ export class GetSubscriberPreferences {
         updatedAt: template.updatedAt,
       },
     };
+  }
+
+  @Instrument()
+  private async getActiveWorkflows({
+    organizationId,
+    environmentId,
+    critical,
+  }: {
+    organizationId: string;
+    environmentId: string;
+    critical?: boolean;
+  }): Promise<NotificationTemplateEntity[]> {
+    const cacheKey = `${organizationId}:${environmentId}`;
+    const cacheVariant = this.buildCacheVariant(critical);
+
+    return this.inMemoryLRUCacheService.get(
+      InMemoryLRUCacheStore.ACTIVE_WORKFLOWS,
+      cacheKey,
+      async () =>
+        await this.notificationTemplateRepository.filterActive({
+          organizationId,
+          environmentId,
+          tags: undefined,
+          severity: undefined,
+          critical,
+        }),
+      {
+        organizationId,
+        environmentId,
+        cacheVariant,
+      }
+    );
+  }
+
+  private buildCacheVariant(critical?: boolean): string {
+    const filters = {
+      ...(critical !== undefined && { critical }),
+    };
+
+    return Object.keys(filters).length > 0 ? JSON.stringify(filters) : 'default';
   }
 }
