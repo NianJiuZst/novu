@@ -14,6 +14,7 @@ type GetOptions = {
   environmentId?: string;
   organizationId?: string;
   skipCache?: boolean;
+  cacheVariant?: string;
 };
 
 const STORES = new Map<string, EntityStore>();
@@ -35,12 +36,14 @@ export class InMemoryLRUCacheService {
       return fetchFn();
     }
 
-    const cached = store.cache.get(key);
+    const effectiveKey = this.resolveKey(key, opts?.cacheVariant);
+
+    const cached = store.cache.get(effectiveKey);
     if (cached !== undefined) {
       return cached;
     }
 
-    const inflightRequest = store.inflightRequests.get(key);
+    const inflightRequest = store.inflightRequests.get(effectiveKey);
     if (inflightRequest) {
       return inflightRequest;
     }
@@ -48,16 +51,16 @@ export class InMemoryLRUCacheService {
     const fetchPromise = fetchFn()
       .then((result) => {
         if (result !== null && result !== undefined) {
-          store.cache.set(key, result);
+          store.cache.set(effectiveKey, result);
         }
 
         return result;
       })
       .finally(() => {
-        store.inflightRequests.delete(key);
+        store.inflightRequests.delete(effectiveKey);
       });
 
-    store.inflightRequests.set(key, fetchPromise);
+    store.inflightRequests.set(effectiveKey, fetchPromise);
 
     return fetchPromise;
   }
@@ -75,8 +78,14 @@ export class InMemoryLRUCacheService {
 
   invalidate(storeName: InMemoryLRUCacheStore, key: string): void {
     const store = STORES.get(storeName);
-    if (store) {
-      store.cache.delete(key);
+    if (!store) {
+      return;
+    }
+
+    for (const cacheKey of store.cache.keys()) {
+      if (cacheKey === key || cacheKey.startsWith(`${key}:v:`)) {
+        store.cache.delete(cacheKey);
+      }
     }
   }
 
@@ -91,6 +100,10 @@ export class InMemoryLRUCacheService {
   set<T>(storeName: InMemoryLRUCacheStore, key: string, value: T): void {
     const store = this.getOrCreateStore<T>(storeName);
     store.cache.set(key, value);
+  }
+
+  private resolveKey(key: string, cacheVariant?: string): string {
+    return cacheVariant ? `${key}:v:${cacheVariant}` : key;
   }
 
   private getOrCreateStore<T>(storeName: InMemoryLRUCacheStore): EntityStore<T> {

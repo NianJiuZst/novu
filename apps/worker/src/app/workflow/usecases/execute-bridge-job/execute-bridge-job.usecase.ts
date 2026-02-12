@@ -353,6 +353,7 @@ export class ExecuteBridgeJob {
       {
         environmentId,
         organizationId,
+        cacheVariant: '_id:apiKeys:echo',
       }
     );
   }

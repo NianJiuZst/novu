@@ -155,6 +155,98 @@ describe('InMemoryLRUCacheService', () => {
       expect(workflowFn).toHaveBeenCalledTimes(1);
       expect(orgFn).toHaveBeenCalledTimes(1);
     });
+
+    it('should isolate cache entries by cacheVariant', async () => {
+      featureFlagsService.getFlag.mockResolvedValue(true);
+      const fetchFn1 = jest.fn().mockResolvedValue({ id: '1', projection: 'variant1' });
+      const fetchFn2 = jest.fn().mockResolvedValue({ id: '2', projection: 'variant2' });
+
+      const result1 = await service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-variant', fetchFn1, {
+        environmentId: 'env1',
+        cacheVariant: 'variant1',
+      });
+
+      const result2 = await service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-variant', fetchFn2, {
+        environmentId: 'env1',
+        cacheVariant: 'variant2',
+      });
+
+      expect(fetchFn1).toHaveBeenCalledTimes(1);
+      expect(fetchFn2).toHaveBeenCalledTimes(1);
+      expect(result1).toEqual({ id: '1', projection: 'variant1' });
+      expect(result2).toEqual({ id: '2', projection: 'variant2' });
+
+      await service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-variant', fetchFn1, {
+        environmentId: 'env1',
+        cacheVariant: 'variant1',
+      });
+
+      await service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-variant', fetchFn2, {
+        environmentId: 'env1',
+        cacheVariant: 'variant2',
+      });
+
+      expect(fetchFn1).toHaveBeenCalledTimes(1);
+      expect(fetchFn2).toHaveBeenCalledTimes(1);
+    });
+
+    it('should deduplicate concurrent requests per variant', async () => {
+      featureFlagsService.getFlag.mockResolvedValue(true);
+      let resolveCount1 = 0;
+      let resolveCount2 = 0;
+      const fetchFn1 = jest.fn().mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(() => {
+              resolveCount1++;
+              resolve({ id: resolveCount1, variant: 'v1' });
+            }, 10);
+          })
+      );
+      const fetchFn2 = jest.fn().mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(() => {
+              resolveCount2++;
+              resolve({ id: resolveCount2, variant: 'v2' });
+            }, 10);
+          })
+      );
+
+      const [result1a, result1b, result1c] = await Promise.all([
+        service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-dedup', fetchFn1, {
+          environmentId: 'env1',
+          cacheVariant: 'v1',
+        }),
+        service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-dedup', fetchFn1, {
+          environmentId: 'env1',
+          cacheVariant: 'v1',
+        }),
+        service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-dedup', fetchFn1, {
+          environmentId: 'env1',
+          cacheVariant: 'v1',
+        }),
+      ]);
+
+      const [result2a, result2b] = await Promise.all([
+        service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-dedup', fetchFn2, {
+          environmentId: 'env1',
+          cacheVariant: 'v2',
+        }),
+        service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-dedup', fetchFn2, {
+          environmentId: 'env1',
+          cacheVariant: 'v2',
+        }),
+      ]);
+
+      expect(fetchFn1).toHaveBeenCalledTimes(1);
+      expect(fetchFn2).toHaveBeenCalledTimes(1);
+      expect(result1a).toEqual({ id: 1, variant: 'v1' });
+      expect(result1b).toEqual({ id: 1, variant: 'v1' });
+      expect(result1c).toEqual({ id: 1, variant: 'v1' });
+      expect(result2a).toEqual({ id: 1, variant: 'v2' });
+      expect(result2b).toEqual({ id: 1, variant: 'v2' });
+    });
   });
 
   describe('getIfCached', () => {
@@ -190,6 +282,43 @@ describe('InMemoryLRUCacheService', () => {
       await service.get(InMemoryLRUCacheStore.WORKFLOW, 'key9', fetchFn, { environmentId: 'env1' });
 
       expect(fetchFn).toHaveBeenCalledTimes(2);
+    });
+
+    it('should invalidate all variants for a base key', async () => {
+      featureFlagsService.getFlag.mockResolvedValue(true);
+      const fetchFn1 = jest.fn().mockResolvedValue({ id: '1', variant: 'v1' });
+      const fetchFn2 = jest.fn().mockResolvedValue({ id: '2', variant: 'v2' });
+      const fetchFnBase = jest.fn().mockResolvedValue({ id: 'base' });
+
+      await service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-invalidate', fetchFnBase, { environmentId: 'env1' });
+      await service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-invalidate', fetchFn1, {
+        environmentId: 'env1',
+        cacheVariant: 'v1',
+      });
+      await service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-invalidate', fetchFn2, {
+        environmentId: 'env1',
+        cacheVariant: 'v2',
+      });
+
+      expect(fetchFnBase).toHaveBeenCalledTimes(1);
+      expect(fetchFn1).toHaveBeenCalledTimes(1);
+      expect(fetchFn2).toHaveBeenCalledTimes(1);
+
+      service.invalidate(InMemoryLRUCacheStore.WORKFLOW, 'key-invalidate');
+
+      await service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-invalidate', fetchFnBase, { environmentId: 'env1' });
+      await service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-invalidate', fetchFn1, {
+        environmentId: 'env1',
+        cacheVariant: 'v1',
+      });
+      await service.get(InMemoryLRUCacheStore.WORKFLOW, 'key-invalidate', fetchFn2, {
+        environmentId: 'env1',
+        cacheVariant: 'v2',
+      });
+
+      expect(fetchFnBase).toHaveBeenCalledTimes(2);
+      expect(fetchFn1).toHaveBeenCalledTimes(2);
+      expect(fetchFn2).toHaveBeenCalledTimes(2);
     });
   });
 
