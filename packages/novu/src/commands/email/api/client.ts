@@ -1,6 +1,6 @@
 import axios from 'axios';
 import FormData from 'form-data';
-import type { DeploymentResult, EnvironmentInfo, WorkflowBundle } from '../types';
+import type { DeploymentResult, EnvironmentInfo, StepResolverManifestStep, StepResolverReleaseBundle } from '../types';
 
 export class StepResolverClient {
   constructor(
@@ -57,10 +57,13 @@ export class StepResolverClient {
     }
   }
 
-  async deployWorkflow(bundle: WorkflowBundle): Promise<DeploymentResult> {
+  async deployRelease(
+    bundle: StepResolverReleaseBundle,
+    manifestSteps: StepResolverManifestStep[]
+  ): Promise<DeploymentResult> {
     try {
       const formData = new FormData();
-      formData.append('workflowId', bundle.workflowId);
+      formData.append('manifest', JSON.stringify({ steps: manifestSteps }));
       formData.append('bundle', Buffer.from(bundle.code, 'utf8'), {
         filename: 'worker.mjs',
         contentType: 'application/javascript+module',
@@ -76,38 +79,44 @@ export class StepResolverClient {
       });
 
       const data = response.data.data;
+      if (
+        typeof data?.stepResolverHash !== 'string' ||
+        typeof data?.workerId !== 'string' ||
+        typeof data?.deployedAt !== 'string'
+      ) {
+        throw new Error('Invalid deployment response from API');
+      }
 
       return {
-        workflowId: bundle.workflowId,
-        workerId: data.workerId || bundle.workflowId,
-        deployedAt: data.deployedAt || new Date().toISOString(),
-        stepIds: bundle.stepIds,
+        stepResolverHash: data.stepResolverHash,
+        workerId: data.workerId,
+        selectedStepsCount: data.selectedStepsCount ?? manifestSteps.length,
+        deployedAt: data.deployedAt,
       };
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        const apiMessage = this.formatApiErrorMessage(error.response?.data, error.message || 'Request failed');
+
         if (error.response?.status === 401) {
           throw new Error('Invalid API key. Please check your secret key.');
         }
         if (error.response?.status === 400) {
-          const apiMessage = error.response?.data?.message || error.response?.data?.error || 'Invalid request';
           throw new Error(`Bad request: ${apiMessage}`);
         }
         if (error.response?.status === 404) {
-          throw new Error(
-            `Workflow not found: ${bundle.workflowId}. Make sure the workflow exists in your environment.`
-          );
+          const stepContext = this.extractStepContext(error.response.data);
+          if (stepContext) {
+            throw new Error(`Not found: ${stepContext}. Make sure the workflow and its steps exist before publishing.`);
+          }
+          throw new Error('Workflow or step not found. Make sure the workflow and its steps exist before publishing.');
         }
         if (error.response?.status === 429) {
           throw new Error('Rate limit exceeded. Please try again later.');
         }
         if (error.response?.status >= 500) {
-          throw new Error(
-            `Server error (${error.response.status}): ${error.response?.data?.message || 'Internal server error'}`
-          );
+          throw new Error(`Server error (${error.response.status}): ${apiMessage || 'Internal server error'}`);
         }
 
-        const apiMessage =
-          error.response?.data?.message || error.response?.data?.error || error.message || 'Request failed';
         throw new Error(`Deployment failed (${error.response?.status || 'unknown'}): ${apiMessage}`);
       }
 
@@ -118,4 +127,94 @@ export class StepResolverClient {
       throw new Error('Unknown deployment error occurred');
     }
   }
+
+  private formatApiErrorMessage(data: unknown, fallback: string): string {
+    const root = asRecord(data);
+    if (!root) {
+      return fallback;
+    }
+
+    const baseMessage = this.readMessage(root) ?? this.readString(root.error) ?? fallback;
+    const stepContext = this.extractStepContext(root);
+
+    if (!stepContext) {
+      return baseMessage;
+    }
+
+    return `${baseMessage} (${stepContext})`;
+  }
+
+  private readMessage(payload: Record<string, unknown>): string | undefined {
+    const rawMessage = payload.message;
+
+    if (typeof rawMessage === 'string' && rawMessage.trim().length > 0) {
+      return rawMessage;
+    }
+
+    if (Array.isArray(rawMessage)) {
+      const messages = rawMessage.filter(
+        (value): value is string => typeof value === 'string' && value.trim().length > 0
+      );
+      if (messages.length > 0) {
+        return messages.join(', ');
+      }
+    }
+
+    const messageRecord = asRecord(rawMessage);
+    if (messageRecord) {
+      const nestedMessage = this.readString(messageRecord.message);
+      if (nestedMessage) {
+        return nestedMessage;
+      }
+    }
+
+    return undefined;
+  }
+
+  private extractStepContext(payload: Record<string, unknown>): string | undefined {
+    const possibleSources: Record<string, unknown>[] = [payload];
+    const ctx = asRecord(payload.ctx);
+    if (ctx) {
+      possibleSources.push(ctx);
+    }
+
+    const nestedMessage = asRecord(payload.message);
+    if (nestedMessage) {
+      possibleSources.push(nestedMessage);
+    }
+
+    for (const source of possibleSources) {
+      const workflowId = this.readString(source.workflowId);
+      const stepId = this.readString(source.stepId);
+
+      if (workflowId && stepId) {
+        return `workflowId=${workflowId}, stepId=${stepId}`;
+      }
+      if (workflowId) {
+        return `workflowId=${workflowId}`;
+      }
+      if (stepId) {
+        return `stepId=${stepId}`;
+      }
+    }
+
+    return undefined;
+  }
+
+  private readString(value: unknown): string | undefined {
+    if (typeof value !== 'string') {
+      return undefined;
+    }
+
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  }
+}
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return value as Record<string, unknown>;
 }

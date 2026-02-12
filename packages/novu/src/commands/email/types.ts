@@ -18,19 +18,21 @@ export interface StepDiscoveryResult {
   errors: ValidationError[];
 }
 
-export interface WorkflowBundle {
-  workflowId: string;
+export interface StepResolverReleaseBundle {
   code: string;
   size: number;
-  stepIds: string[];
-  steps: DiscoveredStep[];
+}
+
+export interface StepResolverManifestStep {
+  workflowId: string;
+  stepId: string;
 }
 
 export interface DeploymentResult {
-  workflowId: string;
+  stepResolverHash: string;
   workerId: string;
+  selectedStepsCount: number;
   deployedAt: string;
-  stepIds: string[];
 }
 
 export interface EnvironmentInfo {

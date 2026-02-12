@@ -4,16 +4,24 @@ import * as path from 'path';
 import { cyan, green, red, yellow } from 'picocolors';
 import prompts from 'prompts';
 import { loadConfig } from './config/loader';
-import type { EmailStepConfig, NovuConfig } from './config/schema';
+import type { NovuConfig } from './config/schema';
 import { discoverEmailTemplates } from './discovery';
 import { generateStepFile } from './templates/step-file';
 import {
+  buildWorkflowsFromSteps,
+  type ConfiguredStep,
+  flattenConfigToSteps,
+  groupStepsByWorkflow,
+} from './utils/data-transforms';
+import { isInteractive } from './utils/environment';
+import { StepFilePathResolver } from './utils/file-paths';
+import { renderTable } from './utils/table';
+import {
   generateStepIdFromFilename,
   generateWorkflowIdFromStepId,
-  isInteractive,
   validateStepId,
   validateWorkflowId,
-} from './utils';
+} from './utils/validation';
 
 interface InitOptions {
   config?: string;
@@ -37,11 +45,14 @@ export async function emailInit(options: InitOptions): Promise<void> {
         console.error('Create novu.config.ts with your step definitions:');
         console.error('');
         console.error(cyan('  export default {'));
-        console.error(cyan('    steps: {'));
-        console.error(cyan('      email: {'));
-        console.error(cyan("        'welcome-email': {"));
-        console.error(cyan("          template: 'emails/welcome.tsx',"));
-        console.error(cyan("          workflowId: 'onboarding',"));
+        console.error(cyan('    workflows: {'));
+        console.error(cyan("      'onboarding': {"));
+        console.error(cyan('        steps: {'));
+        console.error(cyan('          email: {'));
+        console.error(cyan("            'welcome-email': {"));
+        console.error(cyan("              template: 'emails/welcome.tsx',"));
+        console.error(cyan('            },'));
+        console.error(cyan('          },'));
         console.error(cyan('        },'));
         console.error(cyan('      },'));
         console.error(cyan('    },'));
@@ -84,14 +95,14 @@ async function runInitWithConfig(config: NovuConfig, options: InitOptions): Prom
 
   const spinner = ora('Validating configuration...').start();
 
-  const emailSteps = Object.entries(config.steps.email);
-  spinner.text = `Found ${emailSteps.length} step definition(s)`;
+  const allSteps = flattenConfigToSteps(config);
+  spinner.text = `Found ${allSteps.length} step definition(s)`;
 
   const errors: string[] = [];
-  for (const [stepId, emailConfig] of emailSteps) {
+  for (const { workflowId, stepId, emailConfig } of allSteps) {
     const templateAbsPath = path.resolve(rootDir, emailConfig.template);
     if (!fs.existsSync(templateAbsPath)) {
-      errors.push(`Template not found: ${emailConfig.template} (step: ${stepId})`);
+      errors.push(`Template not found: ${emailConfig.template} (workflow: ${workflowId}, step: ${stepId})`);
     }
   }
 
@@ -110,42 +121,11 @@ async function runInitWithConfig(config: NovuConfig, options: InitOptions): Prom
   console.log('');
 
   console.log('Steps to generate:');
-
-  const stepIdWidth = Math.max('Step ID'.length, ...emailSteps.map(([id]) => id.length)) + 2;
-  const workflowIdWidth = Math.max('Workflow ID'.length, ...emailSteps.map(([, cfg]) => cfg.workflowId.length)) + 2;
-  const templateWidth = Math.max('Template'.length, ...emailSteps.map(([, cfg]) => cfg.template.length)) + 2;
-
-  console.log(
-    '┌' + '─'.repeat(stepIdWidth) + '┬' + '─'.repeat(workflowIdWidth) + '┬' + '─'.repeat(templateWidth) + '┐'
-  );
-  console.log(
-    '│ ' +
-      'Step ID'.padEnd(stepIdWidth - 1) +
-      '│ ' +
-      'Workflow ID'.padEnd(workflowIdWidth - 1) +
-      '│ ' +
-      'Template'.padEnd(templateWidth - 1) +
-      '│'
-  );
-  console.log(
-    '├' + '─'.repeat(stepIdWidth) + '┼' + '─'.repeat(workflowIdWidth) + '┼' + '─'.repeat(templateWidth) + '┤'
-  );
-
-  for (const [stepId, emailConfig] of emailSteps) {
-    console.log(
-      '│ ' +
-        stepId.padEnd(stepIdWidth - 1) +
-        '│ ' +
-        emailConfig.workflowId.padEnd(workflowIdWidth - 1) +
-        '│ ' +
-        emailConfig.template.padEnd(templateWidth - 1) +
-        '│'
-    );
-  }
-
-  console.log(
-    '└' + '─'.repeat(stepIdWidth) + '┴' + '─'.repeat(workflowIdWidth) + '┴' + '─'.repeat(templateWidth) + '┘'
-  );
+  renderTable(allSteps, [
+    { header: 'Workflow ID', getValue: (s) => s.workflowId },
+    { header: 'Step ID', getValue: (s) => s.stepId },
+    { header: 'Template', getValue: (s) => s.emailConfig.template },
+  ]);
   console.log('');
 
   if (options.dryRun) {
@@ -155,38 +135,36 @@ async function runInitWithConfig(config: NovuConfig, options: InitOptions): Prom
   }
 
   const outDir = options.out || config.outDir || './novu';
-  const stepsDir = path.resolve(rootDir, outDir);
+  const outDirPath = path.resolve(rootDir, outDir);
+  const pathResolver = new StepFilePathResolver(rootDir, outDirPath);
 
   console.log(green(`📁 Generating step handlers in ${outDir}\n`));
-
-  if (!fs.existsSync(stepsDir)) {
-    fs.mkdirSync(stepsDir, { recursive: true });
-  }
 
   let createdCount = 0;
   let skippedCount = 0;
 
-  for (const [stepId, emailConfig] of emailSteps) {
-    const stepFilePath = path.join(stepsDir, `${stepId}.step.tsx`);
+  for (const { workflowId, stepId, emailConfig } of allSteps) {
+    const workflowDir = pathResolver.getWorkflowDir(workflowId);
+
+    if (!fs.existsSync(workflowDir)) {
+      fs.mkdirSync(workflowDir, { recursive: true });
+    }
+
+    const stepFilePath = pathResolver.getStepFilePath(workflowId, stepId);
+    const relativeStepPath = pathResolver.getRelativeStepPath(workflowId, stepId);
 
     if (fs.existsSync(stepFilePath) && !options.force) {
-      console.log(yellow(`   ⊘ ${stepId}.step.tsx`) + ' (exists, use --force to overwrite)');
+      console.log(yellow(`   ⊘ ${relativeStepPath}`) + ' (exists, use --force to overwrite)');
       skippedCount++;
       continue;
     }
 
-    const templateAbsPath = path.resolve(rootDir, emailConfig.template);
-    const relativeImportPath = path.relative(stepsDir, templateAbsPath);
-
-    const importPath = relativeImportPath.replace(/\\/g, '/').replace(/\.(tsx?|jsx?)$/, '');
-
-    const finalImportPath = importPath.startsWith('.') ? importPath : `./${importPath}`;
-
-    const stepFileContent = generateStepFile(stepId, finalImportPath, emailConfig);
+    const templateImportPath = pathResolver.getTemplateImportPath(workflowId, emailConfig.template);
+    const stepFileContent = generateStepFile(stepId, workflowId, templateImportPath, emailConfig);
 
     fs.writeFileSync(stepFilePath, stepFileContent, 'utf8');
 
-    console.log(green(`   ✓ ${stepId}.step.tsx`));
+    console.log(green(`   ✓ ${relativeStepPath}`));
     createdCount++;
   }
 
@@ -235,8 +213,8 @@ async function runInitInteractive(options: InitOptions): Promise<void> {
 
   console.log(cyan("📝 Let's configure the templates:\n"));
 
-  const emailSteps: Record<string, EmailStepConfig> = {};
-  const existingStepIds = new Set<string>();
+  const configuredSteps: ConfiguredStep[] = [];
+  const existingStepIdsByWorkflow = new Map<string, Set<string>>();
 
   for (const template of templates) {
     console.log(green(`\n📧 ${template.relativePath}`));
@@ -270,6 +248,9 @@ async function runInitInteractive(options: InitOptions): Promise<void> {
       process.exit(130);
     }
 
+    const workflowId = workflowResponse.workflowId;
+    const existingStepIds = existingStepIdsByWorkflow.get(workflowId) || new Set<string>();
+
     const stepResponse = await prompts({
       type: 'text',
       name: 'stepId',
@@ -291,46 +272,58 @@ async function runInitInteractive(options: InitOptions): Promise<void> {
     });
 
     existingStepIds.add(stepResponse.stepId);
+    existingStepIdsByWorkflow.set(workflowId, existingStepIds);
 
-    emailSteps[stepResponse.stepId] = {
-      template: template.relativePath,
-      workflowId: workflowResponse.workflowId,
-      ...(subjectResponse.subject && { subject: subjectResponse.subject }),
-    };
+    configuredSteps.push({
+      workflowId,
+      stepId: stepResponse.stepId,
+      config: {
+        template: template.relativePath,
+        ...(subjectResponse.subject && { subject: subjectResponse.subject }),
+      },
+    });
 
     console.log('');
   }
 
   console.log(cyan('💾 Saving configuration to novu.config.ts...'));
 
-  const configContent = generateConfigFile(emailSteps);
+  const configContent = generateConfigFile(configuredSteps);
   fs.writeFileSync('novu.config.ts', configContent, 'utf8');
 
   console.log(green('   ✓ Created novu.config.ts\n'));
 
-  const config: NovuConfig = {
-    steps: {
-      email: emailSteps,
-    },
-  };
+  const workflows = buildWorkflowsFromSteps(configuredSteps);
+  const config: NovuConfig = { workflows };
 
   await runInitWithConfig(config, options);
 }
 
-function generateConfigFile(emailSteps: Record<string, EmailStepConfig>): string {
-  let content = 'export default {\n  steps: {\n    email: {\n';
+function generateConfigFile(steps: ConfiguredStep[]): string {
+  const workflowsMap = groupStepsByWorkflow(steps);
 
-  for (const [stepId, config] of Object.entries(emailSteps)) {
-    content += `      '${stepId}': {\n`;
-    content += `        template: '${config.template}',\n`;
-    content += `        workflowId: '${config.workflowId}',\n`;
-    if (config.subject) {
-      content += `        subject: '${config.subject}',\n`;
+  let content = 'export default {\n  workflows: {\n';
+
+  for (const [workflowId, workflowSteps] of workflowsMap) {
+    content += `    '${workflowId}': {\n`;
+    content += `      steps: {\n`;
+    content += `        email: {\n`;
+
+    for (const { stepId, config } of workflowSteps) {
+      content += `          '${stepId}': {\n`;
+      content += `            template: '${config.template}',\n`;
+      if (config.subject) {
+        content += `            subject: '${config.subject}',\n`;
+      }
+      content += `          },\n`;
     }
+
+    content += `        },\n`;
     content += `      },\n`;
+    content += `    },\n`;
   }
 
-  content += '    },\n  },\n};\n';
+  content += '  },\n};\n';
 
   return content;
 }

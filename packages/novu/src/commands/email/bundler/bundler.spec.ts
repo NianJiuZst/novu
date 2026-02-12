@@ -3,9 +3,9 @@ import * as os from 'os';
 import * as path from 'path';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { DiscoveredStep } from '../types';
-import { bundleWorkflow } from './bundler';
+import { bundleRelease } from './bundler';
 
-describe('bundleWorkflow', () => {
+describe('bundleRelease', () => {
   let tempDir = '';
 
   afterEach(() => {
@@ -14,7 +14,7 @@ describe('bundleWorkflow', () => {
     }
   });
 
-  it('should bundle workflow when aliases are provided', async () => {
+  it('should bundle release when aliases are provided', async () => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'novu-bundler-alias-'));
     const sourceDir = path.join(tempDir, 'src');
     const stepDir = path.join(tempDir, 'novu');
@@ -53,15 +53,14 @@ export default async function () {
       },
     ];
 
-    const bundle = await bundleWorkflow('onboarding', steps, 'env-123', tempDir, {
+    const bundle = await bundleRelease(steps, tempDir, {
       minify: false,
       aliases: {
         '@emails/*': './src/*',
       },
     });
 
-    expect(bundle.workflowId).toBe('onboarding');
-    expect(bundle.stepIds).toEqual(['welcome-email']);
+    expect(bundle.size).toBeGreaterThan(0);
     expect(bundle.code).toContain('Hello from alias');
   });
 
@@ -101,7 +100,7 @@ export default async function () {
     ];
 
     try {
-      await bundleWorkflow('onboarding', steps, 'env-123', tempDir);
+      await bundleRelease(steps, tempDir);
       throw new Error('Expected bundling to fail');
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

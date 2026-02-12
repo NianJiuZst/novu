@@ -71,73 +71,92 @@ function analyzeStepFile(filePath: string, relativePath: string): AnalyzedStepFi
   const sourceCode = fs.readFileSync(filePath, 'utf-8');
   const sourceFile = ts.createSourceFile(filePath, sourceCode, ts.ScriptTarget.Latest, true, getScriptKind(filePath));
 
+  return {
+    filePath,
+    relativePath,
+    metadata: extractStepMetadata(sourceFile),
+    hasDefaultExport: hasDefaultExportInFile(sourceFile),
+    hasReactEmailImport: hasReactEmailImportInFile(sourceFile),
+    parseErrors: extractParseDiagnostics(sourceFile),
+  };
+}
+
+function extractStepMetadata(sourceFile: ts.SourceFile): StepMetadata {
   const metadata: StepMetadata = {};
-  let hasDefaultExport = false;
-  let hasReactEmailImport = false;
 
   function visit(node: ts.Node) {
     if (ts.isVariableStatement(node) && hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
-      for (const declaration of node.declarationList.declarations) {
-        if (
-          !ts.isIdentifier(declaration.name) ||
-          !declaration.initializer ||
-          !ts.isStringLiteral(declaration.initializer)
-        ) {
-          continue;
-        }
-
-        const exportName = declaration.name.text;
-        const exportValue = declaration.initializer.text;
-
-        if (exportName === 'stepId') {
-          metadata.stepId = exportValue;
-        }
-
-        if (exportName === 'workflowId') {
-          metadata.workflowId = exportValue;
-        }
-
-        if (exportName === 'type') {
-          metadata.type = exportValue;
-        }
-      }
+      extractExportedStringLiterals(node, metadata);
     }
-
-    if (ts.isFunctionDeclaration(node) && hasModifier(node.modifiers, ts.SyntaxKind.DefaultKeyword)) {
-      hasDefaultExport = true;
-    }
-
-    if (ts.isExportAssignment(node) && !node.isExportEquals) {
-      hasDefaultExport = true;
-    }
-
-    if (ts.isExportDeclaration(node) && node.exportClause && ts.isNamedExports(node.exportClause)) {
-      if (node.exportClause.elements.some((el) => el.name.text === 'default')) {
-        hasDefaultExport = true;
-      }
-    }
-
-    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
-      if (node.moduleSpecifier.text === '@react-email/components') {
-        hasReactEmailImport = true;
-      }
-    }
-
     ts.forEachChild(node, visit);
   }
 
   visit(sourceFile);
+  return metadata;
+}
+
+function extractExportedStringLiterals(node: ts.VariableStatement, metadata: StepMetadata): void {
+  for (const declaration of node.declarationList.declarations) {
+    if (
+      !ts.isIdentifier(declaration.name) ||
+      !declaration.initializer ||
+      !ts.isStringLiteral(declaration.initializer)
+    ) {
+      continue;
+    }
+
+    const exportName = declaration.name.text;
+    const exportValue = declaration.initializer.text;
+
+    if (exportName === 'stepId') metadata.stepId = exportValue;
+    if (exportName === 'workflowId') metadata.workflowId = exportValue;
+    if (exportName === 'type') metadata.type = exportValue;
+  }
+}
+
+function hasDefaultExportInFile(sourceFile: ts.SourceFile): boolean {
+  let hasExport = false;
+
+  function visit(node: ts.Node) {
+    if (ts.isFunctionDeclaration(node) && hasModifier(node.modifiers, ts.SyntaxKind.DefaultKeyword)) {
+      hasExport = true;
+    }
+    if (ts.isExportAssignment(node) && !node.isExportEquals) {
+      hasExport = true;
+    }
+    if (ts.isExportDeclaration(node) && node.exportClause && ts.isNamedExports(node.exportClause)) {
+      if (node.exportClause.elements.some((el) => el.name.text === 'default')) {
+        hasExport = true;
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return hasExport;
+}
+
+function hasReactEmailImportInFile(sourceFile: ts.SourceFile): boolean {
+  let hasImport = false;
+
+  function visit(node: ts.Node) {
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+      if (node.moduleSpecifier.text === '@react-email/components') {
+        hasImport = true;
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return hasImport;
+}
+
+function extractParseDiagnostics(sourceFile: ts.SourceFile): string[] {
   const parseDiagnostics = (sourceFile as ts.SourceFile & { parseDiagnostics?: readonly ts.DiagnosticWithLocation[] })
     .parseDiagnostics;
 
-  return {
-    filePath,
-    relativePath,
-    metadata,
-    hasDefaultExport,
-    hasReactEmailImport,
-    parseErrors: (parseDiagnostics ?? []).map((diagnostic) => formatParseDiagnostic(sourceFile, diagnostic)),
-  };
+  return (parseDiagnostics ?? []).map((diagnostic) => formatParseDiagnostic(sourceFile, diagnostic));
 }
 
 function buildValidationErrors(analysis: AnalyzedStepFile): string[] {
@@ -169,36 +188,50 @@ function buildValidationErrors(analysis: AnalyzedStepFile): string[] {
 }
 
 function buildDuplicateStepIdErrors(analyses: AnalyzedStepFile[]): Map<string, string[]> {
-  const stepIdToFiles = new Map<string, AnalyzedStepFile[]>();
+  const filesByCompositeKey = groupAnalysesByCompositeKey(analyses);
+  return buildErrorsForDuplicates(filesByCompositeKey);
+}
+
+function groupAnalysesByCompositeKey(analyses: AnalyzedStepFile[]): Map<string, AnalyzedStepFile[]> {
+  const grouped = new Map<string, AnalyzedStepFile[]>();
 
   for (const analysis of analyses) {
-    if (!analysis.metadata.stepId) {
+    if (!analysis.metadata.stepId || !analysis.metadata.workflowId) {
       continue;
     }
 
-    const files = stepIdToFiles.get(analysis.metadata.stepId) ?? [];
+    const key = `${analysis.metadata.workflowId}:${analysis.metadata.stepId}`;
+    const files = grouped.get(key) ?? [];
     files.push(analysis);
-    stepIdToFiles.set(analysis.metadata.stepId, files);
+    grouped.set(key, files);
   }
 
-  const duplicateErrors = new Map<string, string[]>();
+  return grouped;
+}
 
-  for (const [stepId, files] of stepIdToFiles) {
+function buildErrorsForDuplicates(filesByKey: Map<string, AnalyzedStepFile[]>): Map<string, string[]> {
+  const errors = new Map<string, string[]>();
+
+  for (const [compositeKey, files] of filesByKey) {
     if (files.length <= 1) {
       continue;
     }
 
+    const [workflowId, stepId] = compositeKey.split(':');
     const relativePaths = files.map((file) => path.relative(process.cwd(), file.filePath));
 
     for (const file of files) {
       const currentFilePath = path.relative(process.cwd(), file.filePath);
       const duplicateLocations = relativePaths.filter((candidate) => candidate !== currentFilePath);
-      const entryErrors = duplicateErrors.get(file.filePath) ?? [];
-      entryErrors.push(`Duplicate stepId: '${stepId}' is also defined in ${duplicateLocations.join(', ')}`);
-      duplicateErrors.set(file.filePath, entryErrors);
+      const entryErrors = errors.get(file.filePath) ?? [];
+      entryErrors.push(
+        `Duplicate stepId: '${stepId}' for workflow '${workflowId}' is also defined in ${duplicateLocations.join(', ')}`
+      );
+      errors.set(file.filePath, entryErrors);
     }
   }
-  return duplicateErrors;
+
+  return errors;
 }
 
 function getScriptKind(filePath: string): ts.ScriptKind {

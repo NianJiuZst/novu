@@ -3,33 +3,31 @@ import ora from 'ora';
 import * as path from 'path';
 import { green, red, yellow } from 'picocolors';
 import { StepResolverClient } from './api';
-import { bundleAllWorkflows, formatBundleSize } from './bundler';
+import { bundleRelease, formatBundleSize } from './bundler';
 import { loadConfig } from './config/loader';
 import { discoverStepFiles } from './discovery';
-import type { DeploymentResult, DiscoveredStep, EnvironmentInfo, WorkflowBundle } from './types';
+import type {
+  DeploymentResult,
+  DiscoveredStep,
+  EnvironmentInfo,
+  StepResolverManifestStep,
+  StepResolverReleaseBundle,
+} from './types';
+import { renderTable, withSpinner } from './utils';
 
 interface PublishOptions {
   secretKey?: string;
   apiUrl?: string;
   config?: string;
   out?: string;
-  workflow?: string;
+  workflow?: string[] | string;
   bundleOutDir?: string | boolean;
   dryRun?: boolean;
 }
 
-interface DeploymentError {
-  workflowId: string;
-  error: string;
-}
-
-interface DeploymentOutcome {
-  deployments: DeploymentResult[];
-  errors: DeploymentError[];
-}
-
 const DEFAULT_API_URL = 'https://api.novu.co';
 const DEFAULT_STEPS_DIR = './novu';
+const RELEASE_ARTIFACT_BASENAME = 'step-resolver-release';
 
 export async function emailPublish(options: PublishOptions): Promise<void> {
   try {
@@ -43,38 +41,36 @@ export async function emailPublish(options: PublishOptions): Promise<void> {
     const stepsDir = path.resolve(rootDir, stepsDirLabel);
     console.log('');
     const client = new StepResolverClient(apiUrl, secretKey);
-    const envInfo = await authenticate(client, apiUrl);
+    await authenticate(client, apiUrl);
 
     const discoveredSteps = await discoverAndValidateSteps(stepsDir, stepsDirLabel);
-    const workflowSteps = groupStepsByWorkflow(discoveredSteps);
-    filterWorkflows(workflowSteps, options.workflow);
-    const selectedSteps = flattenWorkflowSteps(workflowSteps);
-    printDiscoveredSteps(selectedSteps, discoveredSteps.length, workflowSteps.size, options.workflow);
+    const selectedSteps = selectStepsByWorkflow(discoveredSteps, options.workflow);
+    printDiscoveredSteps(selectedSteps, discoveredSteps.length, options.workflow);
 
     const shouldMinifyBundles = !options.bundleOutDir;
     if (!shouldMinifyBundles) {
-      console.log(yellow('ℹ Debug bundle mode enabled: generating unminified workflow bundles.'));
+      console.log(yellow('ℹ Debug bundle mode enabled: generating unminified release bundle.'));
       console.log('');
     }
-    const bundles = await bundleWorkflows(workflowSteps, envInfo._id, rootDir, shouldMinifyBundles, config?.aliases);
+
+    const releaseBundle = await buildReleaseBundle(selectedSteps, rootDir, shouldMinifyBundles, config?.aliases);
+    const manifestSteps = selectedSteps.map((step) => ({
+      workflowId: step.workflowId,
+      stepId: step.stepId,
+    }));
 
     const bundleOutputDir = resolveBundleOutputDir(options.bundleOutDir, rootDir);
     if (bundleOutputDir) {
-      await writeBundleArtifactsWithSpinner(bundles, bundleOutputDir, rootDir);
+      await writeBundleArtifactsWithSpinner(releaseBundle, manifestSteps, bundleOutputDir, rootDir);
     }
 
     if (options.dryRun) {
-      printDryRunSummary(bundles);
+      printDryRunSummary(releaseBundle, selectedSteps, manifestSteps);
       return;
     }
 
-    const deploymentOutcome = await deployBundles(client, bundles, envInfo._id);
-    if (deploymentOutcome.errors.length > 0) {
-      printDeploymentErrors(deploymentOutcome.errors, deploymentOutcome.deployments);
-      process.exit(1);
-    }
-
-    printSuccessSummary(deploymentOutcome.deployments, selectedSteps);
+    const deployment = await deployRelease(client, releaseBundle, manifestSteps);
+    printSuccessSummary(deployment, selectedSteps);
   } catch (error) {
     console.error('');
     console.error(red('❌ Publish failed:'), error instanceof Error ? error.message : error);
@@ -102,129 +98,125 @@ function assertSecretKey(secretKey?: string): asserts secretKey is string {
 }
 
 async function authenticate(client: StepResolverClient, apiUrl: string): Promise<EnvironmentInfo> {
-  const authSpinner = ora('Authenticating with Novu...').start();
+  const envInfo = await withSpinner(
+    'Authenticating with Novu...',
+    async () => {
+      try {
+        await client.validateConnection();
+        const envInfo = await client.getEnvironmentInfo();
+        return envInfo;
+      } catch (error) {
+        console.error(`Using API URL: ${apiUrl}`);
+        console.error('(For EU region, use: --api-url https://eu.api.novu.co)');
+        console.error('');
+        throw error;
+      }
+    },
+    { successMessage: 'Authenticated with Novu', failMessage: 'Authentication failed' }
+  );
 
-  try {
-    await client.validateConnection();
-    const envInfo = await client.getEnvironmentInfo();
-    authSpinner.succeed('Authenticated with Novu');
-    console.log(`   ${green('✓')} Environment: ${envInfo.name} (${envInfo._id})`);
-    console.log('');
-    return envInfo;
-  } catch (error) {
-    authSpinner.fail('Authentication failed');
-    console.error('');
-    if (error instanceof Error) {
-      console.error(red(error.message));
-    }
-    console.error('');
-    console.error(`Using API URL: ${apiUrl}`);
-    console.error('(For EU region, use: --api-url https://eu.api.novu.co)');
-    console.error('');
-    process.exit(1);
-  }
+  console.log(`   ${green('✓')} Environment: ${envInfo.name} (${envInfo._id})`);
+  console.log('');
+  return envInfo;
 }
 
 async function discoverAndValidateSteps(stepsDir: string, stepsDirLabel: string): Promise<DiscoveredStep[]> {
-  const discoverySpinner = ora(`Discovering steps in ${stepsDirLabel}...`).start();
+  return withSpinner(
+    `Discovering steps in ${stepsDirLabel}...`,
+    async () => {
+      const discovery = await discoverStepFiles(stepsDir);
 
-  try {
-    const discovery = await discoverStepFiles(stepsDir);
-
-    if (discovery.matchedFiles === 0) {
-      discoverySpinner.fail('No step files found');
-      console.error('');
-      console.error(red(`❌ No step files found in ${stepsDir}`));
-      console.error('');
-      console.error('Expected *.step.tsx, *.step.ts, *.step.jsx, or *.step.js files.');
-      console.error('');
-      console.error("Run 'npx novu email init' first to generate step handlers.");
-      console.error('');
-      process.exit(1);
-    }
-
-    if (!discovery.valid) {
-      discoverySpinner.fail('Step file validation failed');
-      console.error('');
-      console.error(red('❌ Step file validation failed'));
-      console.error('');
-
-      for (const fileError of discovery.errors) {
-        console.error(red(`Errors in ${fileError.filePath}:`));
-        for (const error of fileError.errors) {
-          console.error(red(`  • ${error}`));
-        }
+      if (discovery.matchedFiles === 0) {
         console.error('');
+        console.error(red(`❌ No step files found in ${stepsDir}`));
+        console.error('');
+        console.error('Expected *.step.tsx, *.step.ts, *.step.jsx, or *.step.js files.');
+        console.error('');
+        console.error("Run 'npx novu email init' first to generate step handlers.");
+        console.error('');
+        throw new Error('No step files found');
       }
 
-      console.error("Fix these errors and run 'npx novu email init --force' to regenerate step files.");
-      console.error('');
-      process.exit(1);
-    }
+      if (!discovery.valid) {
+        console.error('');
+        console.error(red('❌ Step file validation failed'));
+        console.error('');
 
-    discoverySpinner.succeed('Discovered step files');
-    return discovery.steps;
-  } catch (error) {
-    discoverySpinner.fail('Discovery failed');
-    console.error('');
-    console.error(red('❌ Failed to discover step files'));
-    if (error instanceof Error) {
-      console.error(red(error.message));
-    }
-    console.error('');
-    process.exit(1);
-  }
+        for (const fileError of discovery.errors) {
+          console.error(red(`Errors in ${fileError.filePath}:`));
+          for (const error of fileError.errors) {
+            console.error(red(`  • ${error}`));
+          }
+          console.error('');
+        }
+
+        console.error("Fix these errors and run 'npx novu email init --force' to regenerate step files.");
+        console.error('');
+        throw new Error('Step file validation failed');
+      }
+
+      return discovery.steps;
+    },
+    { successMessage: 'Discovered step files', failMessage: 'Discovery failed' }
+  );
 }
 
-function groupStepsByWorkflow(steps: DiscoveredStep[]): Map<string, DiscoveredStep[]> {
-  const workflowSteps = new Map<string, DiscoveredStep[]>();
-
-  for (const step of steps) {
-    const existing = workflowSteps.get(step.workflowId) || [];
-    existing.push(step);
-    workflowSteps.set(step.workflowId, existing);
+function selectStepsByWorkflow(
+  discoveredSteps: DiscoveredStep[],
+  requestedWorkflowOption?: string[] | string
+): DiscoveredStep[] {
+  const requestedWorkflows = normalizeRequestedWorkflows(requestedWorkflowOption);
+  if (requestedWorkflows.length === 0) {
+    return discoveredSteps;
   }
 
-  return workflowSteps;
-}
+  const requestedSet = new Set(requestedWorkflows);
+  const selectedSteps = discoveredSteps.filter((step) => requestedSet.has(step.workflowId));
+  const missingWorkflows = requestedWorkflows.filter(
+    (workflowId) => !selectedSteps.some((step) => step.workflowId === workflowId)
+  );
 
-function filterWorkflows(workflowSteps: Map<string, DiscoveredStep[]>, workflow?: string): void {
-  if (!workflow) {
-    return;
-  }
-
-  const selectedSteps = workflowSteps.get(workflow);
-  if (!selectedSteps) {
-    console.error(red(`❌ Workflow not found: ${workflow}`));
+  if (missingWorkflows.length > 0) {
+    console.error(red(`❌ Step(s) not found for workflow(s): ${missingWorkflows.join(', ')}`));
     console.error('');
     console.error('Available workflows:');
-    for (const workflowId of workflowSteps.keys()) {
-      console.error(`  • ${workflowId}`);
+    const availableWorkflows = Array.from(new Set(discoveredSteps.map((step) => step.workflowId))).sort();
+    for (const workflow of availableWorkflows) {
+      console.error(`  • ${workflow}`);
     }
     console.error('');
     process.exit(1);
   }
 
-  workflowSteps.clear();
-  workflowSteps.set(workflow, selectedSteps);
+  return selectedSteps;
 }
 
-function flattenWorkflowSteps(workflowSteps: Map<string, DiscoveredStep[]>): DiscoveredStep[] {
-  return Array.from(workflowSteps.values()).flat();
+function normalizeRequestedWorkflows(requestedWorkflowOption?: string[] | string): string[] {
+  if (!requestedWorkflowOption) {
+    return [];
+  }
+
+  if (Array.isArray(requestedWorkflowOption)) {
+    return requestedWorkflowOption;
+  }
+
+  return [requestedWorkflowOption];
 }
 
 function printDiscoveredSteps(
   steps: DiscoveredStep[],
   totalDiscoveredSteps: number,
-  workflowCount: number,
-  selectedWorkflow?: string
-): void {
+  selectedWorkflowOption?: string[] | string
+) {
   for (const step of steps) {
     console.log(`   ${green('✓')} ${step.stepId} (workflow: ${step.workflowId})`);
   }
 
+  const workflowCount = new Set(steps.map((step) => step.workflowId)).size;
+  const requestedWorkflows = normalizeRequestedWorkflows(selectedWorkflowOption);
+
   console.log('');
-  if (selectedWorkflow) {
+  if (requestedWorkflows.length > 0) {
     console.log(
       `   Found ${steps.length} step(s) across ${workflowCount} workflow(s) (filtered from ${totalDiscoveredSteps} total step(s))`
     );
@@ -234,231 +226,171 @@ function printDiscoveredSteps(
   console.log('');
 }
 
-async function bundleWorkflows(
-  workflowSteps: Map<string, DiscoveredStep[]>,
-  environmentId: string,
+async function buildReleaseBundle(
+  selectedSteps: DiscoveredStep[],
   rootDir: string,
   minify: boolean,
   aliases?: Record<string, string>
-): Promise<WorkflowBundle[]> {
-  const bundleSpinner = ora('Bundling workflows...').start();
+): Promise<StepResolverReleaseBundle> {
+  const bundle = await withSpinner(
+    'Packaging steps...',
+    async () => {
+      return bundleRelease(selectedSteps, rootDir, { minify, aliases });
+    },
+    { successMessage: 'Packaged successfully', failMessage: 'Packaging failed' }
+  );
+
+  const workflowCount = new Set(selectedSteps.map((step) => step.workflowId)).size;
+  console.log(
+    `   ${green('✓')} ${selectedSteps.length} step(s), ${workflowCount} workflow(s), ${formatBundleSize(bundle.size)}`
+  );
+  console.log('');
+  return bundle;
+}
+
+async function deployRelease(
+  client: StepResolverClient,
+  releaseBundle: StepResolverReleaseBundle,
+  manifestSteps: StepResolverManifestStep[]
+): Promise<DeploymentResult> {
+  const deploySpinner = ora('Publishing...').start();
 
   try {
-    const bundles = await bundleAllWorkflows(workflowSteps, environmentId, rootDir, { minify, aliases });
-    bundleSpinner.succeed('Bundled workflows');
+    const result = await client.deployRelease(releaseBundle, manifestSteps);
+    deploySpinner.stop();
 
-    for (const bundle of bundles) {
-      console.log(
-        `   ${green('✓')} ${bundle.workflowId}: ${bundle.stepIds.length} steps, ${formatBundleSize(bundle.size)}`
-      );
-    }
-    console.log('');
-
-    return bundles;
+    return result;
   } catch (error) {
-    bundleSpinner.fail('Bundling failed');
-    console.error('');
-    if (error instanceof Error) {
-      console.error(red(error.message));
-    }
-    console.error('');
-    process.exit(1);
+    deploySpinner.fail('Publishing failed');
+    throw error;
   }
 }
 
+function printDryRunSummary(
+  bundle: StepResolverReleaseBundle,
+  selectedSteps: DiscoveredStep[],
+  manifestSteps: StepResolverManifestStep[]
+): void {
+  const workflowCount = new Set(selectedSteps.map((step) => step.workflowId)).size;
+
+  console.log(yellow('🔍 Dry run mode - skipping deployment'));
+  console.log('');
+  console.log('Package summary:');
+  console.log(`  • Size: ${formatBundleSize(bundle.size)}`);
+  console.log(`  • Steps: ${selectedSteps.length}`);
+  console.log(`  • Workflows: ${workflowCount}`);
+  console.log('');
+  console.log('Included steps:');
+  for (const step of manifestSteps) {
+    console.log(`  • ${step.stepId} (workflow: ${step.workflowId})`);
+  }
+  console.log('');
+  console.log(green('✅ Ready to publish!'));
+  console.log('');
+}
+
+function printSuccessSummary(deployment: DeploymentResult, steps: DiscoveredStep[]): void {
+  console.log(green('✅ Published successfully!'));
+  console.log('');
+
+  const workflowCount = new Set(steps.map((step) => step.workflowId)).size;
+  const stepText = deployment.selectedStepsCount === 1 ? 'step' : 'steps';
+  const workflowText = workflowCount === 1 ? 'workflow' : 'workflows';
+  console.log(
+    `   ${deployment.selectedStepsCount} ${stepText} across ${workflowCount} ${workflowText} ${deployment.selectedStepsCount === 1 ? 'is' : 'are'} now live`
+  );
+  console.log('');
+  console.log(`   Version: ${deployment.stepResolverHash}`);
+  console.log(`   Published: ${formatDeploymentTime(deployment.deployedAt)}`);
+  console.log('');
+
+  renderTable(
+    steps,
+    [
+      { header: 'Step', getValue: (s) => s.stepId },
+      { header: 'Workflow', getValue: (s) => s.workflowId },
+      { header: 'Status', getValue: () => green('Live') },
+    ],
+    '   '
+  );
+  console.log('');
+}
+
+function formatDeploymentTime(isoString: string): string {
+  const date = new Date(isoString);
+  const month = date.toLocaleString('en-US', { month: 'short' });
+  const day = date.getDate();
+  const year = date.getFullYear();
+  const time = date.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  return `${month} ${day}, ${year} at ${time}`;
+}
+
+interface ReleaseArtifactFiles {
+  bundlePath: string;
+  manifestPath: string;
+  metadataPath: string;
+}
+
 async function writeBundleArtifactsWithSpinner(
-  bundles: WorkflowBundle[],
+  bundle: StepResolverReleaseBundle,
+  manifestSteps: StepResolverManifestStep[],
   outputDir: string,
   rootDir: string
 ): Promise<void> {
   const outputDirLabel = path.relative(rootDir, outputDir) || '.';
-  const writeSpinner = ora(`Writing bundle artifacts to ${outputDirLabel}...`).start();
 
-  try {
-    const artifacts = await writeBundleArtifacts(bundles, outputDir);
-    writeSpinner.succeed(`Saved bundle artifacts to ${outputDirLabel}`);
+  return withSpinner(
+    `Writing bundle artifacts to ${outputDirLabel}...`,
+    async () => {
+      const artifacts = await writeBundleArtifacts(bundle, manifestSteps, outputDir);
 
-    for (const artifact of artifacts) {
-      console.log(
-        `   ${green('✓')} ${artifact.workflowId}: ${path.relative(rootDir, artifact.bundlePath)} ` +
-          `(${path.relative(rootDir, artifact.metadataPath)})`
-      );
-    }
-    console.log('');
-  } catch (error) {
-    writeSpinner.fail('Failed to write bundle artifacts');
-    console.error('');
-    if (error instanceof Error) {
-      console.error(red(error.message));
-    }
-    console.error('');
-    process.exit(1);
-  }
+      console.log(`   ${green('✓')} ${path.relative(rootDir, artifacts.bundlePath)}`);
+      console.log(`   ${green('✓')} ${path.relative(rootDir, artifacts.manifestPath)}`);
+      console.log(`   ${green('✓')} ${path.relative(rootDir, artifacts.metadataPath)}`);
+      console.log('');
+    },
+    { successMessage: `Saved bundle artifacts to ${outputDirLabel}`, failMessage: 'Failed to write bundle artifacts' }
+  );
 }
 
-function printDryRunSummary(bundles: WorkflowBundle[]): void {
-  console.log(yellow('🔍 Dry run mode - skipping deployment'));
-  console.log('');
-  console.log('Bundle information:');
-  for (const bundle of bundles) {
-    console.log(`  • ${bundle.workflowId}: ${formatBundleSize(bundle.size)}, ${bundle.stepIds.length} step(s)`);
-    console.log(`    Steps: ${bundle.stepIds.join(', ')}`);
-  }
-  console.log('');
-  console.log(green('✅ Bundle successful!'));
-  console.log('');
-}
-
-async function deployBundles(
-  client: StepResolverClient,
-  bundles: WorkflowBundle[],
-  environmentId: string
-): Promise<DeploymentOutcome> {
-  const deploySpinner = ora('Deploying to Novu worker...').start();
-  const deployments: DeploymentResult[] = [];
-  const errors: DeploymentError[] = [];
-
-  let processed = 0;
-  for (const bundle of bundles) {
-    try {
-      const result = await client.deployWorkflow(bundle);
-      deployments.push(result);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      errors.push({ workflowId: bundle.workflowId, error: errorMessage });
-    }
-
-    processed += 1;
-    deploySpinner.text = `Deploying to Novu worker... (${processed}/${bundles.length})`;
-  }
-
-  if (errors.length === 0) {
-    deploySpinner.succeed('Deployed to Novu worker');
-  } else if (deployments.length > 0) {
-    deploySpinner.fail('Deployment completed with errors');
-  } else {
-    deploySpinner.fail('All deployments failed');
-  }
-
-  if (deployments.length > 0) {
-    for (const deployment of deployments) {
-      console.log(`   ${green('✓')} ${environmentId}-${deployment.workflowId}`);
-    }
-    console.log('');
-  }
-
-  return {
-    deployments,
-    errors,
-  };
-}
-
-function printDeploymentErrors(errors: DeploymentError[], deployments: DeploymentResult[]): void {
-  console.error('');
-  console.error(red('❌ Some deployments failed:'));
-  console.error('');
-  for (const { workflowId, error } of errors) {
-    console.error(red(`  ${workflowId}: ${error}`));
-  }
-  console.error('');
-
-  if (deployments.length > 0) {
-    console.log(yellow('Other workflows deployed successfully:'));
-    for (const deployment of deployments) {
-      console.log(`  ${green('✓')} ${deployment.workflowId}`);
-    }
-    console.log('');
-  }
-}
-
-function printSuccessSummary(deployments: DeploymentResult[], steps: DiscoveredStep[]): void {
-  console.log(green('✅ Deployment successful!'));
-  console.log(`   Deployed: ${deployments.length} workflow(s), ${steps.length} step(s)`);
-  console.log('');
-
-  console.log('   Steps deployed:');
-  const stepIdWidth = Math.max('Step'.length, ...steps.map((s) => s.stepId.length)) + 2;
-  const workflowIdWidth = Math.max('Workflow'.length, ...steps.map((s) => s.workflowId.length)) + 2;
-
-  console.log('   ┌' + '─'.repeat(stepIdWidth) + '┬' + '─'.repeat(workflowIdWidth) + '┬─────────┐');
-  console.log('   │ ' + 'Step'.padEnd(stepIdWidth - 1) + '│ ' + 'Workflow'.padEnd(workflowIdWidth - 1) + '│ Status  │');
-  console.log('   ├' + '─'.repeat(stepIdWidth) + '┼' + '─'.repeat(workflowIdWidth) + '┼─────────┤');
-
-  for (const step of steps) {
-    console.log(
-      '   │ ' +
-        step.stepId.padEnd(stepIdWidth - 1) +
-        '│ ' +
-        step.workflowId.padEnd(workflowIdWidth - 1) +
-        '│ ' +
-        green('✅ Live') +
-        ' │'
-    );
-  }
-
-  console.log('   └' + '─'.repeat(stepIdWidth) + '┴' + '─'.repeat(workflowIdWidth) + '┴─────────┘');
-  console.log('');
-}
-
-interface BundleArtifactFiles {
-  workflowId: string;
-  bundlePath: string;
-  metadataPath: string;
-}
-
-async function writeBundleArtifacts(bundles: WorkflowBundle[], outputDir: string): Promise<BundleArtifactFiles[]> {
+async function writeBundleArtifacts(
+  bundle: StepResolverReleaseBundle,
+  manifestSteps: StepResolverManifestStep[],
+  outputDir: string
+): Promise<ReleaseArtifactFiles> {
   await fs.mkdir(outputDir, { recursive: true });
 
-  const usedNames = new Map<string, number>();
-  const artifacts: BundleArtifactFiles[] = [];
+  const bundlePath = path.join(outputDir, `${RELEASE_ARTIFACT_BASENAME}.worker.mjs`);
+  const manifestPath = path.join(outputDir, `${RELEASE_ARTIFACT_BASENAME}.manifest.json`);
+  const metadataPath = path.join(outputDir, `${RELEASE_ARTIFACT_BASENAME}.meta.json`);
+  const workflowIds = Array.from(new Set(manifestSteps.map((step) => step.workflowId))).sort((a, b) =>
+    a.localeCompare(b)
+  );
+  const stepIds = manifestSteps.map((step) => step.stepId);
 
-  for (const bundle of bundles) {
-    const fileBaseName = getUniqueFileBaseName(bundle.workflowId, usedNames);
-    const bundlePath = path.join(outputDir, `${fileBaseName}.worker.mjs`);
-    const metadataPath = path.join(outputDir, `${fileBaseName}.meta.json`);
+  await fs.writeFile(bundlePath, bundle.code, 'utf8');
+  await fs.writeFile(manifestPath, `${JSON.stringify({ steps: manifestSteps }, null, 2)}\n`, 'utf8');
+  await fs.writeFile(
+    metadataPath,
+    `${JSON.stringify(
+      {
+        releaseId: RELEASE_ARTIFACT_BASENAME,
+        size: bundle.size,
+        workflowIds,
+        stepIds,
+        createdAt: new Date().toISOString(),
+      },
+      null,
+      2
+    )}\n`,
+    'utf8'
+  );
 
-    await fs.writeFile(bundlePath, bundle.code, 'utf8');
-    await fs.writeFile(
-      metadataPath,
-      `${JSON.stringify(
-        {
-          workflowId: bundle.workflowId,
-          size: bundle.size,
-          stepIds: bundle.stepIds,
-          createdAt: new Date().toISOString(),
-        },
-        null,
-        2
-      )}\n`,
-      'utf8'
-    );
-
-    artifacts.push({
-      workflowId: bundle.workflowId,
-      bundlePath,
-      metadataPath,
-    });
-  }
-
-  return artifacts;
-}
-
-function getUniqueFileBaseName(workflowId: string, usedNames: Map<string, number>): string {
-  const baseName = toSafeFileName(workflowId);
-  const currentCount = usedNames.get(baseName) ?? 0;
-  usedNames.set(baseName, currentCount + 1);
-
-  if (currentCount === 0) {
-    return baseName;
-  }
-
-  return `${baseName}-${currentCount + 1}`;
-}
-
-function toSafeFileName(value: string): string {
-  const sanitized = value.replace(/[<>:"/\\|?*\u0000-\u001f]/g, '-');
-  const collapsed = sanitized.replace(/-+/g, '-').replace(/^-|-$/g, '');
-  return collapsed || 'workflow';
+  return {
+    bundlePath,
+    manifestPath,
+    metadataPath,
+  };
 }
 
 function resolveBundleOutputDir(bundleOutDir: PublishOptions['bundleOutDir'], rootDir: string): string | undefined {

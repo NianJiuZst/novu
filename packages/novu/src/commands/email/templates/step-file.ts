@@ -1,13 +1,18 @@
 import type { EmailStepConfig } from '../config/schema';
 
-export function generateStepFile(stepId: string, templateImportPath: string, emailConfig: EmailStepConfig): string {
+export function generateStepFile(
+  stepId: string,
+  workflowId: string,
+  templateImportPath: string,
+  emailConfig: EmailStepConfig
+): string {
   const defaultSubject = emailConfig.subject || 'No Subject';
 
   return `import { render } from '@react-email/components';
 import EmailTemplate from '${templateImportPath}';
 
 export const stepId = '${stepId}';
-export const workflowId = '${emailConfig.workflowId}';
+export const workflowId = '${workflowId}';
 export const type = 'email';
 
 export default async function({ payload, subscriber, context, steps }) {

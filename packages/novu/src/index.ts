@@ -164,7 +164,7 @@ emailCommand
   .option('-a, --api-url <url>', 'Novu API URL')
   .option('-c, --config <path>', 'Path to config file')
   .option('--out <path>', 'Directory containing step handlers')
-  .option('--workflow <id>', 'Deploy only specific workflow')
+  .option('--workflow <id...>', 'Deploy only specific workflows')
   .option('--bundle-out-dir [path]', 'Write bundled workflow artifacts to a directory for debugging')
   .option('--dry-run', 'Bundle without deploying')
   .action(async (options) => {

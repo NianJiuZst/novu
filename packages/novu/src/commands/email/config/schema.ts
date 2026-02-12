@@ -1,13 +1,16 @@
 export type EmailStepConfig = {
   template: string;
-  workflowId: string;
   subject?: string;
 };
 
 export type NovuConfig = {
   outDir?: string;
-  steps: {
-    email: Record<string, EmailStepConfig>;
+  workflows: {
+    [workflowId: string]: {
+      steps: {
+        email: Record<string, EmailStepConfig>;
+      };
+    };
   };
   apiUrl?: string;
   aliases?: Record<string, string>;
@@ -20,33 +23,43 @@ export function validateConfig(config: unknown): NovuConfig {
 
   const novuConfig = config as Partial<NovuConfig>;
 
-  if (!novuConfig.steps || typeof novuConfig.steps !== 'object') {
-    throw new Error('Invalid config: steps field is required and must be an object');
-  }
-
-  if (!novuConfig.steps.email || typeof novuConfig.steps.email !== 'object') {
-    throw new Error('Invalid config: steps.email field is required and must be an object');
+  if (!novuConfig.workflows || typeof novuConfig.workflows !== 'object') {
+    throw new Error('Invalid config: workflows field is required and must be an object');
   }
 
   const errors: string[] = [];
-  const stepIds = new Set<string>();
 
-  for (const [stepId, emailConfig] of Object.entries(novuConfig.steps.email)) {
-    if (stepIds.has(stepId)) {
-      errors.push(`Duplicate step ID: ${stepId}`);
-    }
-    stepIds.add(stepId);
-
-    if (!emailConfig.template || typeof emailConfig.template !== 'string') {
-      errors.push(`steps.email['${stepId}'].template is required and must be a string`);
+  for (const [workflowId, workflow] of Object.entries(novuConfig.workflows)) {
+    if (!workflow || typeof workflow !== 'object') {
+      errors.push(`workflows['${workflowId}'] must be an object`);
+      continue;
     }
 
-    if (!emailConfig.workflowId || typeof emailConfig.workflowId !== 'string') {
-      errors.push(`steps.email['${stepId}'].workflowId is required and must be a string`);
+    if (!workflow.steps || typeof workflow.steps !== 'object') {
+      errors.push(`workflows['${workflowId}'].steps is required and must be an object`);
+      continue;
     }
 
-    if (emailConfig.subject !== undefined && typeof emailConfig.subject !== 'string') {
-      errors.push(`steps.email['${stepId}'].subject must be a string`);
+    if (!workflow.steps.email || typeof workflow.steps.email !== 'object') {
+      errors.push(`workflows['${workflowId}'].steps.email is required and must be an object`);
+      continue;
+    }
+
+    const stepIds = new Set<string>();
+
+    for (const [stepId, emailConfig] of Object.entries(workflow.steps.email)) {
+      if (stepIds.has(stepId)) {
+        errors.push(`Duplicate step ID '${stepId}' in workflow '${workflowId}'`);
+      }
+      stepIds.add(stepId);
+
+      if (!emailConfig.template || typeof emailConfig.template !== 'string') {
+        errors.push(`workflows['${workflowId}'].steps.email['${stepId}'].template is required and must be a string`);
+      }
+
+      if (emailConfig.subject !== undefined && typeof emailConfig.subject !== 'string') {
+        errors.push(`workflows['${workflowId}'].steps.email['${stepId}'].subject must be a string`);
+      }
     }
   }
 

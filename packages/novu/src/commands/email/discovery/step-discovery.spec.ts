@@ -122,9 +122,21 @@ describe('step-discovery', () => {
     expect(result.errors[0].errors.some((error) => error.includes('@react-email/components'))).toBe(true);
   });
 
-  it('detects duplicate step IDs across files', async () => {
-    writeStepFile('first.step.tsx', createStepFileContent({ stepId: 'duplicate-step', workflowId: 'workflow-one' }));
-    writeStepFile('second.step.tsx', createStepFileContent({ stepId: 'duplicate-step', workflowId: 'workflow-two' }));
+  it('allows duplicate step IDs across different workflows', async () => {
+    writeStepFile('first.step.tsx', createStepFileContent({ stepId: 'confirmation', workflowId: 'signup' }));
+    writeStepFile('second.step.tsx', createStepFileContent({ stepId: 'confirmation', workflowId: 'booking' }));
+
+    const result = await discoverStepFiles(tempDir);
+
+    expect(result.valid).toBe(true);
+    expect(result.matchedFiles).toBe(2);
+    expect(result.steps).toHaveLength(2);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('detects duplicate step IDs within same workflow', async () => {
+    writeStepFile('first.step.tsx', createStepFileContent({ stepId: 'duplicate-step', workflowId: 'onboarding' }));
+    writeStepFile('second.step.tsx', createStepFileContent({ stepId: 'duplicate-step', workflowId: 'onboarding' }));
 
     const result = await discoverStepFiles(tempDir);
 
@@ -134,7 +146,7 @@ describe('step-discovery', () => {
     expect(result.errors).toHaveLength(2);
     expect(
       result.errors.every((error) =>
-        error.errors.some((message) => message.includes("Duplicate stepId: 'duplicate-step'"))
+        error.errors.some((message) => message.includes("Duplicate stepId: 'duplicate-step' for workflow 'onboarding'"))
       )
     ).toBe(true);
   });

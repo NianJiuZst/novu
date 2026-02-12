@@ -21,29 +21,29 @@ describe('generateWorkerWrapper', () => {
   ];
 
   it('should match snapshot', () => {
-    const result = generateWorkerWrapper(mockSteps, 'onboarding', 'env-123', '/root');
+    const result = generateWorkerWrapper(mockSteps, '/root');
     expect(result).toMatchSnapshot();
   });
 
   it('should handle empty steps array', () => {
-    const result = generateWorkerWrapper([], 'workflow', 'env', '/root');
+    const result = generateWorkerWrapper([], '/root');
     expect(result).toMatchSnapshot('empty-steps');
   });
 
   it('should handle single step', () => {
-    const result = generateWorkerWrapper([mockSteps[0]], 'workflow', 'env', '/root');
+    const result = generateWorkerWrapper([mockSteps[0]], '/root');
     expect(result).toMatchSnapshot('single-step');
   });
 
-  it('should interpolate workflow and environment IDs', () => {
-    const result = generateWorkerWrapper(mockSteps, 'my-workflow', 'my-env', '/root');
+  it('should keep workflow IDs in step entries', () => {
+    const result = generateWorkerWrapper(mockSteps, '/root');
 
-    expect(result).toContain('workflowId: "my-workflow"');
-    expect(result).toContain('environmentId: "my-env"');
+    expect(result).toContain('workflowId: workflowId0');
+    expect(result).toContain('workflowId: workflowId1');
   });
 
   it('should generate map-based dispatch and invalid JSON handling', () => {
-    const result = generateWorkerWrapper(mockSteps, 'workflow', 'env', '/root');
+    const result = generateWorkerWrapper(mockSteps, '/root');
 
     expect(result).toContain('const stepHandlers = new Map([');
     expect(result).toContain('function jsonResponse(body, status, extraHeaders = {})');
