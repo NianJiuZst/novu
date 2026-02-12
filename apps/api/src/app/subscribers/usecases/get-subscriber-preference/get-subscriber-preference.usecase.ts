@@ -17,6 +17,7 @@ import {
   NotificationTemplateRepository,
   PreferencesEntity,
   PreferencesRepository,
+  SubscriberEntity,
   SubscriberRepository,
 } from '@novu/dal';
 import {
@@ -41,19 +42,21 @@ export class GetSubscriberPreference {
 
   @InstrumentUsecase()
   async execute(command: GetSubscriberPreferenceCommand): Promise<ISubscriberPreferenceResponse[]> {
-    const subscriber =
+    const subscriber: Pick<SubscriberEntity, '_id'> | null =
       command.subscriber ??
-      (await this.subscriberRepository.findBySubscriberId(command.environmentId, command.subscriberId));
+      (await this.subscriberRepository.findBySubscriberId(command.environmentId, command.subscriberId, false, '_id'));
     if (!subscriber) {
       throw new NotFoundException(`Subscriber with id: ${command.subscriberId} not found`);
     }
 
-    const workflowList = await this.notificationTemplateRepository.filterActive({
-      organizationId: command.organizationId,
-      environmentId: command.environmentId,
-      tags: command.tags,
-      severity: command.severity,
-    });
+    const workflowList =
+      command.workflowList ??
+      (await this.notificationTemplateRepository.filterActive({
+        organizationId: command.organizationId,
+        environmentId: command.environmentId,
+        tags: command.tags,
+        severity: command.severity,
+      }));
 
     const workflowIds = workflowList.map((wf) => wf._id);
 
