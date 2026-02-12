@@ -10,7 +10,7 @@ export enum InMemoryLRUCacheStore {
   ACTIVE_WORKFLOWS = 'active-workflows',
 }
 
-export type WorkflowCacheData = NotificationTemplateEntity;
+export type WorkflowCacheData = NotificationTemplateEntity | null;
 export type OrganizationCacheData = OrganizationEntity | null;
 export type EnvironmentCacheData = Pick<EnvironmentEntity, '_id' | 'echo' | 'apiKeys'> | null;
 export type ApiKeyUserCacheData = UserSessionData | null;

@@ -18,12 +18,7 @@ import {
 } from '@novu/dal';
 import { workflow } from '@novu/framework/express';
 import { ActionStep, ChannelStep, PostActionEnum, Schema, Step, StepOutput, Workflow } from '@novu/framework/internal';
-import {
-  EnvironmentTypeEnum,
-  LAYOUT_PREVIEW_EMAIL_STEP,
-  LAYOUT_PREVIEW_WORKFLOW_ID,
-  StepTypeEnum,
-} from '@novu/shared';
+import { EnvironmentTypeEnum, LAYOUT_PREVIEW_EMAIL_STEP, LAYOUT_PREVIEW_WORKFLOW_ID, StepTypeEnum } from '@novu/shared';
 import { AdditionalOperation, RulesLogic } from 'json-logic-js';
 import _ from 'lodash';
 import { evaluateRules } from '../../../shared/services/query-parser/query-parser.service';
@@ -400,6 +395,10 @@ export class ConstructFrameworkWorkflow {
         skipCache: !shouldUseCache,
       }
     );
+
+    if (!workflow) {
+      throw new InternalServerErrorException(`Workflow ${workflowId} not found`);
+    }
 
     return workflow;
   }

@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   CreateExecutionDetails,
   CreateExecutionDetailsCommand,
@@ -409,11 +409,15 @@ export class RunJob {
     environmentId: string,
     organizationId: string,
     source?: string
-  ): Promise<NotificationTemplateEntity | undefined> {
+  ): Promise<NotificationTemplateEntity> {
     const workflow = await this.inMemoryLRUCacheService.get(
       InMemoryLRUCacheStore.WORKFLOW,
       `${environmentId}:${templateId}`,
-      () => this.notificationTemplateRepository.findById(templateId, environmentId),
+      async () => {
+        const result = await this.notificationTemplateRepository.findById(templateId, environmentId);
+
+        return result;
+      },
       {
         environmentId,
         organizationId,
@@ -421,7 +425,11 @@ export class RunJob {
       }
     );
 
-    return workflow ?? undefined;
+    if (!workflow) {
+      throw new NotFoundException(`Workflow ${templateId} not found`);
+    }
+
+    return workflow;
   }
 
   private isUnsnoozeJob(job: JobEntity) {
