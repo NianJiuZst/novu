@@ -59,6 +59,7 @@ export function TextWidget(props: WidgetProps) {
                     variables={variables}
                     isAllowedVariable={isAllowedVariable}
                     size="sm"
+                    disabled={disabled}
                   />
                 </InputWrapper>
               </InputRoot>
