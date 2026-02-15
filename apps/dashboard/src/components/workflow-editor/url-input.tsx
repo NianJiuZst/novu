@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/primitives/form/form';
 import { InputProps, InputRoot } from '@/components/primitives/input';
@@ -23,11 +24,18 @@ export const URLInput = ({
   variables = [],
   isAllowedVariable,
 }: URLInputProps) => {
-  const { control, getFieldState } = useFormContext();
+  const { control, getFieldState, setValue, watch } = useFormContext();
   const { saveForm } = useSaveForm();
   const url = getFieldState(`${urlKey}`);
   const target = getFieldState(`${targetKey}`);
   const error = url.error || target.error;
+
+  const targetValue = watch(targetKey);
+  useEffect(() => {
+    if (!targetValue && options.length > 0) {
+      setValue(targetKey, options[0]);
+    }
+  }, [targetValue, targetKey, options, setValue]);
 
   return (
     <div className="flex flex-col gap-1">
@@ -58,7 +66,7 @@ export const URLInput = ({
                 <FormItem className="space-y-0">
                   <FormControl>
                     <Select
-                      value={field.value}
+                      value={field.value || options[0]}
                       onValueChange={(value) => {
                         field.onChange(value);
                         saveForm();

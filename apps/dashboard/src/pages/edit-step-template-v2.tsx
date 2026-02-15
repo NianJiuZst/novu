@@ -18,7 +18,7 @@ export function EditStepTemplateV2Page() {
 
   const form = useForm({
     defaultValues,
-    values: step?.controls.values,
+    values: defaultValues,
     shouldFocusError: false,
     resetOptions: {
       keepDirtyValues: true,

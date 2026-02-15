@@ -25,14 +25,15 @@ function sanitizeEmptyInput<T_Type>(input: T_Type, defaultValue: T_Type = undefi
 }
 
 export function sanitizeRedirect(redirect: InAppRedirectType | undefined) {
-  // Only remove redirect if URL is empty - let validation catch missing target errors
   if (!redirect?.url || redirect.url.length === 0) {
     return undefined;
   }
 
+  const defaultTarget = redirect.url.startsWith('/') ? '_self' : '_blank';
+
   return {
     url: redirect.url as string,
-    target: redirect.target as '_self' | '_blank' | '_parent' | '_top' | '_unfencedTop',
+    target: (redirect.target || defaultTarget) as '_self' | '_blank' | '_parent' | '_top' | '_unfencedTop',
   };
 }
 
