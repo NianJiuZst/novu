@@ -1,4 +1,4 @@
-import { IActivity, IEnvironment } from '@novu/shared';
+import { ContextPayload, IActivity } from '@novu/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'motion/react';
 import { RiCloseLine, RiRouteFill } from 'react-icons/ri';
@@ -11,6 +11,37 @@ import { QueryKeys } from '@/utils/query-keys';
 import { cn } from '@/utils/ui';
 import { triggerWorkflow } from '../../api/workflows';
 import { RepeatPlay } from '../icons/repeat-play';
+
+function reconstructContextFromKeys(contextKeys?: string[]): ContextPayload | undefined {
+  if (!contextKeys || contextKeys.length === 0) return undefined;
+
+  const context: ContextPayload = {};
+  for (const key of contextKeys) {
+    const separatorIndex = key.indexOf(':');
+    if (separatorIndex === -1) continue;
+
+    const type = key.substring(0, separatorIndex);
+    const id = key.substring(separatorIndex + 1);
+    if (type && id) {
+      context[type] = id;
+    }
+  }
+
+  return Object.keys(context).length > 0 ? context : undefined;
+}
+
+function getActivityOverrides(activity: IActivity): Record<string, unknown> | undefined {
+  if (activity.overrides && Object.keys(activity.overrides).length > 0) {
+    return activity.overrides;
+  }
+
+  const firstJobOverrides = activity.jobs?.[0]?.overrides;
+  if (firstJobOverrides && Object.keys(firstJobOverrides).length > 0) {
+    return firstJobOverrides as Record<string, unknown>;
+  }
+
+  return undefined;
+}
 
 type ActivityHeaderProps = {
   className?: string;
@@ -37,12 +68,17 @@ export const ActivityHeader = ({ className, activity, onTransactionIdChange, onC
     mutationFn: async () => {
       if (!activity) throw new Error('No activity data available');
 
+      const resendContext = activity.context ?? reconstructContextFromKeys(activity.contextKeys);
+      const resendOverrides = getActivityOverrides(activity);
+
       const {
         data: { transactionId: newTransactionId },
       } = await triggerWorkflow({
         name: activity.template?.triggers[0].identifier ?? '',
         to: activity.subscriber?.subscriberId,
         payload: resentPayload,
+        context: resendContext,
+        overrides: resendOverrides,
         environment: currentEnvironment!,
       });
 

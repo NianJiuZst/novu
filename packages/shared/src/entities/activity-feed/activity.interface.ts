@@ -1,5 +1,6 @@
 import { SeverityLevelEnum } from '../../consts';
 import { ChannelTypeEnum, ISubscriber } from '../../types';
+import { ContextPayload } from '../../types/context';
 import { IExecutionDetail } from '../execution-details';
 import { IJob as IJobBase } from '../job';
 import { INotificationTemplate } from '../notification-template';
@@ -22,6 +23,8 @@ export interface IActivity {
     subscriberId: string;
   };
   payload: Record<string, unknown>;
+  overrides?: Record<string, unknown>;
+  context?: ContextPayload;
   tags: string[];
   createdAt: string;
   updatedAt: string;

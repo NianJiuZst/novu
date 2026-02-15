@@ -10,7 +10,7 @@ import {
   WorkflowRunRepository,
 } from '@novu/application-generic';
 import { JobEntity, JobRepository } from '@novu/dal';
-import { SeverityLevelEnum, StepTypeEnum } from '@novu/shared';
+import { ContextPayload, SeverityLevelEnum, StepTypeEnum } from '@novu/shared';
 import { GetWorkflowRunResponseDto, StepRunDto } from '../../dtos/workflow-run-response.dto';
 import { mapTraceToExecutionDetailDto, mapWorkflowRunStatusToDto } from '../../shared/mappers';
 import { GetWorkflowRunCommand } from './get-workflow-run.command';
@@ -146,8 +146,13 @@ export class GetWorkflowRun {
       }
 
       const workflowRun = workflowRunResult.data;
-      const stepRuns = await this.getStepRunsForWorkflowRun(command, workflowRun);
-      const workflowRunDto = this.mapWorkflowRunToDto(workflowRun, stepRuns);
+      const [stepRuns, overrides] = await Promise.all([
+        this.getStepRunsForWorkflowRun(command, workflowRun),
+        this.getOverridesForWorkflowRun(workflowRun, command),
+      ]);
+
+      const context = this.reconstructContextFromKeys(workflowRun.context_keys);
+      const workflowRunDto = this.mapWorkflowRunToDto(workflowRun, stepRuns, overrides, context);
 
       return workflowRunDto;
     } catch (error) {
@@ -284,9 +289,64 @@ export class GetWorkflowRun {
     };
   }
 
+  private async getOverridesForWorkflowRun(
+    workflowRun: WorkflowRunFetchResult,
+    command: GetWorkflowRunCommand
+  ): Promise<Record<string, unknown> | undefined> {
+    try {
+      const firstJob: Pick<JobEntity, 'overrides'> | null = await this.jobRepository.findOne(
+        {
+          _notificationId: workflowRun.workflow_run_id,
+          _environmentId: command.environmentId,
+        },
+        'overrides',
+        { sort: { createdAt: 1 } }
+      );
+
+      if (firstJob?.overrides && Object.keys(firstJob.overrides).length > 0) {
+        return firstJob.overrides as Record<string, unknown>;
+      }
+
+      return undefined;
+    } catch (error) {
+      this.logger.warn('Failed to get overrides for workflow run', {
+        error: error.message,
+        workflowRunId: workflowRun.workflow_run_id,
+      });
+
+      return undefined;
+    }
+  }
+
+  private reconstructContextFromKeys(contextKeys: string[] | undefined): ContextPayload | undefined {
+    if (!contextKeys || contextKeys.length === 0) {
+      return undefined;
+    }
+
+    const context: ContextPayload = {};
+    for (const key of contextKeys) {
+      const separatorIndex = key.indexOf(':');
+      if (separatorIndex === -1) continue;
+
+      const type = key.substring(0, separatorIndex);
+      const id = key.substring(separatorIndex + 1);
+      if (type && id) {
+        context[type] = id;
+      }
+    }
+
+    if (Object.keys(context).length === 0) {
+      return undefined;
+    }
+
+    return context;
+  }
+
   private mapWorkflowRunToDto(
     workflowRun: WorkflowRunFetchResult,
-    stepRuns: IStepRunWithDetails[]
+    stepRuns: IStepRunWithDetails[],
+    overrides?: Record<string, unknown>,
+    context?: ContextPayload
   ): GetWorkflowRunResponseDto {
     return {
       id: workflowRun.workflow_run_id,
@@ -308,6 +368,8 @@ export class GetWorkflowRun {
       critical: workflowRun.critical,
       contextKeys: workflowRun.context_keys,
       topics: workflowRun.topics ? JSON.parse(workflowRun.topics) : [],
+      overrides,
+      context,
     };
   }
 }

@@ -58,6 +58,8 @@ export interface GetWorkflowRunsDto {
 
 export type GetWorkflowRunResponse = GetWorkflowRunsDto & {
   payload: Record<string, unknown>;
+  overrides?: Record<string, unknown>;
+  context?: Record<string, unknown>;
 };
 
 export interface GetWorkflowRunsResponseDto {
@@ -67,6 +69,9 @@ export interface GetWorkflowRunsResponseDto {
 }
 
 function mapWorkflowRunToActivity(workflowRun: GetWorkflowRunResponse | GetWorkflowRunsDto): IActivity {
+  const overrides = 'overrides' in workflowRun ? workflowRun.overrides : undefined;
+  const context = 'context' in workflowRun ? workflowRun.context : undefined;
+
   return {
     _id: workflowRun.id,
     severity: workflowRun.severity,
@@ -76,12 +81,14 @@ function mapWorkflowRunToActivity(workflowRun: GetWorkflowRunResponse | GetWorkf
     _organizationId: workflowRun.organizationId,
     _subscriberId: workflowRun.internalSubscriberId,
     transactionId: workflowRun.transactionId,
-    channels: [], // Not available in workflow runs, empty array for compatibility
+    channels: [],
     to: {
       subscriberId: workflowRun.subscriberId || workflowRun.internalSubscriberId,
     },
     payload: 'payload' in workflowRun ? workflowRun.payload : {},
-    tags: [], // Not available in workflow runs, empty array for compatibility
+    overrides,
+    context,
+    tags: [],
     createdAt: workflowRun.createdAt,
     updatedAt: workflowRun.updatedAt,
     contextKeys: workflowRun.contextKeys || [],
@@ -145,13 +152,12 @@ function mapWorkflowRunToActivity(workflowRun: GetWorkflowRunResponse | GetWorkf
       _organizationId: workflowRun.organizationId,
       _environmentId: workflowRun.environmentId,
       _userId: '',
-      // delay: step.delay,
       _notificationId: workflowRun.id,
       status: step.status === 'queued' ? 'pending' : (step.status as any),
       _templateId: workflowRun.workflowId,
       payload: 'payload' in workflowRun ? workflowRun.payload : {},
       providerId: undefined,
-      overrides: {},
+      overrides: overrides ?? {},
       transactionId: workflowRun.transactionId,
       createdAt: workflowRun.createdAt,
       updatedAt: workflowRun.updatedAt,
