@@ -294,15 +294,16 @@ export class GetWorkflowRun {
     command: GetWorkflowRunCommand
   ): Promise<Record<string, unknown> | undefined> {
     try {
-      const firstJob: Pick<JobEntity, 'overrides'> | null = await this.jobRepository.findOne(
+      const jobs: Pick<JobEntity, 'overrides'>[] = await this.jobRepository.find(
         {
           _notificationId: workflowRun.workflow_run_id,
           _environmentId: command.environmentId,
         },
         'overrides',
-        { sort: { createdAt: 1 } }
+        { limit: 1, sort: { createdAt: 1 } }
       );
 
+      const firstJob = jobs[0];
       if (firstJob?.overrides && Object.keys(firstJob.overrides).length > 0) {
         return firstJob.overrides as Record<string, unknown>;
       }
