@@ -84,7 +84,24 @@ export async function bootstrap(
   server.headersTimeout = 65 * 1000;
   logger.trace(`Server headersTimeout: ${server.headersTimeout / 1000}s `);
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", 'https:'],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          fontSrc: ["'self'", 'https:'],
+          objectSrc: ["'none'"],
+          frameAncestors: ["'none'"],
+          baseUri: ["'self'"],
+          formAction: ["'self'"],
+          upgradeInsecureRequests: [],
+        },
+      },
+    })
+  );
   app.enableCors(corsOptionsDelegate);
 
   app.use(passport.initialize());
