@@ -4,14 +4,19 @@ import {
   CreateExecutionDetailsCommand,
   DetailEnum,
   dashboardSanitizeControlValues,
+  EnvironmentCacheData,
   ExecuteBridgeRequest,
   ExecuteBridgeRequestCommand,
+  FeatureFlagsService,
+  InMemoryLRUCacheService,
+  InMemoryLRUCacheStore,
   Instrument,
   InstrumentUsecase,
   PinoLogger,
 } from '@novu/application-generic';
 import {
   ControlValuesRepository,
+  EnvironmentEntity,
   EnvironmentRepository,
   JobEntity,
   JobRepository,
@@ -50,7 +55,9 @@ export class ExecuteBridgeJob {
     private controlValuesRepository: ControlValuesRepository,
     private createExecutionDetails: CreateExecutionDetails,
     private executeBridgeRequest: ExecuteBridgeRequest,
-    private logger: PinoLogger
+    private logger: PinoLogger,
+    private featureFlagsService: FeatureFlagsService,
+    private inMemoryLRUCacheService: InMemoryLRUCacheService
   ) {
     this.logger.setContext(this.constructor.name);
   }
@@ -63,16 +70,23 @@ export class ExecuteBridgeJob {
 
     let workflow: NotificationTemplateEntity | null = null;
     if (isStateful) {
-      workflow = await this.notificationTemplateRepository.findOne(
-        {
-          _id: command.job._templateId,
-          _environmentId: command.environmentId,
-          type: {
-            $in: [ResourceTypeEnum.ECHO, ResourceTypeEnum.BRIDGE],
+      if (
+        command.workflow &&
+        (command.workflow.type === ResourceTypeEnum.ECHO || command.workflow.type === ResourceTypeEnum.BRIDGE)
+      ) {
+        workflow = command.workflow;
+      } else {
+        workflow = await this.notificationTemplateRepository.findOne(
+          {
+            _id: command.job._templateId,
+            _environmentId: command.environmentId,
+            type: {
+              $in: [ResourceTypeEnum.ECHO, ResourceTypeEnum.BRIDGE],
+            },
           },
-        },
-        '_id triggers type origin'
-      );
+          '_id triggers type origin'
+        );
+      }
     }
 
     if (!workflow && isStateful) {
@@ -83,13 +97,7 @@ export class ExecuteBridgeJob {
       throw new Error('Step id is not set');
     }
 
-    const environment = await this.environmentRepository.findOne(
-      {
-        _id: command.environmentId,
-        _organizationId: command.organizationId,
-      },
-      'echo apiKeys _id'
-    );
+    const environment = await this.getEnvironment(command.environmentId, command.organizationId);
 
     if (!environment) {
       throw new Error(`Environment id ${command.environmentId} is not found`);
@@ -326,5 +334,26 @@ export class ExecuteBridgeJob {
         error: job?.error,
       },
     };
+  }
+
+  @Instrument()
+  private async getEnvironment(environmentId: string, organizationId: string): Promise<EnvironmentCacheData | null> {
+    return this.inMemoryLRUCacheService.get(
+      InMemoryLRUCacheStore.ENVIRONMENT,
+      `${organizationId}:${environmentId}`,
+      () =>
+        this.environmentRepository.findOne(
+          {
+            _id: environmentId,
+            _organizationId: organizationId,
+          },
+          'echo apiKeys _id'
+        ),
+      {
+        environmentId,
+        organizationId,
+        cacheVariant: '_id:apiKeys:echo',
+      }
+    );
   }
 }
