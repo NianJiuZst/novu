@@ -44,6 +44,9 @@ export const IS_SELF_HOSTED = (window._env_?.VITE_SELF_HOSTED || import.meta.env
 
 export const IS_ENTERPRISE = (window._env_?.VITE_NOVU_ENTERPRISE || import.meta.env.VITE_NOVU_ENTERPRISE) === 'true';
 
+export const IS_EMAIL_VERIFICATION_DISABLED =
+  (window._env_?.VITE_DISABLE_EMAIL_VERIFICATION || import.meta.env.VITE_DISABLE_EMAIL_VERIFICATION) === 'true';
+
 if (!IS_SELF_HOSTED && EE_AUTH_PROVIDER === 'clerk' && !CLERK_PUBLISHABLE_KEY) {
   throw new Error('Missing Clerk Publishable Key');
 }

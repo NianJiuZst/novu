@@ -67,3 +67,5 @@ export const getEEAuthProvider = (): EEAuthProvider => {
 export const isClerkEnabled = () => isEEAuthEnabled() && getEEAuthProvider() === 'clerk';
 
 export const isBetterAuthEnabled = () => isEEAuthEnabled() && getEEAuthProvider() === 'better-auth';
+
+export const isEmailVerificationDisabled = () => process.env.DISABLE_EMAIL_VERIFICATION === 'true';

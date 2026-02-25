@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/primitives/button';
 import { Input } from '@/components/primitives/input';
+import { IS_EMAIL_VERIFICATION_DISABLED } from '@/config';
 import { ROUTES } from '@/utils/routes';
 import { authClient } from '../client';
 import { useAuth } from '../index';
@@ -104,7 +105,7 @@ export function SignUp() {
         throw new Error('Sign up failed');
       }
 
-      if (!signUpData.token) {
+      if (!signUpData.token && !IS_EMAIL_VERIFICATION_DISABLED) {
         navigate(`${ROUTES.VERIFY_EMAIL}?email=${encodeURIComponent(email)}`);
 
         return;

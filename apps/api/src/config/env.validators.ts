@@ -15,6 +15,7 @@ export const envValidators = {
   PORT: port(),
   FRONT_BASE_URL: str(),
   DISABLE_USER_REGISTRATION: bool({ default: false }),
+  DISABLE_EMAIL_VERIFICATION: bool({ default: false }),
   REDIS_HOST: str(),
   REDIS_PORT: port(),
   REDIS_TLS: json({ default: undefined }),

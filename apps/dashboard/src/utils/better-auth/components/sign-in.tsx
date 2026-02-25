@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/primitives/button';
 import { Input } from '@/components/primitives/input';
-import { IS_ENTERPRISE } from '@/config';
+import { IS_EMAIL_VERIFICATION_DISABLED, IS_ENTERPRISE } from '@/config';
 import { ROUTES } from '@/utils/routes';
 import { authClient } from '../client';
 
@@ -47,7 +47,7 @@ export function SignIn() {
       });
 
       if (authError) {
-        if (authError.status === 403) {
+        if (authError.status === 403 && !IS_EMAIL_VERIFICATION_DISABLED) {
           setShowResendVerification(true);
           throw new Error('Please verify your email address before signing in.');
         }
