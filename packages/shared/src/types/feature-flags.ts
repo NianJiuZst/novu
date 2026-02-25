@@ -94,9 +94,11 @@ export enum FeatureFlagsKeysEnum {
   IS_ORG_KILLSWITCH_FLAG_ENABLED = 'IS_ORG_KILLSWITCH_FLAG_ENABLED',
   IS_USAGE_REPORT_ENABLED = 'IS_USAGE_REPORT_ENABLED',
   IS_USAGE_REPORT_DELAY_ENABLED = 'IS_USAGE_REPORT_DELAY_ENABLED',
+  IS_STEP_RESOLVER_ENABLED = 'IS_STEP_RESOLVER_ENABLED',
 
   // String flags
   CF_SCHEDULER_MODE = 'CF_SCHEDULER_MODE', // Values: "off" | "shadow" | "live" | "complete"
+  QUEUE_BACKEND_MODE = 'QUEUE_BACKEND_MODE', // Values: "bullmq" | "shadow" | "live" | "complete"
   USAGE_REPORT_TRIGGER_SECRET = 'USAGE_REPORT_TRIGGER_SECRET',
   USAGE_REPORT_OVERRIDE_EMAIL = 'USAGE_REPORT_OVERRIDE_EMAIL',
 
@@ -115,6 +117,13 @@ export enum FeatureFlagsKeysEnum {
 
 export enum CloudflareSchedulerMode {
   OFF = 'off',
+  SHADOW = 'shadow',
+  LIVE = 'live',
+  COMPLETE = 'complete',
+}
+
+export enum QueueBackendMode {
+  BULLMQ = 'bullmq',
   SHADOW = 'shadow',
   LIVE = 'live',
   COMPLETE = 'complete',
