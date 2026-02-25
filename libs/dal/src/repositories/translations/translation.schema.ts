@@ -37,4 +37,5 @@ const translationSchema = new Schema<TranslationModel>(
 
 translationSchema.plugin(mongooseDelete, { deletedAt: true, deletedBy: true, overrideMethods: 'all' });
 
-export const Translation = mongoose.models.Translation || mongoose.model<TranslationModel>('Translation', translationSchema);
+export const Translation =
+  mongoose.models.Translation || mongoose.model<TranslationModel>('Translation', translationSchema);

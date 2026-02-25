@@ -35,4 +35,5 @@ translationGroupSchema.virtual('translations', {
 
 translationGroupSchema.plugin(mongooseDelete, { deletedAt: true, deletedBy: true, overrideMethods: 'all' });
 
-export const TranslationGroup = mongoose.models.TranslationGroup || mongoose.model<TranslationGroupModel>('TranslationGroup', translationGroupSchema);
+export const TranslationGroup =
+  mongoose.models.TranslationGroup || mongoose.model<TranslationGroupModel>('TranslationGroup', translationGroupSchema);
