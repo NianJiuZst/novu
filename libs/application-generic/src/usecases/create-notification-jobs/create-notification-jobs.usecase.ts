@@ -103,6 +103,7 @@ export class CreateNotificationJobs {
       severity: command.severity,
       critical: command.critical,
       contextKeys: command.contextKeys,
+      overrides: command.overrides,
     });
 
     await this.createWorkflowRun(notification, command);

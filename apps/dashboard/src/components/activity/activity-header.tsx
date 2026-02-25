@@ -44,6 +44,7 @@ export const ActivityHeader = ({ className, activity, onTransactionIdChange, onC
         to: activity.subscriber?.subscriberId,
         payload: resentPayload,
         environment: currentEnvironment!,
+        overrides: activity.overrides as Record<string, unknown>,
       });
 
       if (!newTransactionId) {

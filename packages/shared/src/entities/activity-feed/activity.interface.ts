@@ -1,4 +1,5 @@
 import { SeverityLevelEnum } from '../../consts';
+import { TriggerOverrides } from '../../dto';
 import { ChannelTypeEnum, ISubscriber } from '../../types';
 import { IExecutionDetail } from '../execution-details';
 import { IJob as IJobBase } from '../job';
@@ -31,4 +32,5 @@ export interface IActivity {
   severity?: SeverityLevelEnum;
   critical?: boolean;
   contextKeys?: string[];
+  overrides?: TriggerOverrides;
 }

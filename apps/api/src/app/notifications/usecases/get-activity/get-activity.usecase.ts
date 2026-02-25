@@ -309,6 +309,12 @@ export class GetActivity {
       const mostRecentWorkflowRun = workflowRunsResult.data[0];
 
       // Create the base feed item from workflow run data
+      const notificationOverrides = await this.fetchNotificationOverrides(
+        mostRecentWorkflowRun.workflow_run_id,
+        command.environmentId,
+        command.organizationId
+      );
+
       const feedItem: NotificationFeedItemEntity = {
         _id: mostRecentWorkflowRun.workflow_run_id,
         _organizationId: mostRecentWorkflowRun.organization_id,
@@ -338,6 +344,7 @@ export class GetActivity {
         jobs: [],
         to: mostRecentWorkflowRun.subscriber_to ? JSON.parse(mostRecentWorkflowRun.subscriber_to) : {},
         payload: mostRecentWorkflowRun.payload ? JSON.parse(mostRecentWorkflowRun.payload) : {},
+        overrides: notificationOverrides,
         contextKeys: mostRecentWorkflowRun.context_keys,
         createdAt: new Date(mostRecentWorkflowRun.created_at).toISOString(),
         updatedAt: new Date(mostRecentWorkflowRun.updated_at).toISOString(),
@@ -361,6 +368,24 @@ export class GetActivity {
 
       // Fall back to step runs method
       return await this.getFeedItemFromStepRuns(command);
+    }
+  }
+
+  private async fetchNotificationOverrides(
+    notificationId: string,
+    environmentId: string,
+    organizationId: string
+  ): Promise<Record<string, unknown> | undefined> {
+    try {
+      const notification = await this.notificationRepository.findOne({
+        _id: notificationId,
+        _environmentId: environmentId,
+        _organizationId: organizationId,
+      });
+
+      return notification?.overrides as Record<string, unknown> | undefined;
+    } catch {
+      return undefined;
     }
   }
 

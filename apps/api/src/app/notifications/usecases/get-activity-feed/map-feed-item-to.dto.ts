@@ -85,6 +85,7 @@ export function mapFeedItemToDto(entity: NotificationFeedItemEntity): ActivityNo
     severity: entity.severity ?? SeverityLevelEnum.NONE,
     critical: entity.critical,
     contextKeys: entity.contextKeys,
+    overrides: entity.overrides as Record<string, unknown>,
   };
 }
 

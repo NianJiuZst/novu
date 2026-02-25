@@ -473,6 +473,14 @@ export class ActivityNotificationResponseDto {
 
   @ApiPropertyOptional({ description: 'Context (single or multi) in which the notification was sent', type: [String] })
   contextKeys?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Overrides used when triggering the notification',
+    type: 'object',
+    required: false,
+    additionalProperties: true,
+  })
+  overrides?: Record<string, unknown>;
 }
 
 // Activities Response DTO

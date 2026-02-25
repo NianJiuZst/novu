@@ -9,7 +9,7 @@ import {
   WorkflowRun,
   WorkflowRunRepository,
 } from '@novu/application-generic';
-import { JobEntity, JobRepository } from '@novu/dal';
+import { JobEntity, JobRepository, NotificationRepository } from '@novu/dal';
 import { SeverityLevelEnum, StepTypeEnum } from '@novu/shared';
 import { GetWorkflowRunResponseDto, StepRunDto } from '../../dtos/workflow-run-response.dto';
 import { mapTraceToExecutionDetailDto, mapWorkflowRunStatusToDto } from '../../shared/mappers';
@@ -77,6 +77,7 @@ export class GetWorkflowRun {
     private stepRunRepository: StepRunRepository,
     private traceLogRepository: TraceLogRepository,
     private jobRepository: JobRepository,
+    private notificationRepository: NotificationRepository,
     private logger: PinoLogger
   ) {
     this.logger.setContext(this.constructor.name);
@@ -146,8 +147,11 @@ export class GetWorkflowRun {
       }
 
       const workflowRun = workflowRunResult.data;
-      const stepRuns = await this.getStepRunsForWorkflowRun(command, workflowRun);
-      const workflowRunDto = this.mapWorkflowRunToDto(workflowRun, stepRuns);
+      const [stepRuns, overrides] = await Promise.all([
+        this.getStepRunsForWorkflowRun(command, workflowRun),
+        this.fetchNotificationOverrides(command.workflowRunId, command.environmentId),
+      ]);
+      const workflowRunDto = this.mapWorkflowRunToDto(workflowRun, stepRuns, overrides);
 
       return workflowRunDto;
     } catch (error) {
@@ -284,9 +288,26 @@ export class GetWorkflowRun {
     };
   }
 
+  private async fetchNotificationOverrides(
+    notificationId: string,
+    environmentId: string
+  ): Promise<Record<string, unknown> | undefined> {
+    try {
+      const notification = await this.notificationRepository.findOne({
+        _id: notificationId,
+        _environmentId: environmentId,
+      });
+
+      return notification?.overrides as Record<string, unknown> | undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
   private mapWorkflowRunToDto(
     workflowRun: WorkflowRunFetchResult,
-    stepRuns: IStepRunWithDetails[]
+    stepRuns: IStepRunWithDetails[],
+    overrides?: Record<string, unknown>
   ): GetWorkflowRunResponseDto {
     return {
       id: workflowRun.workflow_run_id,
@@ -308,6 +329,7 @@ export class GetWorkflowRun {
       critical: workflowRun.critical,
       contextKeys: workflowRun.context_keys,
       topics: workflowRun.topics ? JSON.parse(workflowRun.topics) : [],
+      overrides,
     };
   }
 }

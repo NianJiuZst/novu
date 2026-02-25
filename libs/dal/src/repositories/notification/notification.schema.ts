@@ -70,6 +70,9 @@ const notificationSchema = new Schema<NotificationDBModel>(
       type: [Schema.Types.String],
       default: undefined,
     },
+    overrides: {
+      type: Schema.Types.Mixed,
+    },
     lastEmittedDeliveryEvent: {
       type: Schema.Types.String,
     },
