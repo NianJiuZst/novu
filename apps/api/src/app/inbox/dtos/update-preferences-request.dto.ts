@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import { IsBoolean, IsObject, IsOptional, ValidateNested } from 'class-validator';
 import { RulesLogic } from 'json-logic-js';
 import { ScheduleDto } from '../../shared/dtos/schedule';
+import { ExtendedOperations } from '../../shared/services/query-parser/query-parser.service';
 
 export class UpdatePreferencesRequestDto {
   @IsOptional()
@@ -47,5 +48,5 @@ export class UpdatePreferencesRequestDto {
   })
   @IsObject()
   @IsOptional()
-  readonly condition?: RulesLogic;
+  readonly condition?: RulesLogic<ExtendedOperations>;
 }

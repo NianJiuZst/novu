@@ -11,6 +11,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { RulesLogic } from 'json-logic-js';
+import { ExtendedOperations } from '../../services/query-parser/query-parser.service';
 
 export class TopicSubscriberIdentifierDto {
   @ApiProperty({
@@ -57,7 +58,7 @@ export class BasePreferenceDto {
   })
   @ValidateIf((o) => o.condition !== undefined)
   @IsOptional()
-  condition?: RulesLogic;
+  condition?: RulesLogic<ExtendedOperations>;
 }
 
 export class WorkflowPreferenceRequestDto extends BasePreferenceDto {

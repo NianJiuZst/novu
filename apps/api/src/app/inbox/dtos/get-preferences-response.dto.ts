@@ -4,6 +4,7 @@ import { Type } from 'class-transformer';
 import { IsDefined, IsEnum, IsOptional, ValidateNested } from 'class-validator';
 import { RulesLogic } from 'json-logic-js';
 import { SubscriberPreferenceChannels } from '../../shared/dtos/preference-channels';
+import { ExtendedOperations } from '../../shared/services/query-parser/query-parser.service';
 import { WorkflowDto } from './workflow.dto';
 
 export class GetPreferencesResponseDto {
@@ -50,5 +51,5 @@ export class GetPreferencesResponseDto {
     nullable: true,
   })
   @IsOptional()
-  condition?: RulesLogic;
+  condition?: RulesLogic<ExtendedOperations>;
 }

@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import { IsArray, IsDefined, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
 import { RulesLogic } from 'json-logic-js';
 import { WorkflowDto } from '../../../inbox/dtos/workflow.dto';
+import { ExtendedOperations } from '../../services/query-parser/query-parser.service';
 
 export class TopicDto {
   @ApiProperty({
@@ -127,7 +128,7 @@ export class SubscriptionPreferenceDto {
   })
   @ValidateIf((o) => o.condition !== undefined)
   @IsOptional()
-  condition?: RulesLogic;
+  condition?: RulesLogic<ExtendedOperations>;
 }
 
 export class SubscriptionResponseDto {

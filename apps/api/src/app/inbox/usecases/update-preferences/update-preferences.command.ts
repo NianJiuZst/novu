@@ -13,6 +13,7 @@ import {
 } from 'class-validator';
 import { RulesLogic } from 'json-logic-js';
 import { EnvironmentWithSubscriber } from '../../../shared/commands/project.command';
+import { ExtendedOperations } from '../../../shared/services/query-parser/query-parser.service';
 
 class AllPreferences {
   @IsOptional()
@@ -21,7 +22,7 @@ class AllPreferences {
 
   @IsOptional()
   @IsObject()
-  condition?: RulesLogic;
+  condition?: RulesLogic<ExtendedOperations>;
 }
 
 export class UpdatePreferencesCommand extends EnvironmentWithSubscriber {

@@ -44,7 +44,7 @@ export class LlmService {
 
     this.config = {
       provider,
-      apiKey,
+      apiKey: apiKey!,
       model: modelId,
       maxOutputTokens: parseInt(process.env.AI_LLM_MAX_OUTPUT_TOKENS || '4096', 10),
       temperature: parseFloat(process.env.AI_LLM_TEMPERATURE || '0'),
