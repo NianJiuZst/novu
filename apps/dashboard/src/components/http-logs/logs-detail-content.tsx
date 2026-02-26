@@ -94,7 +94,7 @@ export function CollapsibleSection({
         <div className="relative">
           <div
             ref={handleContentRef}
-            className={`border-stroke-soft bg-bg-weak [&_.jer-editor-container]:px-4.5 overflow-y-auto border-t transition-all duration-300 [&_.jer-editor-container]:py-1 ${
+            className={`border-stroke-soft bg-bg-weak overflow-y-auto border-t px-4.5 py-1 transition-all duration-300 ${
               isContentExpanded ? 'max-h-none' : 'h-[90px]'
             }`}
           >
