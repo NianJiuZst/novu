@@ -1,4 +1,5 @@
 import type { RulesLogic } from 'json-logic-js';
+import type { ExtendedOperations } from '../subscriptions/conditions';
 import type { PreferenceFilter } from '../subscriptions/types';
 import type {
   ActionTypeEnum,
@@ -418,7 +419,7 @@ export class InboxService {
     subscriptionIdentifier: string;
     workflowId: string;
     enabled?: boolean;
-    condition?: RulesLogic;
+    condition?: RulesLogic<ExtendedOperations>;
     email?: boolean;
     sms?: boolean;
     in_app?: boolean;
@@ -441,7 +442,7 @@ export class InboxService {
       subscriptionIdentifier: string;
       workflowId: string;
       enabled?: boolean;
-      condition?: RulesLogic;
+      condition?: RulesLogic<ExtendedOperations>;
       email?: boolean;
       sms?: boolean;
       in_app?: boolean;

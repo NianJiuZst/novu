@@ -1,78 +1,35 @@
-# AnnotatedRule Conditions Preferences
+# AnnotatedRule — Developer Guide
 
-This document explains why `AnnotatedRule` is a better structure than raw `RulesLogic` for building conditions-based subscription preference UIs.
-
-## The Problem with Raw `RulesLogic`
-
-The original `conditions-preferences.tsx` component manages conditions using raw `RulesLogic` objects and a parallel `CONDITION_RULES` array. This creates several DX problems:
-
-### 1. Fragile rule identification via `JSON.stringify`
-
-To check which rules are currently "active", the component compares serialized JSON:
-
-```typescript
-const isEnabled = rules.some(
-  (r) => JSON.stringify(r) === JSON.stringify(condRule.enabledRule)
-);
-```
-
-This breaks silently if key order changes between serializations, and it cannot distinguish between two rules that produce the same JSON output.
-
-### 2. Redundant dual definitions
-
-Every rule must be defined twice — once for the "enabled" case and once for the "disabled" case:
-
-```typescript
-{
-  key: 'status',
-  label: 'payload.status',
-  enabledRule:  { '==': [{ var: 'payload.status' }, 'completed'] },
-  disabledRule: { '!=': [{ var: 'payload.status' }, 'completed'] },
-}
-```
-
-Adding a new condition means touching three places: the `CONDITION_RULES` array, the `buildConditionFromStates` helper, and potentially the render logic.
-
-### 3. Full tree rebuild on every toggle
-
-Toggling any single rule rebuilds the entire condition tree from scratch:
-
-```typescript
-function buildConditionFromStates(states: Record<string, boolean>): RulesLogic {
-  const rules = CONDITION_RULES.map((r) => (states[r.key] ? r.enabledRule : r.disabledRule));
-  return buildCondition({ operator: 'and', rules });
-}
-```
-
-This means the component cannot perform targeted updates — changing one leaf always regenerates the entire root.
-
-### 4. Flat-only structure
-
-The component can only handle a single flat list of rules under one `and`/`or` operator. Rendering nested groups (e.g. `and [ or [...], and [...] ]`) requires a complete rewrite of the state management and render logic.
-
-### 5. Unsafe type casts
-
-Without IDs, parsing the condition tree requires multiple unsafe casts:
-
-```typescript
-const raw = condition as Record<string, RulesLogic[]>;
-const operator = Object.keys(raw)[0] as ConditionOperator;
-```
+`AnnotatedRule` is a lightweight wrapper that adds a stable `id` to any rule in a `RulesLogic<ExtendedOperations>` tree. This guide explains the problem it solves and how to use it.
 
 ---
 
-## The Solution: `AnnotatedRule`
+## The Problem
 
-`AnnotatedRule` wraps each node in the rule tree with a stable `id`:
+Working with raw `RulesLogic<ExtendedOperations>` trees in UI code requires identifying nodes without any stable handle. The typical workaround is serializing the rule to JSON and comparing strings:
 
 ```typescript
-type AnnotatedRule =
-  | { id?: string; rule: { and: AnnotatedRule[] } }
-  | { id?: string; rule: { or: AnnotatedRule[] } }
-  | { id?: string; rule: LeafRule };
+const isActive = rules.some(
+  (r) => JSON.stringify(r) === JSON.stringify(targetRule)
+);
 ```
 
-A conditions tree now looks like:
+This breaks silently when JSON key order differs, and makes targeted updates impossible — any change to a single leaf forces you to rebuild the entire tree.
+
+---
+
+## The Solution
+
+Wrap each node with an `id`:
+
+```typescript
+type AnnotatedRule = {
+  id?: string;
+  rule: RulesLogic<ExtendedOperations> | { and: AnnotatedRule[] } | { or: AnnotatedRule[] };
+};
+```
+
+The same condition tree now looks like this:
 
 ```typescript
 const condition: AnnotatedRule = {
@@ -88,42 +45,71 @@ const condition: AnnotatedRule = {
 
 ---
 
-## Side-by-Side Comparison
-
-| Operation | Raw `RulesLogic` | `AnnotatedRule` |
-|---|---|---|
-| Find a rule | `JSON.stringify` comparison across every node | `findById(tree, id)` — O(n) recursive lookup by stable ID |
-| Update a rule | Rebuild the entire tree from a parallel `ruleStates` record | `updateById(tree, id, updater)` — targeted immutable update |
-| Toggle a rule | Look up in `CONDITION_RULES`, replace with `enabledRule`/`disabledRule` | `toggleLeafOperator(node)` — flip operator on the node directly |
-| Render nested groups | Not supported without a rewrite | Recursive `RuleNode` component handles any depth naturally |
-| Add a new rule | Edit `CONDITION_RULES`, `buildConditionFromStates`, and render | Add one entry to the annotated tree |
-| Type safety | Requires `as` casts to parse operator and args | Tree structure is self-describing; helpers are strongly typed |
-
----
-
 ## Before and After
 
-### Before — adding a third condition
+### Finding a rule
 
+**Before**
 ```typescript
-// 1. Add to CONDITION_RULES
-const CONDITION_RULES = [
-  // ...existing two rules...
-  {
-    key: 'priority',
-    label: 'payload.priority',
-    enabledRule:  { '==': [{ var: 'payload.priority' }, 'high'] },
-    disabledRule: { '!=': [{ var: 'payload.priority' }, 'high'] },
-  },
-];
-
-// 2. buildConditionFromStates picks it up automatically — but only if key matches
-// 3. getRuleStatesFromCondition must also handle it correctly
-// 4. formatRuleLabel must parse the new op without error
+const active = rules.some(
+  (r) => JSON.stringify(r) === JSON.stringify(targetRule)
+);
 ```
 
-### After — adding a third condition
+**After**
+```typescript
+function findById(node: AnnotatedRule, id: string): AnnotatedRule | null {
+  if (node.id === id) return node;
+  if ('and' in node.rule) return node.rule.and.reduce<AnnotatedRule | null>((acc, child) => acc ?? findById(child, id), null);
+  if ('or'  in node.rule) return node.rule.or.reduce<AnnotatedRule | null>((acc, child) => acc ?? findById(child, id), null);
+  return null;
+}
 
+const node = findById(condition, 'status-check');
+```
+
+### Updating a rule
+
+**Before** — rebuild the entire tree from a parallel state record:
+```typescript
+const rules = CONDITION_RULES.map((r) =>
+  states[r.key] ? r.enabledRule : r.disabledRule
+);
+const newCondition = { and: rules };
+```
+
+**After** — targeted immutable update by ID:
+```typescript
+function updateById(
+  node: AnnotatedRule,
+  id: string,
+  updater: (n: AnnotatedRule) => AnnotatedRule
+): AnnotatedRule {
+  if (node.id === id) return updater(node);
+  if ('and' in node.rule) return { ...node, rule: { and: node.rule.and.map((c) => updateById(c, id, updater)) } };
+  if ('or'  in node.rule) return { ...node, rule: { or:  node.rule.or.map((c)  => updateById(c, id, updater)) } };
+  return node;
+}
+
+const updated = updateById(condition, 'status-check', (n) => ({
+  ...n,
+  rule: { '!=': [{ var: 'payload.status' }, 'completed'] },
+}));
+```
+
+### Adding a new rule
+
+**Before** — edit the parallel config array, the builder function, and the render logic:
+```typescript
+const CONDITION_RULES = [
+  { key: 'status', enabledRule: { '==' : [...] }, disabledRule: { '!=' : [...] } },
+  { key: 'type',   enabledRule: { '==' : [...] }, disabledRule: { '!=' : [...] } },
+  // Add here AND update buildConditionFromStates AND update render
+  { key: 'priority', enabledRule: { '==' : [...] }, disabledRule: { '!=' : [...] } },
+];
+```
+
+**After** — one entry, one place:
 ```typescript
 const condition: AnnotatedRule = {
   id: 'root',
@@ -137,34 +123,18 @@ const condition: AnnotatedRule = {
 };
 ```
 
-One change, one place.
-
 ---
 
 ## Sending to the API
 
-The SDK's `SubscriptionPreference.update()` currently accepts `RulesLogic`. Strip annotations before sending:
+`SubscriptionPreference.update()` accepts `RulesLogic<ExtendedOperations>`. Strip the annotations before sending:
 
 ```typescript
-function stripAnnotations(node: AnnotatedRule): RulesLogic {
-  if (isCompound(node)) {
-    const operator = getGroupOperator(node);
-    const children = getChildRules(node).map(stripAnnotations);
-    return { [operator]: children } as RulesLogic;
-  }
-  return node.rule as RulesLogic;
+function stripAnnotations(node: AnnotatedRule): RulesLogic<ExtendedOperations> {
+  if ('and' in node.rule) return { and: node.rule.and.map(stripAnnotations) } as RulesLogic<ExtendedOperations>;
+  if ('or'  in node.rule) return { or:  node.rule.or.map(stripAnnotations)  } as RulesLogic<ExtendedOperations>;
+  return node.rule as RulesLogic<ExtendedOperations>;
 }
 
-await pref.update({ value: stripAnnotations(annotatedCondition) });
+await preference.update({ value: stripAnnotations(condition) });
 ```
-
-Once the SDK exposes `AnnotatedRule` natively via `SubscriptionPreference.update({ value: AnnotatedRule })`, the `stripAnnotations` step can be removed entirely.
-
----
-
-## Files
-
-| File | Description |
-|---|---|
-| `conditions-preferences.tsx` | Original implementation using raw `RulesLogic` |
-| `annotated-conditions-preferences.tsx` | New implementation using `AnnotatedRule` |

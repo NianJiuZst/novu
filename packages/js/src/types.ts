@@ -1,4 +1,5 @@
 import type { RulesLogic } from 'json-logic-js';
+import type { ExtendedOperations } from './subscriptions/conditions';
 import { NovuError } from './utils/errors';
 
 export type { FiltersCountResponse, ListNotificationsResponse } from './notifications';
@@ -221,7 +222,7 @@ export type Context = Partial<Record<string, ContextValue>>;
 export type PreferencesResponse = {
   level: PreferenceLevel;
   enabled: boolean;
-  condition?: RulesLogic;
+  condition?: RulesLogic<ExtendedOperations>;
   subscriptionId?: string;
   channels: ChannelPreference;
   overrides?: IPreferenceOverride[];

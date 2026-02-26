@@ -1,3 +1,4 @@
+export type { ExtendedOperations } from './conditions';
 export { TopicSubscription } from './subscription';
 export { SubscriptionPreference } from './subscription-preference';
 export { Subscriptions } from './subscriptions';

@@ -138,6 +138,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^6.0.0",
+    "@novu/js": "workspace:*",
     "@nestjs/cli": "10.4.5",
     "@nestjs/schematics": "10.1.4",
     "@nestjs/testing": "10.4.18",

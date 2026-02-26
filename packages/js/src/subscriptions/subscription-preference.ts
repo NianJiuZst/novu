@@ -3,6 +3,7 @@ import { InboxService } from '../api';
 import { SubscriptionsCache } from '../cache';
 import { NovuEventEmitter } from '../event-emitter';
 import type { Result, SubscriptionPreferenceResponse, Workflow } from '../types';
+import type { ExtendedOperations } from './conditions';
 import { updateSubscriptionPreference } from './helpers';
 
 export class SubscriptionPreference {
@@ -14,7 +15,7 @@ export class SubscriptionPreference {
   readonly subscriptionId: string;
   readonly workflow: Workflow;
   readonly enabled: boolean;
-  readonly condition?: RulesLogic;
+  readonly condition?: RulesLogic<ExtendedOperations>;
 
   constructor(
     preference: SubscriptionPreferenceResponse,
@@ -33,7 +34,7 @@ export class SubscriptionPreference {
     this.subscriptionId = preference.subscriptionId;
   }
 
-  async update(args: { value: boolean | RulesLogic }): Result<SubscriptionPreference> {
+  async update(args: { value: boolean | RulesLogic<ExtendedOperations> }): Result<SubscriptionPreference> {
     return updateSubscriptionPreference({
       emitter: this.#emitter,
       apiService: this.#inboxService,

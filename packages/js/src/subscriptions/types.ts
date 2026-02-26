@@ -1,4 +1,5 @@
 import type { RulesLogic } from 'json-logic-js';
+import type { ExtendedOperations } from './conditions';
 import type { TopicSubscription } from './subscription';
 import { SubscriptionPreference } from './subscription-preference';
 
@@ -7,14 +8,14 @@ export type WorkflowIdentifierOrId = string;
 export type WorkflowFilter = {
   workflowId: WorkflowIdentifierOrId;
   enabled?: boolean;
-  condition?: RulesLogic;
+  condition?: RulesLogic<ExtendedOperations>;
   filter?: never;
 };
 
 export type WorkflowGroupFilter = {
   filter: { workflowIds?: Array<WorkflowIdentifierOrId>; tags?: string[] };
   enabled?: boolean;
-  condition?: RulesLogic;
+  condition?: RulesLogic<ExtendedOperations>;
   workflowId?: never;
 };
 
@@ -56,12 +57,12 @@ export type UpdateSubscriptionArgs = BaseUpdateSubscriptionArgs | InstanceUpdate
 
 export type BaseSubscriptionPreferenceArgs = {
   workflowId: string;
-  value: boolean | RulesLogic;
+  value: boolean | RulesLogic<ExtendedOperations>;
 };
 
 export type InstanceSubscriptionPreferenceArgs = {
   preference: SubscriptionPreference;
-  value: boolean | RulesLogic;
+  value: boolean | RulesLogic<ExtendedOperations>;
 };
 
 export type UpdateSubscriptionPreferenceArgs = BaseSubscriptionPreferenceArgs | InstanceSubscriptionPreferenceArgs;
