@@ -59,6 +59,7 @@ export class BuildStepIssuesUsecase {
       controlsDto: controlValuesDto,
       stepType,
       preloadedControlValues,
+      optimisticPayloadSchema,
     } = command;
 
     const variableSchema = await this.buildAvailableVariableSchemaUsecase.execute(
@@ -71,6 +72,7 @@ export class BuildStepIssuesUsecase {
         ...(controlValuesDto ? { optimisticControlValues: controlValuesDto } : {}),
         ...(command.optimisticSteps ? { optimisticSteps: command.optimisticSteps } : {}),
         ...(preloadedControlValues ? { preloadedControlValues } : {}),
+        ...(optimisticPayloadSchema ? { optimisticPayloadSchema } : {}),
       })
     );
 
