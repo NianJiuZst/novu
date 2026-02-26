@@ -3,7 +3,6 @@ import { NovuProvider, Subscription } from '@novu/nextjs';
 import { subscriptionDarkTheme } from '@novu/nextjs/themes';
 import { useState } from 'react';
 import Title from '@/components/Title';
-import { Switch } from '@/components/ui/switch';
 import { novuConfig } from '@/utils/config';
 
 const topicKey = 'topic_key_13';
@@ -81,9 +80,11 @@ function ConditionsPreferences({ isDark }: { isDark: boolean }) {
                   {isEnabled ? 'payload.status == completed' : 'payload.status != completed'}
                 </span>
               </div>
-              <Switch
+              <input
+                type="checkbox"
                 checked={isEnabled}
-                onCheckedChange={(checked: boolean) => handleTogglePreference(pref, checked)}
+                onChange={(e) => handleTogglePreference(pref, e.target.checked)}
+                style={{ width: '44px', height: '24px', cursor: 'pointer', accentColor: '#22c55e' }}
               />
             </div>
           );
