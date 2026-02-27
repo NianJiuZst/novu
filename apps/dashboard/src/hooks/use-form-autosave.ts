@@ -1,6 +1,7 @@
 // useFormAutosave.ts
 
-import { useCallback, useEffect } from 'react';
+import isEqual from 'lodash.isequal';
+import { useCallback, useEffect, useRef } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
 import { useDataRef } from '@/hooks/use-data-ref';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -21,6 +22,7 @@ export function useFormAutosave<U extends Record<string, unknown>, T extends Fie
 }: UseFormAutosaveProps<U, T>) {
   const formRef = useDataRef(propsForm);
   const savePropsRef = useDataRef({ ...saveProps });
+  const lastSavedDataRef = useRef<U | null>(null);
 
   const onSave = useCallback(
     async (data: T, options?: { forceSubmit?: boolean; onSuccess?: () => void }) => {
@@ -49,10 +51,16 @@ export function useFormAutosave<U extends Record<string, unknown>, T extends Fie
       }
 
       const values = { ...previousData, ...data };
+
+      if (!options?.forceSubmit && lastSavedDataRef.current !== null && isEqual(values, lastSavedDataRef.current)) {
+        return;
+      }
+
       // reset the dirty fields right away because on slow networks the patch request might take a while
       // so other blur/change events might trigger in the meantime
       // we also send the invalid values to api and should keep the errors in the form
       form.reset(values, { keepErrors: true });
+      lastSavedDataRef.current = values;
       save(values, { onSuccess: options?.onSuccess });
     },
     [formRef, savePropsRef]
