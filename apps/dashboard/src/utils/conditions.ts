@@ -1,63 +1,40 @@
 import { RQBJsonLogic, RuleGroupType } from 'react-querybuilder';
 import { parseJsonLogic } from 'react-querybuilder/parseJsonLogic';
 
-// Custom JsonLogic operations for parsing relative date operators
+function parseArrayOperatorArgs(val: any, operator: string) {
+  if (!val || !Array.isArray(val) || val.length < 2) {
+    return false;
+  }
+
+  const values = Array.isArray(val[1]) ? val[1].join(', ') : String(val[1]);
+
+  return {
+    field: val[0]?.var,
+    operator,
+    value: values,
+  };
+}
+
+function parseRelativeDateArgs(val: any, operator: string) {
+  if (!val || !Array.isArray(val) || val.length < 2) {
+    return false;
+  }
+
+  return {
+    field: val[0]?.var,
+    operator,
+    value: JSON.stringify(val[1]),
+  };
+}
+
 const customJsonLogicOperations = {
-  moreThanXAgo: (val: any) => {
-    if (!val || !Array.isArray(val) || val.length < 2) {
-      return false;
-    }
-
-    return {
-      field: val[0]?.var,
-      operator: 'moreThanXAgo',
-      value: JSON.stringify(val[1]),
-    };
-  },
-  lessThanXAgo: (val: any) => {
-    if (!val || !Array.isArray(val) || val.length < 2) {
-      return false;
-    }
-
-    return {
-      field: val[0]?.var,
-      operator: 'lessThanXAgo',
-      value: JSON.stringify(val[1]),
-    };
-  },
-  exactlyXAgo: (val: any) => {
-    if (!val || !Array.isArray(val) || val.length < 2) {
-      return false;
-    }
-
-    return {
-      field: val[0]?.var,
-      operator: 'exactlyXAgo',
-      value: JSON.stringify(val[1]),
-    };
-  },
-  withinLast: (val: any) => {
-    if (!val || !Array.isArray(val) || val.length < 2) {
-      return false;
-    }
-
-    return {
-      field: val[0]?.var,
-      operator: 'withinLast',
-      value: JSON.stringify(val[1]),
-    };
-  },
-  notWithinLast: (val: any) => {
-    if (!val || !Array.isArray(val) || val.length < 2) {
-      return false;
-    }
-
-    return {
-      field: val[0]?.var,
-      operator: 'notWithinLast',
-      value: JSON.stringify(val[1]),
-    };
-  },
+  moreThanXAgo: (val: any) => parseRelativeDateArgs(val, 'moreThanXAgo'),
+  lessThanXAgo: (val: any) => parseRelativeDateArgs(val, 'lessThanXAgo'),
+  exactlyXAgo: (val: any) => parseRelativeDateArgs(val, 'exactlyXAgo'),
+  withinLast: (val: any) => parseRelativeDateArgs(val, 'withinLast'),
+  notWithinLast: (val: any) => parseRelativeDateArgs(val, 'notWithinLast'),
+  containsAny: (val: any) => parseArrayOperatorArgs(val, 'containsAny'),
+  doesNotContainAny: (val: any) => parseArrayOperatorArgs(val, 'doesNotContainAny'),
 };
 
 // Shared parse options for consistency
