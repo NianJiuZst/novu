@@ -62,7 +62,16 @@ const customRuleProcessor = (rule: RuleType, options: any) => {
   }
 
   if (isContainsAnyOperator(rule.operator)) {
-    const values = (rule.value as string)
+    const trimmedValue = (rule.value as string).trim();
+    const variableMatch = trimmedValue.match(/^\{\{(.+?)\}\}$/);
+
+    if (variableMatch) {
+      return {
+        [rule.operator]: [{ var: rule.field }, { var: variableMatch[1].trim() }],
+      };
+    }
+
+    const values = trimmedValue
       .split(',')
       .map((v) => v.trim())
       .filter(Boolean);

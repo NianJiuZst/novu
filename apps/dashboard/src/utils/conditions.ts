@@ -6,7 +6,16 @@ function parseArrayOperatorArgs(val: any, operator: string) {
     return false;
   }
 
-  const values = Array.isArray(val[1]) ? val[1].join(', ') : String(val[1]);
+  const secondOperand = val[1];
+  let values: string;
+
+  if (secondOperand && typeof secondOperand === 'object' && 'var' in secondOperand) {
+    values = `{{${secondOperand.var}}}`;
+  } else if (Array.isArray(secondOperand)) {
+    values = secondOperand.join(', ');
+  } else {
+    values = String(secondOperand);
+  }
 
   return {
     field: val[0]?.var,
