@@ -229,6 +229,28 @@ describe('QueryValidatorService', () => {
         expect(issues[0].message).to.include('Value is required');
         expect(issues[0].type).to.equal(QueryIssueTypeEnum.MISSING_VALUE);
       });
+
+      it('should validate containsAny with a var reference as second operand', () => {
+        const rule: RulesLogic<AdditionalOperation> = {
+          containsAny: [{ var: 'payload.foo' }, { var: 'subscriber.data.tags' }],
+        };
+
+        const issues = queryValidatorService.validateQueryRules(rule);
+
+        expect(issues).to.be.empty;
+      });
+
+      it('should detect invalid var reference in containsAny second operand', () => {
+        const rule: RulesLogic<AdditionalOperation> = {
+          containsAny: [{ var: 'payload.foo' }, { var: 'invalid.field' }],
+        };
+
+        const issues = queryValidatorService.validateQueryRules(rule);
+
+        expect(issues).to.have.lengthOf(1);
+        expect(issues[0].message).to.include('Value is not valid');
+        expect(issues[0].type).to.equal(QueryIssueTypeEnum.INVALID_FIELD_VALUE);
+      });
     });
 
     describe('doesNotContainAny operation', () => {

@@ -310,6 +310,15 @@ export class QueryValidatorService {
 
     this.validateFieldReference(field, issues, path);
 
+    const isVarReference =
+      comparisonValue && typeof comparisonValue === 'object' && !Array.isArray(comparisonValue) && 'var' in comparisonValue;
+
+    if (isVarReference) {
+      this.validateFieldReference(comparisonValue, issues, path);
+
+      return;
+    }
+
     const isEmpty =
       comparisonValue === undefined ||
       comparisonValue === null ||

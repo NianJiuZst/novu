@@ -321,6 +321,26 @@ describe('QueryParserService', () => {
         expect(error).to.be.undefined;
         expect(result).to.be.false;
       });
+
+      it('should resolve var references and compare two array variables', () => {
+        const rule: RulesLogic<AdditionalOperation> = {
+          containsAny: [{ var: 'payload.items' }, { var: 'payload.tags' }],
+        };
+        const data = { payload: { items: ['dima'], tags: ['dima'] } };
+        const { result, error } = evaluateRules(rule, data);
+        expect(error).to.be.undefined;
+        expect(result).to.be.true;
+      });
+
+      it('should return false when var-referenced arrays have no overlap', () => {
+        const rule: RulesLogic<AdditionalOperation> = {
+          containsAny: [{ var: 'payload.items' }, { var: 'subscriber.data.tags' }],
+        };
+        const data = { payload: { items: ['a', 'b'] }, subscriber: { data: { tags: ['x', 'y'] } } };
+        const { result, error } = evaluateRules(rule, data);
+        expect(error).to.be.undefined;
+        expect(result).to.be.false;
+      });
     });
 
     describe('doesNotContainAny operator', () => {
