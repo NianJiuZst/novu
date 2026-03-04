@@ -1,18 +1,23 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { QueryKeys } from '@/utils/query-keys';
 
 const POLL_INTERVAL_MS = 3_000;
 
-export function useReactEmailPolling({ stepResolverHash }: { stepResolverHash?: string | null }) {
+export function useReactEmailPolling({
+  stepResolverHash,
+  isReactEmailMode,
+}: {
+  stepResolverHash?: string | null;
+  isReactEmailMode: boolean;
+}) {
   const queryClient = useQueryClient();
-  const { control, formState } = useFormContext();
-  const rendererType = useWatch({ name: 'rendererType', control });
+  const { formState } = useFormContext();
   const prevHashRef = useRef(stepResolverHash);
 
   useEffect(() => {
-    if (rendererType !== 'react-email') return;
+    if (!isReactEmailMode) return;
 
     const interval = setInterval(() => {
       if (formState.isDirty) return;
@@ -20,16 +25,17 @@ export function useReactEmailPolling({ stepResolverHash }: { stepResolverHash?: 
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(interval);
-  }, [rendererType, queryClient, formState.isDirty]);
+  }, [isReactEmailMode, queryClient, formState.isDirty]);
 
   useEffect(() => {
     if (stepResolverHash && stepResolverHash !== prevHashRef.current) {
-      if (formState.isDirty || rendererType !== 'react-email') return;
-
-      queryClient.invalidateQueries({ queryKey: [QueryKeys.previewStep] });
-      queryClient.invalidateQueries({ queryKey: [QueryKeys.diffEnvironments] });
+      if (!formState.isDirty) {
+        queryClient.invalidateQueries({ queryKey: [QueryKeys.previewStep] });
+        queryClient.invalidateQueries({ queryKey: [QueryKeys.diffEnvironments] });
+        prevHashRef.current = stepResolverHash;
+      }
+    } else {
+      prevHashRef.current = stepResolverHash;
     }
-
-    prevHashRef.current = stepResolverHash;
-  }, [stepResolverHash, queryClient, formState.isDirty, rendererType]);
+  }, [stepResolverHash, queryClient, formState.isDirty]);
 }
