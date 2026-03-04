@@ -6,15 +6,22 @@ import {
   InstrumentUsecase,
   PinoLogger,
 } from '@novu/application-generic';
-import { ControlValuesEntity, ControlValuesRepository } from '@novu/dal';
+import { ClientSession, ControlValuesEntity, ControlValuesRepository, MessageTemplateRepository } from '@novu/dal';
 import { ControlValuesLevelEnum, FeatureFlagsKeysEnum } from '@novu/shared';
 import { createHash } from 'crypto';
 import { DeployStepResolverResponseDto } from '../../dtos';
 import { CloudflareStepResolverDeployService } from '../../services/cloudflare-step-resolver-deploy.service';
 import { generateStepResolverWorkerId } from '../../utils/generate-step-resolver-worker-id';
+import {
+  getStepResolverControlSchema,
+  REACT_EMAIL_STEP_RESOLVER_DEFAULTS,
+  reconcileStepResolverControlValues,
+  STEP_RESOLVER_EMAIL_UI_SCHEMA,
+} from '../../utils/step-resolver-control-state';
 import { DeployStepResolverCommand, DeployStepResolverManifestStepCommand } from './deploy-step-resolver.command';
 
 const MAX_BUNDLE_SIZE_BYTES = 10 * 1024 * 1024;
+// cspell:disable-next-line
 const STEP_RESOLVER_HASH_ALPHABET = '0123456789abcdefghjkmnpqrstvwxyz';
 const STEP_RESOLVER_HASH_LENGTH = 10;
 
@@ -23,6 +30,7 @@ interface ResolvedManifestStep {
   workflowInternalId: string;
   stepId: string;
   stepInternalId: string;
+  controlSchema: Record<string, unknown>;
   existingControlValues: ControlValuesEntity | null;
 }
 
@@ -32,6 +40,7 @@ export class DeployStepResolverUsecase {
     private getWorkflowByIdsUseCase: GetWorkflowByIdsUseCase,
     private cloudflareStepResolverDeployService: CloudflareStepResolverDeployService,
     private controlValuesRepository: ControlValuesRepository,
+    private messageTemplateRepository: MessageTemplateRepository,
     private featureFlagsService: FeatureFlagsService,
     private logger: PinoLogger
   ) {
@@ -76,7 +85,11 @@ export class DeployStepResolverUsecase {
       bundleBuffer: command.bundleBuffer,
     });
 
-    await this.upsertControlValues(command, resolvedManifestSteps, stepResolverHash);
+    await this.controlValuesRepository.withTransaction(async (session) => {
+      await this.writeHashToMessageTemplates(command, resolvedManifestSteps, stepResolverHash, session);
+      await this.upsertControlValues(command, resolvedManifestSteps, session);
+      await this.updateStepControlSchemas(command, resolvedManifestSteps, session);
+    });
 
     return {
       stepResolverHash,
@@ -122,6 +135,7 @@ export class DeployStepResolverUsecase {
         workflowInternalId: String(workflow._id),
         stepId: manifestStep.stepId,
         stepInternalId: String(step._templateId),
+        controlSchema: getStepResolverControlSchema(manifestStep.controlSchema),
       });
     }
 
@@ -143,47 +157,80 @@ export class DeployStepResolverUsecase {
     }));
   }
 
+  private async writeHashToMessageTemplates(
+    command: DeployStepResolverCommand,
+    resolvedSteps: ResolvedManifestStep[],
+    stepResolverHash: string,
+    session: ClientSession | null
+  ): Promise<void> {
+    for (const step of resolvedSteps) {
+      // transactions can't be called in Promise.all, so we need to call it sequentially
+      await this.messageTemplateRepository.update(
+        { _id: step.stepInternalId, _environmentId: command.user.environmentId },
+        { $set: { stepResolverHash } },
+        { session }
+      );
+    }
+  }
+
   private async upsertControlValues(
     command: DeployStepResolverCommand,
     resolvedSteps: ResolvedManifestStep[],
-    stepResolverHash: string
+    session: ClientSession | null
   ): Promise<void> {
-    await this.controlValuesRepository.withTransaction(async (session) => {
-      for (const step of resolvedSteps) {
-        const existingControls = this.readControlObject(step.existingControlValues);
-        const mergedControls = {
-          ...existingControls,
-          stepResolverHash,
-        };
+    for (const step of resolvedSteps) {
+      // Keep values that still match the current resolver schema and drop stale ones from previous deploys.
+      const mergedControls = {
+        ...reconcileStepResolverControlValues(this.readControlObject(step.existingControlValues), step.controlSchema),
+        ...REACT_EMAIL_STEP_RESOLVER_DEFAULTS,
+      };
 
-        if (step.existingControlValues) {
-          await this.controlValuesRepository.update(
-            {
-              _id: step.existingControlValues._id,
-              _organizationId: command.user.organizationId,
-            },
-            {
-              priority: 0,
-              controls: mergedControls,
-            },
-            { session }
-          );
-        } else {
-          await this.controlValuesRepository.create(
-            {
-              _organizationId: command.user.organizationId,
-              _environmentId: command.user.environmentId,
-              _workflowId: step.workflowInternalId,
-              _stepId: step.stepInternalId,
-              level: ControlValuesLevelEnum.STEP_CONTROLS,
-              priority: 0,
-              controls: mergedControls,
-            },
-            { session }
-          );
-        }
+      if (step.existingControlValues) {
+        await this.controlValuesRepository.update(
+          {
+            _id: step.existingControlValues._id,
+            _organizationId: command.user.organizationId,
+          },
+          {
+            priority: 0,
+            controls: mergedControls,
+          },
+          { session }
+        );
+      } else {
+        await this.controlValuesRepository.create(
+          {
+            _organizationId: command.user.organizationId,
+            _environmentId: command.user.environmentId,
+            _workflowId: step.workflowInternalId,
+            _stepId: step.stepInternalId,
+            level: ControlValuesLevelEnum.STEP_CONTROLS,
+            priority: 0,
+            controls: mergedControls,
+          },
+          { session }
+        );
       }
-    });
+    }
+  }
+
+  private async updateStepControlSchemas(
+    command: DeployStepResolverCommand,
+    resolvedSteps: ResolvedManifestStep[],
+    session: ClientSession | null
+  ): Promise<void> {
+    for (const step of resolvedSteps) {
+      await this.messageTemplateRepository.update(
+        { _id: step.stepInternalId, _environmentId: command.user.environmentId },
+        {
+          $set: {
+            'controls.schema': step.controlSchema,
+            'controls.uiSchema': STEP_RESOLVER_EMAIL_UI_SCHEMA,
+          },
+        },
+        { session }
+      );
+    }
   }
 
   private readControlObject(controlValues: ControlValuesEntity | null): Record<string, unknown> {
