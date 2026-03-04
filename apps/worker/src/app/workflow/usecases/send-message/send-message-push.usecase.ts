@@ -61,6 +61,11 @@ export const SUBSCRIBER_ERROR_PATTERNS: string[] = [
   'DeviceTokenNotForTopic',
   'ExpiredPushToken',
   'InvalidProviderToken',
+  'Requested entity was not found',
+  'SenderId mismatch',
+  'Make sure you have provided a server key as directed by the Expo FCM documentation',
+  'is not a valid Expo push token',
+  'The registration token is not a valid FCM registration token',
 ];
 
 export function isSubscriberError(errorMessage: string): boolean {
