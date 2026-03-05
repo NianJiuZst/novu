@@ -174,3 +174,4 @@ Just <a href="https://discord.novu.co">Join Our Discord</a> server and ask for h
 ## 🔗 Links
 
 - [Home page](https://novu.co/)
+
