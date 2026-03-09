@@ -3,56 +3,19 @@ import { PromptConfig, replaceConfigVariables } from './types';
 const KITCHEN_SINK_INBOX_SNIPPET = `import { Inbox } from '@novu/react';
 
 function NotificationInbox() {
-  // Ensure the environment variable is available
   const applicationIdentifier = process.env.REACT_APP_NOVU_APPLICATION_IDENTIFIER;
-  
-  if (!applicationIdentifier) {
-    console.error('REACT_APP_NOVU_APPLICATION_IDENTIFIER is not defined');
-    return null;
-  }
 
   return (
     <Inbox
-      // Required core configuration
       applicationIdentifier={applicationIdentifier}
       subscriberId={subscriberId}
-
-      // Backend configuration (for EU region use https://eu.api.novu.co and https://eu.ws.novu.co)
-      backendUrl=process.env.NOVU_BACKEND_URL
-      socketUrl=process.env.NOVU_SOCKET_URL
-
-      // Appearance configuration
+      // For EU region use https://eu.api.novu.co and https://eu.ws.novu.co
+      backendUrl={process.env.NOVU_BACKEND_URL}
+      socketUrl={process.env.NOVU_SOCKET_URL}
       appearance={{
-        // Base theme configuration
-        baseTheme: dark, // Or undefined for light theme
-
-        // Variables for global styling
-        variables: {
-          colorPrimary: '',
-          colorPrimaryForeground: '',
-          colorSecondary: '',
-          colorSecondaryForeground: '',
-          colorCounter: '',
-          colorCounterForeground: '',
-          colorBackground: '',
-          colorRing: '',
-          colorForeground: '',
-          colorNeutral: '',
-          colorShadow: '',
-
-          // Typography and Layout
-          fontSize: '',
-        },
-        elements: {
-          bellIcon: {
-            color: '',
-          },
-        },
-      },
-
-      // Layout configuration
-      placement=""
-      placementOffset={}
+        variables: {},
+        elements: {},
+      }}
     />
   );
 }
@@ -78,19 +41,19 @@ const REACT_PROMPT = `You are an AI agent specialized in integrating the Novu In
 Before starting the integration, analyze the host application to understand:
 
 **Project Structure Analysis**:
-- [ ] Package manager (pnpm, yarn, npm, bun)
-- [ ] React version and configuration
-- [ ] Existing authentication system (Auth0, Firebase, Supabase, custom)
-- [ ] UI framework/library (Tailwind, styled-components, CSS modules, etc.)
-- [ ] Existing component patterns and naming conventions
-- [ ] State management solution (Redux, MobX, Zustand, React Query, etc.)
-- [ ] Routing solution (React Router, TanStack Router, etc.)
+- Package manager (pnpm, yarn, npm, bun)
+- React version and configuration
+- Existing authentication system (Auth0, Firebase, Supabase, custom)
+- UI framework/library (Tailwind, styled-components, CSS modules, etc.)
+- Existing component patterns and naming conventions
+- State management solution (Redux, MobX, Zustand, React Query, etc.)
+- Routing solution (React Router, TanStack Router, etc.)
 
 **UI Placement Analysis**:
 Potential common places where the inbox could be integrated in the UI:
-- [ ] Header/navbar structure and positioning
-- [ ] User menu or profile dropdown location
-- [ ] Sidebar layout and available space
+- Header/navbar structure and positioning
+- User menu or profile dropdown location
+- Sidebar layout and available space
 
 ## Critical Constraints & Requirements
 
@@ -119,20 +82,7 @@ Potential common places where the inbox could be integrated in the UI:
 
 **Actions**:
 1. Detect the project's package manager (pnpm, yarn, npm, bun)
-2. Install @novu/react using the appropriate command:
-\`\`\`bash
-npm install @novu/react
-# or
-yarn add @novu/react
-# or
-pnpm add @novu/react
-# or
-bun add @novu/react
-\`\`\`
-
-**Verification**:
-- [ ] Package installed successfully
-- [ ] No peer dependency conflicts
+2. Install @novu/react using the appropriate command
 
 ### Step 2: Environment Variable Configuration
 **Objective**: Set up the required environment variable for Novu application identifier
@@ -161,114 +111,17 @@ REACT_APP_NOVU_APPLICATION_IDENTIFIER=YOUR_APP_IDENTIFIER
 subscriberId="YOUR_SUBSCRIBER_ID"
 \`\`\`
 
-**Validation**:
-- [ ] Subscriber ID is properly extracted from auth system
-- [ ] Fallback placeholder is used when auth is not available
-- [ ] No undefined or null values passed to component
-
 ### Step 4: Inline Appearance Configuration
-**Objective**: Embed empty appearance objects to demonstrate customization capabilities
+**Objective**: Embed appearance objects matching the host application's design
 
 **Implementation**:
 \`\`\`typescript
 appearance={{
-  variables: {
-    // Optional: define colors, typography, spacing, border-radius, etc.
-    // Example: colors: { primary: '#007bff', secondary: '#6c757d' }
-  },
-  elements: {
-    // Optional: customize container, notifications, badges, buttons, etc.
-    // Example: container: { backgroundColor: 'var(--bg-color)' }
-  },
-  icons: {
-    // Optional: override icons, e.g.
-  },
+  variables: {},
+  elements: {},
 }}
 \`\`\`
-
-### Step 4.0 — Styling Integration Principles
-
-Extract styling variables from the host application first.
-
-Customize only what's necessary to achieve visual consistency.
-
-Avoid introducing new styles that don't exist in the host application.
-
-### Step 4.1 — Extract Styling Variables
-
-**Objective**:
-- Collect and prepare the host application's design tokens (colors, typography, spacing) for the <Inbox /> component appearance.variables object.
-
-**Actions**:
-
-- Identify styling system:
-
-- Tailwind CSS → check tailwind.config.js
-
-- CSS custom properties → check :root {}
-
-- SCSS/SASS → look for _variables.scss
-
-- CSS-in-JS → inspect theme objects or styled-components
-
-- Locate variables: Extract values such as primary/secondary colors, background, text, borders, shadows, radii, and fonts.
-
-- Create variables object: Map them to the appearance.variables object on <Inbox />.
-
-- Validate: Ensure the object is correctly referenced inside the appearance prop.
-
-
-**Suggested Variables to Extract**:
-
-- colorBackground → main background
-- colorForeground → base text color
-- colorPrimary, colorPrimaryForeground
-- colorSecondary, colorSecondaryForeground
-- colorNeutral → borders/dividers
-- fontSize → base font size
-
-**Fallback Guidelines**:
-
-- If variables are missing, infer equivalents from the app's design.
-
-- Use the most prominent brand colors as primary/secondary.
-
-- Stick to values consistent with existing patterns.
-
-- Document any assumptions.
-
-### Step 4.2 — Apply Variables
-
-**Objective**:    
-Integrate the extracted variables into <Inbox />.
-
-**Actions**:
-
-- Apply the variables object to the <Inbox appearance={{ variables: {...} }} />.
-
-- [ ] Confirm the variables are applied and override correctly.
-
-**Verification**:
-
-- [ ] The variables object is applied and functional.
-
-### Step 4.3 — Validate Visual Integration
-
-**Objective**:
-- Ensure <Inbox /> aligns visually with the host application.
-
-**Actions**:
-1. Extract design tokens (e.g., colors, typography, spacing) from the host application:
-   - **Tailwind CSS**: Check tailwind.config.js.
-   - **CSS Variables**: Inspect :root {}.
-   - **SCSS/SASS**: Look for _variables.scss.
-   - **CSS-in-JS**: Review theme objects or styled-components.
-
-2. Map the extracted tokens to the appearance.variables object.
-
-3. Validate the integration:
-   - [ ] Ensure the variables are applied correctly.
-   - [ ] Confirm visual consistency with the host application.
+Extract the host app's design tokens (colors, typography, spacing) from its styling system (Tailwind config, CSS variables, SCSS, theme objects) and map them to the appearance.variables object.
 
 ### Step 5: Component Creation
 **Objective**: Create a self-contained component for the Inbox integration
@@ -295,45 +148,15 @@ ${KITCHEN_SINK_INBOX_SNIPPET}
 ### Step 7: Validation & Testing
 **Objective**: Ensure the integration meets all quality standards
 
-**Visual Validation**:
-- [ ] Proper spacing and typography
-- [ ] Consistent with host application design system
+- Proper spacing and typography
+- Consistent with host application design system
+- No JavaScript errors
+- No TypeScript compilation errors
 
-**Console Validation**:
-- [ ] No JavaScript errors
-- [ ] No TypeScript compilation errors
-
-### Step 8: AI Model Verification (Internal Process)
-**Objective**: Perform final verification before returning code
-
-**Verification Checklist**:
-- [ ] Package installation confirmed
-- [ ] <Inbox /> component is inline with no wrappers/triggers
-- [ ] <Inbox /> component is properly configured with all required props
-- [ ] <Inbox /> component is properly styled and aligned with the host application's design system
-- [ ] <Inbox /> component is properly placed in the appropriate UI location
-
-**Action**: If any check fails → stop and revise the implementation
-
-### Step 9: Iterative Refinement Process
-**Objective**: Fine-tune the integration based on validation results
-
-**Refinement Areas**:
-- Adjust inline appearance properties
-- Optimize subscriber detection logic
-- Improve placement positioning
-- Preserve validated design tokens and placement
-
-### Step 10: Final Output Requirements
-**Objective**: Deliver a complete, production-ready integration
-
-**Required Deliverables**:
-- Self-contained NotificationInbox.tsx component
-- Inline appearance prop with empty placeholders
-- Subscriber detection with fallback mechanism
-- Environment variable reference via .env
-- TypeScript compliance with proper typing
-- Dark mode support (if any)
+### Step 8: Verify & Deliver
+- Confirm package installation, env vars, component props, and UI placement
+- Ensure TypeScript compliance and no console errors
+- Deliver a self-contained component with inline appearance, subscriber detection, and env var references
 `;
 
 /**
