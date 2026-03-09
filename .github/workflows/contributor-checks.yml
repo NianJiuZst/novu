@@ -65,6 +65,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Disable Nx Cloud
+        run: |
+          node -e "
+            const fs = require('fs');
+            const nx = JSON.parse(fs.readFileSync('nx.json', 'utf-8'));
+            delete nx.tasksRunnerOptions;
+            delete nx.nxCloudId;
+            delete nx.nxCloudAccessToken;
+            delete nx.nxCloudUrl;
+            delete nx.nxCloudEncryptionKey;
+            nx.neverConnectToCloud = true;
+            fs.writeFileSync('nx.json', JSON.stringify(nx, null, 2));
+          "
+
       - name: Reset Nx cache
         run: npx nx reset || true
 
