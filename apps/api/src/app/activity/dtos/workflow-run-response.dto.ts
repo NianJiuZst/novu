@@ -108,4 +108,9 @@ export class GetWorkflowRunResponseDto extends GetWorkflowRunResponseBaseDto {
   @ApiProperty({ description: 'Trigger payload' })
   @IsObject()
   payload: Record<string, unknown>;
+
+  @ApiPropertyOptional({ description: 'Trigger overrides from the original workflow trigger' })
+  @IsOptional()
+  @IsObject()
+  overrides?: Record<string, unknown>;
 }

@@ -58,6 +58,7 @@ export interface GetWorkflowRunsDto {
 
 export type GetWorkflowRunResponse = GetWorkflowRunsDto & {
   payload: Record<string, unknown>;
+  overrides?: Record<string, unknown>;
 };
 
 export interface GetWorkflowRunsResponseDto {
@@ -81,6 +82,7 @@ function mapWorkflowRunToActivity(workflowRun: GetWorkflowRunResponse | GetWorkf
       subscriberId: workflowRun.subscriberId || workflowRun.internalSubscriberId,
     },
     payload: 'payload' in workflowRun ? workflowRun.payload : {},
+    overrides: 'overrides' in workflowRun ? workflowRun.overrides : undefined,
     tags: [], // Not available in workflow runs, empty array for compatibility
     createdAt: workflowRun.createdAt,
     updatedAt: workflowRun.updatedAt,

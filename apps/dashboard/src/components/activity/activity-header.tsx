@@ -1,4 +1,4 @@
-import { IActivity, IEnvironment } from '@novu/shared';
+import { type ContextPayload, IActivity, IEnvironment } from '@novu/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'motion/react';
 import { RiCloseLine, RiRouteFill } from 'react-icons/ri';
@@ -11,6 +11,32 @@ import { QueryKeys } from '@/utils/query-keys';
 import { cn } from '@/utils/ui';
 import { triggerWorkflow } from '../../api/workflows';
 import { RepeatPlay } from '../icons/repeat-play';
+
+function reconstructContextFromKeys(contextKeys?: string[]): ContextPayload | undefined {
+  if (!contextKeys || contextKeys.length === 0) return undefined;
+
+  const context: ContextPayload = {};
+  for (const key of contextKeys) {
+    const separatorIndex = key.indexOf(':');
+    if (separatorIndex === -1) continue;
+
+    const type = key.substring(0, separatorIndex);
+    const id = key.substring(separatorIndex + 1);
+    if (type && id) {
+      context[type] = id;
+    }
+  }
+
+  return Object.keys(context).length > 0 ? context : undefined;
+}
+
+function getOverridesFromJobs(activity: IActivity): Record<string, unknown> | undefined {
+  const firstJobWithOverrides = activity.jobs?.find(
+    (job) => job.overrides && Object.keys(job.overrides).length > 0
+  );
+
+  return firstJobWithOverrides?.overrides as Record<string, unknown> | undefined;
+}
 
 type ActivityHeaderProps = {
   className?: string;
@@ -37,6 +63,9 @@ export const ActivityHeader = ({ className, activity, onTransactionIdChange, onC
     mutationFn: async () => {
       if (!activity) throw new Error('No activity data available');
 
+      const context = reconstructContextFromKeys(activity.contextKeys);
+      const overrides = activity.overrides ?? getOverridesFromJobs(activity);
+
       const {
         data: { transactionId: newTransactionId },
       } = await triggerWorkflow({
@@ -44,6 +73,8 @@ export const ActivityHeader = ({ className, activity, onTransactionIdChange, onC
         to: activity.subscriber?.subscriberId,
         payload: resentPayload,
         environment: currentEnvironment!,
+        context,
+        overrides,
       });
 
       if (!newTransactionId) {

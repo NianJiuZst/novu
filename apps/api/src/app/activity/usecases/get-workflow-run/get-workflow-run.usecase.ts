@@ -146,8 +146,11 @@ export class GetWorkflowRun {
       }
 
       const workflowRun = workflowRunResult.data;
-      const stepRuns = await this.getStepRunsForWorkflowRun(command, workflowRun);
-      const workflowRunDto = this.mapWorkflowRunToDto(workflowRun, stepRuns);
+      const [stepRuns, overrides] = await Promise.all([
+        this.getStepRunsForWorkflowRun(command, workflowRun),
+        this.getOverridesForWorkflowRun(workflowRun.transaction_id, command),
+      ]);
+      const workflowRunDto = this.mapWorkflowRunToDto(workflowRun, stepRuns, overrides);
 
       return workflowRunDto;
     } catch (error) {
@@ -284,9 +287,40 @@ export class GetWorkflowRun {
     };
   }
 
+  private async getOverridesForWorkflowRun(
+    transactionId: string,
+    command: GetWorkflowRunCommand
+  ): Promise<Record<string, unknown> | undefined> {
+    try {
+      const jobs: Pick<JobEntity, '_id' | 'overrides'>[] = await this.jobRepository.find(
+        {
+          transactionId,
+          _environmentId: command.environmentId,
+        },
+        '_id overrides',
+        { limit: 1, sort: { createdAt: 1 } }
+      );
+
+      const firstJob = jobs[0];
+      if (firstJob?.overrides && Object.keys(firstJob.overrides).length > 0) {
+        return firstJob.overrides as Record<string, unknown>;
+      }
+
+      return undefined;
+    } catch (error) {
+      this.logger.warn({
+        error: error.message,
+        transactionId,
+      }, 'Failed to get overrides for workflow run');
+
+      return undefined;
+    }
+  }
+
   private mapWorkflowRunToDto(
     workflowRun: WorkflowRunFetchResult,
-    stepRuns: IStepRunWithDetails[]
+    stepRuns: IStepRunWithDetails[],
+    overrides?: Record<string, unknown>
   ): GetWorkflowRunResponseDto {
     return {
       id: workflowRun.workflow_run_id,
@@ -308,6 +342,7 @@ export class GetWorkflowRun {
       critical: workflowRun.critical,
       contextKeys: workflowRun.context_keys,
       topics: workflowRun.topics ? JSON.parse(workflowRun.topics) : [],
+      overrides,
     };
   }
 }

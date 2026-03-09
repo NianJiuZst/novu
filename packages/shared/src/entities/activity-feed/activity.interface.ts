@@ -22,6 +22,7 @@ export interface IActivity {
     subscriberId: string;
   };
   payload: Record<string, unknown>;
+  overrides?: Record<string, unknown>;
   tags: string[];
   createdAt: string;
   updatedAt: string;
