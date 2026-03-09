@@ -4,58 +4,24 @@ import { NotificationCenter } from '@novu/react-native';
 import Config from 'react-native-config';
 
 export default function NotificationInbox() {
-  // Ensure the environment variables are available
   const applicationIdentifier = Config.NOVU_APP_IDENTIFIER;
   const subscriberId = Config.NOVU_SUBSCRIBER_ID;
 
   if (!applicationIdentifier || !subscriberId) {
-    console.error('Required environment variables are not defined');
     return null;
   }
 
   return (
     <View style={styles.container}>
       <NotificationCenter
-        // Required core configuration
         applicationIdentifier={applicationIdentifier}
         subscriberId={subscriberId}
-
-        // Backend configuration (for EU region use https://eu.api.novu.co and https://eu.ws.novu.co)
         backendUrl=""
         socketUrl=""
-
-        // Appearance configuration
         appearance={{
-          // Base theme configuration
-          baseTheme: dark, // Or undefined for light theme
-
-          // Variables for global styling
-          variables: {
-            colorPrimary: '',
-            colorPrimaryForeground: '',
-            colorSecondary: '',
-            colorSecondaryForeground: '',
-            colorCounter: '',
-            colorCounterForeground: '',
-            colorBackground: '',
-            colorRing: '',
-            colorForeground: '',
-            colorNeutral: '',
-            colorShadow: '',
-
-            // Typography and Layout
-            fontSize: '',
-          },
-          elements: {
-            bellIcon: {
-              color: '',
-            },
-          },
+          variables: {},
+          elements: {},
         }}
-
-        // Layout configuration
-        placement=""
-        placementOffset={{}}
       />
     </View>
   );
@@ -85,21 +51,21 @@ const REACT_NATIVE_PROMPT = `You are an AI agent specialized in integrating the 
 Before starting the integration, analyze the host application to understand:
 
 **Project Structure Analysis**:
-- [ ] Package manager (pnpm, yarn, npm, bun)
-- [ ] React Native version and configuration
-- [ ] Navigation system (React Navigation, Expo Router)
-- [ ] Existing authentication system (Auth0, Firebase, Supabase, custom)
-- [ ] UI framework/library (React Native Paper, Native Base, etc.)
-- [ ] Existing component patterns and naming conventions
-- [ ] State management solution (Redux, MobX, Zustand, etc.)
-- [ ] Environment variable handling (react-native-config, dotenv)
+- Package manager (pnpm, yarn, npm, bun)
+- React Native version and configuration
+- Navigation system (React Navigation, Expo Router)
+- Existing authentication system (Auth0, Firebase, Supabase, custom)
+- UI framework/library (React Native Paper, Native Base, etc.)
+- Existing component patterns and naming conventions
+- State management solution (Redux, MobX, Zustand, etc.)
+- Environment variable handling (react-native-config, dotenv)
 
 **UI Placement Analysis**:
 Potential common places where the inbox could be integrated in the UI:
-- [ ] Header/navbar structure and positioning
-- [ ] Tab bar or drawer menu location
-- [ ] Screen layout and available space
-- [ ] Platform-specific considerations (iOS vs Android)
+- Header/navbar structure and positioning
+- Tab bar or drawer menu location
+- Screen layout and available space
+- Platform-specific considerations (iOS vs Android)
 
 ## Critical Constraints & Requirements
 
@@ -138,11 +104,6 @@ pnpm add @novu/react-native react-native-config
 # or
 bun add @novu/react-native react-native-config
 \`\`\`
-
-**Verification**:
-- [ ] Package installed successfully
-- [ ] No peer dependency conflicts
-- [ ] Native modules linked properly
 
 ### Step 2: Environment Variable Configuration
 **Objective**: Set up the required environment variables for Novu
@@ -195,95 +156,11 @@ export default function App() {
 **Implementation**:
 \`\`\`typescript
 const appearance = {
-  variables: {
-    // Optional: define colors, typography, spacing, border-radius, etc.
-  },
-  elements: {
-    // Optional: customize container, notifications, badges, buttons, etc.
-  },
+  variables: {},
+  elements: {},
 };
 \`\`\`
-
-### Step 4.0 — Styling Integration Principles
-
-Extract styling variables from the host application first.
-
-Customize only what's necessary to achieve visual consistency.
-
-Avoid introducing new styles that don't exist in the host application.
-
-### Step 4.1 — Extract Styling Variables
-
-**Objective**:
-- Collect and prepare the host application's design tokens for the appearance configuration.
-
-**Actions**:
-
-- Identify styling system:
-
-- Theme configuration → check theme files
-
-- StyleSheet definitions → check style files
-
-- UI library → check theme configuration
-
-- Locate variables: Extract values such as primary/secondary colors, background, text, borders, shadows, radii, and fonts.
-
-- Create variables object: Map them to the appearance configuration.
-
-- Validate: Ensure the object is correctly referenced.
-
-
-**Suggested Variables to Extract**:
-
-- colorBackground → main background
-- colorForeground → base text color
-- colorPrimary, colorPrimaryForeground
-- colorSecondary, colorSecondaryForeground
-- colorNeutral → borders/dividers
-- fontSize → base font size
-
-**Fallback Guidelines**:
-
-- If variables are missing, infer equivalents from the app's design.
-
-- Use the most prominent brand colors as primary/secondary.
-
-- Stick to values consistent with existing patterns.
-
-- Document any assumptions.
-
-### Step 4.2 — Apply Variables
-
-**Objective**:    
-Integrate the extracted variables into the appearance configuration.
-
-**Actions**:
-
-- Apply the variables object to the appearance configuration.
-
-- [ ] Confirm the variables are applied and override correctly.
-
-**Verification**:
-
-- [ ] The variables object is applied and functional.
-
-### Step 4.3 — Validate Visual Integration
-
-**Objective**:
-- Ensure the notification center aligns visually with the host application.
-
-**Actions**:
-1. Extract design tokens from the host application:
-   - **Theme Configuration**: Check theme files.
-   - **StyleSheet**: Review style definitions.
-   - **UI Library**: Check theme settings.
-
-2. Map the extracted tokens to the appearance configuration.
-
-3. Validate the integration:
-   - [ ] Ensure the variables are applied correctly.
-   - [ ] Confirm visual consistency with the host application.
+Extract the host app's design tokens (colors, typography, spacing) from its styling system and map them to the appearance variables.
 
 ### Step 5: Component Creation
 **Objective**: Create a self-contained component for the Inbox integration
@@ -310,51 +187,17 @@ ${KITCHEN_SINK_INBOX_SNIPPET}
 ### Step 7: Validation & Testing
 **Objective**: Ensure the integration meets all quality standards
 
-**Visual Validation**:
-- [ ] Proper spacing and typography
-- [ ] Consistent with host application design system
-- [ ] Platform-specific UI guidelines followed
+- Proper spacing and typography
+- Consistent with host application design system
+- Platform-specific UI guidelines followed
+- No JavaScript errors
+- No native module errors
+- No layout warnings
 
-**Console Validation**:
-- [ ] No JavaScript errors
-- [ ] No native module errors
-- [ ] No layout warnings
-
-### Step 8: AI Model Verification (Internal Process)
-**Objective**: Perform final verification before returning code
-
-**Verification Checklist**:
-- [ ] Package installation confirmed
-- [ ] Environment variables properly configured
-- [ ] NovuProvider properly set up in App.tsx
-- [ ] Component uses proper React Native patterns
-- [ ] Appearance configuration is inline and type-safe
-- [ ] Component is properly placed in the UI
-- [ ] Platform-specific considerations handled
-
-**Action**: If any check fails → stop and revise the implementation
-
-### Step 9: Iterative Refinement Process
-**Objective**: Fine-tune the integration based on validation results
-
-**Refinement Areas**:
-- Adjust inline appearance properties
-- Optimize native module usage
-- Improve placement positioning
-- Preserve validated design tokens and placement
-- Handle platform-specific edge cases
-
-### Step 10: Final Output Requirements
-**Objective**: Deliver a complete, production-ready integration
-
-**Required Deliverables**:
-- Self-contained NotificationInbox component
-- App root with NovuProvider
-- Inline appearance configuration with empty placeholders
-- Environment variable configuration
-- TypeScript compliance with proper typing
-- Platform-specific handling
-- Dark mode support (if any)
+### Step 8: Verify & Deliver
+- Confirm package installation, env vars, component configuration, and UI placement
+- Ensure TypeScript compliance and no console errors
+- Deliver a self-contained component with inline appearance, subscriber detection, and env var references
 `;
 
 interface PromptConfig {
