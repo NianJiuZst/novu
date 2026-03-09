@@ -190,7 +190,7 @@ function StepCodeBlock({
 }
 
 function buildCursorDeeplink(promptText: string): string {
-  return `https://cursor.com/link/prompt?text=${encodeURIComponent(promptText)}`;
+  return `cursor://anysphere.cursor-deeplink/prompt?text=${encodeURIComponent(promptText)}`;
 }
 
 const PROMPT_BUTTON_STYLE = {
@@ -237,10 +237,13 @@ function StepButton({
     }
   };
 
-  const handleCursorDeeplink = () => {
+  const handleCursorDeeplink = async () => {
     track(TelemetryEvent.AI_PROMPT_COPIED, { framework: frameworkName });
     track(TelemetryEvent.CURSOR_DEEPLINK_CLICKED, { framework: frameworkName });
-    window.open(buildCursorDeeplink(copyText), '_blank');
+    try {
+      await navigator.clipboard.writeText(copyText);
+    } catch {}
+    window.location.href = buildCursorDeeplink(copyText);
   };
 
   return (
