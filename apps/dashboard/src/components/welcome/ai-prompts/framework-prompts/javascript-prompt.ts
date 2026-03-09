@@ -9,6 +9,10 @@ const novu = new NovuUI({
     backendUrl: '',
     socketUrl: '',
   },
+  appearance: {
+    variables: {},
+    elements: {},
+  },
 });
 
 novu.mountComponent({
@@ -35,19 +39,19 @@ const JAVASCRIPT_PROMPT = `You are an AI agent specialized in integrating the No
 Before starting the integration, analyze the host application to understand:
 
 **Project Structure Analysis**:
-- [ ] Package manager (pnpm, yarn, npm, bun)
-- [ ] Build tool (Webpack, Vite, Parcel, etc.)
-- [ ] Module system (ESM, CommonJS)
-- [ ] Existing authentication system (custom, third-party)
-- [ ] UI patterns (vanilla DOM, Web Components)
-- [ ] Existing component patterns and naming conventions
-- [ ] State management approach (custom, third-party)
+- Package manager (pnpm, yarn, npm, bun)
+- Build tool (Webpack, Vite, Parcel, etc.)
+- Module system (ESM, CommonJS)
+- Existing authentication system (custom, third-party)
+- UI patterns (vanilla DOM, Web Components)
+- Existing component patterns and naming conventions
+- State management approach (custom, third-party)
 
 **UI Placement Analysis**:
 Potential common places where the inbox could be integrated in the UI:
-- [ ] Header/navbar structure and positioning
-- [ ] User menu or profile dropdown location
-- [ ] Sidebar layout and available space
+- Header/navbar structure and positioning
+- User menu or profile dropdown location
+- Sidebar layout and available space
 
 ## Critical Constraints & Requirements
 
@@ -86,10 +90,6 @@ pnpm add @novu/js
 # or
 bun add @novu/js
 \`\`\`
-
-**Verification**:
-- [ ] Package installed successfully
-- [ ] No peer dependency conflicts
 
 ### Step 2: Environment Variable Configuration
 **Objective**: Set up the required environment variables for Novu
@@ -146,100 +146,16 @@ export const novuManager = new NovuManager();
 \`\`\`
 
 ### Step 4: Inline Appearance Configuration
-**Objective**: Create type-safe appearance configuration
+**Objective**: Create appearance configuration
 
 **Implementation**:
 \`\`\`javascript
 const appearance = {
-  variables: {
-    // Optional: define colors, typography, spacing, border-radius, etc.
-  },
-  elements: {
-    // Optional: customize container, notifications, badges, buttons, etc.
-  },
+  variables: {},
+  elements: {},
 };
+// Extract the host app's design tokens (colors, typography, spacing) from its styling system and map them to the appearance variables.
 \`\`\`
-
-### Step 4.0 — Styling Integration Principles
-
-Extract styling variables from the host application first.
-
-Customize only what's necessary to achieve visual consistency.
-
-Avoid introducing new styles that don't exist in the host application.
-
-### Step 4.1 — Extract Styling Variables
-
-**Objective**:
-- Collect and prepare the host application's design tokens for the appearance configuration.
-
-**Actions**:
-
-- Identify styling system:
-
-- CSS custom properties → check :root {}
-
-- SCSS/SASS → look for _variables.scss
-
-- CSS-in-JS → inspect theme objects
-
-- Locate variables: Extract values such as primary/secondary colors, background, text, borders, shadows, radii, and fonts.
-
-- Create variables object: Map them to the appearance configuration.
-
-- Validate: Ensure the object is correctly referenced.
-
-
-**Suggested Variables to Extract**:
-
-- colorBackground → main background
-- colorForeground → base text color
-- colorPrimary, colorPrimaryForeground
-- colorSecondary, colorSecondaryForeground
-- colorNeutral → borders/dividers
-- fontSize → base font size
-
-**Fallback Guidelines**:
-
-- If variables are missing, infer equivalents from the app's design.
-
-- Use the most prominent brand colors as primary/secondary.
-
-- Stick to values consistent with existing patterns.
-
-- Document any assumptions.
-
-### Step 4.2 — Apply Variables
-
-**Objective**:    
-Integrate the extracted variables into the appearance configuration.
-
-**Actions**:
-
-- Apply the variables object to the appearance configuration.
-
-- [ ] Confirm the variables are applied and override correctly.
-
-**Verification**:
-
-- [ ] The variables object is applied and functional.
-
-### Step 4.3 — Validate Visual Integration
-
-**Objective**:
-- Ensure the notification center aligns visually with the host application.
-
-**Actions**:
-1. Extract design tokens from the host application:
-   - **CSS Variables**: Inspect :root {}.
-   - **SCSS/SASS**: Look for _variables.scss.
-   - **CSS-in-JS**: Review theme objects.
-
-2. Map the extracted tokens to the appearance configuration.
-
-3. Validate the integration:
-   - [ ] Ensure the variables are applied correctly.
-   - [ ] Confirm visual consistency with the host application.
 
 ### Step 5: Integration Implementation
 **Objective**: Create a self-contained implementation for the Inbox integration
@@ -266,47 +182,16 @@ ${KITCHEN_SINK_INBOX_SNIPPET}
 ### Step 7: Validation & Testing
 **Objective**: Ensure the integration meets all quality standards
 
-**Visual Validation**:
-- [ ] Proper spacing and typography
-- [ ] Consistent with host application design system
+- Proper spacing and typography
+- Consistent with host application design system
+- No JavaScript errors
+- No module loading errors
+- No DOM manipulation errors
 
-**Console Validation**:
-- [ ] No JavaScript errors
-- [ ] No module loading errors
-- [ ] No DOM manipulation errors
-
-### Step 8: AI Model Verification (Internal Process)
-**Objective**: Perform final verification before returning code
-
-**Verification Checklist**:
-- [ ] Package installation confirmed
-- [ ] Environment variables properly configured
-- [ ] Module properly initialized
-- [ ] DOM ready state handled
-- [ ] Appearance configuration is inline
-- [ ] Component is properly placed in the UI
-
-**Action**: If any check fails → stop and revise the implementation
-
-### Step 9: Iterative Refinement Process
-**Objective**: Fine-tune the integration based on validation results
-
-**Refinement Areas**:
-- Adjust inline appearance properties
-- Optimize initialization logic
-- Improve placement positioning
-- Preserve validated design tokens and placement
-
-### Step 10: Final Output Requirements
-**Objective**: Deliver a complete, production-ready integration
-
-**Required Deliverables**:
-- Self-contained JavaScript module
-- DOM ready state handling
-- Inline appearance configuration with empty placeholders
-- Environment variable configuration
-- Error handling and fallbacks
-- Dark mode support (if any)
+### Step 8: Verify & Deliver
+- Confirm package installation, env vars, component configuration, and UI placement
+- Ensure TypeScript compliance and no console errors
+- Deliver a self-contained component with inline appearance, subscriber detection, and env var references
 `;
 
 /**
