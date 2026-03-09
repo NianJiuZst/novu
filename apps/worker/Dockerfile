@@ -1,4 +1,5 @@
 FROM node:20-alpine3.21 AS dev_base
+RUN apk upgrade --no-cache libcrypto3 libssl3
 RUN apk --update --no-cache add curl g++ make py3-pip
 ENV NX_DAEMON=false
 
@@ -50,12 +51,12 @@ RUN pnpm recursive exec -- rm -rf ./src
 
 # ------- PRODUCTION BUILD ----------
 FROM node:20-alpine3.21 AS prod
+RUN apk upgrade --no-cache libcrypto3 libssl3
 ARG PACKAGE_PATH
 
 ENV CI=true
 ENV NX_DAEMON=false
 
-# Install only runtime dependencies (NO Python, NO build tools)
 RUN apk --update --no-cache add curl
 RUN npm i pm2 -g && npm --no-update-notifier --no-fund --global install pnpm@10.16.1
 
