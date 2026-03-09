@@ -34,6 +34,9 @@ Key gotchas:
 pnpm start:worker    # Background worker
 ```
 
+### Dashboard interaction
+Immediatly after creating a new user in the dashboard, you will need to create a new organization. After the organization name is submitted, you can immediatly navigate to the localhost:4201 root url and you should see the dashboard directly on the workflows page (Avoid doing the full onboarding unless requested).
+
 ### Linting
 
 `pnpm check` runs Biome across the entire monorepo. Pre-existing warnings/errors are expected in this large codebase. The linter itself functions correctly.
