@@ -4,8 +4,9 @@ import { Transform } from 'class-transformer';
 
 export const TransformToBoolean = () =>
   Transform(({ value }) => {
+    if (value === '' || value === null) return undefined;
     if (value === 'true') return true;
     if (value === 'false') return false;
 
-    return value; // @IsBoolean validator should reject non-boolean value.
+    return value;
   });

@@ -310,7 +310,7 @@ function InputControl({
     return <PushResources credential={credential} integrationId={integrationId} />;
   }
 
-  if (credential.type === 'switch') {
+  if (credential.type === 'switch' || credential.type === 'boolean') {
     return (
       <SwitchInput
         credential={credential}

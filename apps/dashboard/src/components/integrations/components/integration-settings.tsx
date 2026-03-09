@@ -141,11 +141,22 @@ export function IntegrationSettings({
     return provider.credentials;
   }, [provider.id, provider.credentials, isSlackTeamsEnabled, mode, integration?.credentials]);
 
+  const handleFormSubmit = (data: IntegrationFormData) => {
+    const cleanRecord = (record: Record<string, string>) =>
+      Object.fromEntries(Object.entries(record).filter(([, v]) => v !== ''));
+
+    onSubmit({
+      ...data,
+      credentials: cleanRecord(data.credentials),
+      configurations: cleanRecord(data.configurations),
+    });
+  };
+
   return (
     <Form {...form}>
       <FormRoot
         id={`integration-configuration-form-${provider.id}`}
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(handleFormSubmit)}
         className="flex flex-col"
       >
         <div className="flex items-center justify-between gap-2 p-3">

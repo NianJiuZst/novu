@@ -277,6 +277,77 @@ describe('Update Integration - /integrations/:integrationId (PUT) #novu-v2', () 
     expect(nodeMailerIntegration?.active).to.equal(true);
   });
 
+  it('should update custom SMTP integration with empty string credentials stripped', async () => {
+    const nodeMailerProviderPayload = {
+      providerId: 'nodemailer',
+      channel: 'email',
+      credentials: {
+        host: 'smtp.example.com',
+        port: '587',
+        secure: true,
+        requireTls: true,
+        tlsOptions: { rejectUnauthorized: false },
+      },
+      active: true,
+      check: false,
+    };
+
+    const nodeMailerIntegrationId = (await session.testAgent.post('/v1/integrations').send(nodeMailerProviderPayload))
+      .body.data._id;
+
+    const updatePayload = {
+      credentials: {
+        host: 'smtp.example.com',
+        port: '587',
+      },
+      check: false,
+    };
+
+    const { body } = await session.testAgent
+      .put(`/v1/integrations/${nodeMailerIntegrationId}`)
+      .send(updatePayload);
+
+    expect(body.statusCode).to.not.equal(422);
+    expect(body.data).to.be.ok;
+    expect(body.data.credentials.host).to.equal('smtp.example.com');
+  });
+
+  it('should update custom SMTP integration with tlsOptions as JSON string', async () => {
+    const nodeMailerProviderPayload = {
+      providerId: 'nodemailer',
+      channel: 'email',
+      credentials: {
+        host: 'smtp.example.com',
+        port: '587',
+      },
+      active: true,
+      check: false,
+    };
+
+    const nodeMailerIntegrationId = (await session.testAgent.post('/v1/integrations').send(nodeMailerProviderPayload))
+      .body.data._id;
+
+    const updatePayload = {
+      credentials: {
+        host: 'smtp.example.com',
+        port: '587',
+        tlsOptions: '{"rejectUnauthorized": false}',
+      },
+      check: false,
+    };
+
+    const { body } = await session.testAgent
+      .put(`/v1/integrations/${nodeMailerIntegrationId}`)
+      .send(updatePayload);
+
+    expect(body.statusCode).to.not.equal(422);
+    expect(body.data).to.be.ok;
+
+    const integrations = await integrationRepository.findByEnvironmentId(session.environment._id);
+    const nodeMailerIntegration = integrations.find((i) => i.providerId.toString() === 'nodemailer');
+    expect(nodeMailerIntegration?.credentials?.tlsOptions).to.eql({ rejectUnauthorized: false });
+  });
+
   it('should not calculate primary and priority if active is not defined', async () => {
     await integrationRepository.deleteMany({
       _organizationId: session.organization._id,
