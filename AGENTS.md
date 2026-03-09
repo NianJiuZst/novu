@@ -46,3 +46,25 @@ Immediatly after creating a new user in the dashboard, you will need to create a
 - API E2E tests: see `.cursor/skills/run-api-e2e-tests/SKILL.md`
 - Dashboard E2E: `cd apps/dashboard && pnpm test:e2e`
 - API unit tests: `cd apps/api && pnpm test`
+
+
+## Creating Pull Requests
+Requirements:
+
+Follow the Conventional Commits specification
+As a team member, include Linear ticket ID at the end: fixes TICKET-ID or include it in your branch name
+Expected format: feat(scope): Add fancy new feature fixes NOV-123
+
+Possible scopes:
+- dashboard
+- api-service
+- worker
+- shared
+- js
+- react
+- react-native
+- nextjs
+- providers
+- root 
+
+PR title must end with 'fixes TICKET-ID' (e.g., 'fixes NOV-123') when a linear ticket id is available in context.
