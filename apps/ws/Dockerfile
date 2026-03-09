@@ -48,7 +48,7 @@ RUN pnpm recursive exec -- rm -rf ./src
 
 # ------- PRODUCTION BUILD ----------
 FROM node:20-alpine3.22 AS prod
-RUN apk upgrade --no-cache libcrypto3 libssl3
+
 
 ARG PACKAGE_PATH
 

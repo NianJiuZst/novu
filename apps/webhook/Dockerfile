@@ -43,7 +43,7 @@ RUN pnpm recursive exec -- rm -rf ./src
 # ------- PRODUCTION BUILD ----------
 # Use clean base for production (NO Python)
 FROM node:20-alpine3.22 AS prod
-RUN apk upgrade --no-cache libcrypto3 libssl3
+
 ARG PACKAGE_PATH
 
 ENV CI=true
