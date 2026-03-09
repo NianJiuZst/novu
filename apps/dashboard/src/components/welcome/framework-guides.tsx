@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { RiSparklingLine } from 'react-icons/ri';
+import { RiExternalLinkLine, RiSparklingLine } from 'react-icons/ri';
 import { useTelemetry } from '../../hooks/use-telemetry';
 import { TelemetryEvent } from '../../utils/telemetry';
 import { CodeBlock, Language } from '../primitives/code-block';
@@ -189,6 +189,29 @@ function StepCodeBlock({
   );
 }
 
+function buildCursorDeeplink(promptText: string): string {
+  return `https://cursor.com/link/prompt?text=${encodeURIComponent(promptText)}`;
+}
+
+const PROMPT_BUTTON_STYLE = {
+  boxSizing: 'border-box' as const,
+  padding: '6px 8px',
+  background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 100%), #0E121B',
+  boxShadow: '0px 1px 2px rgba(27, 28, 29, 0.48), 0px 0px 0px 1px #242628',
+  borderRadius: '8px',
+  fontFamily: 'Inter',
+  fontWeight: 500,
+  fontSize: '12px',
+  lineHeight: '16px',
+  fontFeatureSettings: "'cv09' on, 'ss11' on, 'calt' off, 'liga' off",
+  transition: 'background 150ms ease, box-shadow 150ms ease',
+};
+
+const PROMPT_BUTTON_STYLE_COPIED = {
+  ...PROMPT_BUTTON_STYLE,
+  background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.12) 100%), #151A22',
+};
+
 function StepButton({
   buttonText,
   copyText,
@@ -214,43 +237,42 @@ function StepButton({
     }
   };
 
+  const handleCursorDeeplink = () => {
+    track(TelemetryEvent.CURSOR_DEEPLINK_CLICKED, { framework: frameworkName });
+    window.open(buildCursorDeeplink(copyText), '_blank');
+  };
+
   return (
     <motion.div {...codeBlockAnimation(index)} className="w-full max-w-[500px]">
       <div className="flex flex-col gap-3">
-        <button
-          onClick={handleCopy}
-          className="relative flex flex-row justify-center items-center gap-1 w-[126px] h-7 text-white font-medium text-xs leading-4"
-          style={{
-            boxSizing: 'border-box',
-            padding: '6px 4px 6px 6px',
-            background: copied
-              ? 'linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.12) 100%), #151A22'
-              : 'linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 100%), #0E121B',
-            boxShadow: '0px 1px 2px rgba(27, 28, 29, 0.48), 0px 0px 0px 1px #242628',
-            borderRadius: '8px',
-            fontFamily: 'Inter',
-            fontWeight: 500,
-            fontSize: '12px',
-            lineHeight: '16px',
-            fontFeatureSettings: "'cv09' on, 'ss11' on, 'calt' off, 'liga' off",
-            transition: 'background 150ms ease, box-shadow 150ms ease',
-          }}
-        >
-          <div
-            className={`${copied ? 'opacity-0' : 'opacity-100'} flex flex-row items-center gap-1 transition-opacity`}
-            aria-hidden={copied}
+        <div className="flex flex-row items-center gap-2">
+          <button
+            onClick={handleCopy}
+            className="relative flex flex-row justify-center items-center gap-1 h-7 text-white font-medium text-xs leading-4"
+            style={copied ? PROMPT_BUTTON_STYLE_COPIED : PROMPT_BUTTON_STYLE}
           >
-            <RiSparklingLine className="w-3.5 h-3.5 flex-none order-0" />
-            <span className="px-1 w-[98px] h-4 flex flex-row justify-center items-center flex-none order-1">
-              <span className="w-[90px] h-4 flex items-center flex-none order-0">{buttonText}</span>
-            </span>
-          </div>
-          <div
-            className={`absolute inset-0 flex items-center justify-center transition-opacity ${copied ? 'opacity-100' : 'opacity-0'}`}
+            <div
+              className={`${copied ? 'opacity-0' : 'opacity-100'} flex flex-row items-center gap-1 transition-opacity`}
+              aria-hidden={copied}
+            >
+              <RiSparklingLine className="w-3.5 h-3.5 flex-none" />
+              <span>{buttonText}</span>
+            </div>
+            <div
+              className={`absolute inset-0 flex items-center justify-center transition-opacity ${copied ? 'opacity-100' : 'opacity-0'}`}
+            >
+              Copied!
+            </div>
+          </button>
+          <button
+            onClick={handleCursorDeeplink}
+            className="flex flex-row items-center gap-1 h-7 text-white font-medium text-xs leading-4 hover:opacity-90 active:scale-[0.98]"
+            style={PROMPT_BUTTON_STYLE}
           >
-            Copied!
-          </div>
-        </button>
+            <RiExternalLinkLine className="w-3.5 h-3.5 flex-none" />
+            <span>Open in Cursor</span>
+          </button>
+        </div>
         <p className="text-foreground-400 text-xs">(No terminal, no docs — just let your pair programmer handle it.)</p>
       </div>
     </motion.div>

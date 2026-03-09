@@ -19,6 +19,7 @@ export enum TelemetryEvent {
   INBOX_PREVIEW_STYLE_CHANGED = 'Inbox preview style changed - [Onboarding]',
   INBOX_FRAMEWORK_SELECTED = 'Inbox framework selected - [Onboarding]',
   AI_PROMPT_COPIED = 'AI prompt copied - [Onboarding]',
+  CURSOR_DEEPLINK_CLICKED = 'Cursor deeplink clicked - [Onboarding]',
   SKIP_ONBOARDING_CLICKED = 'Skip onboarding clicked - [Onboarding]',
   ONBOARDING_COMPLETED = 'Onboarding completed - [Onboarding]',
   USECASE_SELECT_PAGE_VIEWED = 'Use case select page viewed - [Onboarding]',
