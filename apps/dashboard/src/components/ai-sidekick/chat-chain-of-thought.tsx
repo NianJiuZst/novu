@@ -255,8 +255,7 @@ function StepTool({
       }
       status={isStreaming ? 'active' : 'complete'}
       icon={isStreaming ? BroomIcon : CheckCircleIcon}
-      collapsible
-      defaultOpen={true}
+      collapsible={false}
     >
       <div className="flex flex-col gap-2 p-2 pl-0">
         <WorkflowStepItem output={stepOutput} isStreaming={isStreaming} action={action} />
@@ -283,7 +282,7 @@ const toolNameToCompleteLabel = {
   [AiWorkflowToolsEnum.MOVE_STEP]: 'Moved Workflow Step',
 };
 
-const STREAMING_MAX_LINES = 4;
+const STREAMING_MAX_LINES = 2;
 const STREAMING_LINE_HEIGHT_REM = 1.25;
 const STREAMING_MAX_HEIGHT = `${STREAMING_MAX_LINES * STREAMING_LINE_HEIGHT_REM}rem`;
 
