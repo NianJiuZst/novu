@@ -1,9 +1,15 @@
+import { RiCloseLine } from 'react-icons/ri';
 import { BroomSparkle } from '../icons/broom-sparkle';
 import { Badge } from '../primitives/badge';
+import { CompactButton } from '../primitives/button-compact';
 import { useAiChat } from './ai-chat-context';
 import { ChatBody, ChatBodySkeleton } from './chat-body';
 
-export function NovuCopilotPanel() {
+type NovuCopilotPanelProps = {
+  onClose?: () => void;
+};
+
+export function NovuCopilotPanel({ onClose }: NovuCopilotPanelProps) {
   const {
     hasNoChatHistory,
     messages,
@@ -47,6 +53,16 @@ export function NovuCopilotPanel() {
             BETA
           </Badge>
         </div>
+        {onClose ? (
+          <CompactButton
+            type="button"
+            variant="ghost"
+            size="md"
+            icon={RiCloseLine}
+            onClick={onClose}
+            aria-label="Hide Copilot"
+          />
+        ) : null}
       </div>
       {isLoading ? (
         <ChatBodySkeleton />

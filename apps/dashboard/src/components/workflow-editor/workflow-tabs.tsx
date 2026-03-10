@@ -7,7 +7,14 @@ import {
   ResourceOriginEnum,
 } from '@novu/shared';
 import { useCallback, useMemo, useState } from 'react';
-import { RiArrowDownSLine, RiCodeSSlashLine, RiFileCopyLine, RiPlayCircleLine } from 'react-icons/ri';
+import {
+  RiArrowDownSLine,
+  RiCodeSSlashLine,
+  RiFileCopyLine,
+  RiPlayCircleLine,
+  RiSidebarFoldLine,
+  RiSidebarUnfoldLine,
+} from 'react-icons/ri';
 import { Link, useMatch, useNavigate, useParams } from 'react-router-dom';
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 
@@ -48,6 +55,7 @@ export const WorkflowTabs = () => {
   const activityMatch = useMatch(ROUTES.EDIT_WORKFLOW_ACTIVITY);
   const [isIntegrateDrawerOpen, setIsIntegrateDrawerOpen] = useState(false);
   const [isTriggerDrawerOpen, setIsTriggerDrawerOpen] = useState(false);
+  const [isCopilotCollapsed, setIsCopilotCollapsed] = useState(false);
   const { workflowSlug = '' } = useParams<{ workflowSlug?: string; stepSlug?: string }>();
   const { testData } = useFetchWorkflowTestData({ workflowSlug });
   const isNewWorkflowSlug = workflowSlug === 'new';
@@ -60,6 +68,8 @@ export const WorkflowTabs = () => {
   const userLastName = currentUser?.lastName;
   const userEmail = currentUser?.email;
   const isDevEnvironment = currentEnvironment?.type === EnvironmentTypeEnum.DEV;
+  const isCopilotEnabled = isAiWorkflowGenerationEnabled && isDevEnvironment;
+  const isCopilotVisible = isCopilotEnabled && !isCopilotCollapsed;
 
   // API key management
   const has = useHasPermission();
@@ -409,6 +419,17 @@ export const WorkflowTabs = () => {
             )}
           </TabsTrigger>
           <div className="my-auto ml-auto flex items-center gap-2">
+            {isCopilotEnabled ? (
+              <Button
+                variant="secondary"
+                size="2xs"
+                mode="ghost"
+                leadingIcon={isCopilotVisible ? RiSidebarFoldLine : RiSidebarUnfoldLine}
+                onClick={() => setIsCopilotCollapsed((currentValue) => !currentValue)}
+              >
+                {isCopilotVisible ? 'Hide Copilot' : 'Show Copilot'}
+              </Button>
+            ) : null}
             <Protect permission={PermissionsEnum.EVENT_WRITE}>
               <Button
                 variant="secondary"
@@ -463,10 +484,10 @@ export const WorkflowTabs = () => {
           </div>
         </TabsList>
         <TabsContent value="workflow" className="flex mt-0 h-full max-w-full overflow-hidden">
-          {isAiWorkflowGenerationEnabled && isDevEnvironment ? (
+          {isCopilotVisible ? (
             <ResizableLayout autoSaveId="workflow-editor-ai-sidekick-layout" className="flex-1 min-w-0">
               <ResizableLayout.ContextPanel defaultSize={26} minSize={20} maxSize={80}>
-                <NovuCopilotPanel />
+                <NovuCopilotPanel onClose={() => setIsCopilotCollapsed(true)} />
               </ResizableLayout.ContextPanel>
               <ResizableLayout.Handle />
               <ResizableLayout.MainContentPanel>
@@ -479,6 +500,7 @@ export const WorkflowTabs = () => {
           ) : (
             <div className="relative flex-1">
               <WorkflowCanvas isReadOnly={isReadOnly} steps={workflow?.steps || []} />
+              {isCopilotEnabled ? <WorkflowCanvasToast /> : null}
             </div>
           )}
         </TabsContent>
@@ -494,11 +516,7 @@ export const WorkflowTabs = () => {
         to={subscriberData}
         payload={JSON.stringify(integrationPayload, null, 2)}
       />
-      <TestWorkflowDrawer
-        isOpen={isTriggerDrawerOpen}
-        onOpenChange={setIsTriggerDrawerOpen}
-        testData={testData}
-      />
+      <TestWorkflowDrawer isOpen={isTriggerDrawerOpen} onOpenChange={setIsTriggerDrawerOpen} testData={testData} />
     </div>
   );
 
