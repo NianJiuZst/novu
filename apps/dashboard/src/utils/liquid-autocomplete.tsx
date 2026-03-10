@@ -11,6 +11,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { NewVariablePreview } from '@/components/variable/components/new-variable-preview';
 import { getFilters } from '@/components/variable/constants';
+import { isNamespaceOnlyVariable } from '@/utils/liquid';
 import { LiquidVariable } from '@/utils/parseStepVariables';
 import { isValidContextVariable } from './context-variable-utils';
 import { getVariablesAtPositionWithLoopProperties } from './liquid-scope-analyzer';
@@ -52,7 +53,7 @@ function createJitVariables({
 
   for (const namespace of namespaces) {
     // Case 1: User typed "namespace.something" (e.g., "context.tenant", "payload.user")
-    if (searchText.startsWith(namespace + '.') && searchText !== namespace) {
+    if (searchText.startsWith(`${namespace}.`) && searchText !== namespace) {
       variables.push(...handleNamespacedInput(searchText, namespace, isPayloadSchemaEnabled, onCreateNewVariable));
     }
     // Case 2: User typed something without namespace (e.g., "tenant", "user")
@@ -280,6 +281,7 @@ export const completions =
     }
 
     const allVariables = [...scopedVariables, ...variables];
+    const fallbackVariables = filterSuggestionVariables(allVariables);
     const matchingVariables = getMatchingVariables(
       searchText,
       scopedVariables,
@@ -305,7 +307,7 @@ export const completions =
                   v.displayLabel
                 )
               )
-            : allVariables.map((v) =>
+            : fallbackVariables.map((v) =>
                 createCompletionOption(v.name, v.type ?? 'variable', v.boost, v.info, v.displayLabel)
               ),
       };
@@ -350,6 +352,18 @@ function getFilterCompletions(afterPipe: string): CompletionOption[] {
     .map((f) => createCompletionOption(f.value, 'function'));
 }
 
+function isSuggestionEligible(variable: LiquidVariable): boolean {
+  if (variable.type === 'local') {
+    return true;
+  }
+
+  return !isNamespaceOnlyVariable(variable.name);
+}
+
+function filterSuggestionVariables(variables: LiquidVariable[]): LiquidVariable[] {
+  return variables.filter(isSuggestionEligible);
+}
+
 function getMatchingVariables(
   searchText: string,
   scopedVariables: LiquidVariable[],
@@ -359,7 +373,7 @@ function getMatchingVariables(
   isContextEnabled?: boolean
 ): LiquidVariable[] {
   const allVariables = [...scopedVariables, ...variables];
-  if (!searchText) return allVariables;
+  if (!searchText) return filterSuggestionVariables(allVariables);
 
   const searchTextTrimmed = searchText.trim();
 
@@ -409,7 +423,9 @@ function getMatchingVariables(
     ];
   }
 
-  const baseVariables = Array.from(new Map(combinedVariables.map((item) => [item.name, item])).values());
+  const baseVariables = Array.from(new Map(combinedVariables.map((item) => [item.name, item])).values()).filter(
+    isSuggestionEligible
+  );
 
   const existingMatchingVariables = baseVariables.filter((v) => {
     const namePartWithoutFilters = v.name.split('|')[0].trim();
