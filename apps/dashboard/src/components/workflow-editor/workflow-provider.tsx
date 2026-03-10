@@ -53,6 +53,29 @@ export type WorkflowContextType = {
 
 export const WorkflowContext = createContext<WorkflowContextType>({} as WorkflowContextType);
 
+function normalizeWorkflowUpdatePayload(data: UpdateWorkflowDto): UpdateWorkflowDto {
+  const preferences = data.preferences as UpdateWorkflowDto['preferences'] & {
+    default?: WorkflowResponseDto['preferences']['default'];
+  };
+
+  if (!preferences) {
+    return data;
+  }
+
+  const workflowPreferences = preferences.workflow ?? preferences.default;
+  if (!workflowPreferences) {
+    return data;
+  }
+
+  return {
+    ...data,
+    preferences: {
+      user: preferences.user ?? null,
+      workflow: workflowPreferences,
+    },
+  };
+}
+
 export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
   const { currentEnvironment } = useEnvironment();
   const { workflowSlug = '', stepSlug = '' } = useParams<{ workflowSlug?: string; stepSlug?: string }>();
@@ -148,7 +171,10 @@ export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
       if (currentWorkflow) {
         enqueue(async () => {
           try {
-            const res = await updateWorkflow({ workflowSlug: currentWorkflow.slug, workflow: { ...data } });
+            const res = await updateWorkflow({
+              workflowSlug: currentWorkflow.slug,
+              workflow: normalizeWorkflowUpdatePayload({ ...data }),
+            });
             options?.onSuccess?.(res);
           } catch (error) {
             setLastSaveError(error);

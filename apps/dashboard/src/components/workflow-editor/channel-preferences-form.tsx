@@ -11,7 +11,6 @@ import { useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { RiArrowLeftSLine, RiCloseFill, RiInformationFill } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
-import { z } from 'zod';
 
 import { STEP_TYPE_TO_ICON } from '@/components/icons/utils';
 import { PageMeta } from '@/components/page-meta';
@@ -105,13 +104,24 @@ export const ChannelPreferencesForm = (props: ConfigureWorkflowFormProps) => {
 
   const { override } = useWatch(overrideForm);
 
+  const buildPreferencesPayload = (userPreferences: WorkflowPreferences | null) => {
+    if (isDashboardWorkflow) {
+      return {
+        user: null,
+        workflow: userPreferences ?? workflow.preferences.default,
+      };
+    }
+
+    return {
+      user: userPreferences,
+      workflow: workflow.preferences.default,
+    };
+  };
+
   const updateUserPreference = (userPreferences: WorkflowPreferences | null) => {
     update({
       ...workflow,
-      preferences: {
-        ...workflow.preferences,
-        user: userPreferences,
-      },
+      preferences: buildPreferencesPayload(userPreferences),
     });
 
     const value = userPreferences === null ? workflow.preferences.default : userPreferences;
@@ -328,6 +338,9 @@ export const ChannelPreferencesForm = (props: ConfigureWorkflowFormProps) => {
                           field.onChange(value as SeverityLevelEnum);
                           update({
                             ...workflow,
+                            preferences: buildPreferencesPayload(
+                              isDashboardWorkflow ? workflow.preferences.default : workflow.preferences.user
+                            ),
                             severity: value as SeverityLevelEnum,
                           });
                         }}
