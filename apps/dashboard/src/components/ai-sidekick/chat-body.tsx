@@ -1,5 +1,6 @@
 import { ChatStatus, UIMessage } from 'ai';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRotatingPlaceholder } from '@/hooks/use-rotating-placeholder';
 import { Conversation, ConversationContent, ConversationScrollButton } from '../ai-elements/conversation';
 import { Message } from '../ai-elements/message';
 import {
@@ -13,9 +14,23 @@ import {
 import { Broom } from '../icons/broom';
 import { BroomSparkle } from '../icons/broom-sparkle';
 import { Skeleton } from '../primitives/skeleton';
+import { Tag } from '../primitives/tag';
 import { AssistantMessage } from './assistant-message';
 import { hasKnownMessageParts } from './message-utils';
 import { UserMessage } from './user-message';
+
+const SIDEKICK_PLACEHOLDER_SUGGESTIONS = [
+  'Ask for changes… eg: Make the workflow high severity..',
+  'Ask for changes… eg: Add SMS fallback if email is not delivered.',
+  'Ask for changes… eg: Improve timing to avoid notification fatigue.',
+  'Ask for changes… eg: Make the copy shorter and more actionable.',
+];
+
+const SIDEKICK_POST_APPLY_SUGGESTIONS = [
+  'Add a fallback channel when a step fails',
+  'Tighten copy for each step',
+  'Add a re-engagement reminder after 24 hours',
+];
 
 export const ChatBodySkeleton = () => {
   return (
@@ -73,6 +88,7 @@ export const ChatBody = ({
   onDiscard,
   onTryAgain,
   onRevertMessage,
+  keepAllSuccessCount,
 }: {
   hasNoChatHistory: boolean;
   inputText: string;
@@ -91,7 +107,10 @@ export const ChatBody = ({
   onDiscard: (messageId: string) => void;
   onTryAgain: (messageId: string) => void;
   onRevertMessage: (messageId: string) => void;
+  keepAllSuccessCount: number;
 }) => {
+  const [isFollowUpSuggestionsVisible, setFollowUpSuggestionsVisible] = useState(false);
+  const lastKeepAllSuccessCountRef = useRef(keepAllSuccessCount);
   const hasLastUserMessage = messages.length === 0 || messages[messages.length - 1].role === 'user';
   const lastMessage = messages[messages.length - 1];
   const isLastAssistantMessage = lastMessage?.role === 'assistant';
@@ -103,10 +122,60 @@ export const ChatBody = ({
     (isGenerating && hasLastUserMessage) || (isGenerating && isLastAssistantMessage && !lastAssistantHasKnownToolCalls);
   const isSubmitGuard = !inputText.trim() || isGenerating || isSubmitDisabled;
   const isSubmitButtonDisabled = (!inputText.trim() && !isGenerating) || isSubmitDisabled;
+  const rotatingPlaceholder = useRotatingPlaceholder({
+    suggestions: SIDEKICK_PLACEHOLDER_SUGGESTIONS,
+    shouldRotate: !inputText.trim() && !isGenerating,
+  });
+  const shouldShowFollowUpSuggestions =
+    isFollowUpSuggestionsVisible && !isGenerating && !isReviewingChanges && !inputText.trim();
+
+  useEffect(() => {
+    if (keepAllSuccessCount <= lastKeepAllSuccessCountRef.current) {
+      return;
+    }
+
+    lastKeepAllSuccessCountRef.current = keepAllSuccessCount;
+    setFollowUpSuggestionsVisible(true);
+  }, [keepAllSuccessCount]);
+
+  useEffect(() => {
+    if (isGenerating || isReviewingChanges) {
+      setFollowUpSuggestionsVisible(false);
+    }
+  }, [isGenerating, isReviewingChanges]);
+
+  function handleInputTextChange(nextText: string) {
+    if (nextText.trim()) {
+      setFollowUpSuggestionsVisible(false);
+    }
+
+    onInputChange(nextText);
+  }
+
+  function handleFollowUpSuggestionClick(suggestion: string) {
+    onInputChange(suggestion);
+    setFollowUpSuggestionsVisible(false);
+  }
+
+  function handleKeepAllClick() {
+    setFollowUpSuggestionsVisible(false);
+    onKeepAll();
+  }
+
+  function handleDiscardClick(messageId: string) {
+    setFollowUpSuggestionsVisible(false);
+    onDiscard(messageId);
+  }
+
+  function handleTryAgainClick(messageId: string) {
+    setFollowUpSuggestionsVisible(false);
+    onTryAgain(messageId);
+  }
 
   const onSubmitHandler = (message: PromptInputMessage) => {
     if (isSubmitGuard) return;
 
+    setFollowUpSuggestionsVisible(false);
     onSubmit(message.text);
   };
 
@@ -139,7 +208,7 @@ export const ChatBody = ({
                     key={chatMessage.id}
                     message={chatMessage}
                     onRevert={onRevertMessage}
-                    onTryAgain={onTryAgain}
+                    onTryAgain={handleTryAgainClick}
                     isGenerating={isGenerating}
                     isActionPending={isActionPending}
                   />
@@ -156,9 +225,9 @@ export const ChatBody = ({
                     isLastAssistantMessage={isLastAssistantMessage}
                     lastUserMessageId={lastUserMessageId}
                     isActionPending={isActionPending}
-                    onKeepAll={onKeepAll}
-                    onDiscard={onDiscard}
-                    onTryAgain={onTryAgain}
+                    onKeepAll={handleKeepAllClick}
+                    onDiscard={handleDiscardClick}
+                    onTryAgain={handleTryAgainClick}
                   />
                 );
               }
@@ -186,10 +255,24 @@ export const ChatBody = ({
         <PromptInput onSubmit={onSubmitHandler}>
           <PromptInputBody>
             <PromptInputTextarea
-              onChange={(event) => onInputChange(event.target.value)}
+              onChange={(event) => handleInputTextChange(event.target.value)}
               value={inputText}
-              placeholder="Ask for changes… eg: Make the workflow high severity.."
+              placeholder={rotatingPlaceholder}
             />
+            {shouldShowFollowUpSuggestions && (
+              <div className="mt-1 flex flex-wrap items-center gap-1.5 px-2 pb-1">
+                {SIDEKICK_POST_APPLY_SUGGESTIONS.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    className="cursor-pointer"
+                    onClick={() => handleFollowUpSuggestionClick(suggestion)}
+                  >
+                    <Tag className="rounded-full">{suggestion}</Tag>
+                  </button>
+                ))}
+              </div>
+            )}
           </PromptInputBody>
           <PromptInputFooter>
             <PromptInputSubmit disabled={isSubmitButtonDisabled} status={status} onStop={stop} className="ml-auto" />

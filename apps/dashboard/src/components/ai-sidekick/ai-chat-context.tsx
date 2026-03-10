@@ -18,6 +18,7 @@ export type ReasoningDataPart = DataUIPart<{ reasoning: { toolCallId: string; te
 export type AiChatContextValue = {
   hasNoChatHistory: boolean;
   lastUserMessageId?: string;
+  keepAllSuccessCount: number;
   messages: UIMessage[];
   dataParts: ReasoningDataPart[];
   status: ChatStatus;
@@ -72,6 +73,7 @@ export function AiChatProvider({ children, config }: { children: React.ReactNode
   } = config;
 
   const [inputText, setInputText] = useState('');
+  const [keepAllSuccessCount, setKeepAllSuccessCount] = useState(0);
   const [isFirstMessageRevertDialogOpen, setFirstMessageRevertDialogOpen] = useState(false);
   const [pendingRevertAction, setPendingRevertAction] = useState<{
     type: 'revert' | 'tryAgain';
@@ -202,6 +204,7 @@ export function AiChatProvider({ children, config }: { children: React.ReactNode
       {
         onSuccess: () => {
           refetchLatestChat();
+          setKeepAllSuccessCount((currentCount) => currentCount + 1);
           onKeepSuccess?.();
         },
         onError: () => {
@@ -358,6 +361,7 @@ export function AiChatProvider({ children, config }: { children: React.ReactNode
     () => ({
       hasNoChatHistory,
       lastUserMessageId,
+      keepAllSuccessCount,
       messages,
       dataParts: dataParts as ReasoningDataPart[],
       status: status as ChatStatus,
@@ -379,6 +383,7 @@ export function AiChatProvider({ children, config }: { children: React.ReactNode
     [
       hasNoChatHistory,
       lastUserMessageId,
+      keepAllSuccessCount,
       messages,
       dataParts,
       status,

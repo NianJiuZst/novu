@@ -17,6 +17,7 @@ export function NovuCopilotPanel() {
     isReviewingChanges,
     inputText,
     lastUserMessageId,
+    keepAllSuccessCount,
     setInputText,
     handleSendMessage,
     handleKeepAll,
@@ -69,6 +70,7 @@ export function NovuCopilotPanel() {
           onTryAgain={handleTryAgain}
           onRevertMessage={handleRevertMessage}
           lastUserMessageId={lastUserMessageId}
+          keepAllSuccessCount={keepAllSuccessCount}
         />
       )}
     </div>

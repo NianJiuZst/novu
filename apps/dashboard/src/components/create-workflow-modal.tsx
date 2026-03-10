@@ -1,5 +1,11 @@
 /** biome-ignore-all lint/correctness/useUniqueElementIds: working correctly */
-import { AiAgentTypeEnum, AiResourceTypeEnum, DuplicateWorkflowDto } from '@novu/shared';
+import {
+  AiAgentTypeEnum,
+  AiResourceTypeEnum,
+  DuplicateWorkflowDto,
+  ProductUseCasesEnum,
+  type WorkflowListResponseDto,
+} from '@novu/shared';
 import { ChatOnDataCallback, generateId, UIMessage } from 'ai';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -36,13 +42,16 @@ import { Tag } from '@/components/primitives/tag';
 import { Textarea } from '@/components/primitives/textarea';
 import { ExternalLink } from '@/components/shared/external-link';
 import { CreateWorkflowForm } from '@/components/workflow-editor/create-workflow-form';
+import { useAuth } from '@/context/auth/hooks';
 import { useEnvironment } from '@/context/environment/hooks';
 import { useAiChatStream } from '@/hooks/use-ai-chat-stream';
 import { useCreateAiChat } from '@/hooks/use-create-ai-chat';
 import { useCreateWorkflow } from '@/hooks/use-create-workflow';
 import { useDuplicateWorkflow } from '@/hooks/use-duplicate-workflow';
 import { useFetchWorkflow } from '@/hooks/use-fetch-workflow';
+import { useFetchWorkflows } from '@/hooks/use-fetch-workflows';
 import { useFormProtection } from '@/hooks/use-form-protection';
+import { useRotatingPlaceholder } from '@/hooks/use-rotating-placeholder';
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { Badge } from './primitives/badge';
 import { Form, FormControl, FormField, FormItem, FormMessage, FormRoot } from './primitives/form/form';
@@ -56,19 +65,64 @@ export type WorkflowCreatedEvent = {
 
 type CreateWorkflowTab = 'guided' | 'manual';
 
-const WORKFLOW_SUGGESTIONS = [
+const DEFAULT_WORKFLOW_SUGGESTIONS = [
   'Welcome email workflow',
   'Order confirmation workflow',
   'Payment failed',
   'Password reset workflow',
 ];
 
+const PRODUCT_USE_CASE_WORKFLOW_SUGGESTIONS: Partial<Record<ProductUseCasesEnum, string>> = {
+  [ProductUseCasesEnum.IN_APP]: 'Send an in-app onboarding checklist right after signup',
+  [ProductUseCasesEnum.MULTI_CHANNEL]: 'Alert users in-app first, then email if they do not engage',
+  [ProductUseCasesEnum.DELAY]: 'Send a reminder 24 hours after signup if activation is incomplete',
+  [ProductUseCasesEnum.TRANSLATION]: 'Send multilingual onboarding by subscriber locale',
+  [ProductUseCasesEnum.DIGEST]: 'Bundle non-urgent updates into a daily digest',
+};
+
+type BuildWorkflowSuggestionsOptions = {
+  organizationName?: string;
+  accountDomain?: string;
+  workflows: WorkflowListResponseDto[];
+  productUseCases?: Partial<Record<ProductUseCasesEnum, boolean>>;
+};
+
+function buildWorkflowSuggestions({
+  organizationName,
+  accountDomain,
+  workflows,
+  productUseCases,
+}: BuildWorkflowSuggestionsOptions) {
+  const enabledUseCases = Object.entries(productUseCases ?? {})
+    .filter(([, isEnabled]) => isEnabled)
+    .map(([useCase]) => useCase as ProductUseCasesEnum);
+  const useCaseSuggestions = enabledUseCases
+    .map((useCase) => PRODUCT_USE_CASE_WORKFLOW_SUGGESTIONS[useCase])
+    .filter((suggestion): suggestion is string => Boolean(suggestion));
+  const accountWorkflowSuggestions = workflows
+    .map((workflow) => workflow.name?.trim())
+    .filter((workflowName): workflowName is string => Boolean(workflowName))
+    .slice(0, 2)
+    .map((workflowName) => `Build "${workflowName}" with fallback channels and better timing`);
+  const contextualSuggestions = [
+    organizationName ? `${organizationName}: onboard new users with email + in-app guidance` : undefined,
+    accountDomain ? `Create ${accountDomain} account-security alerts for suspicious sign-ins` : undefined,
+    ...useCaseSuggestions,
+    ...accountWorkflowSuggestions,
+    ...DEFAULT_WORKFLOW_SUGGESTIONS,
+  ].filter((suggestion): suggestion is string => Boolean(suggestion));
+
+  return Array.from(new Set(contextualSuggestions)).slice(0, 6);
+}
+
 export function CreateWorkflowModal({ mode, workflowId }: { mode: 'create' | 'duplicate'; workflowId?: string }) {
   const navigate = useNavigate();
+  const { currentUser, currentOrganization } = useAuth();
   const { currentEnvironment } = useEnvironment();
   const [open, setOpen] = useState(true);
   const createdWorkflowSlugRef = useRef<string | null>(null);
   const [tab, setTab] = useState<CreateWorkflowTab>('guided');
+  const { data: workflowsData } = useFetchWorkflows({ limit: 5 });
 
   const { workflow, isPending: isLoadingWorkflow } = useFetchWorkflow({
     workflowSlug: mode === 'duplicate' ? workflowId : undefined,
@@ -177,6 +231,21 @@ export function CreateWorkflowModal({ mode, workflowId }: { mode: 'create' | 'du
   const showTabs = !isDuplicateMode;
   const showGuidedContent = !isDuplicateMode && tab === 'guided';
   const showManualContent = isDuplicateMode || tab === 'manual';
+  const accountDomain = useMemo(() => {
+    const emailParts = currentUser?.email?.split('@');
+
+    return emailParts?.[1];
+  }, [currentUser?.email]);
+  const workflowSuggestions = useMemo(
+    () =>
+      buildWorkflowSuggestions({
+        organizationName: currentOrganization?.name,
+        accountDomain,
+        workflows: workflowsData?.workflows ?? [],
+        productUseCases: currentOrganization?.productUseCases,
+      }),
+    [currentOrganization?.name, currentOrganization?.productUseCases, accountDomain, workflowsData?.workflows]
+  );
 
   const title = isDuplicateMode ? 'Duplicate workflow' : 'Create workflow';
   const buttonText = showGuidedContent
@@ -236,7 +305,12 @@ export function CreateWorkflowModal({ mode, workflowId }: { mode: 'create' | 'du
             )}
 
             {showGuidedContent && (
-              <GuidedModeContent onSubmit={handleGuidedSubmit} isGenerating={isGenerating} error={error} />
+              <GuidedModeContent
+                onSubmit={handleGuidedSubmit}
+                isGenerating={isGenerating}
+                error={error}
+                suggestions={workflowSuggestions}
+              />
             )}
 
             {showManualContent &&
@@ -293,6 +367,7 @@ type GuidedModeContentProps = {
   onSubmit: (values: z.infer<typeof schema>) => void;
   isGenerating: boolean;
   error?: Error;
+  suggestions: string[];
 };
 
 const STEP_DELAY_MS = 2000;
@@ -320,7 +395,7 @@ type GenerationStep = {
   status: GenerationStepStatus;
 };
 
-function GuidedModeContent({ onSubmit, isGenerating, error }: GuidedModeContentProps) {
+function GuidedModeContent({ onSubmit, isGenerating, error, suggestions }: GuidedModeContentProps) {
   const form = useForm<z.infer<typeof schema>>({
     defaultValues: {
       prompt: '',
@@ -328,6 +403,11 @@ function GuidedModeContent({ onSubmit, isGenerating, error }: GuidedModeContentP
   });
 
   const [animatedStepIndex, setAnimatedStepIndex] = useState(-1);
+  const promptText = form.watch('prompt');
+  const rotatingPlaceholder = useRotatingPlaceholder({
+    suggestions,
+    shouldRotate: !promptText.trim() && !isGenerating,
+  });
 
   useEffect(() => {
     if (!isGenerating) return;
@@ -443,7 +523,7 @@ function GuidedModeContent({ onSubmit, isGenerating, error }: GuidedModeContentP
       {header}
 
       <div className="flex flex-wrap items-center gap-2 mt-8">
-        {WORKFLOW_SUGGESTIONS.map((suggestion) => (
+        {suggestions.map((suggestion) => (
           <button
             key={suggestion}
             type="button"
@@ -482,7 +562,7 @@ function GuidedModeContent({ onSubmit, isGenerating, error }: GuidedModeContentP
                     maxLength={2000}
                     value={field.value}
                     onChange={field.onChange}
-                    placeholder="When a user signs up, send a welcome email and an in-app tip. If they don't activate in 24h, send a reminder."
+                    placeholder={rotatingPlaceholder}
                     className="min-h-[100px] resize-none rounded-lg"
                   />
                 </FormControl>
