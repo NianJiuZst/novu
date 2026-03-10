@@ -1,11 +1,12 @@
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RiSparklingLine } from 'react-icons/ri';
 import { useTelemetry } from '../../hooks/use-telemetry';
 import { TelemetryEvent } from '../../utils/telemetry';
 import { CodeBlock, Language } from '../primitives/code-block';
 import { InlineToast } from '../primitives/inline-toast';
 import { Tabs, TabsList, TabsTrigger } from '../primitives/tabs';
+import { Textarea } from '../primitives/textarea';
 import { Framework, InstallationStep } from './framework-guides.instructions';
 
 type PackageManager = 'npm' | 'pnpm' | 'yarn';
@@ -201,11 +202,16 @@ function StepButton({
   frameworkName?: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const [promptText, setPromptText] = useState(copyText);
   const track = useTelemetry();
+
+  useEffect(() => {
+    setPromptText(copyText);
+  }, [copyText]);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(copyText);
+      await navigator.clipboard.writeText(promptText);
       setCopied(true);
       track(TelemetryEvent.AI_PROMPT_COPIED, { framework: frameworkName });
       setTimeout(() => setCopied(false), 2000);
@@ -217,8 +223,18 @@ function StepButton({
   return (
     <motion.div {...codeBlockAnimation(index)} className="w-full max-w-[500px]">
       <div className="flex flex-col gap-3">
+        <div className="rounded-xl border border-neutral-800/70 bg-[#0d1117] p-3">
+          <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-neutral-400">Quick start prompt</p>
+          <Textarea
+            simple
+            className="min-h-52 bg-[#161b22] text-neutral-100 ring-neutral-700 hover:bg-[#1a2230] focus:ring-neutral-500"
+            value={promptText}
+            onChange={(event) => setPromptText(event.target.value)}
+          />
+        </div>
         <button
           onClick={handleCopy}
+          disabled={!promptText.trim()}
           className="relative flex flex-row justify-center items-center gap-1 w-[126px] h-7 text-white font-medium text-xs leading-4"
           style={{
             boxSizing: 'border-box',
