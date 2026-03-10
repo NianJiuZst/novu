@@ -10,7 +10,7 @@ export const FRAMEWORK_EMPTY_STEP_RESOLVER_SCHEMA = {
   additionalProperties: false,
 } as const;
 
-const STEP_RESOLVER_RESERVED_CONTROL_KEYS = ['editorType', 'rendererType'] as const;
+const STEP_RESOLVER_RESERVED_CONTROL_KEYS = ['editorType', 'rendererType', 'layoutId'] as const;
 
 export const REACT_EMAIL_STEP_RESOLVER_DEFAULTS = {
   editorType: 'html',
@@ -26,6 +26,9 @@ export const STEP_RESOLVER_EMAIL_UI_SCHEMA: UiSchema = {
     rendererType: {
       component: UiComponentEnum.EMAIL_RENDERER_SELECT,
       placeholder: REACT_EMAIL_STEP_RESOLVER_DEFAULTS.rendererType,
+    },
+    layoutId: {
+      component: UiComponentEnum.LAYOUT_SELECT,
     },
   },
 };

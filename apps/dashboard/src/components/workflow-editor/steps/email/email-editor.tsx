@@ -75,7 +75,7 @@ export const EmailEditor = (props: EmailEditorProps) => {
             {isCodeEditor &&
               isStepResolverEnabled &&
               getComponentByType({ component: rendererTypeSchema?.component ?? UiComponentEnum.EMAIL_RENDERER_SELECT })}
-            {!isReactEmail && getComponentByType({ component: layoutId?.component ?? UiComponentEnum.LAYOUT_SELECT })}
+            {getComponentByType({ component: layoutId?.component ?? UiComponentEnum.LAYOUT_SELECT })}
             {showReactEmailHint && (
               <Tooltip>
                 <TooltipTrigger asChild>
