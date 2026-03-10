@@ -1,5 +1,4 @@
 import { ChatStatus, UIMessage } from 'ai';
-import { useMemo } from 'react';
 import { Conversation, ConversationContent, ConversationScrollButton } from '../ai-elements/conversation';
 import { Message } from '../ai-elements/message';
 import {
@@ -14,7 +13,6 @@ import { Broom } from '../icons/broom';
 import { BroomSparkle } from '../icons/broom-sparkle';
 import { Skeleton } from '../primitives/skeleton';
 import { AssistantMessage } from './assistant-message';
-import { hasKnownMessageParts } from './message-utils';
 import { UserMessage } from './user-message';
 
 export const ChatBodySkeleton = () => {
@@ -93,14 +91,7 @@ export const ChatBody = ({
   onRevertMessage: (messageId: string) => void;
 }) => {
   const hasLastUserMessage = messages.length === 0 || messages[messages.length - 1].role === 'user';
-  const lastMessage = messages[messages.length - 1];
-  const isLastAssistantMessage = lastMessage?.role === 'assistant';
-  const lastAssistantHasKnownToolCalls = useMemo(
-    () => isLastAssistantMessage && hasKnownMessageParts(lastMessage),
-    [lastMessage, isLastAssistantMessage]
-  );
-  const isGeneratingOrSubmitted =
-    (isGenerating && hasLastUserMessage) || (isGenerating && isLastAssistantMessage && !lastAssistantHasKnownToolCalls);
+  const shouldShowGeneratingIndicator = isGenerating && hasLastUserMessage;
   const isSubmitGuard = !inputText.trim() || isGenerating || isSubmitDisabled;
   const isSubmitButtonDisabled = (!inputText.trim() && !isGenerating) || isSubmitDisabled;
 
@@ -165,7 +156,7 @@ export const ChatBody = ({
 
               return null;
             })}
-            {isGeneratingOrSubmitted && !errorMessage && (
+            {shouldShowGeneratingIndicator && !errorMessage && (
               <Message from="assistant" className="flex flex-row items-center gap-1">
                 <Broom className="size-3" />
               </Message>
