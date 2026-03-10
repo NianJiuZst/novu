@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   ClientSession,
   ControlSchemas,
@@ -28,7 +28,7 @@ import { WorkflowResponseDto } from '../../dtos/workflow/workflow-response.dto';
 import { Instrument, InstrumentUsecase } from '../../instrumentation';
 import { EmailControlType } from '../../schemas/control';
 import { AnalyticsService } from '../../services';
-import { computeWorkflowStatus, removeBrandingFromHtml, shortId, stepTypeToControlSchema } from '../../utils';
+import { computeWorkflowStatus, removeBrandingFromHtml, stepTypeToControlSchema } from '../../utils';
 import { isStringifiedMailyJSONContent } from '../../utils/maily-utils';
 import { isStepResolverEmailStep, REACT_EMAIL_STEP_RESOLVER_DEFAULTS } from '../../utils/step-resolver-control-state';
 import { NotificationStep } from '../../value-objects';
@@ -234,10 +234,11 @@ export class UpsertWorkflowUseCase {
 
       const updateStepId = existingStep?.stepId;
       const syncToEnvironmentCreateStepId = step.stepId;
+      const stepsForIdGeneration = existingWorkflow ? [...existingWorkflow.steps, ...tempSteps] : tempSteps;
       const generatedStepId =
         updateStepId ||
         syncToEnvironmentCreateStepId ||
-        this.generateUniqueStepId(step, existingWorkflow ? existingWorkflow.steps : tempSteps);
+        this.generateUniqueStepId(step, stepsForIdGeneration);
 
       stepIds.push(generatedStepId);
       tempSteps.push({ stepId: generatedStepId } as NotificationStep);
@@ -298,36 +299,29 @@ export class UpsertWorkflowUseCase {
 
   @Instrument()
   private generateUniqueStepId(step: UpsertStepDataCommand, previousSteps: NotificationStep[]): string {
-    const slug = slugify(step.name);
+    const previousStepIds = new Set(
+      previousSteps.reduce<string[]>((acc, { stepId }) => {
+        if (stepId) {
+          acc.push(stepId);
+        }
 
-    let finalStepId = slug;
-    let attempts = 0;
-    const maxAttempts = 5;
+        return acc;
+      }, [])
+    );
+    const baseStepIdFromType = step.type.replace(/_/g, '');
+    const fallbackStepIdFromName = slugify(step.name).replace(/-/g, '');
+    const baseStepId = baseStepIdFromType || fallbackStepIdFromName || 'step';
 
-    const previousStepIds = previousSteps.reduce<string[]>((acc, { stepId }) => {
-      if (stepId) {
-        acc.push(stepId);
-      }
-
-      return acc;
-    }, []);
-
-    const isStepIdUnique = (stepId: string) => !previousStepIds.includes(stepId);
-
-    while (attempts < maxAttempts) {
-      if (isStepIdUnique(finalStepId)) {
-        break;
-      }
-
-      finalStepId = `${slug}-${shortId()}`;
-      attempts += 1;
+    if (!previousStepIds.has(baseStepId)) {
+      return baseStepId;
     }
 
-    if (attempts === maxAttempts && !isStepIdUnique(finalStepId)) {
-      throw new BadRequestException({
-        message: 'Failed to generate unique stepId',
-        stepId: finalStepId,
-      });
+    let suffix = 1;
+    let finalStepId = `${baseStepId}${suffix}`;
+
+    while (previousStepIds.has(finalStepId)) {
+      suffix += 1;
+      finalStepId = `${baseStepId}${suffix}`;
     }
 
     return finalStepId;

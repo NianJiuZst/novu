@@ -364,25 +364,36 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
       expect(updatedStep.id).to.be.equal(originalStep.id);
     });
 
-    it('should keep the step id on updated ', async () => {
+    it('should generate short readable stepIds and keep them unique when adding new steps', async () => {
       const nameSuffix = `Test Workflow${new Date().toISOString()}`;
       const workflowCreated: WorkflowResponseDto = await createWorkflowAndValidate(nameSuffix);
       expect(workflowCreated.steps.length).to.be.equal(2);
+      expect(workflowCreated.steps[0].stepId).to.equal('email');
+      expect(workflowCreated.steps[1].stepId).to.equal('inapp');
 
       // Verify that all step ids are unique
       const stepIds1 = workflowCreated.steps.map((step) => step.id);
       const uniqueStepIds1 = [...new Set(stepIds1)];
       expect(stepIds1.length).to.equal(uniqueStepIds1.length, 'All step ids should be unique on creation');
+      const stepIdentifiers1 = workflowCreated.steps.map((step) => step.stepId);
+      const uniqueStepIdentifiers1 = [...new Set(stepIdentifiers1)];
+      expect(stepIdentifiers1.length).to.equal(uniqueStepIdentifiers1.length, 'All step identifiers should be unique');
 
       // Add a step of an existing channel at the beginning of the steps array
       workflowCreated.steps = [buildInAppStep(), ...workflowCreated.steps] as any;
       const updatedWorkflow = await updateWorkflow(workflowCreated.id, mapResponseToUpdateDto(workflowCreated));
       expect(updatedWorkflow.steps.length).to.be.equal(3);
+      expect(updatedWorkflow.steps[0].stepId).to.equal('inapp1');
+      expect(updatedWorkflow.steps[1].stepId).to.equal('email');
+      expect(updatedWorkflow.steps[2].stepId).to.equal('inapp');
 
       // Verify that all step ids are unique
-      const stepIds2 = workflowCreated.steps.map((step) => step.id);
+      const stepIds2 = updatedWorkflow.steps.map((step) => step.id);
       const uniqueStepIds2 = [...new Set(stepIds2)];
       expect(stepIds2.length).to.equal(uniqueStepIds2.length, 'All step ids should be unique after update');
+      const stepIdentifiers2 = updatedWorkflow.steps.map((step) => step.stepId);
+      const uniqueStepIdentifiers2 = [...new Set(stepIdentifiers2)];
+      expect(stepIdentifiers2.length).to.equal(uniqueStepIdentifiers2.length, 'All step identifiers should be unique');
     });
 
     it('should update user preferences', async () => {
