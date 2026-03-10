@@ -86,16 +86,34 @@ export const useCanvasNodesEdges = ({
     steps: currentSteps,
   });
 
-  const updateEdges = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+  type UpdateEdgesOptions = {
+    immediate?: boolean;
+  };
 
-    timeoutRef.current = setTimeout(() => {
-      setEdges(createEdges(dataRef.current.nodes, dataRef.current.isTemplateStorePreview));
-      timeoutRef.current = null;
-    }, 150);
-  }, [dataRef, setEdges]);
+  const updateEdges = useCallback(
+    (nodes?: Node<NodeData, keyof typeof nodeTypes>[], options?: UpdateEdgesOptions) => {
+      const isImmediate = options?.immediate ?? false;
+      const nodesToUse = nodes ?? dataRef.current.nodes;
+
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      const applyEdgeUpdate = () => {
+        setEdges(createEdges(nodesToUse, dataRef.current.isTemplateStorePreview));
+        timeoutRef.current = null;
+      };
+
+      if (isImmediate) {
+        applyEdgeUpdate();
+
+        return;
+      }
+
+      timeoutRef.current = setTimeout(applyEdgeUpdate, 150);
+    },
+    [dataRef, setEdges]
+  );
 
   const removeEdges = useCallback(() => {
     setEdges([]);
@@ -293,8 +311,9 @@ export const useCanvasNodesEdges = ({
         {
           onSuccess: () => {
             const newNodes = [...dataRef.current.nodes].filter((node) => node.id !== nodeToRemove.id);
-            setNodes(recalculatePositionAndIndex(newNodes, dataRef.current.containerWidth));
-            updateEdges();
+            const recalculatedNodes = recalculatePositionAndIndex(newNodes, dataRef.current.containerWidth);
+            setNodes(recalculatedNodes);
+            updateEdges(recalculatedNodes, { immediate: true });
             options?.onSuccess?.();
 
             // navigate to the workflow editor
@@ -311,7 +330,9 @@ export const useCanvasNodesEdges = ({
           onError: () => {
             showErrorToast('Failed to remove node');
             options?.onError?.();
-            setNodes(recalculatePositionAndIndex(oldNodes, dataRef.current.containerWidth));
+            const restoredNodes = recalculatePositionAndIndex(oldNodes, dataRef.current.containerWidth);
+            setNodes(restoredNodes);
+            updateEdges(restoredNodes, { immediate: true });
           },
         }
       );
@@ -356,7 +377,7 @@ export const useCanvasNodesEdges = ({
             );
 
             setNodes(finalNodes);
-            updateEdges();
+            updateEdges(finalNodes, { immediate: true });
             const reactFlowInstance = dataRef.current.reactFlowInstance;
             // force updating the ids to regenerate the edges
             for (const node of finalNodes) {
@@ -369,8 +390,9 @@ export const useCanvasNodesEdges = ({
           onError: () => {
             showErrorToast('Failed to reorder nodes');
             options?.onError?.();
-            setNodes(recalculatePositionAndIndex(oldNodes, dataRef.current.containerWidth));
-            updateEdges();
+            const restoredNodes = recalculatePositionAndIndex(oldNodes, dataRef.current.containerWidth);
+            setNodes(restoredNodes);
+            updateEdges(restoredNodes, { immediate: true });
           },
         }
       );
@@ -671,8 +693,9 @@ export const useCanvasNodesEdges = ({
       if (step && finalSelectedNode) {
         setSelectedNodeId(finalSelectedNode.id);
       }
-      setNodes(recalculatePositionAndIndex(finalNodes, dataRef.current.containerWidth));
-      updateEdges();
+      const recalculatedNodes = recalculatePositionAndIndex(finalNodes, dataRef.current.containerWidth);
+      setNodes(recalculatedNodes);
+      updateEdges(recalculatedNodes, { immediate: true });
     }, 0);
 
     return () => {
