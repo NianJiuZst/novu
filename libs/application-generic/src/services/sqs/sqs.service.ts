@@ -19,7 +19,10 @@ export class SqsService {
     if (hasConfiguredQueues) {
       this.initializeClient();
       this.initializeProducers();
-      Logger.log({ message: 'SQS service initialized', configuredTopics: Array.from(this.producers.keys()) }, LOG_CONTEXT);
+      Logger.log(
+        { message: 'SQS service initialized', configuredTopics: Array.from(this.producers.keys()) },
+        LOG_CONTEXT
+      );
     } else {
       this.producers = new Map();
       Logger.log('SQS service initialized with no queues configured', LOG_CONTEXT);

@@ -1,10 +1,14 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
 import {
   FeatureFlagsService,
   GetWorkflowByIdsCommand,
   GetWorkflowByIdsUseCase,
+  getStepResolverControlSchema,
   InstrumentUsecase,
   PinoLogger,
+  REACT_EMAIL_STEP_RESOLVER_DEFAULTS,
+  reconcileStepResolverControlValues,
+  STEP_RESOLVER_EMAIL_UI_SCHEMA,
 } from '@novu/application-generic';
 import { ClientSession, ControlValuesEntity, ControlValuesRepository, MessageTemplateRepository } from '@novu/dal';
 import { ControlValuesLevelEnum, FeatureFlagsKeysEnum } from '@novu/shared';
@@ -12,12 +16,6 @@ import { createHash } from 'crypto';
 import { DeployStepResolverResponseDto } from '../../dtos';
 import { CloudflareStepResolverDeployService } from '../../services/cloudflare-step-resolver-deploy.service';
 import { generateStepResolverWorkerId } from '../../utils/generate-step-resolver-worker-id';
-import {
-  getStepResolverControlSchema,
-  REACT_EMAIL_STEP_RESOLVER_DEFAULTS,
-  reconcileStepResolverControlValues,
-  STEP_RESOLVER_EMAIL_UI_SCHEMA,
-} from '../../utils/step-resolver-control-state';
 import { DeployStepResolverCommand, DeployStepResolverManifestStepCommand } from './deploy-step-resolver.command';
 
 const MAX_BUNDLE_SIZE_BYTES = 10 * 1024 * 1024;
@@ -62,6 +60,9 @@ export class DeployStepResolverUsecase {
     this.assertBundleSize(command.bundleBuffer);
 
     const resolvedManifestSteps = await this.resolveManifestSteps(command, command.manifestSteps);
+
+    this.assertNoRendererConflicts(resolvedManifestSteps);
+
     const stepResolverHash = this.generateStepResolverHash(command.bundleBuffer);
     const workerId = generateStepResolverWorkerId(command.user.organizationId, stepResolverHash);
 
@@ -268,6 +269,25 @@ export class DeployStepResolverUsecase {
     }
 
     return output;
+  }
+
+  private assertNoRendererConflicts(resolvedSteps: ResolvedManifestStep[]): void {
+    const conflictingSteps = resolvedSteps.filter((step) => {
+      if (!step.existingControlValues) return false;
+
+      const controls = step.existingControlValues.controls;
+      if (!isPlainObject(controls)) return true;
+
+      return controls.rendererType !== 'react-email';
+    });
+
+    if (conflictingSteps.length === 0) return;
+
+    throw new ConflictException({
+      message: `Publishing blocked: ${conflictingSteps.length} step(s) are not using React Email. To protect existing email content from being overwritten, switch each affected step to React Email in the Novu dashboard before publishing.`,
+      errorCode: 'STEP_RENDERER_CONFLICT',
+      conflictingSteps: conflictingSteps.map((s) => ({ workflowId: s.workflowId, stepId: s.stepId })),
+    });
   }
 
   private assertBundleSize(bundleBuffer: Buffer): void {
