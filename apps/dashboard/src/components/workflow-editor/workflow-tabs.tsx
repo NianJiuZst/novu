@@ -7,7 +7,14 @@ import {
   ResourceOriginEnum,
 } from '@novu/shared';
 import { useCallback, useMemo, useState } from 'react';
-import { RiArrowDownSLine, RiCodeSSlashLine, RiFileCopyLine, RiPlayCircleLine } from 'react-icons/ri';
+import {
+  RiArrowDownSLine,
+  RiCodeSSlashLine,
+  RiFileCopyLine,
+  RiPlayCircleLine,
+  RiSidebarFoldLine,
+  RiSidebarUnfoldLine,
+} from 'react-icons/ri';
 import { Link, useMatch, useNavigate, useParams } from 'react-router-dom';
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 
@@ -48,6 +55,7 @@ export const WorkflowTabs = () => {
   const activityMatch = useMatch(ROUTES.EDIT_WORKFLOW_ACTIVITY);
   const [isIntegrateDrawerOpen, setIsIntegrateDrawerOpen] = useState(false);
   const [isTriggerDrawerOpen, setIsTriggerDrawerOpen] = useState(false);
+  const [isCopilotPanelVisible, setIsCopilotPanelVisible] = useState(true);
   const { workflowSlug = '' } = useParams<{ workflowSlug?: string; stepSlug?: string }>();
   const { testData } = useFetchWorkflowTestData({ workflowSlug });
   const isNewWorkflowSlug = workflowSlug === 'new';
@@ -409,6 +417,17 @@ export const WorkflowTabs = () => {
             )}
           </TabsTrigger>
           <div className="my-auto ml-auto flex items-center gap-2">
+            {isAiWorkflowGenerationEnabled && isDevEnvironment && (
+              <Button
+                variant="secondary"
+                size="2xs"
+                mode="ghost"
+                leadingIcon={isCopilotPanelVisible ? RiSidebarFoldLine : RiSidebarUnfoldLine}
+                onClick={() => setIsCopilotPanelVisible((isVisible) => !isVisible)}
+              >
+                {isCopilotPanelVisible ? 'Hide Copilot' : 'Show Copilot'}
+              </Button>
+            )}
             <Protect permission={PermissionsEnum.EVENT_WRITE}>
               <Button
                 variant="secondary"
@@ -464,18 +483,25 @@ export const WorkflowTabs = () => {
         </TabsList>
         <TabsContent value="workflow" className="flex mt-0 h-full max-w-full overflow-hidden">
           {isAiWorkflowGenerationEnabled && isDevEnvironment ? (
-            <ResizableLayout autoSaveId="workflow-editor-ai-sidekick-layout" className="flex-1 min-w-0">
-              <ResizableLayout.ContextPanel defaultSize={26} minSize={20} maxSize={80}>
-                <NovuCopilotPanel />
-              </ResizableLayout.ContextPanel>
-              <ResizableLayout.Handle />
-              <ResizableLayout.MainContentPanel>
-                <div className="relative flex-1">
-                  <WorkflowCanvas isReadOnly={isReadOnly} steps={workflow?.steps || []} />
-                  <WorkflowCanvasToast />
-                </div>
-              </ResizableLayout.MainContentPanel>
-            </ResizableLayout>
+            isCopilotPanelVisible ? (
+              <ResizableLayout autoSaveId="workflow-editor-ai-sidekick-layout" className="flex-1 min-w-0">
+                <ResizableLayout.ContextPanel defaultSize={26} minSize={20} maxSize={80}>
+                  <NovuCopilotPanel />
+                </ResizableLayout.ContextPanel>
+                <ResizableLayout.Handle />
+                <ResizableLayout.MainContentPanel>
+                  <div className="relative flex-1">
+                    <WorkflowCanvas isReadOnly={isReadOnly} steps={workflow?.steps || []} />
+                    <WorkflowCanvasToast />
+                  </div>
+                </ResizableLayout.MainContentPanel>
+              </ResizableLayout>
+            ) : (
+              <div className="relative flex-1">
+                <WorkflowCanvas isReadOnly={isReadOnly} steps={workflow?.steps || []} />
+                <WorkflowCanvasToast />
+              </div>
+            )
           ) : (
             <div className="relative flex-1">
               <WorkflowCanvas isReadOnly={isReadOnly} steps={workflow?.steps || []} />
@@ -494,11 +520,7 @@ export const WorkflowTabs = () => {
         to={subscriberData}
         payload={JSON.stringify(integrationPayload, null, 2)}
       />
-      <TestWorkflowDrawer
-        isOpen={isTriggerDrawerOpen}
-        onOpenChange={setIsTriggerDrawerOpen}
-        testData={testData}
-      />
+      <TestWorkflowDrawer isOpen={isTriggerDrawerOpen} onOpenChange={setIsTriggerDrawerOpen} testData={testData} />
     </div>
   );
 
