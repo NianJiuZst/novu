@@ -42,7 +42,7 @@ export async function authenticateJWT(context: Context, next: Next) {
     const userId = userPayload._id;
     const subscriberId = userPayload.subscriberId || userId;
     const { organizationId, environmentId } = userPayload;
-    const contextKeys = userPayload.contextKeys;
+    const contextKeys = userPayload.contextKeys ?? [];
 
     if (!userId || !subscriberId || !organizationId || !environmentId) {
       return context.json({ error: 'Unauthorized: Missing required user information in JWT' }, 401);

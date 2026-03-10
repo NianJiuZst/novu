@@ -260,7 +260,7 @@ export class WebSocketRoom extends DurableObject<IEnv> {
       environmentId,
       connectedAt: attachment.connectedAt || Date.now(),
       jwtToken: attachment.jwtToken,
-      contextKeys: attachment.contextKeys,
+      contextKeys: attachment.contextKeys ?? [],
     };
   }
 
