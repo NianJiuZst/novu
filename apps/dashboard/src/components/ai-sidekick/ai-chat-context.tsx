@@ -325,14 +325,13 @@ export function AiChatProvider({ children, config }: { children: React.ReactNode
     if (!pendingRevertAction) return;
 
     const { type, messageId } = pendingRevertAction;
+    setPendingRevertAction(null);
 
     if (type === 'tryAgain') {
       await executeTryAgain(messageId);
     } else {
       await executeRevertMessage(messageId);
     }
-
-    setPendingRevertAction(null);
   }, [pendingRevertAction, executeTryAgain, executeRevertMessage]);
 
   const handleFirstMessageRevertConfirm = useCallback(async () => {
