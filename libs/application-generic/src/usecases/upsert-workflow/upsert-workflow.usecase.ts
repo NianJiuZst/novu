@@ -308,9 +308,7 @@ export class UpsertWorkflowUseCase {
         return acc;
       }, [])
     );
-    const baseStepIdFromType = step.type.replace(/_/g, '');
-    const fallbackStepIdFromName = slugify(step.name).replace(/-/g, '');
-    const baseStepId = baseStepIdFromType || fallbackStepIdFromName || 'step';
+    const baseStepId = step.type.replace(/_/g, '') || 'step';
 
     if (!previousStepIds.has(baseStepId)) {
       return baseStepId;

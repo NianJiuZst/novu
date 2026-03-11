@@ -746,7 +746,7 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
       // Verify new created step
       expect(prodWorkflowUpdated.steps[1].name).to.equal('New InApp Step');
       expect(prodWorkflowUpdated.steps[1].id).to.not.equal(prodWorkflowCreated.steps[1].id);
-      expect(prodWorkflowUpdated.steps[1].stepId).to.equal('new-in-app-step');
+      expect(prodWorkflowUpdated.steps[1].stepId).to.equal('inapp1');
       expect(prodWorkflowUpdated.steps[1].controls.values).to.deep.equal({
         body: 'Example body',
         disableOutputSanitization: false,

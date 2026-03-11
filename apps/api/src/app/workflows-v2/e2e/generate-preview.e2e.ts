@@ -1021,13 +1021,13 @@ describe('Workflow Step Preview - POST /:workflowId/step/:stepId/preview #novu-v
 
     // Validate digest step structure without hardcoded timestamps
     expect(actualPayload.steps).to.exist;
-    expect(actualPayload.steps).to.have.property('digest-step');
-    expect(actualPayload.steps!['digest-step']).to.have.property('eventCount', 3);
-    expect(actualPayload.steps!['digest-step']).to.have.property('events');
-    expect(actualPayload.steps!['digest-step'].events).to.have.length(3);
+    expect(actualPayload.steps).to.have.property('digest');
+    expect(actualPayload.steps!['digest']).to.have.property('eventCount', 3);
+    expect(actualPayload.steps!['digest']).to.have.property('events');
+    expect(actualPayload.steps!['digest'].events).to.have.length(3);
 
     // Validate each event has the required structure without checking exact timestamps
-    actualPayload.steps!['digest-step'].events.forEach((event, index) => {
+    actualPayload.steps!['digest'].events.forEach((event, index) => {
       expect(event).to.have.property('id', `example-id-${index + 1}`);
       expect(event).to.have.property('time').that.is.a('string');
       expect(event)
@@ -1582,7 +1582,7 @@ describe('Workflow Step Preview - POST /:workflowId/step/:stepId/preview #novu-v
 
       // testing the default preview payload is generated when no user payload is provided
       const controlValues1 = {
-        body: '{"type":"doc","content":[{"type":"paragraph","attrs":{"textAlign":null,"showIfKey":null},"content":[{"type":"text","text":"events length "},{"type":"variable","attrs":{"id":"steps.digest-step.events.length","label":null,"fallback":null,"required":false,"aliasFor":null}},{"type":"text","text":" "}]},{"type":"paragraph","attrs":{"textAlign":null,"showIfKey":null},"content":[{"type":"text","text":" "}]}]}',
+        body: '{"type":"doc","content":[{"type":"paragraph","attrs":{"textAlign":null,"showIfKey":null},"content":[{"type":"text","text":"events length "},{"type":"variable","attrs":{"id":"steps.digest.events.length","label":null,"fallback":null,"required":false,"aliasFor":null}},{"type":"text","text":" "}]},{"type":"paragraph","attrs":{"textAlign":null,"showIfKey":null},"content":[{"type":"text","text":" "}]}]}',
         subject: 'events length',
       };
       const previewResponse1 = await novuClient.workflows.steps.generatePreview({
@@ -1591,7 +1591,7 @@ describe('Workflow Step Preview - POST /:workflowId/step/:stepId/preview #novu-v
         workflowId,
       });
 
-      validateDigestEventsInMergeTest(previewResponse1.result.previewPayloadExample.steps?.['digest-step'].events, {
+      validateDigestEventsInMergeTest(previewResponse1.result.previewPayloadExample.steps?.['digest'].events, {
         third: 'example text',
         name: 'John Doe',
         items: [
