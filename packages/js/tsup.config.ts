@@ -58,6 +58,7 @@ const baseModuleConfig: Options = {
   ...baseConfig,
   treeshake: true,
   dts: true,
+  noExternal: ['solid-motionone', '@kobalte/core'],
   entry: {
     index: './src/index.ts',
     'ui/index': './src/ui/index.ts',
