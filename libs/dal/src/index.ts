@@ -8,6 +8,7 @@ export * from './repositories/channel-endpoint';
 export * from './repositories/context';
 export * from './repositories/control-values';
 export * from './repositories/environment';
+export * from './repositories/environment-variable';
 export * from './repositories/execution-details';
 export * from './repositories/feed';
 export * from './repositories/integration';
