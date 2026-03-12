@@ -3,79 +3,119 @@
 exports[`generateStepFile > should match snapshot 1`] = `
 "import { step } from '@novu/framework/step-resolver';
 import { render } from '@react-email/components';
+import { z } from 'zod';
 import EmailTemplate from '../emails/welcome';
 
-export default step.email('welcome-email', async (controls, { payload, subscriber, context, steps }) => ({
-  subject: controls.subject ?? payload.subject ?? 'No Subject',
-  body: await render(
-    <EmailTemplate
-      {...payload}
-      subscriber={subscriber}
-      context={context}
-      steps={steps}
-      controls={controls}
-    />
-  ),
-}));
+// Controls are editable in the Novu dashboard by non-technical users.
+// Add more fields here to make your email content dynamic.
+// Docs: https://docs.novu.co/framework/controls
+const controlSchema = z.object({
+  subject: z.string().default('Welcome Email'),
+});
+
+export default step.email(
+  'welcome-email',
+  async (controls, { payload, subscriber }) => ({
+    subject: controls.subject,
+    body: await render(
+      <EmailTemplate
+        {...controls}
+        {...payload}
+        subscriber={subscriber}
+      />
+    ),
+  }),
+  { controlSchema }
+);
 "
 `;
 
 exports[`generateStepFile > should match snapshot with different import paths > nested-import 1`] = `
 "import { step } from '@novu/framework/step-resolver';
 import { render } from '@react-email/components';
+import { z } from 'zod';
 import EmailTemplate from '../../src/emails/welcome';
 
-export default step.email('welcome-email', async (controls, { payload, subscriber, context, steps }) => ({
-  subject: controls.subject ?? payload.subject ?? 'No Subject',
-  body: await render(
-    <EmailTemplate
-      {...payload}
-      subscriber={subscriber}
-      context={context}
-      steps={steps}
-      controls={controls}
-    />
-  ),
-}));
+// Controls are editable in the Novu dashboard by non-technical users.
+// Add more fields here to make your email content dynamic.
+// Docs: https://docs.novu.co/framework/controls
+const controlSchema = z.object({
+  subject: z.string().default('Welcome Email'),
+});
+
+export default step.email(
+  'welcome-email',
+  async (controls, { payload, subscriber }) => ({
+    subject: controls.subject,
+    body: await render(
+      <EmailTemplate
+        {...controls}
+        {...payload}
+        subscriber={subscriber}
+      />
+    ),
+  }),
+  { controlSchema }
+);
 "
 `;
 
 exports[`generateStepFile > should match snapshot with different import paths > relative-import 1`] = `
 "import { step } from '@novu/framework/step-resolver';
 import { render } from '@react-email/components';
+import { z } from 'zod';
 import EmailTemplate from './emails/welcome';
 
-export default step.email('welcome-email', async (controls, { payload, subscriber, context, steps }) => ({
-  subject: controls.subject ?? payload.subject ?? 'No Subject',
-  body: await render(
-    <EmailTemplate
-      {...payload}
-      subscriber={subscriber}
-      context={context}
-      steps={steps}
-      controls={controls}
-    />
-  ),
-}));
+// Controls are editable in the Novu dashboard by non-technical users.
+// Add more fields here to make your email content dynamic.
+// Docs: https://docs.novu.co/framework/controls
+const controlSchema = z.object({
+  subject: z.string().default('Welcome Email'),
+});
+
+export default step.email(
+  'welcome-email',
+  async (controls, { payload, subscriber }) => ({
+    subject: controls.subject,
+    body: await render(
+      <EmailTemplate
+        {...controls}
+        {...payload}
+        subscriber={subscriber}
+      />
+    ),
+  }),
+  { controlSchema }
+);
 "
 `;
 
 exports[`generateStepFile > should match snapshot with subject > with-subject 1`] = `
 "import { step } from '@novu/framework/step-resolver';
 import { render } from '@react-email/components';
+import { z } from 'zod';
 import EmailTemplate from '../emails/welcome';
 
-export default step.email('welcome-email', async (controls, { payload, subscriber, context, steps }) => ({
-  subject: controls.subject ?? payload.subject ?? 'Welcome to Acme!',
-  body: await render(
-    <EmailTemplate
-      {...payload}
-      subscriber={subscriber}
-      context={context}
-      steps={steps}
-      controls={controls}
-    />
-  ),
-}));
+// Controls are editable in the Novu dashboard by non-technical users.
+// Add more fields here to make your email content dynamic.
+// Docs: https://docs.novu.co/framework/controls
+const controlSchema = z.object({
+  subject: z.string().default('Welcome to Acme!'),
+});
+
+export default step.email(
+  'welcome-email',
+  async (controls, { payload, subscriber }) => ({
+    subject: controls.subject,
+    body: await render(
+      <EmailTemplate
+        {...controls}
+        {...payload}
+        subscriber={subscriber}
+      />
+    ),
+  }),
+  { controlSchema }
+);
 "
 `;

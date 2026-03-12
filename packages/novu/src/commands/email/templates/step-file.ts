@@ -13,24 +13,40 @@ function escapeString(value: string): string {
     .replace(/\u2029/g, '\\u2029');
 }
 
+function humanizeStepId(stepId: string): string {
+  return stepId
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export function generateStepFile(stepId: string, templateImportPath: string, emailConfig: EmailStepConfig): string {
-  const defaultSubject = emailConfig.subject || 'No Subject';
+  const defaultSubject = emailConfig.subject || humanizeStepId(stepId);
 
   return `import { step } from '@novu/framework/step-resolver';
 import { render } from '@react-email/components';
+import { z } from 'zod';
 import EmailTemplate from '${escapeString(templateImportPath)}';
 
-export default step.email('${escapeString(stepId)}', async (controls, { payload, subscriber, context, steps }) => ({
-  subject: controls.subject ?? payload.subject ?? '${escapeString(defaultSubject)}',
-  body: await render(
-    <EmailTemplate
-      {...payload}
-      subscriber={subscriber}
-      context={context}
-      steps={steps}
-      controls={controls}
-    />
-  ),
-}));
+// Controls are editable in the Novu dashboard by non-technical users.
+// Add more fields here to make your email content dynamic.
+// Docs: https://docs.novu.co/framework/controls
+const controlSchema = z.object({
+  subject: z.string().default('${escapeString(defaultSubject)}'),
+});
+
+export default step.email(
+  '${escapeString(stepId)}',
+  async (controls, { payload, subscriber }) => ({
+    subject: controls.subject,
+    body: await render(
+      <EmailTemplate
+        {...controls}
+        {...payload}
+        subscriber={subscriber}
+      />
+    ),
+  }),
+  { controlSchema }
+);
 `;
 }
