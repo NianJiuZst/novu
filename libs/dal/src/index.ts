@@ -1,6 +1,7 @@
 export * from './dal.service';
 export * from './repositories/ai-chat';
 export * from './repositories/base-repository';
+export * from './repositories/base-repository-v2';
 export * from './repositories/change';
 export * from './repositories/channel-connection';
 export * from './repositories/channel-endpoint';
@@ -22,6 +23,7 @@ export * from './repositories/notification-group';
 export * from './repositories/notification-template';
 export * from './repositories/organization';
 export * from './repositories/preferences';
+export * from './repositories/projection.types';
 export * from './repositories/schema-default.options';
 export * from './repositories/snapshot';
 export * from './repositories/subscriber';
