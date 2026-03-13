@@ -790,7 +790,8 @@
     "Vitest",
     "signoz",
     "sanitised",
-    "serialises"
+    "serialises",
+    "customerio"
   ],
   "flagWords": [],
   "patterns": [
