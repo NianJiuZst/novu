@@ -4,6 +4,7 @@ import type { DiscoveredStep } from '../types';
 export function generateWorkerWrapper(steps: DiscoveredStep[], rootDir: string): string {
   return [
     generateImports(steps, rootDir),
+    generateValidatorPrecompilation(steps),
     generateStepHandlersMap(steps),
     generateWorkerUtilities(),
     generateFetchHandler(),
@@ -15,7 +16,25 @@ function generateImports(steps: DiscoveredStep[], rootDir: string): string {
     .map((s, i) => `import stepHandler${i} from ${JSON.stringify(getImportPath(s.filePath, rootDir))};`)
     .join('\n');
 
-  return `import { validateData } from '@novu/framework/validators';\n${stepImports}`;
+  return `import { validateData } from '@novu/framework/validators';
+import { channelStepSchemas } from '@novu/framework/step-resolver';\n${stepImports}`;
+}
+
+function generateValidatorPrecompilation(steps: DiscoveredStep[]): string {
+  const handlerRefs = steps.map((_, i) => `stepHandler${i}`).join(', ');
+
+  return `// Pre-compile all JSON Schema validators during the startup phase.
+// Cloudflare Workers allow new Function() (used by AJV) during startup but not during request handling.
+// JsonSchemaValidator caches compiled validators by schema object reference, so these pre-compiled
+// validators are reused on every request without triggering new Function() again.
+await Promise.all([
+  ...Object.values(channelStepSchemas).map(({ output }) =>
+    validateData(output, {})
+  ),
+  ...[${handlerRefs}].flatMap(handler =>
+    handler.controlSchema ? [validateData(handler.controlSchema, {})] : []
+  ),
+]);`;
 }
 
 function generateStepHandlersMap(steps: DiscoveredStep[]): string {
@@ -88,8 +107,10 @@ function generateRequestHandler(): string {
 
       const result = await step.resolve(validatedControls, { payload, subscriber, context, steps: stepOutputs });
 
+      ${generateOutputValidation()}
+
       return jsonResponse(
-        { stepId: step.stepId, workflowId: workflowId, subject: result.subject, body: result.body },
+        { stepId: step.stepId, workflowId: workflowId, ...validatedResult },
         200
       );`;
 }
@@ -121,6 +142,21 @@ function generateBodyValidation(): string {
           { error: 'Invalid request body', message: 'payload, subscriber, context, steps, and controls must be JSON objects' },
           400
         );
+      }`;
+}
+
+function generateOutputValidation(): string {
+  return `const outputSchema = channelStepSchemas[step.type]?.output;
+      let validatedResult = result;
+      if (outputSchema) {
+        const outputResult = await validateData(outputSchema, result);
+        if (!outputResult.success) {
+          return jsonResponse(
+            { error: 'INVALID_OUTPUT', message: 'Step output failed schema validation', details: outputResult.errors },
+            400
+          );
+        }
+        validatedResult = outputResult.data ?? result;
       }`;
 }
 
