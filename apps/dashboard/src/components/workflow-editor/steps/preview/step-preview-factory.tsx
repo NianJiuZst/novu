@@ -3,12 +3,12 @@ import { memo } from 'react';
 import { InlineToast } from '@/components/primitives/inline-toast';
 import { ChatPreview } from '@/components/workflow-editor/steps/chat/chat-preview';
 import { useStepEditor } from '@/components/workflow-editor/steps/context/step-editor-context';
+import { HttpRequestConsolePreview } from '@/components/workflow-editor/steps/http-request/http-request-console-preview';
 import { InboxPreview } from '@/components/workflow-editor/steps/in-app/inbox-preview';
 import { PushPreview } from '@/components/workflow-editor/steps/push/push-preview';
 import { SmsPreview } from '@/components/workflow-editor/steps/sms/sms-preview';
 import { STEP_TYPE_LABELS } from '@/utils/constants';
 import { EmailCorePreview } from './previews/email-preview-wrapper';
-import { ReactEmailPreviewPlaceholder } from './previews/react-email-preview-placeholder';
 
 const NoPreviewAvailable = memo(({ stepType }: { stepType: StepTypeEnum }) => {
   return (
@@ -42,13 +42,6 @@ export function StepPreviewFactory() {
 
   switch (step.type) {
     case StepTypeEnum.EMAIL: {
-      const isReactEmailUnpublished =
-        controlValues?.rendererType === 'react-email' && controlValues?.editorType === 'html' && !step.stepResolverHash;
-
-      if (isReactEmailUnpublished) {
-        return <ReactEmailPreviewPlaceholder />;
-      }
-
       return (
         <EmailCorePreview
           {...commonProps}
@@ -78,6 +71,9 @@ export function StepPreviewFactory() {
 
     case StepTypeEnum.CHAT:
       return <ChatPreview {...commonProps} />;
+
+    case StepTypeEnum.HTTP_REQUEST:
+      return <HttpRequestConsolePreview />;
 
     default:
       return <NoPreviewAvailable stepType={step.type} />;
