@@ -1,5 +1,5 @@
 import { BadRequestException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { AnalyticsService, FeatureFlagsService, SendWebhookMessage, UpsertPreferences } from '@novu/application-generic';
+import { AnalyticsService, FeatureFlagsService, SendWebhookMessage } from '@novu/application-generic';
 import {
   ContextRepository,
   EnvironmentRepository,
@@ -93,7 +93,6 @@ describe('BulkUpdatePreferences', () => {
   let contextRepositoryMock: sinon.SinonStubbedInstance<ContextRepository>;
   let featureFlagsServiceMock: sinon.SinonStubbedInstance<FeatureFlagsService>;
   let preferencesRepositoryMock: sinon.SinonStubbedInstance<PreferencesRepository>;
-  let upsertPreferencesMock: sinon.SinonStubbedInstance<UpsertPreferences>;
   let sendWebhookMessageMock: sinon.SinonStubbedInstance<SendWebhookMessage>;
 
   beforeEach(() => {
@@ -105,7 +104,6 @@ describe('BulkUpdatePreferences', () => {
     contextRepositoryMock = sinon.createStubInstance(ContextRepository);
     featureFlagsServiceMock = sinon.createStubInstance(FeatureFlagsService);
     preferencesRepositoryMock = sinon.createStubInstance(PreferencesRepository);
-    upsertPreferencesMock = sinon.createStubInstance(UpsertPreferences);
     sendWebhookMessageMock = sinon.createStubInstance(SendWebhookMessage);
 
     bulkUpdatePreferences = new BulkUpdatePreferences(
@@ -117,7 +115,6 @@ describe('BulkUpdatePreferences', () => {
       contextRepositoryMock as any,
       featureFlagsServiceMock as any,
       preferencesRepositoryMock as any,
-      upsertPreferencesMock as any,
       sendWebhookMessageMock as any
     );
   });

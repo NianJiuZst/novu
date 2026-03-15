@@ -10,7 +10,6 @@ import {
   MergePreferencesCommand,
   overridePreferences,
   SendWebhookMessage,
-  UpsertPreferences,
 } from '@novu/application-generic';
 import {
   BaseRepository,
@@ -57,7 +56,6 @@ export class BulkUpdatePreferences {
     private contextRepository: ContextRepository,
     private featureFlagsService: FeatureFlagsService,
     private preferencesRepository: PreferencesRepository,
-    private upsertPreferences: UpsertPreferences,
     private sendWebhookMessage: SendWebhookMessage
   ) {}
 
@@ -247,7 +245,6 @@ export class BulkUpdatePreferences {
       }
     }
 
-    const isContextScoped = true;
     const bulkOps: Array<{
       updateOne: {
         filter: Record<string, unknown>;
@@ -308,7 +305,7 @@ export class BulkUpdatePreferences {
                 _subscriberId: subscriber._id,
                 _templateId: workflowId,
                 type: PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
-                ...(useContextFiltering && isContextScoped ? { contextKeys: contextKeys ?? [] } : {}),
+                ...(useContextFiltering ? { contextKeys: contextKeys ?? [] } : {}),
               },
               $set: {
                 preferences: newPreferences,
