@@ -1,6 +1,43 @@
 import { TranslationResponseDto } from '@novu/api/models/components';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+function escapeControlCharsInJsonStrings(raw: string): string {
+  let result = '';
+  let inString = false;
+
+  for (let i = 0; i < raw.length; i++) {
+    const char = raw[i];
+
+    if (inString) {
+      if (char === '\\') {
+        result += char;
+        i++;
+        if (i < raw.length) {
+          result += raw[i];
+        }
+      } else if (char === '"') {
+        result += char;
+        inString = false;
+      } else if (char === '\n') {
+        result += '\\n';
+      } else if (char === '\r') {
+        result += '\\r';
+      } else if (char === '\t') {
+        result += '\\t';
+      } else {
+        result += char;
+      }
+    } else {
+      if (char === '"') {
+        inString = true;
+      }
+      result += char;
+    }
+  }
+
+  return result;
+}
+
 export function useTranslationEditor(selectedTranslation: TranslationResponseDto | undefined) {
   const [modifiedContentString, setModifiedContentString] = useState<string | null>(null);
   const [modifiedContent, setModifiedContent] = useState<Record<string, any> | null>(null);
@@ -17,16 +54,20 @@ export function useTranslationEditor(selectedTranslation: TranslationResponseDto
   }, [selectedTranslation?.locale]);
 
   const handleContentChange = useCallback((newContentString: string) => {
-    // Store the raw string content without any reformatting
     setModifiedContentString(newContentString);
 
     try {
-      // Only parse for validation, don't modify the content
       setModifiedContent(JSON.parse(newContentString));
       setJsonError(null);
-    } catch (error) {
-      setModifiedContent(null);
-      setJsonError(error instanceof Error ? error.message : 'Invalid JSON format');
+    } catch {
+      try {
+        const sanitized = escapeControlCharsInJsonStrings(newContentString);
+        setModifiedContent(JSON.parse(sanitized));
+        setJsonError(null);
+      } catch (innerError) {
+        setModifiedContent(null);
+        setJsonError(innerError instanceof Error ? innerError.message : 'Invalid JSON format');
+      }
     }
   }, []);
 
