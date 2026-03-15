@@ -1,16 +1,44 @@
 import { BadRequestException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { AnalyticsService, FeatureFlagsService, InstrumentUsecase } from '@novu/application-generic';
+import {
+  AnalyticsService,
+  deepMerge,
+  FeatureFlagsService,
+  filteredPreference,
+  GetPreferences,
+  InstrumentUsecase,
+  MergePreferences,
+  MergePreferencesCommand,
+  overridePreferences,
+  SendWebhookMessage,
+  UpsertPreferences,
+} from '@novu/application-generic';
 import {
   BaseRepository,
   ContextRepository,
+  EnvironmentEntity,
   EnvironmentRepository,
   NotificationTemplateEntity,
   NotificationTemplateRepository,
+  PreferencesEntity,
+  PreferencesRepository,
+  SubscriberEntity,
   SubscriberRepository,
 } from '@novu/dal';
-import { ContextPayload, FeatureFlagsKeysEnum, PreferenceLevelEnum } from '@novu/shared';
+import {
+  ContextPayload,
+  FeatureFlagsKeysEnum,
+  IPreferenceChannels,
+  PreferenceLevelEnum,
+  PreferencesTypeEnum,
+  SeverityLevelEnum,
+  StepTypeEnum,
+  WebhookEventEnum,
+  WebhookObjectTypeEnum,
+  WorkflowPreferences,
+  WorkflowPreferencesPartial,
+  buildWorkflowPreferences,
+} from '@novu/shared';
 import { BulkUpdatePreferenceItemDto } from '../../dtos/bulk-update-preferences-request.dto';
-import { AnalyticsEventsEnum } from '../../utils';
 import { InboxPreference } from '../../utils/types';
 import { UpdatePreferencesCommand } from '../update-preferences/update-preferences.command';
 import { UpdatePreferences } from '../update-preferences/update-preferences.usecase';
@@ -27,7 +55,10 @@ export class BulkUpdatePreferences {
     private updatePreferencesUsecase: UpdatePreferences,
     private environmentRepository: EnvironmentRepository,
     private contextRepository: ContextRepository,
-    private featureFlagsService: FeatureFlagsService
+    private featureFlagsService: FeatureFlagsService,
+    private preferencesRepository: PreferencesRepository,
+    private upsertPreferences: UpsertPreferences,
+    private sendWebhookMessage: SendWebhookMessage
   ) {}
 
   @InstrumentUsecase()
@@ -77,7 +108,6 @@ export class BulkUpdatePreferences {
       throw new BadRequestException(`Critical workflows with ids: ${criticalWorkflowIds.join(', ')} cannot be updated`);
     }
 
-    // deduplicate preferences by workflow document ID, it ensures we only process one update per actual workflow document
     const workflowPreferencesMap = new Map<
       string,
       { preference: BulkUpdatePreferenceItemDto; workflow: NotificationTemplateEntity }
@@ -96,6 +126,24 @@ export class BulkUpdatePreferences {
       _id: command.environmentId,
     });
 
+    const hasSubscriptionPreferences = Array.from(workflowPreferencesMap.values()).some(
+      ({ preference }) => preference.subscriptionIdentifier
+    );
+
+    if (hasSubscriptionPreferences) {
+      return this.executePerItem(command, workflowPreferencesMap, contextKeys, subscriber, environment!);
+    }
+
+    return this.executeBulkOptimized(command, workflowPreferencesMap, contextKeys, subscriber, environment!);
+  }
+
+  private async executePerItem(
+    command: BulkUpdatePreferencesCommand,
+    workflowPreferencesMap: Map<string, { preference: BulkUpdatePreferenceItemDto; workflow: NotificationTemplateEntity }>,
+    contextKeys: string[] | undefined,
+    subscriber: SubscriberEntity,
+    environment: EnvironmentEntity
+  ): Promise<InboxPreference[]> {
     const updatePromises = Array.from(workflowPreferencesMap.entries()).map(
       async ([workflowId, { preference, workflow }]) => {
         const isUpdatingSubscriptionPreference =
@@ -125,16 +173,236 @@ export class BulkUpdatePreferences {
             workflow,
             includeInactiveChannels: false,
             subscriber,
-            // biome-ignore lint/style/noNonNullAssertion: environment is always found
-            environment: environment!,
+            environment,
           })
         );
       }
     );
 
-    const updatedPreferences = await Promise.all(updatePromises);
+    return Promise.all(updatePromises);
+  }
 
-    return updatedPreferences;
+  private async executeBulkOptimized(
+    command: BulkUpdatePreferencesCommand,
+    workflowPreferencesMap: Map<string, { preference: BulkUpdatePreferenceItemDto; workflow: NotificationTemplateEntity }>,
+    contextKeys: string[] | undefined,
+    subscriber: SubscriberEntity,
+    environment: EnvironmentEntity
+  ): Promise<InboxPreference[]> {
+    const templateIds = Array.from(workflowPreferencesMap.keys());
+
+    const useContextFiltering = await this.featureFlagsService.getFlag({
+      key: FeatureFlagsKeysEnum.IS_CONTEXT_PREFERENCES_ENABLED,
+      defaultValue: false,
+      organization: { _id: command.organizationId },
+    });
+
+    const contextQuery = this.preferencesRepository.buildContextExactMatchQuery(contextKeys, {
+      enabled: useContextFiltering,
+    });
+
+    const [existingSubscriberWorkflowPrefs, subscriberGlobalPref, workflowLevelPrefs] = await Promise.all([
+      this.preferencesRepository.find({
+        _environmentId: command.environmentId,
+        _organizationId: command.organizationId,
+        _subscriberId: subscriber._id,
+        _templateId: { $in: templateIds },
+        type: PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
+        ...contextQuery,
+      }),
+      this.preferencesRepository.findOne({
+        _environmentId: command.environmentId,
+        _organizationId: command.organizationId,
+        _subscriberId: subscriber._id,
+        type: PreferencesTypeEnum.SUBSCRIBER_GLOBAL,
+        ...contextQuery,
+      }),
+      this.preferencesRepository.find(
+        {
+          _environmentId: command.environmentId,
+          _organizationId: command.organizationId,
+          _templateId: { $in: templateIds },
+          type: { $in: [PreferencesTypeEnum.WORKFLOW_RESOURCE, PreferencesTypeEnum.USER_WORKFLOW] },
+        },
+        undefined,
+        { readPreference: 'secondaryPreferred' as const }
+      ),
+    ]);
+
+    const existingSubWorkflowPrefMap = new Map<string, PreferencesEntity>();
+    for (const pref of existingSubscriberWorkflowPrefs) {
+      if (pref._templateId) {
+        existingSubWorkflowPrefMap.set(pref._templateId, pref);
+      }
+    }
+
+    const workflowResourcePrefMap = new Map<string, PreferencesEntity>();
+    const workflowUserPrefMap = new Map<string, PreferencesEntity>();
+    for (const pref of workflowLevelPrefs) {
+      if (!pref._templateId) continue;
+      if (pref.type === PreferencesTypeEnum.WORKFLOW_RESOURCE) {
+        workflowResourcePrefMap.set(pref._templateId, pref);
+      } else {
+        workflowUserPrefMap.set(pref._templateId, pref);
+      }
+    }
+
+    const isContextScoped = true;
+    const bulkOps: Array<{
+      updateOne: {
+        filter: Record<string, unknown>;
+        update: Record<string, unknown>;
+        upsert?: boolean;
+      };
+    }> = [];
+    const computedSubscriberWorkflowPrefs = new Map<string, WorkflowPreferencesPartial>();
+
+    for (const [workflowId, { preference }] of workflowPreferencesMap) {
+      const channelPreferences = buildChannelPreferences(preference);
+      const newPreferences: WorkflowPreferencesPartial = {
+        channels: Object.entries(channelPreferences).reduce(
+          (acc, [channel, enabled]) => ({
+            ...acc,
+            [channel]: { enabled },
+          }),
+          {} as WorkflowPreferences['channels']
+        ),
+      };
+
+      const existing = existingSubWorkflowPrefMap.get(workflowId);
+
+      if (existing) {
+        const mergedPreferences = deepMerge([
+          existing.preferences as Record<string, unknown>,
+          newPreferences as Record<string, unknown>,
+        ]);
+        computedSubscriberWorkflowPrefs.set(workflowId, mergedPreferences as WorkflowPreferencesPartial);
+
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: existing._id, _environmentId: command.environmentId },
+            update: {
+              $set: {
+                preferences: mergedPreferences,
+              },
+            },
+          },
+        });
+      } else {
+        computedSubscriberWorkflowPrefs.set(workflowId, newPreferences);
+
+        bulkOps.push({
+          updateOne: {
+            filter: {
+              _environmentId: command.environmentId,
+              _organizationId: command.organizationId,
+              _subscriberId: subscriber._id,
+              _templateId: workflowId,
+              type: PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
+              ...contextQuery,
+            },
+            update: {
+              $setOnInsert: {
+                _environmentId: command.environmentId,
+                _organizationId: command.organizationId,
+                _subscriberId: subscriber._id,
+                _templateId: workflowId,
+                type: PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
+                ...(useContextFiltering && isContextScoped ? { contextKeys: contextKeys ?? [] } : {}),
+              },
+              $set: {
+                preferences: newPreferences,
+              },
+            },
+            upsert: true,
+          },
+        });
+      }
+    }
+
+    if (bulkOps.length > 0) {
+      await this.preferencesRepository.bulkWrite(bulkOps);
+    }
+
+    const results: InboxPreference[] = [];
+
+    for (const [workflowId, { workflow }] of workflowPreferencesMap) {
+      const subscriberWorkflowPref = computedSubscriberWorkflowPrefs.get(workflowId);
+      const workflowResourcePref = workflowResourcePrefMap.get(workflowId);
+      const workflowUserPref = workflowUserPrefMap.get(workflowId);
+
+      const mergedPreferences = MergePreferences.execute(
+        MergePreferencesCommand.create({
+          ...(workflowResourcePref ? { workflowResourcePreference: workflowResourcePref as any } : {}),
+          ...(workflowUserPref ? { workflowUserPreference: workflowUserPref as any } : {}),
+          ...(subscriberGlobalPref ? { subscriberGlobalPreference: subscriberGlobalPref as any } : {}),
+          ...(subscriberWorkflowPref
+            ? {
+                subscriberWorkflowPreference: {
+                  preferences: subscriberWorkflowPref,
+                  type: PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
+                  _environmentId: command.environmentId,
+                  _organizationId: command.organizationId,
+                } as any,
+              }
+            : {}),
+        })
+      );
+
+      const mergedChannels = GetPreferences.mapWorkflowPreferencesToChannelPreferences(
+        mergedPreferences.preferences || {}
+      );
+
+      const activeChannels = getActiveChannelsFromWorkflow(workflow);
+      const initialChannels = filteredPreference(
+        { email: true, sms: true, in_app: true, chat: true, push: true },
+        activeChannels
+      );
+
+      const { channels } = overridePreferences(
+        {
+          template: workflow.preferenceSettings,
+          subscriber: mergedChannels,
+          workflowOverride: undefined,
+        },
+        initialChannels
+      );
+
+      const builtPreferences = buildWorkflowPreferences(mergedPreferences.preferences);
+
+      const inboxPreference: InboxPreference = {
+        level: PreferenceLevelEnum.TEMPLATE,
+        enabled: builtPreferences.all.enabled,
+        channels,
+        workflow: {
+          id: workflow._id,
+          identifier: workflow.triggers[0]?.identifier,
+          name: workflow.name,
+          critical: workflow.critical,
+          tags: workflow.tags,
+          data: workflow.data,
+          severity: workflow.severity ?? SeverityLevelEnum.NONE,
+        },
+      };
+
+      results.push(inboxPreference);
+    }
+
+    for (const result of results) {
+      this.sendWebhookMessage.execute({
+        eventType: WebhookEventEnum.PREFERENCE_UPDATED,
+        objectType: WebhookObjectTypeEnum.PREFERENCE,
+        payload: {
+          object: result,
+          subscriberId: command.subscriberId,
+        },
+        organizationId: command.organizationId,
+        environmentId: command.environmentId,
+        environment,
+      });
+    }
+
+    return results;
   }
 
   private async resolveContexts(
@@ -142,7 +410,6 @@ export class BulkUpdatePreferences {
     organizationId: string,
     context?: ContextPayload
   ): Promise<string[] | undefined> {
-    // Check if context preferences feature is enabled
     const isEnabled = await this.featureFlagsService.getFlag({
       key: FeatureFlagsKeysEnum.IS_CONTEXT_PREFERENCES_ENABLED,
       defaultValue: false,
@@ -150,7 +417,7 @@ export class BulkUpdatePreferences {
     });
 
     if (!isEnabled) {
-      return undefined; // Ignore context when FF is off
+      return undefined;
     }
 
     if (!context) {
@@ -165,4 +432,32 @@ export class BulkUpdatePreferences {
 
     return contexts.map((ctx) => ctx.key);
   }
+}
+
+function buildChannelPreferences(preference: BulkUpdatePreferenceItemDto): IPreferenceChannels {
+  return {
+    ...(preference.chat !== undefined && { chat: preference.chat }),
+    ...(preference.email !== undefined && { email: preference.email }),
+    ...(preference.in_app !== undefined && { in_app: preference.in_app }),
+    ...(preference.push !== undefined && { push: preference.push }),
+    ...(preference.sms !== undefined && { sms: preference.sms }),
+  };
+}
+
+function getActiveChannelsFromWorkflow(workflow: NotificationTemplateEntity): string[] {
+  const activeSteps = (workflow.steps || []).filter((step) => step.active === true);
+
+  const channels = activeSteps
+    .map((item) => item.template?.type as StepTypeEnum)
+    .filter(Boolean)
+    .reduce<StepTypeEnum[]>((list, channel) => {
+      if (list.includes(channel)) {
+        return list;
+      }
+      list.push(channel);
+
+      return list;
+    }, []);
+
+  return channels as unknown as string[];
 }

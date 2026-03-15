@@ -1,12 +1,13 @@
 import { BadRequestException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { AnalyticsService, FeatureFlagsService } from '@novu/application-generic';
+import { AnalyticsService, FeatureFlagsService, SendWebhookMessage, UpsertPreferences } from '@novu/application-generic';
 import {
   ContextRepository,
   EnvironmentRepository,
   NotificationTemplateRepository,
+  PreferencesRepository,
   SubscriberRepository,
 } from '@novu/dal';
-import { PreferenceLevelEnum, TriggerTypeEnum } from '@novu/shared';
+import { PreferenceLevelEnum, PreferencesTypeEnum, TriggerTypeEnum } from '@novu/shared';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { UpdatePreferences } from '../update-preferences/update-preferences.usecase';
@@ -27,6 +28,8 @@ const mockedWorkflow1: any = {
   triggers: [{ identifier: 'test-trigger-1' }],
   tags: [],
   data: undefined,
+  steps: [{ active: true, template: { type: 'email' } }],
+  preferenceSettings: {},
 };
 
 const mockedWorkflow2: any = {
@@ -36,6 +39,8 @@ const mockedWorkflow2: any = {
   triggers: [{ identifier: 'test-trigger-2' }],
   tags: [],
   data: undefined,
+  steps: [{ active: true, template: { type: 'in_app' } }],
+  preferenceSettings: {},
 };
 
 const mockedInboxPreference1: any = {
@@ -87,6 +92,9 @@ describe('BulkUpdatePreferences', () => {
   let environmentRepositoryMock: sinon.SinonStubbedInstance<EnvironmentRepository>;
   let contextRepositoryMock: sinon.SinonStubbedInstance<ContextRepository>;
   let featureFlagsServiceMock: sinon.SinonStubbedInstance<FeatureFlagsService>;
+  let preferencesRepositoryMock: sinon.SinonStubbedInstance<PreferencesRepository>;
+  let upsertPreferencesMock: sinon.SinonStubbedInstance<UpsertPreferences>;
+  let sendWebhookMessageMock: sinon.SinonStubbedInstance<SendWebhookMessage>;
 
   beforeEach(() => {
     subscriberRepositoryMock = sinon.createStubInstance(SubscriberRepository);
@@ -96,6 +104,9 @@ describe('BulkUpdatePreferences', () => {
     environmentRepositoryMock = sinon.createStubInstance(EnvironmentRepository);
     contextRepositoryMock = sinon.createStubInstance(ContextRepository);
     featureFlagsServiceMock = sinon.createStubInstance(FeatureFlagsService);
+    preferencesRepositoryMock = sinon.createStubInstance(PreferencesRepository);
+    upsertPreferencesMock = sinon.createStubInstance(UpsertPreferences);
+    sendWebhookMessageMock = sinon.createStubInstance(SendWebhookMessage);
 
     bulkUpdatePreferences = new BulkUpdatePreferences(
       notificationTemplateRepositoryMock as any,
@@ -104,7 +115,10 @@ describe('BulkUpdatePreferences', () => {
       updatePreferencesUsecaseMock as any,
       environmentRepositoryMock as any,
       contextRepositoryMock as any,
-      featureFlagsServiceMock as any
+      featureFlagsServiceMock as any,
+      preferencesRepositoryMock as any,
+      upsertPreferencesMock as any,
+      sendWebhookMessageMock as any
     );
   });
 
@@ -199,15 +213,19 @@ describe('BulkUpdatePreferences', () => {
     subscriberRepositoryMock.findBySubscriberId.resolves(mockedSubscriber);
     notificationTemplateRepositoryMock.findForBulkPreferences.resolves([mockedWorkflow1, mockedWorkflow2]);
     environmentRepositoryMock.findOne.resolves({ _id: 'env-1' } as any);
-    updatePreferencesUsecaseMock.execute.onFirstCall().resolves(mockedInboxPreference1);
-    updatePreferencesUsecaseMock.execute.onSecondCall().resolves(mockedInboxPreference2);
+    featureFlagsServiceMock.getFlag.resolves(false);
+    preferencesRepositoryMock.find.resolves([]);
+    preferencesRepositoryMock.findOne.resolves(null);
+    preferencesRepositoryMock.buildContextExactMatchQuery.returns({});
+    preferencesRepositoryMock.bulkWrite.resolves({});
+    sendWebhookMessageMock.execute.resolves();
 
     await bulkUpdatePreferences.execute(command);
 
     const findCallArgs = notificationTemplateRepositoryMock.findForBulkPreferences.firstCall.args;
-    expect(findCallArgs[0]).to.equal('env-1'); // environmentId
-    expect(findCallArgs[1]).to.deep.equal([mockedWorkflow1._id]); // internal IDs
-    expect(findCallArgs[2]).to.deep.equal(['test-trigger-2']); // identifiers
+    expect(findCallArgs[0]).to.equal('env-1');
+    expect(findCallArgs[1]).to.deep.equal([mockedWorkflow1._id]);
+    expect(findCallArgs[2]).to.deep.equal(['test-trigger-2']);
   });
 
   it('should handle mixed ID types correctly', async () => {
@@ -219,11 +237,11 @@ describe('BulkUpdatePreferences', () => {
       subscriberId: 'test-mockSubscriber',
       preferences: [
         {
-          workflowId: mockedWorkflow1._id, // ObjectId
+          workflowId: mockedWorkflow1._id,
           in_app: true,
         },
         {
-          workflowId: nonObjectIdString, // Non-ObjectId string
+          workflowId: nonObjectIdString,
           email: true,
         },
       ],
@@ -235,17 +253,18 @@ describe('BulkUpdatePreferences', () => {
       { ...mockedWorkflow2, triggers: [{ type: TriggerTypeEnum.EVENT, identifier: nonObjectIdString }] },
     ]);
     environmentRepositoryMock.findOne.resolves({ _id: 'env-1' } as any);
-    updatePreferencesUsecaseMock.execute.onFirstCall().resolves(mockedInboxPreference1);
-    updatePreferencesUsecaseMock.execute.onSecondCall().resolves({
-      ...mockedInboxPreference2,
-      workflow: { ...mockedInboxPreference2.workflow, identifier: nonObjectIdString },
-    });
+    featureFlagsServiceMock.getFlag.resolves(false);
+    preferencesRepositoryMock.find.resolves([]);
+    preferencesRepositoryMock.findOne.resolves(null);
+    preferencesRepositoryMock.buildContextExactMatchQuery.returns({});
+    preferencesRepositoryMock.bulkWrite.resolves({});
+    sendWebhookMessageMock.execute.resolves();
 
     await bulkUpdatePreferences.execute(command);
 
     const findCallArgs = notificationTemplateRepositoryMock.findForBulkPreferences.firstCall.args;
-    expect(findCallArgs[1]).to.include(mockedWorkflow1._id); // internal IDs
-    expect(findCallArgs[2]).to.include(nonObjectIdString); // identifiers
+    expect(findCallArgs[1]).to.include(mockedWorkflow1._id);
+    expect(findCallArgs[2]).to.include(nonObjectIdString);
   });
 
   it('should deduplicate preferences when different identifiers resolve to the same workflow', async () => {
@@ -273,18 +292,18 @@ describe('BulkUpdatePreferences', () => {
     subscriberRepositoryMock.findBySubscriberId.resolves(mockedSubscriber);
     notificationTemplateRepositoryMock.findForBulkPreferences.resolves([mockedWorkflow1]);
     environmentRepositoryMock.findOne.resolves({ _id: 'env-1' } as any);
-    updatePreferencesUsecaseMock.execute.resolves(mockedInboxPreference1);
+    featureFlagsServiceMock.getFlag.resolves(false);
+    preferencesRepositoryMock.find.resolves([]);
+    preferencesRepositoryMock.findOne.resolves(null);
+    preferencesRepositoryMock.buildContextExactMatchQuery.returns({});
+    preferencesRepositoryMock.bulkWrite.resolves({});
+    sendWebhookMessageMock.execute.resolves();
 
     const result = await bulkUpdatePreferences.execute(command);
 
-    expect(updatePreferencesUsecaseMock.execute.callCount).to.equal(1);
-
-    const updateArgs = updatePreferencesUsecaseMock.execute.firstCall.args[0];
-    expect(updateArgs).to.include({
-      workflowIdOrIdentifier: internalId,
-      in_app: false,
-      email: true,
-    });
+    expect(preferencesRepositoryMock.bulkWrite.callCount).to.equal(1);
+    const bulkOps = preferencesRepositoryMock.bulkWrite.firstCall.args[0];
+    expect(bulkOps).to.have.lengthOf(1);
 
     expect(result.length).to.equal(1);
   });
@@ -341,7 +360,7 @@ describe('BulkUpdatePreferences', () => {
     }
   });
 
-  it('should update multiple workflow preferences in parallel', async () => {
+  it('should use bulkWrite to update multiple workflow preferences', async () => {
     const command = BulkUpdatePreferencesCommand.create({
       environmentId: 'env-1',
       organizationId: 'org-1',
@@ -363,37 +382,71 @@ describe('BulkUpdatePreferences', () => {
     subscriberRepositoryMock.findBySubscriberId.resolves(mockedSubscriber);
     notificationTemplateRepositoryMock.findForBulkPreferences.resolves([mockedWorkflow1, mockedWorkflow2]);
     environmentRepositoryMock.findOne.resolves({ _id: 'env-1' } as any);
-
-    updatePreferencesUsecaseMock.execute.onFirstCall().resolves(mockedInboxPreference1);
-    updatePreferencesUsecaseMock.execute.onSecondCall().resolves(mockedInboxPreference2);
+    featureFlagsServiceMock.getFlag.resolves(false);
+    preferencesRepositoryMock.find.resolves([]);
+    preferencesRepositoryMock.findOne.resolves(null);
+    preferencesRepositoryMock.buildContextExactMatchQuery.returns({});
+    preferencesRepositoryMock.bulkWrite.resolves({});
+    sendWebhookMessageMock.execute.resolves();
 
     const result = await bulkUpdatePreferences.execute(command);
 
-    expect(updatePreferencesUsecaseMock.execute.calledTwice).to.be.true;
+    expect(preferencesRepositoryMock.bulkWrite.callCount).to.equal(1);
+    const bulkOps = preferencesRepositoryMock.bulkWrite.firstCall.args[0];
+    expect(bulkOps).to.have.lengthOf(2);
 
-    const firstCallArgs = updatePreferencesUsecaseMock.execute.firstCall.args[0];
-    expect(firstCallArgs).to.include({
-      environmentId: command.environmentId,
-      organizationId: command.organizationId,
-      subscriberId: command.subscriberId,
-      workflowIdOrIdentifier: mockedWorkflow1._id,
-      level: PreferenceLevelEnum.TEMPLATE,
-      in_app: true,
-      email: false,
+    expect(result).to.have.lengthOf(2);
+    expect(result[0].level).to.equal(PreferenceLevelEnum.TEMPLATE);
+    expect(result[1].level).to.equal(PreferenceLevelEnum.TEMPLATE);
+  });
+
+  it('should merge with existing preferences when updating', async () => {
+    const existingPref = {
+      _id: 'existing-pref-id',
+      _environmentId: 'env-1',
+      _organizationId: 'org-1',
+      _subscriberId: mockedSubscriber._id,
+      _templateId: mockedWorkflow1._id,
+      type: PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
+      preferences: {
+        channels: {
+          email: { enabled: true },
+          sms: { enabled: false },
+        },
+      },
+    };
+
+    const command = BulkUpdatePreferencesCommand.create({
+      environmentId: 'env-1',
+      organizationId: 'org-1',
+      subscriberId: 'test-mockSubscriber',
+      preferences: [
+        {
+          workflowId: mockedWorkflow1._id,
+          email: false,
+        },
+      ],
     });
 
-    const secondCallArgs = updatePreferencesUsecaseMock.execute.secondCall.args[0];
-    expect(secondCallArgs).to.include({
-      environmentId: command.environmentId,
-      organizationId: command.organizationId,
-      subscriberId: command.subscriberId,
-      workflowIdOrIdentifier: mockedWorkflow2._id,
-      level: PreferenceLevelEnum.TEMPLATE,
-      sms: true,
-      chat: true,
-    });
+    subscriberRepositoryMock.findBySubscriberId.resolves(mockedSubscriber);
+    notificationTemplateRepositoryMock.findForBulkPreferences.resolves([mockedWorkflow1]);
+    environmentRepositoryMock.findOne.resolves({ _id: 'env-1' } as any);
+    featureFlagsServiceMock.getFlag.resolves(false);
+    preferencesRepositoryMock.find.onFirstCall().resolves([existingPref as any]);
+    preferencesRepositoryMock.find.onSecondCall().resolves([]);
+    preferencesRepositoryMock.findOne.resolves(null);
+    preferencesRepositoryMock.buildContextExactMatchQuery.returns({});
+    preferencesRepositoryMock.bulkWrite.resolves({});
+    sendWebhookMessageMock.execute.resolves();
 
-    expect(result).to.deep.equal([mockedInboxPreference1, mockedInboxPreference2]);
+    await bulkUpdatePreferences.execute(command);
+
+    expect(preferencesRepositoryMock.bulkWrite.callCount).to.equal(1);
+    const bulkOps = preferencesRepositoryMock.bulkWrite.firstCall.args[0];
+    expect(bulkOps[0].updateOne.filter).to.deep.include({ _id: 'existing-pref-id' });
+    const setPrefs = bulkOps[0].updateOne.update.$set.preferences;
+    expect(setPrefs.channels.email.enabled).to.equal(false);
+    expect(setPrefs.channels.sms.enabled).to.equal(false);
   });
 
   it('should support lookup by workflow identifier', async () => {
@@ -403,8 +456,38 @@ describe('BulkUpdatePreferences', () => {
       subscriberId: 'test-mockSubscriber',
       preferences: [
         {
-          workflowId: 'test-trigger-1', // Using identifier instead of ID
+          workflowId: 'test-trigger-1',
           in_app: true,
+        },
+      ],
+    });
+
+    subscriberRepositoryMock.findBySubscriberId.resolves(mockedSubscriber);
+    notificationTemplateRepositoryMock.findForBulkPreferences.resolves([mockedWorkflow1]);
+    environmentRepositoryMock.findOne.resolves({ _id: 'env-1' } as any);
+    featureFlagsServiceMock.getFlag.resolves(false);
+    preferencesRepositoryMock.find.resolves([]);
+    preferencesRepositoryMock.findOne.resolves(null);
+    preferencesRepositoryMock.buildContextExactMatchQuery.returns({});
+    preferencesRepositoryMock.bulkWrite.resolves({});
+    sendWebhookMessageMock.execute.resolves();
+
+    const result = await bulkUpdatePreferences.execute(command);
+
+    expect(preferencesRepositoryMock.bulkWrite.callCount).to.equal(1);
+    expect(result).to.have.lengthOf(1);
+  });
+
+  it('should fall back to per-item path when subscriptionIdentifier is present', async () => {
+    const command = BulkUpdatePreferencesCommand.create({
+      environmentId: 'env-1',
+      organizationId: 'org-1',
+      subscriberId: 'test-mockSubscriber',
+      preferences: [
+        {
+          workflowId: mockedWorkflow1._id,
+          in_app: true,
+          subscriptionIdentifier: 'sub-123',
         },
       ],
     });
@@ -416,9 +499,40 @@ describe('BulkUpdatePreferences', () => {
 
     const result = await bulkUpdatePreferences.execute(command);
 
-    const updateArgs = updatePreferencesUsecaseMock.execute.firstCall.args[0];
-    expect(updateArgs.workflowIdOrIdentifier).to.equal(mockedWorkflow1._id);
-
+    expect(updatePreferencesUsecaseMock.execute.callCount).to.equal(1);
+    expect(preferencesRepositoryMock.bulkWrite.callCount).to.equal(0);
     expect(result).to.deep.equal([mockedInboxPreference1]);
+  });
+
+  it('should send webhook for each updated preference', async () => {
+    const command = BulkUpdatePreferencesCommand.create({
+      environmentId: 'env-1',
+      organizationId: 'org-1',
+      subscriberId: 'test-mockSubscriber',
+      preferences: [
+        {
+          workflowId: mockedWorkflow1._id,
+          email: false,
+        },
+        {
+          workflowId: mockedWorkflow2._id,
+          sms: true,
+        },
+      ],
+    });
+
+    subscriberRepositoryMock.findBySubscriberId.resolves(mockedSubscriber);
+    notificationTemplateRepositoryMock.findForBulkPreferences.resolves([mockedWorkflow1, mockedWorkflow2]);
+    environmentRepositoryMock.findOne.resolves({ _id: 'env-1' } as any);
+    featureFlagsServiceMock.getFlag.resolves(false);
+    preferencesRepositoryMock.find.resolves([]);
+    preferencesRepositoryMock.findOne.resolves(null);
+    preferencesRepositoryMock.buildContextExactMatchQuery.returns({});
+    preferencesRepositoryMock.bulkWrite.resolves({});
+    sendWebhookMessageMock.execute.resolves();
+
+    await bulkUpdatePreferences.execute(command);
+
+    expect(sendWebhookMessageMock.execute.callCount).to.equal(2);
   });
 });
