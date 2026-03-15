@@ -22,7 +22,7 @@ export class EnvironmentVariableRepository extends BaseRepositoryV2<
     return this.findOne({ _organizationId: organizationId, key }, '*');
   }
 
-  async resolveForEnvironment(organizationId: string, environmentId: EnvironmentId): Promise<Record<string, string>> {
+  async findByEnvironment(organizationId: string, environmentId: EnvironmentId): Promise<Record<string, string>> {
     const variables = await this.find({ _organizationId: organizationId }, '*');
     const resolved: Record<string, string> = {};
 
