@@ -235,19 +235,19 @@ export class BaseRepositoryV2<T_DBModel, T_MappedEntity, T_Enforcement> {
   // ---------------------------------------------------------------------------
 
   async findById<K extends keyof T_MappedEntity & string>(
-    id: string,
+    query: { _id: string } & T_Enforcement,
     select: readonly K[],
     options?: FindOneOptionsV2<T_DBModel>
   ): Promise<Pick<T_MappedEntity, K | ('_id' extends keyof T_MappedEntity ? '_id' : never)> | null>;
 
   async findById<S extends SelectFieldsObject<T_MappedEntity> & { _id: 0 }>(
-    id: string,
+    query: { _id: string } & T_Enforcement,
     select: S,
     options?: FindOneOptionsV2<T_DBModel>
   ): Promise<Pick<T_MappedEntity, Exclude<IncludedKeys<S, T_MappedEntity>, '_id'>> | null>;
 
   async findById<S extends SelectFieldsObject<T_MappedEntity>>(
-    id: string,
+    query: { _id: string } & T_Enforcement,
     select: S,
     options?: FindOneOptionsV2<T_DBModel>
   ): Promise<Pick<
@@ -255,14 +255,18 @@ export class BaseRepositoryV2<T_DBModel, T_MappedEntity, T_Enforcement> {
     IncludedKeys<S, T_MappedEntity> | ('_id' extends keyof T_MappedEntity ? '_id' : never)
   > | null>;
 
-  async findById(id: string, select: '*', options?: FindOneOptionsV2<T_DBModel>): Promise<T_MappedEntity | null>;
+  async findById(
+    query: { _id: string } & T_Enforcement,
+    select: '*',
+    options?: FindOneOptionsV2<T_DBModel>
+  ): Promise<T_MappedEntity | null>;
 
   async findById(
-    id: string,
+    query: { _id: string } & T_Enforcement,
     select: SelectInput<T_MappedEntity> | '*',
     options?: FindOneOptionsV2<T_DBModel>
   ): Promise<any> {
-    return this.findOne({ _id: id } as unknown as FilterQuery<T_DBModel> & T_Enforcement, select as any, options);
+    return this.findOne(query as unknown as FilterQuery<T_DBModel> & T_Enforcement, select as any, options);
   }
 
   // ---------------------------------------------------------------------------

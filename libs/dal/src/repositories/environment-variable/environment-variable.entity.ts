@@ -24,10 +24,6 @@ export class EnvironmentVariableEntity implements IEnvironmentVariable {
 
   values: EnvironmentVariableValueEntity[];
 
-  tags?: string[];
-
-  description?: string;
-
   createdAt: string;
 
   updatedAt: string;

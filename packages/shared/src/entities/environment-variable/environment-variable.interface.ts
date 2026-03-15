@@ -11,8 +11,6 @@ export interface IEnvironmentVariable {
   key: string;
   isSecret: boolean;
   values: IEnvironmentVariableValue[];
-  tags?: string[];
-  description?: string;
   createdAt: string;
   updatedAt: string;
 }

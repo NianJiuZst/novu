@@ -35,6 +35,7 @@ import {
   ControlValuesRepository,
   DalService,
   EnvironmentRepository,
+  EnvironmentVariableRepository,
   ExecutionDetailsRepository,
   FeedRepository,
   IntegrationRepository,
@@ -107,6 +108,7 @@ const DAL_MODELS = [
   WorkflowOverrideRepository,
   ControlValuesRepository,
   PreferencesRepository,
+  EnvironmentVariableRepository,
 ];
 
 const dalService = {

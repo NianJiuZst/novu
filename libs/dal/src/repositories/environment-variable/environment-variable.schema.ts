@@ -34,10 +34,6 @@ const environmentVariableSchema = new Schema<EnvironmentVariableDBModel>(
       default: false,
     },
     values: [environmentVariableValueSchema],
-    tags: [Schema.Types.String],
-    description: {
-      type: Schema.Types.String,
-    },
   },
   schemaOptions
 );
