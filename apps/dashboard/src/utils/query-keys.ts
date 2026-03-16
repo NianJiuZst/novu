@@ -37,4 +37,5 @@ export const QueryKeys = Object.freeze({
   fetchChat: 'fetchChat',
   fetchEnvironmentVariables: 'fetchEnvironmentVariables',
   fetchEnvironmentVariable: 'fetchEnvironmentVariable',
+  fetchEnvironmentVariableUsage: 'fetchEnvironmentVariableUsage',
 });

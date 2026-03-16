@@ -13,7 +13,6 @@ import {
   RiMore2Fill,
 } from 'react-icons/ri';
 import type { EnvironmentVariableResponseDto } from '@/api/environment-variables';
-import { ConfirmationModal } from '@/components/confirmation-modal';
 import { CompactButton } from '@/components/primitives/button-compact';
 import { CopyButton } from '@/components/primitives/copy-button';
 import {
@@ -31,6 +30,7 @@ import { useDeleteEnvironmentVariable } from '@/hooks/use-delete-environment-var
 import { formatDateSimple } from '@/utils/format-date';
 import { Protect } from '@/utils/protect';
 import { cn } from '@/utils/ui';
+import { DeleteVariableDialog } from './delete-variable-dialog';
 import { UpsertVariableDrawer } from './upsert-variable-drawer';
 
 const SECRET_MASK = '••••••••';
@@ -195,18 +195,11 @@ export const VariableRow = ({
       {isExpanded &&
         environments.map((env) => <EnvironmentSubRow key={env._id} variable={variable} environment={env} />)}
       <UpsertVariableDrawer variable={variable} isOpen={isEditDrawerOpen} onOpenChange={setIsEditDrawerOpen} />
-      <ConfirmationModal
+      <DeleteVariableDialog
+        variable={variable}
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
         onConfirm={handleDelete}
-        title="Delete variable"
-        description={
-          <span>
-            Are you sure you want to delete <span className="font-bold">{variable.key}</span>? This action cannot be
-            undone.
-          </span>
-        }
-        confirmButtonText="Delete variable"
         isLoading={isDeleting}
       />
     </>

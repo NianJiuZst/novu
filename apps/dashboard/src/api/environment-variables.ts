@@ -80,3 +80,15 @@ export const updateEnvironmentVariable = async (
 export const deleteEnvironmentVariable = async (variableId: string): Promise<void> => {
   await del(`/environment-variables/${variableId}`);
 };
+
+export type GetEnvironmentVariableUsageResponse = {
+  workflows: { name: string; workflowId: string }[];
+};
+
+export const getEnvironmentVariableUsage = async (variableId: string): Promise<GetEnvironmentVariableUsageResponse> => {
+  const { data } = await get<{ data: GetEnvironmentVariableUsageResponse }>(
+    `/environment-variables/${variableId}/usage`
+  );
+
+  return data;
+};

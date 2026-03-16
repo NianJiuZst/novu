@@ -29,6 +29,7 @@ import {
   CreateEnvironmentVariableRequestDto,
   EnvironmentVariableResponseDto,
   GetEnvironmentVariablesRequestDto,
+  GetEnvironmentVariableUsageResponseDto,
   UpdateEnvironmentVariableRequestDto,
 } from './dtos';
 import {
@@ -40,6 +41,8 @@ import {
   GetEnvironmentVariableCommand,
   GetEnvironmentVariables,
   GetEnvironmentVariablesCommand,
+  GetEnvironmentVariableUsage,
+  GetEnvironmentVariableUsageCommand,
   UpdateEnvironmentVariable,
   UpdateEnvironmentVariableCommand,
 } from './usecases';
@@ -54,6 +57,7 @@ export class EnvironmentVariablesController {
   constructor(
     private getEnvironmentVariablesUsecase: GetEnvironmentVariables,
     private getEnvironmentVariableUsecase: GetEnvironmentVariable,
+    private getEnvironmentVariableUsageUsecase: GetEnvironmentVariableUsage,
     private createEnvironmentVariableUsecase: CreateEnvironmentVariable,
     private updateEnvironmentVariableUsecase: UpdateEnvironmentVariable,
     private deleteEnvironmentVariableUsecase: DeleteEnvironmentVariable
@@ -75,6 +79,28 @@ export class EnvironmentVariablesController {
         organizationId: user.organizationId,
         userId: user._id,
         search: query.search,
+      })
+    );
+  }
+
+  @Get('/:variableId/usage')
+  @ExternalApiAccessible()
+  @ApiResponse(GetEnvironmentVariableUsageResponseDto)
+  @ApiOperation({
+    summary: 'Get environment variable usage',
+    description:
+      'Returns the workflows that reference this environment variable via {{env.KEY}} in their step controls.',
+  })
+  @ApiNotFoundResponse({ description: 'Environment variable not found.' })
+  async getEnvironmentVariableUsage(
+    @UserSession() user: UserSessionData,
+    @Param('variableId') variableId: string
+  ): Promise<GetEnvironmentVariableUsageResponseDto> {
+    return this.getEnvironmentVariableUsageUsecase.execute(
+      GetEnvironmentVariableUsageCommand.create({
+        organizationId: user.organizationId,
+        userId: user._id,
+        variableId,
       })
     );
   }
