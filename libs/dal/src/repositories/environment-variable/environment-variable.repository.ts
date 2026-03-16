@@ -20,10 +20,6 @@ export class EnvironmentVariableRepository extends BaseRepositoryV2<
     super(EnvironmentVariable, EnvironmentVariableEntity);
   }
 
-  async findByOrganization(organizationId: string) {
-    return this.find({ _organizationId: organizationId }, '*', { sort: { createdAt: -1 } });
-  }
-
   async findByKey(organizationId: string, key: string) {
     return this.findOne({ _organizationId: organizationId, key }, '*');
   }

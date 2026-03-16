@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { decryptEnvironmentVariableValue } from '@novu/application-generic';
-import { EnvironmentVariableEntity, EnvironmentVariableRepository } from '@novu/dal';
+import { EnforceOrgId, EnvironmentVariableEntity, EnvironmentVariableRepository, FilterQuery } from '@novu/dal';
 import { EnvironmentVariableType } from '@novu/shared';
 import { EnvironmentVariableResponseDto, SECRET_MASK } from '../../dtos/environment-variable-response.dto';
 import { GetEnvironmentVariablesCommand } from './get-environment-variables.command';
@@ -10,13 +10,17 @@ export class GetEnvironmentVariables {
   constructor(private environmentVariableRepository: EnvironmentVariableRepository) {}
 
   async execute(command: GetEnvironmentVariablesCommand): Promise<EnvironmentVariableResponseDto[]> {
-    const variables = await this.environmentVariableRepository.findByOrganization(command.organizationId);
+    const query: FilterQuery<EnvironmentVariableEntity> & EnforceOrgId = {
+      _organizationId: command.organizationId,
+    };
 
-    const filtered = command.search
-      ? variables.filter((v) => v.key.toLowerCase().includes(command.search!.toLowerCase()))
-      : variables;
+    if (command.search) {
+      query.key = { $regex: command.search, $options: 'i' };
+    }
 
-    return filtered.map((variable) => toEnvironmentVariableResponseDto(variable));
+    const variables = await this.environmentVariableRepository.find(query, '*', { sort: { createdAt: -1 } });
+
+    return variables.map((variable) => toEnvironmentVariableResponseDto(variable));
   }
 }
 
