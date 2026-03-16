@@ -17,8 +17,10 @@ import {
   PreviewPayloadProcessorService,
   PreviewStep,
   PreviewStepCommand,
+  resolveEnvironmentVariables,
   StepResponseDto,
 } from '@novu/application-generic';
+import { EnvironmentVariableRepository } from '@novu/dal';
 import { ContextResolved } from '@novu/framework/internal';
 import { ChannelTypeEnum, ResourceOriginEnum } from '@novu/shared';
 import { PayloadMergerService } from './services/payload-merger.service';
@@ -34,7 +36,8 @@ export class PreviewUsecase {
     private readonly payloadMerger: PayloadMergerService,
     private readonly payloadProcessor: PreviewPayloadProcessorService,
     private readonly errorHandler: PreviewErrorHandler,
-    private readonly logger: PinoLogger
+    private readonly logger: PinoLogger,
+    private readonly environmentVariableRepository: EnvironmentVariableRepository
   ) {}
 
   @InstrumentUsecase()
@@ -77,7 +80,8 @@ export class PreviewUsecase {
           context.stepData,
           payloadExample,
           previewTemplateData.controlValues,
-          stepResolverHash
+          stepResolverHash,
+          context.envVars
         );
 
         return {
@@ -131,7 +135,13 @@ export class PreviewUsecase {
       })
     );
 
-    return { stepData, controlValues, variableSchema: stepData.variables, variablesObject, workflow };
+    const rawEnvVars = await this.environmentVariableRepository.findByEnvironment(
+      command.user.organizationId,
+      command.user.environmentId
+    );
+    const envVars = resolveEnvironmentVariables(rawEnvVars);
+
+    return { stepData, controlValues, variableSchema: stepData.variables, variablesObject, workflow, envVars };
   }
 
   @Instrument()
@@ -161,7 +171,8 @@ export class PreviewUsecase {
     stepData: StepResponseDto,
     previewPayloadExample: PreviewPayloadDto,
     controlValues: Record<string, unknown>,
-    stepResolverHash: string | undefined
+    stepResolverHash: string | undefined,
+    envVars: Record<string, string>
   ) {
     const state = this.payloadProcessor.buildState(previewPayloadExample.steps);
 
@@ -180,6 +191,7 @@ export class PreviewUsecase {
         state,
         skipLayoutRendering: command.skipLayoutRendering,
         stepResolverHash,
+        env: envVars,
       })
     );
   }

@@ -1,3 +1,4 @@
+import { EnvironmentVariableForTemplate } from '@novu/dal';
 import { EncryptedSecret, ICredentialsDto, NOVU_ENCRYPTION_SUB_MASK, secureCredentials } from '@novu/shared';
 
 import { decrypt, encrypt } from './cipher';
@@ -57,6 +58,16 @@ export function decryptApiKey(apiKey: string): string {
   }
 
   return apiKey;
+}
+
+export function resolveEnvironmentVariables(variables: EnvironmentVariableForTemplate[]): Record<string, string> {
+  const resolved: Record<string, string> = {};
+
+  for (const variable of variables) {
+    resolved[variable.key] = variable.isSecret ? decryptSecret(variable.value) : variable.value;
+  }
+
+  return resolved;
 }
 
 function isNovuEncrypted(text: string): text is EncryptedSecret {

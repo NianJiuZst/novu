@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   ControlValuesEntity,
   ControlValuesRepository,
+  EnvironmentVariableRepository,
   JsonSchemaTypeEnum,
   NotificationStepEntity,
   NotificationTemplateEntity,
@@ -9,9 +10,11 @@ import {
 import { ControlValuesLevelEnum, StepTypeEnum } from '@novu/shared';
 import { JSONSchemaDto } from '../../dtos/json-schema.dto';
 import { PreviewPayloadDto } from '../../dtos/workflow/preview-payload.dto';
+import { resolveEnvironmentVariables } from '../../encryption/encrypt-provider';
 import { Instrument, InstrumentUsecase } from '../../instrumentation';
 import {
   buildContextSchema,
+  buildEnvSchema,
   buildSubscriberSchema,
   buildVariablesSchema,
   buildWorkflowSchema,
@@ -26,7 +29,8 @@ import { BuildVariableSchemaCommand, IOptimisticStepInfo } from './build-availab
 export class BuildVariableSchemaUsecase {
   constructor(
     private readonly createVariablesObject: CreateVariablesObject,
-    private readonly controlValuesRepository: ControlValuesRepository
+    private readonly controlValuesRepository: ControlValuesRepository,
+    private readonly environmentVariableRepository: EnvironmentVariableRepository
   ) {}
 
   @InstrumentUsecase()
@@ -86,6 +90,12 @@ export class BuildVariableSchemaUsecase {
 
     const effectivePayloadSchema = optimisticPayloadSchema ?? workflow?.payloadSchema;
 
+    const rawEnvVars = await this.environmentVariableRepository.findByEnvironment(
+      command.organizationId,
+      command.environmentId
+    );
+    const envVars = resolveEnvironmentVariables(rawEnvVars);
+
     return {
       type: JsonSchemaTypeEnum.OBJECT,
       properties: {
@@ -97,6 +107,7 @@ export class BuildVariableSchemaUsecase {
         }),
         payload: await this.resolvePayloadSchema(workflow, finalPayload, optimisticPayloadSchema),
         context: buildContextSchema(finalContext),
+        env: buildEnvSchema(envVars),
       },
       additionalProperties: false,
     } as const satisfies JSONSchemaDto;
