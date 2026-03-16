@@ -9,6 +9,7 @@ export type EnvironmentVariableResponseDto = {
   _id: string;
   _organizationId: string;
   key: string;
+  type: string;
   isSecret: boolean;
   defaultValue?: string;
   values: EnvironmentVariableValueDto[];
@@ -18,6 +19,7 @@ export type EnvironmentVariableResponseDto = {
 
 export type CreateEnvironmentVariableDto = {
   key: string;
+  type?: string;
   isSecret?: boolean;
   defaultValue?: string;
   values?: EnvironmentVariableValueDto[];
@@ -25,6 +27,7 @@ export type CreateEnvironmentVariableDto = {
 
 export type UpdateEnvironmentVariableDto = {
   key?: string;
+  type?: string;
   isSecret?: boolean;
   defaultValue?: string;
   values?: EnvironmentVariableValueDto[];

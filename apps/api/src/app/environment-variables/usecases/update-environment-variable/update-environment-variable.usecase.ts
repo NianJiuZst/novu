@@ -22,6 +22,7 @@ export class UpdateEnvironmentVariable {
     const updateBody: Record<string, unknown> = {};
 
     if (command.key !== undefined) updateBody.key = command.key;
+    if (command.type !== undefined) updateBody.type = command.type;
     if (command.isSecret !== undefined) updateBody.isSecret = command.isSecret;
 
     if (command.values !== undefined) {

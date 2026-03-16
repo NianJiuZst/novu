@@ -1,4 +1,5 @@
-import mongoose, { Schema } from 'mongoose';
+import { EnvironmentVariableType } from '@novu/shared';
+import mongoose, { Schema, SchemaDefinitionProperty } from 'mongoose';
 
 import { schemaOptions } from '../schema-default.options';
 import { EnvironmentVariableDBModel } from './environment-variable.entity';
@@ -29,6 +30,11 @@ const environmentVariableSchema = new Schema<EnvironmentVariableDBModel>(
       type: Schema.Types.String,
       required: true,
     },
+    type: {
+      type: Schema.Types.String,
+      default: EnvironmentVariableType.STRING,
+      enum: Object.values(EnvironmentVariableType),
+    } as SchemaDefinitionProperty<EnvironmentVariableType>,
     isSecret: {
       type: Schema.Types.Boolean,
       default: false,

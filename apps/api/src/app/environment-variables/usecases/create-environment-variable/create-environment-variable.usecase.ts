@@ -1,6 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { encryptSecret, ResourceValidatorService } from '@novu/application-generic';
 import { EnvironmentVariableRepository } from '@novu/dal';
+import { EnvironmentVariableType } from '@novu/shared';
 import { EnvironmentVariableResponseDto } from '../../dtos/environment-variable-response.dto';
 import { toEnvironmentVariableResponseDto } from '../get-environment-variables/get-environment-variables.usecase';
 import { CreateEnvironmentVariableCommand } from './create-environment-variable.command';
@@ -29,6 +30,7 @@ export class CreateEnvironmentVariable {
     const created = await this.environmentVariableRepository.create({
       _organizationId: command.organizationId,
       key: command.key,
+      type: command.type ?? EnvironmentVariableType.STRING,
       isSecret: command.isSecret ?? false,
       values,
     });

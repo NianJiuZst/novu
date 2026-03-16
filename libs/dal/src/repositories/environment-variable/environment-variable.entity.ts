@@ -2,6 +2,7 @@ import {
   EncryptedSecret,
   EnvironmentId,
   EnvironmentVariableId,
+  EnvironmentVariableType,
   IEnvironmentVariable,
   IEnvironmentVariableValue,
   OrganizationId,
@@ -19,6 +20,8 @@ export class EnvironmentVariableEntity implements IEnvironmentVariable {
   _organizationId: OrganizationId;
 
   key: string;
+
+  type: EnvironmentVariableType;
 
   isSecret: boolean;
 

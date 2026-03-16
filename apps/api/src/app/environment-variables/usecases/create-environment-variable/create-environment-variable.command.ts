@@ -1,6 +1,7 @@
 import { OrganizationLevelWithUserCommand } from '@novu/application-generic';
+import { EnvironmentVariableType } from '@novu/shared';
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, Matches, ValidateNested } from 'class-validator';
 
 export class EnvironmentVariableValueCommand {
   @IsString()
@@ -16,6 +17,10 @@ export class CreateEnvironmentVariableCommand extends OrganizationLevelWithUserC
   @IsNotEmpty()
   @Matches(/^[A-Za-z][A-Za-z0-9_]*$/)
   key: string;
+
+  @IsEnum(EnvironmentVariableType)
+  @IsOptional()
+  type?: EnvironmentVariableType;
 
   @IsBoolean()
   @IsOptional()

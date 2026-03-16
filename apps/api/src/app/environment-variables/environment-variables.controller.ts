@@ -119,6 +119,7 @@ export class EnvironmentVariablesController {
         organizationId: user.organizationId,
         userId: user._id,
         key: body.key,
+        type: body.type,
         isSecret: body.isSecret,
         values: body.values,
       })
@@ -145,6 +146,7 @@ export class EnvironmentVariablesController {
         userId: user._id,
         variableId,
         key: body.key,
+        type: body.type,
         isSecret: body.isSecret,
         values: body.values,
       })
