@@ -1,5 +1,4 @@
 import {
-  EncryptedSecret,
   EnvironmentId,
   EnvironmentVariableId,
   EnvironmentVariableType,
@@ -11,7 +10,7 @@ import { ChangePropsValueType } from '../../types/helpers';
 
 export class EnvironmentVariableValueEntity implements IEnvironmentVariableValue {
   _environmentId: EnvironmentId;
-  value: string | EncryptedSecret;
+  value: string;
 }
 
 export class EnvironmentVariableEntity implements IEnvironmentVariable {

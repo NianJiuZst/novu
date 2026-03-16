@@ -37,7 +37,7 @@ export class EnvironmentVariableRepository extends BaseRepositoryV2<
       if (envValue !== undefined) {
         resolved.push({
           key: variable.key,
-          value: envValue.value as string,
+          value: envValue.value,
           isSecret: variable.isSecret,
         });
       }

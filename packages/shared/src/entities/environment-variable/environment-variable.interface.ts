@@ -1,4 +1,4 @@
-import { EncryptedSecret, EnvironmentId, EnvironmentVariableId, OrganizationId } from '../../types';
+import { EnvironmentId, EnvironmentVariableId, OrganizationId } from '../../types';
 
 export enum EnvironmentVariableType {
   STRING = 'string',
@@ -6,7 +6,7 @@ export enum EnvironmentVariableType {
 
 export interface IEnvironmentVariableValue {
   _environmentId: EnvironmentId;
-  value: string | EncryptedSecret;
+  value: string;
 }
 
 export interface IEnvironmentVariable {
