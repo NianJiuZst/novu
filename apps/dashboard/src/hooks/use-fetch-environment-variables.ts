@@ -4,13 +4,15 @@ import { QueryKeys } from '@/utils/query-keys';
 
 interface UseFetchEnvironmentVariablesParams {
   search?: string;
+  enabled?: boolean;
 }
 
-export function useFetchEnvironmentVariables({ search = '' }: UseFetchEnvironmentVariablesParams = {}) {
+export function useFetchEnvironmentVariables({ search = '', enabled = true }: UseFetchEnvironmentVariablesParams = {}) {
   return useQuery({
     queryKey: [QueryKeys.fetchEnvironmentVariables, { search }],
     queryFn: () => getEnvironmentVariables({ search: search || undefined }),
     placeholderData: keepPreviousData,
     refetchOnWindowFocus: true,
+    enabled,
   });
 }

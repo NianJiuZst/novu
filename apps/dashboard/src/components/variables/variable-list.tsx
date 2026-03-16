@@ -1,13 +1,16 @@
-import { PermissionsEnum } from '@novu/shared';
+import { ApiServiceLevelEnum, FeatureNameEnum, getFeatureForTierAsBoolean, PermissionsEnum } from '@novu/shared';
 import React, { useCallback, useRef, useState } from 'react';
 import { RiAddCircleLine, RiSearchLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import { PermissionButton } from '@/components/primitives/permission-button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/primitives/table';
+import { IS_ENTERPRISE, IS_SELF_HOSTED } from '@/config';
 import { useEnvironment } from '@/context/environment/hooks';
 import { useFetchEnvironmentVariables } from '@/hooks/use-fetch-environment-variables';
+import { useFetchSubscription } from '@/hooks/use-fetch-subscription';
 import { buildRoute, ROUTES } from '@/utils/routes';
 import { Input } from '../primitives/input';
+import { VariableListUpgradeCta } from './variable-list-upgrade-cta';
 import { VariableRow, VariableRowSkeleton } from './variable-row';
 
 export const VariableList = () => {
@@ -16,6 +19,14 @@ export const VariableList = () => {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const { currentEnvironment, environments } = useEnvironment();
   const navigate = useNavigate();
+  const { subscription } = useFetchSubscription();
+
+  const canUseVariablesFeature =
+    getFeatureForTierAsBoolean(
+      FeatureNameEnum.ENVIRONMENT_VARIABLES,
+      subscription?.apiServiceLevel || ApiServiceLevelEnum.FREE
+    ) &&
+    (!IS_SELF_HOSTED || IS_ENTERPRISE);
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -27,7 +38,14 @@ export const VariableList = () => {
     }, 400);
   }, []);
 
-  const { data: variables, isLoading } = useFetchEnvironmentVariables({ search: debouncedSearch });
+  const { data: variables, isLoading } = useFetchEnvironmentVariables({
+    search: debouncedSearch,
+    enabled: canUseVariablesFeature,
+  });
+
+  if (!canUseVariablesFeature) {
+    return <VariableListUpgradeCta />;
+  }
 
   const handleCreateClick = () => {
     if (currentEnvironment?.slug) {
