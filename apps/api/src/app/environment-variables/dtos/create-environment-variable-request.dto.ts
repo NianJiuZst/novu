@@ -1,7 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EnvironmentVariableType, ICreateEnvironmentVariableDto, IEnvironmentVariableValueDto } from '@novu/shared';
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsEnum, IsOptional, IsString, Matches, MaxLength, ValidateNested } from 'class-validator';
+import {
+  ArrayUnique,
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator';
 
 export class EnvironmentVariableValueDto implements IEnvironmentVariableValueDto {
   @ApiProperty()
@@ -38,6 +48,7 @@ export class CreateEnvironmentVariableRequestDto implements ICreateEnvironmentVa
 
   @ApiPropertyOptional({ type: [EnvironmentVariableValueDto] })
   @IsArray()
+  @ArrayUnique((v: EnvironmentVariableValueDto) => v._environmentId, { message: 'Duplicate _environmentId in values' })
   @ValidateNested({ each: true })
   @Type(() => EnvironmentVariableValueDto)
   @IsOptional()
