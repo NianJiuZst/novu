@@ -20,7 +20,6 @@ import { Hint, HintIcon } from '@/components/primitives/hint';
 import { Input } from '@/components/primitives/input';
 import { Separator } from '@/components/primitives/separator';
 import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner-helpers';
-import { Switch } from '@/components/primitives/switch';
 import { useCreateEnvironmentVariable } from '@/hooks/use-create-environment-variable';
 import { useUpdateEnvironmentVariable } from '@/hooks/use-update-environment-variable';
 import { EnvironmentBranchIcon } from '../primitives/environment-branch-icon';
@@ -179,27 +178,6 @@ export const UpsertVariableForm = ({
                   Must start with a letter and only contain letters, numbers, and underscores
                 </Hint>
               )}
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="isSecret"
-          render={({ field }) => (
-            <FormItem>
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1">
-                    <FormLabel className="mb-0">Secret variable</FormLabel>
-                    <RiInformationLine className="text-text-soft size-4" />
-                  </div>
-                  <p className="text-text-sub text-xs">Secret variables are never exposed in the API and dashboard.</p>
-                </div>
-                <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
-                </FormControl>
-              </div>
             </FormItem>
           )}
         />
