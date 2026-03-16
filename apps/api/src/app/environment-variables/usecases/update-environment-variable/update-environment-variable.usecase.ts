@@ -33,7 +33,7 @@ export class UpdateEnvironmentVariable {
     }
 
     await this.environmentVariableRepository.update(
-      { _id: command.variableId as any, _organizationId: command.organizationId },
+      { _id: command.variableId, _organizationId: command.organizationId },
       { $set: updateBody }
     );
 
