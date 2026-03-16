@@ -19,8 +19,6 @@ export class UpdateEnvironmentVariable {
       throw new NotFoundException(`Environment variable with id ${command.variableId} not found`);
     }
 
-    const isSecret = command.isSecret !== undefined ? command.isSecret : existing.isSecret;
-
     const updateBody: Record<string, unknown> = {};
 
     if (command.key !== undefined) updateBody.key = command.key;
@@ -29,12 +27,7 @@ export class UpdateEnvironmentVariable {
     if (command.values !== undefined) {
       updateBody.values = command.values.map((v) => ({
         _environmentId: v._environmentId,
-        value: isSecret ? encryptSecret(v.value) : v.value,
-      }));
-    } else if (command.isSecret !== undefined && command.isSecret !== existing.isSecret) {
-      updateBody.values = existing.values.map((v) => ({
-        _environmentId: v._environmentId,
-        value: command.isSecret ? encryptSecret(v.value as string) : (v.value as string),
+        value: encryptSecret(v.value),
       }));
     }
 

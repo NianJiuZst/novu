@@ -23,7 +23,7 @@ export class CreateEnvironmentVariable {
 
     const values = (command.values ?? []).map((v) => ({
       _environmentId: v._environmentId,
-      value: command.isSecret ? encryptSecret(v.value) : v.value,
+      value: encryptSecret(v.value),
     }));
 
     const created = await this.environmentVariableRepository.create({

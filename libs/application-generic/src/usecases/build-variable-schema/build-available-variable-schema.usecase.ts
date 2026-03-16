@@ -10,7 +10,7 @@ import {
 import { ControlValuesLevelEnum, StepTypeEnum } from '@novu/shared';
 import { JSONSchemaDto } from '../../dtos/json-schema.dto';
 import { PreviewPayloadDto } from '../../dtos/workflow/preview-payload.dto';
-import { resolveEnvironmentVariables } from '../../encryption/encrypt-provider';
+import { resolveEnvironmentVariables } from '../../encryption/encrypt-environment-variable';
 import { Instrument, InstrumentUsecase } from '../../instrumentation';
 import {
   buildContextSchema,

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { decryptEnvironmentVariableValue } from '@novu/application-generic';
 import { EnvironmentVariableEntity, EnvironmentVariableRepository } from '@novu/dal';
 import { EnvironmentVariableResponseDto, SECRET_MASK } from '../../dtos/environment-variable-response.dto';
 import { GetEnvironmentVariablesCommand } from './get-environment-variables.command';
@@ -26,7 +27,7 @@ export function toEnvironmentVariableResponseDto(variable: EnvironmentVariableEn
     isSecret: variable.isSecret,
     values: variable.values.map((v) => ({
       _environmentId: v._environmentId,
-      value: variable.isSecret ? SECRET_MASK : (v.value as string),
+      value: variable.isSecret ? SECRET_MASK : decryptEnvironmentVariableValue(v.value as string),
     })),
     createdAt: variable.createdAt,
     updatedAt: variable.updatedAt,
