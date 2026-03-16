@@ -85,8 +85,12 @@ export class GetEnvironmentVariableUsage {
   /**
    * Matches both Liquid syntax ({{env.KEY}}) and Maily JSON node attributes ("id": "env.KEY"),
    * so a bare `env.KEY` search covers all control value storage formats without false negatives.
+   * Uses token-boundary regex to avoid false positives on similarly prefixed keys (e.g. env.KEY vs env.KEY_EXTRA).
    */
   private controlsReferenceEnvVar(controls: ControlValuesUsageFetchResult['controls'], envVarPattern: string): boolean {
-    return JSON.stringify(controls).includes(envVarPattern);
+    const escaped = envVarPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const boundaryRegex = new RegExp(`(^|[^\\w$])${escaped}(?![\\w$])`);
+
+    return boundaryRegex.test(JSON.stringify(controls));
   }
 }
