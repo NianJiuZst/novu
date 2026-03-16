@@ -8,11 +8,14 @@ import {
   RiCornerDownRightLine,
   RiDeleteBin2Line,
   RiEditLine,
+  RiEyeLine,
+  RiEyeOffLine,
   RiMore2Fill,
 } from 'react-icons/ri';
 import type { EnvironmentVariableResponseDto } from '@/api/environment-variables';
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { CompactButton } from '@/components/primitives/button-compact';
+import { CopyButton } from '@/components/primitives/copy-button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,8 +73,9 @@ function EnvironmentSubRow({
   variable: EnvironmentVariableResponseDto;
   environment: IEnvironment;
 }) {
+  const [isRevealed, setIsRevealed] = useState(false);
   const envValue = variable.values.find((v) => v._environmentId === environment._id);
-  const displayValue = variable.isSecret && envValue?.value ? SECRET_MASK : (envValue?.value ?? '');
+  const displayValue = !isRevealed && envValue?.value ? SECRET_MASK : (envValue?.value ?? '');
 
   return (
     <TableRow className="bg-neutral-alpha-25 hover:bg-neutral-alpha-50">
@@ -84,12 +88,21 @@ function EnvironmentSubRow({
       </TableCell>
       <TableCell>
         {envValue ? (
-          <span className="font-code text-text-strong text-xs">{displayValue}</span>
+          <div className="flex items-center gap-1">
+            <span className="font-code text-text-strong max-w-[300px] truncate text-xs">{displayValue}</span>
+            <button
+              type="button"
+              className="text-text-sub hover:text-text-strong hover:bg-bg-weak inline-flex items-center justify-center rounded p-1 transition duration-200 ease-out"
+              onClick={() => setIsRevealed((prev) => !prev)}
+            >
+              {isRevealed ? <RiEyeOffLine className="size-4" /> : <RiEyeLine className="size-4" />}
+            </button>
+            <CopyButton valueToCopy={envValue?.value ?? ''} size="xs" className="p-1" />
+          </div>
         ) : (
           <span className="text-text-disabled text-xs italic">No value set</span>
         )}
       </TableCell>
-      <TableCell />
       <TableCell />
       <TableCell />
     </TableRow>
@@ -138,9 +151,6 @@ export const VariableRow = ({
           <div className="flex items-center gap-2">
             {totalCount > 0 && <CoverageBadge filledCount={filledCount} totalCount={totalCount} />}
           </div>
-        </VariableCell>
-        <VariableCell>
-          <span className="text-text-soft text-sm">–</span>
         </VariableCell>
         <VariableCell>
           {variable.updatedAt && (
@@ -210,9 +220,6 @@ export const VariableRowSkeleton = () => (
     </TableCell>
     <TableCell>
       <Skeleton className="h-5 w-32" />
-    </TableCell>
-    <TableCell>
-      <Skeleton className="h-5 w-24" />
     </TableCell>
     <TableCell>
       <Skeleton className="h-5 w-28" />

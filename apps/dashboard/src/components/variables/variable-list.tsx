@@ -51,7 +51,6 @@ export const VariableList = () => {
             <TableRow>
               <TableHead className="w-[370px]">Variable</TableHead>
               <TableHead>Value</TableHead>
-              <TableHead className="w-[175px]">Used in</TableHead>
               <TableHead className="w-[175px]">Last updated</TableHead>
               <TableHead className="w-[52px]" />
             </TableRow>
@@ -99,7 +98,6 @@ export const VariableList = () => {
           <TableRow>
             <TableHead className="w-[370px]">Variable</TableHead>
             <TableHead>Value</TableHead>
-            <TableHead className="w-[175px]">Used in</TableHead>
             <TableHead className="w-[175px]">Last updated</TableHead>
             <TableHead className="w-[52px]" />
           </TableRow>
@@ -108,7 +106,7 @@ export const VariableList = () => {
           <TableBody>
             {variables?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-text-soft py-10 text-center text-sm">
+                <TableCell colSpan={4} className="text-text-soft py-10 text-center text-sm">
                   {debouncedSearch ? 'No variables match your search.' : 'No variables yet. Create your first one.'}
                 </TableCell>
               </TableRow>
