@@ -246,8 +246,8 @@ export const UpsertVariableForm = ({
               <span className="text-text-strong font-medium">Note</span>
               {': These values can be accessed in the workflows via '}
               <code className="font-mono">{'{{env.'}</code>
-              <code className="font-mono text-text-strong">{'{KEY}'}</code>
-              <code className="font-mono">{'}'}</code>
+              <code className="font-mono text-text-strong">{'KEY'}</code>
+              <code className="font-mono">{'}}'}</code>
               {'. '}
               <Link
                 to="https://docs.novu.co/platform/workflow/template-editor/variables"
