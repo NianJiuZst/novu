@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import {
   RiBarChartBoxLine,
   RiBuildingLine,
+  RiCodeSSlashLine,
   RiDatabase2Line,
   RiDiscussLine,
   RiGroup2Line,
@@ -271,6 +272,16 @@ export const SideNavigation = () => {
                 >
                   <RiDatabase2Line className="size-4" />
                   <span>Environments</span>
+                </NavigationLink>
+                <NavigationLink
+                  to={
+                    currentEnvironment?.slug
+                      ? buildRoute(ROUTES.VARIABLES, { environmentSlug: currentEnvironment?.slug ?? '' })
+                      : undefined
+                  }
+                >
+                  <RiCodeSSlashLine className="size-4" />
+                  <span>Variables</span>
                 </NavigationLink>
                 <Protect permission={PermissionsEnum.INTEGRATION_READ}>
                   <NavigationLink

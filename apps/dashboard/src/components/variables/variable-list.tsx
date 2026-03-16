@@ -1,0 +1,93 @@
+import { PermissionsEnum } from '@novu/shared';
+import React, { useCallback, useRef, useState } from 'react';
+import { RiAddCircleLine, RiSearchLine } from 'react-icons/ri';
+import { useNavigate } from 'react-router-dom';
+import { PermissionButton } from '@/components/primitives/permission-button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/primitives/table';
+import { useEnvironment } from '@/context/environment/hooks';
+import { useFetchEnvironmentVariables } from '@/hooks/use-fetch-environment-variables';
+import { buildRoute, ROUTES } from '@/utils/routes';
+import { Input } from '../primitives/input';
+import { VariableRow, VariableRowSkeleton } from './variable-row';
+
+export const VariableList = () => {
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const { currentEnvironment, environments } = useEnvironment();
+  const navigate = useNavigate();
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(value);
+    }, 400);
+  }, []);
+
+  const { data: variables, isLoading } = useFetchEnvironmentVariables({ search: debouncedSearch });
+
+  const handleCreateClick = () => {
+    if (currentEnvironment?.slug) {
+      navigate(buildRoute(ROUTES.VARIABLES_CREATE, { environmentSlug: currentEnvironment.slug }));
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2 py-2">
+      <div className="flex items-center justify-between">
+        <div className="w-[250px]">
+          <Input
+            size="xs"
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Search variables..."
+            leadingIcon={RiSearchLine}
+          />
+        </div>
+        <PermissionButton
+          permission={PermissionsEnum.ORG_SETTINGS_WRITE}
+          variant="primary"
+          mode="gradient"
+          size="xs"
+          leadingIcon={RiAddCircleLine}
+          onClick={handleCreateClick}
+        >
+          Create variable
+        </PermissionButton>
+      </div>
+      <Table isLoading={isLoading} loadingRowsCount={5} loadingRow={<VariableRowSkeleton />}>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[370px]">Variable</TableHead>
+            <TableHead>Value ({currentEnvironment?.name ?? 'Environment'})</TableHead>
+            <TableHead className="w-[175px]">Used in</TableHead>
+            <TableHead className="w-[175px]">Last updated</TableHead>
+            <TableHead className="w-[52px]" />
+          </TableRow>
+        </TableHeader>
+        {!isLoading && (
+          <TableBody>
+            {variables?.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-text-soft py-10 text-center text-sm">
+                  {debouncedSearch ? 'No variables match your search.' : 'No variables yet. Create your first one.'}
+                </TableCell>
+              </TableRow>
+            )}
+            {variables?.map((variable) => (
+              <VariableRow
+                key={variable._id}
+                variable={variable}
+                currentEnvironment={currentEnvironment}
+                environments={environments}
+              />
+            ))}
+          </TableBody>
+        )}
+      </Table>
+    </div>
+  );
+};

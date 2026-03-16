@@ -35,4 +35,6 @@ export const QueryKeys = Object.freeze({
   fetchContext: 'fetchContext',
   fetchSubscriberSubscriptions: 'fetchSubscriberSubscriptions',
   fetchChat: 'fetchChat',
+  fetchEnvironmentVariables: 'fetchEnvironmentVariables',
+  fetchEnvironmentVariable: 'fetchEnvironmentVariable',
 });
