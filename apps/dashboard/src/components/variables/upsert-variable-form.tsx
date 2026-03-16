@@ -6,6 +6,7 @@ import { RiInformationLine } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
 import { NovuApiError } from '@/api/api.client';
+import type { EnvironmentVariableResponseDto } from '@/api/environment-variables';
 import {
   Form,
   FormControl,
@@ -21,46 +22,69 @@ import { Separator } from '@/components/primitives/separator';
 import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner-helpers';
 import { Switch } from '@/components/primitives/switch';
 import { useCreateEnvironmentVariable } from '@/hooks/use-create-environment-variable';
+import { useUpdateEnvironmentVariable } from '@/hooks/use-update-environment-variable';
 import { EnvironmentBranchIcon } from '../primitives/environment-branch-icon';
 
-const VARIABLE_KEY_REGEX = /^[A-Z][A-Z0-9_]*$/;
+const VARIABLE_KEY_REGEX = /^[A-Za-z][A-Za-z0-9_]*$/;
 
-const CreateVariableSchema = z.object({
-  key: z
-    .string()
-    .min(1, 'Variable key is required')
-    .regex(VARIABLE_KEY_REGEX, 'Must be unique and all uppercase, using _ only'),
-  isSecret: z.boolean(),
-  defaultValue: z.string().optional(),
-  environmentValues: z.record(z.string(), z.string()),
-});
+const VariableSchema = z
+  .object({
+    key: z
+      .string()
+      .min(1, 'Variable key is required')
+      .regex(VARIABLE_KEY_REGEX, 'Must start with a letter and only contain letters, numbers, and underscores'),
+    isSecret: z.boolean(),
+    environmentValues: z.record(z.string(), z.string()),
+  })
+  .superRefine((data, ctx) => {
+    for (const [envId, value] of Object.entries(data.environmentValues)) {
+      if (!value.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Value is required',
+          path: ['environmentValues', envId],
+        });
+      }
+    }
+  });
 
-type CreateVariableFormValues = z.infer<typeof CreateVariableSchema>;
+type VariableFormValues = z.infer<typeof VariableSchema>;
 
-type CreateVariableFormProps = {
+type UpsertVariableFormProps = {
   formId?: string;
   environments: IEnvironment[];
+  variable?: EnvironmentVariableResponseDto;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
   onSubmitStart?: () => void;
 };
 
-export const CreateVariableForm = ({
+export const UpsertVariableForm = ({
   formId: providedFormId,
   environments,
+  variable,
   onSuccess,
   onError,
   onSubmitStart,
-}: CreateVariableFormProps) => {
+}: UpsertVariableFormProps) => {
   const generatedFormId = useId();
   const formId = providedFormId ?? generatedFormId;
+  const isEditing = !!variable;
+
+  const initialEnvironmentValues = Object.fromEntries(
+    environments.map((env) => {
+      const match = isEditing ? variable.values.find((v) => v._environmentId === env._id) : undefined;
+
+      return [env._id, match?.value ?? ''];
+    })
+  );
 
   const { createEnvironmentVariable } = useCreateEnvironmentVariable({
     onSuccess: () => {
       showSuccessToast('Variable created successfully');
       onSuccess?.();
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       if (error instanceof NovuApiError && error.status === 409) {
         form.setError('key', { type: 'manual', message: 'A variable with this key already exists' });
       } else {
@@ -71,32 +95,56 @@ export const CreateVariableForm = ({
     },
   });
 
-  const form = useForm<CreateVariableFormValues>({
-    defaultValues: {
-      key: '',
-      isSecret: false,
-      defaultValue: '',
-      environmentValues: {},
+  const { updateEnvironmentVariable } = useUpdateEnvironmentVariable({
+    onSuccess: () => {
+      showSuccessToast('Variable updated successfully');
+      onSuccess?.();
     },
-    resolver: standardSchemaResolver(CreateVariableSchema),
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Failed to update variable';
+      showErrorToast(message);
+      onError?.(error instanceof Error ? error : new Error('Unknown error'));
+    },
+  });
+
+  const form = useForm<VariableFormValues>({
+    defaultValues: {
+      key: variable?.key ?? '',
+      isSecret: variable?.isSecret ?? false,
+      environmentValues: initialEnvironmentValues,
+    },
+    resolver: standardSchemaResolver(VariableSchema),
     shouldFocusError: false,
     mode: 'onSubmit',
     reValidateMode: 'onChange',
   });
 
-  const onSubmit = async (data: CreateVariableFormValues) => {
+  const onSubmit = async (data: VariableFormValues) => {
     onSubmitStart?.();
 
-    const values = Object.entries(data.environmentValues)
-      .filter(([, val]) => val.trim())
-      .map(([_environmentId, value]) => ({ _environmentId, value }));
+    const values = Object.entries(data.environmentValues).map(([_environmentId, value]) => ({
+      _environmentId,
+      value,
+    }));
 
-    await createEnvironmentVariable({
-      key: data.key.trim(),
-      isSecret: data.isSecret,
-      defaultValue: data.defaultValue?.trim() || undefined,
-      values,
-    });
+    try {
+      if (isEditing) {
+        await updateEnvironmentVariable({
+          variableId: variable._id,
+          key: data.key.trim(),
+          isSecret: data.isSecret,
+          values,
+        });
+      } else {
+        await createEnvironmentVariable({
+          key: data.key.trim(),
+          isSecret: data.isSecret,
+          values,
+        });
+      }
+    } catch {
+      // errors are handled by the mutation's onError callback
+    }
   };
 
   return (
@@ -120,7 +168,7 @@ export const CreateVariableForm = ({
                   placeholder="e.g. BASE_URL"
                   size="xs"
                   hasError={!!fieldState.error}
-                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                  onChange={(e) => field.onChange(e.target.value)}
                 />
               </FormControl>
               {fieldState.error ? (
@@ -128,7 +176,7 @@ export const CreateVariableForm = ({
               ) : (
                 <Hint>
                   <HintIcon as={RiInformationLine} />
-                  Must be unique and all uppercase, using _ only
+                  Must start with a letter and only contain letters, numbers, and underscores
                 </Hint>
               )}
             </FormItem>
@@ -165,44 +213,24 @@ export const CreateVariableForm = ({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <FormField
-              control={form.control}
-              name="defaultValue"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center gap-1.5">
-                    <div className="flex w-[175px] shrink-0 items-center gap-1">
-                      <span className="text-text-sub text-xs font-medium">Default value</span>
-                      <RiInformationLine className="text-text-soft size-4" />
-                    </div>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Default value used across environments..."
-                        size="xs"
-                        className="flex-1"
-                      />
-                    </FormControl>
-                  </div>
-                </FormItem>
-              )}
-            />
-
             {environments.map((env) => (
               <FormField
                 key={env._id}
                 control={form.control}
                 name={`environmentValues.${env._id}`}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
                     <div className="flex items-center gap-1.5">
                       <div className="flex w-[175px] shrink-0 items-center gap-1.5">
                         <EnvironmentBranchIcon environment={env} size="sm" />
                         <span className="text-text-sub truncate text-xs font-medium">{env.name}</span>
                       </div>
-                      <FormControl>
-                        <Input {...field} placeholder={`${env.name} value`} size="xs" className="flex-1" />
-                      </FormControl>
+                      <div className="flex flex-1 flex-col gap-1">
+                        <FormControl>
+                          <Input {...field} placeholder={`${env.name} value`} size="xs" hasError={!!fieldState.error} />
+                        </FormControl>
+                        {fieldState.error && <FormMessage />}
+                      </div>
                     </div>
                   </FormItem>
                 )}

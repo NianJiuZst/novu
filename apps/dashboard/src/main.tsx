@@ -44,7 +44,6 @@ import { ContextsPage } from './pages/contexts';
 import { CreateContextPage } from './pages/create-context';
 import { CreateSubscriberPage } from './pages/create-subscriber';
 import { CreateTopicPage } from './pages/create-topic';
-import { CreateVariablePage } from './pages/create-variable';
 import { DuplicateLayoutPage } from './pages/duplicate-layout-page';
 import { EditContextPage } from './pages/edit-context';
 import { EditLayoutPage } from './pages/edit-layout';
@@ -62,6 +61,7 @@ import { ResetPasswordPage } from './pages/reset-password';
 import { TestWorkflowDrawerPage } from './pages/test-workflow-drawer-page';
 import { TestWorkflowRouteHandler } from './pages/test-workflow-route-handler';
 import { TopicsPage } from './pages/topics';
+import { UpsertVariablePage } from './pages/upsert-variable';
 import { VariablesPage } from './pages/variables';
 import { VercelIntegrationPage } from './pages/vercel-integration-page';
 import { AuthRoute, CatchAllRoute, DashboardRoute, RootRoute } from './routes';
@@ -359,7 +359,7 @@ const router = createBrowserRouter([
                     path: ROUTES.VARIABLES_CREATE,
                     element: (
                       <ProtectedRoute permission={PermissionsEnum.ORG_SETTINGS_WRITE} isDrawerRoute>
-                        <CreateVariablePage />
+                        <UpsertVariablePage />
                       </ProtectedRoute>
                     ),
                   },

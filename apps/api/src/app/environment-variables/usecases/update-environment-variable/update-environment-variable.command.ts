@@ -9,7 +9,7 @@ export class UpdateEnvironmentVariableCommand extends OrganizationLevelWithUserC
   variableId: string;
 
   @IsString()
-  @Matches(/^[A-Z][A-Z0-9_]*$/)
+  @Matches(/^[A-Za-z][A-Za-z0-9_]*$/)
   @IsOptional()
   key?: string;
 

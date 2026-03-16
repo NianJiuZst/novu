@@ -14,7 +14,7 @@ export class EnvironmentVariableValueCommand {
 export class CreateEnvironmentVariableCommand extends OrganizationLevelWithUserCommand {
   @IsString()
   @IsNotEmpty()
-  @Matches(/^[A-Z][A-Z0-9_]*$/)
+  @Matches(/^[A-Za-z][A-Za-z0-9_]*$/)
   key: string;
 
   @IsBoolean()

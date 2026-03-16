@@ -7,6 +7,7 @@ import {
   RiCheckLine,
   RiCornerDownRightLine,
   RiDeleteBin2Line,
+  RiEditLine,
   RiMore2Fill,
 } from 'react-icons/ri';
 import type { EnvironmentVariableResponseDto } from '@/api/environment-variables';
@@ -27,6 +28,7 @@ import { useDeleteEnvironmentVariable } from '@/hooks/use-delete-environment-var
 import { formatDateSimple } from '@/utils/format-date';
 import { Protect } from '@/utils/protect';
 import { cn } from '@/utils/ui';
+import { UpsertVariableDrawer } from './upsert-variable-drawer';
 
 const SECRET_MASK = '••••••••';
 
@@ -94,16 +96,17 @@ function EnvironmentSubRow({
   );
 }
 
-export const VariableRow = ({ variable, currentEnvironment, environments = [] }: VariableRowProps) => {
+export const VariableRow = ({
+  variable,
+  currentEnvironment: _currentEnvironment,
+  environments = [],
+}: VariableRowProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const { deleteEnvironmentVariable, isPending: isDeleting } = useDeleteEnvironmentVariable();
 
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
-
-  const currentEnvValue = variable.values.find((v) => v._environmentId === currentEnvironment?._id);
-  const displayCurrentValue =
-    variable.isSecret && currentEnvValue?.value ? SECRET_MASK : (currentEnvValue?.value ?? '');
 
   const filledCount = variable.values.filter((v) => v.value).length;
   const totalCount = environments.length;
@@ -123,7 +126,9 @@ export const VariableRow = ({ variable, currentEnvironment, environments = [] }:
             ) : (
               <RiArrowRightSLine className="text-text-sub size-4 shrink-0" />
             )}
-            <span className="font-code text-text-strong text-sm font-medium">{variable.key}</span>
+            <span className="font-code text-text-strong max-w-[200px] truncate text-sm font-medium">
+              {variable.key}
+            </span>
             {variable.isSecret && (
               <span className="bg-feature/10 text-feature rounded px-1.5 py-0.5 text-xs font-medium">Secret</span>
             )}
@@ -131,11 +136,6 @@ export const VariableRow = ({ variable, currentEnvironment, environments = [] }:
         </VariableCell>
         <VariableCell>
           <div className="flex items-center gap-2">
-            {currentEnvValue?.value ? (
-              <span className="font-code text-text-strong text-sm">{displayCurrentValue}</span>
-            ) : (
-              <span className="text-text-soft text-sm italic">No value</span>
-            )}
             {totalCount > 0 && <CoverageBadge filledCount={filledCount} totalCount={totalCount} />}
           </div>
         </VariableCell>
@@ -163,6 +163,13 @@ export const VariableRow = ({ variable, currentEnvironment, environments = [] }:
               <DropdownMenuGroup>
                 <Protect permission={PermissionsEnum.ORG_SETTINGS_WRITE}>
                   <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => setTimeout(() => setIsEditDrawerOpen(true), 0)}
+                  >
+                    <RiEditLine />
+                    Edit variable
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
                     className="text-destructive cursor-pointer"
                     onClick={() => setTimeout(() => setIsDeleteModalOpen(true), 0)}
                   >
@@ -177,6 +184,7 @@ export const VariableRow = ({ variable, currentEnvironment, environments = [] }:
       </TableRow>
       {isExpanded &&
         environments.map((env) => <EnvironmentSubRow key={env._id} variable={variable} environment={env} />)}
+      <UpsertVariableDrawer variable={variable} isOpen={isEditDrawerOpen} onOpenChange={setIsEditDrawerOpen} />
       <ConfirmationModal
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}

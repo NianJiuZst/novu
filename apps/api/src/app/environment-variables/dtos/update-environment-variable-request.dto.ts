@@ -5,9 +5,14 @@ import { IsArray, IsBoolean, IsOptional, IsString, Matches, ValidateNested } fro
 import { EnvironmentVariableValueDto } from './create-environment-variable-request.dto';
 
 export class UpdateEnvironmentVariableRequestDto implements IUpdateEnvironmentVariableDto {
-  @ApiPropertyOptional({ description: 'Unique key for the variable. Must be uppercase with underscores only.' })
+  @ApiPropertyOptional({
+    description:
+      'Unique key for the variable. Must start with a letter and contain only letters, digits, and underscores.',
+  })
   @IsString()
-  @Matches(/^[A-Z][A-Z0-9_]*$/, { message: 'Key must be uppercase and contain only letters, digits, and underscores' })
+  @Matches(/^[A-Za-z][A-Za-z0-9_]*$/, {
+    message: 'Key must start with a letter and contain only letters, digits, and underscores',
+  })
   @IsOptional()
   key?: string;
 

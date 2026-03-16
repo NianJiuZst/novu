@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreateVariableDrawer } from '@/components/variables/create-variable-drawer';
+import { UpsertVariableDrawer } from '@/components/variables/upsert-variable-drawer';
 import { useEnvironment } from '@/context/environment/hooks';
 import { useOnElementUnmount } from '@/hooks/use-on-element-unmount';
 import { buildRoute, ROUTES } from '@/utils/routes';
 
-export const CreateVariablePage = () => {
+export const UpsertVariablePage = () => {
   const [isOpen, setIsOpen] = useState(true);
   const navigate = useNavigate();
   const { currentEnvironment } = useEnvironment();
@@ -22,7 +22,7 @@ export const CreateVariablePage = () => {
   });
 
   return (
-    <CreateVariableDrawer
+    <UpsertVariableDrawer
       ref={unmountRef}
       isOpen={isOpen}
       onOpenChange={setIsOpen}

@@ -14,9 +14,14 @@ export class EnvironmentVariableValueDto implements IEnvironmentVariableValueDto
 }
 
 export class CreateEnvironmentVariableRequestDto implements ICreateEnvironmentVariableDto {
-  @ApiProperty({ description: 'Unique key for the variable. Must be uppercase with underscores only.' })
+  @ApiProperty({
+    description:
+      'Unique key for the variable. Must start with a letter and contain only letters, digits, and underscores.',
+  })
   @IsString()
-  @Matches(/^[A-Z][A-Z0-9_]*$/, { message: 'Key must be uppercase and contain only letters, digits, and underscores' })
+  @Matches(/^[A-Za-z][A-Za-z0-9_]*$/, {
+    message: 'Key must start with a letter and contain only letters, digits, and underscores',
+  })
   key: string;
 
   @ApiPropertyOptional({ description: 'Whether this variable is a secret (encrypted at rest, masked in responses)' })

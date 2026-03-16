@@ -62,7 +62,7 @@ export const VariableList = () => {
         <TableHeader>
           <TableRow>
             <TableHead className="w-[370px]">Variable</TableHead>
-            <TableHead>Value ({currentEnvironment?.name ?? 'Environment'})</TableHead>
+            <TableHead>Value</TableHead>
             <TableHead className="w-[175px]">Used in</TableHead>
             <TableHead className="w-[175px]">Last updated</TableHead>
             <TableHead className="w-[52px]" />
