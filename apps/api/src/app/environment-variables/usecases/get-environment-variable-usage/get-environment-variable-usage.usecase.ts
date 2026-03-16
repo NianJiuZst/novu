@@ -47,7 +47,9 @@ export class GetEnvironmentVariableUsage {
       CONTROL_VALUES_SELECT.join(' ')
     );
 
-    const referencingControlValues = controlValues.filter((cv) => JSON.stringify(cv.controls).includes(envVarPattern));
+    const referencingControlValues = controlValues.filter((cv) =>
+      this.controlsReferenceEnvVar(cv.controls, envVarPattern)
+    );
 
     const uniqueWorkflowIds = [
       ...new Set(referencingControlValues.filter((cv) => cv._workflowId).map((cv) => cv._workflowId as string)),
@@ -78,5 +80,13 @@ export class GetEnvironmentVariableUsage {
       }));
 
     return { workflows };
+  }
+
+  /**
+   * Matches both Liquid syntax ({{env.KEY}}) and Maily JSON node attributes ("id": "env.KEY"),
+   * so a bare `env.KEY` search covers all control value storage formats without false negatives.
+   */
+  private controlsReferenceEnvVar(controls: ControlValuesUsageFetchResult['controls'], envVarPattern: string): boolean {
+    return JSON.stringify(controls).includes(envVarPattern);
   }
 }
