@@ -40,6 +40,7 @@ import {
   ControlValuesRepository,
   DalService,
   EnvironmentRepository,
+  EnvironmentVariableRepository,
   ExecutionDetailsRepository,
   IntegrationRepository,
   JobRepository,
@@ -63,6 +64,7 @@ import { ActiveJobsMetricService } from '../workflow/services';
 
 const DAL_MODELS = [
   EnvironmentRepository,
+  EnvironmentVariableRepository,
   ExecutionDetailsRepository,
   NotificationTemplateRepository,
   SubscriberRepository,
