@@ -19,7 +19,7 @@ export const VariableList = () => {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const { currentEnvironment, environments } = useEnvironment();
   const navigate = useNavigate();
-  const { subscription } = useFetchSubscription();
+  const { subscription, isLoading: isLoadingSubscription } = useFetchSubscription();
 
   const canUseVariablesFeature =
     getFeatureForTierAsBoolean(
@@ -38,10 +38,28 @@ export const VariableList = () => {
     }, 400);
   }, []);
 
-  const { data: variables, isLoading } = useFetchEnvironmentVariables({
+  const { data: variables, isLoading: isLoadingVariables } = useFetchEnvironmentVariables({
     search: debouncedSearch,
     enabled: canUseVariablesFeature,
   });
+
+  if (isLoadingSubscription) {
+    return (
+      <div className="flex flex-col gap-2 py-2">
+        <Table isLoading loadingRowsCount={5} loadingRow={<VariableRowSkeleton />}>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[370px]">Variable</TableHead>
+              <TableHead>Value</TableHead>
+              <TableHead className="w-[175px]">Used in</TableHead>
+              <TableHead className="w-[175px]">Last updated</TableHead>
+              <TableHead className="w-[52px]" />
+            </TableRow>
+          </TableHeader>
+        </Table>
+      </div>
+    );
+  }
 
   if (!canUseVariablesFeature) {
     return <VariableListUpgradeCta />;
@@ -76,7 +94,7 @@ export const VariableList = () => {
           Create variable
         </PermissionButton>
       </div>
-      <Table isLoading={isLoading} loadingRowsCount={5} loadingRow={<VariableRowSkeleton />}>
+      <Table isLoading={isLoadingVariables} loadingRowsCount={5} loadingRow={<VariableRowSkeleton />}>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[370px]">Variable</TableHead>
@@ -86,7 +104,7 @@ export const VariableList = () => {
             <TableHead className="w-[52px]" />
           </TableRow>
         </TableHeader>
-        {!isLoading && (
+        {!isLoadingVariables && (
           <TableBody>
             {variables?.length === 0 && (
               <TableRow>
