@@ -1,5 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { encryptSecret } from '@novu/application-generic';
+import { encryptSecret, ResourceValidatorService } from '@novu/application-generic';
 import { EnvironmentVariableRepository } from '@novu/dal';
 import { EnvironmentVariableResponseDto } from '../../dtos/environment-variable-response.dto';
 import { toEnvironmentVariableResponseDto } from '../get-environment-variables/get-environment-variables.usecase';
@@ -7,9 +7,14 @@ import { CreateEnvironmentVariableCommand } from './create-environment-variable.
 
 @Injectable()
 export class CreateEnvironmentVariable {
-  constructor(private environmentVariableRepository: EnvironmentVariableRepository) {}
+  constructor(
+    private environmentVariableRepository: EnvironmentVariableRepository,
+    private resourceValidatorService: ResourceValidatorService
+  ) {}
 
   async execute(command: CreateEnvironmentVariableCommand): Promise<EnvironmentVariableResponseDto> {
+    await this.resourceValidatorService.validateEnvironmentVariablesLimit(command.organizationId);
+
     const existing = await this.environmentVariableRepository.findByKey(command.organizationId, command.key);
 
     if (existing) {

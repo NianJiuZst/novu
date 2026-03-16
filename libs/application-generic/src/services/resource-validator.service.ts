@@ -3,6 +3,7 @@ import {
   CommunityOrganizationRepository,
   EnvironmentEntity,
   EnvironmentRepository,
+  EnvironmentVariableRepository,
   LayoutRepository,
   NotificationTemplateRepository,
   OrganizationEntity,
@@ -38,6 +39,7 @@ export const SYSTEM_LIMITS = {
   DEFER_DURATION_MS: 180 * DAY_IN_MS,
   ENVIRONMENTS: 10,
   SUBSCRIBER_DEVICE_TOKENS: 100,
+  ENVIRONMENT_VARIABLES: 10,
 } as const;
 
 /* The threshold below which validation is skipped */
@@ -55,7 +57,8 @@ export class ResourceValidatorService {
     private organizationRepository: CommunityOrganizationRepository,
     private environmentRepository: EnvironmentRepository,
     private featureFlagService: FeatureFlagsService,
-    private layoutRepository: LayoutRepository
+    private layoutRepository: LayoutRepository,
+    private environmentVariableRepository: EnvironmentVariableRepository
   ) {}
 
   async validateStepsLimit(environmentId: string, organizationId: string, steps: NotificationStep[]): Promise<void> {
@@ -207,6 +210,27 @@ export class ResourceValidatorService {
       organization.apiServiceLevel || ApiServiceLevelEnum.FREE,
       false
     );
+  }
+
+  async getEnvironmentVariablesLimit(organizationId: string): Promise<number> {
+    return this.featureFlagService.getFlag({
+      key: FeatureFlagsKeysEnum.MAX_ENVIRONMENT_VARIABLES_LIMIT_NUMBER,
+      defaultValue: SYSTEM_LIMITS.ENVIRONMENT_VARIABLES,
+      organization: { _id: organizationId },
+    });
+  }
+
+  async validateEnvironmentVariablesLimit(organizationId: string): Promise<void> {
+    const variablesCount = await this.environmentVariableRepository.count({ _organizationId: organizationId });
+    const maxEnvironmentVariablesLimit = await this.getEnvironmentVariablesLimit(organizationId);
+
+    if (variablesCount >= maxEnvironmentVariablesLimit) {
+      throw new BadRequestException({
+        message: `Environment variables limit exceeded. Maximum allowed variables is ${maxEnvironmentVariablesLimit}.`,
+        currentCount: variablesCount,
+        limit: maxEnvironmentVariablesLimit,
+      });
+    }
   }
 
   private async getEnvironment(environmentId: string) {
