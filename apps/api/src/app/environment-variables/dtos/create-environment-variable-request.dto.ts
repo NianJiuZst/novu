@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ICreateEnvironmentVariableDto, IEnvironmentVariableValueDto } from '@novu/shared';
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsOptional, IsString, Matches, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsOptional, IsString, Matches, MaxLength, ValidateNested } from 'class-validator';
 
 export class EnvironmentVariableValueDto implements IEnvironmentVariableValueDto {
   @ApiProperty()
@@ -10,6 +10,7 @@ export class EnvironmentVariableValueDto implements IEnvironmentVariableValueDto
 
   @ApiProperty()
   @IsString()
+  @MaxLength(256)
   value: string;
 }
 
@@ -19,6 +20,7 @@ export class CreateEnvironmentVariableRequestDto implements ICreateEnvironmentVa
       'Unique key for the variable. Must start with a letter and contain only letters, digits, and underscores.',
   })
   @IsString()
+  @MaxLength(256)
   @Matches(/^[A-Za-z][A-Za-z0-9_]*$/, {
     message: 'Key must start with a letter and contain only letters, digits, and underscores',
   })
@@ -28,11 +30,6 @@ export class CreateEnvironmentVariableRequestDto implements ICreateEnvironmentVa
   @IsBoolean()
   @IsOptional()
   isSecret?: boolean;
-
-  @ApiPropertyOptional({ description: 'Default value used when no environment-specific value is set' })
-  @IsString()
-  @IsOptional()
-  defaultValue?: string;
 
   @ApiPropertyOptional({ type: [EnvironmentVariableValueDto] })
   @IsArray()

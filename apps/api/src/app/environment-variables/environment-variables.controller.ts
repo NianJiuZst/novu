@@ -120,7 +120,6 @@ export class EnvironmentVariablesController {
         userId: user._id,
         key: body.key,
         isSecret: body.isSecret,
-        defaultValue: body.defaultValue,
         values: body.values,
       })
     );
@@ -147,7 +146,6 @@ export class EnvironmentVariablesController {
         variableId,
         key: body.key,
         isSecret: body.isSecret,
-        defaultValue: body.defaultValue,
         values: body.values,
       })
     );

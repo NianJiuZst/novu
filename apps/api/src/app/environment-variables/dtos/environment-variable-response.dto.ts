@@ -23,9 +23,6 @@ export class EnvironmentVariableResponseDto {
   @ApiProperty()
   isSecret: boolean;
 
-  @ApiPropertyOptional()
-  defaultValue?: string;
-
   @ApiProperty({ type: [EnvironmentVariableValueResponseDto] })
   values: EnvironmentVariableValueResponseDto[];
 

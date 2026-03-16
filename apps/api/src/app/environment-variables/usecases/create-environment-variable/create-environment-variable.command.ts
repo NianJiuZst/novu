@@ -21,10 +21,6 @@ export class CreateEnvironmentVariableCommand extends OrganizationLevelWithUserC
   @IsOptional()
   isSecret?: boolean;
 
-  @IsString()
-  @IsOptional()
-  defaultValue?: string;
-
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => EnvironmentVariableValueCommand)
