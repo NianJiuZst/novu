@@ -1,6 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InstrumentUsecase } from '@novu/application-generic';
-import { ControlValuesRepository, EnvironmentVariableRepository, NotificationTemplateRepository } from '@novu/dal';
+import { InstrumentUsecase, PinoLogger } from '@novu/application-generic';
+import {
+  ControlValuesEntity,
+  ControlValuesRepository,
+  EnvironmentVariableRepository,
+  NotificationTemplateRepository,
+} from '@novu/dal';
 import { ControlValuesLevelEnum } from '@novu/shared';
 import {
   EnvironmentVariableWorkflowInfoDto,
@@ -8,55 +13,69 @@ import {
 } from '../../dtos/get-environment-variable-usage-response.dto';
 import { GetEnvironmentVariableUsageCommand } from './get-environment-variable-usage.command';
 
+const CONTROL_VALUES_SELECT = ['_workflowId', '_environmentId', 'controls'] as const;
+type ControlValuesUsageFetchResult = Pick<ControlValuesEntity, (typeof CONTROL_VALUES_SELECT)[number]>;
+
 @Injectable()
 export class GetEnvironmentVariableUsage {
   constructor(
     private environmentVariableRepository: EnvironmentVariableRepository,
     private controlValuesRepository: ControlValuesRepository,
-    private notificationTemplateRepository: NotificationTemplateRepository
-  ) {}
+    private notificationTemplateRepository: NotificationTemplateRepository,
+    private logger: PinoLogger
+  ) {
+    this.logger.setContext(this.constructor.name);
+  }
 
   @InstrumentUsecase()
   async execute(command: GetEnvironmentVariableUsageCommand): Promise<GetEnvironmentVariableUsageResponseDto> {
     const variable = await this.environmentVariableRepository.findById(
       { _id: command.variableId, _organizationId: command.organizationId },
-      '*'
+      { _id: 0, key: 1 }
     );
 
     if (!variable) {
       throw new NotFoundException(`Environment variable with id ${command.variableId} not found`);
     }
 
-    const controlValues = await this.controlValuesRepository.findMany({
-      _organizationId: command.organizationId,
-      level: ControlValuesLevelEnum.STEP_CONTROLS,
-    });
-
     const envVarPattern = `env.${variable.key}`;
+    const controlValues: ControlValuesUsageFetchResult[] = await this.controlValuesRepository.find(
+      {
+        _organizationId: command.organizationId,
+        level: ControlValuesLevelEnum.STEP_CONTROLS,
+      },
+      CONTROL_VALUES_SELECT.join(' ')
+    );
+
     const referencingControlValues = controlValues.filter((cv) => JSON.stringify(cv.controls).includes(envVarPattern));
 
-    const workflowEnvironmentMap = new Map<string, string>();
+    const uniqueWorkflowIds = [
+      ...new Set(referencingControlValues.filter((cv) => cv._workflowId).map((cv) => cv._workflowId as string)),
+    ];
 
-    for (const cv of referencingControlValues) {
-      if (cv._workflowId && cv._environmentId && !workflowEnvironmentMap.has(cv._workflowId)) {
-        workflowEnvironmentMap.set(cv._workflowId, cv._environmentId);
-      }
+    if (uniqueWorkflowIds.length === 0) {
+      return { workflows: [] };
     }
 
-    const workflows: EnvironmentVariableWorkflowInfoDto[] = [];
+    let fetchedWorkflows: Awaited<ReturnType<typeof this.notificationTemplateRepository.findNameAndTriggersByIds>>;
 
-    for (const [workflowId, environmentId] of workflowEnvironmentMap) {
-      try {
-        const workflow = await this.notificationTemplateRepository.findById(workflowId, environmentId);
+    try {
+      fetchedWorkflows = await this.notificationTemplateRepository.findNameAndTriggersByIds(
+        command.organizationId,
+        uniqueWorkflowIds
+      );
+    } catch (error) {
+      this.logger.error({ err: error }, 'Failed to fetch workflows for environment variable usage');
 
-        if (workflow?.triggers && workflow.triggers.length > 0) {
-          workflows.push({
-            name: workflow.name,
-            workflowId: workflow.triggers[0].identifier,
-          });
-        }
-      } catch (error) {}
+      return { workflows: [] };
     }
+
+    const workflows: EnvironmentVariableWorkflowInfoDto[] = fetchedWorkflows
+      .filter((workflow) => workflow?.triggers?.length > 0)
+      .map((workflow) => ({
+        name: workflow.name,
+        workflowId: workflow.triggers[0].identifier,
+      }));
 
     return { workflows };
   }

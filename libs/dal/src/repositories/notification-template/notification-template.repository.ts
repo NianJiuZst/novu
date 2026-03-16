@@ -63,6 +63,18 @@ export class NotificationTemplateRepository extends BaseRepository<
     return this.mapEntities(items);
   }
 
+  async findNameAndTriggersByIds(organizationId: string, workflowIds: string[]) {
+    const items = await this.MongooseModel.find(
+      {
+        _id: { $in: workflowIds },
+        _organizationId: organizationId,
+      },
+      { name: 1, triggers: 1, _environmentId: 1 }
+    );
+
+    return this.mapEntities(items);
+  }
+
   async findByTriggerIdentifierBulk(environmentId: string, identifiers: string[], session?: ClientSession | null) {
     const requestQuery: NotificationTemplateQuery = {
       _environmentId: environmentId,
