@@ -31,7 +31,7 @@ export class GetEnvironmentVariableUsage {
   async execute(command: GetEnvironmentVariableUsageCommand): Promise<GetEnvironmentVariableUsageResponseDto> {
     const variable = await this.environmentVariableRepository.findById(
       { _id: command.variableId, _organizationId: command.organizationId },
-      { _id: 0, key: 1 }
+      ['key']
     );
 
     if (!variable) {

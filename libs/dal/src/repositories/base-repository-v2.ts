@@ -187,7 +187,7 @@ export class BaseRepositoryV2<T_DBModel, T_MappedEntity, T_Enforcement> {
     query: FilterQuery<T_DBModel> & T_Enforcement,
     select: readonly K[],
     options?: FindOneOptionsV2<T_DBModel>
-  ): Promise<Pick<T_MappedEntity, K | ('_id' extends keyof T_MappedEntity ? '_id' : never)> | null>;
+  ): Promise<Pick<T_MappedEntity, K> | null>;
 
   async findOne<S extends SelectFieldsObject<T_MappedEntity> & { _id: 0 }>(
     query: FilterQuery<T_DBModel> & T_Enforcement,
@@ -238,7 +238,7 @@ export class BaseRepositoryV2<T_DBModel, T_MappedEntity, T_Enforcement> {
     query: { _id: string } & T_Enforcement,
     select: readonly K[],
     options?: FindOneOptionsV2<T_DBModel>
-  ): Promise<Pick<T_MappedEntity, K | ('_id' extends keyof T_MappedEntity ? '_id' : never)> | null>;
+  ): Promise<Pick<T_MappedEntity, K> | null>;
 
   async findById<S extends SelectFieldsObject<T_MappedEntity> & { _id: 0 }>(
     query: { _id: string } & T_Enforcement,
@@ -277,7 +277,7 @@ export class BaseRepositoryV2<T_DBModel, T_MappedEntity, T_Enforcement> {
     query: FilterQuery<T_DBModel> & T_Enforcement,
     select: readonly K[],
     options?: FindOptionsV2<T_MappedEntity>
-  ): Promise<Pick<T_MappedEntity, K | ('_id' extends keyof T_MappedEntity ? '_id' : never)>[]>;
+  ): Promise<Pick<T_MappedEntity, K>[]>;
 
   async find<S extends SelectFieldsObject<T_MappedEntity> & { _id: 0 }>(
     query: FilterQuery<T_DBModel> & T_Enforcement,
@@ -329,7 +329,7 @@ export class BaseRepositoryV2<T_DBModel, T_MappedEntity, T_Enforcement> {
     select: readonly K[],
     options?: { limit?: number; sort?: Partial<Record<K, 1 | -1>>; skip?: number },
     batchSize?: number
-  ): AsyncGenerator<Pick<T_MappedEntity, K | ('_id' extends keyof T_MappedEntity ? '_id' : never)>>;
+  ): AsyncGenerator<Pick<T_MappedEntity, K>>;
 
   findBatch<S extends SelectFieldsObject<T_MappedEntity>>(
     query: FilterQuery<T_DBModel> & T_Enforcement,
@@ -518,13 +518,13 @@ export class BaseRepositoryV2<T_DBModel, T_MappedEntity, T_Enforcement> {
   // Cursor-based pagination
   // ---------------------------------------------------------------------------
 
-  // Overload 1: array select — data is Pick<T, K | '_id'> (MongoDB implicit _id)
+  // Overload 1: array select — data is Pick<T, K> (only the requested fields)
   async findWithCursorBasedPagination<K extends keyof T_MappedEntity & string>(
     options: FindWithCursorPaginationOptionsV2<T_DBModel, readonly K[]> & {
       query?: FilterQuery<T_DBModel> & T_Enforcement;
     }
   ): Promise<{
-    data: Pick<T_MappedEntity, K | ('_id' extends keyof T_MappedEntity ? '_id' : never)>[];
+    data: Pick<T_MappedEntity, K>[];
     next: string | null;
     previous: string | null;
     totalCount: number;

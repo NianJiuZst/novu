@@ -15,8 +15,8 @@ alwaysApply: false
 #### BaseRepositoryV2 — required `select`
 
 - Every read method (`find`, `findOne`, `findById`, `findBatch`, `findWithCursorBasedPagination`) requires an explicit `select` argument — there is no default `SELECT *`.
-- Use array syntax as the default: `find(query, ['_id', 'name', 'status'])`.
-- Use object syntax only when `_id` needs to be excluded: `findOne(query, { _id: 0, name: 1 })`.
+- Use array syntax as the default: `find(query, ['_id', 'name', 'status'])`. Array syntax returns exactly the listed fields — `_id` is excluded unless explicitly included.
+- Use object syntax when you need MongoDB-style projections where `_id` is included by default: `findOne(query, { name: 1, email: 1 })`, or explicitly excluded: `findOne(query, { _id: 0, name: 1 })`.
 - Exclusion projections for non-`_id` fields (e.g. `{ name: 0 }`) are intentionally unsupported — they are a compile error.
 - Return types are automatically inferred as `Pick<Entity, Keys>` — do not manually annotate the return type.
 - Use `select: '*'` to retrieve all fields with a fully-typed `Entity` return (instead of a `Pick`). All five read methods support this overload: `find(query, '*')`, `findOne(query, '*')`, `findById(id, '*')`, `findBatch(query, '*')`, and `findWithCursorBasedPagination({ select: '*', ... })`.

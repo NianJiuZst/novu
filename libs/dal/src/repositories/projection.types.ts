@@ -1,6 +1,7 @@
 /**
  * Array-based select: ['name', 'email']
  * Only accepts valid keys of the entity.
+ * Returns exactly the listed fields — `_id` is excluded unless explicitly included.
  */
 export type SelectFieldsArray<T> = readonly (keyof T & string)[];
 
@@ -32,17 +33,20 @@ export type IncludedKeys<S, T> = {
 }[keyof S];
 
 /**
- * Infers the projected result type from a select input, mirroring MongoDB behavior:
+ * Infers the projected result type from a select input:
  *
- * - Array syntax:           ['name', 'email']           → Pick<T, 'name' | 'email' | '_id'>
- * - Object, no _id:0:       { name: 1, email: 1 }       → Pick<T, 'name' | 'email' | '_id'>
- * - Object, with _id:0:     { _id: 0, name: 1, email: 1 } → Pick<T, 'name' | 'email'>
+ * - Array syntax:           ['name', 'email']              → Pick<T, 'name' | 'email'>
+ * - Array with _id:         ['_id', 'name']                → Pick<T, '_id' | 'name'>
+ * - Object, no _id:0:       { name: 1, email: 1 }          → Pick<T, 'name' | 'email' | '_id'>
+ * - Object, with _id:0:     { _id: 0, name: 1, email: 1 }  → Pick<T, 'name' | 'email'>
  *
- * MongoDB always returns `_id` unless explicitly excluded via `_id: 0`.
+ * Array syntax returns exactly the requested fields — `_id` is only included
+ * when explicitly listed. Object syntax follows MongoDB conventions where `_id`
+ * is included unless explicitly set to `0`.
  */
 export type InferProjection<T, S extends SelectInput<T>> = S extends readonly (infer K)[]
   ? K extends keyof T
-    ? Pick<T, (K & keyof T) | ('_id' extends keyof T ? '_id' : never)>
+    ? Pick<T, K & keyof T>
     : never
   : S extends { _id: 0 }
     ? Pick<T, Exclude<IncludedKeys<S, T>, '_id'>>
@@ -50,13 +54,22 @@ export type InferProjection<T, S extends SelectInput<T>> = S extends readonly (i
 
 /**
  * Normalizes both select syntaxes into a Mongoose-compatible projection object.
- * Preserves `_id: 0` when present in object syntax.
+ *
+ * Array syntax auto-excludes `_id` unless it is explicitly listed in the array,
+ * so callers get exactly the fields they request. Object syntax preserves
+ * MongoDB conventions (`_id` included unless set to `0`).
  */
 export function convertSelectToProjection<T>(select: SelectInput<T>): Record<string, 0 | 1> | undefined {
   if (select === '*') return undefined;
 
   if (Array.isArray(select)) {
-    return Object.fromEntries((select as string[]).map((key) => [key, 1]));
+    const keys = select as string[];
+    const projection: Record<string, 0 | 1> = Object.fromEntries(keys.map((key) => [key, 1]));
+    if (!keys.includes('_id')) {
+      projection._id = 0;
+    }
+
+    return projection;
   }
 
   return { ...(select as Record<string, 0 | 1>) };
