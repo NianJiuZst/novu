@@ -121,6 +121,14 @@ export const VariableRow = ({
 
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
 
+  const handleRowKeyDown = (e: React.KeyboardEvent<HTMLTableRowElement>) => {
+    if (e.target !== e.currentTarget) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setIsExpanded((prev) => !prev);
+    }
+  };
+
   const filledCount = variable.values.filter((v) => v.value).length;
   const totalCount = environments.length;
 
@@ -131,7 +139,14 @@ export const VariableRow = ({
 
   return (
     <>
-      <TableRow className="group/row relative isolate cursor-pointer" onClick={() => setIsExpanded((prev) => !prev)}>
+      <TableRow
+        className="group/row relative isolate cursor-pointer"
+        onClick={() => setIsExpanded((prev) => !prev)}
+        tabIndex={0}
+        role="button"
+        aria-expanded={isExpanded}
+        onKeyDown={handleRowKeyDown}
+      >
         <VariableCell>
           <div className="flex items-center gap-2">
             {isExpanded ? (
