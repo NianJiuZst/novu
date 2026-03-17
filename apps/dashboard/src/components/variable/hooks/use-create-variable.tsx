@@ -1,6 +1,5 @@
 import merge from 'lodash.merge';
 import { useCallback, useContext, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { ToastIcon } from '@/components/primitives/sonner';
 import { showErrorToast, showToast } from '@/components/primitives/sonner-helpers';
 import type { JSONSchema7TypeName } from '@/components/schema-editor/json-schema';
@@ -10,9 +9,8 @@ import { parseJsonValue } from '@/components/workflow-editor/steps/utils/preview
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 import { useWorkflowSchema } from '@/components/workflow-editor/workflow-schema-provider';
 import { useEnvironment } from '@/context/environment/hooks';
-import { buildRoute, ROUTES } from '@/utils/routes';
 
-type VariableType = 'payload' | 'subscriber' | 'context' | 'env';
+type VariableType = 'payload' | 'subscriber' | 'context';
 
 interface VariableInfo {
   type: VariableType;
@@ -25,7 +23,6 @@ const VARIABLE_PREFIXES = {
   PAYLOAD: 'payload.',
   SUBSCRIBER: 'subscriber.data.',
   CONTEXT: 'context.',
-  ENV: 'env.',
 } as const;
 
 /**
@@ -36,7 +33,6 @@ function parseVariablePath(variablePath: string): VariableInfo | null {
     { prefix: VARIABLE_PREFIXES.PAYLOAD, type: 'payload' },
     { prefix: VARIABLE_PREFIXES.SUBSCRIBER, type: 'subscriber' },
     { prefix: VARIABLE_PREFIXES.CONTEXT, type: 'context' },
-    { prefix: VARIABLE_PREFIXES.ENV, type: 'env' },
   ];
 
   for (const { prefix, type } of prefixMap) {
@@ -71,30 +67,11 @@ function createPayloadVariableSuccessToast() {
   });
 }
 
-function createEnvVariableRedirectToast(variablesHref: string) {
-  return showToast({
-    children: () => (
-      <div className="flex min-w-[350px] items-center gap-3">
-        <ToastIcon variant="info" />
-        <span className="text-sm">
-          {'Manage environment variables in '}
-          <Link to={variablesHref} className="underline">
-            Variables settings
-          </Link>
-        </span>
-      </div>
-    ),
-    options: {
-      position: 'bottom-right',
-    },
-  });
-}
-
 /**
  * Hook that is triggered when a new liquid variable is being created in control-input, email-body or preview-context-panel
  */
 export const useCreateVariable = () => {
-  const { workflow, step } = useWorkflow();
+  const { workflow } = useWorkflow();
   const { currentEnvironment } = useEnvironment();
 
   const {
@@ -192,17 +169,6 @@ export const useCreateVariable = () => {
     [setEditorValue, editorValue, savePersistedContext]
   );
 
-  const handleEnvVariable = useCallback(
-    (_variableInfo: VariableInfo) => {
-      const variablesHref = currentEnvironment?.slug
-        ? buildRoute(ROUTES.VARIABLES, { environmentSlug: currentEnvironment.slug })
-        : ROUTES.VARIABLES;
-
-      createEnvVariableRedirectToast(variablesHref);
-    },
-    [currentEnvironment]
-  );
-
   const handleCreateNewVariable = useCallback(
     async (variablePath: string) => {
       if (!workflow) {
@@ -220,7 +186,6 @@ export const useCreateVariable = () => {
           payload: handlePayloadVariable,
           subscriber: handleSubscriberVariable,
           context: handleContextVariable,
-          env: handleEnvVariable,
         } as const;
 
         const handler = handlers[variableInfo.type];
@@ -233,7 +198,7 @@ export const useCreateVariable = () => {
         showErrorToast(`Failed to create ${variableInfo.type} variable: ${error}`);
       }
     },
-    [workflow, handlePayloadVariable, handleSubscriberVariable, handleContextVariable, handleEnvVariable]
+    [workflow, handlePayloadVariable, handleSubscriberVariable, handleContextVariable]
   );
 
   const openSchemaDrawer = useCallback((variableName?: string) => {
