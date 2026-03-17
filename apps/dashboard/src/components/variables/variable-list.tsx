@@ -1,7 +1,8 @@
 import { ApiServiceLevelEnum, FeatureNameEnum, getFeatureForTierAsBoolean, PermissionsEnum } from '@novu/shared';
-import React, { useCallback, useEffect, useState } from 'react';
-import { RiAddCircleLine, RiSearchLine } from 'react-icons/ri';
+import { useCallback, useEffect, useState } from 'react';
+import { RiAddCircleLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
+import { FacetedFormFilter } from '@/components/primitives/form/faceted-filter/facated-form-filter';
 import { PermissionButton } from '@/components/primitives/permission-button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/primitives/table';
 import { IS_ENTERPRISE, IS_SELF_HOSTED } from '@/config';
@@ -9,7 +10,6 @@ import { useEnvironment } from '@/context/environment/hooks';
 import { useFetchEnvironmentVariables } from '@/hooks/use-fetch-environment-variables';
 import { useFetchSubscription } from '@/hooks/use-fetch-subscription';
 import { buildRoute, ROUTES } from '@/utils/routes';
-import { Input } from '../primitives/input';
 import { VariableListUpgradeCta } from './variable-list-upgrade-cta';
 import { VariableRow, VariableRowSkeleton } from './variable-row';
 
@@ -35,8 +35,8 @@ export const VariableList = () => {
     return () => clearTimeout(timeout);
   }, [search]);
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch(value);
   }, []);
 
   const { data: variables, isLoading: isLoadingVariables } = useFetchEnvironmentVariables({
@@ -74,15 +74,14 @@ export const VariableList = () => {
   return (
     <div className="flex flex-col gap-2 py-2">
       <div className="flex items-center justify-between">
-        <div className="w-[250px]">
-          <Input
-            size="xs"
-            value={search}
-            onChange={handleSearchChange}
-            placeholder="Search variables..."
-            leadingIcon={RiSearchLine}
-          />
-        </div>
+        <FacetedFormFilter
+          type="text"
+          size="small"
+          title="Search"
+          value={search}
+          onChange={handleSearchChange}
+          placeholder="Search variables..."
+        />
         <PermissionButton
           permission={PermissionsEnum.ORG_SETTINGS_WRITE}
           variant="primary"
