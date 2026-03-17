@@ -28,6 +28,7 @@ type PublishState = {
   modalState: ModalState;
   selectedEnvironment: IEnvironment | null;
   publishResult: IEnvironmentPublishResponse | null;
+  preSelectedWorkflowId: string | null;
 };
 
 export const PublishButton = () => {
@@ -79,16 +80,14 @@ export const PublishButton = () => {
     [queryClient, actions]
   );
 
-  // Listen for custom event from command palette
+  // Listen for custom event from command palette or workflow actions
   useEffect(() => {
     const handleOpenPublishModal = (event: CustomEvent) => {
-      const { targetEnvironment: eventTargetEnv } = event.detail;
+      const { targetEnvironment: eventTargetEnv, preSelectedWorkflowId } = event.detail;
       if (eventTargetEnv) {
-        // Force refetch diff data to get latest changes
         queryClient.invalidateQueries({ queryKey: ['diff-environments'] });
 
-        // Check if there are changes and open appropriate modal
-        handleEnvironmentSelect(eventTargetEnv, true); // Assume there are changes for now
+        actions.openPublishModal(eventTargetEnv, preSelectedWorkflowId);
       }
     };
 
@@ -97,7 +96,7 @@ export const PublishButton = () => {
     return () => {
       window.removeEventListener('open-publish-modal', handleOpenPublishModal as EventListener);
     };
-  }, [queryClient, handleEnvironmentSelect]);
+  }, [queryClient, actions]);
 
   const handlePublish = async (selectedResources?: ResourceToPublish[]) => {
     if (!state.selectedEnvironment?._id || !currentEnvironment?._id) {
@@ -155,6 +154,7 @@ export const PublishButton = () => {
           currentEnvironmentId={currentEnvironment?._id}
           onConfirm={handlePublish}
           isPublishing={publishMutation.isPending}
+          preSelectedWorkflowId={state.preSelectedWorkflowId ?? undefined}
         />
 
         <PublishSuccessModal
@@ -219,6 +219,7 @@ export const PublishButton = () => {
             currentEnvironmentId={currentEnvironment?._id}
             onConfirm={handlePublish}
             isPublishing={publishMutation.isPending}
+            preSelectedWorkflowId={state.preSelectedWorkflowId ?? undefined}
           />
 
           <PublishSuccessModal
@@ -253,19 +254,31 @@ const usePublishState = () => {
     modalState: 'closed',
     selectedEnvironment: null,
     publishResult: null,
+    preSelectedWorkflowId: null,
   });
 
   const actions = {
-    openPublishModal: (environment: IEnvironment) =>
-      setState({ modalState: 'publish', selectedEnvironment: environment, publishResult: null }),
+    openPublishModal: (environment: IEnvironment, preSelectedWorkflowId?: string) =>
+      setState({
+        modalState: 'publish',
+        selectedEnvironment: environment,
+        publishResult: null,
+        preSelectedWorkflowId: preSelectedWorkflowId ?? null,
+      }),
 
     openNoChangesModal: (environment: IEnvironment) =>
-      setState({ modalState: 'no-changes', selectedEnvironment: environment, publishResult: null }),
+      setState({
+        modalState: 'no-changes',
+        selectedEnvironment: environment,
+        publishResult: null,
+        preSelectedWorkflowId: null,
+      }),
 
     showSuccess: (result: IEnvironmentPublishResponse) =>
       setState((prev) => ({ ...prev, modalState: 'success', publishResult: result })),
 
-    close: () => setState({ modalState: 'closed', selectedEnvironment: null, publishResult: null }),
+    close: () =>
+      setState({ modalState: 'closed', selectedEnvironment: null, publishResult: null, preSelectedWorkflowId: null }),
   };
 
   return { state, actions };

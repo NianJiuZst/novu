@@ -31,6 +31,7 @@ type PublishModalProps = {
   currentEnvironmentId?: string;
   onConfirm: (selectedResources: ResourceToPublish[]) => void;
   isPublishing?: boolean;
+  preSelectedWorkflowId?: string;
 };
 
 type ResourceSelection = {
@@ -48,6 +49,7 @@ export function PublishModal({
   currentEnvironmentId,
   onConfirm,
   isPublishing = false,
+  preSelectedWorkflowId,
 }: PublishModalProps) {
   const [resourceSelection, setResourceSelection] = useState<ResourceSelection>({});
   const [workflowsExpanded, setWorkflowsExpanded] = useState(true);
@@ -71,18 +73,22 @@ export function PublishModal({
       const resourceId = resource.sourceResource?.id || resource.targetResource?.id;
 
       if (resourceId) {
+        const shouldBeSelected = preSelectedWorkflowId
+          ? resource.resourceType === 'workflow' && resourceId === preSelectedWorkflowId
+          : true;
+
         initialSelection[resourceId] = {
-          selected: true, // Start with all selected
+          selected: shouldBeSelected,
           disabled: false,
           resource,
         };
       }
     });
 
-    // Apply dependency rules to the initial selection
+    // Apply dependency rules to the initial selection (this will auto-select dependent layouts)
     const selectionWithDependencies = calculateDependencyState(initialSelection);
     setResourceSelection(selectionWithDependencies);
-  }, [diffData, calculateDependencyState]);
+  }, [diffData, calculateDependencyState, preSelectedWorkflowId]);
 
   const handleResourceToggle = (resourceId: string) => {
     setResourceSelection((prev) => {

@@ -50,7 +50,6 @@ import { useDeleteWorkflow } from '@/hooks/use-delete-workflow';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { useHasPermission } from '@/hooks/use-has-permission';
 import { usePatchWorkflow } from '@/hooks/use-patch-workflow';
-import { useSyncWorkflow } from '@/hooks/use-sync-workflow';
 import { LocalizationResourceEnum } from '@/types/translations';
 import { ResourceOriginEnum, WorkflowStatusEnum } from '@/utils/enums';
 import { formatDateSimple } from '@/utils/format-date';
@@ -128,7 +127,6 @@ export const WorkflowRow = ({ workflow }: WorkflowRowProps) => {
   const { currentEnvironment } = useEnvironment();
   const { isUserLoaded } = useAuth();
   const has = useHasPermission();
-  const { safeSync, PromoteConfirmModal } = useSyncWorkflow(workflow);
   const isHttpLogsPageEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_HTTP_LOGS_PAGE_ENABLED, false);
   const isV0Workflow = workflow.origin === ResourceOriginEnum.NOVU_CLOUD_V1;
   const isDuplicable =
@@ -418,11 +416,9 @@ export const WorkflowRow = ({ workflow }: WorkflowRowProps) => {
                     </Link>
                   </Protect>
                   <Protect permission={PermissionsEnum.WORKFLOW_WRITE}>
-                    <SyncWorkflowMenuItem
+                    <PublishWorkflowMenuItem
                       currentEnvironment={currentEnvironment}
-                      isSyncable={false}
-                      tooltipContent="Syncing workflows is now performed in the top right corner of the navigation bar as Publish changes."
-                      onSync={safeSync}
+                      workflowId={workflow.workflowId}
                     />
                   </Protect>
                   <Protect permission={PermissionsEnum.NOTIFICATION_READ}>
@@ -542,37 +538,44 @@ export const WorkflowRow = ({ workflow }: WorkflowRowProps) => {
         confirmButtonText="Proceed"
         isLoading={isPauseWorkflowPending}
       />
-      <PromoteConfirmModal />
     </>
   );
 };
 
-const SyncWorkflowMenuItem = ({
+const PublishWorkflowMenuItem = ({
   currentEnvironment,
-  isSyncable,
-  tooltipContent,
-  onSync,
+  workflowId,
 }: {
   currentEnvironment: IEnvironment | undefined;
-  isSyncable: boolean;
-  tooltipContent: string | undefined;
-  onSync: (targetEnvironmentId: string) => void;
+  workflowId: string;
 }) => {
   const { currentOrganization } = useAuth();
   const { environments = [] } = useFetchEnvironments({ organizationId: currentOrganization?._id });
   const otherEnvironments = environments.filter((env: IEnvironment) => env._id !== currentEnvironment?._id);
 
-  if (!isSyncable) {
+  const handlePublishClick = (targetEnvironment: IEnvironment) => {
+    window.dispatchEvent(
+      new CustomEvent('open-publish-modal', {
+        detail: { targetEnvironment, preSelectedWorkflowId: workflowId },
+      })
+    );
+  };
+
+  if (currentEnvironment?.type !== EnvironmentTypeEnum.DEV) {
+    return null;
+  }
+
+  if (otherEnvironments.length === 0) {
     return (
       <Tooltip>
         <TooltipTrigger>
           <DropdownMenuItem disabled>
             <LuBookUp2 />
-            Sync workflow
+            Publish workflow
           </DropdownMenuItem>
         </TooltipTrigger>
         <TooltipPortal>
-          <TooltipContent>{tooltipContent}</TooltipContent>
+          <TooltipContent>No other environments available</TooltipContent>
         </TooltipPortal>
       </Tooltip>
     );
@@ -580,9 +583,9 @@ const SyncWorkflowMenuItem = ({
 
   if (otherEnvironments.length === 1) {
     return (
-      <DropdownMenuItem onClick={() => onSync(otherEnvironments[0]._id)}>
+      <DropdownMenuItem onClick={() => handlePublishClick(otherEnvironments[0])}>
         <LuBookUp2 />
-        {`Sync to ${otherEnvironments[0].name}`}
+        {`Publish to ${otherEnvironments[0].name}`}
       </DropdownMenuItem>
     );
   }
@@ -591,12 +594,12 @@ const SyncWorkflowMenuItem = ({
     <DropdownMenuSub>
       <DropdownMenuSubTrigger className="gap-2">
         <LuBookUp2 />
-        Sync workflow
+        Publish workflow
       </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
           {otherEnvironments.map((env) => (
-            <DropdownMenuItem key={env._id} onClick={() => onSync(env._id)}>
+            <DropdownMenuItem key={env._id} onClick={() => handlePublishClick(env)}>
               {env.name}
             </DropdownMenuItem>
           ))}
