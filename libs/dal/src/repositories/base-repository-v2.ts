@@ -505,19 +505,24 @@ export class BaseRepositoryV2<T_DBModel, T_MappedEntity, T_Enforcement> {
    * See https://mongoosejs.com/docs/transactions.html#note-about-parallelism-in-transactions
    */
   async withTransaction(fn: (session: ClientSession | null) => Promise<any>) {
+    const session = await this._model.db.startSession();
+    let executed = false;
+
     try {
-      return await (await this._model.db.startSession()).withTransaction(fn);
+      return await session.withTransaction(async (txnSession) => {
+        executed = true;
+
+        return fn(txnSession);
+      });
     } catch (error) {
-      const errorMessage = (error as Error)?.message?.toLowerCase() || '';
-      if (
-        errorMessage.includes('replica set') ||
-        errorMessage.includes('transaction') ||
-        (error as any).codeName === 'IllegalOperation'
-      ) {
+      const errorMessage = (error as Error)?.message || '';
+      if (errorMessage === 'Transaction numbers are only allowed on a replica set member or mongos' && !executed) {
         return fn(null);
       }
 
       throw error;
+    } finally {
+      await session.endSession();
     }
   }
 
