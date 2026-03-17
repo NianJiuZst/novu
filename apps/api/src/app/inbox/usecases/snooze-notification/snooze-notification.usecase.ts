@@ -99,6 +99,7 @@ export class SnoozeNotification {
         _id: job._id,
         _organizationId: job._organizationId,
         _userId: job._userId,
+        _workflowId: job._templateId,
       },
       groupId: job._organizationId,
       options: { delay, attempts: this.RETRY_ATTEMPTS, backoff: { type: 'exponential', delay: 5000 } },

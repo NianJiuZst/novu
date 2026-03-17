@@ -46,6 +46,7 @@ export class WorkflowWorker extends WorkflowWorkerService {
       organization: { _id: data.organizationId },
       environment: { _id: data.environmentId },
       component: 'worker',
+      workflowId: data.identifier,
     });
   }
 
@@ -54,7 +55,9 @@ export class WorkflowWorker extends WorkflowWorkerService {
       const isKillSwitchEnabled = await this.isKillSwitchEnabled(data);
 
       if (isKillSwitchEnabled) {
-        this.logger.warn(`Kill switch enabled for organizationId ${data.organizationId}. Skipping job.`);
+        this.logger.warn(
+          `Kill switch enabled for organizationId ${data.organizationId}, workflowId ${data.identifier}. Skipping job.`
+        );
 
         return;
       }

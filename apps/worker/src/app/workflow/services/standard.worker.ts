@@ -115,6 +115,7 @@ export class StandardWorker extends StandardWorkerService {
       organization: { _id: data._organizationId },
       environment: { _id: data._environmentId },
       component: 'worker',
+      workflowId: data._workflowId,
     });
   }
 
@@ -123,7 +124,10 @@ export class StandardWorker extends StandardWorkerService {
       const isKillSwitchEnabled = await this.isKillSwitchEnabled(data);
 
       if (isKillSwitchEnabled) {
-        Logger.log(`Kill switch enabled for organizationId ${data._organizationId}. Skipping job.`, LOG_CONTEXT);
+        Logger.log(
+          `Kill switch enabled for organizationId ${data._organizationId}, workflowId ${data._workflowId}. Skipping job.`,
+          LOG_CONTEXT
+        );
 
         return;
       }

@@ -42,6 +42,7 @@ export class SubscriberProcessWorker extends SubscriberProcessWorkerService {
       organization: { _id: data.organizationId },
       environment: { _id: data.environmentId },
       component: 'worker',
+      workflowId: data.identifier,
     });
   }
 
@@ -50,7 +51,10 @@ export class SubscriberProcessWorker extends SubscriberProcessWorkerService {
       const isKillSwitchEnabled = await this.isKillSwitchEnabled(data);
 
       if (isKillSwitchEnabled) {
-        Logger.log(`Kill switch enabled for organizationId ${data.organizationId}. Skipping job.`, LOG_CONTEXT);
+        Logger.log(
+          `Kill switch enabled for organizationId ${data.organizationId}, workflowId ${data.identifier}. Skipping job.`,
+          LOG_CONTEXT
+        );
 
         return;
       }

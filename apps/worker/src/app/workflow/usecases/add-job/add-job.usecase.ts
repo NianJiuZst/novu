@@ -1086,6 +1086,7 @@ export class AddJob {
         _id: job._id,
         _organizationId: job._organizationId,
         _userId: job._userId,
+        _workflowId: job._templateId,
       },
       groupId: job._organizationId,
       options,

@@ -5,6 +5,7 @@ export class IStandardDataDto {
   _environmentId: string;
   _organizationId: string;
   _id: string;
+  _workflowId?: string;
   /*
    * skipProcessing flag for CF Scheduler migration
    * When true, the consumer should skip processing this job

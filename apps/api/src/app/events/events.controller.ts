@@ -69,13 +69,14 @@ export class EventsController {
     private featureFlagsService: FeatureFlagsService
   ) {}
 
-  private async checkKillSwitch(user: UserSessionData): Promise<void> {
+  private async checkKillSwitch(user: UserSessionData, workflowId?: string): Promise<void> {
     const isKillSwitchEnabled = await this.featureFlagsService.getFlag({
       key: FeatureFlagsKeysEnum.IS_ORG_KILLSWITCH_FLAG_ENABLED,
       defaultValue: false,
       organization: { _id: user.organizationId },
       environment: { _id: user.environmentId },
       component: 'trigger',
+      workflowId,
     });
 
     if (isKillSwitchEnabled) {
@@ -107,7 +108,7 @@ export class EventsController {
     @Req() req: RequestWithReqId,
     @Body() body: TriggerEventRequestDto
   ): Promise<TriggerEventResponseDto> {
-    await this.checkKillSwitch(user);
+    await this.checkKillSwitch(user, body.name);
 
     const result = await this.parseEventRequest.execute(
       ParseEventRequestMulticastCommand.create({
@@ -198,7 +199,7 @@ export class EventsController {
     @Body() body: TriggerEventToAllRequestDto,
     @Req() req: RequestWithReqId
   ): Promise<TriggerEventResponseDto> {
-    await this.checkKillSwitch(user);
+    await this.checkKillSwitch(user, body.name);
 
     const transactionId = body.transactionId || uuidv4();
 

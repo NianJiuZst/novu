@@ -31,14 +31,21 @@ export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
     organization,
     user,
     component,
+    workflowId,
   }: FeatureFlagContext<T_Result>): Promise<T_Result> {
-    const context = this.buildLDContext({ user, organization, environment, component });
+    const context = this.buildLDContext({ user, organization, environment, component, workflowId });
     const newVar = await this.client.variation(key, context, defaultValue);
 
     return newVar;
   }
 
-  private buildLDContext({ user, organization, environment, component }: FeatureFlagContextBase): LDMultiKindContext {
+  private buildLDContext({
+    user,
+    organization,
+    environment,
+    component,
+    workflowId,
+  }: FeatureFlagContextBase): LDMultiKindContext {
     const mappedContext: LDMultiKindContext = {
       kind: 'multi',
     };
@@ -81,6 +88,12 @@ export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
     if (component) {
       mappedContext.component = {
         key: component,
+      };
+    }
+
+    if (workflowId) {
+      mappedContext.workflow = {
+        key: workflowId,
       };
     }
 

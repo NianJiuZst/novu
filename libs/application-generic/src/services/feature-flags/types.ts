@@ -9,18 +9,21 @@ export type FeatureFlagContextBase =
       organization?: PartialWithId<OrganizationEntity>;
       user?: PartialWithId<UserEntity>;
       component?: string;
+      workflowId?: string;
     }
   | {
       environment?: PartialWithId<EnvironmentEntity>;
       organization: PartialWithId<OrganizationEntity>;
       user?: PartialWithId<UserEntity>;
       component?: string;
+      workflowId?: string;
     }
   | {
       environment?: PartialWithId<EnvironmentEntity>;
       organization?: PartialWithId<OrganizationEntity>;
       user: PartialWithId<UserEntity>;
       component?: string;
+      workflowId?: string;
     };
 
 export type FeatureFlagContext<T_Result> = FeatureFlagContextBase & {
