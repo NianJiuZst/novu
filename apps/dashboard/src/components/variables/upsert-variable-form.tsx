@@ -38,7 +38,7 @@ const VariableSchema = z
     for (const [envId, value] of Object.entries(data.environmentValues)) {
       if (!value.trim()) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           message: 'Value is required',
           path: ['environmentValues', envId],
         });
