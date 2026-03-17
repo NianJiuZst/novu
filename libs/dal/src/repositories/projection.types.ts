@@ -35,6 +35,7 @@ export type IncludedKeys<S, T> = {
 /**
  * Infers the projected result type from a select input:
  *
+ * - Select all:             '*'                             → T
  * - Array syntax:           ['name', 'email']              → Pick<T, 'name' | 'email'>
  * - Array with _id:         ['_id', 'name']                → Pick<T, '_id' | 'name'>
  * - Object, no _id:0:       { name: 1, email: 1 }          → Pick<T, 'name' | 'email' | '_id'>
@@ -44,13 +45,15 @@ export type IncludedKeys<S, T> = {
  * when explicitly listed. Object syntax follows MongoDB conventions where `_id`
  * is included unless explicitly set to `0`.
  */
-export type InferProjection<T, S extends SelectInput<T>> = S extends readonly (infer K)[]
-  ? K extends keyof T
-    ? Pick<T, K & keyof T>
-    : never
-  : S extends { _id: 0 }
-    ? Pick<T, Exclude<IncludedKeys<S, T>, '_id'>>
-    : Pick<T, IncludedKeys<S, T> | ('_id' extends keyof T ? '_id' : never)>;
+export type InferProjection<T, S extends SelectInput<T>> = S extends '*'
+  ? T
+  : S extends readonly (infer K)[]
+    ? K extends keyof T
+      ? Pick<T, K & keyof T>
+      : never
+    : S extends { _id: 0 }
+      ? Pick<T, Exclude<IncludedKeys<S, T>, '_id'>>
+      : Pick<T, IncludedKeys<S, T> | ('_id' extends keyof T ? '_id' : never)>;
 
 /**
  * Normalizes both select syntaxes into a Mongoose-compatible projection object.
