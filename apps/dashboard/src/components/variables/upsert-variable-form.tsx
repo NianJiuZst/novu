@@ -32,7 +32,6 @@ const VariableSchema = z
       .string()
       .min(1, 'Variable key is required')
       .regex(VARIABLE_KEY_REGEX, 'Must start with a letter and only contain letters, numbers, and underscores'),
-    isSecret: z.boolean(),
     environmentValues: z.record(z.string(), z.string()),
   })
   .superRefine((data, ctx) => {
@@ -109,7 +108,6 @@ export const UpsertVariableForm = ({
   const form = useForm<VariableFormValues>({
     defaultValues: {
       key: variable?.key ?? '',
-      isSecret: variable?.isSecret ?? false,
       environmentValues: initialEnvironmentValues,
     },
     resolver: standardSchemaResolver(VariableSchema),
@@ -131,13 +129,11 @@ export const UpsertVariableForm = ({
         await updateEnvironmentVariable({
           variableId: variable._id,
           key: data.key.trim(),
-          isSecret: data.isSecret,
           values,
         });
       } else {
         await createEnvironmentVariable({
           key: data.key.trim(),
-          isSecret: data.isSecret,
           values,
         });
       }
