@@ -356,10 +356,17 @@ export class BaseRepositoryV2<T_DBModel, T_MappedEntity, T_Enforcement> {
     const projection = convertSelectToProjection(select);
 
     for await (const doc of this._model
-      .find(query, projection, { sort: options.sort ?? null })
+      .find(query, projection, {
+        sort: options.sort ?? null,
+        ...(options.limit != null && { limit: options.limit }),
+        ...(options.skip != null && { skip: options.skip }),
+        ...(options.session && { session: options.session }),
+        ...(options.readPreference && { readPreference: options.readPreference }),
+      })
+      .lean()
       .batchSize(batchSize)
       .cursor()) {
-      yield this.mapProjectedEntity(doc.toObject());
+      yield this.mapProjectedEntity(doc);
     }
   }
 
