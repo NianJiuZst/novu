@@ -94,7 +94,7 @@ interface IWriteOptions {
  * ```
  */
 export class BaseRepositoryV2<T_DBModel, T_MappedEntity, T_Enforcement> {
-  public _model: Model<T_DBModel>;
+  private readonly _model: Model<T_DBModel>;
 
   private readonly defaultReadPreference: 'secondaryPreferred' | 'primary';
 
