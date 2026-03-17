@@ -141,11 +141,19 @@ export class PreviewUsecase {
       })
     );
 
-    const rawEnvVars = await this.environmentVariableRepository.findByEnvironment(
-      command.user.organizationId,
-      command.user.environmentId
-    );
-    const envVars = resolveEnvironmentVariables(rawEnvVars);
+    let envVars: Record<string, string> = {};
+    try {
+      const rawEnvVars = await this.environmentVariableRepository.findByEnvironment(
+        command.user.organizationId,
+        command.user.environmentId
+      );
+      envVars = resolveEnvironmentVariables(rawEnvVars);
+    } catch (error) {
+      this.logger.error(
+        { error },
+        'Failed to fetch or resolve environment variables for preview; falling back to empty env vars'
+      );
+    }
 
     return { stepData, controlValues, variableSchema: stepData.variables, variablesObject, workflow, envVars };
   }
