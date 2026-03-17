@@ -475,11 +475,15 @@ export class BaseRepositoryV2<T_DBModel, T_MappedEntity, T_Enforcement> {
   }
 
   async upsertMany(data: (FilterQuery<T_DBModel> & T_Enforcement)[]) {
-    const promises = data.map((entry) =>
-      this.MongooseModel.findOneAndUpdate(entry, entry, { upsert: true, new: true })
-    );
+    const operations = data.map((entry) => ({
+      updateOne: {
+        filter: entry,
+        update: { $set: entry },
+        upsert: true,
+      },
+    }));
 
-    return Promise.all(promises);
+    return this.bulkWrite(operations as mongo.AnyBulkWriteOperation[], false);
   }
 
   async upsert(query: FilterQuery<T_DBModel> & T_Enforcement, data: FilterQuery<T_DBModel> & T_Enforcement) {
