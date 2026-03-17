@@ -15,7 +15,9 @@ export class GetEnvironmentVariables {
     };
 
     if (command.search) {
-      query.key = { $regex: command.search, $options: 'i' };
+      const escapedSearch = command.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      query.key = { $regex: escapedSearch, $options: 'i' };
     }
 
     const variables = await this.environmentVariableRepository.find(query, '*', { sort: { createdAt: -1 } });
