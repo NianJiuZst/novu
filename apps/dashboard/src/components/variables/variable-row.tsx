@@ -174,15 +174,10 @@ export const VariableRow = ({
             </TimeDisplayHoverCard>
           )}
         </VariableCell>
-        <VariableCell className="w-1">
+        <VariableCell className="flex w-1 items-center justify-center">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <CompactButton
-                icon={RiMore2Fill}
-                variant="ghost"
-                className="z-10 h-8 w-8 p-0"
-                onClick={stopPropagation}
-              />
+            <DropdownMenuTrigger asChild onClick={stopPropagation}>
+              <CompactButton icon={RiMore2Fill} variant="ghost" className="z-10 h-8 w-8 p-0" />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-44" onClick={stopPropagation}>
               <DropdownMenuGroup>
@@ -232,8 +227,8 @@ export const VariableRowSkeleton = () => (
     <TableCell>
       <Skeleton className="h-5 w-28" />
     </TableCell>
-    <TableCell className="w-1">
-      <RiMore2Fill className="size-4 opacity-30" />
+    <TableCell>
+      <Skeleton className="ml-auto h-8 w-8" />
     </TableCell>
   </TableRow>
 );
