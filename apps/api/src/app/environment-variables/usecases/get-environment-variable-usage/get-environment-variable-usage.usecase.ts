@@ -69,7 +69,7 @@ export class GetEnvironmentVariableUsage {
     } catch (error) {
       this.logger.error({ err: error }, 'Failed to fetch workflows for environment variable usage');
 
-      return { workflows: [] };
+      throw error;
     }
 
     const workflows: EnvironmentVariableWorkflowInfoDto[] = fetchedWorkflows
