@@ -12,7 +12,7 @@ export const LayoutPreviewFactory = () => {
     <EmailCorePreview
       isPreviewPending={isPreviewPending}
       previewData={previewData}
-      isCustomHtmlEditor={editorType === 'html'}
+      editorType={(editorType as 'block' | 'html') ?? 'block'}
       resourceOrigin={layout?.origin ?? ResourceOriginEnum.NOVU_CLOUD}
     />
   );

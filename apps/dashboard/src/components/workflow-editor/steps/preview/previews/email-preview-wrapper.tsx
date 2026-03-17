@@ -13,11 +13,14 @@ import {
 } from '@/components/workflow-editor/steps/email/email-preview';
 import { EmailTabsSection } from '@/components/workflow-editor/steps/email/email-tabs-section';
 import { cn } from '@/utils/ui';
+import { EmailPreviewEmptyState } from './email-preview-empty-state';
+
+type EmailEditorType = 'block' | 'html';
 
 type EmailCorePreviewProps = {
   previewData: any;
   isPreviewPending: boolean;
-  isCustomHtmlEditor?: boolean;
+  editorType?: EmailEditorType;
   resourceOrigin: ResourceOriginEnum;
   isStepResolver?: boolean;
 };
@@ -30,10 +33,11 @@ const fadeVariants = {
 export function EmailCorePreview({
   previewData,
   isPreviewPending,
-  isCustomHtmlEditor,
+  editorType,
   resourceOrigin,
   isStepResolver,
 }: EmailCorePreviewProps) {
+  const isCustomHtmlEditor = editorType === 'html';
   const [activeTab, setActiveTab] = useState('desktop');
 
   // Memoize the preview content extraction to avoid recalculating on every render
@@ -48,6 +52,9 @@ export function EmailCorePreview({
       from: previewData.result.preview?.from,
     };
   }, [previewData?.result]);
+
+  // Check if the email body is empty (for empty state display)
+  const isBodyEmpty = !emailPreviewContent?.body || emailPreviewContent.body.trim() === '';
 
   // Memoize the loading skeleton to avoid recreating it
   const loadingSkeleton = useMemo(
@@ -105,7 +112,7 @@ export function EmailCorePreview({
                   transition={{ duration: 0.2 }}
                   className="h-full"
                 >
-                  {emailPreviewContent ? (
+                  {emailPreviewContent && !isBodyEmpty ? (
                     <>
                       <TabsContent value="mobile">
                         <div className="border-b px-2">
@@ -137,7 +144,7 @@ export function EmailCorePreview({
                       </TabsContent>
                     </>
                   ) : (
-                    <div className="p-6">No preview available</div>
+                    <EmailPreviewEmptyState isStepResolver={isStepResolver} editorType={editorType} />
                   )}
                 </motion.div>
               )}

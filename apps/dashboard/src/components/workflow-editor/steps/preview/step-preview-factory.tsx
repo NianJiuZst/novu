@@ -54,7 +54,7 @@ export function StepPreviewFactory() {
       return (
         <EmailCorePreview
           {...commonProps}
-          isCustomHtmlEditor={controlValues?.editorType === 'html'}
+          editorType={(controlValues?.editorType as 'block' | 'html') ?? 'block'}
           resourceOrigin={step.origin ?? ResourceOriginEnum.NOVU_CLOUD}
           isStepResolver={isStepResolver}
         />
