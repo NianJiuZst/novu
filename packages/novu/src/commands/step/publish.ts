@@ -134,7 +134,7 @@ export async function stepPublish(options: PublishOptions): Promise<void> {
     }
 
     if (options.dryRun) {
-      printDryRunSummary(releaseBundle, selectedSteps, startTime);
+      printDryRunSummary(releaseBundle, selectedSteps, startTime, rootDir);
       return;
     }
 
@@ -149,7 +149,7 @@ export async function stepPublish(options: PublishOptions): Promise<void> {
     }
 
     const deployment = await deployRelease(client, releaseBundle, manifestSteps);
-    printSuccessSummary(deployment, selectedSteps, startTime);
+    printSuccessSummary(deployment, selectedSteps, startTime, rootDir);
   } catch (error) {
     console.error('');
     console.error(red('❌ Publish failed:'), error instanceof Error ? error.message : error);
@@ -175,7 +175,13 @@ async function resolveScaffoldInteractively(
   const outDirPath = path.resolve(rootDir, outDir);
   const pathResolver = new StepFilePathResolver(rootDir, outDirPath);
 
-  if (pathResolver.findExistingStepFilePath(workflowIds[0], stepIds[0])) {
+  const existingStepFilePath = pathResolver.findExistingStepFilePath(workflowIds[0], stepIds[0]);
+  if (existingStepFilePath) {
+    const relPath = path.relative(rootDir, existingStepFilePath);
+    console.log(yellow(`ℹ  Step file found: ${relPath}`));
+    console.log(`   Edit this file and re-run to update, or delete it to re-scaffold.`);
+    console.log('');
+
     return undefined;
   }
 
@@ -682,7 +688,8 @@ async function deployRelease(
 function printDryRunSummary(
   bundle: StepResolverReleaseBundle,
   selectedSteps: DiscoveredStep[],
-  startTime: number
+  startTime: number,
+  rootDir: string
 ): void {
   const workflowCount = new Set(selectedSteps.map((step) => step.workflowId)).size;
   const stepText = selectedSteps.length === 1 ? 'step' : 'steps';
@@ -697,6 +704,7 @@ function printDryRunSummary(
     [
       { header: 'Step', getValue: (s) => s.stepId },
       { header: 'Workflow', getValue: (s) => s.workflowId },
+      { header: 'File', getValue: (s) => path.relative(rootDir, s.filePath) },
     ],
     '   '
   );
@@ -707,7 +715,12 @@ function printDryRunSummary(
   console.log('');
 }
 
-function printSuccessSummary(deployment: DeploymentResult, steps: DiscoveredStep[], startTime: number): void {
+function printSuccessSummary(
+  deployment: DeploymentResult,
+  steps: DiscoveredStep[],
+  startTime: number,
+  rootDir: string
+): void {
   const workflowCount = new Set(steps.map((step) => step.workflowId)).size;
   const stepText = steps.length === 1 ? 'step' : 'steps';
   const workflowText = workflowCount === 1 ? 'workflow' : 'workflows';
@@ -719,6 +732,7 @@ function printSuccessSummary(deployment: DeploymentResult, steps: DiscoveredStep
     [
       { header: 'Step', getValue: (s) => s.stepId },
       { header: 'Workflow', getValue: (s) => s.workflowId },
+      { header: 'File', getValue: (s) => path.relative(rootDir, s.filePath) },
     ],
     '   '
   );
