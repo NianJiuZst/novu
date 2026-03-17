@@ -1,5 +1,5 @@
 import { ApiServiceLevelEnum, FeatureNameEnum, getFeatureForTierAsBoolean, PermissionsEnum } from '@novu/shared';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { RiAddCircleLine, RiSearchLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import { PermissionButton } from '@/components/primitives/permission-button';
@@ -16,7 +16,6 @@ import { VariableRow, VariableRowSkeleton } from './variable-row';
 export const VariableList = () => {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const { currentEnvironment, environments } = useEnvironment();
   const navigate = useNavigate();
   const { subscription, isLoading: isLoadingSubscription } = useFetchSubscription();
@@ -28,14 +27,16 @@ export const VariableList = () => {
     ) &&
     (!IS_SELF_HOSTED || IS_ENTERPRISE);
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearch(value);
-
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setDebouncedSearch(value);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(search);
     }, 400);
+
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
   }, []);
 
   const { data: variables, isLoading: isLoadingVariables } = useFetchEnvironmentVariables({
