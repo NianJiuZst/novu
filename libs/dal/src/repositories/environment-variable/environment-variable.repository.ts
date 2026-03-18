@@ -20,15 +20,11 @@ export class EnvironmentVariableRepository extends BaseRepositoryV2<
     super(EnvironmentVariable, EnvironmentVariableEntity);
   }
 
-  async findByKey(organizationId: string, key: string) {
-    return this.findOne({ _organizationId: organizationId, key }, '*');
-  }
-
   async findByEnvironment(
     organizationId: string,
     environmentId: EnvironmentId
   ): Promise<EnvironmentVariableForTemplate[]> {
-    const variables = await this.find({ _organizationId: organizationId }, '*');
+    const variables = await this.find({ _organizationId: organizationId }, ['values', 'key', 'isSecret']);
     const resolved: EnvironmentVariableForTemplate[] = [];
 
     for (const variable of variables) {

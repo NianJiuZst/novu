@@ -44,7 +44,7 @@ function createJitVariables({
   onCreateNewVariable?: (variableName: string) => Promise<void>;
 }): LiquidVariable[] {
   // Skip if user is typing steps.* or env.* to avoid conflicts — these are schema-driven, not JIT-created
-  if (searchText.startsWith('steps.') || searchText.startsWith('env.') || searchText === 'env') {
+  if (searchText.startsWith('steps.') || searchText.startsWith('env.')) {
     return [];
   }
 

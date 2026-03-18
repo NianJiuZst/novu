@@ -4,6 +4,7 @@ import {
   ControlValuesEntity,
   ControlValuesRepository,
   EnvironmentVariableRepository,
+  NotificationTemplateEntity,
   NotificationTemplateRepository,
 } from '@novu/dal';
 import { ControlValuesLevelEnum } from '@novu/shared';
@@ -59,7 +60,7 @@ export class GetEnvironmentVariableUsage {
       return { workflows: [] };
     }
 
-    let fetchedWorkflows: Awaited<ReturnType<typeof this.notificationTemplateRepository.findNameAndTriggersByIds>>;
+    let fetchedWorkflows: Pick<NotificationTemplateEntity, 'name' | 'triggers' | '_environmentId'>[];
 
     try {
       fetchedWorkflows = await this.notificationTemplateRepository.findNameAndTriggersByIds(

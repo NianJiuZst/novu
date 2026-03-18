@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { encryptSecret } from '@novu/application-generic';
 import { EnvironmentVariableRepository } from '@novu/dal';
 import { EnvironmentVariableResponseDto } from '../../dtos/environment-variable-response.dto';
@@ -12,7 +12,7 @@ export class UpdateEnvironmentVariable {
   async execute(command: UpdateEnvironmentVariableCommand): Promise<EnvironmentVariableResponseDto> {
     const existing = await this.environmentVariableRepository.findById(
       { _id: command.variableId, _organizationId: command.organizationId },
-      '*'
+      ['_id']
     );
 
     if (!existing) {
@@ -21,15 +21,25 @@ export class UpdateEnvironmentVariable {
 
     const updateBody: Record<string, unknown> = {};
 
-    if (command.key !== undefined) updateBody.key = command.key;
-    if (command.type !== undefined) updateBody.type = command.type;
-    if (command.isSecret !== undefined) updateBody.isSecret = command.isSecret;
+    if (command.key !== undefined) {
+      updateBody.key = command.key;
+    }
+    if (command.type !== undefined) {
+      updateBody.type = command.type;
+    }
+    if (command.isSecret !== undefined) {
+      updateBody.isSecret = command.isSecret;
+    }
 
     if (command.values !== undefined) {
       updateBody.values = command.values.map((v) => ({
         _environmentId: v._environmentId,
         value: encryptSecret(v.value),
       }));
+    }
+
+    if (Object.keys(updateBody).length === 0) {
+      throw new BadRequestException('At least one field must be provided to update');
     }
 
     await this.environmentVariableRepository.update(

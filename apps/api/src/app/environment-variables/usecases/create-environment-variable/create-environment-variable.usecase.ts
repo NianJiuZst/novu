@@ -16,7 +16,10 @@ export class CreateEnvironmentVariable {
   async execute(command: CreateEnvironmentVariableCommand): Promise<EnvironmentVariableResponseDto> {
     await this.resourceValidatorService.validateEnvironmentVariablesLimit(command.organizationId);
 
-    const existing = await this.environmentVariableRepository.findByKey(command.organizationId, command.key);
+    const existing = await this.environmentVariableRepository.findOne(
+      { _organizationId: command.organizationId, key: command.key },
+      ['_id']
+    );
 
     if (existing) {
       throw new ConflictException(`Environment variable with key "${command.key}" already exists`);

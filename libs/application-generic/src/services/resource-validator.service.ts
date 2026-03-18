@@ -212,17 +212,13 @@ export class ResourceValidatorService {
     );
   }
 
-  async getEnvironmentVariablesLimit(organizationId: string): Promise<number> {
-    return this.featureFlagService.getFlag({
+  async validateEnvironmentVariablesLimit(organizationId: string): Promise<void> {
+    const variablesCount = await this.environmentVariableRepository.count({ _organizationId: organizationId });
+    const maxEnvironmentVariablesLimit = await this.featureFlagService.getFlag({
       key: FeatureFlagsKeysEnum.MAX_ENVIRONMENT_VARIABLES_LIMIT_NUMBER,
       defaultValue: SYSTEM_LIMITS.ENVIRONMENT_VARIABLES,
       organization: { _id: organizationId },
     });
-  }
-
-  async validateEnvironmentVariablesLimit(organizationId: string): Promise<void> {
-    const variablesCount = await this.environmentVariableRepository.count({ _organizationId: organizationId });
-    const maxEnvironmentVariablesLimit = await this.getEnvironmentVariablesLimit(organizationId);
 
     if (variablesCount >= maxEnvironmentVariablesLimit) {
       throw new BadRequestException({

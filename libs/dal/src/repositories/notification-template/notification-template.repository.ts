@@ -63,13 +63,16 @@ export class NotificationTemplateRepository extends BaseRepository<
     return this.mapEntities(items);
   }
 
-  async findNameAndTriggersByIds(organizationId: string, workflowIds: string[]): Promise<NotificationTemplateEntity[]> {
+  async findNameAndTriggersByIds(
+    organizationId: string,
+    workflowIds: string[]
+  ): Promise<Pick<NotificationTemplateEntity, 'name' | 'triggers' | '_environmentId'>[]> {
     return this.find(
       {
         _id: { $in: workflowIds },
         _organizationId: organizationId,
       },
-      { name: 1, triggers: 1, _environmentId: 1 }
+      { _id: 0, name: 1, triggers: 1, _environmentId: 1 }
     );
   }
 
