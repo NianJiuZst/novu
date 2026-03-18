@@ -46,6 +46,7 @@ cp apps/dashboard/.env.agent apps/dashboard/.env
 cp apps/worker/src/.env.agent apps/worker/src/.env
 
 ensure_docker
+docker compose -f docker/local/docker-compose.agent.yml down --remove-orphans 2>/dev/null || true
 docker compose -f docker/local/docker-compose.agent.yml up -d
 
 pnpm seed:agent
