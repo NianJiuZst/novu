@@ -25,6 +25,11 @@ pnpm start:dashboard  # Dashboard (Vite dev server on port 4201)
 pnpm start:worker     # Background worker (only needed when testing workflow triggers)
 ```
 
+Key gotchas:
+- The Dashboard Vite dev server runs on **port 4201** (configured in `apps/dashboard/vite.config.ts`)
+- The Worker service must be running when testing the triggering of a workflow notification in Novu, otherwise can be skipped.
+
+
 Run `pnpm build` before starting services **only** if you made changes to the `libs/`, `packages/` or `enterprise/` folder.
 
 ### Dashboard interaction
@@ -63,8 +68,9 @@ The `.source` folder is a **git submodule** pointing to the `novuhq/packages-ent
 
 1. **Create a branch in the submodule** following the same Conventional Commits naming convention (e.g., `feat/scope-description-fixes-NOV-123`).
 2. **Commit and push** the enterprise changes to that branch in the `novuhq/packages-enterprise` remote.
-3. **Create a matching branch in the main repository** with the same name.
-4. **Commit the updated submodule reference** (the changed pointer in `enterprise/`) along with any other main-repo changes to that branch.
-5. **Push the main repository branch** and open PRs in both repositories.
+3. **Create a PR in the enterprise repository** (`novuhq/packages-enterprise`) first, following the conventions from the "Creating Pull Requests" section above.
+4. **Create a matching branch in the main repository** with the same name.
+5. **Commit the updated submodule reference** (the changed pointer in `enterprise/`) along with any other main-repo changes to that branch.
+6. **Push the main repository branch** and **create a PR** that includes a link to the enterprise PR from step 3 in its description.
 
 Both PRs must follow the conventions from the "Creating Pull Requests" section above (Conventional Commits format, proper scope, Linear ticket ID when available).
