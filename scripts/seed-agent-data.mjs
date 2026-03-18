@@ -1,3 +1,10 @@
+import { spawn } from 'node:child_process';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT_DIR = resolve(__dirname, '..');
+
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 const BETTER_AUTH_URL = `${API_URL}/v1/better-auth`;
 
@@ -6,8 +13,67 @@ const SEED_PASSWORD = process.env.SEED_USER_PASSWORD || 'Agent123!@#';
 const SEED_ORG_NAME = process.env.SEED_ORG_NAME || 'Agent Organization';
 const SEED_USER_NAME = process.env.SEED_USER_NAME || 'Agent User';
 
-const MAX_HEALTH_RETRIES = 30;
+const MAX_HEALTH_RETRIES = 60;
 const HEALTH_RETRY_DELAY_MS = 2000;
+
+let managedApiProcess = null;
+
+async function isApiRunning() {
+  try {
+    const res = await fetch(`${API_URL}/v1/health-check`);
+
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+function startApiServer() {
+  console.log('API is not running. Starting it temporarily for seeding...');
+
+  managedApiProcess = spawn('pnpm', ['start:api:dev'], {
+    cwd: ROOT_DIR,
+    stdio: 'ignore',
+    detached: true,
+  });
+
+  managedApiProcess.on('error', (err) => {
+    console.error('Failed to start API server:', err.message);
+    managedApiProcess = null;
+  });
+
+  managedApiProcess.on('exit', (code) => {
+    if (code !== null && code !== 0) {
+      console.error(`API server exited with code ${code}`);
+    }
+    managedApiProcess = null;
+  });
+}
+
+function stopApiServer() {
+  if (!managedApiProcess) return;
+
+  console.log('Stopping temporary API server...');
+  try {
+    process.kill(-managedApiProcess.pid, 'SIGTERM');
+  } catch {
+    try {
+      managedApiProcess.kill('SIGTERM');
+    } catch {}
+  }
+  managedApiProcess = null;
+}
+
+async function ensureApiRunning() {
+  if (await isApiRunning()) {
+    console.log('API is already running.');
+
+    return;
+  }
+
+  startApiServer();
+  await waitForApi();
+}
 
 async function waitForApi() {
   console.log(`Waiting for API at ${API_URL}...`);
@@ -185,7 +251,7 @@ async function triggerNovuSync(token) {
 
 async function main() {
   try {
-    await waitForApi();
+    await ensureApiRunning();
 
     const { token } = await signUp();
     const org = await createOrganization(token);
@@ -206,7 +272,18 @@ async function main() {
   } catch (err) {
     console.error('Seed failed:', err.message);
     process.exit(1);
+  } finally {
+    stopApiServer();
   }
 }
+
+process.on('SIGINT', () => {
+  stopApiServer();
+  process.exit(1);
+});
+process.on('SIGTERM', () => {
+  stopApiServer();
+  process.exit(1);
+});
 
 main();
