@@ -122,19 +122,19 @@ async function signUp() {
     }),
   });
 
-  const body = await res.json();
-
   if (!res.ok) {
-    if (body?.message?.includes('already') || body?.code === 'USER_ALREADY_EXISTS') {
+    const text = await res.text();
+    if (text.includes('already') || text.includes('USER_ALREADY_EXISTS')) {
       console.log('User already exists, signing in instead...');
 
       return signIn();
     }
-    throw new Error(`Sign-up failed: ${JSON.stringify(body)}`);
+    throw new Error(`Sign-up failed (${res.status}): ${text}`);
   }
 
+  const body = await res.json();
   const token = extractSessionToken(res) || body?.token;
-  if (!token) throw new Error('No session token returned from sign-up');
+  if (!token) throw new Error(`No session token returned from sign-up. Response: ${JSON.stringify(body)}`);
 
   console.log('User created successfully.');
 
@@ -151,12 +151,11 @@ async function signIn() {
     }),
   });
 
+  if (!res.ok) throw new Error(`Sign-in failed (${res.status}): ${await res.text()}`);
+
   const body = await res.json();
-
-  if (!res.ok) throw new Error(`Sign-in failed: ${JSON.stringify(body)}`);
-
   const token = extractSessionToken(res) || body?.token;
-  if (!token) throw new Error('No session token returned from sign-in');
+  if (!token) throw new Error(`No session token returned from sign-in. Response: ${JSON.stringify(body)}`);
 
   console.log('Signed in successfully.');
 
@@ -180,14 +179,14 @@ async function listOrganizations(token) {
 
   const body = await res.json();
 
-  return body || [];
+  return Array.isArray(body) ? body : [];
 }
 
 async function createOrganization(token) {
   console.log(`Creating organization: ${SEED_ORG_NAME}`);
 
   const existingOrgs = await listOrganizations(token);
-  const existingOrg = existingOrgs.find?.((org) => org.name === SEED_ORG_NAME);
+  const existingOrg = existingOrgs.find((org) => org.name === SEED_ORG_NAME);
 
   if (existingOrg) {
     console.log(`Organization "${SEED_ORG_NAME}" already exists.`);
@@ -202,9 +201,9 @@ async function createOrganization(token) {
     body: JSON.stringify({ name: SEED_ORG_NAME, slug }),
   });
 
-  const body = await res.json();
+  if (!res.ok) throw new Error(`Create organization failed (${res.status}): ${await res.text()}`);
 
-  if (!res.ok) throw new Error(`Create organization failed: ${JSON.stringify(body)}`);
+  const body = await res.json();
 
   console.log('Organization created successfully.');
 
@@ -220,10 +219,7 @@ async function setActiveOrganization(token, organizationId) {
     body: JSON.stringify({ organizationId }),
   });
 
-  if (!res.ok) {
-    const body = await res.json();
-    throw new Error(`Set active organization failed: ${JSON.stringify(body)}`);
-  }
+  if (!res.ok) throw new Error(`Set active organization failed (${res.status}): ${await res.text()}`);
 
   const updatedToken = extractSessionToken(res);
 
