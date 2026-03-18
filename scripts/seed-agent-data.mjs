@@ -112,7 +112,7 @@ function extractSessionToken(res) {
 async function signUp() {
   console.log(`Signing up user: ${SEED_EMAIL}`);
 
-  const res = await fetch(`${BETTER_AUTH_URL}/api/sign-up/email`, {
+  const res = await fetch(`${BETTER_AUTH_URL}/sign-up/email`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -142,7 +142,7 @@ async function signUp() {
 }
 
 async function signIn() {
-  const res = await fetch(`${BETTER_AUTH_URL}/api/sign-in/email`, {
+  const res = await fetch(`${BETTER_AUTH_URL}/sign-in/email`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -170,7 +170,7 @@ function authHeaders(token) {
 }
 
 async function listOrganizations(token) {
-  const res = await fetch(`${BETTER_AUTH_URL}/api/organization/list`, {
+  const res = await fetch(`${BETTER_AUTH_URL}/organization/list`, {
     method: 'GET',
     headers: authHeaders(token),
   });
@@ -195,7 +195,7 @@ async function createOrganization(token) {
   }
 
   const slug = SEED_ORG_NAME.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  const res = await fetch(`${BETTER_AUTH_URL}/api/organization/create`, {
+  const res = await fetch(`${BETTER_AUTH_URL}/organization/create`, {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify({ name: SEED_ORG_NAME, slug }),
@@ -213,7 +213,7 @@ async function createOrganization(token) {
 async function setActiveOrganization(token, organizationId) {
   console.log('Setting active organization...');
 
-  const res = await fetch(`${BETTER_AUTH_URL}/api/organization/set-active`, {
+  const res = await fetch(`${BETTER_AUTH_URL}/organization/set-active`, {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify({ organizationId }),
