@@ -68,7 +68,10 @@ The `.source` folder is a **git submodule** pointing to the `novuhq/packages-ent
 
 1. **Create a branch in the submodule** following the same Conventional Commits naming convention (e.g., `feat/scope-description-fixes-NOV-123`).
 2. **Commit and push** the enterprise changes to that branch in the `novuhq/packages-enterprise` remote.
-3. **Create a PR in the enterprise repository** (`novuhq/packages-enterprise`) first, following the conventions from the "Creating Pull Requests" section above.
+3. **Create a PR in the enterprise repository** first, following the conventions from the "Creating Pull Requests" section above. Use the `--repo` flag from the workspace root — do NOT `cd` into the submodule:
+   ```bash
+   gh pr create --repo novuhq/packages-enterprise --head <branch-name> --base next --title "..." --body "..."
+   ```
 4. **Create a matching branch in the main repository** with the same name.
 5. **Commit the updated submodule reference** (the changed pointer in `enterprise/`) along with any other main-repo changes to that branch.
 6. **Push the main repository branch** and **create a PR** that includes a link to the enterprise PR from step 3 in its description.
