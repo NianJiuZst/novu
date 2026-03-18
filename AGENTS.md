@@ -2,33 +2,34 @@
 
 ## Cursor Cloud specific instructions
 
-When running in the cloud environment the pnpm setup:agent was already run, so you don't need to run it again and everything should be already setup (including .env files copied from .env.agent, and pnpm build and install with enterprise packages).
-
-### Prerequisites
-
-- **Docker** required for MongoDB, Redis, ClickHouse, and LocalStack
+`pnpm setup:agent` has already been run. Do not run it again. The environment is fully configured: dependencies installed, enterprise packages linked, project built, `.env` files in place, Docker services running, and a default user/org seeded.
 
 ### Infrastructure Services
 
-Start with: `docker compose -f docker/local/docker-compose.yml -f docker/local/docker-compose.agent.yml up -d`
+Docker services are running. To restart them after a reboot:
+
+`docker compose -f docker/local/docker-compose.agent.yml up -d`
 
 | Service | Port | Purpose |
 |---------|------|---------|
 | MongoDB | 27017 | Primary database |
 | Redis | 6379 | Caching + Bull queues |
-| ClickHouse | 8123/9000 | Analytics (optional) |
-| LocalStack | 4566 | S3 emulation (optional) |
+| ClickHouse | 8123/9000 | Analytics |
+| LocalStack | 4566 | S3 emulation |
 
-
-### Pre-seeding User and Organization
-
-After Docker services and the API are running, seed a default user and organization so you can skip the signup and org creation flows:
+### Running Services
 
 ```bash
-pnpm seed:agent
+pnpm start:api:dev    # API service with hot reload
+pnpm start:dashboard  # Dashboard (Vite dev server on port 4201)
+pnpm start:worker     # Background worker (only needed when testing workflow triggers)
 ```
 
-This creates a user and organization via the Better Auth API. Default credentials (overridable via env vars `SEED_USER_EMAIL`, `SEED_USER_PASSWORD`, `SEED_ORG_NAME`):
+Run `pnpm build` before starting services **only** if you made changes to the `libs/`, `packages/` or `enterprise/` folder.
+
+### Dashboard interaction
+
+A default user and organization are pre-seeded. Sign in at `http://localhost:4201/auth/sign-in` with these credentials — no signup or org creation is needed:
 
 | Field        | Value                |
 |--------------|----------------------|
@@ -36,35 +37,11 @@ This creates a user and organization via the Better Auth API. Default credential
 | Password     | `Agent123!@#`        |
 | Organization | `Agent Organization` |
 
-After seeding, sign in on the dashboard at `http://localhost:4201/auth/sign-in` with the credentials above. The organization already exists, so you will go straight to the dashboard without creating one.
-
-**🏃 Running Services:**
-
-Before running the use computer resource to navigate to the dashboard, make sure to run "pnpm build" script to ensure all your code changes are built and ready to be used. Only run those changes if you made changes to the "packages" folder or the "enterprise" folder.
-
-```bash
-# Core development stack
-pnpm start:api:dev    # API service with hot reload
-pnpm start:dashboard  # New React dashboard  
-```
-
-Key gotchas:
-- The Dashboard Vite dev server runs on **port 4201** (configured in `apps/dashboard/vite.config.ts`)
-- The Worker service must be running when testing the triggering of a workflow notification in Novu, otherwise can be skipped.
-
-```bash
-pnpm start:worker    # Background worker
-```
-
-### Dashboard interaction
-
-If you have run `pnpm seed:agent`, sign in with `agent@novu.co` / `Agent123!@#` and you will land directly on the workflows page (no signup or org creation needed).
-
-If you have NOT seeded, you will need to create a new user and organization. After the organization name is submitted, you can immediately navigate to the localhost:4201 root url and you should see the dashboard directly on the workflows page (Avoid doing the full onboarding unless requested).
+Do not go through the onboarding flow unless explicitly requested.
 
 ### Linting
 
-`pnpm check` runs Biome across the entire monorepo. Pre-existing warnings/errors are expected in this large codebase. The linter itself functions correctly.
+`pnpm check` runs Biome across the monorepo. Pre-existing warnings/errors are expected.
 
 ### Testing
 
@@ -74,25 +51,11 @@ If you have NOT seeded, you will need to create a new user and organization. Aft
 
 ## Creating Pull Requests
 
-Requirements:
+Follow the Conventional Commits specification. Include a Linear ticket ID when available.
 
-Follow the Conventional Commits specification
-As a team member, include Linear ticket ID at the end: fixes TICKET-ID or include it in your branch name
-Expected format: feat(scope): Add fancy new feature fixes NOV-123
+Format: `feat(scope): Add fancy new feature fixes NOV-123`
 
-Possible scopes:
-- dashboard
-- api-service
-- worker
-- shared
-- js
-- react
-- react-native
-- nextjs
-- providers
-- root 
-
-PR title must end with 'fixes TICKET-ID' (e.g., 'fixes NOV-123') when a linear ticket id is available in context.
+Scopes: `dashboard`, `api-service`, `worker`, `shared`, `js`, `react`, `react-native`, `nextjs`, `providers`, `root`, `application-generic`
 
 ### Enterprise Packages (Git Submodule)
 

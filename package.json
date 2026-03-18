@@ -46,7 +46,7 @@
     "release:version:apps": "nx release version --projects=tag:type:app",
     "setup:project": "npx --yes pnpm@10.16.1 i && node scripts/setup-env-files.js && pnpm build",
     "seed:agent": "node scripts/seed-agent-data.mjs",
-    "setup:agent": "git submodule update --init --recursive && git config --global submodule.recurse true && pnpm install:with-ee && pnpm build && cp apps/api/src/.env.agent apps/api/src/.env && cp apps/dashboard/.env.agent apps/dashboard/.env && cp apps/worker/src/.env.agent apps/worker/src/.env",
+    "setup:agent": "bash scripts/setup-agent.sh",
     "start:api:dev": "cross-env nx run @novu/api-service:start:dev",
     "start:api:test": "cross-env nx run-many --target=start:test --projects=@novu/api-service",
     "start:api": "cross-env nx run @novu/api-service:start",
