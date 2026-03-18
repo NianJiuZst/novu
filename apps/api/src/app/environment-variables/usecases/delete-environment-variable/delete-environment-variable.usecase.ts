@@ -9,7 +9,7 @@ export class DeleteEnvironmentVariable {
   async execute(command: DeleteEnvironmentVariableCommand): Promise<void> {
     const existing = await this.environmentVariableRepository.findById(
       { _id: command.variableId, _organizationId: command.organizationId },
-      '*'
+      ['_id']
     );
 
     if (!existing) {
@@ -17,7 +17,7 @@ export class DeleteEnvironmentVariable {
     }
 
     await this.environmentVariableRepository.delete({
-      _id: command.variableId as any,
+      _id: command.variableId,
       _organizationId: command.organizationId,
     });
   }
