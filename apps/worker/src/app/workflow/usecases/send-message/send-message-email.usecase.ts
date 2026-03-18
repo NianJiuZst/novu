@@ -6,7 +6,6 @@ import {
   CreateExecutionDetails,
   CreateExecutionDetailsCommand,
   DetailEnum,
-  FeatureFlagsService,
   GetLayoutCommandV0,
   GetLayoutUseCaseV0,
   GetNovuProviderCredentials,
@@ -19,15 +18,12 @@ import {
   SendWebhookMessage,
 } from '@novu/application-generic';
 import {
-  EnvironmentEntity,
   EnvironmentRepository,
   IntegrationEntity,
   LayoutRepository,
   MessageEntity,
   MessageRepository,
-  OrganizationEntity,
   SubscriberRepository,
-  UserEntity,
 } from '@novu/dal';
 import { EmailOutput } from '@novu/framework/internal';
 import {
@@ -37,7 +33,6 @@ import {
   EmailProviderIdEnum,
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
-  FeatureFlagsKeysEnum,
   IAttachmentOptions,
   IEmailOptions,
   WebhookEventEnum,
@@ -67,7 +62,6 @@ export class SendMessageEmail extends SendMessageBase {
     protected getNovuProviderCredentials: GetNovuProviderCredentials,
     protected selectVariant: SelectVariant,
     protected moduleRef: ModuleRef,
-    private featureFlagService: FeatureFlagsService,
     private getLayoutUseCaseV0: GetLayoutUseCaseV0,
     private sendWebhookMessage: SendWebhookMessage
   ) {
@@ -245,23 +239,10 @@ export class SendMessageEmail extends SendMessageBase {
           i18nInstance
         ));
 
-        // TODO: remove as part of https://linear.app/novu/issue/NV-4117/email-html-content-issue-in-mobile-devices
-        const shouldDisableInlineCss = await this.featureFlagService.getFlag({
-          key: FeatureFlagsKeysEnum.IS_EMAIL_INLINE_CSS_DISABLED,
-          defaultValue: false,
-          environment: { _id: command.environmentId } as EnvironmentEntity,
-          organization: { _id: command.organizationId } as OrganizationEntity,
-          user: { _id: command.userId } as UserEntity,
+        html = await inlineCss(html, {
+          url: ' ',
+          applyLinkTags: false,
         });
-
-        if (!shouldDisableInlineCss) {
-          // this is causing rendering issues in Gmail (especially when media queries are used), so we are disabling it
-          html = await inlineCss(html, {
-            // Used for style sheet links that starts with / so should not be needed in our case.
-            url: ' ',
-            applyLinkTags: false,
-          });
-        }
       }
     } catch (error) {
       Logger.error(
