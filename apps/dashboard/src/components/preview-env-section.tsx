@@ -62,21 +62,19 @@ export function PreviewEnvSection({ schema, env, onUpdate }: EnvSectionProps) {
     <AccordionItem value="env" className={ACCORDION_STYLES.itemLast}>
       <AccordionTrigger className={ACCORDION_STYLES.trigger}>
         <div className="flex w-full items-center justify-between">
-          <div className="flex items-center gap-1">
-            <div className="flex items-center gap-0.5">
-              Environment
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="text-foreground-400 inline-block hover:cursor-help">
-                    <RiInformation2Line className="size-3" />
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  Environment variables available via <code className="font-mono text-[10px]">{'{{env.KEY}}'}</code> in
-                  templates. Values are resolved server-side.
-                </TooltipContent>
-              </Tooltip>
-            </div>
+          <div className="flex items-center gap-0.5">
+            Environment
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-foreground-400 inline-block hover:cursor-help">
+                  <RiInformation2Line className="size-3" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                Environment variables available via <code className="font-mono text-[10px]">{'{{env.KEY}}'}</code> in
+                templates. Values are resolved server-side.
+              </TooltipContent>
+            </Tooltip>
           </div>
           <div className="mr-2 flex items-center gap-2">
             <Button
