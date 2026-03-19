@@ -181,7 +181,7 @@ export const VariableRow = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-44" onClick={stopPropagation}>
               <DropdownMenuGroup>
-                <Protect permission={PermissionsEnum.ORG_SETTINGS_WRITE}>
+                <Protect permission={PermissionsEnum.ENVIRONMENT_VARIABLE_WRITE}>
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => setTimeout(() => setIsEditDrawerOpen(true), 0)}

@@ -13,7 +13,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiRateLimitCategoryEnum, UserSessionData } from '@novu/shared';
+import { RequirePermissions } from '@novu/application-generic';
+import { ApiRateLimitCategoryEnum, PermissionsEnum, UserSessionData } from '@novu/shared';
 import { RequireAuthentication } from '../auth/framework/auth.decorator';
 import { ExternalApiAccessible } from '../auth/framework/external-api.decorator';
 import { ThrottlerCategory } from '../rate-limiting/guards';
@@ -65,6 +66,7 @@ export class EnvironmentVariablesController {
 
   @Get('/')
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.ENVIRONMENT_VARIABLE_READ)
   @ApiResponse(EnvironmentVariableResponseDto, 200, true)
   @ApiOperation({
     summary: 'List environment variables',
@@ -85,6 +87,7 @@ export class EnvironmentVariablesController {
 
   @Get('/:variableId/usage')
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.ENVIRONMENT_VARIABLE_READ)
   @ApiResponse(GetEnvironmentVariableUsageResponseDto)
   @ApiOperation({
     summary: 'Get environment variable usage',
@@ -107,6 +110,7 @@ export class EnvironmentVariablesController {
 
   @Get('/:variableId')
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.ENVIRONMENT_VARIABLE_READ)
   @ApiResponse(EnvironmentVariableResponseDto)
   @ApiOperation({
     summary: 'Get environment variable',
@@ -128,6 +132,7 @@ export class EnvironmentVariablesController {
 
   @Post('/')
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.ENVIRONMENT_VARIABLE_WRITE)
   @ApiResponse(EnvironmentVariableResponseDto)
   @ApiOperation({
     summary: 'Create environment variable',
@@ -154,6 +159,7 @@ export class EnvironmentVariablesController {
 
   @Patch('/:variableId')
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.ENVIRONMENT_VARIABLE_WRITE)
   @ApiResponse(EnvironmentVariableResponseDto)
   @ApiOperation({
     summary: 'Update environment variable',
@@ -181,6 +187,7 @@ export class EnvironmentVariablesController {
 
   @Delete('/:variableId')
   @ExternalApiAccessible()
+  @RequirePermissions(PermissionsEnum.ENVIRONMENT_VARIABLE_WRITE)
   @ApiOperation({
     summary: 'Delete environment variable',
     description: 'Deletes an environment variable by id.',
