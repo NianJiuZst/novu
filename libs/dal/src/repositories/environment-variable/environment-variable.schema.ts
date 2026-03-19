@@ -24,7 +24,6 @@ const environmentVariableSchema = new Schema<EnvironmentVariableDBModel>(
     _organizationId: {
       type: Schema.Types.ObjectId,
       ref: 'Organization',
-      index: true,
     },
     key: {
       type: Schema.Types.String,

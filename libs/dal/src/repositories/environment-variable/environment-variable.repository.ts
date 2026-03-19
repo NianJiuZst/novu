@@ -1,5 +1,4 @@
 import { EnvironmentId } from '@novu/shared';
-
 import { EnforceOrgId } from '../../types';
 import { BaseRepositoryV2 } from '../base-repository-v2';
 import { EnvironmentVariableDBModel, EnvironmentVariableEntity } from './environment-variable.entity';
@@ -24,21 +23,15 @@ export class EnvironmentVariableRepository extends BaseRepositoryV2<
     organizationId: string,
     environmentId: EnvironmentId
   ): Promise<EnvironmentVariableForTemplate[]> {
-    const variables = await this.find({ _organizationId: organizationId }, ['values', 'key', 'isSecret']);
-    const resolved: EnvironmentVariableForTemplate[] = [];
+    const results = await this.MongooseModel.find(
+      { _organizationId: organizationId, 'values._environmentId': environmentId },
+      { _id: 0, key: 1, isSecret: 1, 'values.$': 1 }
+    ).lean();
 
-    for (const variable of variables) {
-      const envValue = variable.values.find((v) => v._environmentId === environmentId);
-
-      if (envValue !== undefined) {
-        resolved.push({
-          key: variable.key,
-          value: envValue.value,
-          isSecret: variable.isSecret,
-        });
-      }
-    }
-
-    return resolved;
+    return results.map((doc) => ({
+      key: doc.key,
+      value: doc.values[0].value,
+      isSecret: doc.isSecret,
+    }));
   }
 }
