@@ -18,4 +18,5 @@ export interface IEnvironmentVariable {
   values: IEnvironmentVariableValue[];
   createdAt: string;
   updatedAt: string;
+  _updatedBy?: string;
 }

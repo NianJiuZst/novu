@@ -39,6 +39,10 @@ const environmentVariableSchema = new Schema<EnvironmentVariableDBModel>(
       default: false,
     },
     values: [environmentVariableValueSchema],
+    _updatedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
   },
   schemaOptions
 );

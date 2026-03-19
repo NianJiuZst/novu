@@ -37,6 +37,7 @@ export class CreateEnvironmentVariable {
         type: command.type ?? EnvironmentVariableType.STRING,
         isSecret: command.isSecret ?? false,
         values,
+        _updatedBy: command.userId,
       });
 
       return toEnvironmentVariableResponseDto(created);

@@ -42,6 +42,8 @@ export class UpdateEnvironmentVariable {
       throw new BadRequestException('At least one field must be provided to update');
     }
 
+    updateBody._updatedBy = command.userId;
+
     await this.environmentVariableRepository.update(
       { _id: command.variableId, _organizationId: command.organizationId },
       { $set: updateBody }

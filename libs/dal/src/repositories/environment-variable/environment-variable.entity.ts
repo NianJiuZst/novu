@@ -29,6 +29,11 @@ export class EnvironmentVariableEntity implements IEnvironmentVariable {
   createdAt: string;
 
   updatedAt: string;
+
+  _updatedBy?: string;
 }
 
-export type EnvironmentVariableDBModel = ChangePropsValueType<EnvironmentVariableEntity, '_organizationId'>;
+export type EnvironmentVariableDBModel = ChangePropsValueType<
+  EnvironmentVariableEntity,
+  '_organizationId' | '_updatedBy'
+>;
