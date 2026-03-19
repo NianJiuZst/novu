@@ -77,7 +77,7 @@ export const LayoutPreviewContextPanel = () => {
         className={ACCORDION_STYLES.item}
       />
 
-      <PreviewEnvSection schema={envSchema} />
+      <PreviewEnvSection schema={envSchema} env={previewContext.env ?? {}} onUpdate={updatePreviewSection} />
     </Accordion>
   );
 };
