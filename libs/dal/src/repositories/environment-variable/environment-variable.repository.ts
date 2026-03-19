@@ -26,7 +26,9 @@ export class EnvironmentVariableRepository extends BaseRepositoryV2<
     const results = await this.MongooseModel.find(
       { _organizationId: organizationId, 'values._environmentId': environmentId },
       { _id: 0, key: 1, isSecret: 1, 'values.$': 1 }
-    ).lean();
+    )
+      .read('secondaryPreferred')
+      .lean();
 
     return results.map((doc) => ({
       key: doc.key,
