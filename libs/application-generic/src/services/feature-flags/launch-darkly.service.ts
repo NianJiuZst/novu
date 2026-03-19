@@ -1,20 +1,27 @@
 import { init, LDClient, LDMultiKindContext } from '@launchdarkly/node-server-sdk';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import type { FeatureFlagContext, FeatureFlagContextBase, IFeatureFlagsService } from './types';
+
+const LOG_CONTEXT = 'LaunchDarklyFeatureFlagsService';
+const INITIALIZATION_TIMEOUT_SECONDS = 10;
 
 @Injectable()
 export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
   private client: LDClient;
-  public isEnabled: boolean;
+  public isEnabled = false;
 
   public async initialize(): Promise<void> {
-    const launchDarklySdkKey = process.env.LAUNCH_DARKLY_SDK_KEY;
-    if (!launchDarklySdkKey) {
-      throw new Error('Missing Launch Darkly SDK key');
+    try {
+      this.client = init(process.env.LAUNCH_DARKLY_SDK_KEY as string);
+      await this.client.waitForInitialization({ timeout: INITIALIZATION_TIMEOUT_SECONDS });
+      this.isEnabled = true;
+    } catch (error) {
+      Logger.error(
+        `Failed to initialize LaunchDarkly client, feature flags will use default values. SDK will retry to initialize in the next tick.`,
+        (error as Error).stack || (error as Error).message,
+        LOG_CONTEXT
+      );
     }
-    this.client = init(launchDarklySdkKey);
-    await this.client.waitForInitialization({ timeout: 10000 });
-    this.isEnabled = true;
   }
 
   public async gracefullyShutdown(): Promise<void> {
@@ -32,10 +39,13 @@ export class LaunchDarklyFeatureFlagsService implements IFeatureFlagsService {
     user,
     component,
   }: FeatureFlagContext<T_Result>): Promise<T_Result> {
-    const context = this.buildLDContext({ user, organization, environment, component });
-    const newVar = await this.client.variation(key, context, defaultValue);
+    if (!this.isEnabled) {
+      return defaultValue;
+    }
 
-    return newVar;
+    const context = this.buildLDContext({ user, organization, environment, component });
+
+    return await this.client.variation(key, context, defaultValue);
   }
 
   private buildLDContext({ user, organization, environment, component }: FeatureFlagContextBase): LDMultiKindContext {
