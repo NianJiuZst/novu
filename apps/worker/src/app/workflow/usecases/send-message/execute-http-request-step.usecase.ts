@@ -7,9 +7,8 @@ import {
   dashboardSanitizeControlValues,
   GetDecryptedSecretKey,
   GetDecryptedSecretKeyCommand,
-  HttpClientError,
-  HttpClientErrorType,
   HttpClientService,
+  ICompileContext,
   InstrumentUsecase,
   PinoLogger,
   shouldIncludeBody,
@@ -17,6 +16,7 @@ import {
   toHeadersRecord,
 } from '@novu/application-generic';
 import { ControlValuesRepository, JobRepository, MessageRepository, NotificationTemplateRepository } from '@novu/dal';
+import { createLiquidEngine } from '@novu/framework/internal';
 import {
   ControlValuesLevelEnum,
   ExecutionDetailsSourceEnum,
@@ -29,6 +29,7 @@ import * as dns from 'dns';
 import { LRUCache } from 'lru-cache';
 
 import { SendMessageChannelCommand } from './send-message-channel.command';
+import { SendMessageResult, SendMessageStatus, SendMessageType } from './send-message-type.usecase';
 
 const DNS_CACHE = new LRUCache<string, dns.LookupAddress[]>({
   max: 500,
@@ -37,10 +38,10 @@ const DNS_CACHE = new LRUCache<string, dns.LookupAddress[]>({
 
 const MAX_RAW_SIZE = 10_240;
 
-import { SendMessageResult, SendMessageStatus, SendMessageType } from './send-message-type.usecase';
-
 @Injectable()
 export class ExecuteHttpRequestStep extends SendMessageType {
+  private readonly liquidEngine: ReturnType<typeof createLiquidEngine>;
+
   constructor(
     private jobRepository: JobRepository,
     private httpClientService: HttpClientService,
@@ -52,6 +53,7 @@ export class ExecuteHttpRequestStep extends SendMessageType {
     protected createExecutionDetails: CreateExecutionDetails
   ) {
     super(messageRepository, createExecutionDetails);
+    this.liquidEngine = createLiquidEngine();
   }
 
   @InstrumentUsecase()
@@ -62,11 +64,14 @@ export class ExecuteHttpRequestStep extends SendMessageType {
       GetDecryptedSecretKeyCommand.create({ environmentId: command.environmentId })
     );
 
-    const url = controlValues.url as string | undefined;
-    const method = (controlValues.method as string) ?? 'GET';
-    const rawHeaders = (controlValues.headers as Array<{ key: string; value: string }> | undefined) ?? [];
-    const rawBody = (controlValues.body as Array<{ key: string; value: string }> | undefined) ?? [];
-    const timeout = (controlValues.timeout as number | undefined) ?? 5000;
+    const compileContext = this.buildCompileContect(command.compileContext);
+    const compiled = (await this.compileControlValues(controlValues, compileContext)) as typeof controlValues;
+
+    const url = compiled.url as string | undefined;
+    const method = (compiled.method as string) ?? 'POST';
+    const rawHeaders = (compiled.headers as Array<{ key: string; value: string }> | undefined) ?? [];
+    const rawBody = (compiled.body as Array<{ key: string; value: string }> | undefined) ?? [];
+    const timeout = (compiled.timeout as number | undefined) ?? 5000;
 
     if (!url) {
       await this.createExecutionDetails.execute(
@@ -123,43 +128,57 @@ export class ExecuteHttpRequestStep extends SendMessageType {
     let result: { statusCode?: number; body: unknown; headers: Record<string, string> };
 
     try {
-      const response = await this.httpClientService.request({
+      const response = await this.httpClientService.request<string>({
         url,
         method: method as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
         headers: mergedHeaders,
         timeout,
+        responseType: 'text',
         ...(hasBody ? { body: bodyObject } : {}),
       });
 
-      result = { statusCode: response.statusCode, body: response.body, headers: response.headers };
-    } catch (error) {
-      if (error instanceof HttpClientError && error.type === HttpClientErrorType.PARSE_ERROR) {
-        result = {
-          statusCode: error.statusCode ?? 200,
-          body: error.responseBody,
-          headers: {},
-        };
-      } else {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+      const parsedBody = tryParseJson(response.body);
+      const isObjectBody = parsedBody !== null && typeof parsedBody === 'object' && !Array.isArray(parsedBody);
 
+      if (!isObjectBody) {
         await this.createExecutionDetails.execute(
           CreateExecutionDetailsCommand.create({
             ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
-            detail: DetailEnum.ACTION_STEP_EXECUTION_FAILED,
+            detail: DetailEnum.ACTION_STEP_NON_OBJECT_RESPONSE,
             source: ExecutionDetailsSourceEnum.INTERNAL,
-            status: ExecutionDetailsStatusEnum.FAILED,
+            status: ExecutionDetailsStatusEnum.WARNING,
             isTest: false,
             isRetry: false,
-            raw: JSON.stringify({ error: errorMessage }),
+            raw: JSON.stringify({
+              message: `The endpoint at "${url}" returned a non-object response (type: ${Array.isArray(parsedBody) ? 'array' : typeof parsedBody}). Subsequent steps that reference this step's output may fail because the framework expects a JSON object. Configure the endpoint to return a JSON object to avoid this issue.`,
+              url,
+              receivedType: Array.isArray(parsedBody) ? 'array' : typeof parsedBody,
+            }),
           })
         );
-
-        return {
-          status: SendMessageStatus.FAILED,
-          errorMessage: DetailEnum.ACTION_STEP_EXECUTION_FAILED,
-          shouldHalt: !controlValues.continueOnFailure,
-        };
       }
+
+      result = { statusCode: response.statusCode, body: parsedBody, headers: response.headers };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      await this.createExecutionDetails.execute(
+        CreateExecutionDetailsCommand.create({
+          ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
+          detail: DetailEnum.ACTION_STEP_EXECUTION_FAILED,
+          source: ExecutionDetailsSourceEnum.INTERNAL,
+          status: ExecutionDetailsStatusEnum.FAILED,
+          isTest: false,
+          isRetry: false,
+          raw: JSON.stringify({ error: errorMessage }),
+        })
+      );
+
+      return {
+        status: SendMessageStatus.FAILED,
+        errorMessage: DetailEnum.ACTION_STEP_EXECUTION_FAILED,
+        shouldHalt: !controlValues.continueOnFailure,
+      };
     }
 
     if (controlValues.enforceSchemaValidation && controlValues.responseBodySchema) {
@@ -239,6 +258,25 @@ export class ExecuteHttpRequestStep extends SendMessageType {
     }
   }
 
+  private async compileControlValues(
+    values: Record<string, unknown>,
+    context: Record<string, unknown>
+  ): Promise<unknown> {
+    const compiled = await this.liquidEngine.parseAndRender(JSON.stringify(values), context);
+
+    return JSON.parse(compiled);
+  }
+
+  private buildCompileContect(compileContext: ICompileContext): Record<string, unknown> {
+    return {
+      subscriber: compileContext.subscriber ?? {},
+      payload: compileContext.payload ?? {},
+      actor: compileContext.actor ?? {},
+      tenant: compileContext.tenant ?? {},
+      context: compileContext.context ?? {},
+    };
+  }
+
   private async fetchControlValues(command: SendMessageChannelCommand): Promise<Record<string, unknown>> {
     const workflow =
       command.workflow ??
@@ -268,6 +306,14 @@ export class ExecuteHttpRequestStep extends SendMessageType {
     }
 
     return rawControls;
+  }
+}
+
+function tryParseJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
   }
 }
 
