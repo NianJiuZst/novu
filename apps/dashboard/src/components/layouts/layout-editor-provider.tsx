@@ -285,7 +285,7 @@ export const LayoutEditorProvider = ({
   >({
     value: previewContextValue,
     onChange: setPreviewContextValueSafe,
-    defaultAccordionValue: ['subscriber', 'context'],
+    defaultAccordionValue: ['subscriber', 'context', 'env'],
     defaultErrors: {
       subscriber: null,
       context: null,
