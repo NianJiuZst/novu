@@ -1,9 +1,11 @@
 import { spawn } from 'node:child_process';
+import { copyFileSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = resolve(__dirname, '..');
+const API_DIR = resolve(ROOT_DIR, 'apps', 'api');
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 const BETTER_AUTH_URL = `${API_URL}/v1/better-auth`;
@@ -15,6 +17,8 @@ const SEED_USER_NAME = process.env.SEED_USER_NAME || 'Agent User';
 
 const MAX_HEALTH_RETRIES = 60;
 const HEALTH_RETRY_DELAY_MS = 2000;
+const STABILITY_CHECK_DELAY_MS = 2000;
+const STABILITY_CHECK_COUNT = 3;
 
 let managedApiProcess = null;
 
@@ -28,11 +32,30 @@ async function isApiRunning() {
   }
 }
 
-function startApiServer() {
-  console.log('API is not running. Starting it temporarily for seeding...');
+function ensureDistEnvFile() {
+  const srcEnv = resolve(API_DIR, 'src', '.env');
+  const distEnv = resolve(API_DIR, 'dist', '.env');
 
-  managedApiProcess = spawn('pnpm', ['start:api:dev'], {
-    cwd: ROOT_DIR,
+  if (existsSync(srcEnv) && !existsSync(distEnv)) {
+    copyFileSync(srcEnv, distEnv);
+  }
+}
+
+function startApiServer() {
+  const distMain = resolve(API_DIR, 'dist', 'main.js');
+
+  if (!existsSync(distMain)) {
+    throw new Error(
+      `API build output not found at ${distMain}. Run "pnpm build:api" first.`
+    );
+  }
+
+  ensureDistEnvFile();
+
+  console.log('API is not running. Starting it from the build folder...');
+
+  managedApiProcess = spawn('node', ['dist/main.js'], {
+    cwd: API_DIR,
     stdio: 'ignore',
     detached: true,
   });
@@ -82,7 +105,8 @@ async function waitForApi() {
     try {
       const res = await fetch(`${API_URL}/v1/health-check`);
       if (res.ok) {
-        console.log('API is ready.');
+        console.log('API is responding. Running stability checks...');
+        await verifyApiStability();
 
         return;
       }
@@ -94,6 +118,16 @@ async function waitForApi() {
   }
 
   throw new Error(`API did not become ready within ${(MAX_HEALTH_RETRIES * HEALTH_RETRY_DELAY_MS) / 1000}s`);
+}
+
+async function verifyApiStability() {
+  for (let i = 0; i < STABILITY_CHECK_COUNT; i++) {
+    await new Promise((r) => setTimeout(r, STABILITY_CHECK_DELAY_MS));
+    if (!(await isApiRunning())) {
+      throw new Error('API became unresponsive during stability check. It may have restarted.');
+    }
+  }
+  console.log('API is stable and ready.');
 }
 
 function extractSessionToken(res) {
