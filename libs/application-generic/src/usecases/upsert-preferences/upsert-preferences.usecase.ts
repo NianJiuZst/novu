@@ -157,16 +157,13 @@ export class UpsertPreferences {
     return this.createPreferences(command);
   }
 
-  private async createPreferences(command: UpsertPreferencesCommand): Promise<PreferencesEntity> {
+  private async createPreferences(command: UpsertPreferencesCommand): Promise<PreferencesEntity | undefined> {
     const useContextFiltering = await this.featureFlagsService.getFlag({
       key: FeatureFlagsKeysEnum.IS_CONTEXT_PREFERENCES_ENABLED,
       defaultValue: false,
       organization: { _id: command.organizationId },
     });
 
-    // Determine contextKeys based on preference type AND feature flag
-    // Non-context-scoped types (universal/workflow-level): undefined (no field)
-    // Context-scoped types (subscriber-level): [] or ["key"]
     const isContextScoped = [
       PreferencesTypeEnum.SUBSCRIBER_WORKFLOW,
       PreferencesTypeEnum.SUBSCRIPTION_SUBSCRIBER_WORKFLOW,
@@ -192,7 +189,7 @@ export class UpsertPreferences {
       if (isDuplicateKeyError) {
         const existingPreference = await this.getPreference(command);
         if (existingPreference) {
-          return existingPreference;
+          return this.updatePreferences(existingPreference, command);
         }
       }
 
