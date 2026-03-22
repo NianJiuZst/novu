@@ -114,9 +114,13 @@ export function WorkflowList({
           ? DirectionEnum.ASC
           : DirectionEnum.DESC
         : DirectionEnum.DESC;
-    searchParams.set('orderDirection', newDirection);
-    searchParams.set('orderBy', column);
-    setSearchParams(searchParams);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('orderDirection', newDirection);
+      next.set('orderBy', column);
+
+      return next;
+    });
   };
 
   if (isError) return <ServerErrorPage />;

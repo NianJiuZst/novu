@@ -147,7 +147,8 @@ export class ConstructFrameworkWorkflow {
           steps: {},
         };
         for (const staticStep of dbWorkflow.steps) {
-          fullPayloadForRender.steps[staticStep.stepId || staticStep._templateId] = await this.constructStep({
+          const stepKey = staticStep.stepId || staticStep._templateId || staticStep._id;
+          fullPayloadForRender.steps[stepKey] = await this.constructStep({
             step,
             staticStep,
             fullPayloadForRender,
@@ -213,7 +214,13 @@ export class ConstructFrameworkWorkflow {
     const stepType = stepTemplate.type;
     const stepId = staticStep.stepId || staticStep._templateId;
     if (!stepId) {
-      throw new InternalServerErrorException(`Step id not found for step ${staticStep._id}`);
+      this.logger.warn(`Step with _id ${staticStep._id} has no stepId or _templateId, skipping step`, LOG_CONTEXT);
+
+      return step.custom(
+        staticStep._id,
+        async () => ({}),
+        { controlSchema: PERMISSIVE_EMPTY_SCHEMA, skip: () => true }
+      );
     }
     const stepControls = stepTemplate.controls;
 
