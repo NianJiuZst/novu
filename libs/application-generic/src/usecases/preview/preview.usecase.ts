@@ -47,6 +47,8 @@ export class PreviewUsecase {
         typeof context.stepData.stepResolverHash === 'string' ? context.stepData.stepResolverHash : undefined;
       const isStepResolver = isStepResolverActive(stepResolverHash);
 
+      const isHttpRequestStep = context.stepData.type === StepTypeEnum.HTTP_REQUEST;
+
       const sanitizedControls = isStepResolver
         ? context.controlValues
         : this.controlValueSanitizer.sanitizeControlsForPreview(
@@ -72,8 +74,6 @@ export class PreviewUsecase {
       payloadExample = this.payloadProcessor.enhanceEventCountValue(payloadExample);
 
       const cleanedPayloadExample = this.payloadProcessor.cleanPreviewExamplePayload(payloadExample);
-
-      const isHttpRequestStep = context.stepData.type === StepTypeEnum.HTTP_REQUEST;
 
       try {
         const executeOutput = await this.executePreviewUsecase(
