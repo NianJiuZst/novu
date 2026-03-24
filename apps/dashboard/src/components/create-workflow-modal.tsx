@@ -39,11 +39,11 @@ import { Textarea } from '@/components/primitives/textarea';
 import { ExternalLink } from '@/components/shared/external-link';
 import { CreateWorkflowForm } from '@/components/workflow-editor/create-workflow-form';
 import { useEnvironment } from '@/context/environment/hooks';
-import { useFetchOrganizationSettings } from '@/hooks/use-fetch-organization-settings';
 import { useAiChatStream } from '@/hooks/use-ai-chat-stream';
 import { useCreateAiChat } from '@/hooks/use-create-ai-chat';
 import { useCreateWorkflow } from '@/hooks/use-create-workflow';
 import { useDuplicateWorkflow } from '@/hooks/use-duplicate-workflow';
+import { useFetchOrganizationSettings } from '@/hooks/use-fetch-organization-settings';
 import { useFetchWorkflow } from '@/hooks/use-fetch-workflow';
 import { useFormProtection } from '@/hooks/use-form-protection';
 import { useTelemetry } from '@/hooks/use-telemetry';
@@ -339,7 +339,12 @@ export function CreateWorkflowModal({ mode, workflowId }: { mode: 'create' | 'du
             )}
 
             {showGuidedContent && (
-              <GuidedModeContent onSubmit={handleGuidedSubmit} isGenerating={isGenerating} error={error} industry={organizationIndustry} />
+              <GuidedModeContent
+                onSubmit={handleGuidedSubmit}
+                isGenerating={isGenerating}
+                error={error}
+                industry={organizationIndustry}
+              />
             )}
 
             {showManualContent &&
