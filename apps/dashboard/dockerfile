@@ -36,26 +36,16 @@ RUN CI='' pnpm build:dashboard --skip-nx-cache
 
 FROM node:20-alpine3.22
 
-
 RUN npm install -g http-server --loglevel notice
 
+USER 1000
 WORKDIR /app
 
-COPY --from=builder /usr/src/app/apps/dashboard/dist /app/dist
-COPY --from=builder /usr/src/app/apps/dashboard/package.json /app/package.json
-COPY --from=builder /usr/src/app/apps/dashboard/docker-entrypoint.sh /app/docker-entrypoint.sh
+COPY --chown=1000:1000 --from=builder /usr/src/app/apps/dashboard/dist /app/dist
+COPY --chown=1000:1000 --from=builder /usr/src/app/apps/dashboard/package.json /app/package.json
+COPY --chown=1000:1000 --from=builder /usr/src/app/apps/dashboard/docker-entrypoint.sh /app/docker-entrypoint.sh  
 
-# OpenShift compatibility: Set group ownership to 0 (root group) and make group-writable
-# OpenShift runs with arbitrary UIDs but keeps GID 0, allowing write access
-# Make /app/dist writable so sed can create temp files
-RUN chgrp -R 0 /app && \
-    chmod -R g+rwX /app && \
-    chmod 775 /app/dist && \
-    chmod 664 /app/dist/index.html && \
-    chmod +x /app/docker-entrypoint.sh
-
-# Run as UID 1000 with GID 0 (root group) for OpenShift compatibility
-USER 1000:0
+RUN chmod +x /app/docker-entrypoint.sh
 ENTRYPOINT [ "/app/docker-entrypoint.sh" ]
 # Expose the port the app runs on
 EXPOSE 4000
