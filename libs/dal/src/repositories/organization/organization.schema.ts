@@ -1,4 +1,4 @@
-import { ApiServiceLevelEnum } from '@novu/shared';
+import { ApiServiceLevelEnum, IndustryEnum } from '@novu/shared';
 import mongoose, { Schema } from 'mongoose';
 
 import { schemaOptions } from '../schema-default.options';
@@ -45,6 +45,10 @@ const organizationSchema = new Schema<OrganizationDBModel>(
     domain: Schema.Types.String,
     language: [Schema.Types.String],
     removeNovuBranding: Schema.Types.Boolean,
+    industry: {
+      type: Schema.Types.String,
+      enum: IndustryEnum,
+    },
     productUseCases: {
       delay: {
         type: Schema.Types.Boolean,

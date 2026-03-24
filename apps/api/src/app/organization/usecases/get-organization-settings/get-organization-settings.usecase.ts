@@ -19,6 +19,7 @@ export class GetOrganizationSettings {
       removeNovuBranding: organization.removeNovuBranding || false,
       defaultLocale: organization.defaultLocale || DEFAULT_LOCALE,
       targetLocales: organization.targetLocales || [],
+      industry: organization.industry,
     };
   }
 }

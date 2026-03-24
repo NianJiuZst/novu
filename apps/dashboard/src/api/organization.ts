@@ -1,16 +1,18 @@
-import type { IEnvironment, UpdateExternalOrganizationDto } from '@novu/shared';
+import type { IEnvironment, IndustryEnum, UpdateExternalOrganizationDto } from '@novu/shared';
 import { get, patch, post } from './api.client';
 
 export type GetOrganizationSettingsDto = {
   removeNovuBranding: boolean;
   defaultLocale: string;
   targetLocales: string[];
+  industry?: IndustryEnum;
 };
 
 export type UpdateOrganizationSettingsDto = {
   removeNovuBranding?: boolean;
   defaultLocale?: string;
   targetLocales?: string[];
+  industry?: IndustryEnum;
 };
 
 export function updateClerkOrgMetadata({

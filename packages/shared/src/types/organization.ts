@@ -23,6 +23,30 @@ export enum ProductUseCasesEnum {
 
 export type ProductUseCases = Partial<Record<ProductUseCasesEnum, boolean>>;
 
+export enum IndustryEnum {
+  ECOMMERCE = 'ecommerce',
+  FINTECH = 'fintech',
+  HEALTHCARE = 'healthcare',
+  SAAS = 'saas',
+  EDUCATION = 'education',
+  MEDIA = 'media',
+  SOCIAL = 'social',
+  GAMING = 'gaming',
+  OTHER = 'other',
+}
+
+export const industryToLabelMapper: Record<IndustryEnum, string> = {
+  [IndustryEnum.ECOMMERCE]: 'E-commerce',
+  [IndustryEnum.FINTECH]: 'Fintech',
+  [IndustryEnum.HEALTHCARE]: 'Healthcare',
+  [IndustryEnum.SAAS]: 'SaaS',
+  [IndustryEnum.EDUCATION]: 'Education',
+  [IndustryEnum.MEDIA]: 'Media & Entertainment',
+  [IndustryEnum.SOCIAL]: 'Social',
+  [IndustryEnum.GAMING]: 'Gaming',
+  [IndustryEnum.OTHER]: 'Other',
+};
+
 export type OrganizationPublicMetadata = {
   externalOrgId?: string;
   domain?: string;

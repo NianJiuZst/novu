@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/correctness/useUniqueElementIds: working correctly */
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
-import { AiAgentTypeEnum, AiResourceTypeEnum, DuplicateWorkflowDto } from '@novu/shared';
+import { AiAgentTypeEnum, AiResourceTypeEnum, DuplicateWorkflowDto, IndustryEnum } from '@novu/shared';
 import * as Sentry from '@sentry/react';
 import { ChatOnDataCallback, generateId, UIMessage } from 'ai';
 import { motion } from 'motion/react';
@@ -39,6 +39,7 @@ import { Textarea } from '@/components/primitives/textarea';
 import { ExternalLink } from '@/components/shared/external-link';
 import { CreateWorkflowForm } from '@/components/workflow-editor/create-workflow-form';
 import { useEnvironment } from '@/context/environment/hooks';
+import { useFetchOrganizationSettings } from '@/hooks/use-fetch-organization-settings';
 import { useAiChatStream } from '@/hooks/use-ai-chat-stream';
 import { useCreateAiChat } from '@/hooks/use-create-ai-chat';
 import { useCreateWorkflow } from '@/hooks/use-create-workflow';
@@ -61,12 +62,72 @@ export type WorkflowCreatedEvent = {
 
 type CreateWorkflowTab = 'guided' | 'manual';
 
-const WORKFLOW_SUGGESTIONS = [
+const DEFAULT_WORKFLOW_SUGGESTIONS = [
   'Welcome email workflow',
   'Order confirmation workflow',
   'Payment failed',
   'Password reset workflow',
 ];
+
+const INDUSTRY_WORKFLOW_SUGGESTIONS: Record<IndustryEnum, string[]> = {
+  [IndustryEnum.ECOMMERCE]: [
+    'Cart abandonment reminder',
+    'Order confirmation workflow',
+    'Shipping update notifications',
+    'Back-in-stock alert',
+  ],
+  [IndustryEnum.FINTECH]: [
+    'Transaction alert notification',
+    'KYC verification reminder',
+    'Security alert workflow',
+    'Payment received confirmation',
+  ],
+  [IndustryEnum.HEALTHCARE]: [
+    'Appointment reminder workflow',
+    'Lab results notification',
+    'Prescription refill reminder',
+    'Telehealth session reminder',
+  ],
+  [IndustryEnum.SAAS]: [
+    'Welcome onboarding sequence',
+    'Feature adoption nudge',
+    'Trial expiring notification',
+    'Billing alert workflow',
+  ],
+  [IndustryEnum.EDUCATION]: [
+    'Assignment due reminder',
+    'Grade posted notification',
+    'Live class starting alert',
+    'Course enrollment confirmation',
+  ],
+  [IndustryEnum.MEDIA]: [
+    'Breaking news alert',
+    'New content recommendation',
+    'Subscription renewal reminder',
+    'Weekly content digest',
+  ],
+  [IndustryEnum.SOCIAL]: [
+    'New message notification',
+    'Mention/tag alert',
+    'Friend request notification',
+    'Activity digest workflow',
+  ],
+  [IndustryEnum.GAMING]: [
+    'In-game event starting',
+    'Reward available notification',
+    'Friend activity alert',
+    'Season launch announcement',
+  ],
+  [IndustryEnum.OTHER]: DEFAULT_WORKFLOW_SUGGESTIONS,
+};
+
+function getWorkflowSuggestions(industry?: IndustryEnum): string[] {
+  if (!industry) {
+    return DEFAULT_WORKFLOW_SUGGESTIONS;
+  }
+
+  return INDUSTRY_WORKFLOW_SUGGESTIONS[industry] ?? DEFAULT_WORKFLOW_SUGGESTIONS;
+}
 
 export function CreateWorkflowModal({ mode, workflowId }: { mode: 'create' | 'duplicate'; workflowId?: string }) {
   const navigate = useNavigate();
@@ -77,6 +138,8 @@ export function CreateWorkflowModal({ mode, workflowId }: { mode: 'create' | 'du
   const chatId = useMemo(() => generateId(), []);
   const persistedChatIdRef = useRef<string | null>(null);
   const [tab, setTab] = useState<CreateWorkflowTab>('guided');
+  const { data: organizationSettings } = useFetchOrganizationSettings();
+  const organizationIndustry = organizationSettings?.data?.industry;
 
   const { workflow, isPending: isLoadingWorkflow } = useFetchWorkflow({
     workflowSlug: mode === 'duplicate' ? workflowId : undefined,
@@ -276,7 +339,7 @@ export function CreateWorkflowModal({ mode, workflowId }: { mode: 'create' | 'du
             )}
 
             {showGuidedContent && (
-              <GuidedModeContent onSubmit={handleGuidedSubmit} isGenerating={isGenerating} error={error} />
+              <GuidedModeContent onSubmit={handleGuidedSubmit} isGenerating={isGenerating} error={error} industry={organizationIndustry} />
             )}
 
             {showManualContent &&
@@ -333,6 +396,7 @@ type GuidedModeContentProps = {
   onSubmit: (values: z.infer<typeof schema>) => void;
   isGenerating: boolean;
   error?: Error;
+  industry?: IndustryEnum;
 };
 
 const STEP_DELAY_MS = 2000;
@@ -360,7 +424,7 @@ type GenerationStep = {
   status: GenerationStepStatus;
 };
 
-function GuidedModeContent({ onSubmit, isGenerating, error }: GuidedModeContentProps) {
+function GuidedModeContent({ onSubmit, isGenerating, error, industry }: GuidedModeContentProps) {
   const track = useTelemetry();
   const form = useForm({
     resolver: standardSchemaResolver(schema),
@@ -486,7 +550,7 @@ function GuidedModeContent({ onSubmit, isGenerating, error }: GuidedModeContentP
       {header}
 
       <div className="flex flex-wrap items-center gap-2 mt-8">
-        {WORKFLOW_SUGGESTIONS.map((suggestion) => (
+        {getWorkflowSuggestions(industry).map((suggestion) => (
           <button
             key={suggestion}
             type="button"

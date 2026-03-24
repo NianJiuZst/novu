@@ -1,7 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsValidLocale } from '@novu/application-generic';
-import { OrganizationEntity } from '@novu/dal';
-import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IndustryEnum } from '@novu/shared';
+import { IsArray, IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class GetOrganizationSettingsDto {
   @ApiProperty({
@@ -26,4 +26,12 @@ export class GetOrganizationSettingsDto {
   @IsArray()
   @IsString({ each: true })
   targetLocales?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Company industry',
+    enum: IndustryEnum,
+  })
+  @IsOptional()
+  @IsEnum(IndustryEnum)
+  industry?: IndustryEnum;
 }

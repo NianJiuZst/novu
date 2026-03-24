@@ -1,8 +1,9 @@
 /** biome-ignore-all lint/correctness/useUniqueElementIds: expected */
 import { OrganizationProfile } from '@clerk/clerk-react';
 import type { Appearance } from '@clerk/types';
-import { PermissionsEnum } from '@novu/shared';
+import { IndustryEnum, industryToLabelMapper, PermissionsEnum } from '@novu/shared';
 import { RiInformation2Line } from 'react-icons/ri';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/primitives/select';
 import { Tooltip, TooltipContent, TooltipPortal, TooltipTrigger } from '@/components/primitives/tooltip';
 import { EE_AUTH_PROVIDER } from '@/config';
 import { useFetchOrganizationSettings } from '@/hooks/use-fetch-organization-settings';
@@ -21,18 +22,23 @@ export function OrganizationSettings({ clerkAppearance }: { clerkAppearance: App
     });
   };
 
+  const handleIndustryChange = (value: string) => {
+    updateOrganizationSettings.mutate({
+      industry: value as IndustryEnum,
+    });
+  };
+
   const removeNovuBranding = organizationSettings?.data?.removeNovuBranding;
+  const industry = organizationSettings?.data?.industry;
   const isUpdating = updateOrganizationSettings.isPending;
 
   return (
     <div className="space-y-8">
-      {/* Badges and Integrations Section */}
       <Protect permission={PermissionsEnum.ORG_SETTINGS_READ}>
         <div>
           <h1 className="text-label-sm text-text-strong mb-2">Branding & Integrations</h1>
 
           <div className="flex flex-col gap-7">
-            {/* Remove branding setting */}
             <div className="flex flex-col border-t border-neutral-100 pt-4 pl-1">
               <div className="flex items-center justify-between py-1">
                 <div className="flex items-center gap-1">
@@ -77,7 +83,41 @@ export function OrganizationSettings({ clerkAppearance }: { clerkAppearance: App
         </div>
       </Protect>
 
-      {/* Organization Settings Section */}
+      <Protect permission={PermissionsEnum.ORG_SETTINGS_READ}>
+        <div>
+          <h1 className="text-label-sm text-text-strong mb-2">AI Co-Pilot</h1>
+
+          <div className="flex flex-col gap-7">
+            <div className="flex flex-col border-t border-neutral-100 pt-4 pl-1">
+              <div className="flex items-center justify-between py-1">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-label-sm text-text-strong">Company industry</span>
+                  <p className="text-paragraph-sm text-text-soft">
+                    Tailors AI workflow suggestions to your industry best practices.
+                  </p>
+                </div>
+                <Select
+                  value={industry ?? ''}
+                  onValueChange={handleIndustryChange}
+                  disabled={isLoadingSettings || isUpdating}
+                >
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Select industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(industryToLabelMapper).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Protect>
+
       <div>
         <h1 className="text-label-sm text-text-strong mb-3">Organization Settings</h1>
         {EE_AUTH_PROVIDER === 'clerk' ? (

@@ -96,6 +96,10 @@ export class UpdateOrganizationSettings {
       updateFields.targetLocales = command.targetLocales;
     }
 
+    if (command.industry !== undefined) {
+      updateFields.industry = command.industry;
+    }
+
     return updateFields;
   }
 
@@ -104,6 +108,7 @@ export class UpdateOrganizationSettings {
       removeNovuBranding: organization.removeNovuBranding || false,
       defaultLocale: organization.defaultLocale || DEFAULT_LOCALE,
       targetLocales: organization.targetLocales || [],
+      industry: organization.industry,
     };
   }
 }

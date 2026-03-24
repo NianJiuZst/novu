@@ -126,6 +126,7 @@ export class EEOrganizationController {
         removeNovuBranding: body.removeNovuBranding,
         defaultLocale: body.defaultLocale,
         targetLocales: body.targetLocales,
+        industry: body.industry,
       })
     );
   }

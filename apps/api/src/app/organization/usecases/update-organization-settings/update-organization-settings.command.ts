@@ -1,5 +1,6 @@
 import { AuthenticatedCommand, IsValidLocale } from '@novu/application-generic';
-import { IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IndustryEnum } from '@novu/shared';
+import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UpdateOrganizationSettingsCommand extends AuthenticatedCommand {
   @IsNotEmpty()
@@ -17,4 +18,8 @@ export class UpdateOrganizationSettingsCommand extends AuthenticatedCommand {
   @IsArray()
   @IsString({ each: true })
   targetLocales?: string[];
+
+  @IsOptional()
+  @IsEnum(IndustryEnum)
+  industry?: IndustryEnum;
 }
