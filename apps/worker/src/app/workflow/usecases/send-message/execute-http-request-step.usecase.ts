@@ -288,9 +288,19 @@ export class ExecuteHttpRequestStep extends SendMessageType {
     values: Record<string, unknown>,
     context: Record<string, unknown>
   ): Promise<unknown> {
-    const compiled = await this.liquidEngine.parseAndRender(JSON.stringify(values), context);
+    try {
+      const compiled = await this.liquidEngine.parseAndRender(JSON.stringify(values), context);
 
-    return JSON.parse(compiled);
+      return JSON.parse(compiled);
+    } catch (error) {
+      this.logger.error(
+        { err: error },
+        'Failed to compile control values with Liquid template engine',
+        'ExecuteHttpRequestStep'
+      );
+
+      return values;
+    }
   }
 
   private buildCompileContect(compileContext: ICompileContext): Record<string, unknown> {

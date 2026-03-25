@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   buildNovuSignatureHeader,
   GetDecryptedSecretKey,
@@ -140,9 +140,16 @@ export class TestHttpEndpointUsecase {
     values: Record<string, unknown>,
     context: Record<string, unknown>
   ): Promise<unknown> {
-    const compiled = await this.liquidEngine.parseAndRender(JSON.stringify(values), context);
+    try {
+      const compiled = await this.liquidEngine.parseAndRender(JSON.stringify(values), context);
 
-    return JSON.parse(compiled);
+      return JSON.parse(compiled);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Invalid template syntax in control values';
+
+      throw new BadRequestException(`Control value compilation failed: ${message}`);
+    }
   }
 }
 
