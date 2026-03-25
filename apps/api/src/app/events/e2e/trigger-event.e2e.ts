@@ -1360,8 +1360,8 @@ describe('Trigger event - /v1/events/trigger (POST) #novu-v2', () => {
     it('should correctly set expiration date (TTL) for notification and messages', async () => {
       const templateName = template.triggers[0].identifier;
 
-      const response = await novuClient.trigger({
-        workflowId: templateName,
+      const response = await session.testAgent.post('/v1/events/trigger').send({
+        name: templateName,
         to: [
           {
             subscriberId: subscriber.subscriberId,
@@ -1372,11 +1372,11 @@ describe('Trigger event - /v1/events/trigger (POST) #novu-v2', () => {
           urlVar: '/test/url/path',
         },
       });
-      const body = response.result;
-      expect(body).to.have.all.keys('acknowledged', 'status', 'transactionId', 'activityFeedLink');
-      expect(body.acknowledged).to.equal(true);
-      expect(body.status).to.equal('processed');
-      expect(body.transactionId).to.be.a.string;
+      const { body } = response;
+      expect(body.data).to.have.all.keys('acknowledged', 'status', 'transactionId', 'activityFeedLink');
+      expect(body.data.acknowledged).to.equal(true);
+      expect(body.data.status).to.equal('processed');
+      expect(body.data.transactionId).to.be.a.string;
 
       await session.waitForJobCompletion(template._id);
 
