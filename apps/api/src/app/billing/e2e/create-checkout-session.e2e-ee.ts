@@ -15,7 +15,6 @@ const checkoutSessionCreateParamsMock = {
   },
   billing_address_collection: 'required',
   customer_update: {
-    name: 'auto',
     address: 'auto',
   },
   success_url: `${dashboardOrigin}/manage-account/billing?result=success&session_id={CHECKOUT_SESSION_ID}`,
