@@ -205,14 +205,16 @@ export function mapDigest(
     return undefined;
   }
 
-  const digestItem =
-    typeof digestData === 'string'
-      ? (JSON.parse(digestData) as IWorkflowStepMetadata & {
-          events?: any[];
-        })
-      : (digestData as IWorkflowStepMetadata & {
-          events?: any[];
-        });
+  let digestItem: (IWorkflowStepMetadata & { events?: any[] }) | undefined;
+  if (typeof digestData === 'string') {
+    try {
+      digestItem = JSON.parse(digestData) as IWorkflowStepMetadata & { events?: any[] };
+    } catch {
+      return undefined;
+    }
+  } else {
+    digestItem = digestData as IWorkflowStepMetadata & { events?: any[] };
+  }
 
   if (!digestItem) {
     return undefined;

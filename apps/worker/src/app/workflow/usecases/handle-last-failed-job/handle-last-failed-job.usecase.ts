@@ -48,7 +48,7 @@ export class HandleLastFailedJob {
         status: ExecutionDetailsStatusEnum.PENDING,
         isTest: false,
         isRetry: true,
-        raw: JSON.stringify({ message: JSON.parse(error.message).message }),
+        raw: JSON.stringify({ message: safeParseErrorMessage(error.message) }),
       })
     );
 
@@ -63,5 +63,15 @@ export class HandleLastFailedJob {
         })
       );
     }
+  }
+}
+
+function safeParseErrorMessage(raw: string): string {
+  try {
+    const parsed = JSON.parse(raw);
+
+    return typeof parsed?.message === 'string' ? parsed.message : raw;
+  } catch {
+    return raw;
   }
 }

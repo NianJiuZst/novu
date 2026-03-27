@@ -21,7 +21,7 @@ export class WebhookFilterBackoffStrategy {
           status: ExecutionDetailsStatusEnum.PENDING,
           isTest: false,
           isRetry: true,
-          raw: JSON.stringify({ message: JSON.parse(error?.message).message, attempt: attemptsMade }),
+          raw: JSON.stringify({ message: safeParseErrorMessage(error?.message), attempt: attemptsMade }),
         })
       );
     } catch (anotherError) {
@@ -33,5 +33,15 @@ export class WebhookFilterBackoffStrategy {
     }
 
     return Math.round(Math.random() * 2 ** attemptsMade * 1000);
+  }
+}
+
+function safeParseErrorMessage(raw: string): string {
+  try {
+    const parsed = JSON.parse(raw);
+
+    return typeof parsed?.message === 'string' ? parsed.message : raw;
+  } catch {
+    return raw;
   }
 }

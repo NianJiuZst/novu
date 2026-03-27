@@ -316,7 +316,7 @@ export class GetWorkflowRun {
       status: stepRun.status,
       createdAt: new Date(stepRun.created_at),
       updatedAt: new Date(stepRun.updated_at),
-      digest: stepRun.digest ? JSON.parse(stepRun.digest) : undefined,
+      digest: safeParseJson(stepRun.digest),
       executionDetails: mapTraceToExecutionDetailDto(stepRun.executionDetails || []),
       scheduleExtensionsCount: stepRun.schedule_extensions_count,
     };
@@ -341,13 +341,25 @@ export class GetWorkflowRun {
       transactionId: workflowRun.transaction_id,
       createdAt: new Date(`${workflowRun.created_at} UTC`).toISOString(),
       updatedAt: new Date(`${workflowRun.updated_at} UTC`).toISOString(),
-      payload: workflowRun.payload ? JSON.parse(workflowRun.payload) : {},
+      payload: safeParseJson(workflowRun.payload) ?? {},
       steps: stepRuns.map((stepRun) => this.mapStepRunToDto(stepRun)),
       severity: workflowRun.severity,
       critical: workflowRun.critical,
       contextKeys: workflowRun.context_keys,
-      topics: workflowRun.topics ? JSON.parse(workflowRun.topics) : [],
+      topics: safeParseJson(workflowRun.topics) ?? [],
       overrides,
     };
+  }
+}
+
+function safeParseJson(value: string | null | undefined): unknown | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
   }
 }

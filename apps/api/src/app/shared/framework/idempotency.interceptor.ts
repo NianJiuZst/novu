@@ -200,7 +200,15 @@ export class IdempotencyInterceptor implements NestInterceptor {
     this.setHeaders(context.switchToHttp().getResponse(), {
       [HttpResponseHeaderKeysEnum.IDEMPOTENCY_KEY]: idempotencyKey,
     });
-    const parsed = JSON.parse(data);
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(data);
+    } catch {
+      await this.cacheService.del(cacheKey);
+      throw new UnprocessableEntityException(
+        `Cached idempotency entry for key "${idempotencyKey}" is corrupted. Please retry the request.`
+      );
+    }
     if (parsed.status === ReqStatusEnum.PROGRESS) {
       // api call is in progress, so client need to handle this case
       this.logger.trace(`previous api call in progress rejecting the request. key: "${idempotencyKey}"`);
