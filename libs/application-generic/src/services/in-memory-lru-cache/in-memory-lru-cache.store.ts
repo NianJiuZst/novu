@@ -5,6 +5,7 @@ const MS_PER_SECOND = 1000;
 const THIRTY_SECONDS_MS = MS_PER_SECOND * 30;
 const ONE_MINUTE_MS = MS_PER_SECOND * 60;
 const ONE_HOUR_MS = ONE_MINUTE_MS * 60;
+const ONE_DAY_MS = ONE_HOUR_MS * 24;
 
 export enum InMemoryLRUCacheStore {
   WORKFLOW = 'workflow',
@@ -15,6 +16,7 @@ export enum InMemoryLRUCacheStore {
   VALIDATOR = 'validator',
   ACTIVE_WORKFLOWS = 'active-workflows',
   WORKFLOW_PREFERENCES = 'workflow-preferences',
+  AI_SUGGESTIONS = 'ai-suggestions',
 }
 
 export type WorkflowCacheData = NotificationTemplateEntity | null;
@@ -25,6 +27,7 @@ export type ApiKeyUserCacheData = UserSessionData | null;
 export type ValidatorCacheData = unknown;
 export type ActiveWorkflowsCacheData = NotificationTemplateEntity[];
 export type WorkflowPreferencesCacheData = [PreferencesEntity | null, PreferencesEntity | null];
+export type AiSuggestionsCacheData = unknown[];
 
 export type CacheStoreDataTypeMap = {
   [InMemoryLRUCacheStore.WORKFLOW]: WorkflowCacheData;
@@ -35,6 +38,7 @@ export type CacheStoreDataTypeMap = {
   [InMemoryLRUCacheStore.VALIDATOR]: ValidatorCacheData;
   [InMemoryLRUCacheStore.ACTIVE_WORKFLOWS]: ActiveWorkflowsCacheData;
   [InMemoryLRUCacheStore.WORKFLOW_PREFERENCES]: WorkflowPreferencesCacheData;
+  [InMemoryLRUCacheStore.AI_SUGGESTIONS]: AiSuggestionsCacheData;
 };
 
 export type StoreConfig = {
@@ -85,5 +89,11 @@ export const STORE_CONFIGS: Record<InMemoryLRUCacheStore, StoreConfig> = {
     max: 1000,
     ttl: ONE_MINUTE_MS,
     featureFlagComponent: 'workflow-preferences',
+  },
+  [InMemoryLRUCacheStore.AI_SUGGESTIONS]: {
+    max: 1000,
+    ttl: ONE_DAY_MS,
+    featureFlagComponent: 'ai-suggestions',
+    skipFeatureFlag: true,
   },
 };

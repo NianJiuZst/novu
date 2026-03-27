@@ -1,4 +1,4 @@
-import { ApiServiceLevelEnum } from '@novu/shared';
+import { ApiServiceLevelEnum, IndustryEnum } from '@novu/shared';
 import mongoose, { Schema } from 'mongoose';
 
 import { schemaOptions } from '../schema-default.options';
@@ -66,6 +66,10 @@ const organizationSchema = new Schema<OrganizationDBModel>(
         type: Schema.Types.Boolean,
         default: false,
       },
+    },
+    industry: {
+      type: Schema.Types.String,
+      enum: IndustryEnum,
     },
     externalId: Schema.Types.String,
     stripeCustomerId: Schema.Types.String,

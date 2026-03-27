@@ -1,4 +1,4 @@
-import { ApiServiceLevelEnum, ProductUseCases } from '../../types';
+import { ApiServiceLevelEnum, IndustryEnum, ProductUseCases } from '../../types';
 
 export interface IOrganizationEntity {
   _id: string;
@@ -17,6 +17,7 @@ export interface IOrganizationEntity {
   targetLocales?: string[];
   domain?: string;
   productUseCases?: ProductUseCases;
+  industry?: IndustryEnum;
   language?: string[];
   removeNovuBranding?: boolean;
   createdAt: string;

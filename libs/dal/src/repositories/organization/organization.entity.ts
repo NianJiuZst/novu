@@ -1,4 +1,4 @@
-import { ApiServiceLevelEnum, IOrganizationEntity, ProductUseCases } from '@novu/shared';
+import { ApiServiceLevelEnum, IndustryEnum, IOrganizationEntity, ProductUseCases } from '@novu/shared';
 
 export class OrganizationEntity implements IOrganizationEntity {
   _id: string;
@@ -22,6 +22,8 @@ export class OrganizationEntity implements IOrganizationEntity {
   domain?: string;
 
   productUseCases?: ProductUseCases;
+
+  industry?: IndustryEnum;
 
   language?: string[];
 
