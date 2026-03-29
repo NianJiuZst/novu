@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://go.novu.co/github" target="_blank" rel="noopener noreferrer"
+  <a href="https://go.novu.co/github?utm_campaign=readme-logo" target="_blank" rel="noopener noreferrer"
 >
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/2233092/213641039-220ac15f-f367-4d13-9eaf-56e79433b8c1.png">
