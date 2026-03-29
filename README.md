@@ -61,7 +61,7 @@
   <a href="https://twitter.com/novuhq" target="_blank" rel="noopener noreferrer"
 >X</a>
   ·
-  <a href="https://novu.co/contact-us/?utm_source=github&utm_medium=readme&utm_campaign=contact-us-link" target="_blank" rel="noopener noreferrer"
+  <a href="https://go.novu.co/contact?utm_source=github&utm_medium=readme&utm_campaign=contact-us-link" target="_blank" rel="noopener noreferrer"
 >Contact us</a>
 .
 <a href="https://www.recent.dev">Recent.dev</a>
