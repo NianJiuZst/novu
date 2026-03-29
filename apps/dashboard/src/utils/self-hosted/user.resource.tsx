@@ -11,9 +11,17 @@ export const UserContext = React.createContext<{
   isLoaded: false,
 });
 
+function safeDecodeJwt(jwt: string): DecodedJwt | null {
+  try {
+    return JSON.parse(atob(jwt.split('.')[1]));
+  } catch {
+    return null;
+  }
+}
+
 export function UserContextProvider({ children }: any) {
   const jwt = localStorage.getItem('self-hosted-jwt');
-  const decodedJwt: DecodedJwt | null = jwt ? JSON.parse(atob(jwt.split('.')[1])) : null;
+  const decodedJwt: DecodedJwt | null = jwt ? safeDecodeJwt(jwt) : null;
   const value = {
     user: createUserFromJwt(decodedJwt),
     isLoaded: true,

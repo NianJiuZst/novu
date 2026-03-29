@@ -76,8 +76,16 @@ export abstract class SendMessageType {
     if (typeof error === 'string' || error instanceof String) {
       return error.toString();
     }
-    if (Object.keys(error)?.length > 0) {
-      return JSON.stringify(error);
+
+    if (typeof error === 'object') {
+      try {
+        const keys = Object.keys(error);
+        if (keys.length > 0) {
+          return JSON.stringify(error);
+        }
+      } catch {
+        return String(error);
+      }
     }
 
     return '';

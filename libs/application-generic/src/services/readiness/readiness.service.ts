@@ -50,7 +50,7 @@ export class ReadinessService {
     try {
       const healths = await Promise.all(this.healthIndicators.map((health) => health.isHealthy()));
 
-      const statuses = healths.map((health: HealthIndicatorResult) => Object.values(health)[0].status);
+      const statuses = healths.map((health: HealthIndicatorResult) => Object.values(health)?.[0]?.status);
 
       return statuses.every((status: HealthIndicatorStatus) => status === 'up');
     } catch (error) {

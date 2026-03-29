@@ -136,8 +136,13 @@ export class ConstructFrameworkWorkflow {
     skipLayoutRendering?: boolean;
     jobId?: string;
   }): Workflow {
+    const triggerIdentifier = dbWorkflow.triggers?.[0]?.identifier;
+    if (!triggerIdentifier) {
+      throw new InternalServerErrorException(`Workflow ${dbWorkflow._id} has no trigger identifier`);
+    }
+
     return workflow(
-      dbWorkflow.triggers[0].identifier,
+      triggerIdentifier,
       async ({ step, payload, subscriber, context }) => {
         const fullPayloadForRender: FullPayloadForRender = {
           workflow: dbWorkflow as unknown as Record<string, unknown>,

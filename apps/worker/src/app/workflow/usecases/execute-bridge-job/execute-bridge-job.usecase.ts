@@ -124,8 +124,12 @@ export class ExecuteBridgeJob {
     };
 
     const workflowId = isStateful
-      ? (workflow as NotificationTemplateEntity).triggers[0].identifier
+      ? (workflow as NotificationTemplateEntity).triggers?.[0]?.identifier
       : command.identifier;
+
+    if (!workflowId) {
+      throw new Error('Workflow identifier could not be resolved: missing triggers');
+    }
     const { stepResolverHash } = controlValuesResult;
 
     const bridgeResponse = await this.sendBridgeRequest({

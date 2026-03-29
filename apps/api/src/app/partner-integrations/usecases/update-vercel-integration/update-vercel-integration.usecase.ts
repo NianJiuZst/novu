@@ -138,7 +138,7 @@ export class UpdateVercelIntegration {
       }
 
       const alias = vercelTarget?.alias?.sort((a, b) => a.length - b.length)[0];
-      const bridgeAlias = alias || vercelTarget?.meta?.branchAlias || vercelTarget?.automaticAliases[0];
+      const bridgeAlias = alias || vercelTarget?.meta?.branchAlias || vercelTarget?.automaticAliases?.[0];
       if (!bridgeAlias) {
         return;
       }

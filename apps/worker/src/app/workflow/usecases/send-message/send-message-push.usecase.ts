@@ -289,7 +289,7 @@ export class SendMessagePush extends SendMessageBase {
         if (result.success) {
           status = SendMessageStatus.SUCCESS;
         } else {
-          const errorMessage = result.error.message || result.error.toString();
+          const errorMessage = result.error?.message || String(result.error ?? 'Unknown push error');
           const logMethod = isSubscriberError(errorMessage) ? 'debug' : 'error';
           Logger[logMethod](
             { jobId: command.jobId },
@@ -341,7 +341,7 @@ export class SendMessagePush extends SendMessageBase {
         if (result.success) {
           status = SendMessageStatus.SUCCESS;
         } else {
-          const errorMessage = result.error.message || result.error.toString();
+          const errorMessage = result.error?.message || String(result.error ?? 'Unknown push error');
           const logMethod = isSubscriberError(errorMessage) ? 'debug' : 'error';
           Logger[logMethod](
             { jobId: command.jobId },

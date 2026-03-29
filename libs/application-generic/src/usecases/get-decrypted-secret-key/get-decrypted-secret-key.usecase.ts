@@ -20,6 +20,11 @@ export class GetDecryptedSecretKey {
       throw new NotFoundException(`Environment ${command.environmentId} not found`);
     }
 
-    return decryptApiKey(environment.apiKeys[0].key);
+    const apiKey = environment.apiKeys?.[0]?.key;
+    if (!apiKey) {
+      throw new NotFoundException(`Environment ${command.environmentId} has no API keys configured`);
+    }
+
+    return decryptApiKey(apiKey);
   }
 }

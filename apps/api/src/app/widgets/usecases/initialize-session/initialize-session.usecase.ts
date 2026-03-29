@@ -55,6 +55,11 @@ export class InitializeSession {
       validateNotificationCenterEncryption(environment, command);
     }
 
+    const apiKey = environment.apiKeys?.[0]?.key;
+    if (!apiKey) {
+      throw new BadRequestException('Environment is missing API key configuration');
+    }
+
     const subscriber = await this.createOrUpdateSubscriberUsecase.execute(
       CreateOrUpdateSubscriberCommand.create({
         environmentId: environment._id,
@@ -64,7 +69,7 @@ export class InitializeSession {
         lastName: command.lastName,
         email: command.email,
         phone: command.phone,
-        allowUpdate: isHmacValid(environment.apiKeys[0].key, command.subscriberId, command.hmacHash),
+        allowUpdate: isHmacValid(apiKey, command.subscriberId, command.hmacHash),
       })
     );
 
@@ -87,7 +92,8 @@ export class InitializeSession {
 }
 
 function validateNotificationCenterEncryption(environment, command: InitializeSessionCommand) {
-  if (!isHmacValid(environment.apiKeys[0].key, command.subscriberId, command.hmacHash)) {
+  const apiKey = environment.apiKeys?.[0]?.key;
+  if (!apiKey || !isHmacValid(apiKey, command.subscriberId, command.hmacHash)) {
     throw new BadRequestException('Please provide a valid HMAC hash');
   }
 }

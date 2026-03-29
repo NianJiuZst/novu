@@ -27,6 +27,11 @@ export class StoreSubscriberJobs {
     }
 
     await this.stepRunRepository.createMany(storedJobs, { status: JobStatusEnum.QUEUED });
+
+    if (!storedJobs?.length) {
+      throw new PlatformException('No jobs were stored for subscriber');
+    }
+
     const firstJob = storedJobs[0];
 
     const addJobCommand = {

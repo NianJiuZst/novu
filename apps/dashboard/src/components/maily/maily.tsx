@@ -9,6 +9,14 @@ import { useRemoveGrammarly } from '@/hooks/use-remove-grammarly';
 import { LocalizationResourceEnum, TranslationKey } from '@/types/translations';
 import { EnhancedParsedVariables, IsAllowedVariable, LiquidVariable } from '@/utils/parseStepVariables';
 import { cn } from '@/utils/ui';
+
+function safeParseJson(value: string): unknown | undefined {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+}
 import { TranslationValueInputComponent } from '../workflow-editor/steps/email/translations/edit-translation-popover/edit-translation-popover';
 import { DEFAULT_EDITOR_CONFIG, MAILY_EMAIL_WIDTH, useCreateExtensions } from './maily-config';
 import { RepeatMenuDescription } from './repeat-menu-description';
@@ -200,7 +208,7 @@ export const Maily = ({
           config={DEFAULT_EDITOR_CONFIG}
           blocks={blocks}
           extensions={extensions}
-          contentJson={value ? JSON.parse(value) : undefined}
+          contentJson={value ? safeParseJson(value) : undefined}
           onUpdate={onUpdate}
           repeatMenuConfig={repeatMenuConfig}
         />
