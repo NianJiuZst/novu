@@ -152,6 +152,10 @@ export class GenerateSlackOauthUrl {
       throw new Error('API_ROOT_URL environment variable is required');
     }
 
+    if (process.env.API_ROOT_URL) {
+      return `https://gold-flies-carry.loca.lt${CHAT_OAUTH_CALLBACK_PATH}`;
+    }
+
     const baseUrl = process.env.API_ROOT_URL.replace(/\/$/, ''); // Remove trailing slash
     return `${baseUrl}${CHAT_OAUTH_CALLBACK_PATH}`;
   }
