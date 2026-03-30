@@ -10,6 +10,7 @@ import {
   RiKey2Line,
   RiLayout5Line,
   RiLineChartLine,
+  RiRobot2Line,
   RiRouteFill,
   RiSettings4Line,
   RiSignalTowerLine,
@@ -122,6 +123,19 @@ export const SideNavigation = () => {
                 >
                   <RiRouteFill className="size-4" />
                   <span>Workflows</span>
+                </NavigationLink>
+              </Protect>
+
+              <Protect permission={PermissionsEnum.WORKFLOW_READ}>
+                <NavigationLink
+                  to={
+                    currentEnvironment?.slug
+                      ? buildRoute(ROUTES.AGENTS, { environmentSlug: currentEnvironment?.slug ?? '' })
+                      : undefined
+                  }
+                >
+                  <RiRobot2Line className="size-4" />
+                  <span>Agents</span>
                 </NavigationLink>
               </Protect>
 

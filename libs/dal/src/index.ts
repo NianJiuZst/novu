@@ -1,5 +1,6 @@
 export * from './dal.service';
 export * from './repositories/ai-chat';
+export * from './repositories/agent';
 export * from './repositories/base-repository';
 export * from './repositories/base-repository-v2';
 export * from './repositories/change';

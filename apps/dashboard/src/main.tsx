@@ -41,6 +41,8 @@ import { UpdateIntegrationSidebar } from './components/integrations/components/u
 import { ChannelPreferences } from './components/workflow-editor/channel-preferences';
 import { IS_ENTERPRISE, IS_SELF_HOSTED } from './config';
 import { FeatureFlagsProvider } from './context/feature-flags-provider';
+import { AgentConfigPage } from './pages/agent-config';
+import { AgentsPage } from './pages/agents';
 import { ContextsPage } from './pages/contexts';
 import { CreateContextPage } from './pages/create-context';
 import { CreateSubscriberPage } from './pages/create-subscriber';
@@ -160,6 +162,30 @@ const router = createBrowserRouter([
               {
                 path: ROUTES.WELCOME,
                 element: <WelcomePage />,
+              },
+              {
+                path: ROUTES.AGENT_INTEGRATIONS,
+                element: (
+                  <ProtectedRoute permission={PermissionsEnum.WORKFLOW_READ}>
+                    <AgentConfigPage />
+                  </ProtectedRoute>
+                ),
+              },
+              {
+                path: ROUTES.AGENT_OVERVIEW,
+                element: (
+                  <ProtectedRoute permission={PermissionsEnum.WORKFLOW_READ}>
+                    <AgentConfigPage />
+                  </ProtectedRoute>
+                ),
+              },
+              {
+                path: ROUTES.AGENTS,
+                element: (
+                  <ProtectedRoute permission={PermissionsEnum.WORKFLOW_READ}>
+                    <AgentsPage />
+                  </ProtectedRoute>
+                ),
               },
               {
                 path: ROUTES.WORKFLOWS,

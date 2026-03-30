@@ -30,6 +30,7 @@ import {
   WorkflowRunRepository,
 } from '@novu/application-generic';
 import {
+  AgentRepository,
   ChangeRepository,
   CommunityMemberRepository,
   CommunityOrganizationRepository,
@@ -87,6 +88,7 @@ function getDynamicAuthProviders() {
 }
 
 const DAL_MODELS = [
+  AgentRepository,
   UserRepository,
   OrganizationRepository,
   CommunityOrganizationRepository,

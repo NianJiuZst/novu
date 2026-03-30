@@ -1,4 +1,6 @@
 export * from './access-denied-page';
+export * from './agent-config';
+export * from './agents';
 export * from './activity-feed';
 export * from './analytics';
 export * from './api-keys';
