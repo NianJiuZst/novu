@@ -254,7 +254,7 @@ export class GetWorkflowRuns {
     } catch (error) {
       this.logger.error(
         {
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           organizationId: command.organizationId,
           environmentId: command.environmentId,
         },
@@ -317,7 +317,7 @@ export class GetWorkflowRuns {
     } catch (error) {
       this.logger.error(
         {
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           currentCursor,
         },
         'Failed to generate previous cursor'
@@ -407,7 +407,7 @@ export class GetWorkflowRuns {
     } catch (error) {
       this.logger.warn(
         {
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           transactionIds: workflowRuns.map((run) => run.transaction_id),
           subscriberIds: workflowRuns.map((run) => run.subscriber_id),
         },

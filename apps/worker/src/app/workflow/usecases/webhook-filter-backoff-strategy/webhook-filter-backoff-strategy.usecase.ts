@@ -4,6 +4,17 @@ import { ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum } from '@novu/sh
 
 import { WebhookFilterBackoffStrategyCommand } from './webhook-filter-backoff-strategy.command';
 
+function safeExtractErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error ?? '');
+  try {
+    const parsed = JSON.parse(message);
+
+    return typeof parsed?.message === 'string' ? parsed.message : message;
+  } catch {
+    return message;
+  }
+}
+
 @Injectable()
 export class WebhookFilterBackoffStrategy {
   constructor(private createExecutionDetails: CreateExecutionDetails) {}
@@ -21,7 +32,7 @@ export class WebhookFilterBackoffStrategy {
           status: ExecutionDetailsStatusEnum.PENDING,
           isTest: false,
           isRetry: true,
-          raw: JSON.stringify({ message: JSON.parse(error?.message).message, attempt: attemptsMade }),
+          raw: JSON.stringify({ message: safeExtractErrorMessage(error), attempt: attemptsMade }),
         })
       );
     } catch (anotherError) {

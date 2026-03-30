@@ -40,7 +40,7 @@ export class CreateVercelIntegration {
       };
     } catch (error) {
       throw new BadRequestException(
-        error?.response?.data?.error_description || error?.response?.data?.message || error.message
+        error?.response?.data?.error_description || error?.response?.data?.message || (error instanceof Error ? error.message : 'Unknown error')
       );
     }
   }
@@ -73,7 +73,7 @@ export class CreateVercelIntegration {
       };
     } catch (error) {
       throw new BadRequestException(
-        error?.response?.data?.error_description || error?.response?.data?.message || error.message
+        error?.response?.data?.error_description || error?.response?.data?.message || (error instanceof Error ? error.message : 'Unknown error')
       );
     }
   }

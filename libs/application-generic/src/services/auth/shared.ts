@@ -5,7 +5,14 @@ export const buildOauthRedirectUrl = (request): string => {
     return `${url}?error=AuthenticationError`;
   }
 
-  const { redirectUrl } = JSON.parse(request.query.state);
+  let state: Record<string, string> = {};
+  try {
+    state = JSON.parse(request.query?.state) ?? {};
+  } catch {
+    state = {};
+  }
+
+  const { redirectUrl } = state;
 
   /**
    * Make sure we only allow localhost redirects for CLI use and our own success route
@@ -25,28 +32,24 @@ export const buildOauthRedirectUrl = (request): string => {
    * partnerCode, next and configurationId are required during external partners integration
    * such as vercel integration etc
    */
-  const { partnerCode } = JSON.parse(request.query.state);
-  if (partnerCode) {
-    url += `&code=${partnerCode}`;
+  if (state.partnerCode) {
+    url += `&code=${state.partnerCode}`;
   }
 
-  const { next } = JSON.parse(request.query.state);
-  if (next) {
-    url += `&next=${next}`;
+  if (state.next) {
+    url += `&next=${state.next}`;
   }
 
-  const { configurationId } = JSON.parse(request.query.state);
-  if (configurationId) {
-    url += `&configurationId=${configurationId}`;
+  if (state.configurationId) {
+    url += `&configurationId=${state.configurationId}`;
   }
 
-  const { invitationToken } = JSON.parse(request.query.state);
-  if (invitationToken) {
-    url += `&invitationToken=${invitationToken}`;
+  if (state.invitationToken) {
+    url += `&invitationToken=${state.invitationToken}`;
   }
-  const { isLoginPage } = JSON.parse(request.query.state);
-  if (isLoginPage) {
-    url += `&isLoginPage=${isLoginPage}`;
+
+  if (state.isLoginPage) {
+    url += `&isLoginPage=${state.isLoginPage}`;
   }
 
   return url;

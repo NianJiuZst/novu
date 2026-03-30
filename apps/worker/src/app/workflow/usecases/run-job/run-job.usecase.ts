@@ -366,7 +366,7 @@ export class RunJob {
         await this.conditionallyUpdateDeliveryLifecycle(job, WorkflowRunStatusEnum.PROCESSING, workflow, notification);
       }
     } catch (caughtError: unknown) {
-      error = caughtError as Error;
+      error = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
       await this.stepRunRepository.create(job, {
         status: JobStatusEnum.FAILED,
         errorCode: 'execution_error',

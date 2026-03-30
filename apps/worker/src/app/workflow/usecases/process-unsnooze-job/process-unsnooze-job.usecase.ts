@@ -123,10 +123,10 @@ export class ProcessUnsnoozeJob {
           status: ExecutionDetailsStatusEnum.FAILED,
           isTest: false,
           isRetry: false,
-          raw: JSON.stringify({ error: error.message }),
+          raw: JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
         })
       );
-      throw new PlatformException(`Failed to unsnooze notification: ${error.message}`);
+      throw new PlatformException(`Failed to unsnooze notification: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 }

@@ -111,7 +111,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
       }
     } catch (err) {
       this.logger.warn(
-        `An error occurred while making idempotency check, key:${idempotencyKey}. error: ${err.message}`
+        `An error occurred while making idempotency check, key:${idempotencyKey}. error: ${err instanceof Error ? err.message : String(err)}`
       );
       if (err instanceof HttpException) {
         return throwError(() => err);
@@ -165,7 +165,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
       }
       await this.cacheService.set(key, JSON.stringify(val), { ttl });
     } catch (err) {
-      this.logger.warn(`An error occurred while setting idempotency cache, key:${key} error: ${err.message}`);
+      this.logger.warn(`An error occurred while setting idempotency cache, key:${key} error: ${err instanceof Error ? err.message : String(err)}`);
     }
 
     return null;
@@ -200,7 +200,12 @@ export class IdempotencyInterceptor implements NestInterceptor {
     this.setHeaders(context.switchToHttp().getResponse(), {
       [HttpResponseHeaderKeysEnum.IDEMPOTENCY_KEY]: idempotencyKey,
     });
-    const parsed = JSON.parse(data);
+    let parsed: { status: ReqStatusEnum; bodyHash: string; data?: any; statusCode?: number };
+    try {
+      parsed = JSON.parse(data);
+    } catch {
+      throw new InternalServerErrorException(`Idempotency cache data is corrupted for key "${idempotencyKey}"`);
+    }
     if (parsed.status === ReqStatusEnum.PROGRESS) {
       // api call is in progress, so client need to handle this case
       this.logger.trace(`previous api call in progress rejecting the request. key: "${idempotencyKey}"`);

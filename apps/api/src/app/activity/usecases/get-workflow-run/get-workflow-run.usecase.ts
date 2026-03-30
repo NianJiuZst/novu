@@ -15,6 +15,14 @@ import { GetWorkflowRunResponseDto, StepRunDto } from '../../dtos/workflow-run-r
 import { mapTraceToExecutionDetailDto, mapWorkflowRunStatusToDto } from '../../shared/mappers';
 import { GetWorkflowRunCommand } from './get-workflow-run.command';
 
+function safeJsonParse<T>(value: string, fallback: T): T {
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
 const workflowRunSelectColumns = [
   'workflow_run_id',
   'workflow_id',
@@ -122,7 +130,7 @@ export class GetWorkflowRun {
     } catch (error) {
       this.logger.error(
         {
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           organizationId: command.organizationId,
           environmentId: command.environmentId,
           workflowRunId: command.workflowRunId,
@@ -163,7 +171,7 @@ export class GetWorkflowRun {
     } catch (error) {
       this.logger.warn(
         {
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           transactionId,
         },
         'Failed to get job digest data'
@@ -190,7 +198,7 @@ export class GetWorkflowRun {
 
       return firstWithOverrides?.overrides ?? {};
     } catch (error) {
-      this.logger.warn({ error: error.message, transactionId }, 'Failed to get job overrides data');
+      this.logger.warn({ error: error instanceof Error ? error.message : String(error), transactionId }, 'Failed to get job overrides data');
 
       return {};
     }
@@ -245,7 +253,7 @@ export class GetWorkflowRun {
       this.logger.warn(
         {
           nv: {
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
             workflowRunId: command.workflowRunId,
             transactionId: workflowRun.transaction_id,
           },
@@ -297,7 +305,7 @@ export class GetWorkflowRun {
     } catch (error) {
       this.logger.warn(
         {
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           entityIds,
         },
         'Failed to get execution details from traces'
@@ -316,7 +324,7 @@ export class GetWorkflowRun {
       status: stepRun.status,
       createdAt: new Date(stepRun.created_at),
       updatedAt: new Date(stepRun.updated_at),
-      digest: stepRun.digest ? JSON.parse(stepRun.digest) : undefined,
+      digest: stepRun.digest ? safeJsonParse(stepRun.digest, undefined) : undefined,
       executionDetails: mapTraceToExecutionDetailDto(stepRun.executionDetails || []),
       scheduleExtensionsCount: stepRun.schedule_extensions_count,
     };
@@ -341,12 +349,12 @@ export class GetWorkflowRun {
       transactionId: workflowRun.transaction_id,
       createdAt: new Date(`${workflowRun.created_at} UTC`).toISOString(),
       updatedAt: new Date(`${workflowRun.updated_at} UTC`).toISOString(),
-      payload: workflowRun.payload ? JSON.parse(workflowRun.payload) : {},
+      payload: workflowRun.payload ? safeJsonParse(workflowRun.payload, {}) : {},
       steps: stepRuns.map((stepRun) => this.mapStepRunToDto(stepRun)),
       severity: workflowRun.severity,
       critical: workflowRun.critical,
       contextKeys: workflowRun.context_keys,
-      topics: workflowRun.topics ? JSON.parse(workflowRun.topics) : [],
+      topics: workflowRun.topics ? safeJsonParse(workflowRun.topics, []) : [],
       overrides,
     };
   }

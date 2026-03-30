@@ -30,7 +30,7 @@ export class GetVercelIntegrationProjects {
 
       return projects;
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new BadRequestException(error instanceof Error ? error.message : 'Unknown error');
     }
   }
 

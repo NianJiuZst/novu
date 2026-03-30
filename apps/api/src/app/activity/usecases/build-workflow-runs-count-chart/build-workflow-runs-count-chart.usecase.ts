@@ -104,7 +104,7 @@ export class BuildWorkflowRunsCountChart {
       };
     } catch (error) {
       this.logger.error({
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         organizationId: command.organizationId,
         environmentId: command.environmentId,
       }, 'Failed to get workflow runs count for chart');
