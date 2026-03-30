@@ -8,6 +8,7 @@ import {
   TopicSubscribersRepository,
 } from '@novu/dal';
 import { AuthModule } from '../auth/auth.module';
+import { ConversationsModule } from '../conversations/conversations.module';
 import { IntegrationModule } from '../integrations/integrations.module';
 import { OrganizationModule } from '../organization/organization.module';
 import { OutboundWebhooksModule } from '../outbound-webhooks/outbound-webhooks.module';
@@ -28,6 +29,7 @@ import { USE_CASES } from './usecases';
     SharedModule,
     SubscribersV1Module,
     AuthModule,
+    ConversationsModule,
     IntegrationModule,
     PreferencesModule,
     OrganizationModule,

@@ -4,6 +4,7 @@ import { ActionsContainer } from './ActionsContainer';
 
 type HeaderProps = {
   navigateToPreferences?: () => void;
+  navigateToAiChats?: () => void;
 };
 
 export const Header = (props: HeaderProps) => {
@@ -18,7 +19,7 @@ export const Header = (props: HeaderProps) => {
       })}
     >
       <StatusDropdown />
-      <ActionsContainer showPreferences={props.navigateToPreferences} />
+      <ActionsContainer showAiChats={props.navigateToAiChats} showPreferences={props.navigateToPreferences} />
     </div>
   );
 };

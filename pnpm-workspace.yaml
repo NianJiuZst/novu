@@ -10,6 +10,8 @@ packages:
   - 'enterprise/workers/step-resolver'
   # playground apps
   - 'playground/*'
+  # demos (local Novu package linking)
+  - 'demos/agent-chat-demo'
 
 # Pnpm configuration
 # Wait 24 hours (1440 minutes) before allowing packages to be installed

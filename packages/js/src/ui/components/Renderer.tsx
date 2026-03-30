@@ -57,6 +57,18 @@ export const novuComponents = {
 
     return <InboxContent {...propsWithoutRenderNotification} hideNav={true} initialPage={InboxPage.Preferences} />;
   },
+  AIChats: (props: Omit<InboxContentProps, 'hideNav' | 'initialPage'>) => {
+    if (props.renderNotification) {
+      const { renderBody, renderSubject, renderAvatar, renderDefaultActions, renderCustomActions, ...otherProps } =
+        props;
+
+      return <InboxContent {...otherProps} hideNav={true} initialPage={InboxPage.AIChats} />;
+    }
+
+    const { renderNotification, ...propsWithoutRenderNotification } = props;
+
+    return <InboxContent {...propsWithoutRenderNotification} hideNav={true} initialPage={InboxPage.AIChats} />;
+  },
   Subscription,
   SubscriptionButton,
   SubscriptionPreferences,
@@ -95,7 +107,7 @@ const InboxComponentsRenderer = (props: {
                ** since we only want to override some styles for those to work properly
                ** due to the extra divs being introduced by the renderer/mounter
                */
-              if (!['Notifications', 'Preferences', 'InboxContent'].includes(novuComponent().name)) return;
+              if (!['Notifications', 'Preferences', 'AIChats', 'InboxContent'].includes(novuComponent().name)) return;
 
               if (node instanceof HTMLElement) {
                 node.style.height = '100%';

@@ -43,6 +43,7 @@ export type {
   SubscriptionProps,
 } from './components';
 export {
+  AIChats,
   Bell,
   Inbox,
   InboxContent,

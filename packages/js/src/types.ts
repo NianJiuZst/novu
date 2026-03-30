@@ -163,6 +163,56 @@ export type InboxNotification = {
   severity: SeverityLevelEnum;
 };
 
+export type ConversationStatus = 'active' | 'resolved' | 'abandoned';
+
+export type ConversationMessageRole = 'user' | 'assistant' | 'system';
+
+export type InboxConversation = {
+  id: string;
+  subscriberId: string;
+  agentId: string;
+  status: ConversationStatus;
+  platform?: string;
+  platformThreadId?: string;
+  title?: string;
+  lastMessageAt?: string;
+  lastMessagePreview?: string;
+  messageCount: number;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type InboxConversationMessage = {
+  id: string;
+  conversationId: string;
+  role: ConversationMessageRole;
+  content: string;
+  senderName?: string;
+  senderAvatar?: string;
+  platform?: string;
+  platformMessageId?: string;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ListConversationsResult = {
+  data: InboxConversation[];
+  next: string | null;
+  previous: string | null;
+  totalCount: number;
+  totalCountCapped: boolean;
+};
+
+export type ListConversationMessagesResult = {
+  data: InboxConversationMessage[];
+  next: string | null;
+  previous: string | null;
+  totalCount: number;
+  totalCountCapped: boolean;
+};
+
 export type NotificationFilter = {
   tags?: string[];
   read?: boolean;

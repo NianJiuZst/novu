@@ -18,6 +18,12 @@ import type {
 import { Preference } from '../preferences/preference';
 import { Schedule } from '../preferences/schedule';
 import { ListPreferencesArgs, UpdatePreferenceArgs, UpdateScheduleArgs } from '../preferences/types';
+import type {
+  ListConversationMessagesArgs,
+  ListConversationMessagesResult,
+  ListConversationsArgs,
+  ListConversationsResult,
+} from '../conversations/types';
 import type { InitializeSessionArgs } from '../session';
 import type { TopicSubscription } from '../subscriptions/subscription';
 import { SubscriptionPreference } from '../subscriptions/subscription-preference';
@@ -121,6 +127,13 @@ type SocketEvents = {
   [key in NotificationUnreadEvent]: { result: { total: number; severity: Record<string, number> } };
 };
 
+type ConversationsListEvents = BaseEvents<'conversations.list', ListConversationsArgs, ListConversationsResult>;
+type ConversationsMessagesEvents = BaseEvents<
+  'conversations.messages',
+  ListConversationMessagesArgs & { conversationId: string },
+  ListConversationMessagesResult
+>;
+
 /**
  * Events that are emitted by Novu Event Emitter.
  *
@@ -134,6 +147,8 @@ type SocketEvents = {
  * - resolved: the args that are passed to the action and the result of the action or the error that is thrown
  */
 export type Events = SessionInitializeEvents &
+  ConversationsListEvents &
+  ConversationsMessagesEvents &
   NotificationsFetchEvents & {
     'notifications.list.updated': { data: ListNotificationsResponse };
   } & NotificationsFetchCountEvents &

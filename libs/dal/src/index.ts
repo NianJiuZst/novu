@@ -6,6 +6,8 @@ export * from './repositories/change';
 export * from './repositories/channel-connection';
 export * from './repositories/channel-endpoint';
 export * from './repositories/context';
+export * from './repositories/conversation';
+export * from './repositories/conversation-message';
 export * from './repositories/control-values';
 export * from './repositories/environment';
 export * from './repositories/environment-variable';

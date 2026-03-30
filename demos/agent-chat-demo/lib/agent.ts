@@ -4,7 +4,13 @@ import type { Novu } from '@novu/api';
 import { after } from 'next/server';
 import { Chat } from 'chat';
 
-import { createNovuApiClient } from './novu-server-api';
+import {
+  appendNovuConversationMessage,
+  createNovuApiClient,
+  createOrGetNovuConversation,
+  getNovuServerUrl,
+  updateNovuConversationStatus,
+} from './novu-server-api';
 import { createSlackSubscriberResolver, ensureSlackUserLinked } from './slack-subscriber-resolution';
 
 type ChatAdapters = NonNullable<ConstructorParameters<typeof Chat>[0]['adapters']>;
@@ -334,6 +340,111 @@ export function serveAgents(options: ServeAgentsOptions) {
     return novuClient;
   }
 
+  function getNovuPersistCredentials(): { secretKey: string; serverURL: string } | null {
+    const secretKey = options.novuSecretKey ?? process.env.NOVU_SECRET_KEY;
+
+    if (!secretKey) {
+      return null;
+    }
+
+    return { secretKey, serverURL: getNovuServerUrl() };
+  }
+
+  async function ensureNovuConversationRecord(
+    conversation: Conversation,
+    subscriberId: string,
+    threadId: string
+  ): Promise<string | undefined> {
+    const existing = conversation.state.novuConversationId as string | undefined;
+
+    if (existing) {
+      return existing;
+    }
+
+    const persist = getNovuPersistCredentials();
+
+    if (!persist) {
+      return undefined;
+    }
+
+    try {
+      const { id } = await createOrGetNovuConversation({
+        ...persist,
+        subscriberId,
+        agentId: primaryAgent.id,
+        platform: 'slack',
+        platformThreadId: threadId,
+      });
+      conversation.state.novuConversationId = id;
+
+      return id;
+    } catch (err) {
+      console.error('[novu] createOrGet conversation failed:', err);
+
+      return undefined;
+    }
+  }
+
+  async function persistNovuConversationMessages(
+    conversationId: string | undefined,
+    entries: Array<{
+      role: 'user' | 'assistant' | 'system';
+      content: string;
+      senderName?: string;
+      platformMessageId?: string;
+    }>
+  ): Promise<void> {
+    const persist = getNovuPersistCredentials();
+
+    if (!persist || !conversationId) {
+      return;
+    }
+
+    for (const entry of entries) {
+      if (!entry.content.trim()) {
+        continue;
+      }
+
+      try {
+        await appendNovuConversationMessage({
+          ...persist,
+          conversationId,
+          role: entry.role,
+          content: entry.content,
+          senderName: entry.senderName,
+          platform: 'slack',
+          platformMessageId: entry.platformMessageId,
+        });
+      } catch (err) {
+        console.error('[novu] append message failed:', err);
+      }
+    }
+  }
+
+  async function maybeSyncNovuConversationResolved(conversation: Conversation): Promise<void> {
+    const novuConversationId = conversation.state.novuConversationId as string | undefined;
+
+    if (!novuConversationId || conversation.status !== 'resolved') {
+      return;
+    }
+
+    const persist = getNovuPersistCredentials();
+
+    if (!persist) {
+      return;
+    }
+
+    try {
+      await updateNovuConversationStatus({
+        ...persist,
+        conversationId: novuConversationId,
+        status: 'resolved',
+      });
+    } catch (err) {
+      console.error('[novu] update conversation status failed:', err);
+    }
+  }
+
   let chatInstance: Chat | null = null;
 
   function getChat(): Chat {
@@ -430,6 +541,12 @@ export function serveAgents(options: ServeAgentsOptions) {
         name: message.author.fullName,
       };
 
+      const novuConversationId = await ensureNovuConversationRecord(conversation, resolvedSubscriberId, thread.id);
+
+      await persistNovuConversationMessages(novuConversationId, [
+        { role: 'user', content: message.text, senderName: message.author.fullName },
+      ]);
+
       const { response, signals } = await primaryAgent.handleSubscribe({
         conversation,
         subscriber,
@@ -437,6 +554,10 @@ export function serveAgents(options: ServeAgentsOptions) {
       });
 
       const text = getResponseText(response);
+
+      await persistNovuConversationMessages(novuConversationId, [
+        { role: 'assistant', content: text, senderName: primaryAgent.id },
+      ]);
 
       if (text) {
         await thread.post(text);
@@ -451,6 +572,8 @@ export function serveAgents(options: ServeAgentsOptions) {
         await executeSignals(resolveSignals, conversation, saveConversation, getNovuClient());
         await thread.unsubscribe();
       }
+
+      await maybeSyncNovuConversationResolved(conversation);
     });
 
     chatInstance.onSubscribedMessage(async (thread, message) => {
@@ -469,6 +592,12 @@ export function serveAgents(options: ServeAgentsOptions) {
         name: message.author.fullName,
       };
 
+      const novuConversationId = await ensureNovuConversationRecord(conversation, resolvedSubscriberId, thread.id);
+
+      await persistNovuConversationMessages(novuConversationId, [
+        { role: 'user', content: message.text, senderName: message.author.fullName },
+      ]);
+
       const history = await buildHistory(thread);
 
       await thread.startTyping();
@@ -481,6 +610,10 @@ export function serveAgents(options: ServeAgentsOptions) {
       });
 
       const text = getResponseText(response);
+
+      await persistNovuConversationMessages(novuConversationId, [
+        { role: 'assistant', content: text, senderName: primaryAgent.id },
+      ]);
 
       if (text) {
         await thread.post(text);
@@ -495,6 +628,8 @@ export function serveAgents(options: ServeAgentsOptions) {
         await executeSignals(resolveSignals, conversation, saveConversation, getNovuClient());
         await thread.unsubscribe();
       }
+
+      await maybeSyncNovuConversationResolved(conversation);
     });
 
     return chatInstance;

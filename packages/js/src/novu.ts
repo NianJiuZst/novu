@@ -1,4 +1,5 @@
 import { InboxService } from './api';
+import { Conversations } from './conversations';
 import type { EventHandler, EventNames, Events } from './event-emitter';
 import { NovuEventEmitter } from './event-emitter';
 import { Notifications } from './notifications';
@@ -17,6 +18,7 @@ export class Novu implements Pick<NovuEventEmitter, 'on'> {
   #options: NovuOptions;
 
   public readonly notifications: Notifications;
+  public readonly conversations: Conversations;
   public readonly preferences: Preferences;
   public readonly subscriptions: Subscriptions;
   public readonly socket: BaseSocketInterface;
@@ -75,6 +77,10 @@ export class Novu implements Pick<NovuEventEmitter, 'on'> {
       inboxServiceInstance: this.#inboxService,
       eventEmitterInstance: this.#emitter,
     });
+    this.conversations = new Conversations({
+      inboxServiceInstance: this.#inboxService,
+      eventEmitterInstance: this.#emitter,
+    });
     this.preferences = new Preferences({
       useCache: options.useCache ?? true,
       inboxServiceInstance: this.#inboxService,
@@ -95,7 +101,7 @@ export class Novu implements Pick<NovuEventEmitter, 'on'> {
     });
 
     this.on = (eventName, listener) => {
-      if (this.socket.isSocketEvent(eventName)) {
+      if (typeof eventName === 'string' && this.socket.isSocketEvent(eventName)) {
         this.socket.connect();
       }
 

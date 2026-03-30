@@ -1,5 +1,12 @@
 export type * from 'json-logic-js';
 export type { EventHandler, Events, SocketEventNames } from './event-emitter';
+export type {
+  ListConversationMessagesArgs,
+  ListConversationMessagesResult,
+  ListConversationsArgs,
+  ListConversationsResult,
+} from './conversations';
+export { Conversations } from './conversations';
 export { Novu } from './novu';
 export type {
   PreferenceFilter,
@@ -28,6 +35,8 @@ export {
   DaySchedule,
   DefaultSchedule,
   FiltersCountResponse,
+  InboxConversation,
+  InboxConversationMessage,
   InboxNotification,
   ListNotificationsResponse,
   Notification,

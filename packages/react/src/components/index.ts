@@ -1,4 +1,5 @@
 export * from '../hooks/NovuProvider';
+export * from './AIChats';
 export * from './Bell';
 export * from './Inbox';
 export * from './InboxContent';

@@ -13,6 +13,7 @@ import type {
   NotificationRenderer,
   SubjectRenderer,
 } from '../types';
+import { AIChatsPage } from './AIChats';
 import { Bell, Footer, Header, Preferences } from './elements';
 import { PreferencesHeader } from './elements/Preferences/PreferencesHeader';
 import { InboxTabs } from './InboxTabs';
@@ -58,6 +59,7 @@ export type InboxProps = {
 
 export enum InboxPage {
   Notifications = 'notifications',
+  AIChats = 'ai_chats',
   Preferences = 'preferences',
 }
 
@@ -90,17 +92,22 @@ export const InboxContent = (props: InboxContentProps) => {
       class={style({
         key: 'inboxContent',
         className: cn(
-          'nt-h-full nt-flex nt-flex-col [&_.nv-preferencesContainer]:nt-pb-8 [&_.nv-notificationList]:nt-pb-8',
+          'nt-h-full nt-flex nt-flex-col [&_.nv-preferencesContainer]:nt-pb-8 [&_.nv-notificationList]:nt-pb-8 [&_.nv-aiChatsList]:nt-pb-8',
           {
-            '[&_.nv-preferencesContainer]:nt-pb-12 [&_.nv-notificationList]:nt-pb-12': isDevelopmentMode(),
-            '[&_.nv-preferencesContainer]:nt-pb-8 [&_.nv-notificationList]:nt-pb-8': !isDevelopmentMode(),
+            '[&_.nv-preferencesContainer]:nt-pb-12 [&_.nv-notificationList]:nt-pb-12 [&_.nv-aiChatsList]:nt-pb-12':
+              isDevelopmentMode(),
+            '[&_.nv-preferencesContainer]:nt-pb-8 [&_.nv-notificationList]:nt-pb-8 [&_.nv-aiChatsList]:nt-pb-8':
+              !isDevelopmentMode(),
           }
         ),
       })}
     >
       <Switch>
         <Match when={currentPage() === InboxPage.Notifications}>
-          <Header navigateToPreferences={navigateToPage()(InboxPage.Preferences)} />
+          <Header
+            navigateToPreferences={navigateToPage()(InboxPage.Preferences)}
+            navigateToAiChats={navigateToPage()(InboxPage.AIChats)}
+          />
           <Show
             keyed
             when={tabs() && tabs().length > 0}
@@ -132,6 +139,9 @@ export const InboxContent = (props: InboxContentProps) => {
               tabs={tabs()}
             />
           </Show>
+        </Match>
+        <Match when={currentPage() === InboxPage.AIChats}>
+          <AIChatsPage navigateToNotifications={navigateToPage()(InboxPage.Notifications)} />
         </Match>
         <Match when={currentPage() === InboxPage.Preferences}>
           <PreferencesHeader navigateToNotifications={navigateToPage()(InboxPage.Notifications)} />

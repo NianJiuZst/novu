@@ -6,6 +6,8 @@ import type {
   Context,
   DefaultSchedule,
   InboxNotification,
+  ListConversationMessagesResult,
+  ListConversationsResult,
   NotificationFilter,
   PreferencesResponse,
   Session,
@@ -22,6 +24,7 @@ export type InboxServiceOptions = HttpClientOptions;
 
 const INBOX_ROUTE = '/inbox';
 const INBOX_NOTIFICATIONS_ROUTE = `${INBOX_ROUTE}/notifications`;
+const INBOX_CONVERSATIONS_ROUTE = `${INBOX_ROUTE}/conversations`;
 
 export class InboxService {
   isSessionInitialized = false;
@@ -454,5 +457,100 @@ export class InboxService {
 
   deleteSubscription({ topicKey, identifier }: { topicKey: string; identifier: string }): Promise<void> {
     return this.#httpClient.delete(`${INBOX_ROUTE}/topics/${topicKey}/subscriptions/${identifier}`);
+  }
+
+  fetchConversations({
+    limit = 10,
+    after,
+    before,
+    orderBy,
+    orderDirection,
+    includeCursor,
+    agentId,
+    status,
+  }: {
+    limit?: number;
+    after?: string;
+    before?: string;
+    orderBy?: 'createdAt' | 'updatedAt' | 'lastMessageAt';
+    orderDirection?: string;
+    includeCursor?: boolean;
+    agentId?: string;
+    status?: string;
+  }): Promise<ListConversationsResult> {
+    const searchParams = new URLSearchParams(`limit=${limit}`);
+
+    if (after) {
+      searchParams.append('after', after);
+    }
+
+    if (before) {
+      searchParams.append('before', before);
+    }
+
+    if (orderBy) {
+      searchParams.append('orderBy', orderBy);
+    }
+
+    if (orderDirection) {
+      searchParams.append('orderDirection', orderDirection);
+    }
+
+    if (includeCursor !== undefined) {
+      searchParams.append('includeCursor', `${includeCursor}`);
+    }
+
+    if (agentId) {
+      searchParams.append('agentId', agentId);
+    }
+
+    if (status) {
+      searchParams.append('status', status);
+    }
+
+    return this.#httpClient.get(INBOX_CONVERSATIONS_ROUTE, searchParams, false);
+  }
+
+  fetchConversationMessages(
+    conversationId: string,
+    {
+      limit = 50,
+      after,
+      before,
+      orderBy,
+      orderDirection,
+      includeCursor,
+    }: {
+      limit?: number;
+      after?: string;
+      before?: string;
+      orderBy?: 'createdAt' | 'updatedAt';
+      orderDirection?: string;
+      includeCursor?: boolean;
+    }
+  ): Promise<ListConversationMessagesResult> {
+    const searchParams = new URLSearchParams(`limit=${limit}`);
+
+    if (after) {
+      searchParams.append('after', after);
+    }
+
+    if (before) {
+      searchParams.append('before', before);
+    }
+
+    if (orderBy) {
+      searchParams.append('orderBy', orderBy);
+    }
+
+    if (orderDirection) {
+      searchParams.append('orderDirection', orderDirection);
+    }
+
+    if (includeCursor !== undefined) {
+      searchParams.append('includeCursor', `${includeCursor}`);
+    }
+
+    return this.#httpClient.get(`${INBOX_CONVERSATIONS_ROUTE}/${conversationId}/messages`, searchParams, false);
   }
 }

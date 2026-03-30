@@ -18,11 +18,22 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiExcludeController } from '@nestjs/swagger';
 import {
   AddressingTypeEnum,
+  DirectionEnum,
   MessageActionStatusEnum,
   PreferenceLevelEnum,
   TriggerRequestCategoryEnum,
   UserSessionData,
 } from '@novu/shared';
+import {
+  mapConversationEntityToDto,
+  mapConversationMessageEntityToDto,
+} from '../conversations/dtos/dto.mapper';
+import { ListConversationMessagesResponseDto } from '../conversations/dtos/list-conversation-messages-response.dto';
+import { ListConversationsResponseDto } from '../conversations/dtos/list-conversations-response.dto';
+import { ListConversationMessagesCommand } from '../conversations/usecases/list-conversation-messages/list-conversation-messages.command';
+import { ListConversationMessages } from '../conversations/usecases/list-conversation-messages/list-conversation-messages.usecase';
+import { ListConversationsCommand } from '../conversations/usecases/list-conversations/list-conversations.command';
+import { ListConversations } from '../conversations/usecases/list-conversations/list-conversations.usecase';
 import { TriggerEventRequestDto } from '../events/dtos';
 import { TriggerEventResponseDto } from '../events/dtos/trigger-event-response.dto';
 import { ParseEventRequestMulticastCommand } from '../events/usecases/parse-event-request';
@@ -38,6 +49,8 @@ import {
 } from '../subscribers/usecases/get-subscriber-global-preference';
 import { ActionTypeRequestDto } from './dtos/action-type-request.dto';
 import { BulkUpdatePreferencesRequestDto } from './dtos/bulk-update-preferences-request.dto';
+import { InboxListConversationMessagesQueryDto } from './dtos/inbox-list-conversation-messages-query.dto';
+import { InboxListConversationsQueryDto } from './dtos/inbox-list-conversations-query.dto';
 import { GetNotificationsCountRequestDto } from './dtos/get-notifications-count-request.dto';
 import { GetNotificationsCountResponseDto } from './dtos/get-notifications-count-response.dto';
 import { GetNotificationsRequestDto } from './dtos/get-notifications-request.dto';
@@ -80,6 +93,7 @@ import { UpdateNotificationActionCommand } from './usecases/update-notification-
 import { UpdateNotificationAction } from './usecases/update-notification-action/update-notification-action.usecase';
 import { UpdatePreferencesCommand } from './usecases/update-preferences/update-preferences.command';
 import { UpdatePreferences } from './usecases/update-preferences/update-preferences.usecase';
+import { buildUserSessionForInboxConversations } from './utils/inbox-conversations-user';
 import type { InboxPreference } from './utils/types';
 
 @ApiCommonResponses()
@@ -103,8 +117,76 @@ export class InboxController {
     private parseEventRequest: ParseEventRequest,
     private getSubscriberGlobalPreference: GetSubscriberGlobalPreference,
     private deleteNotificationUsecase: DeleteNotification,
-    private deleteAllNotificationsUsecase: DeleteAllNotifications
+    private deleteAllNotificationsUsecase: DeleteAllNotifications,
+    private listConversationsUsecase: ListConversations,
+    private listConversationMessagesUsecase: ListConversationMessages
   ) {}
+
+  @UseGuards(AuthGuard('subscriberJwt'))
+  @Get('/conversations')
+  async getInboxConversations(
+    @SubscriberSession() subscriberSession: SubscriberSession,
+    @Query() query: InboxListConversationsQueryDto
+  ): Promise<ListConversationsResponseDto> {
+    const user = buildUserSessionForInboxConversations(subscriberSession);
+
+    const result = await this.listConversationsUsecase.execute(
+      ListConversationsCommand.create({
+        user,
+        limit: query.limit || 10,
+        after: query.after,
+        before: query.before,
+        orderDirection: query.orderDirection ?? DirectionEnum.DESC,
+        orderBy: query.orderBy || 'updatedAt',
+        includeCursor: query.includeCursor,
+        subscriberId: subscriberSession.subscriberId,
+        agentId: query.agentId,
+        status: query.status,
+      })
+    );
+
+    return {
+      data: result.data.map(mapConversationEntityToDto),
+      next: result.next,
+      previous: result.previous,
+      totalCount: result.totalCount!,
+      totalCountCapped: result.totalCountCapped!,
+    };
+  }
+
+  @UseGuards(AuthGuard('subscriberJwt'))
+  @Get('/conversations/:conversationId/messages')
+  async getInboxConversationMessages(
+    @SubscriberSession() subscriberSession: SubscriberSession,
+    @Param('conversationId') conversationId: string,
+    @Query() query: InboxListConversationMessagesQueryDto
+  ): Promise<ListConversationMessagesResponseDto> {
+    const user = buildUserSessionForInboxConversations(subscriberSession);
+
+    const result = await this.listConversationMessagesUsecase.execute(
+      ListConversationMessagesCommand.create({
+        user,
+        limit: query.limit || 50,
+        after: query.after,
+        before: query.before,
+        orderDirection: query.orderDirection ?? DirectionEnum.ASC,
+        orderBy: query.orderBy || 'createdAt',
+        includeCursor: query.includeCursor,
+        conversationIdentifier: conversationId,
+        expectedSubscriberId: subscriberSession.subscriberId,
+      })
+    );
+
+    return {
+      data: result.data.map((row) =>
+        mapConversationMessageEntityToDto(row, result.conversationIdentifier ?? conversationId)
+      ),
+      next: result.next,
+      previous: result.previous,
+      totalCount: result.totalCount!,
+      totalCountCapped: result.totalCountCapped!,
+    };
+  }
 
   @KeylessAccessible()
   @Post('/session')
