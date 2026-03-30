@@ -23,7 +23,8 @@ export const wineAgent = agent('wine-bot', {
     return `Hey ${subscriber.name ?? 'there'}! 🍷 I'm your personal wine sommelier. Ask me anything — pairings, recommendations, regions, you name it.`;
   },
 
-  onMessage: async ({ message, conversation, history, novu }) => {
+  onMessage: async ({ message, conversation, history, novu, subscriber }) => {
+    console.log('subscriber!!', subscriber);
     const chatMessages: OpenAI.ChatCompletionMessageParam[] = [
       { role: 'system', content: SYSTEM_PROMPT },
       ...history.map(
@@ -41,7 +42,8 @@ export const wineAgent = agent('wine-bot', {
       max_tokens: 500,
     });
 
-    const responseText = completion.choices[0].message.content ?? 'Hmm, I seem to have lost my train of thought. Could you ask again?';
+    const responseText =
+      completion.choices[0].message.content ?? 'Hmm, I seem to have lost my train of thought. Could you ask again?';
     novu.state.increment('messageCount');
 
     const madeRecommendation = /\$\d+|\bregion\b|\bvineyard\b|\bwinery\b|\bgrape\b/i.test(responseText);
@@ -51,7 +53,7 @@ export const wineAgent = agent('wine-bot', {
       const recCount = ((conversation.state.recommendationCount as number) ?? 0) + 1;
       if (recCount >= 3) {
         novu.trigger('wine-recommendations-ready', {
-          to: { subscriberId: message.author.userId },
+          to: { subscriberId: subscriber.subscriberId },
           payload: {
             conversationId: conversation.id,
             recommendationCount: recCount,
@@ -76,9 +78,9 @@ export const wineAgent = agent('wine-bot', {
     return responseText;
   },
 
-  onResolve: async ({ conversation, novu }) => {
+  onResolve: async ({ conversation, subscriber, novu }) => {
     novu.trigger('wine-session-summary', {
-      to: { subscriberId: conversation.participants[0] },
+      to: { subscriberId: subscriber.subscriberId },
       payload: {
         conversationId: conversation.id,
         messageCount: conversation.state.messageCount,

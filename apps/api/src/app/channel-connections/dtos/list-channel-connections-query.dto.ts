@@ -29,15 +29,12 @@ export class ListChannelConnectionsQueryDto extends CursorPaginationQueryDto<
 
   @ApiPropertyOptional({
     description: 'Filter by provider identifier (e.g., sendgrid, twilio, slack, etc.).',
-    enum: [...new Set([...Object.values(ProvidersIdEnumConst).flatMap((enumObj) => Object.values(enumObj))])],
-    enumName: 'ProvidersIdEnum',
     type: String,
     example: 'slack',
   })
   @IsString()
   @IsOptional()
-  @IsEnum(Object.values(ProvidersIdEnumConst))
-  providerId?: ProvidersIdEnum;
+  providerId?: string;
 
   @ApiPropertyOptional({
     description: 'Filter by integration identifier.',

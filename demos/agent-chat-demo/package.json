@@ -8,14 +8,14 @@
     "start": "next start -p 4321"
   },
   "dependencies": {
-    "chat": "latest",
     "@chat-adapter/slack": "latest",
     "@chat-adapter/state-redis": "latest",
+    "@novu/api": "^3.14.2",
     "@novu/framework": "latest",
     "@novu/react": "latest",
-    "@novu/node": "latest",
-    "openai": "latest",
+    "chat": "latest",
     "next": "15",
+    "openai": "latest",
     "react": "19",
     "react-dom": "19"
   },

@@ -20,9 +20,8 @@ export class ListChannelEndpointsCommand extends CursorBasedPaginatedCommand<
   @IsOptional()
   channel?: ChannelTypeEnum;
 
-  @IsEnum(ProvidersIdEnumConst)
   @IsOptional()
-  providerId?: ProvidersIdEnum;
+  providerId?: string;
 
   @IsOptional()
   @IsString()

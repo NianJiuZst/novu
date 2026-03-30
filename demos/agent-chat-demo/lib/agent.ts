@@ -1,8 +1,11 @@
 import { createRedisState } from '@chat-adapter/state-redis';
 import { createSlackAdapter } from '@chat-adapter/slack';
-import { Novu } from '@novu/node';
+import type { Novu } from '@novu/api';
 import { after } from 'next/server';
 import { Chat } from 'chat';
+
+import { createNovuApiClient } from './novu-server-api';
+import { createSlackSubscriberResolver, ensureSlackUserLinked } from './slack-subscriber-resolution';
 
 type ChatAdapters = NonNullable<ConstructorParameters<typeof Chat>[0]['adapters']>;
 
@@ -165,7 +168,8 @@ export async function executeSignals(
         break;
       case 'trigger':
         try {
-          await novuClient.trigger(signal.workflowId, {
+          await novuClient.trigger({
+            workflowId: signal.workflowId,
             to: signal.to ?? { subscriberId: 'default' },
             payload: signal.payload ?? {},
           });
@@ -241,6 +245,14 @@ export type ServeAgentsOptions = {
   novuSecretKey?: string;
   stateAdapter?: ReturnType<typeof createRedisState>;
   onLockConflict?: ConstructorParameters<typeof Chat>[0]['onLockConflict'];
+  /**
+   * Optional override (e.g. load from your DB). Return undefined to continue with built-in Slack resolution.
+   */
+  resolveSubscriberId?: (platformUserId: string, platform: string) => Promise<string | undefined>;
+  /** When set, Slack user ids are mapped via `slack_user` channel endpoints and/or the single-connection demo fallback. */
+  slackIntegrationIdentifier?: string;
+  /** When true (default), if there is exactly one Slack connection in the env, use its subscriberId for all Slack users. */
+  singleSlackConnectionFallback?: boolean;
 };
 
 function buildDefaultAdapters(platforms?: string[]): ChatAdapters {
@@ -265,6 +277,14 @@ export function serveAgents(options: ServeAgentsOptions) {
 
   const primaryAgent = agents[0];
   const store = new Map<string, StoredConversation>();
+  const slackUserLinkCache = new Set<string>();
+
+  const slackUserResolver = options.slackIntegrationIdentifier
+    ? createSlackSubscriberResolver({
+        integrationIdentifier: options.slackIntegrationIdentifier,
+        singleSlackConnectionFallback: options.singleSlackConnectionFallback ?? true,
+      })
+    : null;
 
   function getOrCreateConversation(threadId: string, participantId: string): Conversation {
     const existing = store.get(threadId);
@@ -308,7 +328,7 @@ export function serveAgents(options: ServeAgentsOptions) {
         throw new Error('NOVU_SECRET_KEY is required for serveAgents()');
       }
 
-      novuClient = new Novu(secret);
+      novuClient = createNovuApiClient({ secretKey: secret });
     }
 
     return novuClient;
@@ -358,6 +378,40 @@ export function serveAgents(options: ServeAgentsOptions) {
       return response.text;
     }
 
+    async function resolveSubscriberForSlackMessage(author: MessageAuthor): Promise<string> {
+      const platformUserId = author.userId;
+      let resolvedId = platformUserId;
+
+      if (options.resolveSubscriberId) {
+        const custom = await options.resolveSubscriberId(platformUserId, 'slack');
+
+        if (custom) {
+          resolvedId = custom;
+        } else if (slackUserResolver) {
+          resolvedId = await slackUserResolver(platformUserId);
+        }
+      } else if (slackUserResolver) {
+        resolvedId = await slackUserResolver(platformUserId);
+      }
+
+      if (options.slackIntegrationIdentifier) {
+        const linkKey = `${resolvedId}::${platformUserId}`;
+
+        if (!slackUserLinkCache.has(linkKey)) {
+          await ensureSlackUserLinked(
+            getNovuClient(),
+            resolvedId,
+            platformUserId,
+            author.userName,
+            options.slackIntegrationIdentifier
+          );
+          slackUserLinkCache.add(linkKey);
+        }
+      }
+
+      return resolvedId;
+    }
+
     chatInstance.onNewMention(async (thread, message) => {
       console.log(`[${primaryAgent.id}] New mention from ${message.author.fullName} in ${thread.id}`);
 
@@ -369,8 +423,10 @@ export function serveAgents(options: ServeAgentsOptions) {
         conversation.participants.push(message.author.userId);
       }
 
+      const resolvedSubscriberId = await resolveSubscriberForSlackMessage(message.author);
+
       const subscriber = {
-        subscriberId: message.author.userId,
+        subscriberId: resolvedSubscriberId,
         name: message.author.fullName,
       };
 
@@ -406,8 +462,10 @@ export function serveAgents(options: ServeAgentsOptions) {
         conversation.participants.push(message.author.userId);
       }
 
+      const resolvedSubscriberId = await resolveSubscriberForSlackMessage(message.author);
+
       const subscriber = {
-        subscriberId: message.author.userId,
+        subscriberId: resolvedSubscriberId,
         name: message.author.fullName,
       };
 
