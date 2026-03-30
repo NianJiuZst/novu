@@ -15,6 +15,26 @@ import { createSlackSubscriberResolver, ensureSlackUserLinked } from './slack-su
 
 type ChatAdapters = NonNullable<ConstructorParameters<typeof Chat>[0]['adapters']>;
 
+function readSlackMessageTs(message: unknown): string | undefined {
+  if (!message || typeof message !== 'object') {
+    return undefined;
+  }
+
+  const record = message as Record<string, unknown>;
+  const ts = record.ts;
+
+  return typeof ts === 'string' && ts.length > 0 ? ts : undefined;
+}
+
+function resolveNovuConversationId(
+  conversation: Conversation,
+  ensureReturnedId: string | undefined
+): string | undefined {
+  const fromState = conversation.state.novuConversationId as string | undefined;
+
+  return ensureReturnedId ?? fromState;
+}
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -376,6 +396,7 @@ export function serveAgents(options: ServeAgentsOptions) {
         platformThreadId: threadId,
       });
       conversation.state.novuConversationId = id;
+      saveConversation(conversation);
 
       return id;
     } catch (err) {
@@ -396,7 +417,15 @@ export function serveAgents(options: ServeAgentsOptions) {
   ): Promise<void> {
     const persist = getNovuPersistCredentials();
 
-    if (!persist || !conversationId) {
+    if (!persist) {
+      return;
+    }
+
+    if (!conversationId) {
+      console.error(
+        '[novu] skip message persist: missing conversation id. Check the previous log for [novu] createOrGet conversation failed — often 404 means the demo called the wrong API path; ensure NOVU_API_BASE_URL matches your API host and that GLOBAL_CONTEXT_PATH / API_CONTEXT_PATH in the demo env match apps/api (e.g. /api/v1 vs /v1).'
+      );
+
       return;
     }
 
@@ -541,10 +570,16 @@ export function serveAgents(options: ServeAgentsOptions) {
         name: message.author.fullName,
       };
 
-      const novuConversationId = await ensureNovuConversationRecord(conversation, resolvedSubscriberId, thread.id);
+      const ensuredId = await ensureNovuConversationRecord(conversation, resolvedSubscriberId, thread.id);
+      const novuConversationId = resolveNovuConversationId(conversation, ensuredId);
 
       await persistNovuConversationMessages(novuConversationId, [
-        { role: 'user', content: message.text, senderName: message.author.fullName },
+        {
+          role: 'user',
+          content: message.text,
+          senderName: message.author.fullName,
+          platformMessageId: readSlackMessageTs(message),
+        },
       ]);
 
       const { response, signals } = await primaryAgent.handleSubscribe({
@@ -592,10 +627,16 @@ export function serveAgents(options: ServeAgentsOptions) {
         name: message.author.fullName,
       };
 
-      const novuConversationId = await ensureNovuConversationRecord(conversation, resolvedSubscriberId, thread.id);
+      const ensuredId = await ensureNovuConversationRecord(conversation, resolvedSubscriberId, thread.id);
+      const novuConversationId = resolveNovuConversationId(conversation, ensuredId);
 
       await persistNovuConversationMessages(novuConversationId, [
-        { role: 'user', content: message.text, senderName: message.author.fullName },
+        {
+          role: 'user',
+          content: message.text,
+          senderName: message.author.fullName,
+          platformMessageId: readSlackMessageTs(message),
+        },
       ]);
 
       const history = await buildHistory(thread);
@@ -650,7 +691,11 @@ export function serveAgents(options: ServeAgentsOptions) {
     }
 
     return handler(request, {
-      waitUntil: (task: Promise<unknown>) => after(() => task),
+      waitUntil: (task: Promise<unknown>) => {
+        after(async () => {
+          await task;
+        });
+      },
     });
   };
 }

@@ -1,4 +1,5 @@
 import { Novu } from '@novu/api';
+import { getContextPath, NovuComponentEnum } from '@novu/shared';
 
 export function getNovuSecretKey(): string {
   const secretKey = process.env.NOVU_SECRET_KEY;
@@ -62,6 +63,19 @@ function normalizeApiRoot(serverURL: string): string {
   return serverURL.replace(/\/$/, '');
 }
 
+/**
+ * Matches Nest `enableVersioning({ prefix: \`\${CONTEXT_PATH}v\` })` — e.g. `/v1/...` or `/api/v1/...`
+ * when GLOBAL_CONTEXT_PATH / API_CONTEXT_PATH are set (same env vars as apps/api).
+ */
+function resolveNovuV1ApiBase(serverURL: string): string {
+  const root = normalizeApiRoot(serverURL);
+  const contextPath = getContextPath(NovuComponentEnum.API);
+  const versionSegment = `${contextPath}v1`.replace(/\/{2,}/g, '/');
+  const path = versionSegment.startsWith('/') ? versionSegment.slice(1) : versionSegment;
+
+  return `${root}/${path}`;
+}
+
 export async function createOrGetNovuConversation(params: {
   serverURL: string;
   secretKey: string;
@@ -71,7 +85,8 @@ export async function createOrGetNovuConversation(params: {
   platformThreadId: string;
   title?: string;
 }): Promise<{ id: string }> {
-  const url = `${normalizeApiRoot(params.serverURL)}/v1/conversations`;
+  const base = resolveNovuV1ApiBase(params.serverURL);
+  const url = `${base}/conversations`;
   const res = await fetch(url, {
     method: 'POST',
     headers: novuApiHeaders(params.secretKey),
@@ -86,12 +101,42 @@ export async function createOrGetNovuConversation(params: {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Novu POST /v1/conversations failed: ${res.status} ${text}`);
+    throw new Error(`Novu POST ${url} failed: ${res.status} ${text}`);
   }
 
-  const body = (await res.json()) as { id: string };
+  const body: unknown = await res.json();
+  const id = extractConversationId(body);
 
-  return body;
+  if (!id) {
+    throw new Error(`Novu POST ${url}: response missing id (${JSON.stringify(body)})`);
+  }
+
+  return { id };
+}
+
+function extractConversationId(body: unknown): string | undefined {
+  if (!body || typeof body !== 'object') {
+    return undefined;
+  }
+
+  const record = body as Record<string, unknown>;
+  const topId = record.id;
+
+  if (typeof topId === 'string' && topId.length > 0) {
+    return topId;
+  }
+
+  const nested = record.data;
+
+  if (nested && typeof nested === 'object' && 'id' in nested) {
+    const innerId = (nested as Record<string, unknown>).id;
+
+    if (typeof innerId === 'string' && innerId.length > 0) {
+      return innerId;
+    }
+  }
+
+  return undefined;
 }
 
 export async function appendNovuConversationMessage(params: {
@@ -104,7 +149,8 @@ export async function appendNovuConversationMessage(params: {
   platform?: string;
   platformMessageId?: string;
 }): Promise<void> {
-  const url = `${normalizeApiRoot(params.serverURL)}/v1/conversations/${encodeURIComponent(params.conversationId)}/messages`;
+  const base = resolveNovuV1ApiBase(params.serverURL);
+  const url = `${base}/conversations/${encodeURIComponent(params.conversationId)}/messages`;
   const res = await fetch(url, {
     method: 'POST',
     headers: novuApiHeaders(params.secretKey),
@@ -119,7 +165,7 @@ export async function appendNovuConversationMessage(params: {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Novu POST conversation message failed: ${res.status} ${text}`);
+    throw new Error(`Novu POST ${url} failed: ${res.status} ${text}`);
   }
 }
 
@@ -129,7 +175,8 @@ export async function updateNovuConversationStatus(params: {
   conversationId: string;
   status: 'active' | 'resolved' | 'abandoned';
 }): Promise<void> {
-  const url = `${normalizeApiRoot(params.serverURL)}/v1/conversations/${encodeURIComponent(params.conversationId)}`;
+  const base = resolveNovuV1ApiBase(params.serverURL);
+  const url = `${base}/conversations/${encodeURIComponent(params.conversationId)}`;
   const res = await fetch(url, {
     method: 'PATCH',
     headers: novuApiHeaders(params.secretKey),
@@ -138,6 +185,6 @@ export async function updateNovuConversationStatus(params: {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Novu PATCH conversation failed: ${res.status} ${text}`);
+    throw new Error(`Novu PATCH ${url} failed: ${res.status} ${text}`);
   }
 }

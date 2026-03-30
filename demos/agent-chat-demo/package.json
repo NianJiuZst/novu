@@ -13,6 +13,7 @@
     "@novu/api": "^3.14.2",
     "@novu/framework": "latest",
     "@novu/react": "workspace:*",
+    "@novu/shared": "workspace:*",
     "chat": "latest",
     "next": "15",
     "openai": "latest",

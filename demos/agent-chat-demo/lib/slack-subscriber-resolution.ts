@@ -36,7 +36,6 @@ export async function findSubscriberIdBySlackUserEndpoint(
   let after: string | undefined;
 
   for (let page = 0; page < MAX_PAGES; page += 1) {
-    console.log('listing channel endpoints', integrationIdentifier, ProvidersIdEnum.Slack, 100, after);
     const { result } = await novu.channelEndpoints.list({
       integrationIdentifier,
       providerId: ProvidersIdEnum.Slack,
