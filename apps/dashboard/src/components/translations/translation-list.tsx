@@ -240,11 +240,11 @@ export function TranslationList(props: TranslationListProps) {
     );
   }
 
-  if (!areFiltersApplied && !data?.data.length) {
+  if (!areFiltersApplied && !data?.data?.length) {
     return <TranslationOnboardingPage />;
   }
 
-  if (!data?.data.length) {
+  if (!data?.data?.length) {
     return (
       <TranslationListContainer
         filterValues={filterValues}

@@ -177,7 +177,7 @@ export const ContextList = (props: ContextListProps) => {
     }
   }, [data, handleFiltersChange]);
 
-  const hasData = !!data?.data.length;
+  const hasData = !!data?.data?.length;
   const paginationProps = data
     ? {
         hasNext: !!data.next,

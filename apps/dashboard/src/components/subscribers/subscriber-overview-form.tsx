@@ -77,7 +77,7 @@ export function SubscriberOverviewForm(props: SubscriberOverviewFormProps) {
     onSuccess: () => {
       showSuccessToast(`Deleted subscriber: ${getSubscriberTitle(subscriber)}`, undefined, toastOptions);
       track(TelemetryEvent.SUBSCRIBER_DELETED);
-      const isLastSubscriber = data?.data.length === 1;
+      const isLastSubscriber = data?.data?.length === 1;
 
       if (onCloseDrawer) {
         onCloseDrawer();
@@ -91,8 +91,8 @@ export function SubscriberOverviewForm(props: SubscriberOverviewFormProps) {
           });
           navigateToSubscribersFirstPage();
         } else {
-          const firstTwoSubscribersInternalIds = data?.data.slice(0, 2).map((s) => s._id as string) || [];
-          const subscribersCount = data?.data.length || 0;
+          const firstTwoSubscribersInternalIds = data?.data?.slice(0, 2).map((s) => s._id as string) || [];
+          const subscribersCount = data?.data?.length || 0;
 
           const hasTwoSubscribersInternalIds = firstTwoSubscribersInternalIds.length === 2 && subscribersCount > 1;
           const firstSubscriberInternalId = firstTwoSubscribersInternalIds[0] || '';

@@ -27,11 +27,13 @@ export function useCheckoutSession() {
       }),
     onSuccess: (response, params) => {
       track(TelemetryEvent.BILLING_UPGRADE_INITIATED, {
-        fromPlan: response.data.apiServiceLevel,
+        fromPlan: response?.data?.apiServiceLevel,
         toPlan: params.requestedServiceLevel,
         billingInterval: params.billingInterval,
       });
-      window.location.href = response.data.stripeCheckoutUrl;
+      if (response?.data?.stripeCheckoutUrl) {
+        window.location.href = response.data.stripeCheckoutUrl;
+      }
     },
     onError: (error: Error, params) => {
       track(TelemetryEvent.BILLING_UPGRADE_ERROR, {

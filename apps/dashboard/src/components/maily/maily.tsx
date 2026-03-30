@@ -17,6 +17,14 @@ import { calculateVariables } from './variables';
 import { MailyVariablesListView } from './views/maily-variables-list-view';
 import { createVariableNodeView as defaultCreateVariableNodeView } from './views/variable-view';
 
+function safeJsonParse(value: string): unknown | undefined {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+}
+
 type MailyProps = HTMLAttributes<HTMLDivElement> & {
   value: string;
   onChange?: (value: string) => void;
@@ -200,7 +208,7 @@ export const Maily = ({
           config={DEFAULT_EDITOR_CONFIG}
           blocks={blocks}
           extensions={extensions}
-          contentJson={value ? JSON.parse(value) : undefined}
+          contentJson={value ? safeJsonParse(value) : undefined}
           onUpdate={onUpdate}
           repeatMenuConfig={repeatMenuConfig}
         />

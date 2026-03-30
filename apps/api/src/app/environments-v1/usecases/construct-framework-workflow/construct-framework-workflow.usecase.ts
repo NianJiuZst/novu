@@ -358,7 +358,7 @@ export class ConstructFrameworkWorkflow {
 
     return {
       skip: skipFunction,
-      controlSchema: staticStep.template!.controls!.schema as unknown as Schema,
+      controlSchema: (staticStep.template?.controls?.schema ?? {}) as unknown as Schema,
       disableOutputSanitization: true,
       providers: {},
     };
@@ -369,7 +369,7 @@ export class ConstructFrameworkWorkflow {
     staticStep: NotificationStepEntity,
     fullPayloadForRender: FullPayloadForRender
   ): Required<Parameters<ActionStep>[2]> {
-    const stepType = staticStep.template!.type;
+    const stepType = staticStep.template?.type as StepTypeEnum;
     const controlSchema = this.optionalAugmentControlSchemaDueToAjvBug(staticStep, stepType);
 
     return {
@@ -379,7 +379,7 @@ export class ConstructFrameworkWorkflow {
   }
 
   private optionalAugmentControlSchemaDueToAjvBug(staticStep: NotificationStepEntity, stepType: StepTypeEnum) {
-    let controlSchema = staticStep.template!.controls!.schema;
+    let controlSchema = staticStep.template?.controls?.schema;
 
     /*
      * because of the known AJV issue with anyOf, we need to find the first schema that matches the control values

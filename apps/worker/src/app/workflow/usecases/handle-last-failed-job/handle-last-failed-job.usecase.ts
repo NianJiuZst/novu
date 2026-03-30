@@ -12,6 +12,16 @@ import { PlatformException, shouldHaltOnStepFailure } from '../../../shared/util
 import { QueueNextJob, QueueNextJobCommand } from '../queue-next-job';
 import { HandleLastFailedJobCommand } from './handle-last-failed-job.command';
 
+function safeParseErrorMessage(raw: string): string {
+  try {
+    const parsed = JSON.parse(raw);
+
+    return parsed?.message ?? raw;
+  } catch {
+    return raw;
+  }
+}
+
 @Injectable()
 export class HandleLastFailedJob {
   constructor(
@@ -48,7 +58,7 @@ export class HandleLastFailedJob {
         status: ExecutionDetailsStatusEnum.PENDING,
         isTest: false,
         isRetry: true,
-        raw: JSON.stringify({ message: JSON.parse(error.message).message }),
+        raw: JSON.stringify({ message: safeParseErrorMessage(error.message) }),
       })
     );
 

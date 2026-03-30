@@ -210,7 +210,7 @@ export const TopicList = (props: TopicListProps) => {
     resetFilters,
     isLoading: isLoading, // Pass loading state
     isFetching: isFetching, // Pass fetching state for spinner
-    hasData: !!data?.data.length,
+    hasData: !!data?.data?.length,
     areFiltersApplied,
     ...rest,
   };
@@ -247,7 +247,7 @@ export const TopicList = (props: TopicListProps) => {
     );
   }
 
-  if (!areFiltersApplied && !data?.data.length) {
+  if (!areFiltersApplied && !data?.data?.length) {
     return (
       <TopicListWrapper {...wrapperProps} showEmptyState={true}>
         <TopicListBlank />
@@ -255,7 +255,7 @@ export const TopicList = (props: TopicListProps) => {
     );
   }
 
-  if (!data?.data.length) {
+  if (!data?.data?.length) {
     return (
       <TopicListWrapper {...wrapperProps}>
         <ListNoResults

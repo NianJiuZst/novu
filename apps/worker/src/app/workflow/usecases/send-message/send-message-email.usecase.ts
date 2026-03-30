@@ -486,6 +486,13 @@ export class SendMessageEmail extends SendMessageBase {
         ),
       });
 
+      if (!result?.id) {
+        return {
+          status: SendMessageStatus.FAILED,
+          errorMessage: DetailEnum.PROVIDER_ERROR,
+        };
+      }
+
       await this.sendWebhookMessage.execute({
         eventType: WebhookEventEnum.MESSAGE_SENT,
         objectType: WebhookObjectTypeEnum.MESSAGE,
@@ -514,13 +521,6 @@ export class SendMessageEmail extends SendMessageBase {
       );
 
       Logger.verbose({ command }, 'Execution details of sending an email message have been stored', LOG_CONTEXT);
-
-      if (!result?.id) {
-        return {
-          status: SendMessageStatus.FAILED,
-          errorMessage: DetailEnum.PROVIDER_ERROR,
-        };
-      }
 
       await this.messageRepository.update(
         { _environmentId: command.environmentId, _id: message._id },

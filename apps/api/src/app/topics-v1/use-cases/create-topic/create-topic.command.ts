@@ -6,11 +6,11 @@ import { TopicKey, TopicName } from '../../types';
 export class CreateTopicCommand extends EnvironmentWithUserCommand {
   @IsString()
   @IsDefined()
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   key: TopicKey;
 
   @IsString()
   @IsDefined()
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   name: TopicName;
 }

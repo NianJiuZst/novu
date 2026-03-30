@@ -15,6 +15,14 @@ import { GetWorkflowRunResponseDto, StepRunDto } from '../../dtos/workflow-run-r
 import { mapTraceToExecutionDetailDto, mapWorkflowRunStatusToDto } from '../../shared/mappers';
 import { GetWorkflowRunCommand } from './get-workflow-run.command';
 
+function safeJsonParse<T = unknown>(value: string, fallback?: T): T {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback as T;
+  }
+}
+
 const workflowRunSelectColumns = [
   'workflow_run_id',
   'workflow_id',
@@ -316,7 +324,7 @@ export class GetWorkflowRun {
       status: stepRun.status,
       createdAt: new Date(stepRun.created_at),
       updatedAt: new Date(stepRun.updated_at),
-      digest: stepRun.digest ? JSON.parse(stepRun.digest) : undefined,
+      digest: stepRun.digest ? safeJsonParse(stepRun.digest) : undefined,
       executionDetails: mapTraceToExecutionDetailDto(stepRun.executionDetails || []),
       scheduleExtensionsCount: stepRun.schedule_extensions_count,
     };
@@ -341,12 +349,12 @@ export class GetWorkflowRun {
       transactionId: workflowRun.transaction_id,
       createdAt: new Date(`${workflowRun.created_at} UTC`).toISOString(),
       updatedAt: new Date(`${workflowRun.updated_at} UTC`).toISOString(),
-      payload: workflowRun.payload ? JSON.parse(workflowRun.payload) : {},
+      payload: workflowRun.payload ? safeJsonParse(workflowRun.payload, {}) : {},
       steps: stepRuns.map((stepRun) => this.mapStepRunToDto(stepRun)),
       severity: workflowRun.severity,
       critical: workflowRun.critical,
       contextKeys: workflowRun.context_keys,
-      topics: workflowRun.topics ? JSON.parse(workflowRun.topics) : [],
+      topics: workflowRun.topics ? safeJsonParse(workflowRun.topics, []) : [],
       overrides,
     };
   }

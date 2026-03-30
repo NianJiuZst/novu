@@ -2,6 +2,14 @@ import { JSONContent as MailyJSONContent } from '@novu/maily-render';
 import { TRANSLATION_KEY_SINGLE_REGEX } from '@novu/shared';
 import { MAILY_FIRST_CITIZEN_VARIABLE_KEY, MailyAttrsEnum, MailyContentTypeEnum } from '../types/maily.types';
 
+function parseMailyContent(content: string): MailyJSONContent {
+  try {
+    return JSON.parse(content);
+  } catch {
+    return { type: 'doc', content: [] };
+  }
+}
+
 export const isStringifiedMailyJSONContent = (value: unknown): value is string => {
   if (typeof value !== 'string') return false;
 
@@ -344,7 +352,7 @@ export const replaceMailyNodesByCondition = (
   conditionFn: (node: MailyJSONContent) => boolean,
   replacementFn: (node: MailyJSONContent) => MailyJSONContent | MailyJSONContent[] | null
 ): MailyJSONContent => {
-  const mailyJSONContent: MailyJSONContent = JSON.parse(content);
+  const mailyJSONContent: MailyJSONContent = parseMailyContent(content);
 
   const processNodes = (node: MailyJSONContent): MailyJSONContent | MailyJSONContent[] | null => {
     // Check if this node should be replaced
@@ -411,7 +419,7 @@ export const replaceMailyNodesByCondition = (
  * },
  */
 export const replaceMailyVariables = (content: string, variableToReplace: string, replacement: string) => {
-  const mailyJSONContent: MailyJSONContent = JSON.parse(content);
+  const mailyJSONContent: MailyJSONContent = parseMailyContent(content);
 
   return processMailyNodes({
     node: mailyJSONContent,
@@ -453,7 +461,7 @@ export const replaceMailyVariables = (content: string, variableToReplace: string
  * }
  */
 export const wrapMailyInLiquid = (content: string) => {
-  const mailyJSONContent: MailyJSONContent = JSON.parse(content);
+  const mailyJSONContent: MailyJSONContent = parseMailyContent(content);
 
   return processMailyNodes({
     node: mailyJSONContent,
@@ -482,7 +490,7 @@ export const wrapMailyInLiquid = (content: string) => {
 };
 
 export const hasMailyVariable = (content: string, variable: string): boolean => {
-  const mailyJSONContent: MailyJSONContent = JSON.parse(content);
+  const mailyJSONContent: MailyJSONContent = parseMailyContent(content);
   let result = false;
 
   processMailyNodes({

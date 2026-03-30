@@ -189,7 +189,7 @@ export const SubscriberList = (props: SubscriberListProps) => {
     );
   }
 
-  if (!areFiltersApplied && !data?.data.length) {
+  if (!areFiltersApplied && !data?.data?.length) {
     return (
       <SubscriberListWrapper
         filterValues={filterValues}
@@ -203,7 +203,7 @@ export const SubscriberList = (props: SubscriberListProps) => {
     );
   }
 
-  if (!data?.data.length) {
+  if (!data?.data?.length) {
     return (
       <SubscriberListWrapper
         filterValues={filterValues}

@@ -42,7 +42,7 @@ export function buildLog(
     created_at: LogRepository.formatDateTime64(new Date()),
     path: req.path,
     url: req.originalUrl,
-    url_pattern: req.route.path,
+    url_pattern: req.route?.path ?? req.path,
     hostname: req.hostname,
     status_code: statusCode,
     method: req.method,
