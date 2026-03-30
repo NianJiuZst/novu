@@ -1,3 +1,5 @@
+import { providers as novuProviders } from '@novu/shared';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useId, useState } from 'react';
 import {
   RiAddLine,
@@ -9,40 +11,45 @@ import {
   RiRobot2Line,
 } from 'react-icons/ri';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { providers as novuProviders } from '@novu/shared';
-import { deleteAgent, type AgentDto, updateAgent } from '@/api/agents';
+import { type AgentDto, deleteAgent, updateAgent } from '@/api/agents';
 import { NovuApiError } from '@/api/api.client';
-import { ProviderIcon } from '@/components/integrations/components/provider-icon';
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { DashboardLayout } from '@/components/dashboard-layout';
+import { ProviderIcon } from '@/components/integrations/components/provider-icon';
 import { PageMeta } from '@/components/page-meta';
 import { Badge } from '@/components/primitives/badge';
 import { Button } from '@/components/primitives/button';
 import { Checkbox } from '@/components/primitives/checkbox';
 import { CopyButton } from '@/components/primitives/copy-button';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/primitives/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/primitives/dialog';
 import { Input } from '@/components/primitives/input';
 import { Label } from '@/components/primitives/label';
 import { Separator } from '@/components/primitives/separator';
 import { Skeleton } from '@/components/primitives/skeleton';
+import { showErrorToast } from '@/components/primitives/sonner-helpers';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/primitives/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/primitives/tabs';
 import { TimeDisplayHoverCard } from '@/components/time-display-hover-card';
-import { showErrorToast } from '@/components/primitives/sonner-helpers';
 import { useEnvironment } from '@/context/environment/hooks';
 import { useFetchAgent } from '@/hooks/use-fetch-agent';
 import { useFetchIntegrations } from '@/hooks/use-fetch-integrations';
+import { AgentSlackSetupTabPanel } from '@/pages/agent-slack-setup-tab';
 import { CHANNEL_TYPE_TO_STRING } from '@/utils/channels';
 import { formatDateSimple } from '@/utils/format-date';
-import { buildRoute, ROUTES } from '@/utils/routes';
 import { QueryKeys } from '@/utils/query-keys';
+import { buildRoute, ROUTES } from '@/utils/routes';
+
+function getAgentConfigTab(pathname: string): 'overview' | 'integrations' | 'slack-setup' {
+  if (pathname.endsWith('/slack-setup')) {
+    return 'slack-setup';
+  }
+
+  if (pathname.endsWith('/integrations')) {
+    return 'integrations';
+  }
+
+  return 'overview';
+}
 
 function AgentOverviewSkeleton() {
   return (
@@ -159,7 +166,9 @@ function AgentIntegrationsTabPanel({
     <div className="flex flex-col gap-6 p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <span className="text-foreground-400 text-xs font-medium uppercase tracking-wider">Connected integrations</span>
+          <span className="text-foreground-400 text-xs font-medium uppercase tracking-wider">
+            Connected integrations
+          </span>
           <p className="text-foreground-600 max-w-[60ch] text-sm">
             Choose which integrations this agent can use. Only integrations in this environment are available.
           </p>
@@ -202,9 +211,7 @@ function AgentIntegrationsTabPanel({
           </TableHeader>
           <TableBody>
             {assignedRows.map(({ id, integration }) => {
-              const provider = integration
-                ? novuProviders.find((p) => p.id === integration.providerId)
-                : undefined;
+              const provider = integration ? novuProviders.find((p) => p.id === integration.providerId) : undefined;
 
               return (
                 <TableRow key={id}>
@@ -329,7 +336,7 @@ export function AgentConfigPage() {
   const queryClient = useQueryClient();
   const agentQuery = useFetchAgent(agentId);
 
-  const currentTab = location.pathname.endsWith('/integrations') ? 'integrations' : 'overview';
+  const currentTab = getAgentConfigTab(location.pathname);
 
   const [editOpen, setEditOpen] = useState(false);
   const [editName, setEditName] = useState('');
@@ -402,6 +409,12 @@ export function AgentConfigPage() {
 
     if (value === 'integrations') {
       navigate(buildRoute(ROUTES.AGENT_INTEGRATIONS, { environmentSlug, agentId }));
+
+      return;
+    }
+
+    if (value === 'slack-setup') {
+      navigate(buildRoute(ROUTES.AGENT_SLACK_SETUP, { environmentSlug, agentId }));
 
       return;
     }
@@ -489,6 +502,9 @@ export function AgentConfigPage() {
               <TabsTrigger value="integrations" variant="regular" size="xl">
                 Integrations
               </TabsTrigger>
+              <TabsTrigger value="slack-setup" variant="regular" size="xl">
+                Slack Setup
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -573,11 +589,11 @@ export function AgentConfigPage() {
           </TabsContent>
 
           <TabsContent value="integrations" className="mt-0!">
-            <AgentIntegrationsTabPanel
-              agent={agent}
-              isAgentLoading={agentQuery.isLoading}
-              agentId={agentId}
-            />
+            <AgentIntegrationsTabPanel agent={agent} isAgentLoading={agentQuery.isLoading} agentId={agentId} />
+          </TabsContent>
+
+          <TabsContent value="slack-setup" className="mt-0!">
+            <AgentSlackSetupTabPanel agent={agent} isAgentLoading={agentQuery.isLoading} />
           </TabsContent>
         </Tabs>
 

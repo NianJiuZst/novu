@@ -172,6 +172,14 @@ const router = createBrowserRouter([
                 ),
               },
               {
+                path: ROUTES.AGENT_SLACK_SETUP,
+                element: (
+                  <ProtectedRoute permission={PermissionsEnum.WORKFLOW_READ}>
+                    <AgentConfigPage />
+                  </ProtectedRoute>
+                ),
+              },
+              {
                 path: ROUTES.AGENT_OVERVIEW,
                 element: (
                   <ProtectedRoute permission={PermissionsEnum.WORKFLOW_READ}>

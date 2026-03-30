@@ -74,6 +74,7 @@ export const ROUTES = {
   AGENTS: '/env/:environmentSlug/agents',
   AGENT_OVERVIEW: '/env/:environmentSlug/agents/:agentId',
   AGENT_INTEGRATIONS: '/env/:environmentSlug/agents/:agentId/integrations',
+  AGENT_SLACK_SETUP: '/env/:environmentSlug/agents/:agentId/slack-setup',
 } as const;
 
 export const buildRoute = (route: string, params: Record<string, string>) => {
