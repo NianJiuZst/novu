@@ -15,6 +15,40 @@ export function isDemoIntegration(providerId: string) {
   );
 }
 
+/**
+ * Pre-fills credential fields from schema `value` when creating a new integration
+ * (e.g. SES API v2, SendGrid region default).
+ */
+export function buildDefaultCredentialsFromProvider(credentials: IConfigCredential[]): Record<string, string> {
+  const result: Record<string, string> = {};
+
+  for (const c of credentials) {
+    if (c.value === undefined || c.value === null) {
+      continue;
+    }
+
+    if (typeof c.value === 'boolean') {
+      result[c.key] = c.value ? 'true' : 'false';
+
+      continue;
+    }
+
+    if (typeof c.value === 'number') {
+      result[c.key] = String(c.value);
+
+      continue;
+    }
+
+    if (typeof c.value === 'string' && c.value === '') {
+      continue;
+    }
+
+    result[c.key] = String(c.value);
+  }
+
+  return result;
+}
+
 export function configurationToCredential(config: ConfigConfiguration): IConfigCredential {
   return {
     key: config.key as CredentialsKeyEnum,

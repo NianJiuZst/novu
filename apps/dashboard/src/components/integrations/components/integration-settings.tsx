@@ -23,7 +23,7 @@ import { InlineToast } from '../../primitives/inline-toast';
 import { EnvironmentDropdown } from '../../side-navigation/environment-dropdown';
 import { CredentialSection } from './credential-section';
 import { GeneralSettings } from './integration-general-settings';
-import { isDemoIntegration } from './utils/helpers';
+import { buildDefaultCredentialsFromProvider, isDemoIntegration } from './utils/helpers';
 
 type IntegrationFormData = {
   name: string;
@@ -68,6 +68,23 @@ export function IntegrationSettings({
 }: IntegrationConfigurationProps) {
   const navigate = useNavigate();
   const { currentEnvironment, environments } = useEnvironment();
+  const isSlackTeamsEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_SLACK_TEAMS_ENABLED, false);
+
+  const providerCredentials = useMemo(() => {
+    if (provider.id === ChatProviderIdEnum.MsTeams) {
+      return isSlackTeamsEnabled ? provider.credentials : [];
+    }
+
+    if (provider.id === ChatProviderIdEnum.Slack && isSlackTeamsEnabled) {
+      if (mode === 'update' && integration?.credentials?.hmac === true) {
+        return provider.credentials;
+      }
+
+      return slackConfig;
+    }
+
+    return provider.credentials;
+  }, [provider.id, provider.credentials, isSlackTeamsEnabled, mode, integration?.credentials]);
 
   const form = useForm<IntegrationFormData>({
     mode: 'all',
@@ -87,7 +104,7 @@ export function IntegrationSettings({
           identifier: generateSlug(provider?.displayName ?? ''),
           active: true,
           primary: true,
-          credentials: {},
+          credentials: buildDefaultCredentialsFromProvider(providerCredentials),
           configurations: {},
           environmentId: currentEnvironment?._id ?? '',
         },
@@ -116,30 +133,6 @@ export function IntegrationSettings({
   }, [name, mode, setValue]);
 
   const isDemo = integration && isDemoIntegration(integration.providerId);
-  const isSlackTeamsEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_SLACK_TEAMS_ENABLED, false);
-
-  // Filter credentials based on provider and feature flag
-  const providerCredentials = useMemo(() => {
-    // MS Teams: only show OAuth credentials when feature flag is enabled
-    if (provider.id === ChatProviderIdEnum.MsTeams) {
-      return isSlackTeamsEnabled ? provider.credentials : [];
-    }
-
-    // Slack: hide HMAC for new integrations when feature flag is enabled
-    // But keep HMAC visible for existing integrations (backward compatibility)
-    if (provider.id === ChatProviderIdEnum.Slack && isSlackTeamsEnabled) {
-      // For existing integrations (update mode), show HMAC if it is true in credentials
-      if (mode === 'update' && integration?.credentials?.hmac === true) {
-        return provider.credentials;
-      }
-
-      // For new integrations (create mode), use config without HMAC
-      return slackConfig;
-    }
-
-    // Default: return all credentials
-    return provider.credentials;
-  }, [provider.id, provider.credentials, isSlackTeamsEnabled, mode, integration?.credentials]);
 
   return (
     <Form {...form}>
