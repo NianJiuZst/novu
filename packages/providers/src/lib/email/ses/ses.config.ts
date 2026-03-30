@@ -5,4 +5,5 @@ export interface SESConfig {
   accessKeyId: string;
   secretAccessKey: string;
   configurationSetName?: string;
+  apiVersion?: 'v1' | 'v2';
 }

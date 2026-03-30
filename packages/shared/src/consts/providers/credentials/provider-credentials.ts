@@ -296,6 +296,18 @@ export const sendinblueConfig: IConfigCredential[] = [
 
 export const sesConfig: IConfigCredential[] = [
   {
+    key: CredentialsKeyEnum.ApiVersion,
+    displayName: 'SES API Version',
+    description: 'v1 uses legacy SendRawEmail (ses:SendRawEmail). v2 uses Amazon SES API v2 (ses:SendEmail).',
+    type: 'dropdown',
+    required: false,
+    value: 'v2',
+    dropdown: [
+      { name: 'v1 (Legacy)', value: 'v1' },
+      { name: 'v2 (Recommended)', value: 'v2' },
+    ],
+  },
+  {
     key: CredentialsKeyEnum.ApiKey,
     displayName: 'Access key ID',
     type: 'string',

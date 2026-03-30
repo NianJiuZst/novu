@@ -1,3 +1,4 @@
+import { SESClient, SendRawEmailCommand } from '@aws-sdk/client-ses';
 import { SESv2Client, SendEmailCommand } from '@aws-sdk/client-sesv2';
 import { EmailProviderIdEnum } from '@novu/shared';
 import {
@@ -11,7 +12,8 @@ import {
   ISendMessageSuccessResponse,
 } from '@novu/stateless';
 import { createVerify } from 'crypto';
-import nodemailer from 'nodemailer';
+import nodemailer, { type SendMailOptions } from 'nodemailer';
+import nodemailerLegacy from 'nodemailer-legacy';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
 import { WithPassthrough } from '../../../utils/types';
 import { SESConfig } from './ses.config';
@@ -20,46 +22,69 @@ export class SESEmailProvider extends BaseProvider implements IEmailProvider {
   id = EmailProviderIdEnum.SES;
   protected casing: CasingEnum = CasingEnum.CAMEL_CASE;
   channelType = ChannelTypeEnum.EMAIL as ChannelTypeEnum.EMAIL;
-  private readonly sesClient: SESv2Client;
+  private readonly sesV1Client: SESClient;
+  private readonly sesV2Client: SESv2Client;
 
   constructor(private readonly config: SESConfig) {
     super();
-    this.sesClient = new SESv2Client({
+    const clientConfig = {
       region: this.config.region,
       credentials: {
         accessKeyId: this.config.accessKeyId,
         secretAccessKey: this.config.secretAccessKey,
       },
+    };
+    this.sesV1Client = new SESClient(clientConfig);
+    this.sesV2Client = new SESv2Client(clientConfig);
+  }
+
+  private get isSesV2(): boolean {
+    return this.config.apiVersion === 'v2';
+  }
+
+  private async sendMailViaSesV1(mailOptions: SendMailOptions) {
+    const transporter = nodemailerLegacy.createTransport({
+      SES: { ses: this.sesV1Client, aws: { SendRawEmailCommand } },
     });
+
+    return await transporter.sendMail(mailOptions);
+  }
+
+  private async sendMailViaSesV2(mailOptions: SendMailOptions) {
+    const transporter = nodemailer.createTransport({
+      SES: { sesClient: this.sesV2Client, SendEmailCommand },
+    });
+
+    return await transporter.sendMail(mailOptions);
   }
 
   private async sendMail(
     { html, text, to, from, senderName, subject, attachments, cc, bcc, replyTo },
     bridgeProviderData: WithPassthrough<Record<string, unknown>> = {}
   ) {
-    const transporter = nodemailer.createTransport({
-      SES: { sesClient: this.sesClient, SendEmailCommand },
-    });
+    const mailOptions = this.transform(bridgeProviderData, {
+      to,
+      html,
+      text,
+      subject,
+      attachments,
+      from: {
+        address: from,
+        name: senderName,
+      },
+      cc,
+      bcc,
+      replyTo,
+      ...(this.config.configurationSetName && {
+        ses: { ConfigurationSetName: this.config.configurationSetName },
+      }),
+    }).body as SendMailOptions;
 
-    return await transporter.sendMail(
-      this.transform(bridgeProviderData, {
-        to,
-        html,
-        text,
-        subject,
-        attachments,
-        from: {
-          address: from,
-          name: senderName,
-        },
-        cc,
-        bcc,
-        replyTo,
-        ...(this.config.configurationSetName && {
-          ses: { ConfigurationSetName: this.config.configurationSetName },
-        }),
-      }).body
-    );
+    if (this.isSesV2) {
+      return await this.sendMailViaSesV2(mailOptions);
+    }
+
+    return await this.sendMailViaSesV1(mailOptions);
   }
 
   async sendMessage(

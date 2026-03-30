@@ -1,3 +1,4 @@
+import { SESClient } from '@aws-sdk/client-ses';
 import { SESv2Client } from '@aws-sdk/client-sesv2';
 import { EmailEventStatusEnum } from '@novu/stateless';
 import { describe, expect, test, vi } from 'vitest';
@@ -9,6 +10,16 @@ const mockConfig = {
   accessKeyId: 'TEST',
   from: 'test@test.com',
   secretAccessKey: 'TEST',
+};
+
+const mockConfigV2 = {
+  ...mockConfig,
+  apiVersion: 'v2' as const,
+};
+
+const mockConfigV1 = {
+  ...mockConfig,
+  apiVersion: 'v1' as const,
 };
 
 const mockNovuMessage = {
@@ -89,13 +100,13 @@ const mockSESMessage = {
   },
 };
 
-test('should trigger ses library correctly', async () => {
+test('should trigger SES v2 (SendEmail) correctly', async () => {
   const mockResponse = { MessageId: 'mock-message-id' };
   const spy = vi.spyOn(SESv2Client.prototype, 'send').mockImplementation(async () => {
     return mockResponse as any;
   });
 
-  const provider = new SESEmailProvider(mockConfig);
+  const provider = new SESEmailProvider(mockConfigV2);
   const response = await provider.sendMessage(mockNovuMessage);
 
   const bufferArray = spy.mock.calls[0][0].input['Content']['Raw']['Data'];
@@ -107,13 +118,13 @@ test('should trigger ses library correctly', async () => {
   expect(response.id).toEqual('<mock-message-id@email.amazonses.com>');
 });
 
-test('should trigger ses library correctly with _passthrough', async () => {
+test('should trigger SES v2 with _passthrough', async () => {
   const mockResponse = { MessageId: 'mock-message-id' };
   const spy = vi.spyOn(SESv2Client.prototype, 'send').mockImplementation(async () => {
     return mockResponse as any;
   });
 
-  const provider = new SESEmailProvider(mockConfig);
+  const provider = new SESEmailProvider(mockConfigV2);
   const response = await provider.sendMessage(mockNovuMessage, {
     _passthrough: {
       body: {
@@ -128,6 +139,42 @@ test('should trigger ses library correctly with _passthrough', async () => {
 
   expect(spy).toHaveBeenCalled();
   expect(emailContent.includes('Subject: test subject _passthrough')).toBe(true);
+  expect(response.id).toEqual('<mock-message-id@email.amazonses.com>');
+});
+
+test('should trigger SES v1 (SendRawEmail) when apiVersion is v1', async () => {
+  const mockResponse = { MessageId: 'mock-message-id' };
+  const spy = vi.spyOn(SESClient.prototype, 'send').mockImplementation(async () => {
+    return mockResponse as any;
+  });
+
+  const provider = new SESEmailProvider(mockConfigV1);
+  const response = await provider.sendMessage(mockNovuMessage);
+
+  const bufferArray = spy.mock.calls[0][0].input['RawMessage']['Data'];
+  const buffer = Buffer.from(bufferArray);
+  const emailContent = buffer.toString();
+
+  expect(spy).toHaveBeenCalled();
+  expect(emailContent.includes('Reply-To: test@test1.com')).toBe(true);
+  expect(response.id).toEqual('<mock-message-id@email.amazonses.com>');
+});
+
+test('should default to SES v1 (SendRawEmail) when apiVersion is omitted', async () => {
+  const mockResponse = { MessageId: 'mock-message-id' };
+  const spy = vi.spyOn(SESClient.prototype, 'send').mockImplementation(async () => {
+    return mockResponse as any;
+  });
+
+  const provider = new SESEmailProvider(mockConfig);
+  const response = await provider.sendMessage(mockNovuMessage);
+
+  const bufferArray = spy.mock.calls[0][0].input['RawMessage']['Data'];
+  const buffer = Buffer.from(bufferArray);
+  const emailContent = buffer.toString();
+
+  expect(spy).toHaveBeenCalled();
+  expect(emailContent.includes('Reply-To: test@test1.com')).toBe(true);
   expect(response.id).toEqual('<mock-message-id@email.amazonses.com>');
 });
 

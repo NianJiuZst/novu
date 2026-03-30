@@ -15,6 +15,7 @@ export class SESHandler extends BaseEmailHandler {
       senderName: credentials.senderName ?? 'no-reply',
       from: from as string,
       configurationSetName: credentials.configurationSetName,
+      apiVersion: credentials.apiVersion as 'v1' | 'v2' | undefined,
     };
 
     this.provider = new SESEmailProvider(config);
