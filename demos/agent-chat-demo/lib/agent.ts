@@ -1,4 +1,10 @@
+import { createRedisState } from '@chat-adapter/state-redis';
+import { createSlackAdapter } from '@chat-adapter/slack';
 import { Novu } from '@novu/node';
+import { after } from 'next/server';
+import { Chat } from 'chat';
+
+type ChatAdapters = NonNullable<ConstructorParameters<typeof Chat>[0]['adapters']>;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -216,5 +222,242 @@ export function agent(id: string, handlers: AgentHandlers) {
 
       return { response: undefined, signals: novu._collect() };
     },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// serveAgents() — Next.js webhook wiring (Chat SDK, store, signals)
+// ---------------------------------------------------------------------------
+
+type StoredConversation = Conversation & {
+  createdAt: Date;
+  lastMessageAt: Date;
+};
+
+export type ServeAgentsOptions = {
+  agents: AgentInstance[];
+  userName?: string;
+  adapters?: ChatAdapters;
+  novuSecretKey?: string;
+  stateAdapter?: ReturnType<typeof createRedisState>;
+  onLockConflict?: ConstructorParameters<typeof Chat>[0]['onLockConflict'];
+};
+
+function buildDefaultAdapters(platforms?: string[]): ChatAdapters {
+  const map = {} as ChatAdapters;
+  const list = platforms?.length ? platforms : ['slack'];
+
+  for (const platform of list) {
+    if (platform === 'slack') {
+      map.slack = createSlackAdapter();
+    }
+  }
+
+  return map;
+}
+
+export function serveAgents(options: ServeAgentsOptions) {
+  const { agents } = options;
+
+  if (!agents.length) {
+    throw new Error('serveAgents requires at least one agent');
+  }
+
+  const primaryAgent = agents[0];
+  const store = new Map<string, StoredConversation>();
+
+  function getOrCreateConversation(threadId: string, participantId: string): Conversation {
+    const existing = store.get(threadId);
+
+    if (existing) {
+      return existing;
+    }
+
+    const conversation: StoredConversation = {
+      id: threadId,
+      state: {},
+      participants: [participantId],
+      status: 'active',
+      createdAt: new Date(),
+      lastMessageAt: new Date(),
+    };
+
+    store.set(threadId, conversation);
+
+    return conversation;
+  }
+
+  function saveConversation(conversation: Conversation) {
+    const stored = store.get(conversation.id);
+
+    if (stored) {
+      Object.assign(stored, conversation);
+      stored.lastMessageAt = new Date();
+    } else {
+      store.set(conversation.id, { ...conversation, createdAt: new Date(), lastMessageAt: new Date() });
+    }
+  }
+
+  let novuClient: Novu | null = null;
+
+  function getNovuClient(): Novu {
+    if (!novuClient) {
+      const secret = options.novuSecretKey ?? process.env.NOVU_SECRET_KEY;
+
+      if (!secret) {
+        throw new Error('NOVU_SECRET_KEY is required for serveAgents()');
+      }
+
+      novuClient = new Novu(secret);
+    }
+
+    return novuClient;
+  }
+
+  let chatInstance: Chat | null = null;
+
+  function getChat(): Chat {
+    if (chatInstance) {
+      return chatInstance;
+    }
+
+    const adapters = options.adapters ?? buildDefaultAdapters(primaryAgent.config.platforms);
+
+    chatInstance = new Chat({
+      userName: options.userName ?? primaryAgent.id,
+      adapters,
+      state: options.stateAdapter ?? createRedisState(),
+      onLockConflict: options.onLockConflict ?? 'force',
+    });
+
+    async function buildHistory(thread: {
+      allMessages: AsyncIterable<{ text: string; author: { isMe: boolean }; metadata?: { dateSent?: Date } }>;
+    }): Promise<HistoryEntry[]> {
+      const messages: HistoryEntry[] = [];
+
+      for await (const msg of thread.allMessages) {
+        messages.push({
+          text: msg.text,
+          isBot: msg.author.isMe,
+          timestamp: msg.metadata?.dateSent?.toISOString() ?? new Date().toISOString(),
+        });
+      }
+
+      return messages;
+    }
+
+    function getResponseText(response: string | RichResponse | void): string {
+      if (!response) {
+        return '';
+      }
+
+      if (typeof response === 'string') {
+        return response;
+      }
+
+      return response.text;
+    }
+
+    chatInstance.onNewMention(async (thread, message) => {
+      console.log(`[${primaryAgent.id}] New mention from ${message.author.fullName} in ${thread.id}`);
+
+      await thread.subscribe();
+
+      const conversation = getOrCreateConversation(thread.id, message.author.userId);
+
+      if (!conversation.participants.includes(message.author.userId)) {
+        conversation.participants.push(message.author.userId);
+      }
+
+      const subscriber = {
+        subscriberId: message.author.userId,
+        name: message.author.fullName,
+      };
+
+      const { response, signals } = await primaryAgent.handleSubscribe({
+        conversation,
+        subscriber,
+        message: { text: message.text, author: message.author },
+      });
+
+      const text = getResponseText(response);
+
+      if (text) {
+        await thread.post(text);
+      }
+
+      await executeSignals(signals, conversation, saveConversation, getNovuClient());
+
+      const hasResolve = signals.some((s) => s.type === 'resolve');
+
+      if (hasResolve) {
+        const { signals: resolveSignals } = await primaryAgent.handleResolve({ conversation, subscriber });
+        await executeSignals(resolveSignals, conversation, saveConversation, getNovuClient());
+        await thread.unsubscribe();
+      }
+    });
+
+    chatInstance.onSubscribedMessage(async (thread, message) => {
+      console.log(`[${primaryAgent.id}] Message from ${message.author.fullName}: ${message.text.slice(0, 80)}`);
+
+      const conversation = getOrCreateConversation(thread.id, message.author.userId);
+
+      if (!conversation.participants.includes(message.author.userId)) {
+        conversation.participants.push(message.author.userId);
+      }
+
+      const subscriber = {
+        subscriberId: message.author.userId,
+        name: message.author.fullName,
+      };
+
+      const history = await buildHistory(thread);
+
+      await thread.startTyping();
+
+      const { response, signals } = await primaryAgent.handleMessage({
+        message: { text: message.text, author: message.author },
+        conversation,
+        subscriber,
+        history: history.slice(0, -1),
+      });
+
+      const text = getResponseText(response);
+
+      if (text) {
+        await thread.post(text);
+      }
+
+      await executeSignals(signals, conversation, saveConversation, getNovuClient());
+
+      const hasResolve = signals.some((s) => s.type === 'resolve');
+
+      if (hasResolve) {
+        const { signals: resolveSignals } = await primaryAgent.handleResolve({ conversation, subscriber });
+        await executeSignals(resolveSignals, conversation, saveConversation, getNovuClient());
+        await thread.unsubscribe();
+      }
+    });
+
+    return chatInstance;
+  }
+
+  return async function POST(
+    request: Request,
+    context: { params: Promise<{ platform: string }> }
+  ): Promise<Response> {
+    const { platform } = await context.params;
+    const chat = getChat();
+    type Platform = keyof typeof chat.webhooks;
+
+    const handler = chat.webhooks[platform as Platform];
+
+    if (!handler) {
+      return new Response(`Unknown platform: ${platform}`, { status: 404 });
+    }
+
+    return handler(request, {
+      waitUntil: (task: Promise<unknown>) => after(() => task),
+    });
   };
 }
