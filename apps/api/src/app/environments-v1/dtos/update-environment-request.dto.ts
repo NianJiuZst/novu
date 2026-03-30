@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsHexColor, IsMongoId, IsOptional, IsString } from 'class-validator';
 
 export class InBoundParseDomainDto {
@@ -12,12 +12,12 @@ export class BridgeConfigurationDto {
 }
 
 export class UpdateEnvironmentRequestDto {
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   name?: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   identifier?: string;

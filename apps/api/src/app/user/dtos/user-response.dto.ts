@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IUserEntity, JobTitleEnum } from '@novu/shared';
 
 export class ServicesHashesDto {
-  @ApiProperty()
+  @ApiPropertyOptional()
   plain?: string;
 }
 
@@ -16,16 +16,16 @@ export class UserResponseDto implements IUserEntity {
   @ApiPropertyOptional()
   resetTokenDate?: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   firstName?: string | null;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   lastName?: string | null;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   email?: string | null;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   profilePicture?: string | null;
 
   @ApiProperty()
@@ -34,7 +34,7 @@ export class UserResponseDto implements IUserEntity {
   @ApiPropertyOptional()
   showOnBoarding?: boolean;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   servicesHashes?: ServicesHashesDto;
 
   @ApiPropertyOptional({
