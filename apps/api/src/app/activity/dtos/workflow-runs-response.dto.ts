@@ -55,12 +55,12 @@ export class GetWorkflowRunsResponseDto {
   @Type(() => GetWorkflowRunsDto)
   data: GetWorkflowRunsDto[];
 
-  @ApiPropertyOptional({ description: 'Next cursor for pagination' })
+  @ApiProperty({ description: 'Next cursor for pagination', nullable: true })
   @IsOptional()
   @IsString()
   next: string | null;
 
-  @ApiPropertyOptional({ description: 'Previous cursor for pagination' })
+  @ApiProperty({ description: 'Previous cursor for pagination', nullable: true })
   @IsOptional()
   @IsString()
   previous: string | null;

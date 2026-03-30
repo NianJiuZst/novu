@@ -35,7 +35,7 @@ export class RequestLogResponseDto {
   @IsString()
   hostname: string;
 
-  @ApiPropertyOptional({ description: 'Transaction identifier', nullable: true })
+  @ApiProperty({ description: 'Transaction identifier', nullable: true })
   @IsOptional()
   @IsString()
   transactionId: string | null;

@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsOptional, IsString } from 'class-validator';
 import { RequestLogResponseDto } from './get-requests.response.dto';
@@ -20,12 +20,12 @@ export class TraceResponseDto {
   @IsString()
   title: string;
 
-  @ApiProperty({ description: 'Detailed message', nullable: true })
+  @ApiPropertyOptional({ description: 'Detailed message', nullable: true })
   @IsOptional()
   @IsString()
   message?: string | null;
 
-  @ApiProperty({ description: 'Raw data associated with trace', nullable: true })
+  @ApiPropertyOptional({ description: 'Raw data associated with trace', nullable: true })
   @IsOptional()
   @IsString()
   rawData?: string | null;
@@ -50,17 +50,17 @@ export class TraceResponseDto {
   @IsString()
   environmentId: string;
 
-  @ApiProperty({ description: 'User identifier', nullable: true })
+  @ApiPropertyOptional({ description: 'User identifier', nullable: true })
   @IsOptional()
   @IsString()
   userId?: string | null;
 
-  @ApiProperty({ description: 'External subscriber identifier', nullable: true })
+  @ApiPropertyOptional({ description: 'External subscriber identifier', nullable: true })
   @IsOptional()
   @IsString()
   externalSubscriberId?: string | null;
 
-  @ApiProperty({ description: 'Subscriber identifier', nullable: true })
+  @ApiPropertyOptional({ description: 'Subscriber identifier', nullable: true })
   @IsOptional()
   @IsString()
   subscriberId?: string | null;
