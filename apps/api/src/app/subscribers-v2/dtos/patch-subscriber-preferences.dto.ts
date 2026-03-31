@@ -6,19 +6,19 @@ import { IsOptional, ValidateNested } from 'class-validator';
 import { ScheduleDto } from '../../shared/dtos/schedule';
 
 export class PatchPreferenceChannelsDto implements IPreferenceChannels {
-  @ApiProperty({ description: 'Email channel preference' })
+  @ApiPropertyOptional({ description: 'Email channel preference' })
   email?: boolean;
 
-  @ApiProperty({ description: 'SMS channel preference' })
+  @ApiPropertyOptional({ description: 'SMS channel preference' })
   sms?: boolean;
 
-  @ApiProperty({ description: 'In-app channel preference' })
+  @ApiPropertyOptional({ description: 'In-app channel preference' })
   in_app?: boolean;
 
-  @ApiProperty({ description: 'Push channel preference' })
+  @ApiPropertyOptional({ description: 'Push channel preference' })
   push?: boolean;
 
-  @ApiProperty({ description: 'Chat channel preference' })
+  @ApiPropertyOptional({ description: 'Chat channel preference' })
   chat?: boolean;
 }
 

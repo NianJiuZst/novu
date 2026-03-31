@@ -51,14 +51,14 @@ export class TriggerEventToAllRequestDto {
   @IsOptional()
   overrides?: TriggerOverrides;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'A unique identifier for this transaction, we will generated a UUID if not provided.',
   })
   @IsString()
   @IsOptional()
   transactionId?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: `It is used to display the Avatar of the provided actor's subscriber id or actor object.
     If a new actor object is provided, we will create a new subscriber in our system
     `,
@@ -73,7 +73,7 @@ export class TriggerEventToAllRequestDto {
   @Type(() => SubscriberPayloadDto)
   actor?: TriggerRecipientSubscriber;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: `It is used to specify a tenant context during trigger event.
     If a new tenant object is provided, we will create a new tenant.
     `,
