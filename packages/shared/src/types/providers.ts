@@ -52,6 +52,8 @@ export enum CredentialsKeyEnum {
   AppIOBaseUrl = 'AppIOBaseUrl',
   ServicePlanId = 'servicePlanId',
   TenantId = 'tenantId',
+  /** Slack app signing secret for verifying Events API / interactivity (e.g. agent webhooks). */
+  SlackSigningSecret = 'slackSigningSecret',
 }
 
 export type ConfigurationKey = keyof IConfigurations;

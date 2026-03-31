@@ -1,13 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PinoLogger } from '@novu/application-generic';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { decryptCredentials, PinoLogger } from '@novu/application-generic';
 import { AgentEntity, AgentRepository, IntegrationRepository } from '@novu/dal';
-import { ChatProviderIdEnum, ConversationMessageRoleEnum } from '@novu/shared';
+import { ChatProviderIdEnum, ConversationMessageRoleEnum, type ICredentialsDto } from '@novu/shared';
 import type { Request } from 'express';
 import { CreateConversationCommand } from '../../conversations/usecases/create-conversation/create-conversation.command';
 import { CreateConversation } from '../../conversations/usecases/create-conversation/create-conversation.usecase';
 import { CreateConversationMessageCommand } from '../../conversations/usecases/create-conversation-message/create-conversation-message.command';
 import { CreateConversationMessage } from '../../conversations/usecases/create-conversation-message/create-conversation-message.usecase';
 import { expressToFetchRequest } from '../utils/express-to-fetch';
+import { resolveRedisUrlForChatState } from '../utils/resolve-redis-url-for-chat-state';
 import { AgentSubscriberResolverService } from './agent-subscriber-resolver.service';
 
 const PONG_RESPONSE = 'PONG';
@@ -106,7 +107,11 @@ export class AgentChatService {
     });
   }
 
-  private async getSlackIntegrationIdentifier(agent: AgentEntity): Promise<string | undefined> {
+  private async getSlackIntegrationForAgent(
+    agent: AgentEntity
+  ): Promise<
+    { identifier: string; slackSigningSecret?: string; clientId?: string; clientSecret?: string } | undefined
+  > {
     const ids = agent.integrationIds;
 
     if (!ids?.length) {
@@ -120,24 +125,25 @@ export class AgentChatService {
           _organizationId: agent._organizationId,
           _id: integrationId,
         },
-        ['identifier', 'providerId']
+        ['identifier', 'providerId', 'credentials']
       );
 
-      if (integration && integration.providerId === ChatProviderIdEnum.Slack) {
-        return integration.identifier;
+      if (!integration || integration.providerId !== ChatProviderIdEnum.Slack) {
+        continue;
       }
+
+      const raw = integration.credentials as ICredentialsDto | undefined;
+      const credentials = raw && Object.keys(raw).length > 0 ? decryptCredentials(raw) : {};
+
+      return {
+        identifier: integration.identifier,
+        slackSigningSecret: credentials.slackSigningSecret,
+        clientId: credentials.clientId,
+        clientSecret: credentials.secretKey,
+      };
     }
 
-    const first = await this.integrationRepository.findOne(
-      {
-        _environmentId: agent._environmentId,
-        _organizationId: agent._organizationId,
-        _id: ids[0],
-      },
-      ['identifier']
-    );
-
-    return first?.identifier;
+    return undefined;
   }
 
   private async getOrCreateChat(agent: AgentEntity): Promise<{ webhooks: Record<string, unknown> }> {
@@ -147,22 +153,45 @@ export class AgentChatService {
       return cached as { webhooks: Record<string, unknown> };
     }
 
+    // SWC rewrites import() → require() for CJS output, but these packages are
+    // ESM-only. Wrapping in new Function prevents SWC from seeing the import()
+    // keyword, so Node executes a real ESM dynamic import at runtime.
+    // biome-ignore lint/suspicious/noExplicitAny: ESM-only Chat SDK; CJS build has no module typings for dynamic import
+    const esmImport = new Function('specifier', 'return import(specifier)') as (s: string) => Promise<any>;
     const [{ Chat }, { createSlackAdapter }, { createRedisState }] = await Promise.all([
-      import('chat'),
-      import('@chat-adapter/slack'),
-      import('@chat-adapter/state-redis'),
+      esmImport('chat'),
+      esmImport('@chat-adapter/slack'),
+      esmImport('@chat-adapter/state-redis'),
     ]);
 
-    const integrationIdentifier = await this.getSlackIntegrationIdentifier(agent);
+    const slackIntegration = await this.getSlackIntegrationForAgent(agent);
+    const integrationIdentifier = slackIntegration?.identifier;
+    const signingSecretFromIntegration = slackIntegration?.slackSigningSecret?.trim();
+    const signingSecret = signingSecretFromIntegration || process.env.SLACK_SIGNING_SECRET?.trim();
+
+    if (!signingSecret) {
+      throw new BadRequestException(
+        'Slack signing secret is required for agent webhooks. Add "Signing secret" on the Slack integration credentials, or set SLACK_SIGNING_SECRET on the API server.'
+      );
+    }
+
     const environmentId = String(agent._environmentId);
     const organizationId = String(agent._organizationId);
+
+    const redisUrl = resolveRedisUrlForChatState();
 
     const chatInstance = new Chat({
       userName: agent.identifier,
       adapters: {
-        slack: createSlackAdapter(),
+        slack: createSlackAdapter({
+          signingSecret,
+          botToken: process.env.SLACK_BOT_TOKEN,
+        }),
       },
-      state: createRedisState(),
+      state: createRedisState({
+        url: redisUrl,
+        keyPrefix: `novu-agent-chat:${agent._id}`,
+      }),
       onLockConflict: 'force',
     });
 

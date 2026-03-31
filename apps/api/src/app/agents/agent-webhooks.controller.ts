@@ -4,12 +4,12 @@ import type { Request, Response } from 'express';
 import { AgentChatService } from './services/agent-chat.service';
 import { sendFetchResponse } from './utils/express-to-fetch';
 
-@Controller({ path: '/agents/:agentId', version: '1' })
+@Controller({ path: '/agents', version: '1' })
 @ApiExcludeController()
 export class AgentWebhooksController {
   constructor(private readonly agentChatService: AgentChatService) {}
 
-  @Post('/:platform')
+  @Post('/:agentId/:platform')
   async handleWebhook(
     @Param('agentId') agentId: string,
     @Param('platform') platform: string,

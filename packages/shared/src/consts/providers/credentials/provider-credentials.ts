@@ -525,6 +525,14 @@ export const slackConfigLegacy: IConfigCredential[] = [
     type: 'switch',
     required: false,
   },
+  {
+    key: CredentialsKeyEnum.SlackSigningSecret,
+    displayName: 'Signing secret',
+    description:
+      'Slack app signing secret (Basic Information → App Credentials). Required for agent Slack webhooks unless SLACK_SIGNING_SECRET is set on the API server.',
+    type: 'string',
+    required: false,
+  },
 ];
 
 export const slackConfig: IConfigCredential[] = [
@@ -550,6 +558,14 @@ export const slackConfig: IConfigCredential[] = [
     key: CredentialsKeyEnum.RedirectUrl,
     displayName: 'Redirect URL',
     description: 'Redirect after Slack OAuth flow finished (default behaviour will close the tab)',
+    type: 'string',
+    required: false,
+  },
+  {
+    key: CredentialsKeyEnum.SlackSigningSecret,
+    displayName: 'Signing secret',
+    description:
+      'Slack app signing secret (Basic Information → App Credentials). Required for agent Slack webhooks unless SLACK_SIGNING_SECRET is set on the API server.',
     type: 'string',
     required: false,
   },

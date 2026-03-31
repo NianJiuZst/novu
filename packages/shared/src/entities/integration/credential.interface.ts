@@ -53,4 +53,6 @@ export interface ICredentials {
   AppIOOriginalSignature?: string;
   servicePlanId?: string;
   tenantId?: string;
+  /** Slack app signing secret for Chat SDK / Events API verification (optional; falls back to SLACK_SIGNING_SECRET). */
+  slackSigningSecret?: string;
 }

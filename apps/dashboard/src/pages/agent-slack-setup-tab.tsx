@@ -169,7 +169,11 @@ export function AgentSlackSetupTabPanel(props: AgentSlackSetupTabPanelProps) {
               <strong>App Credentials</strong> and copy the <strong>Signing Secret</strong>.
             </p>
             <p>
-              Set these as environment variables on the <strong>Novu API</strong> server (not the dashboard build):
+              For agent Slack webhooks, the signing secret can live on the <strong>Slack integration</strong> in Novu
+              (optional field <strong>Signing secret</strong> in integration credentials) instead of{' '}
+              <code className="font-code bg-neutral-alpha-100 rounded px-1 py-0.5">SLACK_SIGNING_SECRET</code> on the API.
+              Otherwise set these as environment variables on the <strong>Novu API</strong> server (not the dashboard
+              build):
             </p>
             <ul className="list-inside list-disc space-y-1 text-sm">
               <li>
@@ -178,7 +182,7 @@ export function AgentSlackSetupTabPanel(props: AgentSlackSetupTabPanelProps) {
               </li>
               <li>
                 <code className="font-code bg-neutral-alpha-100 rounded px-1 py-0.5">SLACK_SIGNING_SECRET</code> —
-                Signing Secret
+                Signing Secret (if not stored on the integration)
               </li>
             </ul>
           </AccordionContent>

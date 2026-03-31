@@ -7,6 +7,37 @@ const NOVU_APP_ID = process.env.NEXT_PUBLIC_NOVU_APP_ID ?? '';
 const NOVU_BACKEND_URL = process.env.NEXT_PUBLIC_NOVU_BACKEND_URL;
 const NOVU_SOCKET_URL = process.env.NEXT_PUBLIC_NOVU_SOCKET_URL;
 
+function SlackMarkIcon({ size = 20 }: { size?: number }) {
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 122.8 122.8"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden
+    >
+      <path
+        d="M25.8 77.6c0 7.1-5.8 12.9-12.9 12.9S0 84.7 0 77.6s5.8-12.9 12.9-12.9h12.9v12.9zm6.5 0c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9v32.3c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9V77.6z"
+        fill="#E01E5A"
+      />
+      <path
+        d="M45.2 25.8c7.1 0 12.9-5.8 12.9-12.9S52.3 0 45.2 0s-12.9 5.8-12.9 12.9v12.9h12.9zm0 6.5c-7.1 0-12.9 5.8-12.9 12.9s5.8 12.9 12.9 12.9h32.3c7.1 0 12.9-5.8 12.9-12.9s-5.8-12.9-12.9-12.9H45.2z"
+        fill="#36C5F0"
+      />
+      <path
+        d="M97 45.2c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9-12.9 5.8-12.9 12.9-12.9h12.9v12.9zm6.5 0c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9v32.3c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9V45.2z"
+        fill="#2EB67D"
+      />
+      <path
+        d="M77.6 97c-7.1 0-12.9 5.8-12.9 12.9s5.8 12.9 12.9 12.9 12.9-5.8 12.9-12.9 12.9-12.9-5.8-12.9-12.9V84.1h12.9zm0-6.5c7.1 0 12.9-5.8 12.9-12.9s-5.8-12.9-12.9-12.9H32.4c-7.1 0-12.9 5.8-12.9 12.9s5.8 12.9 12.9 12.9h45.2z"
+        fill="#ECB22E"
+      />
+    </svg>
+  );
+}
+
 export default function Home() {
   const [appUserId, setAppUserId] = useState('');
   const [subscriberEmail, setSubscriberEmail] = useState('');
@@ -150,17 +181,28 @@ export default function Home() {
               onClick={handleConnectSlack}
               disabled={!appUserId.trim() || connectLoading}
               style={{
-                padding: '10px 20px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 18px',
                 borderRadius: 8,
                 border: 'none',
-                background: appUserId.trim() && !connectLoading ? '#0ea5e9' : '#333',
+                background: appUserId.trim() && !connectLoading ? '#4A154B' : '#2d2d2d',
                 color: '#fff',
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: 600,
-                cursor: appUserId.trim() && !connectLoading ? 'pointer' : 'default',
+                letterSpacing: 0.2,
+                cursor: appUserId.trim() && !connectLoading ? 'pointer' : 'not-allowed',
+                boxShadow:
+                  appUserId.trim() && !connectLoading
+                    ? '0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)'
+                    : 'none',
               }}
             >
-              {connectLoading ? 'Starting OAuth…' : 'Connect Slack'}
+              <span style={{ display: 'flex', flexShrink: 0, opacity: appUserId.trim() ? 1 : 0.45 }}>
+                <SlackMarkIcon size={22} />
+              </span>
+              {connectLoading ? 'Connecting…' : 'Connect Slack'}
             </button>
             <button
               type="button"

@@ -251,4 +251,12 @@ export class CredentialsDto implements ICredentials {
   @IsOptional()
   @IsString()
   AppIOBaseUrl?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Slack app signing secret for verifying Events API / interactivity webhooks (Novu agents). Optional if SLACK_SIGNING_SECRET is set on the API.',
+  })
+  @IsString()
+  @IsOptional()
+  slackSigningSecret?: string;
 }
