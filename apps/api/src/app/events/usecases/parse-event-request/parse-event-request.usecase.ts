@@ -417,16 +417,26 @@ export class ParseEventRequest {
   @Instrument()
   private modifyAttachments(command: ParseEventRequestCommand): void {
     // eslint-disable-next-line no-param-reassign
-    command.payload.attachments = command.payload.attachments.map((attachment) => {
-      const randomId = randomBytes(16).toString('hex');
+    command.payload.attachments = command.payload.attachments
+      .filter((attachment) => {
+        if (!attachment.file || typeof attachment.file !== 'string') {
+          this.logger.warn({ attachmentName: attachment.name }, 'Skipping attachment with missing or invalid file data');
 
-      return {
-        ...attachment,
-        name: attachment.name,
-        file: Buffer.from(attachment.file, 'base64'),
-        storagePath: `${command.organizationId}/${command.environmentId}/${randomId}/${attachment.name}`,
-      };
-    });
+          return false;
+        }
+
+        return true;
+      })
+      .map((attachment) => {
+        const randomId = randomBytes(16).toString('hex');
+
+        return {
+          ...attachment,
+          name: attachment.name,
+          file: Buffer.from(attachment.file, 'base64'),
+          storagePath: `${command.organizationId}/${command.environmentId}/${randomId}/${attachment.name}`,
+        };
+      });
   }
 
   /**
