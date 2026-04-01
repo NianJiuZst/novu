@@ -1,14 +1,18 @@
 import { ChannelTypeEnum } from '@novu/shared';
 import * as Sentry from '@sentry/react';
-import { HTMLAttributes, useEffect } from 'react';
+import { HTMLAttributes, ReactNode, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
+  InAppPreviewActions,
   InAppPreview,
   InAppPreviewAvatar,
+  InAppPreviewBell,
   InAppPreviewBody,
   InAppPreviewHeader,
   InAppPreviewNotification,
   InAppPreviewNotificationContent,
+  InAppPreviewPrimaryAction,
+  InAppPreviewSecondaryAction,
   InAppPreviewSubject,
 } from '@/components/workflow-editor/in-app-preview';
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
@@ -44,47 +48,55 @@ export const ConfigureInAppStepPreview = (props: ConfigureInAppStepPreviewProps)
   }, [workflowSlug, stepSlug, previewStep, step, isPending]);
 
   const previewResult = previewData?.result;
+  let notificationContent: ReactNode = null;
 
   if (isPreviewPending || previewData === undefined) {
-    return (
-      <InAppPreview {...props}>
-        <InAppPreviewHeader />
-        <InAppPreviewNotification>
-          <InAppPreviewAvatar isPending />
-          <InAppPreviewNotificationContent>
-            <InAppPreviewSubject isPending />
-            <InAppPreviewBody isPending className="line-clamp-2" />
-          </InAppPreviewNotificationContent>
-        </InAppPreviewNotification>
-      </InAppPreview>
-    );
-  }
-
-  if (previewResult?.type === undefined || previewResult?.type !== ChannelTypeEnum.IN_APP) {
-    return (
-      <InAppPreview {...props}>
-        <InAppPreviewHeader />
-        <InAppPreviewNotification className="flex-1 items-center">
-          <InAppPreviewNotificationContent className="my-auto">
-            <InAppPreviewBody className="mb-4 text-center">No preview available</InAppPreviewBody>
-          </InAppPreviewNotificationContent>
-        </InAppPreviewNotification>
-      </InAppPreview>
-    );
-  }
-
-  const preview = previewResult.preview;
-
-  return (
-    <InAppPreview {...props}>
-      <InAppPreviewHeader />
+    notificationContent = (
       <InAppPreviewNotification>
-        <InAppPreviewAvatar src={preview?.avatar} />
+        <InAppPreviewAvatar isPending />
         <InAppPreviewNotificationContent>
-          <InAppPreviewSubject>{preview?.subject}</InAppPreviewSubject>
-          <InAppPreviewBody className="line-clamp-2">{preview?.body}</InAppPreviewBody>
+          <InAppPreviewSubject isPending />
+          <InAppPreviewBody isPending className="line-clamp-2" />
+          <InAppPreviewActions>
+            <InAppPreviewPrimaryAction isPending />
+            <InAppPreviewSecondaryAction isPending />
+          </InAppPreviewActions>
         </InAppPreviewNotificationContent>
       </InAppPreviewNotification>
-    </InAppPreview>
+    );
+  } else if (previewResult?.type === undefined || previewResult?.type !== ChannelTypeEnum.IN_APP) {
+    notificationContent = (
+      <InAppPreviewNotification className="flex-1 items-center">
+        <InAppPreviewNotificationContent className="my-auto">
+          <InAppPreviewBody className="mb-4 text-center">No preview available</InAppPreviewBody>
+        </InAppPreviewNotificationContent>
+      </InAppPreviewNotification>
+    );
+  } else {
+    notificationContent = (
+      <InAppPreviewNotification>
+        <InAppPreviewAvatar src={previewResult.preview?.avatar} />
+        <InAppPreviewNotificationContent>
+          <InAppPreviewSubject>{previewResult.preview?.subject}</InAppPreviewSubject>
+          <InAppPreviewBody className="line-clamp-3">{previewResult.preview?.body}</InAppPreviewBody>
+          <InAppPreviewActions>
+            <InAppPreviewPrimaryAction>{previewResult.preview?.primaryAction?.label}</InAppPreviewPrimaryAction>
+            <InAppPreviewSecondaryAction>{previewResult.preview?.secondaryAction?.label}</InAppPreviewSecondaryAction>
+          </InAppPreviewActions>
+        </InAppPreviewNotificationContent>
+      </InAppPreviewNotification>
+    );
+  }
+
+  return (
+    <div {...props}>
+      <div className="relative mx-auto max-w-sm py-1">
+        <InAppPreviewBell className="px-0 pb-1 pt-0" />
+        <InAppPreview className="min-h-52 bg-bg-white">
+          <InAppPreviewHeader />
+          {notificationContent}
+        </InAppPreview>
+      </div>
+    </div>
   );
 };

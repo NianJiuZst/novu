@@ -149,9 +149,6 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
 
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
-      if (isClickingInputRef.current) {
-        return;
-      }
       if (blurTimeoutRef.current) {
         clearTimeout(blurTimeoutRef.current);
       }

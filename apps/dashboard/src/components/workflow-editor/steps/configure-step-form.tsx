@@ -4,13 +4,13 @@ import {
   EnvironmentTypeEnum,
   FeatureFlagsKeysEnum,
   FeatureNameEnum,
+  getFeatureForTierAsNumber,
   IEnvironment,
   ResourceOriginEnum,
   StepResponseDto,
   StepUpdateDto,
   UNLIMITED_VALUE,
   WorkflowResponseDto,
-  getFeatureForTierAsNumber,
 } from '@novu/shared';
 import { FileCode2, Hash } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -28,6 +28,7 @@ import { Input } from '@/components/primitives/input';
 import { Separator } from '@/components/primitives/separator';
 import { SidebarContent, SidebarFooter, SidebarHeader } from '@/components/side-navigation/sidebar';
 import TruncatedText from '@/components/truncated-text';
+import { UpgradeCTATooltip } from '@/components/upgrade-cta-tooltip';
 import { stepSchema } from '@/components/workflow-editor/schema';
 import { flattenIssues, getFirstErrorMessage, updateStepInWorkflow } from '@/components/workflow-editor/step-utils';
 import { ConfigureChatStepPreview } from '@/components/workflow-editor/steps/chat/configure-chat-step-preview';
@@ -47,12 +48,11 @@ import { SdkBanner } from '@/components/workflow-editor/steps/sdk-banner';
 import { SkipConditionsButton } from '@/components/workflow-editor/steps/skip-conditions-button';
 import { ConfigureSmsStepPreview } from '@/components/workflow-editor/steps/sms/configure-sms-step-preview';
 import { ThrottleControlValues } from '@/components/workflow-editor/steps/throttle/throttle-control-values';
-import { UpgradeCTATooltip } from '@/components/upgrade-cta-tooltip';
 import { UpdateWorkflowFn } from '@/components/workflow-editor/workflow-provider';
 import { IS_SELF_HOSTED } from '@/config';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
-import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { useFetchSubscription } from '@/hooks/use-fetch-subscription';
+import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { useStepResolversCount } from '@/hooks/use-step-resolvers-count';
 import {
   INLINE_CONFIGURABLE_STEP_TYPES,
@@ -93,6 +93,16 @@ const STEP_TYPE_TO_PREVIEW: Record<StepTypeEnum, ((props: HTMLAttributes<HTMLDiv
   [StepTypeEnum.DELAY]: null,
   [StepTypeEnum.THROTTLE]: null,
 };
+
+const CHANNEL_PREVIEW_STEP_TYPES = new Set<StepTypeEnum>([
+  StepTypeEnum.IN_APP,
+  StepTypeEnum.EMAIL,
+  StepTypeEnum.SMS,
+  StepTypeEnum.CHAT,
+  StepTypeEnum.PUSH,
+]);
+
+const SIDEPANEL_ACTION_ROW_BASE_CLASS = 'flex h-12 w-full justify-start gap-1.5 rounded-none px-3 text-xs font-medium';
 
 type ConfigureStepFormProps = {
   workflow: WorkflowResponseDto;
@@ -255,6 +265,7 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
 
   const Preview = STEP_TYPE_TO_PREVIEW[step.type];
   const InlineControlValues = STEP_TYPE_TO_INLINE_CONTROL_VALUES[step.type];
+  const isChannelPreviewStep = CHANNEL_PREVIEW_STEP_TYPES.has(step.type);
   const httpRequestControlValues =
     step.type === StepTypeEnum.HTTP_REQUEST ? (step.controls.values as Record<string, unknown>) : null;
 
@@ -283,13 +294,7 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
                 <span className="sr-only">Back</span>
               </CompactButton>
             </Link>
-            <div className="flex items-center gap-1.5">
-              {(() => {
-                const StepIcon = STEP_TYPE_ICONS[step.type] || DEFAULT_STEP_ICON;
-                return <StepIcon className="h-4 w-4 shrink-0" />;
-              })()}
-              <span>Configure Step</span>
-            </div>
+            <span>Configure Step</span>
             <Link
               to={buildRoute(ROUTES.EDIT_WORKFLOW, {
                 environmentSlug: environment.slug!,
@@ -344,7 +349,7 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
                                       onChange={field.onChange}
                                       hasError={!!fieldState.error}
                                       maxLength={64}
-                                      className="w-full [&>div]:before:hidden [&>div]:shadow-none [&>div]:focus-within:ring-1 [&>div]:focus-within:ring-stroke-soft [&>div]:focus-within:ring-offset-0 [&>div]:focus-within:border-stroke-soft [&_input]:text-right [&_input]:whitespace-nowrap [&_input]:[mask-image:linear-gradient(to_right,transparent,black_1rem,black_calc(100%-1rem),transparent)]"
+                                      className="w-full [&>div]:before:hidden [&>div]:shadow-none [&>div]:focus-within:ring-1 [&>div]:focus-within:ring-stroke-soft [&>div]:focus-within:ring-offset-0 [&>div]:focus-within:border-stroke-soft [&_input]:text-right [&_input]:whitespace-nowrap [&_input]:mask-[linear-gradient(to_right,transparent,black_1rem,black)]"
                                       size="xs"
                                       autoFocus
                                       onBlur={() => {
@@ -432,74 +437,18 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
 
                 {isInlineConfigurableStep && !hasCustomControls && !isInlineResolverActive && <InlineControlValues />}
 
-                {isInlineResolverSupportedStep && !isInlineResolverActive && !isReadOnly && (
-                  <SidebarContent>
-                    {isAtCodeStepLimit ? (
-                      <UpgradeCTATooltip description={codeStepLimitDescription} utmCampaign="code_steps_limit">
-                        <span className="inline-flex w-full cursor-not-allowed">
-                          <Button
-                            variant="secondary"
-                            mode="outline"
-                            className="flex w-full cursor-not-allowed justify-start gap-1.5 text-xs font-medium opacity-60"
-                            type="button"
-                            disabled
-                          >
-                            <FileCode2 className="h-4 w-4 text-neutral-600" />
-                            Resolve with custom code
-                            <RiArrowRightSLine className="ml-auto h-4 w-4 text-neutral-600" />
-                          </Button>
-                        </span>
-                      </UpgradeCTATooltip>
-                    ) : (
-                      <Button
-                        variant="secondary"
-                        mode="outline"
-                        className="flex w-full justify-start gap-1.5 text-xs font-medium"
-                        type="button"
-                        onClick={() =>
-                          navigate('./editor', { relative: 'path', state: { isPendingResolverActivation: true } })
-                        }
-                      >
-                        <FileCode2 className="h-4 w-4 text-neutral-600" />
-                        Resolve with custom code
-                        <RiArrowRightSLine className="ml-auto h-4 w-4 text-neutral-600" />
-                      </Button>
-                    )}
-                  </SidebarContent>
-                )}
-
                 {step.type === StepTypeEnum.HTTP_REQUEST && (
                   <SidebarContent>
                     <ContinueOnFailure />
                   </SidebarContent>
                 )}
               </SaveFormContext.Provider>
+              <Separator />
             </FormRoot>
           </Form>
 
           {(isTemplateConfigurableStep || isInlineConfigurableStepWithCustomControls || isInlineResolverActive) && (
             <>
-              <SidebarContent>
-                <Link to="./editor" relative="path" state={{ stepType: step.type }}>
-                  <Button
-                    variant="secondary"
-                    mode="outline"
-                    className="flex w-full justify-start gap-1.5 text-xs font-medium"
-                  >
-                    <RiEdit2Line className="h-4 w-4 text-neutral-600" />
-                    {step.type === StepTypeEnum.HTTP_REQUEST
-                      ? 'Edit API request'
-                      : `Edit ${STEP_TYPE_LABELS[step.type]} Step content`}
-                    <RiArrowRightSLine className="ml-auto h-4 w-4 text-neutral-600" />
-                  </Button>
-                </Link>
-
-                {environment.type === EnvironmentTypeEnum.DEV && (
-                  <SkipConditionsButton origin={workflow.origin} step={step} />
-                )}
-              </SidebarContent>
-              <Separator />
-
               {firstControlsError || firstIntegrationError ? (
                 <>
                   <ConfigureStepTemplateIssuesContainer>
@@ -517,7 +466,28 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
                   {Preview && (
                     <>
                       <SidebarContent>
-                        <Preview />
+                        {isChannelPreviewStep ? (
+                          <div className="group relative">
+                            <Link
+                              to="./editor"
+                              relative="path"
+                              state={{ stepType: step.type }}
+                              className="absolute inset-0 z-20 rounded-lg"
+                              aria-label="Open full preview"
+                            />
+                            <div className="pointer-events-none relative z-10">
+                              <Preview />
+                            </div>
+                            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-20 rounded-b-lg bg-linear-to-b from-transparent via-bg-white/75 to-bg-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100" />
+                            <div className="pointer-events-none absolute inset-x-2 bottom-2 z-30 flex justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
+                              <span className="border-stroke-soft bg-bg-white text-foreground-600 inline-flex h-8 items-center gap-1 rounded-md border px-3 text-xs font-medium shadow-sm">
+                                View full preview <RiArrowRightSLine className="size-3.5" />
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <Preview />
+                        )}
                       </SidebarContent>
                       <Separator />
                     </>
@@ -532,12 +502,75 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
                   )}
                 </>
               )}
+
+              <SidebarContent size="lg" className="gap-0 px-0 py-0">
+                <Link to="./editor" relative="path" state={{ stepType: step.type }} className="block">
+                  <Button
+                    variant="secondary"
+                    mode="ghost"
+                    className={cn(SIDEPANEL_ACTION_ROW_BASE_CLASS, 'border-b border-stroke-weak')}
+                    leadingIcon={RiEdit2Line}
+                    trailingIcon={RiArrowRightSLine}
+                  >
+                    {step.type === StepTypeEnum.HTTP_REQUEST
+                      ? 'Edit API request'
+                      : `Edit ${STEP_TYPE_LABELS[step.type]} Step content`}
+                    <span className="ml-auto" />
+                  </Button>
+                </Link>
+
+                {environment.type === EnvironmentTypeEnum.DEV && (
+                  <SkipConditionsButton origin={workflow.origin} step={step} />
+                )}
+              </SidebarContent>
+              <Separator />
             </>
+          )}
+
+          {isInlineResolverSupportedStep && !isInlineResolverActive && !isReadOnly && (
+            <SidebarContent size="lg" className="gap-0 px-0 py-0">
+              {isAtCodeStepLimit ? (
+                <UpgradeCTATooltip description={codeStepLimitDescription} utmCampaign="code_steps_limit">
+                  <span className="inline-flex w-full cursor-not-allowed">
+                    <Button
+                      variant="secondary"
+                      mode="ghost"
+                      className={cn(
+                        SIDEPANEL_ACTION_ROW_BASE_CLASS,
+                        'cursor-not-allowed border-b border-stroke-soft opacity-60'
+                      )}
+                      type="button"
+                      disabled
+                      trailingIcon={RiArrowRightSLine}
+                    >
+                      <FileCode2 className="size-4 shrink-0" />
+                      Resolve with custom code
+                      <span className="ml-auto" />
+                    </Button>
+                  </span>
+                </UpgradeCTATooltip>
+              ) : (
+                <Button
+                  variant="secondary"
+                  mode="ghost"
+                  className={cn(SIDEPANEL_ACTION_ROW_BASE_CLASS, 'border-b border-stroke-soft')}
+                  type="button"
+                  onClick={() =>
+                    navigate('./editor', { relative: 'path', state: { isPendingResolverActivation: true } })
+                  }
+                  trailingIcon={RiArrowRightSLine}
+                >
+                  <FileCode2 className="size-4 shrink-0" />
+                  Resolve with custom code
+                  <span className="ml-auto" />
+                </Button>
+              )}
+            </SidebarContent>
           )}
 
           {isInlineConfigurableStep && environment.type === EnvironmentTypeEnum.DEV && (
             <>
-              <SidebarContent>
+              <SidebarContent size="lg" className="gap-0 px-0 py-0">
                 <SkipConditionsButton origin={workflow.origin} step={step} />
               </SidebarContent>
               <Separator />
@@ -581,7 +614,6 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
           )}
         </motion.div>
       </AnimatePresence>
-
     </>
   );
 };

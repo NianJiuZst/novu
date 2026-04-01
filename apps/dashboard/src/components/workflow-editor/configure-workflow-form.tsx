@@ -10,7 +10,7 @@ import {
 } from '@novu/shared';
 import { ChevronsUpDown, CircleDot, FilesIcon, FileText, Hash, Tags } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { LuPlus, LuX } from 'react-icons/lu';
 import {
@@ -105,11 +105,7 @@ function TagInputField({ currentTags, suggestions, onAddTag, onBlur, hasReachedT
         onBlur={onBlur}
         hideTags
         size="xs"
-        placeholder={
-          hasReachedTagLimit
-            ? `Tag limit reached (${MAX_TAG_ELEMENTS} max)`
-            : 'Type a tag and press Enter'
-        }
+        placeholder={hasReachedTagLimit ? `Tag limit reached (${MAX_TAG_ELEMENTS} max)` : 'Type a tag and press Enter'}
         disabled={hasReachedTagLimit}
       />
     </motion.div>
@@ -125,6 +121,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [isAddingTag, setIsAddingTag] = useState(false);
+  const descriptionContainerRef = useRef<HTMLDivElement>(null);
 
   const { tags } = useTags();
   const { currentEnvironment } = useEnvironment();
@@ -222,6 +219,28 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
   }, []);
 
   const isDuplicable = useMemo(() => workflow.origin === ResourceOriginEnum.NOVU_CLOUD, [workflow.origin]);
+
+  useEffect(() => {
+    if (!isDescriptionExpanded) {
+      return;
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+
+      if (descriptionContainerRef.current?.contains(target)) {
+        return;
+      }
+
+      setIsDescriptionExpanded(false);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDescriptionExpanded]);
 
   return (
     <>
@@ -392,7 +411,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                                 onChange={field.onChange}
                                 hasError={!!fieldState.error}
                                 maxLength={64}
-                                className="w-full [&>div]:before:hidden [&>div]:shadow-none [&>div]:focus-within:ring-1 [&>div]:focus-within:ring-stroke-soft [&>div]:focus-within:ring-offset-0 [&>div]:focus-within:border-stroke-soft [&_input]:text-right [&_input]:whitespace-nowrap [&_input]:mask-[linear-gradient(to_right,transparent,black_1rem,black_calc(100%-1rem),transparent)]"
+                                className="w-full [&>div]:before:hidden [&>div]:shadow-none [&>div]:focus-within:ring-1 [&>div]:focus-within:ring-stroke-soft [&>div]:focus-within:ring-offset-0 [&>div]:focus-within:border-stroke-soft [&_input]:text-right [&_input]:whitespace-nowrap [&_input]:mask-none"
                                 size="xs"
                                 autoFocus
                                 onBlur={() => {
@@ -481,54 +500,56 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <button
-                      type="button"
-                      onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                      className="group flex h-6 w-full cursor-pointer items-center justify-between transition-colors hover:text-foreground-800"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <FileText className="text-text-soft h-3.5 w-3.5 shrink-0" />
-                        <span className="text-text-soft font-code text-xs font-medium">DESCRIPTION</span>
-                      </div>
-                      <div className="relative flex items-center gap-2">
+                    <div ref={descriptionContainerRef}>
+                      <button
+                        type="button"
+                        onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                        className="group flex h-6 w-full cursor-pointer items-center justify-between transition-colors hover:text-foreground-800"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <FileText className="text-text-soft h-3.5 w-3.5 shrink-0" />
+                          <span className="text-text-soft font-code text-xs font-medium">DESCRIPTION</span>
+                        </div>
+                        <div className="relative flex items-center gap-2">
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            transition={{ duration: 0.15 }}
+                            className="bg-bg-white hover:bg-bg-weak text-foreground-400 hover:text-foreground-600 flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors"
+                          >
+                            <ChevronsUpDown
+                              className={cn(
+                                'size-3.5 transition-transform duration-200',
+                                isDescriptionExpanded && 'rotate-180'
+                              )}
+                            />
+                          </motion.div>
+                        </div>
+                      </button>
+                      {isDescriptionExpanded && (
                         <motion.div
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          transition={{ duration: 0.15 }}
-                          className="bg-bg-white hover:bg-bg-weak text-foreground-400 hover:text-foreground-600 flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2, ease: 'easeInOut' }}
+                          className="mt-2 overflow-hidden"
                         >
-                          <ChevronsUpDown
-                            className={cn(
-                              'size-3.5 transition-transform duration-200',
-                              isDescriptionExpanded && 'rotate-180'
-                            )}
+                          <Textarea
+                            className="min-h-24 text-sm"
+                            placeholder="Describe what this workflow does"
+                            value={field.value}
+                            onChange={field.onChange}
+                            maxLength={MAX_DESCRIPTION_LENGTH}
+                            showCounter
+                            disabled={isReadOnly}
+                            onBlur={() => {
+                              field.onBlur();
+                              saveForm();
+                            }}
                           />
                         </motion.div>
-                      </div>
-                    </button>
-                    {isDescriptionExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2, ease: 'easeInOut' }}
-                        className="mt-2 overflow-hidden"
-                      >
-                        <Textarea
-                          className="min-h-24 text-sm"
-                          placeholder="Describe what this workflow does"
-                          value={field.value}
-                          onChange={field.onChange}
-                          maxLength={MAX_DESCRIPTION_LENGTH}
-                          showCounter
-                          disabled={isReadOnly}
-                          onBlur={() => {
-                            field.onBlur();
-                            saveForm();
-                          }}
-                        />
-                      </motion.div>
-                    )}
+                      )}
+                    </div>
                     <FormMessage className="mt-1" />
                   </FormItem>
                 )}
@@ -650,7 +671,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
             </SidebarContent>
           </FormRoot>
         </Form>
-        <Separator />
+        <Separator className="bg-stroke-soft" />
         <SidebarContent size="lg" className="gap-0 px-0 py-0">
           <Link to={ROUTES.EDIT_WORKFLOW_PREFERENCES} className="block">
             <Button

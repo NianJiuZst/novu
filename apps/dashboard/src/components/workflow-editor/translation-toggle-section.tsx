@@ -9,7 +9,6 @@ import { useEnvironment } from '@/context/environment/hooks';
 import { useFetchOrganizationSettings } from '@/hooks/use-fetch-organization-settings';
 import { LocalizationResourceEnum } from '@/types/translations';
 import { buildRoute, ROUTES } from '@/utils/routes';
-import { Badge } from '../primitives/badge';
 import { Button } from '../primitives/button';
 
 interface TranslationToggleSectionProps {
@@ -58,16 +57,11 @@ export function TranslationToggleSection({
       <div className="flex flex-col">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-label-xs text-text-strong">
-              Enable Translations{' '}
-              <Badge color="gray" size="sm" variant="lighter">
-                BETA
-              </Badge>
-            </span>
+            <span className="text-label-xs text-text-strong">Enable Translations</span>
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <RiInformation2Line className="size-4 text-text-soft cursor-help" />
+                <RiInformation2Line className="size-3 text-text-soft cursor-help" />
               </TooltipTrigger>
               <TooltipPortal>
                 <TooltipContent side="left" hideWhenDetached>
@@ -105,15 +99,10 @@ export function TranslationToggleSection({
     <div className="flex flex-col">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-label-xs text-text-strong">
-            Enable Translations{' '}
-            <Badge color="gray" size="sm" variant="lighter">
-              BETA
-            </Badge>
-          </span>
+          <span className="text-label-xs text-text-strong">Enable Translations </span>
           <Tooltip>
             <TooltipTrigger asChild>
-              <RiInformation2Line className="size-4 text-text-soft cursor-help" />
+              <RiInformation2Line className="size-3 text-text-soft cursor-help" />
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent side="left" hideWhenDetached>
