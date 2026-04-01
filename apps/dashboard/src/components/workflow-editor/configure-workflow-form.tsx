@@ -411,7 +411,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                                 onChange={field.onChange}
                                 hasError={!!fieldState.error}
                                 maxLength={64}
-                                className="w-full [&>div]:before:hidden [&>div]:shadow-none [&>div]:focus-within:ring-1 [&>div]:focus-within:ring-stroke-soft [&>div]:focus-within:ring-offset-0 [&>div]:focus-within:border-stroke-soft [&_input]:text-right [&_input]:whitespace-nowrap [&_input]:mask-none"
+                                className="w-full text-right whitespace-nowrap overflow-x-hidden mask-none"
                                 size="xs"
                                 autoFocus
                                 onBlur={() => {
@@ -454,7 +454,9 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                                 isReadOnly && 'cursor-default'
                               )}
                             >
-                              <span className="truncate max-w-full">{field.value || 'Untitled workflow'}</span>
+                              <span className="block w-full min-w-0 truncate text-right">
+                                {field.value || 'Untitled workflow'}
+                              </span>
                             </motion.button>
                           )}
                         </AnimatePresence>
