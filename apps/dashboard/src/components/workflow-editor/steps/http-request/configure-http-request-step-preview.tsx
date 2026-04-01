@@ -1,4 +1,4 @@
-import { RiGlobalLine, RiHttpLine } from 'react-icons/ri';
+import { RiGlobalLine } from 'react-icons/ri';
 import { CopyButton } from '@/components/primitives/copy-button';
 import { CurlDisplay } from './curl-display';
 import { buildRawCurlString, getUrlDisplay, type KeyValuePair } from './curl-utils';
