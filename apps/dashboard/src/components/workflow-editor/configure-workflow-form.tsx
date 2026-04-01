@@ -29,6 +29,7 @@ import { RouteFill } from '@/components/icons/route-fill';
 import { PageMeta } from '@/components/page-meta';
 import { PAUSE_MODAL_TITLE, PauseModalDescription } from '@/components/pause-workflow-dialog';
 import { AnimatedBadgeDot, Badge, Dot as BadgeDot } from '@/components/primitives/badge';
+import { Button } from '@/components/primitives/button';
 import { CompactButton } from '@/components/primitives/button-compact';
 import { CopyButton } from '@/components/primitives/copy-button';
 import {
@@ -93,20 +94,18 @@ function TagInputField({ currentTags, suggestions, onAddTag, onBlur }: TagInputF
       transition={{ duration: 0.2, ease: 'easeInOut' }}
       className="mt-2"
     >
-      <div className="p-1 -m-1">
-        <TagInput
-          value={currentTags}
-          suggestions={suggestions}
-          onChange={() => {
-            // No-op since we use onAddTag instead
-          }}
-          onAddTag={onAddTag}
-          onBlur={onBlur}
-          hideTags
-          size="xs"
-          placeholder="Type a tag and press Enter"
-        />
-      </div>
+      <TagInput
+        value={currentTags}
+        suggestions={suggestions}
+        onChange={() => {
+          // No-op since we use onAddTag instead
+        }}
+        onAddTag={onAddTag}
+        onBlur={onBlur}
+        hideTags
+        size="xs"
+        placeholder="Type a tag and press Enter"
+      />
     </motion.div>
   );
 }
@@ -370,7 +369,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                         <RouteFill className="text-text-soft h-3.5 w-3.5 shrink-0" />
                         <span className="text-text-soft font-code text-xs font-medium">WORKFLOW</span>
                       </div>
-                      <div className="relative flex min-w-0 flex-1 items-center justify-end">
+                      <div className="relative flex h-8 min-w-0 flex-1 items-center justify-end">
                         <AnimatePresence mode="wait">
                           {isEditingName && !isReadOnly ? (
                             <motion.div
@@ -425,7 +424,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                               whileHover={!isReadOnly ? { x: 2 } : {}}
                               whileTap={!isReadOnly ? { scale: 0.98 } : {}}
                               className={cn(
-                                'text-foreground-600 flex min-w-0 w-full items-center justify-end text-right text-label-xs transition-colors',
+                                'text-foreground-600 flex h-8 min-w-0 w-full items-center justify-end text-right text-label-xs transition-colors',
                                 !isReadOnly && 'hover:text-foreground-800 cursor-pointer',
                                 isReadOnly && 'cursor-default'
                               )}
@@ -635,28 +634,34 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
           </FormRoot>
         </Form>
         <Separator />
-        <SidebarContent size="lg" className="gap-0 py-0">
-          <div className="-mx-3">
-            <Link
-              to={ROUTES.EDIT_WORKFLOW_PREFERENCES}
-              className="hover:bg-bg-weak focus-visible:bg-bg-weak focus-visible:ring-stroke-soft flex h-12 items-center gap-2.5 border-b px-3 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-inset"
+        <SidebarContent size="lg">
+          <Link to={ROUTES.EDIT_WORKFLOW_PREFERENCES}>
+            <Button
+              variant="secondary"
+              mode="outline"
+              leadingIcon={RiSettingsLine}
+              className="flex w-full justify-start gap-1.5 p-1.5 text-xs font-medium"
+              type="button"
+              trailingIcon={RiArrowRightSLine}
             >
-              <RiSettingsLine className="text-text-sub size-4 shrink-0" />
-              <span>Configure channel preferences</span>
-              <RiArrowRightSLine className="text-text-soft ml-auto size-5 shrink-0" />
-            </Link>
-            {workflow?.origin === ResourceOriginEnum.NOVU_CLOUD && (
-              <button
-                type="button"
-                onClick={() => setIsPayloadSchemaDrawerOpen(true)}
-                className="hover:bg-bg-weak focus-visible:bg-bg-weak focus-visible:ring-stroke-soft flex h-12 w-full items-center gap-2.5 border-b px-3 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-inset"
-              >
-                <RiListView className="text-text-sub size-4 shrink-0" />
-                <span>Manage payload schema</span>
-                <RiArrowRightSLine className="text-text-soft ml-auto size-5 shrink-0" />
-              </button>
-            )}
-          </div>
+              Configure channel preferences
+              <span className="ml-auto" />
+            </Button>
+          </Link>
+          {workflow?.origin === ResourceOriginEnum.NOVU_CLOUD && (
+            <Button
+              variant="secondary"
+              mode="outline"
+              leadingIcon={RiListView}
+              className="flex w-full justify-start gap-1.5 p-1.5 text-xs font-medium"
+              type="button"
+              onClick={() => setIsPayloadSchemaDrawerOpen(true)}
+              trailingIcon={RiArrowRightSLine}
+            >
+              Manage payload schema
+              <span className="ml-auto" />
+            </Button>
+          )}
           <FormField
             control={form.control}
             name="isTranslationEnabled"
