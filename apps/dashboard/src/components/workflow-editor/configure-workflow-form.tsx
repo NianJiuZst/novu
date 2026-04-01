@@ -2,6 +2,7 @@ import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
 import {
   EnvironmentTypeEnum,
   MAX_DESCRIPTION_LENGTH,
+  MAX_TAG_ELEMENTS,
   PermissionsEnum,
   ResourceOriginEnum,
   UpdateWorkflowDto,
@@ -22,7 +23,6 @@ import {
 } from 'react-icons/ri';
 import { Link, useNavigate } from 'react-router-dom';
 import type { ExternalToast } from 'sonner';
-import { z } from 'zod';
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { DeleteWorkflowDialog } from '@/components/delete-workflow-dialog';
 import { RouteFill } from '@/components/icons/route-fill';
@@ -83,9 +83,10 @@ type TagInputFieldProps = {
   suggestions: string[];
   onAddTag: (tag: string) => void;
   onBlur: () => void;
+  hasReachedTagLimit: boolean;
 };
 
-function TagInputField({ currentTags, suggestions, onAddTag, onBlur }: TagInputFieldProps) {
+function TagInputField({ currentTags, suggestions, onAddTag, onBlur, hasReachedTagLimit }: TagInputFieldProps) {
   return (
     <motion.div
       initial={{ height: 0, opacity: 0 }}
@@ -104,7 +105,12 @@ function TagInputField({ currentTags, suggestions, onAddTag, onBlur }: TagInputF
         onBlur={onBlur}
         hideTags
         size="xs"
-        placeholder="Type a tag and press Enter"
+        placeholder={
+          hasReachedTagLimit
+            ? `Tag limit reached (${MAX_TAG_ELEMENTS} max)`
+            : 'Type a tag and press Enter'
+        }
+        disabled={hasReachedTagLimit}
       />
     </motion.div>
   );
@@ -386,7 +392,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                                 onChange={field.onChange}
                                 hasError={!!fieldState.error}
                                 maxLength={64}
-                                className="w-full [&>div]:before:hidden [&>div]:shadow-none [&>div]:focus-within:ring-1 [&>div]:focus-within:ring-stroke-soft [&>div]:focus-within:ring-offset-0 [&>div]:focus-within:border-stroke-soft [&_input]:text-right [&_input]:whitespace-nowrap [&_input]:[mask-image:linear-gradient(to_right,transparent,black_1rem,black_calc(100%-1rem),transparent)]"
+                                className="w-full [&>div]:before:hidden [&>div]:shadow-none [&>div]:focus-within:ring-1 [&>div]:focus-within:ring-stroke-soft [&>div]:focus-within:ring-offset-0 [&>div]:focus-within:border-stroke-soft [&_input]:text-right [&_input]:whitespace-nowrap [&_input]:mask-[linear-gradient(to_right,transparent,black_1rem,black_calc(100%-1rem),transparent)]"
                                 size="xs"
                                 autoFocus
                                 onBlur={() => {
@@ -535,10 +541,12 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                 render={({ field }) => {
                   const currentTags = field.value ?? [];
                   const availableSuggestions = tags.map((tag) => tag.name).filter((tag) => !currentTags.includes(tag));
+                  const hasReachedTagLimit = currentTags.length >= MAX_TAG_ELEMENTS;
 
                   const handleRemoveTag = (tagToRemove: string) => {
                     const newTags = currentTags.filter((tag) => tag !== tagToRemove);
                     form.setValue('tags', newTags, { shouldValidate: true, shouldDirty: true });
+                    form.clearErrors('tags');
                     saveForm();
                   };
 
@@ -547,8 +555,16 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                     if (trimmedTag === '' || currentTags.includes(trimmedTag)) {
                       return;
                     }
+                    if (hasReachedTagLimit) {
+                      form.setError('tags', {
+                        type: 'max',
+                        message: `Tag limit reached. A workflow can have up to ${MAX_TAG_ELEMENTS} tags.`,
+                      });
+                      return;
+                    }
                     const newTags = [...currentTags, trimmedTag];
                     form.setValue('tags', newTags, { shouldValidate: true, shouldDirty: true });
+                    form.clearErrors('tags');
                     saveForm();
                   };
 
@@ -622,6 +638,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                             suggestions={availableSuggestions}
                             onAddTag={handleAddTag}
                             onBlur={() => setIsAddingTag(false)}
+                            hasReachedTagLimit={hasReachedTagLimit}
                           />
                         )}
                       </AnimatePresence>
@@ -634,13 +651,13 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
           </FormRoot>
         </Form>
         <Separator />
-        <SidebarContent size="lg">
-          <Link to={ROUTES.EDIT_WORKFLOW_PREFERENCES}>
+        <SidebarContent size="lg" className="gap-0 px-0 py-0">
+          <Link to={ROUTES.EDIT_WORKFLOW_PREFERENCES} className="block">
             <Button
               variant="secondary"
-              mode="outline"
+              mode="ghost"
               leadingIcon={RiSettingsLine}
-              className="flex w-full justify-start gap-1.5 p-1.5 text-xs font-medium"
+              className="flex h-12 w-full justify-start gap-1.5 rounded-none border-b border-stroke-weak px-3 text-xs font-medium"
               type="button"
               trailingIcon={RiArrowRightSLine}
             >
@@ -651,9 +668,9 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
           {workflow?.origin === ResourceOriginEnum.NOVU_CLOUD && (
             <Button
               variant="secondary"
-              mode="outline"
+              mode="ghost"
               leadingIcon={RiListView}
-              className="flex w-full justify-start gap-1.5 p-1.5 text-xs font-medium"
+              className="flex h-12 w-full justify-start gap-1.5 rounded-none border-b border-stroke-soft px-3 text-xs font-medium"
               type="button"
               onClick={() => setIsPayloadSchemaDrawerOpen(true)}
               trailingIcon={RiArrowRightSLine}
@@ -662,23 +679,25 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
               <span className="ml-auto" />
             </Button>
           )}
-          <FormField
-            control={form.control}
-            name="isTranslationEnabled"
-            render={({ field }) => (
-              <TranslationToggleSection
-                value={field.value ?? false}
-                onChange={(checked) => {
-                  field.onChange(checked);
-                  saveForm();
-                }}
-                isReadOnly={isReadOnly}
-                resourceId={workflow?.workflowId}
-                resourceType={LocalizationResourceEnum.WORKFLOW}
-                showDrawer={!!(workflow?.workflowId && workflow?.isTranslationEnabled)}
-              />
-            )}
-          />
+          <div className="px-3 py-4">
+            <FormField
+              control={form.control}
+              name="isTranslationEnabled"
+              render={({ field }) => (
+                <TranslationToggleSection
+                  value={field.value ?? false}
+                  onChange={(checked) => {
+                    field.onChange(checked);
+                    saveForm();
+                  }}
+                  isReadOnly={isReadOnly}
+                  resourceId={workflow?.workflowId}
+                  resourceType={LocalizationResourceEnum.WORKFLOW}
+                  showDrawer={!!(workflow?.workflowId && workflow?.isTranslationEnabled)}
+                />
+              )}
+            />
+          </div>
         </SidebarContent>
         <Separator />
       </motion.div>

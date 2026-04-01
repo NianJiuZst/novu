@@ -55,7 +55,7 @@ export function TranslationToggleSection({
 
   if (needsOnboarding) {
     return (
-      <div className="flex flex-col border-t border-neutral-100 pt-4">
+      <div className="flex flex-col">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-label-xs text-text-strong">
@@ -90,14 +90,20 @@ export function TranslationToggleSection({
             </Button>
           </motion.div>
         </div>
-        <p className="text-foreground-400 text-xs">Set up your target locales first to enable translations</p>
+        <button
+          type="button"
+          onClick={() => navigate(translationsUrl)}
+          className="text-foreground-400 hover:text-foreground-600 cursor-pointer text-left text-xs transition-colors"
+        >
+          Set up your target locales first to enable translations
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col border-t border-neutral-100 pt-4">
-      <div className="flex items-center justify-between py-1">
+    <div className="flex flex-col">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-label-xs text-text-strong">
             Enable Translations{' '}
@@ -129,7 +135,7 @@ export function TranslationToggleSection({
           <button
             type="button"
             onClick={handleManageTranslationsClick}
-            className="text-foreground-400 text-2xs hover:text-foreground-600 mb-1 cursor-pointer text-left transition-colors"
+            className="text-foreground-400 text-xs hover:text-foreground-600 cursor-pointer text-left transition-colors"
           >
             View & manage translations ↗
           </button>

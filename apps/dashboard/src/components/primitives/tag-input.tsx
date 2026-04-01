@@ -13,6 +13,8 @@ type TagInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange
   hideTags?: boolean;
   onAddTag?: (tag: string) => void;
   hasError?: boolean;
+  popoverClassName?: string;
+  popoverSideOffset?: number;
 };
 
 const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
@@ -26,6 +28,8 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
     onAddTag,
     size = 'xs',
     hasError,
+    popoverClassName,
+    popoverSideOffset = 8,
     ...rest
   } = props;
   const [tags, setTags] = useState<string[]>(Array.isArray(value) ? value : []);
@@ -133,6 +137,16 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
     }, 100);
   }, [inputValue, validSuggestions.length]);
 
+  const handleFocus = useCallback(() => {
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+      blurTimeoutRef.current = null;
+    }
+    if (validSuggestions.length > 0 || inputValue.trim()) {
+      setIsOpen(true);
+    }
+  }, [inputValue, validSuggestions.length]);
+
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
       if (isClickingInputRef.current) {
@@ -162,21 +176,20 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
         <Command loop shouldFilter={false} className="overflow-visible">
           <PopoverAnchor asChild>
             <div className={cn('flex flex-col gap-2 overflow-visible', !hideTags && 'pb-0.5')}>
-              <div className="p-1 -m-1">
+              <div className="px-0.5">
                 <CommandInput
                   ref={ref}
                   autoComplete="off"
                   value={inputValue}
-                  className={cn('flex-grow', className)}
-                  size={size}
+                  className={cn('grow', className)}
+                  size={size as unknown as undefined}
                   hasError={hasError}
                   onValueChange={(value) => {
                     setInputValue(value);
-                    if (value) {
-                      setIsOpen(true);
-                    }
+                    setIsOpen(Boolean(value.trim()) || validSuggestions.length > 0);
                   }}
                   onClick={handleClick}
+                  onFocus={handleFocus}
                   onKeyDown={handleKeyDown}
                   onBlur={handleBlur}
                   {...rest}
@@ -188,7 +201,7 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
                     <Tag
                       key={`${tag}-${index}`}
                       variant="stroke"
-                      className="max-w-[12rem] shrink-0"
+                      className="max-w-48 shrink-0"
                       onDismiss={(e) => {
                         e?.preventDefault();
                         e?.stopPropagation();
@@ -213,16 +226,20 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
           <CommandList>
             {(filteredSuggestions.length > 0 || isNewTag) && (
               <PopoverContent
-                className="bg-background text-foreground-600 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 relative z-50 max-h-96 w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-md border shadow-md p-1"
+                className={cn(
+                  'bg-bg-white text-foreground-600 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 relative z-50 max-h-96 w-(--radix-popover-trigger-width) overflow-hidden rounded-[8px] border border-stroke-soft p-1.5 shadow-lg',
+                  popoverClassName
+                )}
                 portal={false}
                 onOpenAutoFocus={(e) => e.preventDefault()}
                 align="start"
-                sideOffset={0}
+                sideOffset={popoverSideOffset}
                 onPointerDownOutside={handlePointerDownOutside}
               >
-                <CommandGroup className="!p-0">
+                <CommandGroup className="p-0!">
                   {isNewTag && inputValue.trim() && (
                     <CommandItem
+                      className="rounded-md px-2.5 py-2"
                       value={inputValue.trim()}
                       onMouseDown={(event) => {
                         event.preventDefault();
@@ -230,15 +247,16 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
                       }}
                       onSelect={() => addTag(inputValue)}
                     >
-                      <span className="text-foreground-400 text-xs font-medium">Create: </span>
-                      <span className="truncate font-mono text-xs">{inputValue.trim()}</span>
+                      <span className="text-foreground-400 text-xs font-medium">Create:</span>
+                      <span className="ml-1 truncate text-xs text-text-strong">{inputValue.trim()}</span>
                     </CommandItem>
                   )}
 
-                  {isNewTag && filteredSuggestions.length > 0 && <div className="bg-muted h-px" />}
+                  {isNewTag && filteredSuggestions.length > 0 && <div className="bg-stroke-soft my-1 h-px" />}
 
                   {filteredSuggestions.map((tag) => (
                     <CommandItem
+                      className="rounded-md px-2.5 py-2"
                       key={tag}
                       value={`${tag}-suggestion`}
                       onMouseDown={(event) => {

@@ -39,16 +39,15 @@ const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
   );
 };
 
-const CommandInput = React.forwardRef<
-  React.ElementRef<typeof CommandPrimitive.Input>,
-  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> & {
-    size?: 'sm' | 'md' | 'xs';
-    inputWrapperClassName?: string;
-    inputRootClassName?: string;
-    inlineLeadingNode?: React.ReactNode;
-    hasError?: boolean;
-  }
->(
+type CommandInputProps = Omit<React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>, 'size'> & {
+  size?: 'sm' | 'md' | 'xs';
+  inputWrapperClassName?: string;
+  inputRootClassName?: string;
+  inlineLeadingNode?: React.ReactNode;
+  hasError?: boolean;
+};
+
+const CommandInput = React.forwardRef<React.ElementRef<typeof CommandPrimitive.Input>, CommandInputProps>(
   (
     { className, size = 'md', inputRootClassName, inputWrapperClassName, inlineLeadingNode, hasError, ...props },
     ref
