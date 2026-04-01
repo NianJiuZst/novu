@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { FeatureFlagsService } from '../../feature-flags/feature-flags.service';
 import { ClickHouseService, InsertOptions } from '../clickhouse.service';
-import { LogRepository } from '../log.repository';
 import { getInsertOptions } from '../shared';
+import { LogRepositoryV2 } from '../v2/log.repository';
 import { ORDER_BY, RequestLog, requestLogSchema, TABLE_NAME } from './request-log.schema';
 
 const REQUEST_LOG_INSERT_OPTIONS: InsertOptions = getInsertOptions(
@@ -12,7 +12,7 @@ const REQUEST_LOG_INSERT_OPTIONS: InsertOptions = getInsertOptions(
 );
 
 @Injectable()
-export class RequestLogRepository extends LogRepository<typeof requestLogSchema, RequestLog> {
+export class RequestLogRepository extends LogRepositoryV2<typeof requestLogSchema> {
   public readonly table = TABLE_NAME;
   public readonly identifierPrefix = 'req_';
 
