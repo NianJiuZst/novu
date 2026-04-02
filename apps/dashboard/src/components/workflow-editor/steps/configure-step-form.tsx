@@ -161,11 +161,9 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
 
   const hasCustomControls = Object.keys(step.controls.dataSchema ?? {}).length > 0 && !step.controls.uiSchema;
   const isInlineConfigurableStepWithCustomControls = isInlineConfigurableStep && hasCustomControls;
-  const showInlineControlValuesSection =
-    isInlineConfigurableStep && !hasCustomControls && !isInlineResolverActive;
+  const showInlineControlValuesSection = isInlineConfigurableStep && !hasCustomControls && !isInlineResolverActive;
   const showHttpRequestFormMiddleSection = step.type === StepTypeEnum.HTTP_REQUEST;
-  const showConfigureStepFormMiddleSection =
-    showInlineControlValuesSection || showHttpRequestFormMiddleSection;
+  const showConfigureStepFormMiddleSection = showInlineControlValuesSection || showHttpRequestFormMiddleSection;
 
   const onDeleteStep = () => {
     update(
@@ -491,21 +489,21 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
                     <>
                       <SidebarContent>
                         {isChannelPreviewStep ? (
-                          <div className="group relative">
+                          <div className="relative">
                             <Link
                               to="./editor"
                               relative="path"
                               state={{ stepType: step.type }}
-                              className="absolute inset-0 z-20 rounded-lg"
+                              className="peer absolute inset-0 z-20 rounded-lg"
                               aria-label="Open full preview"
                             />
                             <div className="pointer-events-none relative z-10">
                               <Preview />
                             </div>
-                            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-20 rounded-b-lg bg-linear-to-b from-transparent via-bg-white/75 to-bg-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100" />
-                            <div className="pointer-events-none absolute inset-x-2 bottom-2 z-30 flex justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
-                              <span className="border-stroke-soft bg-bg-white text-foreground-600 inline-flex h-8 items-center gap-1 rounded-md border px-3 text-xs font-medium shadow-sm">
-                                View full preview <RiArrowRightSLine className="size-3.5" />
+                            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-20 rounded-b-lg bg-linear-to-b from-transparent via-bg-white/75 to-bg-white opacity-0 transition-opacity duration-200 peer-hover:opacity-100 peer-focus:opacity-100" />
+                            <div className="pointer-events-none absolute inset-x-2 bottom-2 z-30 flex justify-center opacity-0 transition-opacity duration-200 peer-hover:opacity-100 peer-focus:opacity-100">
+                              <span className="border-neutral-alpha-200 bg-bg-white text-foreground-600 inline-flex h-8 items-center gap-1 rounded-md border border-solid px-3 text-xs font-medium shadow-xs">
+                                View full preview <RiArrowRightSLine className="size-3.5 shrink-0" />
                               </span>
                             </div>
                           </div>
