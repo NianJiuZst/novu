@@ -215,14 +215,9 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
                   autoComplete="off"
                   value={inputValue}
                   className={cn('grow', className)}
- <CommandInput
-   ref={ref}
-   autoComplete="off"
-   value={inputValue}
-   className={cn('grow', className)}
-   size={size}
-   hasError={hasError}
+                  size={size}
                   hasError={hasError}
+                  onValueChange={(value) => {
                   onValueChange={(value) => {
                     setInputValue(value);
                     setIsOpen(Boolean(value.trim()) || validSuggestions.length > 0);
