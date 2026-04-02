@@ -218,7 +218,6 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
                   size={size}
                   hasError={hasError}
                   onValueChange={(value) => {
-                  onValueChange={(value) => {
                     setInputValue(value);
                     setIsOpen(Boolean(value.trim()) || validSuggestions.length > 0);
                   }}
