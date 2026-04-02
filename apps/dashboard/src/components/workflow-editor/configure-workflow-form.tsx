@@ -122,6 +122,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [isAddingTag, setIsAddingTag] = useState(false);
   const descriptionContainerRef = useRef<HTMLDivElement>(null);
+  const nameBeforeEditRef = useRef(workflow.name);
 
   const { tags } = useTags();
   const { currentEnvironment } = useEnvironment();
@@ -232,7 +233,11 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
         return;
       }
 
-      setIsDescriptionExpanded(false);
+      // mousedown fires before blur; collapsing here would unmount the textarea
+      // and skip its onBlur save. Persist first, then collapse.
+      void saveForm().finally(() => {
+        setIsDescriptionExpanded(false);
+      });
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -240,7 +245,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isDescriptionExpanded]);
+  }, [isDescriptionExpanded, saveForm]);
 
   return (
     <>
@@ -416,17 +421,24 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                                 autoFocus
                                 onBlur={() => {
                                   field.onBlur();
-                                  setIsEditingName(false);
-                                  if (field.value?.trim()) {
-                                    saveForm();
+
+                                  if (!field.value?.trim()) {
+                                    field.onChange(nameBeforeEditRef.current);
+                                    setIsEditingName(false);
+
+                                    return;
                                   }
+
+                                  setIsEditingName(false);
+                                  saveForm();
                                 }}
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter') {
                                     if (field.value?.trim()) {
                                       e.currentTarget.blur();
                                     } else {
-                                      form.setFocus('name');
+                                      field.onChange(nameBeforeEditRef.current);
+                                      setIsEditingName(false);
                                     }
                                   }
                                   if (e.key === 'Escape') {
@@ -440,7 +452,16 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                             <motion.button
                               key="button"
                               type="button"
-                              onClick={() => !isReadOnly && setIsEditingName(true)}
+                              onClick={() => {
+                                if (isReadOnly) {
+                                  return;
+                                }
+
+                                const current = field.value ?? '';
+                                nameBeforeEditRef.current = current.trim() ? current : workflow.name;
+
+                                setIsEditingName(true);
+                              }}
                               disabled={isReadOnly}
                               initial={{ opacity: 0, scale: 0.98 }}
                               animate={{ opacity: 1, scale: 1 }}
@@ -716,7 +737,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                   isReadOnly={isReadOnly}
                   resourceId={workflow?.workflowId}
                   resourceType={LocalizationResourceEnum.WORKFLOW}
-                  showDrawer={!!(workflow?.workflowId && workflow?.isTranslationEnabled)}
+                  showDrawer={!!(workflow?.workflowId && (field.value ?? false))}
                 />
               )}
             />

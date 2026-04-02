@@ -52,7 +52,7 @@ const CommandInput = React.forwardRef<React.ElementRef<typeof CommandPrimitive.I
     { className, size = 'md', inputRootClassName, inputWrapperClassName, inlineLeadingNode, hasError, ...props },
     ref
   ) => (
-    <InputRoot className={inputRootClassName} size={size as 'sm' | 'md' | 'xs' | '2xs'} hasError={hasError}>
+    <InputRoot className={inputRootClassName} size={size} hasError={hasError}>
       <InputWrapper
         className={cn(
           size === 'md' && 'h-10',

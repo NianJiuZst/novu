@@ -17,6 +17,8 @@ type TagInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange
   popoverSideOffset?: number;
 };
 
+const normalizeTag = (tag: string) => tag.trim().toLowerCase();
+
 const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
   const {
     className,
@@ -52,9 +54,38 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
     };
   }, []);
 
+  const normalizedValueTagSet = useMemo(() => {
+    const set = new Set<string>();
+    for (const t of value || []) {
+      const n = normalizeTag(t ?? '');
+      if (n) {
+        set.add(n);
+      }
+    }
+
+    return set;
+  }, [value]);
+
+  const normalizedSuggestionSet = useMemo(() => {
+    const set = new Set<string>();
+    for (const s of suggestions || []) {
+      const n = normalizeTag(s ?? '');
+      if (n) {
+        set.add(n);
+      }
+    }
+
+    return set;
+  }, [suggestions]);
+
   const validSuggestions = useMemo(
-    () => (suggestions || []).filter((suggestion) => !(value || []).includes(suggestion)),
-    [value, suggestions]
+    () =>
+      (suggestions || []).filter((suggestion) => {
+        const n = normalizeTag(suggestion ?? '');
+
+        return n.length > 0 && !normalizedValueTagSet.has(n);
+      }),
+    [normalizedValueTagSet, suggestions]
   );
 
   const filteredSuggestions = useMemo(() => {
@@ -65,14 +96,13 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
   }, [inputValue, validSuggestions]);
 
   const isNewTag = useMemo(() => {
-    const trimmed = inputValue.trim();
-    if (!trimmed) return false;
-    const trimmedLower = trimmed.toLowerCase();
-    return (
-      !suggestions.some((s) => s?.toLowerCase() === trimmedLower) &&
-      !(value || []).some((t) => t?.toLowerCase() === trimmedLower)
-    );
-  }, [inputValue, suggestions, value]);
+    const key = normalizeTag(inputValue);
+    if (!key) {
+      return false;
+    }
+
+    return !normalizedSuggestionSet.has(key) && !normalizedValueTagSet.has(key);
+  }, [inputValue, normalizedSuggestionSet, normalizedValueTagSet]);
 
   const shouldShowPopover = useMemo(() => {
     if (!isOpen) return false;
@@ -86,7 +116,13 @@ const TagInput = forwardRef<HTMLInputElement, TagInputProps>((props, ref) => {
       if (!tag) return;
 
       const newTag = tag.trim();
-      if (!newTag || tags.includes(newTag)) return;
+      const key = normalizeTag(newTag);
+      if (!newTag || !key) return;
+
+      const existingNormalized = new Set(
+        tags.map((t) => normalizeTag(t ?? '')).filter((n) => n.length > 0)
+      );
+      if (existingNormalized.has(key)) return;
 
       const newTags = [...tags, newTag];
       if (onAddTag) {

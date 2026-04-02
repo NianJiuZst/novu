@@ -14,7 +14,7 @@ import {
 } from '@novu/shared';
 import { FileCode2, Hash } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { HTMLAttributes, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { HTMLAttributes, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { RiArrowLeftSLine, RiArrowRightSLine, RiCloseFill, RiDeleteBin2Line, RiEdit2Line } from 'react-icons/ri';
 import { Link, useNavigate } from 'react-router-dom';
@@ -117,6 +117,7 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
   const isActionStepResolverEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_ACTION_STEP_RESOLVER_ENABLED);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
+  const nameBeforeEditRef = useRef(step.name);
   const { subscription, isLoading: isSubscriptionLoading } = useFetchSubscription();
   const { data: stepResolversCountData, isLoading: isCountLoading } = useStepResolversCount();
   const supportedStepTypes = [
@@ -160,6 +161,11 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
 
   const hasCustomControls = Object.keys(step.controls.dataSchema ?? {}).length > 0 && !step.controls.uiSchema;
   const isInlineConfigurableStepWithCustomControls = isInlineConfigurableStep && hasCustomControls;
+  const showInlineControlValuesSection =
+    isInlineConfigurableStep && !hasCustomControls && !isInlineResolverActive;
+  const showHttpRequestFormMiddleSection = step.type === StepTypeEnum.HTTP_REQUEST;
+  const showConfigureStepFormMiddleSection =
+    showInlineControlValuesSection || showHttpRequestFormMiddleSection;
 
   const onDeleteStep = () => {
     update(
@@ -354,17 +360,24 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
                                       autoFocus
                                       onBlur={() => {
                                         field.onBlur();
-                                        setIsEditingName(false);
-                                        if (field.value?.trim()) {
-                                          saveForm();
+
+                                        if (!field.value?.trim()) {
+                                          field.onChange(nameBeforeEditRef.current);
+                                          setIsEditingName(false);
+
+                                          return;
                                         }
+
+                                        setIsEditingName(false);
+                                        saveForm();
                                       }}
                                       onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
                                           if (field.value?.trim()) {
                                             e.currentTarget.blur();
                                           } else {
-                                            form.setFocus('name');
+                                            field.onChange(nameBeforeEditRef.current);
+                                            setIsEditingName(false);
                                           }
                                         }
                                         if (e.key === 'Escape') {
@@ -378,7 +391,16 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
                                   <motion.button
                                     key="button"
                                     type="button"
-                                    onClick={() => !isReadOnly && setIsEditingName(true)}
+                                    onClick={() => {
+                                      if (isReadOnly) {
+                                        return;
+                                      }
+
+                                      const current = field.value ?? '';
+                                      nameBeforeEditRef.current = current.trim() ? current : step.name;
+
+                                      setIsEditingName(true);
+                                    }}
                                     disabled={isReadOnly}
                                     initial={{ opacity: 0, scale: 0.98 }}
                                     animate={{ opacity: 1, scale: 1 }}
@@ -437,15 +459,15 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
                 </SidebarContent>
                 <Separator />
 
-                {isInlineConfigurableStep && !hasCustomControls && !isInlineResolverActive && <InlineControlValues />}
+                {showInlineControlValuesSection && <InlineControlValues />}
 
-                {step.type === StepTypeEnum.HTTP_REQUEST && (
+                {showHttpRequestFormMiddleSection && (
                   <SidebarContent>
                     <ContinueOnFailure />
                   </SidebarContent>
                 )}
               </SaveFormContext.Provider>
-              <Separator />
+              {showConfigureStepFormMiddleSection && <Separator />}
             </FormRoot>
           </Form>
 
@@ -521,7 +543,7 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
                   </Button>
                 </Link>
 
-                {environment.type === EnvironmentTypeEnum.DEV && (
+                {environment.type === EnvironmentTypeEnum.DEV && !isInlineConfigurableStep && (
                   <SkipConditionsButton origin={workflow.origin} step={step} />
                 )}
               </SidebarContent>

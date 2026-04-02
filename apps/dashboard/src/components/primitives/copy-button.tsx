@@ -13,6 +13,11 @@ type CopyButtonProps = {
   onCopyError?: (error: unknown) => void;
 };
 
+const PADDING_CLASS_BY_SIZE: Record<NonNullable<CopyButtonProps['size']>, string> = {
+  '2xs': 'p-0',
+  xs: 'p-1',
+};
+
 export const CopyButton = (props: CopyButtonProps) => {
   const { className, valueToCopy, size, onCopySuccess, onCopyError, ...rest } = props;
 
@@ -32,7 +37,7 @@ export const CopyButton = (props: CopyButtonProps) => {
   };
 
   const sizeClass = size === '2xs' ? 'size-3' : 'size-3.5';
-  const paddingClass = size === 'xs' ? 'p-1' : size === '2xs' ? 'p-0' : 'p-2.5';
+  const paddingClass = size === undefined ? 'p-2.5' : PADDING_CLASS_BY_SIZE[size];
 
   return (
     <Tooltip>
