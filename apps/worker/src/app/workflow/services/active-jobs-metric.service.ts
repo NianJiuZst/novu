@@ -2,9 +2,9 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   ActiveJobsMetricQueueService,
   ActiveJobsMetricWorkerService,
+  BullMqWorkerOptions,
   MetricsService,
   QueueBaseService,
-  WorkerOptions,
 } from '@novu/application-generic';
 import { CronExpressionEnum } from '@novu/shared';
 
@@ -86,7 +86,7 @@ export class ActiveJobsMetricService {
       });
   }
 
-  private getWorkerOptions(): WorkerOptions {
+  private getWorkerOptions(): BullMqWorkerOptions {
     return {
       lockDuration: 900,
       concurrency: 1,

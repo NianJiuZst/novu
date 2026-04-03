@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   BullMqService,
+  BullMqWorkerOptions,
   FeatureFlagsService,
   getWorkflowWorkerOptions,
   IWorkflowDataDto,
@@ -9,7 +10,6 @@ import {
   Store,
   storage,
   TriggerEvent,
-  WorkerOptions,
   WorkerProcessor,
   WorkflowInMemoryProviderService,
   WorkflowWorkerService,
@@ -35,7 +35,7 @@ export class WorkflowWorker extends WorkflowWorkerService {
     this.initWorker(this.getWorkerProcessor(), this.getWorkerOptions());
   }
 
-  private getWorkerOptions(): WorkerOptions {
+  private getWorkerOptions(): BullMqWorkerOptions {
     return getWorkflowWorkerOptions();
   }
 

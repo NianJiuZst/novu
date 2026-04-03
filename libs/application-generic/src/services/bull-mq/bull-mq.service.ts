@@ -24,6 +24,9 @@ interface IQueueMetrics {
 
 type BullMqJobData = undefined | IJobData | IEventJobData;
 
+export type BullMqQueueOptions = Omit<QueueOptions, 'connection'>;
+export type BullMqWorkerOptions = Omit<WorkerOptions, 'connection'>;
+
 const LOG_CONTEXT = 'BullMqService';
 
 export {
@@ -96,7 +99,7 @@ export class BullMqService {
     return undefined;
   }
 
-  public createQueue(topic: JobTopicNameEnum, queueOptions: QueueOptions) {
+  public createQueue(topic: JobTopicNameEnum, queueOptions: BullMqQueueOptions) {
     const config = {
       connection: this.workflowInMemoryProviderService.getClient(),
       ...(queueOptions?.defaultJobOptions && {
@@ -125,11 +128,11 @@ export class BullMqService {
   public createWorker(
     topic: JobTopicNameEnum,
     processor?: string | Processor<any, unknown | void, string>,
-    workerOptions?: WorkerOptions
+    workerOptions?: BullMqWorkerOptions
   ) {
     const WorkerClass = !BullMqService.pro ? Worker : require('@taskforcesh/bullmq-pro').WorkerPro;
 
-    const { concurrency, connection, lockDuration, settings } = workerOptions;
+    const { concurrency, lockDuration, settings } = workerOptions ?? {};
 
     const config = {
       connection: this.workflowInMemoryProviderService.getClient(),

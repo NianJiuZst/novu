@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   BullMqService,
+  BullMqWorkerOptions,
   FeatureFlagsService,
   getSubscriberProcessWorkerOptions,
   IProcessSubscriberDataDto,
@@ -9,7 +10,6 @@ import {
   Store,
   SubscriberProcessWorkerService,
   storage,
-  WorkerOptions,
   WorkflowInMemoryProviderService,
 } from '@novu/application-generic';
 import { CommunityOrganizationRepository } from '@novu/dal';
@@ -97,7 +97,7 @@ export class SubscriberProcessWorker extends SubscriberProcessWorkerService {
     };
   }
 
-  private getWorkerOpts(): WorkerOptions {
+  private getWorkerOpts(): BullMqWorkerOptions {
     return getSubscriberProcessWorkerOptions();
   }
 

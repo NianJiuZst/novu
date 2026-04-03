@@ -2,12 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import {
   BullMqService,
+  BullMqWorkerOptions,
   getWebSocketWorkerOptions,
   IWebSocketDataDto,
   PinoLogger,
   SqsService,
   WebSocketsWorkerService,
-  WorkerOptions,
   WorkflowInMemoryProviderService,
 } from '@novu/application-generic';
 
@@ -75,7 +75,7 @@ export class WebSocketWorker extends WebSocketsWorkerService {
     };
   }
 
-  private getWorkerOpts(): WorkerOptions {
+  private getWorkerOpts(): BullMqWorkerOptions {
     return getWebSocketWorkerOptions();
   }
 }

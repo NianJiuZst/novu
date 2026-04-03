@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import {
   BullMqService,
+  BullMqWorkerOptions,
   FeatureFlagsService,
   getStandardWorkerOptions,
   IStandardDataDto,
@@ -10,7 +11,6 @@ import {
   StandardWorkerService,
   Store,
   storage,
-  WorkerOptions,
   WorkflowInMemoryProviderService,
 } from '@novu/application-generic';
 import { CommunityOrganizationRepository, JobRepository } from '@novu/dal';
@@ -68,7 +68,7 @@ export class StandardWorker extends StandardWorkerService {
     this.startSqsConsumer();
   }
 
-  private getWorkerOptions(): WorkerOptions {
+  private getWorkerOptions(): BullMqWorkerOptions {
     return {
       ...getStandardWorkerOptions(),
       settings: {

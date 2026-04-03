@@ -3,7 +3,7 @@ import { CommunityOrganizationRepository } from '@novu/dal';
 import { ApiServiceLevelEnum, FeatureFlagsKeysEnum, JobTopicNameEnum, QueueBackendMode } from '@novu/shared';
 import { PinoLogger } from '../../logging';
 
-import { BulkJobOptions, BullMqService, JobsOptions, Queue, QueueOptions } from '../bull-mq';
+import { BulkJobOptions, BullMqQueueOptions, BullMqService, JobsOptions, Queue } from '../bull-mq';
 import { FeatureFlagsService } from '../feature-flags';
 import { SqsService } from '../sqs';
 
@@ -29,7 +29,7 @@ export class QueueBaseService implements OnModuleDestroy {
     }
   }
 
-  public createQueue(overrideOptions?: QueueOptions): void {
+  public createQueue(overrideOptions?: BullMqQueueOptions): void {
     const options = {
       ...this.getQueueOptions(),
       ...(overrideOptions && {
@@ -43,7 +43,7 @@ export class QueueBaseService implements OnModuleDestroy {
     this.queue = this.bullMqService.createQueue(this.topic, options);
   }
 
-  private getQueueOptions(): QueueOptions {
+  private getQueueOptions(): BullMqQueueOptions {
     return {
       defaultJobOptions: {
         removeOnComplete: true,

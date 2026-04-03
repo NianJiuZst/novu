@@ -13,6 +13,7 @@ export {
   Worker,
   WorkerOptions,
 } from './bull-mq';
+export type { BullMqQueueOptions, BullMqWorkerOptions } from './bull-mq';
 export * from './cache';
 export * from './calculate-delay';
 export * from './cloudflare-scheduler';

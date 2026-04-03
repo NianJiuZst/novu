@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   BullMqService,
+  BullMqWorkerOptions,
   getInboundParseMailWorkerOptions,
   IInboundParseDataDto,
   WorkerBaseService,
-  WorkerOptions,
   WorkflowInMemoryProviderService,
 } from '@novu/application-generic';
 import { JobTopicNameEnum } from '@novu/shared';
@@ -28,7 +28,7 @@ export class InboundParseWorker extends WorkerBaseService {
     this.initWorker(this.getWorkerProcessor(), this.getWorkerOptions());
   }
 
-  private getWorkerOptions(): WorkerOptions {
+  private getWorkerOptions(): BullMqWorkerOptions {
     return getInboundParseMailWorkerOptions();
   }
 

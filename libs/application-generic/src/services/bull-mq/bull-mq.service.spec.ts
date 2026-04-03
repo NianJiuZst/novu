@@ -1,6 +1,6 @@
 import { JobTopicNameEnum } from '@novu/shared';
 import { WorkflowInMemoryProviderService } from '../in-memory-provider';
-import { BullMqService, QueueBaseOptions, WorkerOptions } from './bull-mq.service';
+import { BullMqQueueOptions, BullMqService } from './bull-mq.service';
 
 let bullMqService: BullMqService;
 
@@ -33,7 +33,7 @@ describe('BullMQ Service', () => {
 
       it('should create a queue properly with the default configuration', async () => {
         const queueName = JobTopicNameEnum.ACTIVE_JOBS_METRIC;
-        const queueOptions: QueueBaseOptions = {};
+        const queueOptions: BullMqQueueOptions = {};
         await bullMqService.createQueue(queueName, queueOptions);
 
         expect(bullMqService.queue.name).toEqual(queueName);

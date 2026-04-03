@@ -7,7 +7,7 @@ import {
   getSqsDefaultWaitTimeSeconds,
 } from '../../config/workers';
 import { PinoLogger } from '../../logging';
-import { BullMqService, Job, Processor, WorkerOptions } from '../bull-mq';
+import { BullMqService, BullMqWorkerOptions, Job, Processor, WorkerOptions } from '../bull-mq';
 import { INovuWorker } from '../readiness';
 import {
   createSqsJobAdapter,
@@ -28,7 +28,7 @@ export type WorkerProcessor = string | Processor<any, unknown, string> | undefin
 export type SqsCompletedHandler = (job: Job<any, unknown, string>) => Promise<void>;
 export type SqsFailedHandler = (job: Job<any, unknown, string>, error: Error) => Promise<boolean>;
 
-export { WorkerOptions };
+export { BullMqWorkerOptions, WorkerOptions };
 
 export class WorkerBaseService implements INovuWorker, OnModuleDestroy {
   public bullMqService: BullMqService;
@@ -51,7 +51,7 @@ export class WorkerBaseService implements INovuWorker, OnModuleDestroy {
     this.bullMqService = bullMqServiceInstance;
   }
 
-  public initWorker(processor: WorkerProcessor, options?: WorkerOptions, deferSqsStart = false): void {
+  public initWorker(processor: WorkerProcessor, options?: BullMqWorkerOptions, deferSqsStart = false): void {
     if (typeof processor === 'function') {
       this.createWorker(this.wrapForBullMQ(processor), options);
       this.initSqsConsumer(processor, options);
@@ -106,11 +106,11 @@ export class WorkerBaseService implements INovuWorker, OnModuleDestroy {
     };
   }
 
-  public createWorker(processor: WorkerProcessor, options: WorkerOptions): void {
+  public createWorker(processor: WorkerProcessor, options?: BullMqWorkerOptions): void {
     this.bullMqService.createWorker(this.topic, processor, options);
   }
 
-  private initSqsConsumer(processor: Processor<any, unknown, string>, options?: WorkerOptions): void {
+  private initSqsConsumer(processor: Processor<any, unknown, string>, options?: BullMqWorkerOptions): void {
     if (!this.sqsService?.isConfigured(this.topic)) {
       return;
     }
