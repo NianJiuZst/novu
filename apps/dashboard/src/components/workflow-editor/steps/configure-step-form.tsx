@@ -4,13 +4,13 @@ import {
   EnvironmentTypeEnum,
   FeatureFlagsKeysEnum,
   FeatureNameEnum,
+  getFeatureForTierAsNumber,
   IEnvironment,
   ResourceOriginEnum,
   StepResponseDto,
   StepUpdateDto,
   UNLIMITED_VALUE,
   WorkflowResponseDto,
-  getFeatureForTierAsNumber,
 } from '@novu/shared';
 import { FileCode2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -36,6 +36,7 @@ import { Input } from '@/components/primitives/input';
 import { Separator } from '@/components/primitives/separator';
 import { SidebarContent, SidebarFooter, SidebarHeader } from '@/components/side-navigation/sidebar';
 import TruncatedText from '@/components/truncated-text';
+import { UpgradeCTATooltip } from '@/components/upgrade-cta-tooltip';
 import { stepSchema } from '@/components/workflow-editor/schema';
 import { flattenIssues, getFirstErrorMessage, updateStepInWorkflow } from '@/components/workflow-editor/step-utils';
 import { ConfigureChatStepPreview } from '@/components/workflow-editor/steps/chat/configure-chat-step-preview';
@@ -55,12 +56,11 @@ import { SdkBanner } from '@/components/workflow-editor/steps/sdk-banner';
 import { SkipConditionsButton } from '@/components/workflow-editor/steps/skip-conditions-button';
 import { ConfigureSmsStepPreview } from '@/components/workflow-editor/steps/sms/configure-sms-step-preview';
 import { ThrottleControlValues } from '@/components/workflow-editor/steps/throttle/throttle-control-values';
-import { UpgradeCTATooltip } from '@/components/upgrade-cta-tooltip';
 import { UpdateWorkflowFn } from '@/components/workflow-editor/workflow-provider';
 import { IS_SELF_HOSTED } from '@/config';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
-import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { useFetchSubscription } from '@/hooks/use-fetch-subscription';
+import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { useStepResolversCount } from '@/hooks/use-step-resolvers-count';
 import {
   INLINE_CONFIGURABLE_STEP_TYPES,
@@ -68,7 +68,7 @@ import {
   STEP_TYPE_LABELS,
   TEMPLATE_CONFIGURABLE_STEP_TYPES,
 } from '@/utils/constants';
-import { getControlsDefaultValues } from '@/utils/default-values';
+import { getControlsDefaultValues, normalizeHttpRequestControlValues } from '@/utils/default-values';
 import { StepTypeEnum } from '@/utils/enums';
 import { buildRoute, ROUTES } from '@/utils/routes';
 
@@ -181,11 +181,13 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
       }
 
       if ((step.type as string) === StepTypeEnum.HTTP_REQUEST) {
+        const raw = (step.controls.values ?? {}) as Record<string, unknown>;
+
         return {
-          controlValues: {
-            ...(step.controls.values ?? {}),
-            continueOnFailure: (step.controls.values?.continueOnFailure as boolean) ?? false,
-          },
+          controlValues: normalizeHttpRequestControlValues({
+            ...raw,
+            continueOnFailure: (raw.continueOnFailure as boolean) ?? false,
+          }),
         };
       }
 
@@ -504,7 +506,6 @@ export const ConfigureStepForm = (props: ConfigureStepFormProps) => {
           )}
         </motion.div>
       </AnimatePresence>
-
     </>
   );
 };
