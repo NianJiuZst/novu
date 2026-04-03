@@ -3137,8 +3137,8 @@ importers:
         specifier: ~5.0.0
         version: 5.0.1(encoding@0.1.13)
       bullmq:
-        specifier: ^4.18.3
-        version: 4.18.3
+        specifier: 5.70.0
+        version: 5.70.0
       class-transformer:
         specifier: 0.5.1
         version: 0.5.1
@@ -16230,9 +16230,6 @@ packages:
   bull@4.10.4:
     resolution: {integrity: sha512-o9m/7HjS/Or3vqRd59evBlWCXd9Lp+ALppKseoSKHaykK46SmRjAilX98PgmOz1yeVaurt8D5UtvEt4bUjM3eA==}
     engines: {node: '>=12'}
-
-  bullmq@4.18.3:
-    resolution: {integrity: sha512-H8t9vhfHEbJDaXp7aalSTe+Do+tR1nvr+lsT+jQxLhy+FFfFj/0p4aYJzADTNLdEqltuxneLVxCGVg92GkQx4w==}
 
   bullmq@5.70.0:
     resolution: {integrity: sha512-HlBSEJqG7MJ97+d/N/8rtGOcpisjGP3WD/zaXZia0hsmckJqAPTVWN6Yfw32FVfVSUVVInZQ2nUgMd2zCRghKg==}
@@ -45515,20 +45512,6 @@ snapshots:
       msgpackr: 1.11.9
       semver: 7.5.4
       uuid: 8.3.2
-    transitivePeerDependencies:
-      - supports-color
-
-  bullmq@4.18.3:
-    dependencies:
-      cron-parser: 4.9.0
-      glob: 8.1.0
-      ioredis: 5.3.2
-      lodash: 4.18.1
-      msgpackr: 1.11.9
-      node-abort-controller: 3.1.1
-      semver: 7.7.4
-      tslib: 2.8.1
-      uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
 
