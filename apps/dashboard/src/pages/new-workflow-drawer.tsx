@@ -83,7 +83,12 @@ export function NewWorkflowDrawer({ mode, workflowId }: NewWorkflowDrawerProps) 
           {isLoadingTemplate ? (
             <CreateWorkflowFormSkeleton />
           ) : (
-            <CreateWorkflowForm onSubmit={submit} template={template} />
+            <CreateWorkflowForm
+              onSubmit={(values) => {
+                submit(values).catch(() => {});
+              }}
+              template={template}
+            />
           )}
         </SheetMain>
         <Separator />

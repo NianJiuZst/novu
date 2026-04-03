@@ -85,8 +85,10 @@ function parseVariableContent(content: string): ParsedVariable {
   let parsedDefaultValue = '';
   const parsedFilters: FilterWithParam[] = [];
 
-  if (filterParts.length > 0) {
-    const filterTokenizer = new Tokenizer('|' + filterParts.join('|'));
+  const validFilterParts = filterParts.filter((part) => part.length > 0);
+
+  if (validFilterParts.length > 0) {
+    const filterTokenizer = new Tokenizer('|' + validFilterParts.join('|'));
     const filters = filterTokenizer.readFilters();
 
     // First pass: find default value

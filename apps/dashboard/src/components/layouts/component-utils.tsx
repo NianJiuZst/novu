@@ -30,8 +30,12 @@ const EmailEditorSelectInternal = () => {
               `{{ ${LAYOUT_CONTENT_VARIABLE} }}`
             )
             .replace(/<table[^>]*data-novu-branding[^>]*>[\s\S]*?<\/table>(\s*)/gi, '');
-          const formattedValue = await formatHtml(cleanedBody);
-          setValue('body', formattedValue);
+          try {
+            const formattedValue = await formatHtml(cleanedBody);
+            setValue('body', formattedValue);
+          } catch {
+            setValue('body', cleanedBody);
+          }
         } else {
           setValue('body', '{"type":"doc","content":[]}');
         }

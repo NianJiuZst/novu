@@ -283,7 +283,12 @@ export function CreateWorkflowModal({ mode, workflowId }: { mode: 'create' | 'du
               (isLoadingTemplate ? (
                 <ManualModeContentSkeleton />
               ) : (
-                <ManualModeContent onSubmit={submitWorkflow} template={template} />
+                <ManualModeContent
+                  onSubmit={(values) => {
+                    submitWorkflow(values).catch(() => {});
+                  }}
+                  template={template}
+                />
               ))}
           </div>
 
