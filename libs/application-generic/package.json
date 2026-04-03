@@ -79,7 +79,7 @@
     "ajv": "^8.18.0",
     "ajv-formats": "^2.1.1",
     "axios": "^1.9.0",
-    "bullmq": "^4.18.3",
+    "bullmq": "5.70.0",
     "class-transformer": "0.5.1",
     "class-validator": "0.14.1",
     "clickhouse-schema": "^2.0.1",
@@ -120,7 +120,7 @@
   },
   "optionalDependencies": {
     "@novu/ee-shared-services": "workspace:*",
-    "@taskforcesh/bullmq-pro": "^7.43.0"
+    "@taskforcesh/bullmq-pro": "7.40.0"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
