@@ -85,9 +85,13 @@ export function CreateSubscriberPage() {
     }, {});
 
     form.reset(formData);
-    await createSubscriber({
-      subscriber: { ...dirtyPayload, subscriberId: formData.subscriberId },
-    });
+    try {
+      await createSubscriber({
+        subscriber: { ...dirtyPayload, subscriberId: formData.subscriberId },
+      });
+    } catch {
+      // errors are handled by the mutation's onError callback
+    }
   };
 
   return (

@@ -315,6 +315,7 @@ export const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>(
     },
     ref
   ) => {
+    const safeValue = typeof value === 'string' ? value : String(value ?? '');
     const onChangeRef = useDataRef(onChange);
     const extensions = useMemo(
       () => [...(extensionsProp ?? []), baseTheme({ multiline })],
@@ -373,7 +374,7 @@ export const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>(
         height="auto"
         placeholder={placeholder}
         basicSetup={basicSetup}
-        value={value}
+        value={safeValue}
         onChange={onChangeCallback}
         theme={theme}
         {...restCodeMirrorProps}

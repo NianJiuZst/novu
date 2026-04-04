@@ -92,11 +92,15 @@ export const CreateContextForm = (props: CreateContextFormProps) => {
 
     const parsedData = formData.data ? JSON.parse(formData.data) : {};
 
-    await createContext({
-      type: formData.type.trim(),
-      id: formData.id.trim(),
-      ...(parsedData && Object.keys(parsedData).length > 0 ? { data: parsedData } : {}),
-    });
+    try {
+      await createContext({
+        type: formData.type.trim(),
+        id: formData.id.trim(),
+        ...(parsedData && Object.keys(parsedData).length > 0 ? { data: parsedData } : {}),
+      });
+    } catch {
+      // errors are handled by the mutation's onError callback
+    }
   };
 
   return (

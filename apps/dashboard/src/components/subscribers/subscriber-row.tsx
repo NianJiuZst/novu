@@ -113,7 +113,12 @@ export const SubscriberRow = ({ subscriber, subscribersCount, firstTwoSubscriber
   };
 
   const handleDeletion = async () => {
-    await deleteSubscriber({ subscriberId: subscriber.subscriberId });
+    try {
+      await deleteSubscriber({ subscriberId: subscriber.subscriberId });
+    } catch {
+      // errors are handled by the mutation's onError callback
+      return;
+    }
     setIsDeleteModalOpen(false);
 
     const hasSingleSubscriber = subscribersCount === 1;

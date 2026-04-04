@@ -109,12 +109,16 @@ export const CreateTopicForm = (props: CreateTopicFormProps) => {
       onSubmitStart();
     }
 
-    await createTopic({
-      topic: {
-        name: formData.name.trim(),
-        key: formData.key.trim(),
-      },
-    });
+    try {
+      await createTopic({
+        topic: {
+          name: formData.name.trim(),
+          key: formData.key.trim(),
+        },
+      });
+    } catch {
+      // errors are handled by the mutation's onError callback
+    }
   };
 
   return (

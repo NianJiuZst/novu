@@ -455,8 +455,12 @@ export function SubscriberOverviewForm(props: SubscriberOverviewFormProps) {
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
         onConfirm={async () => {
-          await deleteSubscriber({ subscriberId: subscriber.subscriberId });
-          setIsDeleteModalOpen(false);
+          try {
+            await deleteSubscriber({ subscriberId: subscriber.subscriberId });
+            setIsDeleteModalOpen(false);
+          } catch {
+            // errors are handled by the mutation's onError callback
+          }
         }}
         title="Delete subscriber"
         description={
