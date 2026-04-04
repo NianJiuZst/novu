@@ -1,4 +1,4 @@
-import { Controls } from '@novu/shared';
+import { Controls, UiSchemaGroupEnum } from '@novu/shared';
 import {
   DEFAULT_CONTROL_HTTP_REQUEST_BODY,
   DEFAULT_CONTROL_HTTP_REQUEST_HEADERS,
@@ -111,10 +111,22 @@ export const getControlsDefaultValues = (resource: { controls: Controls }): Reco
   if (Object.keys(resource.controls.uiSchema ?? {}).length !== 0) {
     const defaults = deepMergeDefaults(uiSchemaDefaultValues, dataSchemaDefaultValues);
 
-    return deepMergeDefaults(defaults, strippedControlValues);
+    const merged = deepMergeDefaults(defaults, strippedControlValues);
+
+    if (resource.controls.uiSchema?.group === UiSchemaGroupEnum.HTTP_REQUEST) {
+      return normalizeHttpRequestControlValues(merged as Record<string, unknown>);
+    }
+
+    return merged;
   }
 
-  return deepMergeDefaults(dataSchemaDefaultValues, strippedControlValues);
+  const merged = deepMergeDefaults(dataSchemaDefaultValues, strippedControlValues);
+
+  if (resource.controls.uiSchema?.group === UiSchemaGroupEnum.HTTP_REQUEST) {
+    return normalizeHttpRequestControlValues(merged as Record<string, unknown>);
+  }
+
+  return merged;
 };
 
 // When uiSchema is non-empty, merges both schemas with uiSchema taking precedence over dataSchema for
