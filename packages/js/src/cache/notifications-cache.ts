@@ -16,7 +16,7 @@ import type {
   UnsnoozeArgs,
 } from '../notifications';
 import type { InboxNotification, NotificationFilter, TagsFilter } from '../types';
-import { createNotification } from '../ui/internal/createNotification';
+import { createNotification, ensureNotificationInstance } from '../ui/internal/createNotification';
 import { areDataEqual, areTagsEqual, isSameFilter } from '../utils/notification-utils';
 import { InMemoryCache } from './in-memory-cache';
 import type { Cache } from './types';
@@ -199,9 +199,17 @@ export class NotificationsCache {
           Array.isArray(data) &&
           data.every((item): item is Notification => typeof item === 'object' && 'id' in item)
         ) {
-          notifications = data;
+          notifications = data.map((item) =>
+            ensureNotificationInstance({ emitter: this.#emitter, inboxService: this.#inboxService, notification: item })
+          );
         } else if (typeof data === 'object' && 'id' in data) {
-          notifications = [data as Notification];
+          notifications = [
+            ensureNotificationInstance({
+              emitter: this.#emitter,
+              inboxService: this.#inboxService,
+              notification: data as Notification,
+            }),
+          ];
         }
       } else if (remove && args) {
         if ('notification' in args && args.notification) {
