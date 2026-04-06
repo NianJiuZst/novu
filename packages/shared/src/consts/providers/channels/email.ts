@@ -109,7 +109,7 @@ export const emailProviders: IProviderConfig[] = [
         displayName: 'v2 (Recommended)',
         status: 'stable',
         isDefault: true,
-        description: 'Uses Amazon SES API v2 (ses:SendEmail).',
+        description: 'Uses Amazon SES API v2',
       },
       {
         value: 'v1',
@@ -117,7 +117,7 @@ export const emailProviders: IProviderConfig[] = [
         status: 'deprecated',
         isDefault: false,
         isLegacyFallback: true,
-        description: 'Uses legacy SendRawEmail (ses:SendRawEmail). Migrate to v2 for improved deliverability.',
+        description: 'Uses legacy v1 SES API. Migrate to v2 for improved deliverability.',
       },
     ] satisfies ProviderVersion[],
   },
