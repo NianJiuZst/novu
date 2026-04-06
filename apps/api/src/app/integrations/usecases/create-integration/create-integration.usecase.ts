@@ -12,6 +12,7 @@ import {
   ChannelTypeEnum,
   ChatProviderIdEnum,
   EmailProviderIdEnum,
+  ICredentialsDto,
   InAppProviderIdEnum,
   providers,
   SmsProviderIdEnum,
@@ -63,6 +64,27 @@ export class CreateIntegration {
     }
 
     return result;
+  }
+
+  /**
+   * When the provider catalog defines versioned APIs, persist the default version if the client omitted apiVersion.
+   * Matches dashboard behavior for new integrations (e.g. SES v2).
+   */
+  private withDefaultProviderApiVersion(providerId: string, credentials: ICredentialsDto): ICredentialsDto {
+    const providerConfig = providers.find((p) => p.id === providerId);
+    const defaultVersion = providerConfig?.versions?.find((v) => v.isDefault)?.value;
+
+    if (!defaultVersion) {
+      return credentials;
+    }
+
+    const existing = credentials.apiVersion;
+
+    if (existing !== undefined && existing !== null && String(existing).trim() !== '') {
+      return credentials;
+    }
+
+    return { ...credentials, apiVersion: defaultVersion };
   }
 
   private async validate(command: CreateIntegrationCommand): Promise<void> {
@@ -125,6 +147,8 @@ export class CreateIntegration {
     });
 
     try {
+      const credentials = this.withDefaultProviderApiVersion(command.providerId, command.credentials ?? {});
+
       if (command.check) {
         await this.checkIntegration.execute(
           CheckIntegrationCommand.create({
@@ -132,7 +156,7 @@ export class CreateIntegration {
             organizationId: command.organizationId,
             providerId: command.providerId,
             channel: command.channel,
-            credentials: command.credentials,
+            credentials,
           })
         );
       }
@@ -150,7 +174,7 @@ export class CreateIntegration {
         _organizationId: command.organizationId,
         providerId: command.providerId,
         channel: command.channel,
-        credentials: encryptCredentials(command.credentials ?? {}),
+        credentials: encryptCredentials(credentials),
         active: command.active,
         conditions: command.conditions,
         configurations: command.configurations,
