@@ -4,6 +4,8 @@ import {
   CredentialsKeyEnum,
   EmailProviderIdEnum,
   IConfigCredential,
+  IIntegration,
+  IProviderConfig,
   SmsProviderIdEnum,
 } from '@novu/shared';
 
@@ -15,9 +17,59 @@ export function isDemoIntegration(providerId: string) {
   );
 }
 
+export function getDefaultVersion(provider: IProviderConfig): string | undefined {
+  return provider.versions?.find((v) => v.isDefault)?.value;
+}
+
+export function getEffectiveApiVersionForForm(
+  provider: IProviderConfig,
+  storedCredentials: IIntegration['credentials'] | undefined
+): string {
+  const existing = storedCredentials?.apiVersion;
+
+  if (existing !== undefined && existing !== null && String(existing) !== '') {
+    return String(existing);
+  }
+
+  const legacy = provider.versions?.find((v) => v.isLegacyFallback)?.value;
+  const defaultVersion = getDefaultVersion(provider);
+
+  return legacy ?? defaultVersion ?? '';
+}
+
+export function buildInitialCredentialsForIntegrationForm(
+  provider: IProviderConfig,
+  providerCredentials: IConfigCredential[],
+  mode: 'create' | 'update',
+  integration?: IIntegration
+): Record<string, string> {
+  const base =
+    mode === 'create'
+      ? buildDefaultCredentialsFromProvider(providerCredentials)
+      : ({ ...(integration?.credentials as Record<string, string>) } as Record<string, string>);
+
+  if (!provider.versions?.length) {
+    return base;
+  }
+
+  const defaultVersion = getDefaultVersion(provider);
+
+  if (mode === 'create') {
+    return {
+      ...base,
+      ...(defaultVersion !== undefined ? { apiVersion: defaultVersion } : {}),
+    };
+  }
+
+  return {
+    ...base,
+    apiVersion: getEffectiveApiVersionForForm(provider, integration?.credentials),
+  };
+}
+
 /**
  * Pre-fills credential fields from schema `value` when creating a new integration
- * (e.g. SES API v2, SendGrid region default).
+ * (e.g. SendGrid region default).
  */
 export function buildDefaultCredentialsFromProvider(credentials: IConfigCredential[]): Record<string, string> {
   const result: Record<string, string> = {};

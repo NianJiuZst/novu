@@ -31,6 +31,18 @@ export type ConfigConfigurationGroup = {
   setupWebhookUrlGuide?: string;
 };
 
+export type ProviderVersionStatus = 'stable' | 'deprecated' | 'beta';
+
+export type ProviderVersion = {
+  value: string;
+  displayName: string;
+  status: ProviderVersionStatus;
+  description?: string;
+  isDefault: boolean;
+  /** When stored credentials omit apiVersion, runtime uses this version; UI should show this value in update mode */
+  isLegacyFallback?: boolean;
+};
+
 export interface IProviderConfig {
   id: ProvidersIdEnum;
   displayName: string;
@@ -41,6 +53,7 @@ export interface IProviderConfig {
   docReference: string;
   comingSoon?: boolean;
   betaVersion?: boolean;
+  versions?: ProviderVersion[];
 }
 
 export type ProviderColorToken =

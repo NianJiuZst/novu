@@ -23,7 +23,8 @@ import { InlineToast } from '../../primitives/inline-toast';
 import { EnvironmentDropdown } from '../../side-navigation/environment-dropdown';
 import { CredentialSection } from './credential-section';
 import { GeneralSettings } from './integration-general-settings';
-import { buildDefaultCredentialsFromProvider, isDemoIntegration } from './utils/helpers';
+import { buildInitialCredentialsForIntegrationForm, isDemoIntegration } from './utils/helpers';
+import { VersionSelector } from './version-selector';
 
 type IntegrationFormData = {
   name: string;
@@ -95,7 +96,7 @@ export function IntegrationSettings({
           identifier: integration.identifier,
           active: integration.active,
           primary: integration.primary ?? false,
-          credentials: integration.credentials as Record<string, string>,
+          credentials: buildInitialCredentialsForIntegrationForm(provider, providerCredentials, 'update', integration),
           configurations: integration.configurations as Record<string, string>,
           environmentId: integration._environmentId,
         }
@@ -104,7 +105,7 @@ export function IntegrationSettings({
           identifier: generateSlug(provider?.displayName ?? ''),
           active: true,
           primary: true,
-          credentials: buildDefaultCredentialsFromProvider(providerCredentials),
+          credentials: buildInitialCredentialsForIntegrationForm(provider, providerCredentials, 'create'),
           configurations: {},
           environmentId: currentEnvironment?._id ?? '',
         },
@@ -194,6 +195,26 @@ export function IntegrationSettings({
             </AccordionContent>
           </AccordionItem>
         </Accordion>
+
+        {!isDemo && provider.versions && provider.versions.length > 0 && (
+          <div className="p-3 pt-0">
+            <Protect permission={PermissionsEnum.INTEGRATION_WRITE}>
+              <Accordion type="single" collapsible defaultValue="provider-version">
+                <AccordionItem value="provider-version">
+                  <AccordionTrigger>
+                    <div className="flex items-center gap-1 text-xs">
+                      <RiInputField className="text-feature size-5" />
+                      Provider API version
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <VersionSelector provider={provider} control={control} isReadOnly={isReadOnly} />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </Protect>
+          </div>
+        )}
 
         {isDemo && (
           <div className="p-3">

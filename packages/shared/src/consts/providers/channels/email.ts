@@ -26,7 +26,7 @@ import {
   sesConfig,
   sparkpostConfig,
 } from '../credentials';
-import { IProviderConfig } from '../provider.interface';
+import { IProviderConfig, ProviderVersion } from '../provider.interface';
 
 export const emailProviders: IProviderConfig[] = [
   {
@@ -103,6 +103,23 @@ export const emailProviders: IProviderConfig[] = [
     configurations: sesGroupConfigurations,
     docReference: `https://docs.novu.co/platform/integrations/email/amazon-ses${UTM_CAMPAIGN_QUERY_PARAM}`,
     logoFileName: { light: 'ses.svg', dark: 'ses.svg' },
+    versions: [
+      {
+        value: 'v2',
+        displayName: 'v2 (Recommended)',
+        status: 'stable',
+        isDefault: true,
+        description: 'Uses Amazon SES API v2 (ses:SendEmail).',
+      },
+      {
+        value: 'v1',
+        displayName: 'v1 (Legacy)',
+        status: 'deprecated',
+        isDefault: false,
+        isLegacyFallback: true,
+        description: 'Uses legacy SendRawEmail (ses:SendRawEmail). Migrate to v2 for improved deliverability.',
+      },
+    ] satisfies ProviderVersion[],
   },
   {
     id: EmailProviderIdEnum.NetCore,
