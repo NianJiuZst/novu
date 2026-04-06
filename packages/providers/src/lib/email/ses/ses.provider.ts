@@ -12,9 +12,10 @@ import {
   ISendMessageSuccessResponse,
 } from '@novu/stateless';
 import { createVerify } from 'crypto';
-import nodemailer, { type SendMailOptions } from 'nodemailer';
+import nodemailer, { SendMailOptions } from 'nodemailer';
 import nodemailerLegacy from 'nodemailer-legacy';
 import { BaseProvider, CasingEnum } from '../../../base.provider';
+import { assertSafeSendMailOptionsForNodemailerDos } from '../../../utils/nodemailer-address-safety';
 import { WithPassthrough } from '../../../utils/types';
 import { SESConfig } from './ses.config';
 
@@ -79,6 +80,8 @@ export class SESEmailProvider extends BaseProvider implements IEmailProvider {
         ses: { ConfigurationSetName: this.config.configurationSetName },
       }),
     }).body as SendMailOptions;
+
+    assertSafeSendMailOptionsForNodemailerDos(mailOptions);
 
     if (this.isSesV2) {
       return await this.sendMailViaSesV2(mailOptions);
