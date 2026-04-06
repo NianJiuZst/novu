@@ -397,7 +397,7 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
                     <div className="group flex h-6 items-center justify-between gap-6">
                       <div className="flex items-center gap-1.5">
                         <RouteFill className="text-text-soft h-3.5 w-3.5 shrink-0" />
-                        <span className="text-text-soft font-code text-xs font-medium">WORKFLOW</span>
+                        <span className="text-text-soft font-code text-xs font-medium">NAME</span>
                       </div>
                       <div className="relative flex h-8 min-w-0 flex-1 items-center justify-end">
                         <AnimatePresence mode="wait">
@@ -723,25 +723,24 @@ export const ConfigureWorkflowForm = (props: ConfigureWorkflowFormProps) => {
               <span className="ml-auto" />
             </Button>
           )}
-          <div className="px-3 py-4">
-            <FormField
-              control={form.control}
-              name="isTranslationEnabled"
-              render={({ field }) => (
-                <TranslationToggleSection
-                  value={field.value ?? false}
-                  onChange={(checked) => {
-                    field.onChange(checked);
-                    saveForm();
-                  }}
-                  isReadOnly={isReadOnly}
-                  resourceId={workflow?.workflowId}
-                  resourceType={LocalizationResourceEnum.WORKFLOW}
-                  showDrawer={!!(workflow?.workflowId && (field.value ?? false))}
-                />
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="isTranslationEnabled"
+            render={({ field }) => (
+              <TranslationToggleSection
+                value={field.value ?? false}
+                onChange={(checked) => {
+                  field.onChange(checked);
+                  saveForm();
+                }}
+                isReadOnly={isReadOnly}
+                resourceId={workflow?.workflowId}
+                resourceType={LocalizationResourceEnum.WORKFLOW}
+                showDrawer={!!(workflow?.workflowId && (field.value ?? false))}
+                className="w-full min-w-0 px-3 py-4"
+              />
+            )}
+          />
         </SidebarContent>
         <Separator />
       </motion.div>
