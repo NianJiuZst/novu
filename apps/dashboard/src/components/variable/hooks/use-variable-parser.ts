@@ -86,10 +86,14 @@ function parseVariableContent(content: string): ParsedVariable {
   const parsedFilters: FilterWithParam[] = [];
 
   if (filterParts.length > 0) {
-    const filterTokenizer = new Tokenizer('|' + filterParts.join('|'));
-    const filters = filterTokenizer.readFilters();
+    let filters: ReturnType<Tokenizer['readFilters']> = [];
+    try {
+      const filterTokenizer = new Tokenizer('|' + filterParts.join('|'));
+      filters = filterTokenizer.readFilters();
+    } catch {
+      return { parsedName, parsedDefaultValue, parsedFilters };
+    }
 
-    // First pass: find default value
     for (const filter of filters) {
       if (filter.kind === TokenKind.Filter && filter.name === 'default' && filter.args.length > 0) {
         parsedDefaultValue = (filter.args[0] as any).content;
@@ -97,7 +101,6 @@ function parseVariableContent(content: string): ParsedVariable {
       }
     }
 
-    // Second pass: collect other filters
     for (const filter of filters) {
       if (
         filter.kind === TokenKind.Filter &&
