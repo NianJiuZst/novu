@@ -1,8 +1,8 @@
 import { OrganizationLevelWithUserCommand } from '@novu/application-generic';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsMongoId, IsNotEmpty } from 'class-validator';
 
 export class GetEnvironmentVariableCommand extends OrganizationLevelWithUserCommand {
-  @IsString()
+  @IsMongoId()
   @IsNotEmpty()
   variableId: string;
 }
