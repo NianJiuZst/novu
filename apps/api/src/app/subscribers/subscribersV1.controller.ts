@@ -14,7 +14,7 @@ import {
   Query,
   Res,
 } from '@nestjs/common';
-import { ApiExcludeEndpoint, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiExcludeEndpoint, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   CreateOrUpdateSubscriberCommand,
   CreateOrUpdateSubscriberUseCase,
@@ -752,6 +752,13 @@ export class SubscribersV1Controller {
     summary: 'Update notification action status',
     description: `Update in-app (inbox) notification's action status by its unique key identifier **messageId** and type field **type**. 
       **type** field can be **primary** or **secondary**`,
+  })
+  @ApiParam({
+    name: 'type',
+    description: 'Action button type (primary or secondary)',
+    enum: [...Object.values(ButtonTypeEnum)],
+    enumName: 'ButtonTypeEnum',
+    type: String,
   })
   @ApiResponse(MessageResponseDto, 201)
   @SdkGroupName('Subscribers.Messages')

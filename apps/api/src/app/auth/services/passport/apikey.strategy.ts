@@ -20,24 +20,28 @@ export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy) {
     private readonly inMemoryLRUCacheService: InMemoryLRUCacheService
   ) {
     super(
-      { header: HttpRequestHeaderKeysEnum.AUTHORIZATION, prefix: `${ApiAuthSchemeEnum.API_KEY} ` },
-      true,
-      async (apikey: string, verified: (err: Error | null, user?: UserSessionData | false) => void) => {
-        try {
-          const user = await this.validateApiKey(apikey);
-
-          if (!user) {
-            return verified(null, false);
-          }
-
-          addNewRelicTraceAttributes(user);
-
-          return verified(null, user);
-        } catch (err) {
-          return verified(err as Error, false);
-        }
-      }
+      {
+        header: HttpRequestHeaderKeysEnum.AUTHORIZATION,
+        prefix: `${ApiAuthSchemeEnum.API_KEY} `,
+      },
+      false
     );
+  }
+
+  async validate(apiKey: string): Promise<UserSessionData | false> {
+    try {
+      const user = await this.validateApiKey(apiKey);
+
+      if (!user) {
+        return false;
+      }
+
+      addNewRelicTraceAttributes(user);
+
+      return user;
+    } catch (err) {
+      throw err;
+    }
   }
 
   private async validateApiKey(apiKey: string): Promise<UserSessionData | null> {

@@ -120,8 +120,7 @@ export class SubscriptionPreferenceDto {
 
   @ApiPropertyOptional({
     description: 'Optional condition using JSON Logic rules',
-    required: false,
-    type: 'object',
+    type: Object,
     additionalProperties: true,
     example: { and: [{ '===': [{ var: 'tier' }, 'premium'] }] },
   })

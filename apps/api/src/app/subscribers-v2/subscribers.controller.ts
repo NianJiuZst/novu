@@ -738,7 +738,8 @@ export class SubscribersController {
   @ApiParam({
     name: 'actionType',
     description: 'The type of action (primary or secondary)',
-    enum: ButtonTypeEnum,
+    enum: [...Object.values(ButtonTypeEnum)],
+    enumName: 'ButtonTypeEnum',
     type: String,
   })
   @ApiQuery({ name: 'contextKeys', required: false, type: [String], description: 'Context keys for filtering' })
@@ -778,7 +779,8 @@ export class SubscribersController {
   @ApiParam({
     name: 'actionType',
     description: 'The type of action (primary or secondary)',
-    enum: ButtonTypeEnum,
+    enum: [...Object.values(ButtonTypeEnum)],
+    enumName: 'ButtonTypeEnum',
     type: String,
   })
   @ApiQuery({ name: 'contextKeys', required: false, type: [String], description: 'Context keys for filtering' })

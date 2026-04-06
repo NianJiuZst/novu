@@ -25,7 +25,6 @@ export class TriggerEventToAllRequestDto {
     description: `The payload object is used to pass additional information that 
     could be used to render the template, or perform routing rules based on it. 
       For In-App channel, payload data are also available in <Inbox />`,
-    required: true,
     additionalProperties: true,
   })
   @IsObject()

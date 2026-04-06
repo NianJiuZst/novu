@@ -126,6 +126,7 @@ export class DigestRegularOutput {
   @ApiPropertyOptional({
     description: 'Look back window configuration',
     type: 'object',
+    additionalProperties: true,
   })
   @IsOptional()
   @ValidateNested()
@@ -256,6 +257,7 @@ export class GeneratePreviewResponseDto {
   @ApiProperty({
     description: 'Preview result',
     type: 'object',
+    additionalProperties: true,
     oneOf: [
       {
         type: 'object',

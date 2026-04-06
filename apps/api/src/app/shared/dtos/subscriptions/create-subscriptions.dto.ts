@@ -39,19 +39,17 @@ export class TopicSubscriberIdentifierDto {
 }
 
 export class BasePreferenceDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Whether the preference is enabled. Used when condition is not provided.',
-    required: false,
     type: Boolean,
     example: true,
   })
   @IsOptional()
   enabled?: boolean;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Optional condition using JSON Logic rules',
-    required: false,
-    type: 'object',
+    type: Object,
     additionalProperties: true,
     example: { and: [{ '===': [{ var: 'tier' }, 'premium'] }] },
   })

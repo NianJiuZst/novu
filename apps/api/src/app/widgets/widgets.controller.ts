@@ -15,7 +15,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiExcludeController, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiExcludeController, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { AnalyticsService } from '@novu/application-generic';
 import { MessageEntity, BaseRepository } from '@novu/dal';
 import {
@@ -382,6 +382,13 @@ export class WidgetsController {
 
   @UseGuards(AuthGuard('subscriberJwt'))
   @Post('/messages/:messageId/actions/:type')
+  @ApiParam({
+    name: 'type',
+    description: 'Action button type (primary or secondary)',
+    enum: [...Object.values(ButtonTypeEnum)],
+    enumName: 'ButtonTypeEnum',
+    type: String,
+  })
   async markActionAsSeen(
     @SubscriberSession() subscriberSession: SubscriberSession,
     @Param('messageId') messageId: string,

@@ -25,6 +25,109 @@ export const BEARER_SECURITY_DEFINITIONS: SecuritySchemeObject = {
   bearerFormat: 'JWT',
 };
 
+/** Global tag definitions — sorted by `name` for `openapi-tags-alphabetical` and `operation-tag-defined`. */
+const OPEN_API_TAG_DEFINITIONS: ReadonlyArray<{ name: string; description: string; docUrl?: string }> = [
+  { name: 'Auth', description: 'Authentication and session-related endpoints.' },
+  { name: 'Changes', description: 'Change tracking for entities in your Novu project.' },
+  {
+    name: 'Channel Connections',
+    description: 'Channel connections link your Novu project to delivery providers.',
+  },
+  {
+    name: 'Channel Endpoints',
+    description: 'Configure Slack, Teams, webhooks, and other channel endpoints.',
+  },
+  { name: 'Contexts', description: 'Context objects for multi-tenant and scoped data.' },
+  {
+    name: 'Environment Variables',
+    description: 'Environment-scoped variables for workflows and integrations.',
+  },
+  {
+    name: 'Environments',
+    description:
+      'Environments allow you to manage different stages of your application development lifecycle. Each environment has its own set of API keys and configurations, enabling you to separate development, staging, and production workflows.',
+    docUrl: 'https://docs.novu.co/platform/environments',
+  },
+  {
+    name: 'Events',
+    description:
+      'Events represent a change in state of a subscriber. They are used to trigger workflows, and enable you to send notifications to subscribers based on their actions.',
+    docUrl: 'https://docs.novu.co/workflows',
+  },
+  {
+    name: 'Execution Details',
+    description: 'Execution traces and details for workflow and step runs.',
+  },
+  { name: 'Feeds', description: 'Subscriber notification feeds and in-app streams.' },
+  { name: 'Inbound Parse', description: 'Inbound email parsing configuration.' },
+  {
+    name: 'Integrations',
+    description:
+      'With the help of the Integration Store, you can easily integrate your favorite delivery provider. During the runtime of the API, the Integrations Store is responsible for storing the configurations of all the providers.',
+    docUrl: 'https://docs.novu.co/platform/integrations/overview',
+  },
+  { name: 'Invites', description: 'Organization member invitations.' },
+  {
+    name: 'Layouts',
+    description: 'Layouts are reusable wrappers for your email notifications.',
+    docUrl: 'https://docs.novu.co/platform/workflow/layouts',
+  },
+  {
+    name: 'Messages',
+    description:
+      'A message in Novu represents a notification delivered to a recipient on a particular channel. Messages contain information about the request that triggered its delivery, a view of the data sent to the recipient, and a timeline of its lifecycle events. Learn more about messages.',
+    docUrl: 'https://docs.novu.co/workflows/messages',
+  },
+  {
+    name: 'Notification Templates',
+    description: 'Templates for notification content across channels.',
+  },
+  { name: 'Notifications', description: 'Notification records and delivery state.' },
+  { name: 'Organizations', description: 'Organization membership, settings, and billing context.' },
+  {
+    name: 'Partner Integrations',
+    description: 'Partner-specific integration and embedding endpoints.',
+  },
+  { name: 'Storage', description: 'File and asset storage for your Novu project.' },
+  {
+    name: 'Subscribers',
+    description:
+      "A subscriber in Novu represents someone who should receive a message. A subscriber's profile information contains important attributes about the subscriber that will be used in messages (name, email). The subscriber object can contain other key-value pairs that can be used to further personalize your messages.",
+    docUrl: 'https://docs.novu.co/subscribers/subscribers',
+  },
+  { name: 'Tenants', description: 'Multi-tenant routing and tenant-scoped resources.' },
+  {
+    name: 'Topics',
+    description:
+      'Topics are a way to group subscribers together so that they can be notified of events at once. A topic is identified by a custom key. This can be helpful for things like sending out marketing emails or notifying users of new features. Topics can also be used to send notifications to the subscribers who have been grouped together based on their interests, location, activities and much more.',
+    docUrl: 'https://docs.novu.co/subscribers/topics',
+  },
+  {
+    name: 'Translations',
+    description: 'Used to localize your notifications to different languages.',
+    docUrl: 'https://docs.novu.co/platform/workflow/advanced-features/translations',
+  },
+  { name: 'Users', description: 'Signed-in user profile and account endpoints.' },
+  {
+    name: 'Webhooks',
+    description: 'Outbound webhook events delivered to your endpoints.',
+  },
+  {
+    name: 'Workflow groups',
+    description: 'Groups for organizing workflows in the Novu dashboard.',
+  },
+  {
+    name: 'Workflows',
+    description:
+      'All notifications are sent via a workflow. Each workflow acts as a container for the logic and blueprint that are associated with a type of notification in your system.',
+    docUrl: 'https://docs.novu.co/workflows',
+  },
+  {
+    name: 'Workflows-Overrides',
+    description: 'Per-subscriber or per-tenant overrides for workflow behavior.',
+  },
+];
+
 function buildBaseOptions() {
   const options = new DocumentBuilder()
     .setTitle('Novu API')
@@ -37,48 +140,15 @@ function buildBaseOptions() {
     .addServer('https://api.novu.co')
     .addServer('https://eu.api.novu.co')
     .addSecurity(API_KEY_SWAGGER_SECURITY_NAME, API_KEY_SECURITY_DEFINITIONS)
-    .addSecurityRequirements(API_KEY_SWAGGER_SECURITY_NAME)
-    .addTag(
-      'Events',
-      `Events represent a change in state of a subscriber. They are used to trigger workflows, and enable you to send notifications to subscribers based on their actions.`,
-      { url: 'https://docs.novu.co/workflows' }
-    )
-    .addTag(
-      'Subscribers',
-      `A subscriber in Novu represents someone who should receive a message. A subscriber's profile information contains important attributes about the subscriber that will be used in messages (name, email). The subscriber object can contain other key-value pairs that can be used to further personalize your messages.`,
-      { url: 'https://docs.novu.co/subscribers/subscribers' }
-    )
-    .addTag(
-      'Topics',
-      `Topics are a way to group subscribers together so that they can be notified of events at once. A topic is identified by a custom key. This can be helpful for things like sending out marketing emails or notifying users of new features. Topics can also be used to send notifications to the subscribers who have been grouped together based on their interests, location, activities and much more.`,
-      { url: 'https://docs.novu.co/subscribers/topics' }
-    )
-    .addTag(
-      'Integrations',
-      `With the help of the Integration Store, you can easily integrate your favorite delivery provider. During the runtime of the API, the Integrations Store is responsible for storing the configurations of all the providers.`,
-      { url: 'https://docs.novu.co/platform/integrations/overview' }
-    )
-    .addTag(
-      'Workflows',
-      `All notifications are sent via a workflow. Each workflow acts as a container for the logic and blueprint that are associated with a type of notification in your system.`,
-      { url: 'https://docs.novu.co/workflows' }
-    )
-    .addTag(
-      'Messages',
-      `A message in Novu represents a notification delivered to a recipient on a particular channel. Messages contain information about the request that triggered its delivery, a view of the data sent to the recipient, and a timeline of its lifecycle events. Learn more about messages.`,
-      { url: 'https://docs.novu.co/workflows/messages' }
-    )
-    .addTag(
-      'Environments',
-      `Environments allow you to manage different stages of your application development lifecycle. Each environment has its own set of API keys and configurations, enabling you to separate development, staging, and production workflows.`,
-      { url: 'https://docs.novu.co/platform/environments' }
-    )
-    .addTag('Layouts', `Layouts are reusable wrappers for your email notifications.`, {
-      url: 'https://docs.novu.co/platform/workflow/layouts',
-    })
-    .addTag('Translations', `Used to localize your notifications to different languages.`, {
-      url: 'https://docs.novu.co/platform/workflow/advanced-features/translations',
-    });
+    .addSecurityRequirements(API_KEY_SWAGGER_SECURITY_NAME);
+
+  for (const tag of OPEN_API_TAG_DEFINITIONS) {
+    if (tag.docUrl) {
+      options.addTag(tag.name, tag.description, { url: tag.docUrl });
+    } else {
+      options.addTag(tag.name, tag.description);
+    }
+  }
 
   return options;
 }

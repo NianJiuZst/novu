@@ -33,6 +33,7 @@ export class GenerateLayoutPreviewResponseDto {
   @ApiProperty({
     description: 'Preview result',
     type: 'object',
+    additionalProperties: true,
     oneOf: [
       {
         properties: {

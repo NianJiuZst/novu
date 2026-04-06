@@ -2,6 +2,7 @@ import './instrument';
 
 import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { BullMqService, getErrorInterceptor, Logger as PinoLogger } from '@novu/application-generic';
 import bodyParser from 'body-parser';
 import helmet from 'helmet';
@@ -18,7 +19,11 @@ validateEnv();
 export async function bootstrap(): Promise<INestApplication> {
   BullMqService.haveProInstalled();
 
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
+
+  // Express v5: preserve qs-style nested query parsing (NestJS migration guide).
+  app.set('query parser', 'extended');
+
   app.useLogger(app.get(PinoLogger));
   app.flushLogs();
 

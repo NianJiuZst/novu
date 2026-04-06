@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, type ApiPropertyOptions } from '@nestjs/swagger';
 import {
   BuilderFieldOperator,
   BuilderFieldType,
@@ -137,6 +137,6 @@ export class StepFilterDto {
       PreviousStepFilterPartDto,
       TenantFilterPartDto,
     ],
-  })
+  } as unknown as ApiPropertyOptions)
   children: FilterPartsDto[];
 }

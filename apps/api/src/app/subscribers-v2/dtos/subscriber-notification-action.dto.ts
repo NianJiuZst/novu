@@ -7,7 +7,8 @@ export class SubscriberNotificationActionDto {
   @IsDefined()
   @ApiProperty({
     description: 'The type of action button (primary or secondary)',
-    enum: ButtonTypeEnum,
+    enum: [...Object.values(ButtonTypeEnum)],
+    enumName: 'ButtonTypeEnum',
     example: ButtonTypeEnum.PRIMARY,
   })
   readonly actionType: ButtonTypeEnum;

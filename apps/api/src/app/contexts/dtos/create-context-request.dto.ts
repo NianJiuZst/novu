@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsValidContextData } from '@novu/application-generic';
 import { CONTEXT_IDENTIFIER_REGEX, ContextData, ContextId, ContextType } from '@novu/shared';
 import { IsDefined, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
@@ -37,11 +37,10 @@ export class CreateContextRequestDto {
   })
   id: ContextId;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Optional custom data to associate with this context.',
     example: { tenantName: 'Acme Corp', region: 'us-east-1', settings: { theme: 'dark' } },
-    required: false,
-    type: 'object',
+    type: Object,
     additionalProperties: true,
   })
   @IsOptional()
