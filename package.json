@@ -332,6 +332,9 @@
       "sharp",
       "unrs-resolver",
       "workerd"
+    ],
+    "ignoredBuiltDependencies": [
+      "@scarf/scarf"
     ]
   }
 }
