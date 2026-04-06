@@ -7,9 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { IntegrationFormData } from '../types';
 import { DescriptionWithLinks } from './description-with-links';
 
-function versionStatusBadgeProps(status: ProviderVersionStatus): {
+function versionStatusBadgeProps(
+  status: ProviderVersionStatus,
+  isDefault: boolean
+): {
   variant: 'filled' | 'light';
-  color: 'green' | 'orange' | 'blue';
+  color: 'green' | 'orange' | 'blue' | 'gray';
 } {
   if (status === 'deprecated') {
     return { variant: 'light', color: 'orange' };
@@ -19,10 +22,14 @@ function versionStatusBadgeProps(status: ProviderVersionStatus): {
     return { variant: 'light', color: 'blue' };
   }
 
-  return { variant: 'light', color: 'green' };
+  if (isDefault) {
+    return { variant: 'light', color: 'green' };
+  }
+
+  return { variant: 'light', color: 'gray' };
 }
 
-function versionStatusLabel(status: ProviderVersionStatus): string {
+function versionStatusLabel(status: ProviderVersionStatus, isDefault: boolean): string {
   if (status === 'deprecated') {
     return 'Deprecated';
   }
@@ -31,7 +38,11 @@ function versionStatusLabel(status: ProviderVersionStatus): string {
     return 'Beta';
   }
 
-  return 'Recommended';
+  if (isDefault) {
+    return 'Recommended';
+  }
+
+  return 'Stable';
 }
 
 type VersionSelectorProps = {
@@ -77,11 +88,11 @@ export function VersionSelector({ provider, control, isReadOnly }: VersionSelect
               </FormLabel>
               {selectedMeta ? (
                 <Badge
-                  variant={versionStatusBadgeProps(selectedMeta.status).variant}
-                  color={versionStatusBadgeProps(selectedMeta.status).color}
+                  variant={versionStatusBadgeProps(selectedMeta.status, selectedMeta.isDefault).variant}
+                  color={versionStatusBadgeProps(selectedMeta.status, selectedMeta.isDefault).color}
                   size="sm"
                 >
-                  {versionStatusLabel(selectedMeta.status)}
+                  {versionStatusLabel(selectedMeta.status, selectedMeta.isDefault)}
                 </Badge>
               ) : null}
             </div>
