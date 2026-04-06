@@ -34,7 +34,10 @@ export class GetRequests {
     }
 
     if (command.createdGte) {
-      queryBuilder.whereGreaterThanOrEqual('created_at', LogRepository.formatDateTime64(new Date(command.createdGte)));
+      queryBuilder.whereGreaterThanOrEqual(
+        'created_at',
+        LogRepository.formatDateTime64(new Date(command.createdGte)) as unknown as string
+      );
     }
 
     const safeWhere = queryBuilder.build();

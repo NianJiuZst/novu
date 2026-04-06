@@ -102,24 +102,7 @@ export abstract class LogRepository<TSchema extends ClickhouseSchema<any>, TEnha
     protected readonly schemaOrderBy: SchemaKeys<TSchema>[],
     protected readonly featureFlagsService: FeatureFlagsService,
     protected readonly batchService?: ClickHouseBatchService
-  ) {
-    this.initialize();
-  }
-
-  private async initialize() {
-    if (process.env.NODE_ENV !== 'local' && process.env.NODE_ENV !== 'test') {
-      return;
-    }
-
-    const query = this.schema.GetCreateTableQuery();
-
-    try {
-      await this.clickhouseService.exec({ query });
-      console.log('Table created', this.table);
-    } catch (error) {
-      this.logger.error('Failed to create ClickHouse table', error);
-    }
-  }
+  ) {}
 
   private getColumnType(column: string): string {
     return this.schema.schema[column]?.type?.toString() || 'String';

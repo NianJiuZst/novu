@@ -1,5 +1,6 @@
 import { ClickHouseClient, ClickHouseSettings, createClient, PingResult } from '@clickhouse/client';
 import { BeforeApplicationShutdown, Injectable } from '@nestjs/common';
+import { migration } from 'clickhouse-migrations';
 
 export { ClickHouseClient };
 
@@ -42,6 +43,12 @@ export class ClickHouseService implements BeforeApplicationShutdown {
         }
       } catch (error) {
         console.error(`Failed to create database ${process.env.CLICK_HOUSE_DATABASE}:`, error);
+      }
+
+      const migrationsHome = process.env.CLICKHOUSE_MIGRATIONS_HOME;
+
+      if (migrationsHome) {
+        await migration(migrationsHome, 'http://localhost:8123', 'default', '', process.env.CLICK_HOUSE_DATABASE!);
       }
     }
 
