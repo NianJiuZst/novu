@@ -1,5 +1,16 @@
 /** @jsxImportSource chat */
-import { Actions, Button, Card, CardText, Divider, Field, Fields, Section, type ChatElement } from 'chat';
+import {
+  Actions,
+  Button,
+  Card,
+  CardText,
+  Divider,
+  Field,
+  Fields,
+  Section,
+  type Attachment,
+  type ChatElement,
+} from 'chat';
 import OpenAI from 'openai';
 
 import { agent, type RichResponse } from './agent';
@@ -147,12 +158,94 @@ function parseAiResponse(raw: string): AiResponse {
   }
 }
 
+async function attachmentToBuffer(att: Attachment): Promise<Buffer | null> {
+  if (att.data) {
+    if (Buffer.isBuffer(att.data)) {
+      return att.data;
+    }
+
+    if (typeof Blob !== 'undefined' && att.data instanceof Blob) {
+      const ab = await att.data.arrayBuffer();
+
+      return Buffer.from(ab);
+    }
+  }
+
+  if (att.fetchData) {
+    return att.fetchData();
+  }
+
+  return null;
+}
+
+async function buildUserContent(
+  userMessage: string,
+  attachments?: Attachment[]
+): Promise<string | OpenAI.ChatCompletionContentPart[]> {
+  if (!attachments?.length) {
+    return userMessage;
+  }
+
+  const fileNotes: string[] = [];
+  const imageParts: OpenAI.ChatCompletionContentPart[] = [];
+
+  for (const att of attachments) {
+    if (att.type === 'image') {
+      const buf = await attachmentToBuffer(att);
+
+      if (buf) {
+        const mime = att.mimeType ?? 'image/png';
+
+        imageParts.push({
+          type: 'image_url',
+          image_url: { url: `data:${mime};base64,${buf.toString('base64')}` },
+        });
+
+        continue;
+      }
+
+      if (att.url?.startsWith('http')) {
+        imageParts.push({
+          type: 'image_url',
+          image_url: { url: att.url },
+        });
+
+        continue;
+      }
+
+      fileNotes.push(`[Attached image: could not load${att.name ? ` (${att.name})` : ''}]`);
+    } else {
+      const name = att.name ?? 'file';
+      const size = att.size !== undefined ? ` (${att.size} bytes)` : '';
+
+      fileNotes.push(`[Attached ${att.type}: ${name}${size}]`);
+    }
+  }
+
+  const textLines = [userMessage, ...fileNotes].filter((line) => line.trim().length > 0);
+  const textBlock = textLines.join('\n');
+
+  if (imageParts.length === 0) {
+    return textBlock;
+  }
+
+  const parts: OpenAI.ChatCompletionContentPart[] = [
+    { type: 'text', text: textBlock || '(User sent image attachments.)' },
+    ...imageParts,
+  ];
+
+  return parts;
+}
+
 async function generateReply(
   history: Array<{ text: string; isBot: boolean }>,
   userMessage: string,
-  systemPrefix?: string
+  systemPrefix?: string,
+  attachments?: Attachment[]
 ): Promise<string | RichResponse> {
   const systemContent = systemPrefix ? `${systemPrefix}\n\n${SYSTEM_PROMPT}` : SYSTEM_PROMPT;
+
+  const userContent = await buildUserContent(userMessage, attachments);
 
   const chatMessages: OpenAI.ChatCompletionMessageParam[] = [
     { role: 'system', content: systemContent },
@@ -162,7 +255,7 @@ async function generateReply(
         content: m.text,
       })
     ),
-    { role: 'user', content: userMessage },
+    { role: 'user', content: userContent },
   ];
 
   const completion = await getOpenAI().chat.completions.create({
@@ -198,13 +291,13 @@ export const wineAgent = agent('wine-bot', {
       return `${greeting} Ask me anything — pairings, recommendations, regions, you name it.`;
     }
 
-    return generateReply([], message.text, greeting);
+    return generateReply([], message.text, greeting, message.attachments);
   },
 
   onMessage: async ({ message, conversation, history, novu, subscriber }) => {
     console.log('subscriber data', subscriber);
 
-    const response = await generateReply(history, message.text);
+    const response = await generateReply(history, message.text, undefined, message.attachments);
 
     if (/\b(cheers|thanks|thank you)\b/i.test(message.text)) {
       novu.resolve('User said cheers');

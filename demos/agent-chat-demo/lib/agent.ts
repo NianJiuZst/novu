@@ -4,7 +4,7 @@ import { createRedisState } from '@chat-adapter/state-redis';
 import { createWhatsAppAdapter } from '@chat-adapter/whatsapp';
 import type { Novu } from '@novu/api';
 import { createResendAdapter } from '@resend/chat-sdk-adapter';
-import { Chat, type ChatElement, type Thread, emoji } from 'chat';
+import { Chat, type Attachment, type ChatElement, type Thread, emoji } from 'chat';
 import { after } from 'next/server';
 
 import {
@@ -62,6 +62,7 @@ type MessageAuthor = {
 type InboundMessage = {
   text: string;
   author: MessageAuthor;
+  attachments?: Attachment[];
 };
 
 type HistoryEntry = {
@@ -697,7 +698,7 @@ export function serveAgents(options: ServeAgentsOptions) {
       const { response, signals } = await primaryAgent.handleSubscribe({
         conversation,
         subscriber,
-        message: { text: message.text, author: message.author },
+        message: { text: message.text, author: message.author, attachments: message.attachments },
       });
 
       const text = getResponseText(response);
@@ -766,7 +767,7 @@ export function serveAgents(options: ServeAgentsOptions) {
       }
 
       const { response, signals } = await primaryAgent.handleMessage({
-        message: { text: message.text, author: message.author },
+        message: { text: message.text, author: message.author, attachments: message.attachments },
         conversation,
         subscriber,
         history: history.slice(0, -1),
