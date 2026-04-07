@@ -1,15 +1,15 @@
 /** @jsxImportSource chat */
 import {
   Actions,
+  type Attachment,
   Button,
   Card,
   CardText,
+  type ChatElement,
   Divider,
   Field,
   Fields,
   Section,
-  type Attachment,
-  type ChatElement,
 } from 'chat';
 import OpenAI from 'openai';
 
@@ -80,7 +80,9 @@ function renderWineCard(rec: RecommendWineArgs): ChatElement {
         </Fields>
         <CardText>{rec.tastingNotes}</CardText>
         <Actions>
-          <Button id="buy_wine_0" style="primary" value={rec.name}>🛒 Buy Now</Button>
+          <Button id="buy_wine_0" style="primary" value={rec.name}>
+            🛒 Buy Now
+          </Button>
         </Actions>
       </Section>
     </Card>
@@ -309,9 +311,10 @@ export const wineAgent = agent('wine-bot', {
     return generateReply([], message.text, greeting, message.attachments);
   },
 
-  onMessage: async ({ message, conversation, history, novu, subscriber }) => {
+  onMessage: async ({ message, conversation, history, novu, subscriber, platform, thread }) => {
     console.log('subscriber data', subscriber);
-
+    console.log('platform', platform);
+    console.log('thread', thread);
     const response = await generateReply(history, message.text, undefined, message.attachments);
 
     if (/\b(cheers|thanks|thank you)\b/i.test(message.text)) {
