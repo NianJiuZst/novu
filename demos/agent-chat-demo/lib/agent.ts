@@ -4,7 +4,7 @@ import { createRedisState } from '@chat-adapter/state-redis';
 import { createWhatsAppAdapter } from '@chat-adapter/whatsapp';
 import type { Novu } from '@novu/api';
 import { createResendAdapter } from '@resend/chat-sdk-adapter';
-import { Chat, type Thread, emoji } from 'chat';
+import { Chat, type ChatElement, type Thread, emoji } from 'chat';
 import { after } from 'next/server';
 
 import {
@@ -97,10 +97,9 @@ export type AgentLifecycleContext = {
   novu: NovuContext;
 };
 
-type RichResponse = {
+export type RichResponse = {
   text: string;
-  cards?: unknown[];
-  actions?: unknown[];
+  card?: ChatElement;
 };
 
 type AgentConfig = {
@@ -112,7 +111,7 @@ type AgentConfig = {
 
 type AgentHandlers = {
   onMessage: (ctx: AgentMessageContext) => Promise<string | RichResponse>;
-  onSubscribe?: (ctx: AgentLifecycleContext) => Promise<string | void>;
+  onSubscribe?: (ctx: AgentLifecycleContext) => Promise<string | RichResponse | void>;
   onIdle?: (ctx: AgentLifecycleContext) => Promise<string | void>;
   onResolve?: (ctx: AgentLifecycleContext) => Promise<void>;
   config?: AgentConfig;
@@ -558,6 +557,14 @@ export function serveAgents(options: ServeAgentsOptions) {
       return response.text;
     }
 
+    function getResponseCard(response: string | RichResponse | void): ChatElement | undefined {
+      if (!response || typeof response === 'string') {
+        return undefined;
+      }
+
+      return response.card;
+    }
+
     async function resolveSubscriberForSlackMessage(author: MessageAuthor): Promise<string> {
       const platformUserId = author.userId;
       let resolvedId = platformUserId;
@@ -694,12 +701,15 @@ export function serveAgents(options: ServeAgentsOptions) {
       });
 
       const text = getResponseText(response);
+      const card = getResponseCard(response);
 
       await persistNovuConversationMessages(novuConversationId, platform, [
         { role: 'assistant', content: text, senderName: primaryAgent.id },
       ]);
 
-      if (text) {
+      if (card) {
+        await thread.post(card);
+      } else if (text) {
         await thread.post(text);
       }
 
@@ -763,12 +773,15 @@ export function serveAgents(options: ServeAgentsOptions) {
       });
 
       const text = getResponseText(response);
+      const card = getResponseCard(response);
 
       await persistNovuConversationMessages(novuConversationId, platform, [
         { role: 'assistant', content: text, senderName: primaryAgent.id },
       ]);
 
-      if (text) {
+      if (card) {
+        await thread.post(card);
+      } else if (text) {
         await thread.post(text);
       }
 
