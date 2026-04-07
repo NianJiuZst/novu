@@ -565,6 +565,25 @@ export function serveAgents(options: ServeAgentsOptions) {
       return resolvedId;
     }
 
+    async function resolveWhatsAppSubscriber(phoneNumber: string): Promise<string> {
+      try {
+        const res = await getNovuClient().subscribers.search({ phone: phoneNumber, limit: 1 });
+        const match = res.result?.data?.[0];
+
+        if (match?.subscriberId) {
+          console.log(`[whatsapp] resolved phone ${phoneNumber} → subscriber ${match.subscriberId}`);
+
+          return match.subscriberId;
+        }
+      } catch (err) {
+        console.error(`[whatsapp] subscriber search by phone failed:`, err);
+      }
+
+      console.warn(`[whatsapp] no subscriber found for phone ${phoneNumber}, falling back to phone as subscriberId`);
+
+      return phoneNumber;
+    }
+
     async function resolveSubscriber(
       threadId: string,
       author: MessageAuthor
@@ -580,7 +599,7 @@ export function serveAgents(options: ServeAgentsOptions) {
           }
         }
 
-        return author.userId;
+        return resolveWhatsAppSubscriber(author.userId);
       }
 
       return resolveSubscriberForSlackMessage(author);
