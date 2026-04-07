@@ -1,3 +1,4 @@
+import { createGoogleChatAdapter, type ServiceAccountCredentials } from '@chat-adapter/gchat';
 import { createGitHubAdapter } from '@chat-adapter/github';
 import { createSlackAdapter } from '@chat-adapter/slack';
 import { createRedisState } from '@chat-adapter/state-redis';
@@ -5,6 +6,8 @@ import { createWhatsAppAdapter } from '@chat-adapter/whatsapp';
 import type { Novu } from '@novu/api';
 import { createResendAdapter } from '@resend/chat-sdk-adapter';
 import { Chat, type Attachment, type ChatElement, type Thread, emoji } from 'chat';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { after } from 'next/server';
 
 import {
@@ -294,8 +297,47 @@ function detectPlatform(threadId: string): string {
   if (threadId.startsWith('resend:')) {
     return 'resend';
   }
+  if (threadId.startsWith('gchat:')) {
+    return 'gchat';
+  }
 
   return 'slack';
+}
+
+/**
+ * Loads Google Chat service account JSON. Multi-line `GOOGLE_CHAT_CREDENTIALS` in `.env` is unreliable
+ * (dotenv ends the string at the first `"` inside the JSON). Prefer `GOOGLE_CHAT_CREDENTIALS_FILE`.
+ */
+function createGoogleChatAdapterFromEnv(): ReturnType<typeof createGoogleChatAdapter> {
+  const filePath = process.env.GOOGLE_CHAT_CREDENTIALS_FILE?.trim();
+
+  if (filePath) {
+    const abs = resolve(process.cwd(), filePath);
+
+    if (!existsSync(abs)) {
+      throw new Error(`GOOGLE_CHAT_CREDENTIALS_FILE not found: ${abs}`);
+    }
+
+    const credentials = JSON.parse(readFileSync(abs, 'utf8')) as ServiceAccountCredentials;
+
+    return createGoogleChatAdapter({ credentials });
+  }
+
+  const raw = process.env.GOOGLE_CHAT_CREDENTIALS?.trim();
+
+  if (raw) {
+    try {
+      const credentials = JSON.parse(raw) as ServiceAccountCredentials;
+
+      return createGoogleChatAdapter({ credentials });
+    } catch {
+      throw new Error(
+        'Invalid GOOGLE_CHAT_CREDENTIALS: use a single line of minified JSON, or set GOOGLE_CHAT_CREDENTIALS_FILE to a path containing the service account JSON file (multi-line JSON in .env does not work).'
+      );
+    }
+  }
+
+  return createGoogleChatAdapter();
 }
 
 function buildDefaultAdapters(platforms?: string[]): ChatAdapters {
@@ -319,6 +361,9 @@ function buildDefaultAdapters(platforms?: string[]): ChatAdapters {
         fromAddress: process.env.RESEND_FROM_ADDRESS ?? '',
         fromName: process.env.RESEND_FROM_NAME,
       });
+    }
+    if (platform === 'gchat') {
+      map.gchat = createGoogleChatAdapterFromEnv();
     }
   }
 
@@ -523,26 +568,49 @@ export function serveAgents(options: ServeAgentsOptions) {
     });
 
     async function buildHistory(thread: {
+      id: string;
       allMessages: AsyncIterable<{ text: string; author: { isMe: boolean }; metadata?: { dateSent?: Date } }>;
     }): Promise<HistoryEntry[]> {
+      const platform = detectPlatform(thread.id);
+
+      if (platform === 'gchat') {
+        return [];
+      }
+
       const messages: HistoryEntry[] = [];
 
-      for await (const msg of thread.allMessages) {
-        messages.push({
-          text: msg.text,
-          isBot: msg.author.isMe,
-          timestamp: msg.metadata?.dateSent?.toISOString() ?? new Date().toISOString(),
-        });
+      try {
+        for await (const msg of thread.allMessages) {
+          messages.push({
+            text: msg.text,
+            isBot: msg.author.isMe,
+            timestamp: msg.metadata?.dateSent?.toISOString() ?? new Date().toISOString(),
+          });
+        }
+      } catch (err) {
+        console.warn(`[${platform}] message history unavailable, continuing without context:`, err);
+
+        return [];
       }
 
       return messages;
     }
 
     async function reactToRootMessage(thread: Thread): Promise<void> {
-      for await (const msg of thread.allMessages) {
-        const sent = thread.createSentMessageFromMessage(msg);
-        await sent.addReaction(emoji.check);
-        break;
+      const platform = detectPlatform(thread.id);
+
+      if (platform === 'gchat') {
+        return;
+      }
+
+      try {
+        for await (const msg of thread.allMessages) {
+          const sent = thread.createSentMessageFromMessage(msg);
+          await sent.addReaction(emoji.check);
+          break;
+        }
+      } catch (err) {
+        console.warn(`[${platform}] could not add resolve reaction:`, err);
       }
     }
 
@@ -646,6 +714,14 @@ export function serveAgents(options: ServeAgentsOptions) {
       return email;
     }
 
+    async function resolveGoogleChatSubscriber(userId: string): Promise<string> {
+      if (userId.includes('@')) {
+        return resolveResendSubscriber(userId);
+      }
+
+      return userId;
+    }
+
     async function resolveSubscriber(threadId: string, author: MessageAuthor): Promise<string> {
       const platform = detectPlatform(threadId);
 
@@ -667,6 +743,10 @@ export function serveAgents(options: ServeAgentsOptions) {
 
       if (platform === 'resend') {
         return resolveResendSubscriber(author.userId);
+      }
+
+      if (platform === 'gchat') {
+        return resolveGoogleChatSubscriber(author.userId);
       }
 
       return resolveSubscriberForSlackMessage(author);

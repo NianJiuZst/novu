@@ -1,5 +1,6 @@
 .next
 node_modules
+google-chat-sa.json
 .env.local
 .env
 tsconfig.tsbuildinfo

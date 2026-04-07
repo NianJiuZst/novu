@@ -334,6 +334,6 @@ export const wineAgent = agent('wine-bot', {
   },
 
   config: {
-    platforms: ['slack', 'whatsapp', 'github', 'resend'],
+    platforms: ['slack', 'whatsapp', 'github', 'resend', 'gchat'],
   },
 });
