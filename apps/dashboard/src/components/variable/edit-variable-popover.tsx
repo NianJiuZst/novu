@@ -17,7 +17,7 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/primitives/command';
-import { FormControl, FormItem, FormMessagePure } from '@/components/primitives/form/form';
+import { FormMessagePure } from '@/components/primitives/form/form';
 import { Input, InputPure, InputRoot, InputWrapper } from '@/components/primitives/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/primitives/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';
@@ -208,78 +208,72 @@ export const EditVariablePopover = ({
           </div>
           <div className="grid gap-2 p-2">
             <div className="flex flex-col gap-1">
-              <FormItem>
-                <FormControl>
-                  <div className="grid">
-                    <div className="mb-1 flex w-full flex-row items-center justify-between gap-1">
-                      <label className="text-text-sub text-label-xs items-start">Variable</label>
-                      {showManageSchemaButton && (
-                        <LinkButton
-                          variant="gray"
-                          size="sm"
-                          className="text-label-2xs text-xs"
-                          leadingIcon={RiListView}
-                          onClick={handleManageSchema}
-                        >
-                          Manage schema ↗
-                        </LinkButton>
-                      )}
-                    </div>
-
-                    <InputRoot size="2xs" hasError={validation.hasError}>
-                      <InputWrapper>
-                        <Code2 className="h-4 w-4 shrink-0 text-gray-500" />
-                        <InputPure
-                          ref={nameInputRef}
-                          value={name}
-                          onChange={(e) => handleNameChange(e.target.value)}
-                          autoFocus
-                          className="text-xs"
-                          placeholder="Variable name (e.g. payload.name)"
-                        />
-                      </InputWrapper>
-                    </InputRoot>
-                    {validation.hasError && !showAddToSchemaButton && (
-                      <FormMessagePure hasError={true}>{validation.errorMessage}</FormMessagePure>
-                    )}
-
-                    {validation.hasError && showAddToSchemaButton && (
-                      <FormMessagePure hasError={true} className="text-label-2xs mb-0.5 mt-0.5">
-                        <RiErrorWarningLine className="h-3 w-3" />
-                        Variable missing from Schema{' '}
-                        <LinkButton
-                          variant="modifiable"
-                          size="sm"
-                          className="text-label-2xs"
-                          onClick={handleAddToSchema}
-                        >
-                          <span className="underline"> Add to schema ↗</span>
-                        </LinkButton>
-                      </FormMessagePure>
+              <div className="space-y-1.5">
+                <div className="grid">
+                  <div className="mb-1 flex w-full flex-row items-center justify-between gap-1">
+                    <label className="text-text-sub text-label-xs items-start">Variable</label>
+                    {showManageSchemaButton && (
+                      <LinkButton
+                        variant="gray"
+                        size="sm"
+                        className="text-label-2xs text-xs"
+                        leadingIcon={RiListView}
+                        onClick={handleManageSchema}
+                      >
+                        Manage schema ↗
+                      </LinkButton>
                     )}
                   </div>
-                </FormControl>
-              </FormItem>
+
+                  <InputRoot size="2xs" hasError={validation.hasError}>
+                    <InputWrapper>
+                      <Code2 className="h-4 w-4 shrink-0 text-gray-500" />
+                      <InputPure
+                        ref={nameInputRef}
+                        value={name}
+                        onChange={(e) => handleNameChange(e.target.value)}
+                        autoFocus
+                        className="text-xs"
+                        placeholder="Variable name (e.g. payload.name)"
+                      />
+                    </InputWrapper>
+                  </InputRoot>
+                  {validation.hasError && !showAddToSchemaButton && (
+                    <FormMessagePure hasError={true}>{validation.errorMessage}</FormMessagePure>
+                  )}
+
+                  {validation.hasError && showAddToSchemaButton && (
+                    <FormMessagePure hasError={true} className="text-label-2xs mb-0.5 mt-0.5">
+                      <RiErrorWarningLine className="h-3 w-3" />
+                      Variable missing from Schema{' '}
+                      <LinkButton
+                        variant="modifiable"
+                        size="sm"
+                        className="text-label-2xs"
+                        onClick={handleAddToSchema}
+                      >
+                        <span className="underline"> Add to schema ↗</span>
+                      </LinkButton>
+                    </FormMessagePure>
+                  )}
+                </div>
+              </div>
 
               {!isPayloadSchemaEnabled && (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      value={defaultVal}
-                      onChange={(e) => handleDefaultValueChange(e.target.value)}
-                      placeholder="Default fallback value"
-                      size="2xs"
-                    />
-                  </FormControl>
-                </FormItem>
+                <div className="space-y-1.5">
+                  <Input
+                    value={defaultVal}
+                    onChange={(e) => handleDefaultValueChange(e.target.value)}
+                    placeholder="Default fallback value"
+                    size="2xs"
+                  />
+                </div>
               )}
 
               {showVariableTypeInput && (
-                <FormItem>
-                  <FormControl>
-                    <Input value={variableType.toString()} disabled placeholder="Variable type" size="2xs" />
-                  </FormControl>
-                </FormItem>
+                <div className="space-y-1.5">
+                  <Input value={variableType.toString()} disabled placeholder="Variable type" size="2xs" />
+                </div>
               )}
 
               {showVariableTypeInput && isPayloadSchemaEnabled && (
@@ -302,87 +296,85 @@ export const EditVariablePopover = ({
             <Separator className="ml-[-10px] mr-[-10px] w-[calc(100%+20px)]" />
 
             <div className="flex flex-col gap-1">
-              <FormItem>
-                <FormControl>
-                  <div className="">
-                    <label className="text-text-sub text-label-xs mb-1 flex items-center gap-1">
-                      LiquidJS Filters
-                      <Tooltip>
-                        <TooltipTrigger className="relative cursor-pointer">
-                          <RiQuestionLine className="text-text-soft size-4" />
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <p className="text-label-xs">
-                            LiquidJS filters modify the variable output in sequence, with each filter using the previous
-                            one's result. Reorder them by dragging and dropping.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </label>
+              <div className="space-y-1.5">
+                <div>
+                  <label className="text-text-sub text-label-xs mb-1 flex items-center gap-1">
+                    LiquidJS Filters
+                    <Tooltip>
+                      <TooltipTrigger className="relative cursor-pointer">
+                        <RiQuestionLine className="text-text-soft size-4" />
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs">
+                        <p className="text-label-xs">
+                          LiquidJS filters modify the variable output in sequence, with each filter using the previous
+                          one's result. Reorder them by dragging and dropping.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </label>
 
-                    <Popover open={isCommandOpen} onOpenChange={setIsCommandOpen}>
-                      <PopoverTrigger asChild>
-                        <button className="text-text-soft bg-background flex h-[30px] w-full items-center justify-between rounded-md border px-2 text-xs">
-                          <span>Add a filter</span>
-                          <RiSearchLine className="h-3 w-3" />
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="min-w-[calc(275px-1rem)] max-w-[calc(275px-1rem)] p-0" align="start">
-                        <Command>
-                          <div className="p-1">
-                            <CommandInput
-                              value={searchQuery}
-                              onValueChange={setSearchQuery}
-                              placeholder="Search..."
-                              className="h-7"
-                              inputWrapperClassName="h-7 text-2xs"
-                            />
-                          </div>
+                  <Popover open={isCommandOpen} onOpenChange={setIsCommandOpen}>
+                    <PopoverTrigger asChild>
+                      <button className="text-text-soft bg-background flex h-[30px] w-full items-center justify-between rounded-md border px-2 text-xs">
+                        <span>Add a filter</span>
+                        <RiSearchLine className="h-3 w-3" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="min-w-[calc(275px-1rem)] max-w-[calc(275px-1rem)] p-0" align="start">
+                      <Command>
+                        <div className="p-1">
+                          <CommandInput
+                            value={searchQuery}
+                            onValueChange={setSearchQuery}
+                            placeholder="Search..."
+                            className="h-7"
+                            inputWrapperClassName="h-7 text-2xs"
+                          />
+                        </div>
 
-                          <CommandList className="max-h-[300px]">
-                            <CommandEmpty>No filters found</CommandEmpty>
-                            {suggestedFilters.length > 0 && !searchQuery && (
-                              <>
-                                <CommandGroup heading="Suggested">
-                                  {suggestedFilters[0].filters.map((filterItem: Filters) => (
-                                    <CommandItem
-                                      key={filterItem.value}
-                                      onSelect={() => {
-                                        handleFilterToggle(filterItem.value);
-                                        setSearchQuery('');
-                                        setIsCommandOpen(false);
-                                      }}
-                                    >
-                                      <FilterItem filter={filterItem} />
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                                {suggestedFilters.length > 0 && <CommandSeparator />}
-                              </>
-                            )}
-                            {filteredFilters.length > 0 && (
-                              <CommandGroup>
-                                {filteredFilters.map((filter) => (
+                        <CommandList className="max-h-[300px]">
+                          <CommandEmpty>No filters found</CommandEmpty>
+                          {suggestedFilters.length > 0 && !searchQuery && (
+                            <>
+                              <CommandGroup heading="Suggested">
+                                {suggestedFilters[0].filters.map((filterItem: Filters) => (
                                   <CommandItem
-                                    key={filter.value}
+                                    key={filterItem.value}
                                     onSelect={() => {
-                                      handleFilterToggle(filter.value);
+                                      handleFilterToggle(filterItem.value);
                                       setSearchQuery('');
                                       setIsCommandOpen(false);
                                     }}
                                   >
-                                    <FilterItem filter={filter} />
+                                    <FilterItem filter={filterItem} />
                                   </CommandItem>
                                 ))}
                               </CommandGroup>
-                            )}
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </FormControl>
-              </FormItem>
+                              {suggestedFilters.length > 0 && <CommandSeparator />}
+                            </>
+                          )}
+                          {filteredFilters.length > 0 && (
+                            <CommandGroup>
+                              {filteredFilters.map((filter) => (
+                                <CommandItem
+                                  key={filter.value}
+                                  onSelect={() => {
+                                    handleFilterToggle(filter.value);
+                                    setSearchQuery('');
+                                    setIsCommandOpen(false);
+                                  }}
+                                >
+                                  <FilterItem filter={filter} />
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          )}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
 
               <ReorderFiltersGroup
                 variables={variables}

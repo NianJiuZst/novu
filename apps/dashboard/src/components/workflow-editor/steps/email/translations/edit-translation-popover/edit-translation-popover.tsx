@@ -4,7 +4,7 @@ import { RiDeleteBin2Line, RiErrorWarningLine, RiListView, RiQuestionLine } from
 import { TranslateVariableIcon } from '@/components/icons/translate-variable';
 import { Button } from '@/components/primitives/button';
 import { LinkButton } from '@/components/primitives/button-link';
-import { FormControl, FormItem, FormMessagePure } from '@/components/primitives/form/form';
+import { FormMessagePure } from '@/components/primitives/form/form';
 import { InputPure, InputRoot, InputWrapper } from '@/components/primitives/input';
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/primitives/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';
@@ -88,67 +88,65 @@ const TranslationKeyInput = ({
   };
 
   return (
-    <FormItem>
-      <FormControl>
-        <div className="space-y-1">
-          <div className="flex w-full items-center justify-between gap-1">
-            <label className="text-text-sub text-label-xs flex items-center gap-1">
-              Translation key
-              <span className="text-text-soft bg-neutral-alpha-50 text-label-2xs rounded px-1.5 py-0.5 font-medium">
-                {DEFAULT_LOCALE}
-              </span>
-              <Tooltip>
-                <TooltipTrigger className="relative cursor-pointer">
-                  <RiQuestionLine className="text-text-soft size-4" />
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
-                  <p className="text-label-xs">
-                    A unique identifier for this translation. Keys are added to the default language ({DEFAULT_LOCALE}).
-                    Use dot notation for nested keys (e.g., "welcome.title" or "buttons.submit").
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </label>
-            <LinkButton
-              variant="gray"
-              size="sm"
-              className="text-label-2xs text-xs"
-              leadingIcon={RiListView}
-              onClick={handleManageTranslationsClick}
-            >
-              View & manage translations ↗
-            </LinkButton>
-          </div>
-          <InputRoot size="2xs" hasError={hasError && !isLoading}>
-            <InputWrapper>
-              <TranslateVariableIcon className="h-4 w-4 shrink-0 text-gray-500" />
-              <InputPure
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className="text-xs"
-                placeholder={isLoading ? 'Loading translation keys...' : 'Enter translation key'}
-                onKeyDown={onKeyDown}
-                disabled={isLoading}
-              />
-            </InputWrapper>
-          </InputRoot>
-          {hasError && !isLoading && (
-            <FormMessagePure hasError={true} className="text-label-2xs mb-0.5 mt-0.5">
-              <RiErrorWarningLine className="h-3 w-3" />
-              {errorMessage}{' '}
-              <LinkButton
-                variant="modifiable"
-                size="sm"
-                className="text-label-2xs"
-                onClick={onAddTranslationKey}
-                disabled={isCreatingKey}
-              >
-                <span className="underline">{isCreatingKey ? 'Adding...' : 'Add translation key ↗'}</span>
-              </LinkButton>
-            </FormMessagePure>
-          )}
+    <div className="space-y-1.5">
+      <div className="space-y-1">
+        <div className="flex w-full items-center justify-between gap-1">
+          <label className="text-text-sub text-label-xs flex items-center gap-1">
+            Translation key
+            <span className="text-text-soft bg-neutral-alpha-50 text-label-2xs rounded px-1.5 py-0.5 font-medium">
+              {DEFAULT_LOCALE}
+            </span>
+            <Tooltip>
+              <TooltipTrigger className="relative cursor-pointer">
+                <RiQuestionLine className="text-text-soft size-4" />
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs">
+                <p className="text-label-xs">
+                  A unique identifier for this translation. Keys are added to the default language ({DEFAULT_LOCALE}).
+                  Use dot notation for nested keys (e.g., "welcome.title" or "buttons.submit").
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </label>
+          <LinkButton
+            variant="gray"
+            size="sm"
+            className="text-label-2xs text-xs"
+            leadingIcon={RiListView}
+            onClick={handleManageTranslationsClick}
+          >
+            View & manage translations ↗
+          </LinkButton>
         </div>
-      </FormControl>
+        <InputRoot size="2xs" hasError={hasError && !isLoading}>
+          <InputWrapper>
+            <TranslateVariableIcon className="h-4 w-4 shrink-0 text-gray-500" />
+            <InputPure
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              className="text-xs"
+              placeholder={isLoading ? 'Loading translation keys...' : 'Enter translation key'}
+              onKeyDown={onKeyDown}
+              disabled={isLoading}
+            />
+          </InputWrapper>
+        </InputRoot>
+        {hasError && !isLoading && (
+          <FormMessagePure hasError={true} className="text-label-2xs mb-0.5 mt-0.5">
+            <RiErrorWarningLine className="h-3 w-3" />
+            {errorMessage}{' '}
+            <LinkButton
+              variant="modifiable"
+              size="sm"
+              className="text-label-2xs"
+              onClick={onAddTranslationKey}
+              disabled={isCreatingKey}
+            >
+              <span className="underline">{isCreatingKey ? 'Adding...' : 'Add translation key ↗'}</span>
+            </LinkButton>
+          </FormMessagePure>
+        )}
+      </div>
 
       <TranslationDrawer
         isOpen={isDrawerOpen}
@@ -156,7 +154,7 @@ const TranslationKeyInput = ({
         resourceType={resourceType}
         resourceId={resourceId}
       />
-    </FormItem>
+    </div>
   );
 };
 
@@ -175,46 +173,44 @@ const TranslationValueInput = ({
   isSaving: boolean;
   translationValueInput: TranslationValueInputComponent;
 }) => (
-  <FormItem>
-    <FormControl>
-      <div className="space-y-1">
-        <div className="flex items-center justify-between">
-          <label className="text-text-sub text-label-xs flex items-center gap-1">
-            Value
-            <Tooltip>
-              <TooltipTrigger className="relative cursor-pointer">
-                <RiQuestionLine className="text-text-soft size-4" />
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs">
-                <p className="text-label-xs">
-                  The translated text content. Use {'{{'} to insert dynamic variables from your workflow payload or step
-                  data.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </label>
-          {isSaving && (
-            <span className="text-text-soft text-label-2xs flex items-center gap-1">
-              <div className="h-2 w-2 animate-spin rounded-full border border-gray-300 border-t-gray-600" />
-              Saving...
-            </span>
-          )}
-        </div>
-        <InputRoot size="2xs" className="min-h-16 overflow-visible">
-          <TranslationValueInputComponent
-            value={value}
-            onChange={onChange}
-            variables={variables}
-            isAllowedVariable={isAllowedVariable}
-            placeholder="Type your translation text here."
-            multiline={true}
-            size="2xs"
-            className="resize-none [&_.cm-scroller]:max-h-32 [&_.cm-scroller]:overflow-y-auto"
-          />
-        </InputRoot>
+  <div className="space-y-1.5">
+    <div className="space-y-1">
+      <div className="flex items-center justify-between">
+        <label className="text-text-sub text-label-xs flex items-center gap-1">
+          Value
+          <Tooltip>
+            <TooltipTrigger className="relative cursor-pointer">
+              <RiQuestionLine className="text-text-soft size-4" />
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs">
+              <p className="text-label-xs">
+                The translated text content. Use {'{{'} to insert dynamic variables from your workflow payload or step
+                data.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </label>
+        {isSaving && (
+          <span className="text-text-soft text-label-2xs flex items-center gap-1">
+            <div className="h-2 w-2 animate-spin rounded-full border border-gray-300 border-t-gray-600" />
+            Saving...
+          </span>
+        )}
       </div>
-    </FormControl>
-  </FormItem>
+      <InputRoot size="2xs" className="min-h-16 overflow-visible">
+        <TranslationValueInputComponent
+          value={value}
+          onChange={onChange}
+          variables={variables}
+          isAllowedVariable={isAllowedVariable}
+          placeholder="Type your translation text here."
+          multiline={true}
+          size="2xs"
+          className="resize-none [&_.cm-scroller]:max-h-32 [&_.cm-scroller]:overflow-y-auto"
+        />
+      </InputRoot>
+    </div>
+  </div>
 );
 
 export const EditTranslationPopover: React.FC<EditTranslationPopoverProps> = ({
