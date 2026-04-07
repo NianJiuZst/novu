@@ -1,5 +1,6 @@
 import { createRedisState } from '@chat-adapter/state-redis';
 import { createSlackAdapter } from '@chat-adapter/slack';
+import { createWhatsAppAdapter } from '@chat-adapter/whatsapp';
 import type { Novu } from '@novu/api';
 import { after } from 'next/server';
 import { Chat } from 'chat';
@@ -281,6 +282,14 @@ export type ServeAgentsOptions = {
   singleSlackConnectionFallback?: boolean;
 };
 
+function detectPlatform(threadId: string): string {
+  if (threadId.startsWith('whatsapp:')) {
+    return 'whatsapp';
+  }
+
+  return 'slack';
+}
+
 function buildDefaultAdapters(platforms?: string[]): ChatAdapters {
   const map = {} as ChatAdapters;
   const list = platforms?.length ? platforms : ['slack'];
@@ -288,6 +297,9 @@ function buildDefaultAdapters(platforms?: string[]): ChatAdapters {
   for (const platform of list) {
     if (platform === 'slack') {
       map.slack = createSlackAdapter();
+    }
+    if (platform === 'whatsapp') {
+      map.whatsapp = createWhatsAppAdapter();
     }
   }
 
@@ -392,7 +404,7 @@ export function serveAgents(options: ServeAgentsOptions) {
         ...persist,
         subscriberId,
         agentId: primaryAgent.id,
-        platform: 'slack',
+        platform: detectPlatform(threadId),
         platformThreadId: threadId,
       });
       conversation.state.novuConversationId = id;
@@ -408,6 +420,7 @@ export function serveAgents(options: ServeAgentsOptions) {
 
   async function persistNovuConversationMessages(
     conversationId: string | undefined,
+    platform: string,
     entries: Array<{
       role: 'user' | 'assistant' | 'system';
       content: string;
@@ -441,7 +454,7 @@ export function serveAgents(options: ServeAgentsOptions) {
           role: entry.role,
           content: entry.content,
           senderName: entry.senderName,
-          platform: 'slack',
+          platform,
           platformMessageId: entry.platformMessageId,
         });
       } catch (err) {
@@ -552,18 +565,40 @@ export function serveAgents(options: ServeAgentsOptions) {
       return resolvedId;
     }
 
+    async function resolveSubscriber(
+      threadId: string,
+      author: MessageAuthor
+    ): Promise<string> {
+      const platform = detectPlatform(threadId);
+
+      if (platform === 'whatsapp') {
+        if (options.resolveSubscriberId) {
+          const custom = await options.resolveSubscriberId(author.userId, 'whatsapp');
+
+          if (custom) {
+            return custom;
+          }
+        }
+
+        return author.userId;
+      }
+
+      return resolveSubscriberForSlackMessage(author);
+    }
+
     chatInstance.onNewMention(async (thread, message) => {
       console.log(`[${primaryAgent.id}] New mention from ${message.author.fullName} in ${thread.id}`);
 
       await thread.subscribe();
 
+      const platform = detectPlatform(thread.id);
       const conversation = getOrCreateConversation(thread.id, message.author.userId);
 
       if (!conversation.participants.includes(message.author.userId)) {
         conversation.participants.push(message.author.userId);
       }
 
-      const resolvedSubscriberId = await resolveSubscriberForSlackMessage(message.author);
+      const resolvedSubscriberId = await resolveSubscriber(thread.id, message.author);
 
       const subscriber = {
         subscriberId: resolvedSubscriberId,
@@ -573,7 +608,7 @@ export function serveAgents(options: ServeAgentsOptions) {
       const ensuredId = await ensureNovuConversationRecord(conversation, resolvedSubscriberId, thread.id);
       const novuConversationId = resolveNovuConversationId(conversation, ensuredId);
 
-      await persistNovuConversationMessages(novuConversationId, [
+      await persistNovuConversationMessages(novuConversationId, platform, [
         {
           role: 'user',
           content: message.text,
@@ -590,7 +625,7 @@ export function serveAgents(options: ServeAgentsOptions) {
 
       const text = getResponseText(response);
 
-      await persistNovuConversationMessages(novuConversationId, [
+      await persistNovuConversationMessages(novuConversationId, platform, [
         { role: 'assistant', content: text, senderName: primaryAgent.id },
       ]);
 
@@ -614,13 +649,14 @@ export function serveAgents(options: ServeAgentsOptions) {
     chatInstance.onSubscribedMessage(async (thread, message) => {
       console.log(`[${primaryAgent.id}] Message from ${message.author.fullName}: ${message.text.slice(0, 80)}`);
 
+      const platform = detectPlatform(thread.id);
       const conversation = getOrCreateConversation(thread.id, message.author.userId);
 
       if (!conversation.participants.includes(message.author.userId)) {
         conversation.participants.push(message.author.userId);
       }
 
-      const resolvedSubscriberId = await resolveSubscriberForSlackMessage(message.author);
+      const resolvedSubscriberId = await resolveSubscriber(thread.id, message.author);
 
       const subscriber = {
         subscriberId: resolvedSubscriberId,
@@ -630,7 +666,7 @@ export function serveAgents(options: ServeAgentsOptions) {
       const ensuredId = await ensureNovuConversationRecord(conversation, resolvedSubscriberId, thread.id);
       const novuConversationId = resolveNovuConversationId(conversation, ensuredId);
 
-      await persistNovuConversationMessages(novuConversationId, [
+      await persistNovuConversationMessages(novuConversationId, platform, [
         {
           role: 'user',
           content: message.text,
@@ -652,7 +688,7 @@ export function serveAgents(options: ServeAgentsOptions) {
 
       const text = getResponseText(response);
 
-      await persistNovuConversationMessages(novuConversationId, [
+      await persistNovuConversationMessages(novuConversationId, platform, [
         { role: 'assistant', content: text, senderName: primaryAgent.id },
       ]);
 
@@ -676,7 +712,7 @@ export function serveAgents(options: ServeAgentsOptions) {
     return chatInstance;
   }
 
-  return async function POST(
+  async function handleWebhook(
     request: Request,
     context: { params: Promise<{ platform: string }> }
   ): Promise<Response> {
@@ -697,5 +733,10 @@ export function serveAgents(options: ServeAgentsOptions) {
         });
       },
     });
-  };
+  }
+
+  handleWebhook.GET = handleWebhook;
+  handleWebhook.POST = handleWebhook;
+
+  return handleWebhook;
 }

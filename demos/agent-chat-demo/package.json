@@ -10,6 +10,7 @@
   "dependencies": {
     "@chat-adapter/slack": "latest",
     "@chat-adapter/state-redis": "latest",
+    "@chat-adapter/whatsapp": "^4.23.0",
     "@novu/api": "^3.14.2",
     "@novu/framework": "latest",
     "@novu/react": "workspace:*",
