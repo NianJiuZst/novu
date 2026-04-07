@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@chat-adapter/github": "^4.23.0",
+    "@chat-adapter/shared": "^4.23.0",
     "@chat-adapter/slack": "latest",
     "@chat-adapter/state-redis": "latest",
     "@chat-adapter/whatsapp": "^4.23.0",
@@ -16,6 +17,7 @@
     "@novu/framework": "latest",
     "@novu/react": "workspace:*",
     "@novu/shared": "workspace:*",
+    "@resend/chat-sdk-adapter": "^0.1.1",
     "chat": "latest",
     "next": "15",
     "openai": "latest",

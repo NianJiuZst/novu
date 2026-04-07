@@ -24,7 +24,7 @@ export const wineAgent = agent('wine-bot', {
   },
 
   onMessage: async ({ message, conversation, history, novu, subscriber }) => {
-    console.log('subscriber!!', subscriber);
+    console.log('subscriber data', subscriber);
     const chatMessages: OpenAI.ChatCompletionMessageParam[] = [
       { role: 'system', content: SYSTEM_PROMPT },
       ...history.map(
@@ -44,32 +44,6 @@ export const wineAgent = agent('wine-bot', {
 
     const responseText =
       completion.choices[0].message.content ?? 'Hmm, I seem to have lost my train of thought. Could you ask again?';
-    novu.state.increment('messageCount');
-
-    const madeRecommendation = /\$\d+|\bregion\b|\bvineyard\b|\bwinery\b|\bgrape\b/i.test(responseText);
-    if (madeRecommendation) {
-      novu.state.increment('recommendationCount');
-
-      const recCount = ((conversation.state.recommendationCount as number) ?? 0) + 1;
-      if (recCount >= 3) {
-        novu.trigger('wine-recommendations-ready', {
-          to: { subscriberId: subscriber.subscriberId },
-          payload: {
-            conversationId: conversation.id,
-            recommendationCount: recCount,
-            lastRecommendation: responseText.slice(0, 200),
-          },
-        });
-      }
-    }
-
-    const tasteKeywords = ['dry', 'sweet', 'bold', 'light', 'fruity', 'oaky', 'tannic', 'crisp'];
-    const mentioned = tasteKeywords.filter((k) => message.text.toLowerCase().includes(k));
-    if (mentioned.length > 0) {
-      const current = (conversation.state.preferences as string[]) ?? [];
-      const updated = [...new Set([...current, ...mentioned])];
-      novu.state.set({ preferences: updated });
-    }
 
     if (/\b(cheers|thanks|thank you)\b/i.test(message.text)) {
       novu.resolve('User said cheers');
@@ -91,6 +65,6 @@ export const wineAgent = agent('wine-bot', {
   },
 
   config: {
-    platforms: ['slack', 'whatsapp', 'github'],
+    platforms: ['slack', 'whatsapp', 'github', 'resend'],
   },
 });

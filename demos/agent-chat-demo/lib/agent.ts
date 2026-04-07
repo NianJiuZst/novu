@@ -3,6 +3,7 @@ import { createSlackAdapter } from '@chat-adapter/slack';
 import { createRedisState } from '@chat-adapter/state-redis';
 import { createWhatsAppAdapter } from '@chat-adapter/whatsapp';
 import type { Novu } from '@novu/api';
+import { createResendAdapter } from '@resend/chat-sdk-adapter';
 import { Chat } from 'chat';
 import { after } from 'next/server';
 
@@ -284,12 +285,14 @@ export type ServeAgentsOptions = {
 };
 
 function detectPlatform(threadId: string): string {
-  console.log('threadId', threadId);
   if (threadId.startsWith('whatsapp:')) {
     return 'whatsapp';
   }
   if (threadId.startsWith('github:')) {
     return 'github';
+  }
+  if (threadId.startsWith('resend:')) {
+    return 'resend';
   }
 
   return 'slack';
@@ -309,6 +312,12 @@ function buildDefaultAdapters(platforms?: string[]): ChatAdapters {
     if (platform === 'github') {
       map.github = createGitHubAdapter({
         botUserId: process.env.GITHUB_BOT_USER_ID ? Number(process.env.GITHUB_BOT_USER_ID) : undefined,
+      });
+    }
+    if (platform === 'resend') {
+      map.resend = createResendAdapter({
+        fromAddress: process.env.RESEND_FROM_ADDRESS ?? '',
+        fromName: process.env.RESEND_FROM_NAME,
       });
     }
   }
@@ -594,6 +603,25 @@ export function serveAgents(options: ServeAgentsOptions) {
       return phoneNumber;
     }
 
+    async function resolveResendSubscriber(email: string): Promise<string> {
+      try {
+        const res = await getNovuClient().subscribers.search({ email, limit: 1 });
+        const match = res.result?.data?.[0];
+
+        if (match?.subscriberId) {
+          console.log(`[resend] resolved email ${email} → subscriber ${match.subscriberId}`);
+
+          return match.subscriberId;
+        }
+      } catch (err) {
+        console.error(`[resend] subscriber search by email failed:`, err);
+      }
+
+      console.warn(`[resend] no subscriber found for email ${email}, falling back to email as subscriberId`);
+
+      return email;
+    }
+
     async function resolveSubscriber(threadId: string, author: MessageAuthor): Promise<string> {
       const platform = detectPlatform(threadId);
 
@@ -609,10 +637,12 @@ export function serveAgents(options: ServeAgentsOptions) {
         return resolveWhatsAppSubscriber(author.userId);
       }
 
-      console.log('platform', platform);
       if (platform === 'github') {
-        console.log('github', author);
         return author.userName || author.userId;
+      }
+
+      if (platform === 'resend') {
+        return resolveResendSubscriber(author.userId);
       }
 
       return resolveSubscriberForSlackMessage(author);
@@ -709,7 +739,11 @@ export function serveAgents(options: ServeAgentsOptions) {
 
       const history = await buildHistory(thread);
 
-      await thread.startTyping();
+      try {
+        await thread.startTyping();
+      } catch (err) {
+        console.error(`[${platform}] start typing failed:`, err);
+      }
 
       const { response, signals } = await primaryAgent.handleMessage({
         message: { text: message.text, author: message.author },
