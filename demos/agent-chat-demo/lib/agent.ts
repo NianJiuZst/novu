@@ -111,15 +111,15 @@ type AgentConfig = {
 };
 
 type AgentHandlers = {
-  onMessage: (ctx: AgentMessageContext) => Promise<string | RichResponse>;
-  onSubscribe?: (ctx: AgentLifecycleContext) => Promise<string | RichResponse | void>;
+  onMessage: (ctx: AgentMessageContext) => Promise<string | RichResponse | AsyncIterable<string>>;
+  onSubscribe?: (ctx: AgentLifecycleContext) => Promise<string | RichResponse | AsyncIterable<string> | void>;
   onIdle?: (ctx: AgentLifecycleContext) => Promise<string | void>;
   onResolve?: (ctx: AgentLifecycleContext) => Promise<void>;
   config?: AgentConfig;
 };
 
 export type AgentHandleResult = {
-  response: string | RichResponse | void;
+  response: string | RichResponse | AsyncIterable<string> | void;
   signals: Signal[];
 };
 
@@ -546,8 +546,16 @@ export function serveAgents(options: ServeAgentsOptions) {
       }
     }
 
-    function getResponseText(response: string | RichResponse | void): string {
+    function isAsyncIterableString(value: unknown): value is AsyncIterable<string> {
+      return value != null && typeof value === 'object' && Symbol.asyncIterator in value;
+    }
+
+    function getResponseText(response: string | RichResponse | AsyncIterable<string> | void): string {
       if (!response) {
+        return '';
+      }
+
+      if (isAsyncIterableString(response)) {
         return '';
       }
 
@@ -558,8 +566,8 @@ export function serveAgents(options: ServeAgentsOptions) {
       return response.text;
     }
 
-    function getResponseCard(response: string | RichResponse | void): ChatElement | undefined {
-      if (!response || typeof response === 'string') {
+    function getResponseCard(response: string | RichResponse | AsyncIterable<string> | void): ChatElement | undefined {
+      if (!response || typeof response === 'string' || isAsyncIterableString(response)) {
         return undefined;
       }
 
@@ -704,12 +712,16 @@ export function serveAgents(options: ServeAgentsOptions) {
       const text = getResponseText(response);
       const card = getResponseCard(response);
 
-      await persistNovuConversationMessages(novuConversationId, platform, [
-        { role: 'assistant', content: text, senderName: primaryAgent.id },
-      ]);
+      if (!isAsyncIterableString(response)) {
+        await persistNovuConversationMessages(novuConversationId, platform, [
+          { role: 'assistant', content: text, senderName: primaryAgent.id },
+        ]);
+      }
 
       if (card) {
         await thread.post(card);
+      } else if (isAsyncIterableString(response)) {
+        await thread.post(response);
       } else if (text) {
         await thread.post(text);
       }
@@ -776,12 +788,16 @@ export function serveAgents(options: ServeAgentsOptions) {
       const text = getResponseText(response);
       const card = getResponseCard(response);
 
-      await persistNovuConversationMessages(novuConversationId, platform, [
-        { role: 'assistant', content: text, senderName: primaryAgent.id },
-      ]);
+      if (!isAsyncIterableString(response)) {
+        await persistNovuConversationMessages(novuConversationId, platform, [
+          { role: 'assistant', content: text, senderName: primaryAgent.id },
+        ]);
+      }
 
       if (card) {
         await thread.post(card);
+      } else if (isAsyncIterableString(response)) {
+        await thread.post(response);
       } else if (text) {
         await thread.post(text);
       }

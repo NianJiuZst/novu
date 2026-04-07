@@ -28,34 +28,33 @@ const SYSTEM_PROMPT = `You are a friendly and knowledgeable wine sommelier bot.
 You help users discover wines, offer food pairing suggestions, explain tasting notes,
 and recommend bottles for any occasion or budget. Keep responses concise for chat (2-4 short paragraphs max).
 If the user's request is vague (e.g. "recommend a wine"), ask a short clarifying question about their preferences — occasion, food pairing, budget, or flavor profile — before making a recommendation.
-When recommending, suggest exactly ONE wine — your single best pick for the situation.
-Use a warm, approachable tone — not pretentious.
+When you have a concrete wine to suggest, call the recommend_wine tool with structured details (exactly one wine — your single best pick). For all other replies, respond in plain text only.
+Use a warm, approachable tone — not pretentious.`;
 
-IMPORTANT: You MUST respond with valid JSON. Every response has all fields — use "type" to indicate the kind of reply.
+const RECOMMEND_WINE_TOOL: OpenAI.ChatCompletionTool = {
+  type: 'function',
+  function: {
+    name: 'recommend_wine',
+    description:
+      'Recommend a specific wine to the user. Only call this when you have a concrete suggestion with grape, region, and price.',
+    parameters: {
+      type: 'object',
+      required: ['intro', 'name', 'grape', 'region', 'priceRange', 'tastingNotes', 'foodPairing'],
+      properties: {
+        intro: { type: 'string', description: 'Short intro sentence about why you picked this wine' },
+        name: { type: 'string' },
+        grape: { type: 'string' },
+        region: { type: 'string' },
+        priceRange: { type: 'string' },
+        tastingNotes: { type: 'string' },
+        foodPairing: { type: 'string', description: 'Food pairing or empty string if none' },
+      },
+    },
+  },
+};
 
-For conversational replies (questions, clarifications, general chat):
-{ "type": "text", "content": "your message here", "intro": "", "wines": [] }
-
-For specific wine recommendations:
-{
-  "type": "recommendation",
-  "content": "",
-  "intro": "A short intro sentence about why you're recommending these",
-  "wines": [
-    {
-      "name": "Wine Name",
-      "grape": "Grape variety",
-      "region": "Region, Country",
-      "priceRange": "$XX–$YY",
-      "tastingNotes": "Brief tasting notes",
-      "foodPairing": "What it pairs well with, or empty string if none"
-    }
-  ]
-}
-
-Only use "recommendation" when you have specific wines to suggest. Use "text" for everything else.`;
-
-type WineRecommendation = {
+type RecommendWineArgs = {
+  intro: string;
   name: string;
   grape: string;
   region: string;
@@ -64,98 +63,87 @@ type WineRecommendation = {
   foodPairing: string;
 };
 
-type AiResponse = {
-  type: 'text' | 'recommendation';
-  content: string;
-  intro: string;
-  wines: WineRecommendation[];
-};
-
-const RESPONSE_SCHEMA: OpenAI.ResponseFormatJSONSchema['json_schema'] = {
-  name: 'wine_response',
-  strict: true,
-  schema: {
-    type: 'object',
-    required: ['type', 'content', 'intro', 'wines'],
-    additionalProperties: false,
-    properties: {
-      type: { type: 'string', enum: ['text', 'recommendation'] },
-      content: { type: 'string' },
-      intro: { type: 'string' },
-      wines: {
-        type: 'array',
-        maxItems: 1,
-        items: {
-          type: 'object',
-          properties: {
-            name: { type: 'string' },
-            grape: { type: 'string' },
-            region: { type: 'string' },
-            priceRange: { type: 'string' },
-            tastingNotes: { type: 'string' },
-            foodPairing: { type: 'string' },
-          },
-          required: ['name', 'grape', 'region', 'priceRange', 'tastingNotes', 'foodPairing'],
-          additionalProperties: false,
-        },
-      },
-    },
-  },
-};
-
 const FALLBACK_REPLY = 'Hmm, I seem to have lost my train of thought. Could you ask again?';
 
-function renderWineCard(rec: AiResponse): ChatElement {
+function renderWineCard(rec: RecommendWineArgs): ChatElement {
   return (
     <Card title="🍷 Wine Recommendation">
       <CardText>{rec.intro}</CardText>
-      {rec.wines.map((wine, i) => (
-        // eslint-disable-next-line react/no-array-index-key
-        <Section key={i}>
-          <Divider />
-          <CardText style="bold">{wine.name}</CardText>
-          <Fields>
-            <Field label="Grape" value={wine.grape} />
-            <Field label="Region" value={wine.region} />
-            <Field label="Price" value={wine.priceRange} />
-            {wine.foodPairing ? <Field label="Pairs with" value={wine.foodPairing} /> : null}
-          </Fields>
-          <CardText>{wine.tastingNotes}</CardText>
-          <Actions>
-            <Button id={`buy_wine_${i}`} style="primary" value={wine.name}>🛒 Buy Now</Button>
-          </Actions>
-        </Section>
-      ))}
+      <Section>
+        <Divider />
+        <CardText style="bold">{rec.name}</CardText>
+        <Fields>
+          <Field label="Grape" value={rec.grape} />
+          <Field label="Region" value={rec.region} />
+          <Field label="Price" value={rec.priceRange} />
+          {rec.foodPairing ? <Field label="Pairs with" value={rec.foodPairing} /> : null}
+        </Fields>
+        <CardText>{rec.tastingNotes}</CardText>
+        <Actions>
+          <Button id="buy_wine_0" style="primary" value={rec.name}>🛒 Buy Now</Button>
+        </Actions>
+      </Section>
     </Card>
   );
 }
 
-function recommendationToPlainText(rec: AiResponse): string {
-  const lines = [rec.intro, ''];
+function recommendationToPlainText(rec: RecommendWineArgs): string {
+  const lines = [
+    rec.intro,
+    '',
+    `*${rec.name}*`,
+    `  Grape: ${rec.grape} · Region: ${rec.region} · Price: ${rec.priceRange}`,
+    `  ${rec.tastingNotes}`,
+  ];
 
-  for (const wine of rec.wines) {
-    lines.push(
-      `*${wine.name}*`,
-      `  Grape: ${wine.grape} · Region: ${wine.region} · Price: ${wine.priceRange}`,
-      `  ${wine.tastingNotes}`
-    );
-
-    if (wine.foodPairing) {
-      lines.push(`  🍽️ Pairs with: ${wine.foodPairing}`);
-    }
-
-    lines.push('');
+  if (rec.foodPairing) {
+    lines.push(`  Pairs with: ${rec.foodPairing}`);
   }
 
   return lines.join('\n').trim();
 }
 
-function parseAiResponse(raw: string): AiResponse {
-  try {
-    return JSON.parse(raw) as AiResponse;
-  } catch {
-    return { type: 'text', content: raw, intro: '', wines: [] };
+type ToolCallMerge = Record<number, { id?: string; name?: string; arguments: string }>;
+
+function mergeToolCallDeltas(
+  toolCalls: NonNullable<OpenAI.ChatCompletionChunk['choices'][0]['delta']['tool_calls']>,
+  acc: ToolCallMerge
+): void {
+  for (const tc of toolCalls) {
+    const idx = tc.index;
+
+    if (acc[idx] === undefined) {
+      acc[idx] = { arguments: '' };
+    }
+
+    if (tc.id) {
+      acc[idx].id = tc.id;
+    }
+
+    if (tc.function?.name) {
+      acc[idx].name = tc.function.name;
+    }
+
+    if (tc.function?.arguments) {
+      acc[idx].arguments += tc.function.arguments;
+    }
   }
+}
+
+function parseRecommendWineTool(acc: ToolCallMerge): RecommendWineArgs | null {
+  for (const key of Object.keys(acc)) {
+    const entry = acc[Number(key)];
+
+    if (entry?.name === 'recommend_wine' && entry.arguments) {
+      try {
+        return JSON.parse(entry.arguments) as RecommendWineArgs;
+      } catch {
+        return null;
+      }
+    }
+  }
+
+  return null;
 }
 
 async function attachmentToBuffer(att: Attachment): Promise<Buffer | null> {
@@ -242,7 +230,7 @@ async function generateReply(
   userMessage: string,
   systemPrefix?: string,
   attachments?: Attachment[]
-): Promise<string | RichResponse> {
+): Promise<string | RichResponse | AsyncIterable<string>> {
   const systemContent = systemPrefix ? `${systemPrefix}\n\n${SYSTEM_PROMPT}` : SYSTEM_PROMPT;
 
   const userContent = await buildUserContent(userMessage, attachments);
@@ -258,29 +246,56 @@ async function generateReply(
     { role: 'user', content: userContent },
   ];
 
-  const completion = await getOpenAI().chat.completions.create({
+  const stream = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     messages: chatMessages,
     max_tokens: 800,
-    response_format: { type: 'json_schema', json_schema: RESPONSE_SCHEMA },
+    stream: true,
+    tools: [RECOMMEND_WINE_TOOL],
+    tool_choice: 'auto',
   });
 
-  const rawContent = completion.choices[0].message.content;
+  const chunks: OpenAI.ChatCompletionChunk[] = [];
 
-  if (!rawContent) {
-    return FALLBACK_REPLY;
+  for await (const chunk of stream) {
+    chunks.push(chunk);
   }
 
-  const aiResponse = parseAiResponse(rawContent);
+  const toolMerge: ToolCallMerge = {};
+  const contentPieces: string[] = [];
 
-  if (aiResponse.type === 'recommendation') {
+  for (const chunk of chunks) {
+    const delta = chunk.choices[0]?.delta;
+
+    if (delta?.tool_calls?.length) {
+      mergeToolCallDeltas(delta.tool_calls, toolMerge);
+    }
+
+    if (delta?.content) {
+      contentPieces.push(delta.content);
+    }
+  }
+
+  const args = parseRecommendWineTool(toolMerge);
+
+  if (args) {
     return {
-      text: recommendationToPlainText(aiResponse),
-      card: renderWineCard(aiResponse),
+      text: recommendationToPlainText(args),
+      card: renderWineCard(args),
     };
   }
 
-  return aiResponse.content;
+  if (contentPieces.length === 0) {
+    return FALLBACK_REPLY;
+  }
+
+  async function* replayContentStream(): AsyncGenerator<string> {
+    for (const piece of contentPieces) {
+      yield piece;
+    }
+  }
+
+  return replayContentStream();
 }
 
 export const wineAgent = agent('wine-bot', {
