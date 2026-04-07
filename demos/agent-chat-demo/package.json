@@ -8,6 +8,7 @@
     "start": "next start -p 4321"
   },
   "dependencies": {
+    "@chat-adapter/github": "^4.23.0",
     "@chat-adapter/slack": "latest",
     "@chat-adapter/state-redis": "latest",
     "@chat-adapter/whatsapp": "^4.23.0",

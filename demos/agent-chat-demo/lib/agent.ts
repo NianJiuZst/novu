@@ -1,9 +1,10 @@
-import { createRedisState } from '@chat-adapter/state-redis';
+import { createGitHubAdapter } from '@chat-adapter/github';
 import { createSlackAdapter } from '@chat-adapter/slack';
+import { createRedisState } from '@chat-adapter/state-redis';
 import { createWhatsAppAdapter } from '@chat-adapter/whatsapp';
 import type { Novu } from '@novu/api';
-import { after } from 'next/server';
 import { Chat } from 'chat';
+import { after } from 'next/server';
 
 import {
   appendNovuConversationMessage,
@@ -283,8 +284,12 @@ export type ServeAgentsOptions = {
 };
 
 function detectPlatform(threadId: string): string {
+  console.log('threadId', threadId);
   if (threadId.startsWith('whatsapp:')) {
     return 'whatsapp';
+  }
+  if (threadId.startsWith('github:')) {
+    return 'github';
   }
 
   return 'slack';
@@ -300,6 +305,11 @@ function buildDefaultAdapters(platforms?: string[]): ChatAdapters {
     }
     if (platform === 'whatsapp') {
       map.whatsapp = createWhatsAppAdapter();
+    }
+    if (platform === 'github') {
+      map.github = createGitHubAdapter({
+        botUserId: process.env.GITHUB_BOT_USER_ID ? Number(process.env.GITHUB_BOT_USER_ID) : undefined,
+      });
     }
   }
 
@@ -584,22 +594,25 @@ export function serveAgents(options: ServeAgentsOptions) {
       return phoneNumber;
     }
 
-    async function resolveSubscriber(
-      threadId: string,
-      author: MessageAuthor
-    ): Promise<string> {
+    async function resolveSubscriber(threadId: string, author: MessageAuthor): Promise<string> {
       const platform = detectPlatform(threadId);
 
-      if (platform === 'whatsapp') {
-        if (options.resolveSubscriberId) {
-          const custom = await options.resolveSubscriberId(author.userId, 'whatsapp');
+      if (options.resolveSubscriberId) {
+        const custom = await options.resolveSubscriberId(author.userId, platform);
 
-          if (custom) {
-            return custom;
-          }
+        if (custom) {
+          return custom;
         }
+      }
 
+      if (platform === 'whatsapp') {
         return resolveWhatsAppSubscriber(author.userId);
+      }
+
+      console.log('platform', platform);
+      if (platform === 'github') {
+        console.log('github', author);
+        return author.userName || author.userId;
       }
 
       return resolveSubscriberForSlackMessage(author);
