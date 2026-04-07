@@ -4,7 +4,7 @@ import { createRedisState } from '@chat-adapter/state-redis';
 import { createWhatsAppAdapter } from '@chat-adapter/whatsapp';
 import type { Novu } from '@novu/api';
 import { createResendAdapter } from '@resend/chat-sdk-adapter';
-import { Chat } from 'chat';
+import { Chat, type Thread, emoji } from 'chat';
 import { after } from 'next/server';
 
 import {
@@ -538,6 +538,14 @@ export function serveAgents(options: ServeAgentsOptions) {
       return messages;
     }
 
+    async function reactToRootMessage(thread: Thread): Promise<void> {
+      for await (const msg of thread.allMessages) {
+        const sent = thread.createSentMessageFromMessage(msg);
+        await sent.addReaction(emoji.check);
+        break;
+      }
+    }
+
     function getResponseText(response: string | RichResponse | void): string {
       if (!response) {
         return '';
@@ -700,6 +708,8 @@ export function serveAgents(options: ServeAgentsOptions) {
       const hasResolve = signals.some((s) => s.type === 'resolve');
 
       if (hasResolve) {
+        await reactToRootMessage(thread);
+
         const { signals: resolveSignals } = await primaryAgent.handleResolve({ conversation, subscriber });
         await executeSignals(resolveSignals, conversation, saveConversation, getNovuClient());
         await thread.unsubscribe();
@@ -767,6 +777,8 @@ export function serveAgents(options: ServeAgentsOptions) {
       const hasResolve = signals.some((s) => s.type === 'resolve');
 
       if (hasResolve) {
+        await reactToRootMessage(thread);
+
         const { signals: resolveSignals } = await primaryAgent.handleResolve({ conversation, subscriber });
         await executeSignals(resolveSignals, conversation, saveConversation, getNovuClient());
         await thread.unsubscribe();
