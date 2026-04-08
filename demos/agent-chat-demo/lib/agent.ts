@@ -622,6 +622,16 @@ export function serveAgents(options: ServeAgentsOptions) {
       return value != null && typeof value === 'object' && Symbol.asyncIterator in value;
     }
 
+    async function collectAsyncIterableString(iter: AsyncIterable<string>): Promise<string> {
+      let out = '';
+
+      for await (const chunk of iter) {
+        out += chunk;
+      }
+
+      return out;
+    }
+
     function getResponseText(response: string | RichResponse | AsyncIterable<string>): string {
       if (!response) {
         return '';
@@ -644,6 +654,54 @@ export function serveAgents(options: ServeAgentsOptions) {
       }
 
       return response.card;
+    }
+
+    async function deliverAssistantReply(params: {
+      novuConversationId: string | undefined;
+      platform: string;
+      thread: Thread;
+      response: string | RichResponse | AsyncIterable<string>;
+      assistantSenderName: string;
+    }): Promise<void> {
+      const { novuConversationId, platform, thread, response, assistantSenderName } = params;
+      const text = getResponseText(response);
+      const card = getResponseCard(response);
+
+      if (card) {
+        await persistNovuConversationMessages(novuConversationId, platform, [
+          { role: 'assistant', content: text, senderName: assistantSenderName },
+        ]);
+        await thread.post(card);
+
+        return;
+      }
+
+      if (isAsyncIterableString(response)) {
+        if (platform === 'resend') {
+          const full = await collectAsyncIterableString(response);
+
+          if (full) {
+            await persistNovuConversationMessages(novuConversationId, platform, [
+              { role: 'assistant', content: full, senderName: assistantSenderName },
+            ]);
+            await thread.post(full);
+          }
+
+          return;
+        }
+
+        await thread.post(response);
+
+        return;
+      }
+
+      await persistNovuConversationMessages(novuConversationId, platform, [
+        { role: 'assistant', content: text, senderName: assistantSenderName },
+      ]);
+
+      if (text) {
+        await thread.post(text);
+      }
     }
 
     async function resolveSubscriberForSlackMessage(author: MessageAuthor): Promise<string> {
@@ -796,22 +854,13 @@ export function serveAgents(options: ServeAgentsOptions) {
       });
 
       if (response !== undefined) {
-        const text = getResponseText(response);
-        const card = getResponseCard(response);
-
-        if (!isAsyncIterableString(response)) {
-          await persistNovuConversationMessages(novuConversationId, platform, [
-            { role: 'assistant', content: text, senderName: primaryAgent.id },
-          ]);
-        }
-
-        if (card) {
-          await thread.post(card);
-        } else if (isAsyncIterableString(response)) {
-          await thread.post(response);
-        } else if (text) {
-          await thread.post(text);
-        }
+        await deliverAssistantReply({
+          novuConversationId,
+          platform,
+          thread,
+          response,
+          assistantSenderName: primaryAgent.id,
+        });
       }
 
       await executeSignals(signals, conversation, saveConversation, getNovuClient());
@@ -881,22 +930,13 @@ export function serveAgents(options: ServeAgentsOptions) {
       });
 
       if (response !== undefined) {
-        const text = getResponseText(response);
-        const card = getResponseCard(response);
-
-        if (!isAsyncIterableString(response)) {
-          await persistNovuConversationMessages(novuConversationId, platform, [
-            { role: 'assistant', content: text, senderName: primaryAgent.id },
-          ]);
-        }
-
-        if (card) {
-          await thread.post(card);
-        } else if (isAsyncIterableString(response)) {
-          await thread.post(response);
-        } else if (text) {
-          await thread.post(text);
-        }
+        await deliverAssistantReply({
+          novuConversationId,
+          platform,
+          thread,
+          response,
+          assistantSenderName: primaryAgent.id,
+        });
       }
 
       await executeSignals(signals, conversation, saveConversation, getNovuClient());
