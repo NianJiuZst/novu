@@ -5,7 +5,16 @@ import { createRedisState } from '@chat-adapter/state-redis';
 import { createWhatsAppAdapter } from '@chat-adapter/whatsapp';
 import type { Novu } from '@novu/api';
 import { createResendAdapter } from '@resend/chat-sdk-adapter';
-import { Chat, type Attachment, type ChatElement, type Thread, emoji } from 'chat';
+import {
+  Chat,
+  type ActionHandler,
+  type Attachment,
+  type ChatElement,
+  type Message,
+  type SentMessage,
+  type Thread,
+  emoji,
+} from 'chat';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { after } from 'next/server';
@@ -117,11 +126,18 @@ type AgentConfig = {
   throttle?: { max: number; windowMs: number };
 };
 
+type AgentActionRegistration = {
+  ids: string | string[];
+  handler: ActionHandler;
+};
+
 type AgentHandlers = {
   onMessage: (ctx: AgentMessageContext) => Promise<string | RichResponse | AsyncIterable<string> | void>;
   onSubscribe?: (ctx: AgentLifecycleContext) => Promise<string | RichResponse | AsyncIterable<string> | void>;
   onIdle?: (ctx: AgentLifecycleContext) => Promise<string | void>;
   onResolve?: (ctx: AgentLifecycleContext) => Promise<void>;
+  /** Card / interactive actions — registered on the Chat SDK via `onAction` ([docs](https://chat-sdk.dev/docs/actions)). */
+  actions?: AgentActionRegistration[];
   config?: AgentConfig;
 };
 
@@ -239,6 +255,7 @@ export function agent(id: string, handlers: AgentHandlers) {
   return {
     id,
     config: handlers.config ?? {},
+    actions: handlers.actions ?? [],
 
     async handleMessage(input: Omit<AgentMessageContext, 'novu'>): Promise<AgentHandleResult> {
       const novu = new NovuContext();
@@ -571,6 +588,12 @@ export function serveAgents(options: ServeAgentsOptions) {
       onLockConflict: options.onLockConflict ?? 'force',
     });
 
+    for (const ag of options.agents) {
+      for (const { ids, handler } of ag.actions) {
+        chatInstance.onAction(ids, handler);
+      }
+    }
+
     async function buildHistory(thread: {
       id: string;
       allMessages: AsyncIterable<{ text: string; author: { isMe: boolean }; metadata?: { dateSent?: Date } }>;
@@ -615,6 +638,40 @@ export function serveAgents(options: ServeAgentsOptions) {
         }
       } catch (err) {
         console.warn(`[${platform}] could not add resolve reaction:`, err);
+      }
+    }
+
+    async function addThinkingReactionToMentionMessage(
+      thread: Thread,
+      message: Message
+    ): Promise<SentMessage | null> {
+      const platform = detectPlatform(thread.id);
+
+      if (platform === 'gchat' || platform === 'slack') {
+        return null;
+      }
+
+      try {
+        const sent = thread.createSentMessageFromMessage(message);
+        await sent.addReaction(emoji.eyes);
+
+        return sent;
+      } catch (err) {
+        console.warn(`[${platform}] could not add thinking reaction:`, err);
+
+        return null;
+      }
+    }
+
+    async function removeThinkingReaction(sent: SentMessage | null, platform: string): Promise<void> {
+      if (!sent) {
+        return;
+      }
+
+      try {
+        await sent.removeReaction(emoji.eyes);
+      } catch (err) {
+        console.warn(`[${platform}] could not remove thinking reaction:`, err);
       }
     }
 
@@ -820,67 +877,79 @@ export function serveAgents(options: ServeAgentsOptions) {
       await thread.subscribe();
 
       const platform = detectPlatform(thread.id);
-      const conversation = getOrCreateConversation(thread.id, message.author.userId);
+      const thinkingSent = await addThinkingReactionToMentionMessage(thread, message);
 
-      if (!conversation.participants.includes(message.author.userId)) {
-        conversation.participants.push(message.author.userId);
-      }
+      try {
+        const conversation = getOrCreateConversation(thread.id, message.author.userId);
 
-      const resolvedSubscriberId = await resolveSubscriber(thread.id, message.author);
+        if (!conversation.participants.includes(message.author.userId)) {
+          conversation.participants.push(message.author.userId);
+        }
 
-      const subscriber = {
-        subscriberId: resolvedSubscriberId,
-        name: message.author.fullName,
-      };
+        const resolvedSubscriberId = await resolveSubscriber(thread.id, message.author);
 
-      const ensuredId = await ensureNovuConversationRecord(conversation, resolvedSubscriberId, thread.id);
-      const novuConversationId = resolveNovuConversationId(conversation, ensuredId);
+        const subscriber = {
+          subscriberId: resolvedSubscriberId,
+          name: message.author.fullName,
+        };
 
-      await persistNovuConversationMessages(novuConversationId, platform, [
-        {
-          role: 'user',
-          content: message.text,
-          senderName: message.author.fullName,
-          platformMessageId: readSlackMessageTs(message),
-        },
-      ]);
+        const ensuredId = await ensureNovuConversationRecord(conversation, resolvedSubscriberId, thread.id);
+        const novuConversationId = resolveNovuConversationId(conversation, ensuredId);
 
-      const { response, signals } = await primaryAgent.handleSubscribe({
-        conversation,
-        subscriber,
-        message: { text: message.text, author: message.author, attachments: message.attachments },
-        thread,
-        platform,
-      });
+        await persistNovuConversationMessages(novuConversationId, platform, [
+          {
+            role: 'user',
+            content: message.text,
+            senderName: message.author.fullName,
+            platformMessageId: readSlackMessageTs(message),
+          },
+        ]);
 
-      if (response !== undefined) {
-        await deliverAssistantReply({
-          novuConversationId,
-          platform,
-          thread,
-          response,
-          assistantSenderName: primaryAgent.id,
-        });
-      }
+        try {
+          await thread.startTyping();
+        } catch (err) {
+          console.error(`[${platform}] start typing failed:`, err);
+        }
 
-      await executeSignals(signals, conversation, saveConversation, getNovuClient());
-
-      const hasResolve = signals.some((s) => s.type === 'resolve');
-
-      if (hasResolve) {
-        await reactToRootMessage(thread);
-
-        const { signals: resolveSignals } = await primaryAgent.handleResolve({
+        const { response, signals } = await primaryAgent.handleSubscribe({
           conversation,
           subscriber,
+          message: { text: message.text, author: message.author, attachments: message.attachments },
           thread,
           platform,
         });
-        await executeSignals(resolveSignals, conversation, saveConversation, getNovuClient());
-        await thread.unsubscribe();
-      }
 
-      await maybeSyncNovuConversationResolved(conversation);
+        if (response !== undefined) {
+          await deliverAssistantReply({
+            novuConversationId,
+            platform,
+            thread,
+            response,
+            assistantSenderName: primaryAgent.id,
+          });
+        }
+
+        await executeSignals(signals, conversation, saveConversation, getNovuClient());
+
+        const hasResolve = signals.some((s) => s.type === 'resolve');
+
+        if (hasResolve) {
+          await reactToRootMessage(thread);
+
+          const { signals: resolveSignals } = await primaryAgent.handleResolve({
+            conversation,
+            subscriber,
+            thread,
+            platform,
+          });
+          await executeSignals(resolveSignals, conversation, saveConversation, getNovuClient());
+          await thread.unsubscribe();
+        }
+
+        await maybeSyncNovuConversationResolved(conversation);
+      } finally {
+        await removeThinkingReaction(thinkingSent, platform);
+      }
     });
 
     chatInstance.onSubscribedMessage(async (thread, message) => {

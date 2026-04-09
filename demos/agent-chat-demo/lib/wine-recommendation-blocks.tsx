@@ -38,7 +38,7 @@ function renderWineCard(rec: WineRecommendationInput): ChatElement {
         </Fields>
         <CardText>{rec.tastingNotes}</CardText>
         <Actions>
-          <Button id="buy_wine_0" style="primary" value={rec.name}>
+          <Button id="buy_wine" style="primary" value={rec.name}>
             🛒 Buy Now
           </Button>
         </Actions>
