@@ -15,4 +15,3 @@ export function sanitizePayload(payload: Record<string, unknown>): string {
     return '[Unserializable Payload]';
   }
 }
-
