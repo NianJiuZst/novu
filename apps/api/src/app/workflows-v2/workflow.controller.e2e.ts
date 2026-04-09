@@ -364,7 +364,7 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
       expect(updatedStep.id).to.be.equal(originalStep.id);
     });
 
-    it('should keep the step id on updated ', async () => {
+    it('should maintain unique step ids when adding new steps', async () => {
       const nameSuffix = `Test Workflow${new Date().toISOString()}`;
       const workflowCreated: WorkflowResponseDto = await createWorkflowAndValidate(nameSuffix);
       expect(workflowCreated.steps.length).to.be.equal(2);
@@ -930,7 +930,7 @@ describe('Workflow Controller E2E API Testing #novu-v2', () => {
   });
 
   describe('Get step data', () => {
-    it('should get step by worflow slugify ids', async () => {
+    it('should get step by workflow slugify ids', async () => {
       const workflowCreated = await createWorkflowAndValidate('XYZ');
       const internalWorkflowId = workflowCreated.id;
       const stepId = workflowCreated.steps[0].id;
