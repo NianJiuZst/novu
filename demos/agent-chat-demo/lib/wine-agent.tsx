@@ -1,33 +1,7 @@
-import type { ActionEvent } from 'chat';
-
 import { agent } from './agent';
 import { generateWineReply } from './wine-agent-reply';
 
 export { type WineRecommendationInput, wineRecommendationBlocks } from './wine-recommendation-blocks';
-
-function buildFakeShipmentConfirmation(wineName: string): string {
-  const tracking = `NVU-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-
-  return [
-    `📦 *Shipment confirmed* — ${wineName}`,
-    '',
-    `• Tracking: \`${tracking}\``,
-    '• Carrier: Novu Express *(demo)*',
-    '• Estimated delivery: 3–5 business days',
-    '',
-    '_Demo only — no payment or real shipment._',
-  ].join('\n');
-}
-
-async function onBuyWineAction(event: ActionEvent) {
-  if (!event.thread) {
-    return;
-  }
-
-  const wineName = event.value?.trim() || 'your selection';
-
-  await event.thread.post(buildFakeShipmentConfirmation(wineName));
-}
 
 export const wineAgent = agent('wine-bot', {
   onSubscribe: async ({ subscriber, message }) => {
@@ -56,3 +30,27 @@ export const wineAgent = agent('wine-bot', {
     platforms: ['slack', 'whatsapp', 'github', 'resend', 'gchat'],
   },
 });
+
+function buildFakeShipmentConfirmation(wineName: string): string {
+  const tracking = `NVU-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
+  return [
+    `📦 *Shipment confirmed* — ${wineName}`,
+    '',
+    `• Tracking: \`${tracking}\``,
+    '• Carrier: Novu Express *(demo)*',
+    '• Estimated delivery: 3–5 business days',
+    '',
+    '_Demo only — no payment or real shipment._',
+  ].join('\n');
+}
+
+async function onBuyWineAction(event: any) {
+  if (!event.thread) {
+    return;
+  }
+
+  const wineName = event.value?.trim() || 'your selection';
+
+  await event.thread.post(buildFakeShipmentConfirmation(wineName));
+}
