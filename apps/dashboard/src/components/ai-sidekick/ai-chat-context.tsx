@@ -530,20 +530,23 @@ export function AiChatProvider({ children, config }: { children: React.ReactNode
 
   const handleStop = useCallback(async () => {
     isStoppingRef.current = true;
-    const { agentType, resourceType } = dataRef.current;
-    await stop();
-    if (latestChat && currentEnvironment && isGenerating) {
-      await cancelStream({ environment: currentEnvironment, chatId: latestChat._id });
+    try {
+      const { agentType, resourceType } = dataRef.current;
+      await stop();
+      if (latestChat && currentEnvironment && isGenerating) {
+        await cancelStream({ environment: currentEnvironment, chatId: latestChat._id });
+      }
+
+      track(TelemetryEvent.COPILOT_GENERATION_STOPPED, {
+        chatId: latestChat?._id,
+        agentType,
+        resourceType,
+      });
+
+      await refetchLatestChat();
+    } finally {
+      isStoppingRef.current = false;
     }
-
-    track(TelemetryEvent.COPILOT_GENERATION_STOPPED, {
-      chatId: latestChat?._id,
-      agentType,
-      resourceType,
-    });
-
-    await refetchLatestChat();
-    isStoppingRef.current = false;
   }, [latestChat, currentEnvironment, isGenerating, stop, refetchLatestChat, track, dataRef]);
 
   const isLoading = isResourceLoading || isFetchingAiChat || areEnvironmentsInitialLoading;
