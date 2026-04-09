@@ -32,6 +32,14 @@ import { ActivityNotificationResponseDto } from '../../dtos/activities-response.
 import { mapFeedItemToDto } from '../get-activity-feed/map-feed-item-to.dto';
 import { GetActivityCommand } from './get-activity.command';
 
+function safeParseJson(value: string, fallback: unknown = undefined): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+
 const workflowRunSelectColumns = [
   'workflow_run_id',
   'workflow_id',
@@ -336,13 +344,17 @@ export class GetActivity {
           phone: undefined,
         },
         jobs: [],
-        to: mostRecentWorkflowRun.subscriber_to ? JSON.parse(mostRecentWorkflowRun.subscriber_to) : {},
-        payload: mostRecentWorkflowRun.payload ? JSON.parse(mostRecentWorkflowRun.payload) : {},
+        to: mostRecentWorkflowRun.subscriber_to ? safeParseJson(mostRecentWorkflowRun.subscriber_to, {}) : {},
+        payload: mostRecentWorkflowRun.payload ? safeParseJson(mostRecentWorkflowRun.payload, {}) : {},
         contextKeys: mostRecentWorkflowRun.context_keys,
         createdAt: new Date(mostRecentWorkflowRun.created_at).toISOString(),
         updatedAt: new Date(mostRecentWorkflowRun.updated_at).toISOString(),
-        channels: mostRecentWorkflowRun.channels ? JSON.parse(mostRecentWorkflowRun.channels) : [],
-        topics: mostRecentWorkflowRun.topics ? JSON.parse(mostRecentWorkflowRun.topics) : [],
+        channels: mostRecentWorkflowRun.channels
+          ? (safeParseJson(mostRecentWorkflowRun.channels, []) as StepTypeEnum[])
+          : [],
+        topics: mostRecentWorkflowRun.topics
+          ? (safeParseJson(mostRecentWorkflowRun.topics, []) as NotificationFeedItemEntity['topics'])
+          : [],
       };
 
       feedItem.jobs = await this.processStepRunsForFeedItem(feedItem, command);
