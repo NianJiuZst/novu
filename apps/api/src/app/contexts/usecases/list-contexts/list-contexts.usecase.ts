@@ -24,7 +24,8 @@ export class ListContexts {
 
     // Search across the composite key field (format: "type:id")
     if (command.search) {
-      filter.key = { $regex: command.search, $options: 'i' };
+      const escapedSearch = command.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.key = { $regex: escapedSearch, $options: 'i' };
     }
 
     // Handle cursor-based pagination
