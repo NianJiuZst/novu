@@ -61,6 +61,7 @@ class MessageActionResult {
     enum: [...Object.values(ButtonTypeEnum)],
     enumName: 'ButtonTypeEnum',
     description: 'Type of button for the action result',
+    type: String,
   })
   type?: ButtonTypeEnum;
 }
@@ -70,6 +71,7 @@ class MessageButton {
     enum: [...Object.values(ButtonTypeEnum)],
     enumName: 'ButtonTypeEnum',
     description: 'Type of the button',
+    type: String,
   })
   type: ButtonTypeEnum;
 

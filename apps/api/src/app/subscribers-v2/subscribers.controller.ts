@@ -738,8 +738,10 @@ export class SubscribersController {
   @ApiParam({
     name: 'actionType',
     description: 'The type of action (primary or secondary)',
-    enum: ButtonTypeEnum,
-    type: String,
+    schema: {
+      type: 'string',
+      enum: Object.values(ButtonTypeEnum) as string[],
+    },
   })
   @ApiQuery({ name: 'contextKeys', required: false, type: [String], description: 'Context keys for filtering' })
   @ApiResponse(InboxNotificationDto, 200, false, false)
@@ -778,8 +780,10 @@ export class SubscribersController {
   @ApiParam({
     name: 'actionType',
     description: 'The type of action (primary or secondary)',
-    enum: ButtonTypeEnum,
-    type: String,
+    schema: {
+      type: 'string',
+      enum: Object.values(ButtonTypeEnum) as string[],
+    },
   })
   @ApiQuery({ name: 'contextKeys', required: false, type: [String], description: 'Context keys for filtering' })
   @ApiResponse(InboxNotificationDto, 200, false, false)
