@@ -200,8 +200,8 @@ export const WorkflowsPage = () => {
 
   return (
     <>
-      <PageMeta title="Workflows" />
-      <DashboardLayout headerStartItems={<h1 className="text-foreground-950 flex items-center gap-1">Workflows</h1>}>
+      <PageMeta title="Workflows list" />
+      <DashboardLayout headerStartItems={<h1 className="text-foreground-950 flex items-center gap-1">Workflows list</h1>}>
         <div className="flex h-full w-full flex-col">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-2 py-2.5">
