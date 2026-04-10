@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, type ApiPropertyOptions } from '@nestjs/swagger';
 import { WebhookEventEnum, WebhookObjectTypeEnum } from '@novu/shared';
 
 export class WrapperDto<T> {
@@ -17,7 +17,7 @@ export class WrapperDto<T> {
   @ApiProperty({
     description: 'The payload of the webhook',
     type: 'object',
-  })
+  } as ApiPropertyOptions)
   data: T;
 
   @ApiProperty({

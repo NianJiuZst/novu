@@ -36,12 +36,12 @@
     ".": {
       "require": "./dist/cjs/index.js",
       "import": "./dist/esm/index.js",
-      "types": "./dist/esm/index.d.js"
+      "types": "./dist/esm/index.d.ts"
     },
     "./utils": {
       "require": "./dist/cjs/utils/index.js",
       "import": "./dist/esm/utils/index.js",
-      "types": "./dist/esm/utils/index.d.js"
+      "types": "./dist/esm/utils/index.d.ts"
     }
   },
   "devDependencies": {

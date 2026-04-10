@@ -32,14 +32,13 @@ export class WorkflowToStepControlValuesDto {
    * @type {Record<stepId, Data>}
    * @optional
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'A mapping of step IDs to their corresponding data.',
-    type: 'object',
+    type: Object,
     additionalProperties: {
       type: 'object',
       additionalProperties: true,
     },
-    required: false,
   })
   steps?: Record<string, Record<string, unknown>>;
 }
@@ -229,12 +228,11 @@ export class TriggerEventRequestDto {
   @IsDefined()
   name: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: `The payload object is used to pass additional custom information that could be 
     used to render the workflow, or perform routing rules based on it. 
       This data will also be available when fetching the notifications feed from the API to display certain parts of the UI.`,
-    type: 'object',
-    required: false,
+    type: Object,
     additionalProperties: true,
     example: {
       comment_id: 'string',
@@ -262,7 +260,6 @@ export class TriggerEventRequestDto {
       },
     },
     type: TriggerOverrides,
-    required: false,
   })
   @IsObject()
   @IsOptional()
@@ -314,14 +311,13 @@ export class TriggerEventRequestDto {
   @IsOptional()
   transactionId?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: `It is used to display the Avatar of the provided actor's subscriber id or actor object.
     If a new actor object is provided, we will create a new subscriber in our system`,
     oneOf: [
       { type: 'string', description: 'Unique identifier of a subscriber in your systems' },
       { $ref: getSchemaPath(SubscriberPayloadDto) },
     ],
-    required: false,
   })
   @IsOptional()
   @ValidateIf((_, value) => typeof value !== 'string')
@@ -329,14 +325,13 @@ export class TriggerEventRequestDto {
   @Type(() => SubscriberPayloadDto)
   actor?: TriggerRecipientSubscriber;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: `It is used to specify a tenant context during trigger event.
     Existing tenants will be updated with the provided details.`,
     oneOf: [
       { type: 'string', description: 'Unique identifier of a tenant in your system' },
       { $ref: getSchemaPath(TenantPayloadDto) },
     ],
-    required: false,
   })
   @IsOptional()
   @ValidateIf((_, value) => typeof value !== 'string')

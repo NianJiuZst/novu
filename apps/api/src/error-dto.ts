@@ -1,4 +1,4 @@
-import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger'; // Ensure you have the correct import for ApiProperty
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 import { ConstraintValidation } from '@novu/application-generic';
 
 export class ErrorDto {
@@ -20,8 +20,7 @@ export class ErrorDto {
   })
   path: string;
 
-  @ApiProperty({
-    required: false,
+  @ApiPropertyOptional({
     description: 'Value that failed validation',
     oneOf: [
       { type: 'string', nullable: true },
@@ -44,10 +43,9 @@ export class ErrorDto {
   })
   message?: unknown;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Optional context object for additional error details.',
-    type: 'object',
-    required: false,
+    type: Object,
     additionalProperties: true,
     example: {
       workflowId: 'some_wf_id',
@@ -59,11 +57,10 @@ export class ErrorDto {
   /**
    * Optional unique identifier for the error, useful for tracking using Sentry and New Relic, only available for 500.
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: `Optional unique identifier for the error, useful for tracking using Sentry and 
       New Relic, only available for 500.`,
     example: 'abc123',
-    required: false,
   })
   errorId?: string;
 }
@@ -81,7 +78,7 @@ export class PayloadValidationErrorDto {
   })
   message: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The actual value that failed validation',
     oneOf: [
       { type: 'string', nullable: true },
@@ -100,15 +97,13 @@ export class PayloadValidationErrorDto {
         },
       },
     ],
-    required: false,
     example: { age: 25 },
   })
   value?: any;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'JSON Schema path where the validation failed',
     example: '#/required',
-    required: false,
   })
   schemaPath?: string;
 }
@@ -135,10 +130,9 @@ export class PayloadValidationExceptionDto extends ErrorDto {
   })
   errors: PayloadValidationErrorDto[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The JSON schema that was used for validation',
-    type: 'object',
-    required: false,
+    type: Object,
     example: {
       type: 'object',
       properties: {
@@ -155,7 +149,7 @@ export class PayloadValidationExceptionDto extends ErrorDto {
 export class ValidationErrorDto extends ErrorDto {
   @ApiProperty({
     description: 'A record of validation errors keyed by field name',
-    type: 'object',
+    type: Object,
     additionalProperties: {
       $ref: getSchemaPath(ConstraintValidation),
     },

@@ -207,29 +207,27 @@ export class NotificationFeedItemDto implements INotificationDto {
   })
   status: 'sent' | 'error' | 'warning';
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The payload that was used to send the notification trigger.',
-    type: 'object',
+    type: Object,
     additionalProperties: true,
-    required: false,
     example: { key: 'value' },
   })
   payload?: Record<string, unknown>;
 
   @ApiPropertyOptional({
     description: 'The data sent with the notification.',
-    type: 'object',
+    type: Object,
     nullable: true,
     example: { key: 'value' },
     additionalProperties: true,
   })
   data?: Record<string, unknown> | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Provider-specific overrides used when triggering the notification.',
-    type: 'object',
+    type: Object,
     additionalProperties: true,
-    required: false,
     example: { overrideKey: 'overrideValue' },
   })
   overrides?: Record<string, unknown>;

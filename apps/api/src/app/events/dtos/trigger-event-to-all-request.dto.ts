@@ -21,11 +21,10 @@ export class TriggerEventToAllRequestDto {
         text: 'string',
       },
     },
-    type: 'object',
+    type: Object,
     description: `The payload object is used to pass additional information that 
     could be used to render the template, or perform routing rules based on it. 
       For In-App channel, payload data are also available in <Inbox />`,
-    required: true,
     additionalProperties: true,
   })
   @IsObject()
@@ -45,7 +44,6 @@ export class TriggerEventToAllRequestDto {
       type: 'object',
       additionalProperties: true,
     },
-    required: false,
   })
   @IsObject()
   @IsOptional()

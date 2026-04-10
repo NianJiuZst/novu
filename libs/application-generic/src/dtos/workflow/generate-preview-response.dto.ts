@@ -1,4 +1,4 @@
-import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath, type ApiPropertyOptions } from '@nestjs/swagger';
 import { ActionTypeEnum, ChannelTypeEnum } from '@novu/shared';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
@@ -126,7 +126,7 @@ export class DigestRegularOutput {
   @ApiPropertyOptional({
     description: 'Look back window configuration',
     type: 'object',
-  })
+  } as ApiPropertyOptions)
   @IsOptional()
   @ValidateNested()
   lookBackWindow?: {
@@ -316,7 +316,7 @@ export class GeneratePreviewResponseDto {
         },
       },
     ],
-  })
+  } as ApiPropertyOptions)
   result:
     | {
         type: ChannelTypeEnum.EMAIL;

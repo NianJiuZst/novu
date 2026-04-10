@@ -254,8 +254,7 @@ export class ActivityNotificationJobResponseDto {
 
   @ApiPropertyOptional({
     description: 'Optional context object for additional error details.',
-    type: 'object',
-    required: false,
+    type: Object,
     additionalProperties: true,
     example: {
       workflowId: 'some_wf_id',
@@ -430,8 +429,7 @@ export class ActivityNotificationResponseDto {
 
   @ApiPropertyOptional({
     description: 'Payload of the notification',
-    type: 'object',
-    required: false,
+    type: Object,
     additionalProperties: true,
   })
   payload?: Record<string, unknown>; // Added to align with NotificationEntity
@@ -444,16 +442,14 @@ export class ActivityNotificationResponseDto {
 
   @ApiPropertyOptional({
     description: 'Controls associated with the notification',
-    type: 'object',
-    required: false,
+    type: Object,
     additionalProperties: true,
   })
   controls?: Record<string, unknown>; // Added to align with NotificationEntity
 
   @ApiPropertyOptional({
     description: 'To field for subscriber definition',
-    type: 'object',
-    required: false,
+    type: Object,
     additionalProperties: true,
   })
   to?: Record<string, unknown>; // Added to align with NotificationEntity

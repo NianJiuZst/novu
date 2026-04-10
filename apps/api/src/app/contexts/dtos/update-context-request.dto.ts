@@ -7,8 +7,7 @@ export class UpdateContextRequestDto {
   @ApiProperty({
     description: 'Custom data to associate with this context. Replaces existing data.',
     example: { tenantName: 'Acme Corp', region: 'us-east-1', settings: { theme: 'dark' } },
-    required: true,
-    type: 'object',
+    type: Object,
     additionalProperties: true,
   })
   @IsDefined()

@@ -1,10 +1,11 @@
 import { INestApplication } from '@nestjs/common';
+import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { HttpRequestHeaderKeysEnum } from '@novu/application-generic';
 
 const ALLOWED_ORIGINS_REGEX = new RegExp(process.env.FRONT_BASE_URL || '');
 
 export const corsOptionsDelegate: Parameters<INestApplication['enableCors']>[0] = (req: Request, callback) => {
-  const corsOptions: Parameters<typeof callback>[1] = {
+  const corsOptions: CorsOptions = {
     origin: false as boolean | string | string[],
     preflightContinue: false,
     maxAge: 86400,

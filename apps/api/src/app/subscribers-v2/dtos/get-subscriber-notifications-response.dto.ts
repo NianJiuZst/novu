@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, type ApiPropertyOptions } from '@nestjs/swagger';
 import { InboxNotificationDto } from '../../inbox/dtos/inbox-notification.dto';
 import type { NotificationFilter } from '../../inbox/utils/types';
 
@@ -17,7 +17,7 @@ export class GetSubscriberNotificationsResponseDto {
 
   @ApiProperty({
     description: 'The filter applied to the notifications',
-    type: 'object',
-  })
+    type: Object,
+  } as ApiPropertyOptions)
   filter: NotificationFilter;
 }

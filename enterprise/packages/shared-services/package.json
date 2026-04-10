@@ -3,7 +3,7 @@
   "version": "2.0.5",
   "description": "Generic service used inside of Novu's different services - can not be depended on application-generic",
   "main": "build/main/index.js",
-  "typings": "build/main/index.d.ts",
+  "types": "build/main/index.d.ts",
   "module": "build/module/index.js",
   "private": true,
   "repository": {
@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@handlebars/parser": "^2.1.0",
+    "@novu/dal": "workspace:*",
     "@novu/shared": "workspace:*"
   },
   "devDependencies": {
@@ -41,7 +42,6 @@
     "typescript": "5.6.2"
   },
   "peerDependencies": {
-    "@nestjs/common": "10.4.18",
-    "@novu/dal": "workspace:*"
+    "@nestjs/common": "11.1.18"
   }
 }

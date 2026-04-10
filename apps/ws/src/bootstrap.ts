@@ -1,5 +1,6 @@
 import './instrument';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { BullMqService, getErrorInterceptor, Logger } from '@novu/application-generic';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
@@ -12,7 +13,10 @@ validateEnv();
 
 export async function bootstrap() {
   BullMqService.haveProInstalled();
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
+
+  // Express v5: preserve qs-style nested query parsing (NestJS migration guide).
+  app.set('query parser', 'extended');
 
   const inMemoryAdapter = new InMemoryIoAdapter(app);
   await inMemoryAdapter.connectToInMemoryCluster();

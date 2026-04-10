@@ -2,6 +2,7 @@ import './instrument';
 
 import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import {
   BullMqService,
   getErrorInterceptor,
@@ -63,7 +64,11 @@ export async function bootstrap(
     };
   }
 
-  const app = await NestFactory.create(AppModule, { bufferLogs: true, ...nestOptions });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true, ...nestOptions });
+
+  // Express v5 defaults to the "simple" query parser; keep Express v4 "extended" (qs) behavior.
+  // See https://docs.nestjs.com/migration-guide#query-parameters-parsing
+  app.set('query parser', 'extended');
 
   app.enableVersioning({
     type: VersioningType.URI,

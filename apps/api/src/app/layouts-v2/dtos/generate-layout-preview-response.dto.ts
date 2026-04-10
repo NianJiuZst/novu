@@ -1,4 +1,4 @@
-import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath, type ApiPropertyOptions } from '@nestjs/swagger';
 import { ChannelTypeEnum } from '@novu/shared';
 import { Type } from 'class-transformer';
 import { IsOptional, IsString, ValidateNested } from 'class-validator';
@@ -23,7 +23,7 @@ export class GenerateLayoutPreviewResponseDto {
 
   @ApiPropertyOptional({
     description: 'The payload schema that was used to generate the preview payload example',
-    type: 'object',
+    type: Object,
     nullable: true,
     additionalProperties: true,
   })
@@ -32,7 +32,7 @@ export class GenerateLayoutPreviewResponseDto {
 
   @ApiProperty({
     description: 'Preview result',
-    type: 'object',
+    type: Object,
     oneOf: [
       {
         properties: {
@@ -41,7 +41,7 @@ export class GenerateLayoutPreviewResponseDto {
         },
       },
     ],
-  })
+  } as ApiPropertyOptions)
   result: {
     type: ChannelTypeEnum.EMAIL;
     preview?: EmailLayoutRenderOutput;
