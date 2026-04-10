@@ -236,7 +236,21 @@ export class SqsConsumerService {
     const rawBody = message.Body || '{}';
     const resolvedBody = this.payloadOffload ? await this.payloadOffload.maybeResolve(rawBody) : rawBody;
 
-    const data = JSON.parse(resolvedBody);
+    let data: unknown;
+    try {
+      data = JSON.parse(resolvedBody);
+    } catch (parseError) {
+      Logger.error(
+        {
+          messageId: message.MessageId,
+          topic: this.topic,
+          body: resolvedBody.slice(0, 200),
+        },
+        'Failed to parse SQS message body as JSON',
+        LOG_CONTEXT
+      );
+      throw parseError;
+    }
     const receiveCount = parseInt(message.Attributes?.ApproximateReceiveCount || '1', 10);
     const meta: ISqsMessageMeta = {
       messageId: message.MessageId || 'unknown',
