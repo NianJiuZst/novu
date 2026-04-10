@@ -45,7 +45,7 @@ import {
 } from '@novu/shared';
 import inlineCss from 'inline-css';
 
-import { PlatformException } from '../../../shared/utils';
+import { PlatformException, safeJsonStringifyForLog } from '../../../shared/utils';
 import { SendMessageBase } from './send-message.base';
 import { SendMessageChannelCommand } from './send-message-channel.command';
 import { SendMessageResult, SendMessageStatus } from './send-message-type.usecase';
@@ -574,7 +574,10 @@ export class SendMessageEmail extends SendMessageBase {
           status: ExecutionDetailsStatusEnum.FAILED,
           isTest: false,
           isRetry: false,
-          raw: JSON.stringify(error) === '{}' ? JSON.stringify({ message: error.message }) : JSON.stringify(error),
+          raw:
+            safeJsonStringifyForLog(error) === '{}'
+              ? safeJsonStringifyForLog({ message: error.message })
+              : safeJsonStringifyForLog(error),
         })
       );
 
