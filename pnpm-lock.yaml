@@ -3128,9 +3128,15 @@ importers:
       '@faker-js/faker':
         specifier: ^6.0.0
         version: 6.3.1
+      '@novu/application-generic':
+        specifier: workspace:*
+        version: link:../application-generic
       '@novu/dal':
         specifier: workspace:*
         version: link:../dal
+      '@novu/ee-auth':
+        specifier: workspace:*
+        version: link:../../enterprise/packages/auth
       '@novu/shared':
         specifier: workspace:*
         version: link:../../packages/shared

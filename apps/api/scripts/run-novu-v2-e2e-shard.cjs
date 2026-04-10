@@ -26,8 +26,6 @@ const MOCHA_ARGS = [
   '--require',
   './swc-register.js',
   '--exit',
-  '--file',
-  'e2e/setup.ts',
 ];
 
 function toPosixPath(filePath) {

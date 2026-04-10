@@ -8,6 +8,7 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
+  ParseEnumPipe,
   Patch,
   Post,
   Put,
@@ -756,10 +757,7 @@ export class SubscribersV1Controller {
   @ApiParam({
     name: 'type',
     description: 'Action button type: primary or secondary',
-    schema: {
-      type: 'string',
-      enum: Object.values(ButtonTypeEnum) as string[],
-    },
+    enum: [ButtonTypeEnum.PRIMARY, ButtonTypeEnum.SECONDARY],
   })
   @ApiResponse(MessageResponseDto, 201)
   @SdkGroupName('Subscribers.Messages')
@@ -767,7 +765,7 @@ export class SubscribersV1Controller {
   async markActionAsSeen(
     @UserSession() user: UserSessionData,
     @Param('messageId') messageId: string,
-    @Param('type') type: ButtonTypeEnum,
+    @Param('type', new ParseEnumPipe(ButtonTypeEnum)) type: string,
     @Body() body: MarkMessageActionAsSeenDto,
     @Param('subscriberId') subscriberId: string
   ): Promise<MessageResponseDto> {
@@ -777,7 +775,7 @@ export class SubscribersV1Controller {
         environmentId: user.environmentId,
         subscriberId,
         messageId,
-        type,
+        type: type as ButtonTypeEnum,
         payload: body.payload,
         status: body.status,
       })

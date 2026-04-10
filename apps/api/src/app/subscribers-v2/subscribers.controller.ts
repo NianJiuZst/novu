@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseEnumPipe,
   Patch,
   Post,
   Query,
@@ -738,10 +739,7 @@ export class SubscribersController {
   @ApiParam({
     name: 'actionType',
     description: 'The type of action (primary or secondary)',
-    schema: {
-      type: 'string',
-      enum: Object.values(ButtonTypeEnum) as string[],
-    },
+    enum: [ButtonTypeEnum.PRIMARY, ButtonTypeEnum.SECONDARY],
   })
   @ApiQuery({ name: 'contextKeys', required: false, type: [String], description: 'Context keys for filtering' })
   @ApiResponse(InboxNotificationDto, 200, false, false)
@@ -752,7 +750,7 @@ export class SubscribersController {
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string,
     @Param('notificationId') notificationId: string,
-    @Param('actionType') actionType: ButtonTypeEnum,
+    @Param('actionType', new ParseEnumPipe(ButtonTypeEnum)) actionType: string,
     @Query() query: ContextKeysQueryDto
   ): Promise<InboxNotificationDto> {
     return await this.updateNotificationActionUsecase.execute(
@@ -762,7 +760,7 @@ export class SubscribersController {
         environmentId: user.environmentId,
         contextKeys: query.contextKeys,
         notificationId,
-        actionType,
+        actionType: actionType as ButtonTypeEnum,
         actionStatus: MessageActionStatusEnum.DONE,
       })
     );
@@ -780,10 +778,7 @@ export class SubscribersController {
   @ApiParam({
     name: 'actionType',
     description: 'The type of action (primary or secondary)',
-    schema: {
-      type: 'string',
-      enum: Object.values(ButtonTypeEnum) as string[],
-    },
+    enum: [ButtonTypeEnum.PRIMARY, ButtonTypeEnum.SECONDARY],
   })
   @ApiQuery({ name: 'contextKeys', required: false, type: [String], description: 'Context keys for filtering' })
   @ApiResponse(InboxNotificationDto, 200, false, false)
@@ -794,7 +789,7 @@ export class SubscribersController {
     @UserSession() user: UserSessionData,
     @Param('subscriberId') subscriberId: string,
     @Param('notificationId') notificationId: string,
-    @Param('actionType') actionType: ButtonTypeEnum,
+    @Param('actionType', new ParseEnumPipe(ButtonTypeEnum)) actionType: string,
     @Query() query: ContextKeysQueryDto
   ): Promise<InboxNotificationDto> {
     return await this.updateNotificationActionUsecase.execute(
@@ -804,7 +799,7 @@ export class SubscribersController {
         environmentId: user.environmentId,
         contextKeys: query.contextKeys,
         notificationId,
-        actionType,
+        actionType: actionType as ButtonTypeEnum,
         actionStatus: MessageActionStatusEnum.PENDING,
       })
     );
