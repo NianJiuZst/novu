@@ -45,7 +45,7 @@ export type SubscriptionPreferenceDtoWorkflow = {
    */
   data?: SubscriptionPreferenceDtoData | undefined;
   /**
-   * Severity of the workflow
+   * Severity level of the workflow
    */
   severity: SeverityLevelEnum;
 };

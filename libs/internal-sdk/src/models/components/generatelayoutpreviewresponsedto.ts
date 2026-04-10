@@ -3,7 +3,10 @@
  */
 
 import * as z from "zod/v3";
-import { safeParse } from "../../lib/schemas.js";
+import {
+  collectExtraKeys as collectExtraKeys$,
+  safeParse,
+} from "../../lib/schemas.js";
 import { ClosedEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
@@ -24,6 +27,7 @@ export type ResultType = ClosedEnum<typeof ResultType>;
 export type One = {
   type?: ResultType | undefined;
   preview?: EmailLayoutRenderOutput | undefined;
+  additionalProperties?: { [k: string]: any } | undefined;
 };
 
 /**
@@ -51,11 +55,15 @@ export const ResultType$inboundSchema: z.ZodNativeEnum<typeof ResultType> = z
   .nativeEnum(ResultType);
 
 /** @internal */
-export const One$inboundSchema: z.ZodType<One, z.ZodTypeDef, unknown> = z
-  .object({
-    type: ResultType$inboundSchema.optional(),
-    preview: EmailLayoutRenderOutput$inboundSchema.optional(),
-  });
+export const One$inboundSchema: z.ZodType<One, z.ZodTypeDef, unknown> =
+  collectExtraKeys$(
+    z.object({
+      type: ResultType$inboundSchema.optional(),
+      preview: EmailLayoutRenderOutput$inboundSchema.optional(),
+    }).catchall(z.any()),
+    "additionalProperties",
+    true,
+  );
 
 export function oneFromJSON(
   jsonString: string,

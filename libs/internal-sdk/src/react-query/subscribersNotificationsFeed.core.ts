@@ -11,6 +11,7 @@ import { NovuCore } from "../core.js";
 import { subscribersNotificationsFeed } from "../funcs/subscribersNotificationsFeed.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
+import * as components from "../models/components/index.js";
 import * as operations from "../models/operations/index.js";
 import { unwrapAsync } from "../types/fp.js";
 export type SubscribersNotificationsFeedQueryData =
@@ -45,6 +46,7 @@ export function buildSubscribersNotificationsFeedQuery(
     queryKey: queryKeySubscribersNotificationsFeed(request.subscriberId, {
       page: request.page,
       limit: request.limit,
+      feedIdentifier: request.feedIdentifier,
       read: request.read,
       seen: request.seen,
       payload: request.payload,
@@ -78,6 +80,7 @@ export function queryKeySubscribersNotificationsFeed(
   parameters: {
     page?: number | undefined;
     limit?: number | undefined;
+    feedIdentifier?: components.ObjectT | undefined;
     read?: boolean | undefined;
     seen?: boolean | undefined;
     payload?: string | undefined;

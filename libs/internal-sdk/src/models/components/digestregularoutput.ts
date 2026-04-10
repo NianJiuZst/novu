@@ -8,11 +8,6 @@ import { Result as SafeParseResult } from "../../types/fp.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 import { TimeUnitEnum, TimeUnitEnum$inboundSchema } from "./timeunitenum.js";
 
-/**
- * Look back window configuration
- */
-export type LookBackWindow = {};
-
 export type DigestRegularOutput = {
   /**
    * Amount of time units
@@ -29,25 +24,8 @@ export type DigestRegularOutput = {
   /**
    * Look back window configuration
    */
-  lookBackWindow?: LookBackWindow | undefined;
+  lookBackWindow?: { [k: string]: any } | undefined;
 };
-
-/** @internal */
-export const LookBackWindow$inboundSchema: z.ZodType<
-  LookBackWindow,
-  z.ZodTypeDef,
-  unknown
-> = z.object({});
-
-export function lookBackWindowFromJSON(
-  jsonString: string,
-): SafeParseResult<LookBackWindow, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => LookBackWindow$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'LookBackWindow' from JSON`,
-  );
-}
 
 /** @internal */
 export const DigestRegularOutput$inboundSchema: z.ZodType<
@@ -58,7 +36,7 @@ export const DigestRegularOutput$inboundSchema: z.ZodType<
   amount: z.number(),
   unit: TimeUnitEnum$inboundSchema,
   digestKey: z.string().optional(),
-  lookBackWindow: z.lazy(() => LookBackWindow$inboundSchema).optional(),
+  lookBackWindow: z.record(z.any()).optional(),
 });
 
 export function digestRegularOutputFromJSON(

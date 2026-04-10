@@ -11,6 +11,7 @@ import { NovuCore } from "../core.js";
 import { subscribersNotificationsUnseenCount } from "../funcs/subscribersNotificationsUnseenCount.js";
 import { combineSignals } from "../lib/primitives.js";
 import { RequestOptions } from "../lib/sdks.js";
+import * as components from "../models/components/index.js";
 import * as operations from "../models/operations/index.js";
 import { unwrapAsync } from "../types/fp.js";
 export type SubscribersNotificationsUnseenCountQueryData =
@@ -45,6 +46,7 @@ export function buildSubscribersNotificationsUnseenCountQuery(
     queryKey: queryKeySubscribersNotificationsUnseenCount(
       request.subscriberId,
       {
+        feedId: request.feedId,
         seen: request.seen,
         limit: request.limit,
         idempotencyKey: request.idempotencyKey,
@@ -76,6 +78,7 @@ export function buildSubscribersNotificationsUnseenCountQuery(
 export function queryKeySubscribersNotificationsUnseenCount(
   subscriberId: string,
   parameters: {
+    feedId?: components.ObjectT | undefined;
     seen?: boolean | undefined;
     limit?: number | undefined;
     idempotencyKey?: string | undefined;

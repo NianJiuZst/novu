@@ -11,7 +11,10 @@ import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 
 export type SubscribersV1ControllerMarkActionAsSeenRequest = {
   messageId: string;
-  type: string;
+  /**
+   * Action button type (primary or secondary)
+   */
+  type: components.ButtonTypeEnum;
   subscriberId: string;
   /**
    * A header for idempotency purposes
@@ -42,7 +45,7 @@ export const SubscribersV1ControllerMarkActionAsSeenRequest$outboundSchema:
     SubscribersV1ControllerMarkActionAsSeenRequest
   > = z.object({
     messageId: z.string(),
-    type: z.string(),
+    type: components.ButtonTypeEnum$outboundSchema,
     subscriberId: z.string(),
     idempotencyKey: z.string().optional(),
     markMessageActionAsSeenDto:

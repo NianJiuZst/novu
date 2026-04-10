@@ -98,5 +98,5 @@ export function queryKeyChannelConnectionsList(
     idempotencyKey?: string | undefined;
   },
 ): QueryKey {
-  return ["@novu/api", "Channel Connections", "list", parameters];
+  return ["@novu/api", "ChannelConnections", "list", parameters];
 }

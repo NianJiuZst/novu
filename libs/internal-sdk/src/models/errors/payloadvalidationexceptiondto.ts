@@ -27,11 +27,6 @@ export type PayloadValidationExceptionDtoMessage =
   | MessagePayloadValidationExceptionDto4
   | Array<string | number | boolean | { [k: string]: any } | null>;
 
-/**
- * The JSON schema that was used for validation
- */
-export type Schema = {};
-
 export type PayloadValidationExceptionDtoData = {
   /**
    * HTTP status code of the error response.
@@ -78,7 +73,7 @@ export type PayloadValidationExceptionDtoData = {
   /**
    * The JSON schema that was used for validation
    */
-  schema?: Schema | undefined;
+  schema?: { [k: string]: any } | undefined;
 };
 
 export class PayloadValidationExceptionDto extends NovuError {
@@ -112,7 +107,7 @@ export class PayloadValidationExceptionDto extends NovuError {
   /**
    * The JSON schema that was used for validation
    */
-  schema?: Schema | undefined;
+  schema?: { [k: string]: any } | undefined;
 
   /** The original data that was passed to this error instance. */
   data$: PayloadValidationExceptionDtoData;
@@ -203,20 +198,6 @@ export function payloadValidationExceptionDtoMessageFromJSON(
 }
 
 /** @internal */
-export const Schema$inboundSchema: z.ZodType<Schema, z.ZodTypeDef, unknown> = z
-  .object({});
-
-export function schemaFromJSON(
-  jsonString: string,
-): SafeParseResult<Schema, SDKValidationError> {
-  return safeParse(
-    jsonString,
-    (x) => Schema$inboundSchema.parse(JSON.parse(x)),
-    `Failed to parse 'Schema' from JSON`,
-  );
-}
-
-/** @internal */
 export const PayloadValidationExceptionDto$inboundSchema: z.ZodType<
   PayloadValidationExceptionDto,
   z.ZodTypeDef,
@@ -242,7 +223,7 @@ export const PayloadValidationExceptionDto$inboundSchema: z.ZodType<
   errorId: z.string().optional(),
   type: z.string(),
   errors: z.array(components.PayloadValidationErrorDto$inboundSchema),
-  schema: z.lazy(() => Schema$inboundSchema).optional(),
+  schema: z.record(z.any()).optional(),
   request$: z.instanceof(Request),
   response$: z.instanceof(Response),
   body$: z.string(),

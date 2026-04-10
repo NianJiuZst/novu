@@ -17,7 +17,7 @@ import {
 
 export type SubscriberPreferenceOverrideDto = {
   /**
-   * Channel type through which the message is sent
+   * The channel type which is overridden
    */
   channel: ChannelTypeEnum;
   /**
