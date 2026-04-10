@@ -17,7 +17,7 @@ class ActorFeedItemDto implements IActor {
     description: 'The type of the actor, indicating the role in the notification process.',
     enum: [...Object.values(ActorTypeEnum)],
     enumName: 'ActorTypeEnum',
-    type: ActorTypeEnum,
+    type: String,
   })
   type: ActorTypeEnum;
 }
@@ -160,7 +160,7 @@ export class NotificationFeedItemDto implements INotificationDto {
     description: 'The channel through which the notification is sent.',
     enum: [...Object.values(ChannelTypeEnum)],
     enumName: 'ChannelTypeEnum',
-    type: ChannelTypeEnum,
+    type: String,
   })
   channel: ChannelTypeEnum;
 
