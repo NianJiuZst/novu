@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CreateExecutionDetails, CreateExecutionDetailsCommand, DetailEnum } from '@novu/application-generic';
 import { ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum } from '@novu/shared';
 
+import { safeExtractErrorMessage } from '../../../shared/utils';
 import { WebhookFilterBackoffStrategyCommand } from './webhook-filter-backoff-strategy.command';
 
 @Injectable()
@@ -21,7 +22,7 @@ export class WebhookFilterBackoffStrategy {
           status: ExecutionDetailsStatusEnum.PENDING,
           isTest: false,
           isRetry: true,
-          raw: JSON.stringify({ message: JSON.parse(error?.message).message, attempt: attemptsMade }),
+          raw: JSON.stringify({ message: safeExtractErrorMessage(error), attempt: attemptsMade }),
         })
       );
     } catch (anotherError) {

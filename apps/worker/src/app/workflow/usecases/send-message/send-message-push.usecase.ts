@@ -45,7 +45,7 @@ import {
 import { IPushOptions } from '@novu/stateless';
 import { addBreadcrumb } from '@sentry/node';
 import { merge } from 'lodash';
-import { PlatformException } from '../../../shared/utils';
+import { PlatformException, safeStringifyError } from '../../../shared/utils';
 import { SendMessageBase } from './send-message.base';
 import { SendMessageChannelCommand } from './send-message-channel.command';
 import { SendMessageResult, SendMessageStatus } from './send-message-type.usecase';
@@ -643,7 +643,7 @@ export class SendMessagePush extends SendMessageBase {
       Logger.log(
         {
           jobId: command.jobId,
-          errorContent: JSON.stringify(e) || e?.message,
+          errorContent: safeStringifyError(e) || e?.message,
           code: e?.code,
           message: e?.message,
           details: e?.details,
@@ -661,7 +661,8 @@ export class SendMessagePush extends SendMessageBase {
         e
       );
 
-      const raw = JSON.stringify(e) !== JSON.stringify({}) ? JSON.stringify(e) : JSON.stringify(e.message);
+      const stringified = safeStringifyError(e);
+      const raw = stringified && stringified !== '{}' ? stringified : JSON.stringify({ message: e?.message });
 
       try {
         await this.createExecutionDetailsError(DetailEnum.PROVIDER_ERROR, command.job, {

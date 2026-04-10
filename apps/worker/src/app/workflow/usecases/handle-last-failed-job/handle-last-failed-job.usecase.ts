@@ -8,7 +8,7 @@ import {
 } from '@novu/application-generic';
 import { JobEntity, JobRepository } from '@novu/dal';
 import { ExecutionDetailsSourceEnum, ExecutionDetailsStatusEnum } from '@novu/shared';
-import { PlatformException, shouldHaltOnStepFailure } from '../../../shared/utils';
+import { PlatformException, safeExtractErrorMessage, shouldHaltOnStepFailure } from '../../../shared/utils';
 import { QueueNextJob, QueueNextJobCommand } from '../queue-next-job';
 import { HandleLastFailedJobCommand } from './handle-last-failed-job.command';
 
@@ -48,7 +48,7 @@ export class HandleLastFailedJob {
         status: ExecutionDetailsStatusEnum.PENDING,
         isTest: false,
         isRetry: true,
-        raw: JSON.stringify({ message: JSON.parse(error.message).message }),
+        raw: JSON.stringify({ message: safeExtractErrorMessage(error) }),
       })
     );
 
