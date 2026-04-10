@@ -3,7 +3,7 @@
   "version": "2.0.5",
   "description": "Generic service used inside of Novu's different services - can not be depended on application-generic",
   "main": "build/main/index.js",
-  "types": "src/index.ts",
+  "typings": "build/main/index.d.ts",
   "module": "build/module/index.js",
   "private": true,
   "repository": {
