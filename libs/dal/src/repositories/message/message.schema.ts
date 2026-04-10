@@ -310,6 +310,17 @@ messageSchema.index({
 });
 
 /*
+ * DELETE /v1/messages/transaction/:transactionId — count, distinct _subscriberId, deleteMany
+ * share the same filter on transactionId + env + org (+ optional channel).
+ */
+messageSchema.index({
+  _organizationId: 1,
+  _environmentId: 1,
+  transactionId: 1,
+  channel: 1,
+});
+
+/*
  * This index was initially created to optimize:
  *
  * Path: apps/api/src/app/integrations/usecases/calculate-limit-novu-integration/calculate-limit-novu-integration.usecase.ts

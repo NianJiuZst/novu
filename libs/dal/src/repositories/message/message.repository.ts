@@ -1073,6 +1073,40 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     return this.mapEntities(res);
   }
 
+  async countMessagesForDeleteByTransactionQuery(query: MessageQuery & EnforceEnvId): Promise<number> {
+    return this.count(
+      {
+        ...query,
+        deleted: { $exists: false },
+      },
+      undefined,
+      'primary'
+    );
+  }
+
+  async distinctSubscriberObjectIdsForDeleteByTransaction(
+    query: MessageQuery & EnforceEnvId
+  ): Promise<Types.ObjectId[]> {
+    const ids = await this.MongooseModel.distinct('_subscriberId', {
+      ...query,
+      deleted: { $exists: false },
+      _subscriberId: { $exists: true, $ne: null },
+    });
+
+    return ids
+      .filter((id): id is Types.ObjectId => id != null)
+      .map((id) => (id instanceof Types.ObjectId ? id : new Types.ObjectId(String(id))));
+  }
+
+  async deleteManyForDeleteByTransactionQuery(query: MessageQuery & EnforceEnvId): Promise<number> {
+    const { deletedCount } = await this.delete({
+      ...query,
+      deleted: { $exists: false },
+    });
+
+    return deletedCount ?? 0;
+  }
+
   async getMessages(
     query: Partial<Omit<MessageEntity, 'transactionId'>> & {
       _environmentId: string;
