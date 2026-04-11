@@ -4,6 +4,16 @@ import { BaseCommand, CommandValidationException } from '@novu/application-gener
 import { expect } from 'chai';
 import { IsNotEmpty } from './chat-oauth-callback.command';
 
+class IsNotEmptyNameCommand extends BaseCommand {
+  name?: string;
+}
+
+IsNotEmpty()(IsNotEmptyNameCommand.prototype, 'name');
+
+class NameCommand extends BaseCommand {
+  name: string;
+}
+
 function assertCommandValidationError(e: CommandValidationException, fieldName: string, fieldMsg: string) {
   if (!(e instanceof CommandValidationException)) {
     throw new Error(e);
@@ -22,7 +32,7 @@ describe('@IsNotEmpty() validator', () => {
   });
 
   it('should throw exception on string null', async () => {
-    const noValidation = NameCommand.create({ name: 'null' } as any);
+    NameCommand.create({ name: 'null' } as any);
 
     try {
       IsNotEmptyNameCommand.create({ name: 'null' } as any);
@@ -33,10 +43,10 @@ describe('@IsNotEmpty() validator', () => {
   });
 
   it('should throw exception on undefined', async () => {
-    const noValidation = NameCommand.create({ name: undefined } as any);
+    NameCommand.create({ name: undefined } as any);
 
     try {
-      const validateNameCommand = IsNotEmptyNameCommand.create({ name: undefined } as any);
+      IsNotEmptyNameCommand.create({ name: undefined } as any);
       throw new Error('should not have passed validation');
     } catch (e) {
       assertCommandValidationError(e, 'name', 'name should not be undefined');
@@ -44,7 +54,7 @@ describe('@IsNotEmpty() validator', () => {
   });
 
   it('should throw exception on undefined null', async () => {
-    const noValidation = NameCommand.create({ name: 'undefined' } as any);
+    NameCommand.create({ name: 'undefined' } as any);
 
     try {
       IsNotEmptyNameCommand.create({ name: 'undefined' } as any);
@@ -55,7 +65,7 @@ describe('@IsNotEmpty() validator', () => {
   });
 
   it('should throw exception on empty string', async () => {
-    const noValidation = NameCommand.create({ name: '' });
+    NameCommand.create({ name: '' });
 
     try {
       IsNotEmptyNameCommand.create({ name: '' });
@@ -65,12 +75,3 @@ describe('@IsNotEmpty() validator', () => {
     }
   });
 });
-
-export class IsNotEmptyNameCommand extends BaseCommand {
-  @IsNotEmpty()
-  name?: string;
-}
-
-export class NameCommand extends BaseCommand {
-  name: string;
-}

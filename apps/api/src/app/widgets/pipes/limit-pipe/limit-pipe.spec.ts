@@ -2,10 +2,10 @@ import { Paramtype } from '@nestjs/common/interfaces/features/paramtype.interfac
 import { expect } from 'chai';
 import { LimitPipe } from './limit-pipe';
 
-enum MetadataEnum {
-  DATA = 'limit',
-  TYPE = 'query',
-}
+const MetadataEnum = {
+  DATA: 'limit',
+  TYPE: 'query',
+} as const;
 
 describe('LimitPipe', () => {
   let pipe: LimitPipe;
