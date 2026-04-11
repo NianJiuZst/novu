@@ -122,7 +122,6 @@
     "@taskforcesh/bullmq-pro": "6.11.0"
   },
   "devDependencies": {
-    "@novu/testing": "workspace:*",
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
     "@types/got": "^9.6.12",
     "@types/jest": "29.5.2",

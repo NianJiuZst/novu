@@ -2,22 +2,23 @@ import { CommunityMemberRepository, CommunityOrganizationRepository, CommunityUs
 import { isClerkEnabled } from '@novu/shared';
 import { ClerkClientMock } from './clerk-client.mock';
 
+function requireNovuWorkspacePackage(suffix: string): unknown {
+  return require(`@novu/${suffix}`);
+}
+
 /**
- * We are using nx-ignore-next-line as a workaround here to avoid following circular dependency error:
- * @novu/application-generic:build --> @novu/testing:build --> @novu/ee-auth:build --> @novu/application-generic:build
- *
- * When revising EE testing, we should consider refactoring the code to potentially avoid this circular dependency.
- *
+ * Dynamic require via template (not `require('@novu/ee-auth')`) so Nx does not infer a build dependency edge.
+ * Packages resolve at runtime from the consuming app.
  */
 export function getEERepository<T>(className: 'OrganizationRepository' | 'MemberRepository' | 'UserRepository'): T {
   if (isClerkEnabled()) {
     switch (className) {
       case 'OrganizationRepository':
-        return getEEOrganizationRepository();
+        return getEEOrganizationRepository() as T;
       case 'MemberRepository':
-        return getEEMemberRepository();
+        return getEEMemberRepository() as T;
       case 'UserRepository':
-        return getEEUserRepository();
+        return getEEUserRepository() as T;
       default:
         throw new Error('Invalid repository name');
     }
@@ -38,24 +39,31 @@ export function getEERepository<T>(className: 'OrganizationRepository' | 'Member
 const clerkClientMock = new ClerkClientMock();
 
 function getEEUserRepository() {
-  // nx-ignore-next-line
-  const { EEUserRepository } = require('@novu/ee-auth');
-  // nx-ignore-next-line
-  const { AnalyticsService } = require('@novu/application-generic');
+  const eeAuth = requireNovuWorkspacePackage('ee-auth') as Record<string, new (...args: unknown[]) => unknown>;
+  const appGeneric = requireNovuWorkspacePackage('application-generic') as Record<
+    string,
+    new (...args: unknown[]) => unknown
+  >;
 
-  return new EEUserRepository(new CommunityUserRepository(), new AnalyticsService(), clerkClientMock);
+  return new eeAuth.EEUserRepository(
+    new CommunityUserRepository(),
+    new appGeneric.AnalyticsService(),
+    clerkClientMock
+  );
 }
 
 function getEEOrganizationRepository() {
-  // nx-ignore-next-line
-  const { EEOrganizationRepository } = require('@novu/ee-auth');
+  const { EEOrganizationRepository } = requireNovuWorkspacePackage('ee-auth') as {
+    EEOrganizationRepository: new (...args: unknown[]) => unknown;
+  };
 
   return new EEOrganizationRepository(new CommunityOrganizationRepository(), clerkClientMock);
 }
 
 function getEEMemberRepository() {
-  // nx-ignore-next-line
-  const { EEMemberRepository } = require('@novu/ee-auth');
+  const { EEMemberRepository } = requireNovuWorkspacePackage('ee-auth') as {
+    EEMemberRepository: new (...args: unknown[]) => unknown;
+  };
 
   return new EEMemberRepository(new CommunityOrganizationRepository(), clerkClientMock);
 }

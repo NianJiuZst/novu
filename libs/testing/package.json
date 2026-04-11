@@ -21,8 +21,6 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@novu/application-generic": "workspace:*",
-    "@novu/ee-auth": "workspace:*",
     "@clerk/backend": "1.25.2",
     "@clerk/types": "^4.6.1",
     "@faker-js/faker": "^6.0.0",
