@@ -143,8 +143,10 @@ notificationSchema.index({
  * Path: libs/dal/src/repositories/notification/notification.repository.ts
  *    Context: getActivityGraphStats()
  *        Query: aggregate(
- *                {createdAt: { $gte: date }_environmentId: new Types.ObjectId(environmentId),
- *                { $sort: { createdAt: -1 } }})
+ *                $match: { createdAt: { $gte: date }, _environmentId },
+ *                $project: { createdAt, _templateId, channels },
+ *                $unwind channels, $group by day, $sort by _id
+ *                hint: { _environmentId: 1, createdAt: -1 })
  *
  * Path: libs/dal/src/repositories/notification/notification.repository.ts
  *    Context: getStats()

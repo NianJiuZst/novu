@@ -305,6 +305,13 @@ export class NotificationRepository extends BaseRepository<
             _environmentId: new Types.ObjectId(environmentId),
           },
         },
+        {
+          $project: {
+            createdAt: 1,
+            _templateId: 1,
+            channels: 1,
+          },
+        },
         { $unwind: '$channels' },
         {
           $group: {
@@ -318,10 +325,11 @@ export class NotificationRepository extends BaseRepository<
             channels: { $addToSet: '$channels' },
           },
         },
-        { $sort: { createdAt: -1 } },
+        { $sort: { _id: 1 } },
       ],
       {
         readPreference: 'secondaryPreferred',
+        hint: { _environmentId: 1, createdAt: -1 },
       }
     );
   }

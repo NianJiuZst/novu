@@ -124,8 +124,20 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     return this.MongooseModel.estimatedDocumentCount();
   }
 
-  async aggregate(query: any[], options: { readPreference?: 'secondaryPreferred' | 'primary' } = {}): Promise<any> {
-    return await this.MongooseModel.aggregate(query).read(options.readPreference || 'primary');
+  async aggregate(
+    query: any[],
+    options: {
+      readPreference?: 'secondaryPreferred' | 'primary';
+      hint?: string | Record<string, 1 | -1>;
+    } = {}
+  ): Promise<any> {
+    let pipeline = this.MongooseModel.aggregate(query);
+
+    if (options.hint !== undefined) {
+      pipeline = pipeline.hint(options.hint);
+    }
+
+    return await pipeline.read(options.readPreference || 'primary');
   }
 
   async findOne(
