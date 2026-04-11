@@ -12,7 +12,9 @@ export const noopNewRelicForCiTest = {
   recordMetric: (_name: string, _value: number) => {},
 };
 
-export type NewRelicAgentLike = typeof noopNewRelicForCiTest;
+export type NewRelicAgentLike = typeof noopNewRelicForCiTest & {
+  instrumentDatastore?: (name: string, callback: () => unknown) => void;
+};
 
 export function loadNewRelicOrNoopInCiTest(): NewRelicAgentLike {
   if (process.env.CI && process.env.NODE_ENV === 'test') {
