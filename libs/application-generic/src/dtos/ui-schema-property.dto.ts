@@ -38,7 +38,7 @@ export class UiSchemaProperty {
 
   @ApiProperty({
     description: 'Component type for the UI Schema Property',
-    enum: [...Object.values(UiComponentEnum)],
+    enum: UiComponentEnum,
     enumName: 'UiComponentEnum',
   })
   @IsEnum(UiComponentEnum)
