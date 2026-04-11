@@ -1,5 +1,10 @@
 import { Inject } from '@nestjs/common';
-import { GetDecryptedSecretKey, GetDecryptedSecretKeyCommand } from '@novu/application-generic';
+import {
+  GetDecryptedSecretKey,
+  GetDecryptedSecretKeyCommand,
+  InMemoryLRUCacheService,
+  InMemoryLRUCacheStore,
+} from '@novu/application-generic';
 import { PostActionEnum, type Workflow } from '@novu/framework/internal';
 import { Client, NovuHandler, NovuRequestHandler } from '@novu/framework/nest';
 import { EnvironmentTypeEnum } from '@novu/shared';
@@ -20,7 +25,8 @@ export class NovuBridgeClient {
   constructor(
     @Inject(NovuHandler) private novuHandler: NovuHandler,
     private constructFrameworkWorkflow: ConstructFrameworkWorkflow,
-    private getDecryptedSecretKey: GetDecryptedSecretKey
+    private getDecryptedSecretKey: GetDecryptedSecretKey,
+    private inMemoryLRUCacheService: InMemoryLRUCacheService
   ) {}
 
   public async handleRequest(req: Request, res: Response) {
@@ -48,11 +54,21 @@ export class NovuBridgeClient {
       workflows.push(programmaticallyConstructedWorkflow);
     }
 
-    const secretKey = await this.getDecryptedSecretKey.execute(
-      GetDecryptedSecretKeyCommand.create({
-        environmentId: req.params.environmentId,
-      })
-    );
+    const environmentId = req.params.environmentId;
+    const secretKey = (await this.inMemoryLRUCacheService.get(
+      InMemoryLRUCacheStore.VALIDATOR,
+      `bridge-secret-key:${environmentId}`,
+      () =>
+        this.getDecryptedSecretKey.execute(
+          GetDecryptedSecretKeyCommand.create({
+            environmentId,
+          })
+        ),
+      {
+        environmentId,
+        cacheVariant: 'bridge-secret-key',
+      }
+    )) as string;
 
     const novuRequestHandler = new NovuRequestHandler({
       frameworkName,
