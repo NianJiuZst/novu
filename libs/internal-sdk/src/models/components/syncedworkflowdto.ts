@@ -17,7 +17,7 @@ import {
 
 export type SyncedWorkflowDto = {
   /**
-   * Type of the layout
+   * Resource type
    */
   resourceType: ResourceTypeEnum;
   /**

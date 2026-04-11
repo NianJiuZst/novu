@@ -73,7 +73,7 @@ export type PushStepResponseDto = {
    */
   type: "push";
   /**
-   * Origin of the layout
+   * Origin of the step
    */
   origin: ResourceOriginEnum;
   /**

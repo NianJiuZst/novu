@@ -119,7 +119,7 @@ export type ThrottleStepResponseDto = {
    */
   type: "throttle";
   /**
-   * Origin of the layout
+   * Origin of the step
    */
   origin: ResourceOriginEnum;
   /**

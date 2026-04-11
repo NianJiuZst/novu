@@ -6,7 +6,7 @@ import * as z from "zod/v3";
 import { ClosedEnum } from "../../types/enums.js";
 
 /**
- * Provider ID of the job
+ * Provider ID of the execution
  */
 export const ProvidersIdEnum = {
   Emailjs: "emailjs",
@@ -90,7 +90,7 @@ export const ProvidersIdEnum = {
   NovuSlack: "novu-slack",
 } as const;
 /**
- * Provider ID of the job
+ * Provider ID of the execution
  */
 export type ProvidersIdEnum = ClosedEnum<typeof ProvidersIdEnum>;
 

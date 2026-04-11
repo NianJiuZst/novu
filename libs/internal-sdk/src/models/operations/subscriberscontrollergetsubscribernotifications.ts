@@ -27,6 +27,10 @@ export type SubscribersControllerGetSubscriberNotificationsRequest = {
   after?: string | undefined;
   offset?: number | undefined;
   /**
+   * Filter by workflow tags. Plain string[] is OR. Use { and: [{ or: string[] }, ...] } for AND of OR-groups (same as inbox).
+   */
+  tags?: components.ObjectT | undefined;
+  /**
    * Filter by read/unread state
    */
   read?: boolean | undefined;
@@ -83,6 +87,7 @@ export type SubscribersControllerGetSubscriberNotificationsRequest$Outbound = {
   limit: number;
   after?: string | undefined;
   offset?: number | undefined;
+  tags?: components.ObjectT$Outbound | undefined;
   read?: boolean | undefined;
   archived?: boolean | undefined;
   snoozed?: boolean | undefined;
@@ -106,6 +111,7 @@ export const SubscribersControllerGetSubscriberNotificationsRequest$outboundSche
     limit: z.number().default(10),
     after: z.string().optional(),
     offset: z.number().optional(),
+    tags: components.ObjectT$outboundSchema.optional(),
     read: z.boolean().optional(),
     archived: z.boolean().optional(),
     snoozed: z.boolean().optional(),

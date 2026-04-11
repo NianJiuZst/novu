@@ -10,7 +10,7 @@ import {
 
 export type ResourceToPublishDto = {
   /**
-   * Type of the layout
+   * Type of resource to publish
    */
   resourceType: ResourceTypeEnum;
   /**

@@ -111,7 +111,7 @@ export type NotificationFeedItemDto = {
    */
   subject?: string | null | undefined;
   /**
-   * Channel type through which the message is sent
+   * The channel through which the notification is sent.
    */
   channel: ChannelTypeEnum;
   /**

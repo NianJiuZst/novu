@@ -65,7 +65,7 @@ export type CustomStepResponseDto = {
    */
   type: "custom";
   /**
-   * Origin of the layout
+   * Origin of the step
    */
   origin: ResourceOriginEnum;
   /**

@@ -106,11 +106,11 @@ export type WorkflowListResponseDto = {
    */
   slug: string;
   /**
-   * Status of the workflow
+   * Workflow status
    */
   status: WorkflowStatusEnum;
   /**
-   * Origin of the layout
+   * Workflow origin
    */
   origin: ResourceOriginEnum;
   /**

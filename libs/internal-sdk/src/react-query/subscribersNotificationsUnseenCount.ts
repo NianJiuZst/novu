@@ -10,6 +10,7 @@ import {
   useSuspenseQuery,
   UseSuspenseQueryResult,
 } from "@tanstack/react-query";
+import * as components from "../models/components/index.js";
 import {
   ConnectionError,
   InvalidRequestError,
@@ -112,6 +113,7 @@ export function setSubscribersNotificationsUnseenCountData(
   queryKeyBase: [
     subscriberId: string,
     parameters: {
+      feedId?: components.ObjectT | undefined;
       seen?: boolean | undefined;
       limit?: number | undefined;
       idempotencyKey?: string | undefined;
@@ -133,6 +135,7 @@ export function invalidateSubscribersNotificationsUnseenCount(
     [
       subscriberId: string,
       parameters: {
+        feedId?: components.ObjectT | undefined;
         seen?: boolean | undefined;
         limit?: number | undefined;
         idempotencyKey?: string | undefined;

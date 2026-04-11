@@ -114,7 +114,7 @@ export type TargetResource = {
 
 export type ResourceDiffResultDto = {
   /**
-   * Type of the layout
+   * Type of resource being compared
    */
   resourceType: ResourceTypeEnum;
   /**

@@ -13,7 +13,7 @@ import {
 
 export type SkippedWorkflowDto = {
   /**
-   * Type of the layout
+   * Resource type
    */
   resourceType: ResourceTypeEnum;
   /**

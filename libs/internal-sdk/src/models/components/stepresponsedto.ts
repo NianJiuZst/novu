@@ -51,7 +51,7 @@ export type StepResponseDto = {
    */
   type: string;
   /**
-   * Origin of the layout
+   * Origin of the step
    */
   origin: ResourceOriginEnum;
   /**

@@ -128,7 +128,7 @@ export type ResourceDiffDto = {
    */
   targetResource?: ResourceDiffDtoTargetResource | null | undefined;
   /**
-   * Type of the layout
+   * Type of resource
    */
   resourceType: ResourceTypeEnum;
   /**

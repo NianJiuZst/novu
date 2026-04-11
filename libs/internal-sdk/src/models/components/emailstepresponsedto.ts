@@ -100,7 +100,7 @@ export type EmailStepResponseDto = {
    */
   type: "email";
   /**
-   * Origin of the layout
+   * Origin of the step
    */
   origin: ResourceOriginEnum;
   /**

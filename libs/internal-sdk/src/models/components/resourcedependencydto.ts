@@ -17,7 +17,7 @@ import {
 
 export type ResourceDependencyDto = {
   /**
-   * Type of the layout
+   * Type of dependent resource
    */
   resourceType: ResourceTypeEnum;
   /**

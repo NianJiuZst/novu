@@ -119,6 +119,7 @@ async function $do(
     "seen": payload.seen,
     "severity": payload.severity,
     "snoozed": payload.snoozed,
+    "tags": payload.tags,
   });
 
   const headers = new Headers(compactMap({

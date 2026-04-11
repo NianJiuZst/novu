@@ -13,7 +13,7 @@ import {
 
 export type FailedWorkflowDto = {
   /**
-   * Type of the layout
+   * Resource type
    */
   resourceType: ResourceTypeEnum;
   /**

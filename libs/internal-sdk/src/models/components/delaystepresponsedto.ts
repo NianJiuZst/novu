@@ -114,7 +114,7 @@ export type DelayStepResponseDto = {
    */
   type: "delay";
   /**
-   * Origin of the layout
+   * Origin of the step
    */
   origin: ResourceOriginEnum;
   /**

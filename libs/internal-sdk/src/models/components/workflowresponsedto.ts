@@ -205,7 +205,7 @@ export type WorkflowResponseDto = {
     | discriminatedUnionTypes.Unknown<"type">
   >;
   /**
-   * Origin of the layout
+   * Origin of the workflow
    */
   origin: ResourceOriginEnum;
   /**

@@ -102,7 +102,7 @@ export type InboxNotificationDto = {
    */
   secondaryAction?: InboxActionDto | undefined;
   /**
-   * Channel type through which the message is sent
+   * Channel type of the notification
    */
   channelType: ChannelTypeEnum;
   /**
@@ -122,7 +122,7 @@ export type InboxNotificationDto = {
    */
   workflow?: NotificationWorkflowDto | undefined;
   /**
-   * Severity of the workflow
+   * Severity level of the notification
    */
   severity: SeverityLevelEnum;
 };

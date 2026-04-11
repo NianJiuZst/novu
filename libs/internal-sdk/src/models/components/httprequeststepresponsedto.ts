@@ -97,7 +97,7 @@ export type HttpRequestStepResponseDto = {
    */
   type: "http_request";
   /**
-   * Origin of the layout
+   * Origin of the step
    */
   origin: ResourceOriginEnum;
   /**

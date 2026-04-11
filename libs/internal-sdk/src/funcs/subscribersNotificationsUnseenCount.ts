@@ -105,6 +105,7 @@ async function $do(
   )(pathParams);
 
   const query = encodeFormQuery({
+    "feedId": payload.feedId,
     "limit": payload.limit,
     "seen": payload.seen,
   });

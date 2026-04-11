@@ -126,7 +126,7 @@ export type DigestStepResponseDto = {
    */
   type: "digest";
   /**
-   * Origin of the layout
+   * Origin of the step
    */
   origin: ResourceOriginEnum;
   /**

@@ -4,6 +4,7 @@
 
 import * as z from "zod/v3";
 import { remap as remap$ } from "../../lib/primitives.js";
+import { ClosedEnum } from "../../types/enums.js";
 import {
   ChatStepUpsertDto,
   ChatStepUpsertDto$Outbound,
@@ -63,10 +64,6 @@ import {
   ThrottleStepUpsertDto$Outbound,
   ThrottleStepUpsertDto$outboundSchema,
 } from "./throttlestepupsertdto.js";
-import {
-  WorkflowCreationSourceEnum,
-  WorkflowCreationSourceEnum$outboundSchema,
-} from "./workflowcreationsourceenum.js";
 
 export type Steps =
   | InAppStepUpsertDto
@@ -79,6 +76,29 @@ export type Steps =
   | ThrottleStepUpsertDto
   | CustomStepUpsertDto
   | HttpRequestStepUpsertDto;
+
+/**
+ * Source of workflow creation
+ */
+export const CreateWorkflowDtoSource = {
+  TemplateStore: "template_store",
+  Editor: "editor",
+  NotificationDirectory: "notification_directory",
+  OnboardingDigestDemo: "onboarding_digest_demo",
+  OnboardingInApp: "onboarding_in_app",
+  EmptyState: "empty_state",
+  Dropdown: "dropdown",
+  OnboardingGetStarted: "onboarding_get_started",
+  Bridge: "bridge",
+  Dashboard: "dashboard",
+  Ai: "ai",
+} as const;
+/**
+ * Source of workflow creation
+ */
+export type CreateWorkflowDtoSource = ClosedEnum<
+  typeof CreateWorkflowDtoSource
+>;
 
 export type CreateWorkflowDto = {
   /**
@@ -131,7 +151,7 @@ export type CreateWorkflowDto = {
   /**
    * Source of workflow creation
    */
-  source?: WorkflowCreationSourceEnum | undefined;
+  source?: CreateWorkflowDtoSource | undefined;
   /**
    * Workflow preferences
    */
@@ -176,6 +196,11 @@ export const Steps$outboundSchema: z.ZodType<
 export function stepsToJSON(steps: Steps): string {
   return JSON.stringify(Steps$outboundSchema.parse(steps));
 }
+
+/** @internal */
+export const CreateWorkflowDtoSource$outboundSchema: z.ZodNativeEnum<
+  typeof CreateWorkflowDtoSource
+> = z.nativeEnum(CreateWorkflowDtoSource);
 
 /** @internal */
 export type CreateWorkflowDto$Outbound = {
@@ -232,7 +257,7 @@ export const CreateWorkflowDto$outboundSchema: z.ZodType<
       HttpRequestStepUpsertDto$outboundSchema,
     ]),
   ),
-  source: WorkflowCreationSourceEnum$outboundSchema.default("editor"),
+  source: CreateWorkflowDtoSource$outboundSchema.default("editor"),
   preferences: PreferencesRequestDto$outboundSchema.optional(),
   severity: SeverityLevelEnum$outboundSchema.optional(),
 }).transform((v) => {

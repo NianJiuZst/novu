@@ -69,7 +69,7 @@ export type SmsStepResponseDto = {
    */
   type: "sms";
   /**
-   * Origin of the layout
+   * Origin of the step
    */
   origin: ResourceOriginEnum;
   /**

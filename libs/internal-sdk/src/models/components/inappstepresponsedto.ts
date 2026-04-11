@@ -99,7 +99,7 @@ export type InAppStepResponseDto = {
    */
   type: "in_app";
   /**
-   * Origin of the layout
+   * Origin of the step
    */
   origin: ResourceOriginEnum;
   /**

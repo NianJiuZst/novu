@@ -10,6 +10,7 @@ import {
   useSuspenseQuery,
   UseSuspenseQueryResult,
 } from "@tanstack/react-query";
+import * as components from "../models/components/index.js";
 import {
   ConnectionError,
   InvalidRequestError,
@@ -117,6 +118,7 @@ export function setSubscribersNotificationsListData(
       limit?: number | undefined;
       after?: string | undefined;
       offset?: number | undefined;
+      tags?: components.ObjectT | undefined;
       read?: boolean | undefined;
       archived?: boolean | undefined;
       snoozed?: boolean | undefined;
@@ -145,6 +147,7 @@ export function invalidateSubscribersNotificationsList(
         limit?: number | undefined;
         after?: string | undefined;
         offset?: number | undefined;
+        tags?: components.ObjectT | undefined;
         read?: boolean | undefined;
         archived?: boolean | undefined;
         snoozed?: boolean | undefined;

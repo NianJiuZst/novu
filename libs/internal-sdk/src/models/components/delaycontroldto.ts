@@ -11,14 +11,14 @@ import { SDKValidationError } from "../errors/sdkvalidationerror.js";
 /**
  * Type of the delay. Currently only 'regular' is supported by the schema.
  */
-export const Type = {
+export const DelayControlDtoType = {
   Regular: "regular",
   Timed: "timed",
 } as const;
 /**
  * Type of the delay. Currently only 'regular' is supported by the schema.
  */
-export type Type = ClosedEnum<typeof Type>;
+export type DelayControlDtoType = ClosedEnum<typeof DelayControlDtoType>;
 
 /**
  * Unit of time for the delay amount.
@@ -44,7 +44,7 @@ export type DelayControlDto = {
   /**
    * Type of the delay. Currently only 'regular' is supported by the schema.
    */
-  type?: Type | undefined;
+  type?: DelayControlDtoType | undefined;
   /**
    * Amount of time to delay.
    */
@@ -60,12 +60,13 @@ export type DelayControlDto = {
 };
 
 /** @internal */
-export const Type$inboundSchema: z.ZodNativeEnum<typeof Type> = z.nativeEnum(
-  Type,
-);
+export const DelayControlDtoType$inboundSchema: z.ZodNativeEnum<
+  typeof DelayControlDtoType
+> = z.nativeEnum(DelayControlDtoType);
 /** @internal */
-export const Type$outboundSchema: z.ZodNativeEnum<typeof Type> =
-  Type$inboundSchema;
+export const DelayControlDtoType$outboundSchema: z.ZodNativeEnum<
+  typeof DelayControlDtoType
+> = DelayControlDtoType$inboundSchema;
 
 /** @internal */
 export const Unit$inboundSchema: z.ZodNativeEnum<typeof Unit> = z.nativeEnum(
@@ -82,7 +83,7 @@ export const DelayControlDto$inboundSchema: z.ZodType<
   unknown
 > = z.object({
   skip: z.record(z.any()).optional(),
-  type: Type$inboundSchema.default("regular"),
+  type: DelayControlDtoType$inboundSchema.default("regular"),
   amount: z.number().optional(),
   unit: Unit$inboundSchema.optional(),
   cron: z.string().optional(),
@@ -103,7 +104,7 @@ export const DelayControlDto$outboundSchema: z.ZodType<
   DelayControlDto
 > = z.object({
   skip: z.record(z.any()).optional(),
-  type: Type$outboundSchema.default("regular"),
+  type: DelayControlDtoType$outboundSchema.default("regular"),
   amount: z.number().optional(),
   unit: Unit$outboundSchema.optional(),
   cron: z.string().optional(),

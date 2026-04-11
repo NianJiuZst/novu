@@ -69,7 +69,7 @@ export type ChatStepResponseDto = {
    */
   type: "chat";
   /**
-   * Origin of the layout
+   * Origin of the step
    */
   origin: ResourceOriginEnum;
   /**

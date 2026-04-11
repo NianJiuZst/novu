@@ -25,7 +25,7 @@ import {
 
 export type SyncResultDto = {
   /**
-   * Type of the layout
+   * Resource type that was synced
    */
   resourceType: ResourceTypeEnum;
   /**
