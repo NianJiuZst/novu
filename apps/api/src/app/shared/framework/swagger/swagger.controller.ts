@@ -256,7 +256,7 @@ function publishSdkSpecificDocumentAndReturnDocument(
 ) {
   overloadNamingGuidelines(document);
   overloadGlobalSdkRetrySettings(document);
-  patchOpenEnumSchemas(document);
+  // patchOpenEnumSchemas(document);
 
   let sdkDocument: OpenAPIObject = overloadDocumentForSdkGeneration(document, internalSdkGeneration);
   sdkDocument = sortOpenAPIDocument(sdkDocument);

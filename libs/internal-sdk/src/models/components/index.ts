@@ -302,6 +302,7 @@ export * from "./triggereventrequestdto.js";
 export * from "./triggereventresponsedto.js";
 export * from "./triggereventtoallrequestdto.js";
 export * from "./triggerrecipientstypeenum.js";
+export * from "./uicomponentenum.js";
 export * from "./uischema.js";
 export * from "./uischemagroupenum.js";
 export * from "./uischemaproperty.js";
