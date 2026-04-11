@@ -20,12 +20,10 @@ export class CreateLayoutDto {
   @IsBoolean()
   isTranslationEnabled?: boolean;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Source of layout creation',
     enum: LayoutCreationSourceEnum,
     enumName: 'LayoutCreationSourceEnum',
-    required: false,
-    default: LayoutCreationSourceEnum.DASHBOARD,
   })
   @IsOptional()
   @IsEnum(LayoutCreationSourceEnum)

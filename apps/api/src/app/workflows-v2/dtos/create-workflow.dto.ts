@@ -138,12 +138,10 @@ export class CreateWorkflowDto extends WorkflowCommonsFields {
     | HttpRequestStepUpsertDto
   )[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Source of workflow creation',
     enum: WorkflowCreationSourceEnum,
     enumName: 'WorkflowCreationSourceEnum',
-    required: false,
-    default: WorkflowCreationSourceEnum.EDITOR,
   })
   @IsOptional()
   @IsEnum(WorkflowCreationSourceEnum)

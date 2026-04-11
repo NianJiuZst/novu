@@ -4,18 +4,10 @@
 
 import * as z from "zod/v3";
 import { remap as remap$ } from "../../lib/primitives.js";
-import { ClosedEnum } from "../../types/enums.js";
-
-/**
- * Source of layout creation
- */
-export const Source = {
-  Dashboard: "dashboard",
-} as const;
-/**
- * Source of layout creation
- */
-export type Source = ClosedEnum<typeof Source>;
+import {
+  LayoutCreationSourceEnum,
+  LayoutCreationSourceEnum$outboundSchema,
+} from "./layoutcreationsourceenum.js";
 
 export type CreateLayoutDto = {
   /**
@@ -33,19 +25,15 @@ export type CreateLayoutDto = {
   /**
    * Source of layout creation
    */
-  source?: Source | undefined;
+  source?: LayoutCreationSourceEnum | undefined;
 };
-
-/** @internal */
-export const Source$outboundSchema: z.ZodNativeEnum<typeof Source> = z
-  .nativeEnum(Source);
 
 /** @internal */
 export type CreateLayoutDto$Outbound = {
   layoutId: string;
   name: string;
   isTranslationEnabled: boolean;
-  __source: string;
+  __source?: string | undefined;
 };
 
 /** @internal */
@@ -57,7 +45,7 @@ export const CreateLayoutDto$outboundSchema: z.ZodType<
   layoutId: z.string(),
   name: z.string(),
   isTranslationEnabled: z.boolean().default(false),
-  source: Source$outboundSchema.default("dashboard"),
+  source: LayoutCreationSourceEnum$outboundSchema.optional(),
 }).transform((v) => {
   return remap$(v, {
     source: "__source",

@@ -4,7 +4,6 @@
 
 import * as z from "zod/v3";
 import { remap as remap$ } from "../../lib/primitives.js";
-import { ClosedEnum } from "../../types/enums.js";
 import {
   ChatStepUpsertDto,
   ChatStepUpsertDto$Outbound,
@@ -64,6 +63,10 @@ import {
   ThrottleStepUpsertDto$Outbound,
   ThrottleStepUpsertDto$outboundSchema,
 } from "./throttlestepupsertdto.js";
+import {
+  WorkflowCreationSourceEnum,
+  WorkflowCreationSourceEnum$outboundSchema,
+} from "./workflowcreationsourceenum.js";
 
 export type Steps =
   | InAppStepUpsertDto
@@ -76,29 +79,6 @@ export type Steps =
   | ThrottleStepUpsertDto
   | CustomStepUpsertDto
   | HttpRequestStepUpsertDto;
-
-/**
- * Source of workflow creation
- */
-export const CreateWorkflowDtoSource = {
-  TemplateStore: "template_store",
-  Editor: "editor",
-  NotificationDirectory: "notification_directory",
-  OnboardingDigestDemo: "onboarding_digest_demo",
-  OnboardingInApp: "onboarding_in_app",
-  EmptyState: "empty_state",
-  Dropdown: "dropdown",
-  OnboardingGetStarted: "onboarding_get_started",
-  Bridge: "bridge",
-  Dashboard: "dashboard",
-  Ai: "ai",
-} as const;
-/**
- * Source of workflow creation
- */
-export type CreateWorkflowDtoSource = ClosedEnum<
-  typeof CreateWorkflowDtoSource
->;
 
 export type CreateWorkflowDto = {
   /**
@@ -151,7 +131,7 @@ export type CreateWorkflowDto = {
   /**
    * Source of workflow creation
    */
-  source?: CreateWorkflowDtoSource | undefined;
+  source?: WorkflowCreationSourceEnum | undefined;
   /**
    * Workflow preferences
    */
@@ -198,11 +178,6 @@ export function stepsToJSON(steps: Steps): string {
 }
 
 /** @internal */
-export const CreateWorkflowDtoSource$outboundSchema: z.ZodNativeEnum<
-  typeof CreateWorkflowDtoSource
-> = z.nativeEnum(CreateWorkflowDtoSource);
-
-/** @internal */
 export type CreateWorkflowDto$Outbound = {
   name: string;
   description?: string | undefined;
@@ -224,7 +199,7 @@ export type CreateWorkflowDto$Outbound = {
     | CustomStepUpsertDto$Outbound
     | HttpRequestStepUpsertDto$Outbound
   >;
-  __source: string;
+  __source?: string | undefined;
   preferences?: PreferencesRequestDto$Outbound | undefined;
   severity?: string | undefined;
 };
@@ -257,7 +232,7 @@ export const CreateWorkflowDto$outboundSchema: z.ZodType<
       HttpRequestStepUpsertDto$outboundSchema,
     ]),
   ),
-  source: CreateWorkflowDtoSource$outboundSchema.default("editor"),
+  source: WorkflowCreationSourceEnum$outboundSchema.optional(),
   preferences: PreferencesRequestDto$outboundSchema.optional(),
   severity: SeverityLevelEnum$outboundSchema.optional(),
 }).transform((v) => {
