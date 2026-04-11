@@ -1,10 +1,13 @@
-import { INestApplication } from '@nestjs/common';
-import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import type {
+  CorsOptions,
+  CorsOptionsDelegate,
+} from '@nestjs/common/interfaces/external/cors-options.interface';
+import type { Request } from 'express';
 import { HttpRequestHeaderKeysEnum } from '@novu/application-generic';
 
 const ALLOWED_ORIGINS_REGEX = new RegExp(process.env.FRONT_BASE_URL || '');
 
-export const corsOptionsDelegate: Parameters<INestApplication['enableCors']>[0] = (req: Request, callback) => {
+export const corsOptionsDelegate: CorsOptionsDelegate<Request> = (req, callback) => {
   const corsOptions: CorsOptions = {
     origin: false as boolean | string | string[],
     preflightContinue: false,
@@ -33,7 +36,7 @@ export const corsOptionsDelegate: Parameters<INestApplication['enableCors']>[0] 
     }
   }
 
-  callback(null as unknown as Error, corsOptions);
+  callback(null, corsOptions);
 };
 
 function enableWildcard(req: Request): boolean {

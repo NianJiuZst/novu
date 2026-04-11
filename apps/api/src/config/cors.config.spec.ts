@@ -1,3 +1,4 @@
+import type { Request } from 'express';
 import { expect } from 'chai';
 import { spy } from 'sinon';
 import { corsOptionsDelegate } from './cors.config';
@@ -19,8 +20,7 @@ describe('CORS Configuration', () => {
     it('should allow all origins', () => {
       const callbackSpy = spy();
 
-      // @ts-expect-error - corsOptionsDelegate is not typed correctly
-      corsOptionsDelegate({ url: '/v1/test' }, callbackSpy);
+      corsOptionsDelegate({ url: '/v1/test' } as Request, callbackSpy);
 
       expect(callbackSpy.calledOnce).to.be.ok;
       expect(callbackSpy.firstCall.firstArg).to.be.null;
@@ -42,14 +42,13 @@ describe('CORS Configuration', () => {
       process.env.WIDGET_BASE_URL = widgetOrigin;
       const callbackSpy = spy();
 
-      // @ts-expect-error - corsOptionsDelegate is not typed correctly
       corsOptionsDelegate(
         {
           url: '/v1/test',
           headers: {
             origin: dashboardOrigin,
           },
-        },
+        } as Request,
         callbackSpy
       );
 
@@ -63,14 +62,13 @@ describe('CORS Configuration', () => {
     it('should allow for the preview deployments origin', () => {
       const callbackSpy = spy();
 
-      // @ts-expect-error - corsOptionsDelegate is not typed correctly
       corsOptionsDelegate(
         {
           url: '/v1/test',
           headers: {
             origin: previewOrigin,
           },
-        },
+        } as Request,
         callbackSpy
       );
 
@@ -83,8 +81,7 @@ describe('CORS Configuration', () => {
     it('widget routes should be wildcarded', () => {
       const callbackSpy = spy();
 
-      // @ts-expect-error - corsOptionsDelegate is not typed correctly
-      corsOptionsDelegate({ url: '/v1/widgets/test' }, callbackSpy);
+      corsOptionsDelegate({ url: '/v1/widgets/test' } as Request, callbackSpy);
 
       expect(callbackSpy.calledOnce).to.be.ok;
       expect(callbackSpy.firstCall.firstArg).to.be.null;
@@ -94,8 +91,7 @@ describe('CORS Configuration', () => {
     it('inbox routes should be wildcarded', () => {
       const callbackSpy = spy();
 
-      // @ts-expect-error - corsOptionsDelegate is not typed correctly
-      corsOptionsDelegate({ url: '/v1/inbox/session' }, callbackSpy);
+      corsOptionsDelegate({ url: '/v1/inbox/session' } as Request, callbackSpy);
 
       expect(callbackSpy.calledOnce).to.be.ok;
       expect(callbackSpy.firstCall.firstArg).to.be.null;
