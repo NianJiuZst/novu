@@ -1,9 +1,10 @@
-import { Inject, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, NotFoundException } from '@nestjs/common';
 import {
   GetDecryptedSecretKey,
   GetDecryptedSecretKeyCommand,
   InMemoryLRUCacheService,
   InMemoryLRUCacheStore,
+  PinoLogger,
 } from '@novu/application-generic';
 import { PostActionEnum, type Workflow } from '@novu/framework/internal';
 import { Client, NovuHandler, NovuRequestHandler } from '@novu/framework/nest';
@@ -22,13 +23,12 @@ export const frameworkName = 'novu-nest';
  * workflows to serve on the Novu Bridge.
  */
 export class NovuBridgeClient {
-  private readonly logger = new Logger(NovuBridgeClient.name);
-
   constructor(
     @Inject(NovuHandler) private novuHandler: NovuHandler,
     private constructFrameworkWorkflow: ConstructFrameworkWorkflow,
     private getDecryptedSecretKey: GetDecryptedSecretKey,
-    private inMemoryLRUCacheService: InMemoryLRUCacheService
+    private inMemoryLRUCacheService: InMemoryLRUCacheService,
+    private logger: PinoLogger
   ) {}
 
   public async handleRequest(req: Request, res: Response) {
@@ -131,6 +131,11 @@ export class NovuBridgeClient {
       handler: this.novuHandler.handler,
     });
 
-    await novuRequestHandler.createHandler()(req as any, res as any);
+    const bridgeHandler = novuRequestHandler.createHandler() as (
+      request: Request,
+      response: Response
+    ) => void | Promise<void>;
+
+    await bridgeHandler(req, res);
   }
 }
