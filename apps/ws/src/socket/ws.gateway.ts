@@ -73,31 +73,14 @@ export class WSGateway implements OnGatewayConnection, OnGatewayDisconnect, IDes
   }
 
   private extractToken(connection: Socket): string | undefined {
-    const fromAuth = this.coerceHandshakeToken(connection.handshake.auth?.token);
-    if (fromAuth) {
-      return fromAuth;
-    }
-
-    return this.coerceHandshakeToken(connection.handshake.query?.token);
-  }
-
-  private coerceHandshakeToken(value: unknown): string | undefined {
-    if (typeof value === 'string' && value.length > 0) {
-      return value;
-    }
-
-    if (Array.isArray(value) && typeof value[0] === 'string' && value[0].length > 0) {
-      return value[0];
-    }
-
-    return undefined;
+    return connection.handshake.auth?.token || connection.handshake.query?.token;
   }
 
   private async getSubscriber(token: string): Promise<ISubscriberJwt | undefined> {
     let subscriber: ISubscriberJwt;
 
     try {
-      subscriber = await this.jwtService.verify(token);
+      subscriber = await this.jwtService.verify(token as string);
       if (subscriber.aud !== 'widget_user') {
         return;
       }

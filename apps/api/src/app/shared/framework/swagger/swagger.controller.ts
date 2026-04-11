@@ -239,12 +239,22 @@ function overloadGlobalSdkRetrySettings(document: OpenAPIObject) {
   };
 }
 
+/** Speakeasy maps snake_case overrides to PascalCase type names (see x-speakeasy-name-override). */
+function pascalSchemaNameToSpeakeasyNameOverride(schemaName: string): string {
+  return schemaName
+    .replace(/([a-z\d])([A-Z])/g, '$1_$2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+    .toLowerCase();
+}
+
 function patchOpenEnumSchemas(document: OpenAPIObject) {
   const openEnumSchemas = ['UiComponentEnum'];
   for (const schemaName of openEnumSchemas) {
     const schema = document.components?.schemas?.[schemaName];
     if (schema) {
       (schema as Record<string, unknown>)['x-speakeasy-unknown-values'] = 'allow';
+      (schema as Record<string, unknown>)['x-speakeasy-name-override'] =
+        pascalSchemaNameToSpeakeasyNameOverride(schemaName);
     }
   }
 }
@@ -256,7 +266,7 @@ function publishSdkSpecificDocumentAndReturnDocument(
 ) {
   overloadNamingGuidelines(document);
   overloadGlobalSdkRetrySettings(document);
-  // patchOpenEnumSchemas(document);
+  patchOpenEnumSchemas(document);
 
   let sdkDocument: OpenAPIObject = overloadDocumentForSdkGeneration(document, internalSdkGeneration);
   sdkDocument = sortOpenAPIDocument(sdkDocument);
