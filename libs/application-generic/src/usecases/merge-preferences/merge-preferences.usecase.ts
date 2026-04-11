@@ -78,10 +78,24 @@ export class MergePreferences {
       [PreferencesTypeEnum.SUBSCRIBER_WORKFLOW]: command.subscriberWorkflowPreference?.preferences || null,
     };
 
+    let mergedType: PreferencesTypeEnum;
+
+    if (command.workflowUserPreference) {
+      mergedType = PreferencesTypeEnum.USER_WORKFLOW;
+    } else if (!shouldExcludeSubscriberPreferences && command.subscriberWorkflowPreference) {
+      mergedType = PreferencesTypeEnum.SUBSCRIBER_WORKFLOW;
+    } else if (!shouldExcludeSubscriberPreferences && command.subscriberGlobalPreference) {
+      mergedType = PreferencesTypeEnum.SUBSCRIBER_GLOBAL;
+    } else if (command.workflowResourcePreference) {
+      mergedType = PreferencesTypeEnum.WORKFLOW_RESOURCE;
+    } else {
+      mergedType = mergedPreferences.type;
+    }
+
     return {
       preferences: mergedPreferences.preferences,
       schedule: mergedPreferences.schedule,
-      type: mergedPreferences.type,
+      type: mergedType,
       source,
     };
   }

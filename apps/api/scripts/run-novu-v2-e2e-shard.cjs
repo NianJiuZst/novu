@@ -14,6 +14,8 @@ const DEFAULT_MOCHA_REPORTER = process.env.CI ? 'dot' : 'spec';
 const MOCHA_REPORTER = process.env.NOVU_V2_MOCHA_REPORTER || DEFAULT_MOCHA_REPORTER;
 
 const MOCHA_ARGS = [
+  '--config',
+  '.mocharc.e2e.json',
   '--timeout',
   '30000',
   '--retries',
@@ -25,8 +27,6 @@ const MOCHA_ARGS = [
   NOVU_V2_TAG,
   '--require',
   './swc-register.js',
-  '--file',
-  'e2e/setup.ts',
   '--exit',
 ];
 
