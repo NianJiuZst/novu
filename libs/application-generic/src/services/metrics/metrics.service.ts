@@ -1,8 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import * as otelApi from '@opentelemetry/api';
+import { loadNewRelicOrNoopInCiTest } from '../load-newrelic-ci-test-safe';
 import { IMetricsService } from './metrics.interface';
 
-const nr = require('newrelic');
+const nr = loadNewRelicOrNoopInCiTest();
 
 const LOG_CONTEXT = 'MetricsService';
 
