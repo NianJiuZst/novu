@@ -25,8 +25,6 @@ const MOCHA_ARGS = [
   MOCHA_REPORTER,
   '--grep',
   NOVU_V2_TAG,
-  '--require',
-  './swc-register.js',
   '--exit',
 ];
 
@@ -152,7 +150,10 @@ function collectWeightedFiles() {
 }
 
 function isLighterShard(candidate, current) {
-  return candidate.weight < current.weight || (candidate.weight === current.weight && candidate.files.length < current.files.length);
+  return (
+    candidate.weight < current.weight ||
+    (candidate.weight === current.weight && candidate.files.length < current.files.length)
+  );
 }
 
 function pickLightestShard(shards) {
@@ -187,7 +188,9 @@ function getShard(weightedFiles, shardIndex, totalShards) {
 }
 
 function printShardSummary(shardIndex, totalShards, shard) {
-  console.log(`Running Novu V2 E2E shard ${shardIndex}/${totalShards} with ${shard.files.length} files (weight ${shard.weight}).`);
+  console.log(
+    `Running Novu V2 E2E shard ${shardIndex}/${totalShards} with ${shard.files.length} files (weight ${shard.weight}).`
+  );
 }
 
 function runMocha(filePaths) {
