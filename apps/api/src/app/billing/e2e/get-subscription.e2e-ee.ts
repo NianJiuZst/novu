@@ -1,3 +1,8 @@
+import {
+  GetPlatformNotificationUsageCommand,
+  GetSubscription,
+  GetSubscriptionCommand,
+} from '@novu/ee-billing';
 import { ApiServiceLevelEnum } from '@novu/shared';
 import { UserSession } from '@novu/testing';
 import { expect } from 'chai';
@@ -55,13 +60,6 @@ const mockedStripeCustomer: DeepPartial<Stripe.Customer> = {
 
 describe('GetSubscription #novu-v2', async () => {
   let session: UserSession;
-
-  const eeBilling = require('@novu/ee-billing');
-  if (!eeBilling) {
-    throw new Error('ee-billing does not exist');
-  }
-
-  const { GetPlatformNotificationUsageCommand, GetSubscription, GetSubscriptionCommand } = eeBilling;
 
   const communityOrganizationRepo = {
     findById: () =>

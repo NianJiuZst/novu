@@ -1,3 +1,10 @@
+import {
+  CreateSubscription,
+  CustomerSubscriptionDeletedHandler,
+  UpdateServiceLevel,
+  UpdateServiceLevelCommand,
+  VerifyCustomer,
+} from '@novu/ee-billing';
 import { ApiServiceLevelEnum, StripeBillingIntervalEnum } from '@novu/shared';
 import { expect } from 'chai';
 import sinon from 'sinon';
@@ -98,19 +105,6 @@ const verifyCustomerMock = {
 };
 
 describe.skip('webhook event - customer.subscription.deleted #novu-v2', () => {
-  const eeBilling = require('@novu/ee-billing');
-  if (!eeBilling) {
-    throw new Error('ee-billing does not exist');
-  }
-
-  const {
-    CustomerSubscriptionDeletedHandler,
-    VerifyCustomer,
-    UpdateServiceLevel,
-    UpdateServiceLevelCommand,
-    CreateSubscription,
-  } = eeBilling;
-
   const stripeStub = {
     customers: {
       update: sinon.stub(),

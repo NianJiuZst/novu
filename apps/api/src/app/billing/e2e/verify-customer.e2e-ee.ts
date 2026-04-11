@@ -1,19 +1,12 @@
 // biome-ignore lint/style/noRestrictedImports: <explanation>
 import { Logger } from '@nestjs/common';
 import { CommunityOrganizationRepository } from '@novu/dal';
-import { VerifyCustomerCommand } from '@novu/ee-billing';
+import { VerifyCustomer, VerifyCustomerCommand } from '@novu/ee-billing';
 import { ApiServiceLevelEnum } from '@novu/shared';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
 describe('VerifyCustomer #novu-v2', () => {
-  const eeBilling = require('@novu/ee-billing');
-  if (!eeBilling) {
-    throw new Error('ee-billing does not exist');
-  }
-
-  const { VerifyCustomer } = eeBilling;
-
   const stripeStub = {
     customers: {
       retrieve: () => {},

@@ -1,14 +1,9 @@
+import { GetPrices, GetPricesCommand } from '@novu/ee-billing';
 import { ApiServiceLevelEnum, StripeBillingIntervalEnum } from '@novu/shared';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
 describe('GetPrices #novu-v2', () => {
-  const eeBilling = require('@novu/ee-billing');
-  if (!eeBilling) {
-    throw new Error('ee-billing does not exist');
-  }
-
-  const { GetPrices, GetPricesCommand } = eeBilling;
 
   const stripeStub = {
     prices: {

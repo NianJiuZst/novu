@@ -1,3 +1,8 @@
+import {
+  CustomerSubscriptionCreatedHandler,
+  UpdateServiceLevel,
+  VerifyCustomer,
+} from '@novu/ee-billing';
 import { ApiServiceLevelEnum, StripeBillingIntervalEnum } from '@novu/shared';
 import { expect } from 'chai';
 import sinon from 'sinon';
@@ -127,13 +132,6 @@ const verifyCustomerMock = {
 };
 
 describe('webhook event - customer.subscription.created #novu-v2', () => {
-  const eeBilling = require('@novu/ee-billing');
-  if (!eeBilling) {
-    throw new Error('ee-billing does not exist');
-  }
-
-  const { CustomerSubscriptionCreatedHandler, VerifyCustomer, UpdateServiceLevel } = eeBilling;
-
   let verifyCustomerStub: sinon.SinonStub;
   let updateServiceLevelStub: sinon.SinonStub;
 

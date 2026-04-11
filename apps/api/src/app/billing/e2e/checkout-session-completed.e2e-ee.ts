@@ -1,3 +1,4 @@
+import { CheckoutSessionCompletedHandler, GetPrices, VerifyCustomer } from '@novu/ee-billing';
 import { ApiServiceLevelEnum, StripeBillingIntervalEnum } from '@novu/shared';
 import { expect } from 'chai';
 import sinon from 'sinon';
@@ -146,13 +147,6 @@ describe('webhook event - checkout.session.completed #novu-v2', () => {
       cancel: sinon.stub(),
     },
   };
-
-  const eeBilling = require('@novu/ee-billing');
-  if (!eeBilling) {
-    throw new Error('ee-billing does not exist');
-  }
-
-  const { CheckoutSessionCompletedHandler, VerifyCustomer, GetPrices } = eeBilling;
 
   let verifyCustomerStub: sinon.SinonStub;
   let getPricesStub: sinon.SinonStub;
