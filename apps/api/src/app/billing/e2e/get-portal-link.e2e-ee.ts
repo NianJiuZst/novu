@@ -3,9 +3,10 @@ import sinon from 'sinon';
 
 const dashboardOrigin = process.env.DASHBOARD_URL;
 
-describe('Get portal link #novu-v2', async () => {
+describe('Get portal link #novu-v2', () => {
   it('Get portal link', async () => {
-    if (!require('@novu/ee-billing').GetPortalLink) {
+    const { GetPortalLink } = await import('@novu/ee-billing');
+    if (!GetPortalLink) {
       throw new Error("GetPortalLink doesn't exist");
     }
     const stubObject = {
@@ -27,7 +28,7 @@ describe('Get portal link #novu-v2', async () => {
 
     const stub = sinon.stub(stubObject.billingPortal.sessions, 'create').resolves({ url: 'url' });
 
-    const usecase = new (require('@novu/ee-billing').GetPortalLink)(stubObject, getCustomerUsecase);
+    const usecase = new GetPortalLink(stubObject, getCustomerUsecase);
 
     const result = await usecase.execute({
       environmentId: 'environment_dd',
