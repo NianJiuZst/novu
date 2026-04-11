@@ -25,6 +25,8 @@ const MOCHA_ARGS = [
   NOVU_V2_TAG,
   '--require',
   './swc-register.js',
+  '--file',
+  'e2e/setup.ts',
   '--exit',
 ];
 
