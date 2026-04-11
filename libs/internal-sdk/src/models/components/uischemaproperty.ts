@@ -4,12 +4,10 @@
 
 import * as z from "zod/v3";
 import { safeParse } from "../../lib/schemas.js";
+import * as openEnums from "../../types/enums.js";
+import { OpenEnum } from "../../types/enums.js";
 import { Result as SafeParseResult } from "../../types/fp.js";
 import { SDKValidationError } from "../errors/sdkvalidationerror.js";
-import {
-  UiComponentEnum,
-  UiComponentEnum$inboundSchema,
-} from "./uicomponentenum.js";
 
 export type Placeholder5 = string | number | boolean | { [k: string]: any };
 
@@ -22,6 +20,61 @@ export type Placeholder =
   | boolean
   | { [k: string]: any }
   | Array<string | number | boolean | { [k: string]: any }>;
+
+/**
+ * Component type for the UI Schema Property
+ */
+export const Component = {
+  EmailEditorSelect: "EMAIL_EDITOR_SELECT",
+  LayoutSelect: "LAYOUT_SELECT",
+  BlockEditor: "BLOCK_EDITOR",
+  EmailBody: "EMAIL_BODY",
+  TextFullLine: "TEXT_FULL_LINE",
+  TextInlineLabel: "TEXT_INLINE_LABEL",
+  InAppBody: "IN_APP_BODY",
+  InAppAvatar: "IN_APP_AVATAR",
+  InAppPrimarySubject: "IN_APP_PRIMARY_SUBJECT",
+  InAppButtonDropdown: "IN_APP_BUTTON_DROPDOWN",
+  InAppDisableSanitizationSwitch: "IN_APP_DISABLE_SANITIZATION_SWITCH",
+  DisableSanitizationSwitch: "DISABLE_SANITIZATION_SWITCH",
+  UrlTextBox: "URL_TEXT_BOX",
+  DigestAmount: "DIGEST_AMOUNT",
+  DigestUnit: "DIGEST_UNIT",
+  DigestType: "DIGEST_TYPE",
+  DigestKey: "DIGEST_KEY",
+  DigestCron: "DIGEST_CRON",
+  DelayAmount: "DELAY_AMOUNT",
+  DelayUnit: "DELAY_UNIT",
+  DelayType: "DELAY_TYPE",
+  DelayCron: "DELAY_CRON",
+  DelayDynamicKey: "DELAY_DYNAMIC_KEY",
+  ThrottleType: "THROTTLE_TYPE",
+  ThrottleWindow: "THROTTLE_WINDOW",
+  ThrottleUnit: "THROTTLE_UNIT",
+  ThrottleDynamicKey: "THROTTLE_DYNAMIC_KEY",
+  ThrottleThreshold: "THROTTLE_THRESHOLD",
+  ThrottleKey: "THROTTLE_KEY",
+  ExtendToSchedule: "EXTEND_TO_SCHEDULE",
+  SmsBody: "SMS_BODY",
+  ChatBody: "CHAT_BODY",
+  PushBody: "PUSH_BODY",
+  PushSubject: "PUSH_SUBJECT",
+  QueryEditor: "QUERY_EDITOR",
+  Data: "DATA",
+  LayoutEmail: "LAYOUT_EMAIL",
+  DestinationMethod: "DESTINATION_METHOD",
+  DestinationUrl: "DESTINATION_URL",
+  DestinationHeaders: "DESTINATION_HEADERS",
+  DestinationBody: "DESTINATION_BODY",
+  DestinationResponseBodySchema: "DESTINATION_RESPONSE_BODY_SCHEMA",
+  DestinationEnforceSchemaValidation: "DESTINATION_ENFORCE_SCHEMA_VALIDATION",
+  DestinationContinueOnFailure: "DESTINATION_CONTINUE_ON_FAILURE",
+  DestinationTimeout: "DESTINATION_TIMEOUT",
+} as const;
+/**
+ * Component type for the UI Schema Property
+ */
+export type Component = OpenEnum<typeof Component>;
 
 export type UiSchemaProperty = {
   /**
@@ -38,7 +91,7 @@ export type UiSchemaProperty = {
   /**
    * Component type for the UI Schema Property
    */
-  component: UiComponentEnum;
+  component: Component;
   /**
    * Properties of the UI Schema
    */
@@ -86,6 +139,13 @@ export function placeholderFromJSON(
 }
 
 /** @internal */
+export const Component$inboundSchema: z.ZodType<
+  Component,
+  z.ZodTypeDef,
+  unknown
+> = openEnums.inboundSchema(Component);
+
+/** @internal */
 export const UiSchemaProperty$inboundSchema: z.ZodType<
   UiSchemaProperty,
   z.ZodTypeDef,
@@ -102,7 +162,7 @@ export const UiSchemaProperty$inboundSchema: z.ZodType<
       ),
     ]),
   ).optional(),
-  component: UiComponentEnum$inboundSchema,
+  component: Component$inboundSchema,
   properties: z.record(z.lazy(() => UiSchemaProperty$inboundSchema)).optional(),
 });
 
