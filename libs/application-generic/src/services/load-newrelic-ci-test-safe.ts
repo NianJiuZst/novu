@@ -10,6 +10,7 @@ export const noopNewRelicForCiTest = {
   getTransaction: () => noopTransaction,
   noticeError: (_error: unknown) => {},
   recordMetric: (_name: string, _value: number) => {},
+  startSegment: (_name: string, _record: boolean, handler: () => unknown) => handler(),
 };
 
 export type NewRelicAgentLike = typeof noopNewRelicForCiTest & {
