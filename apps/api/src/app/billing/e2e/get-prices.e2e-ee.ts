@@ -4,7 +4,6 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 
 describe('GetPrices #novu-v2', () => {
-
   const stripeStub = {
     prices: {
       list: sinon.stub(),

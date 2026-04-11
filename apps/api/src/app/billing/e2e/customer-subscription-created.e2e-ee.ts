@@ -1,8 +1,4 @@
-import {
-  CustomerSubscriptionCreatedHandler,
-  UpdateServiceLevel,
-  VerifyCustomer,
-} from '@novu/ee-billing';
+import { CustomerSubscriptionCreatedHandler, UpdateServiceLevel, VerifyCustomer } from '@novu/ee-billing';
 import { ApiServiceLevelEnum, StripeBillingIntervalEnum } from '@novu/shared';
 import { expect } from 'chai';
 import sinon from 'sinon';

@@ -1,8 +1,4 @@
-import {
-  GetPlatformNotificationUsageCommand,
-  GetSubscription,
-  GetSubscriptionCommand,
-} from '@novu/ee-billing';
+import { GetPlatformNotificationUsageCommand, GetSubscription, GetSubscriptionCommand } from '@novu/ee-billing';
 import { ApiServiceLevelEnum } from '@novu/shared';
 import { UserSession } from '@novu/testing';
 import { expect } from 'chai';
