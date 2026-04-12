@@ -124,8 +124,17 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     return this.MongooseModel.estimatedDocumentCount();
   }
 
-  async aggregate(query: any[], options: { readPreference?: 'secondaryPreferred' | 'primary' } = {}): Promise<any> {
-    return await this.MongooseModel.aggregate(query).read(options.readPreference || 'primary');
+  async aggregate(
+    query: any[],
+    options: { readPreference?: 'secondaryPreferred' | 'primary'; allowDiskUse?: boolean } = {}
+  ): Promise<any> {
+    let cursor = this.MongooseModel.aggregate(query).read(options.readPreference || 'primary');
+
+    if (options.allowDiskUse) {
+      cursor = cursor.allowDiskUse(true);
+    }
+
+    return await cursor;
   }
 
   async findOne(

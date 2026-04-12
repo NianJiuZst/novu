@@ -303,25 +303,44 @@ export class NotificationRepository extends BaseRepository<
           $match: {
             createdAt: { $gte: date },
             _environmentId: new Types.ObjectId(environmentId),
+            channels: { $exists: true, $ne: [] },
           },
         },
-        { $unwind: '$channels' },
+        {
+          $project: {
+            day: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+            _templateId: 1,
+            channelCount: { $size: { $ifNull: ['$channels', []] } },
+            channels: { $ifNull: ['$channels', []] },
+          },
+        },
         {
           $group: {
-            _id: {
-              $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
-            },
-            count: {
-              $sum: 1,
-            },
+            _id: '$day',
+            count: { $sum: '$channelCount' },
             templates: { $addToSet: '$_templateId' },
-            channels: { $addToSet: '$channels' },
+            channelArrays: { $push: '$channels' },
           },
         },
-        { $sort: { createdAt: -1 } },
+        {
+          $project: {
+            _id: 1,
+            count: 1,
+            templates: 1,
+            channels: {
+              $reduce: {
+                input: '$channelArrays',
+                initialValue: [],
+                in: { $setUnion: ['$$value', '$$this'] },
+              },
+            },
+          },
+        },
+        { $sort: { _id: 1 } },
       ],
       {
         readPreference: 'secondaryPreferred',
+        allowDiskUse: true,
       }
     );
   }
