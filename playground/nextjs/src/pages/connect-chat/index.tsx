@@ -5,7 +5,7 @@ import { novuConfig } from '@/utils/config';
 
 const INTEGRATION_IDENTIFIER = process.env.NEXT_PUBLIC_NOVU_SLACK_INTEGRATION_IDENTIFIER ?? 'slack';
 const CONNECTION_IDENTIFIER = 'slack-workspace-connection';
-const SLACK_USER_ID = process.env.NEXT_PUBLIC_SLACK_USER_ID ?? 'U03EH637N06';
+const SLACK_USER_ID = process.env.NEXT_PUBLIC_SLACK_USER_ID ?? 'C03FDHMURU0';
 const SLACK_TEST_WORKFLOW_ID = process.env.NEXT_PUBLIC_NOVU_SLACK_TEST_WORKFLOW_ID ?? '';
 
 export default function ConnectChatPage() {
