@@ -29,11 +29,7 @@ export default function ConnectChatPage() {
         }),
       });
 
-      console.log('res', res);
-
       const data = (await res.json()) as { slackUserId?: string; error?: string };
-
-      console.log('data', data);
 
       if (!res.ok || data.error) {
         setDmStatus({ type: 'error', message: data.error ?? 'Unknown error' });
