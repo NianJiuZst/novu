@@ -1,14 +1,19 @@
 import { ConnectChat, LinkUser, NovuProvider } from '@novu/nextjs';
+import { Info } from 'lucide-react';
 import { useState } from 'react';
 import Title from '@/components/Title';
 import { novuConfig } from '@/utils/config';
 
 const INTEGRATION_IDENTIFIER = process.env.NEXT_PUBLIC_NOVU_SLACK_INTEGRATION_IDENTIFIER ?? 'slack';
 const CONNECTION_IDENTIFIER = 'slack-workspace-connection';
-const SLACK_USER_ID = process.env.NEXT_PUBLIC_SLACK_USER_ID ?? 'C03FDHMURU0';
+const SLACK_USER_ID_DEFAULT = 'C03FDHMURU0';
 const SLACK_TEST_WORKFLOW_ID = process.env.NEXT_PUBLIC_NOVU_SLACK_TEST_WORKFLOW_ID ?? '';
 
 export default function ConnectChatPage() {
+  const [slackUserIdInput, setSlackUserIdInput] = useState('');
+  const slackUserIdForLink =
+    slackUserIdInput.trim() || (process.env.NEXT_PUBLIC_SLACK_USER_ID?.trim() ?? '') || SLACK_USER_ID_DEFAULT;
+
   const [dmStatus, setDmStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [dmLoading, setDmLoading] = useState(false);
   const [triggerWorkflowId, setTriggerWorkflowId] = useState(SLACK_TEST_WORKFLOW_ID);
@@ -108,12 +113,40 @@ export default function ConnectChatPage() {
             Creates a <code>ChannelEndpoint</code> of type <code>slack_user</code> linking the subscriber to a Slack
             user. Requires an active workspace connection.
           </p>
+          <label className="flex flex-col gap-1.5 text-xs">
+            <span className="flex items-center gap-1.5 font-medium text-foreground">
+              Slack user ID
+              <span className="group relative inline-flex">
+                <button
+                  type="button"
+                  className="inline-flex cursor-help border-0 bg-transparent p-0 text-muted-foreground hover:text-foreground"
+                  aria-label="Slack member ID info"
+                >
+                  <Info className="size-3.5 shrink-0" aria-hidden />
+                </button>
+                <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded bg-popover px-2 py-1 text-xs text-popover-foreground shadow-md opacity-0 transition-opacity group-hover:opacity-100">
+                  Slack member ID (U…); optional if <code className="font-mono">NEXT_PUBLIC_SLACK_USER_ID</code> or
+                  default is set
+                </span>
+              </span>
+            </span>
+            <input
+              type="text"
+              value={slackUserIdInput}
+              onChange={(e) => setSlackUserIdInput(e.target.value)}
+              placeholder="Slack member ID (e.g. U0123…)"
+              className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+            <span className="text-muted-foreground">
+              Effective ID for link: <code className="text-foreground">{slackUserIdForLink}</code>
+            </span>
+          </label>
           <NovuProvider {...novuConfig}>
             <LinkUser
               integrationIdentifier={INTEGRATION_IDENTIFIER}
               connectionIdentifier={CONNECTION_IDENTIFIER}
               subscriberId={novuConfig.subscriberId}
-              slackUserId={SLACK_USER_ID}
+              slackUserId={slackUserIdForLink}
               onLinkSuccess={(ep) => console.log('link success, endpoint:', ep.identifier)}
               onLinkError={(err) => console.error('link error:', err)}
               onUnlinkSuccess={() => console.log('unlink success')}
