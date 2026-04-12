@@ -14,6 +14,10 @@ export type LinkUserProps = {
   endpoint: Record<string, string>;
   endpointIdentifier?: string;
   context?: Context;
+  /** Pre-computed context keys (e.g. from a previous response) used to scope the endpoint list when
+   * looking up an existing endpoint for deduplication. Corresponds to the `contextKeys` filter on
+   * the list endpoint. Pass this alongside `context` when the context keys are already known. */
+  contextKeys?: string[];
   onLinkSuccess?: (endpoint: { identifier: string }) => void;
   onLinkError?: (error: unknown) => void;
   onUnlinkSuccess?: () => void;
@@ -44,10 +48,11 @@ export const LinkUser = (props: LinkUserProps) => {
     () => ({
       endpointIdentifier: props.endpointIdentifier,
       integrationIdentifier: props.integrationIdentifier,
+      contextKeys: props.contextKeys,
       type: props.type,
       endpoint: props.endpoint,
     }),
-    async ({ endpointIdentifier, integrationIdentifier, type, endpoint }) => {
+    async ({ endpointIdentifier, integrationIdentifier, contextKeys, type, endpoint }) => {
       setLoading(true);
 
       try {
@@ -56,8 +61,9 @@ export const LinkUser = (props: LinkUserProps) => {
           setEndpoint(response.data ?? null);
         } else {
           // Discover whether an endpoint already exists for this type+endpoint combination
-          // to avoid creating duplicates.
-          const response = await novuAccessor().channelEndpoints.list({ integrationIdentifier });
+          // to avoid creating duplicates. Pass contextKeys when provided so the search is
+          // scoped to the same context.
+          const response = await novuAccessor().channelEndpoints.list({ integrationIdentifier, contextKeys });
           const existing = response.data?.find((ep) => endpointMatches(ep, type, endpoint));
           setEndpoint(existing ?? null);
         }

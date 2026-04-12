@@ -526,6 +526,9 @@ export class InboxService {
   listChannelConnections({
     subscriberId,
     integrationIdentifier,
+    channel,
+    providerId,
+    contextKeys,
     limit,
     after,
     before,
@@ -537,6 +540,17 @@ export class InboxService {
     const searchParams = new URLSearchParams();
     if (subscriberId) searchParams.append('subscriberId', subscriberId);
     if (integrationIdentifier) searchParams.append('integrationIdentifier', integrationIdentifier);
+    if (channel) searchParams.append('channel', channel);
+    if (providerId) searchParams.append('providerId', providerId);
+    if (contextKeys !== undefined) {
+      if (contextKeys.length === 0) {
+        searchParams.append('contextKeys', '');
+      } else {
+        for (const key of contextKeys) {
+          searchParams.append('contextKeys', key);
+        }
+      }
+    }
     if (limit) searchParams.append('limit', String(limit));
     if (after) searchParams.append('after', after);
     if (before) searchParams.append('before', before);
@@ -575,6 +589,9 @@ export class InboxService {
     subscriberId,
     integrationIdentifier,
     connectionIdentifier,
+    channel,
+    providerId,
+    contextKeys,
     limit,
     after,
     before,
@@ -583,6 +600,17 @@ export class InboxService {
     if (subscriberId) searchParams.append('subscriberId', subscriberId);
     if (integrationIdentifier) searchParams.append('integrationIdentifier', integrationIdentifier);
     if (connectionIdentifier) searchParams.append('connectionIdentifier', connectionIdentifier);
+    if (channel) searchParams.append('channel', channel);
+    if (providerId) searchParams.append('providerId', providerId);
+    if (contextKeys !== undefined) {
+      if (contextKeys.length === 0) {
+        searchParams.append('contextKeys', '');
+      } else {
+        for (const key of contextKeys) {
+          searchParams.append('contextKeys', key);
+        }
+      }
+    }
     if (limit) searchParams.append('limit', String(limit));
     if (after) searchParams.append('after', after);
     if (before) searchParams.append('before', before);

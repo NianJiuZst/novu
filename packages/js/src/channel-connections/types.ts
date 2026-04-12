@@ -37,6 +37,9 @@ export type GenerateChatOAuthUrlArgs = {
 export type ListChannelConnectionsArgs = {
   subscriberId?: string;
   integrationIdentifier?: string;
+  channel?: string;
+  providerId?: string;
+  contextKeys?: string[];
   limit?: number;
   after?: string;
   before?: string;
@@ -63,6 +66,9 @@ export type ListChannelEndpointsArgs = {
   subscriberId?: string;
   integrationIdentifier?: string;
   connectionIdentifier?: string;
+  channel?: string;
+  providerId?: string;
+  contextKeys?: string[];
   limit?: number;
   after?: string;
   before?: string;
