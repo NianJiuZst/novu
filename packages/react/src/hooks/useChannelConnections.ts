@@ -17,10 +17,10 @@ export type UseChannelConnectionsResult = {
 
 /**
  * List channel connections for the current subscriber. Use this to discover an active
- * connection identifier after a Slack OAuth flow so it can be passed to `LinkUser`.
+ * connection identifier after a chat OAuth flow so it can be passed to `LinkUser`.
  *
  * @example
- * const { connections } = useChannelConnections({ integrationIdentifier: 'slack' });
+ * const { connections } = useChannelConnections({ integrationIdentifier: 'my-chat-integration' });
  * const connectionIdentifier = connections[0]?.identifier;
  */
 export const useChannelConnections = (props: UseChannelConnectionsProps = {}): UseChannelConnectionsResult => {

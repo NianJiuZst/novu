@@ -8,7 +8,8 @@ export type DefaultLinkUserProps = Pick<
   | 'integrationIdentifier'
   | 'connectionIdentifier'
   | 'subscriberId'
-  | 'slackUserId'
+  | 'type'
+  | 'endpoint'
   | 'endpointIdentifier'
   | 'context'
   | 'onLinkSuccess'
@@ -22,7 +23,8 @@ export const DefaultLinkUser = (props: DefaultLinkUserProps) => {
     integrationIdentifier,
     connectionIdentifier,
     subscriberId,
-    slackUserId,
+    type,
+    endpoint,
     endpointIdentifier,
     context,
     onLinkSuccess,
@@ -40,7 +42,8 @@ export const DefaultLinkUser = (props: DefaultLinkUserProps) => {
           integrationIdentifier,
           connectionIdentifier,
           subscriberId,
-          slackUserId,
+          type,
+          endpoint,
           endpointIdentifier,
           context,
           onLinkSuccess,
@@ -56,7 +59,8 @@ export const DefaultLinkUser = (props: DefaultLinkUserProps) => {
       integrationIdentifier,
       connectionIdentifier,
       subscriberId,
-      slackUserId,
+      type,
+      endpoint,
       endpointIdentifier,
       context,
       onLinkSuccess,

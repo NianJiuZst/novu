@@ -10,13 +10,21 @@ export type LinkUserProps = {
   integrationIdentifier: string;
   connectionIdentifier?: string;
   subscriberId: string;
-  slackUserId: string;
+  type: string;
+  endpoint: Record<string, string>;
   endpointIdentifier?: string;
   context?: Context;
   onLinkSuccess?: (endpoint: { identifier: string }) => void;
   onLinkError?: (error: unknown) => void;
   onUnlinkSuccess?: () => void;
   onUnlinkError?: (error: unknown) => void;
+};
+
+const endpointMatches = (ep: ChannelEndpointResponse, type: string, endpoint: Record<string, string>): boolean => {
+  if (ep.type !== type) return false;
+  const epEndpoint = ep.endpoint as Record<string, string>;
+
+  return Object.keys(endpoint).every((key) => epEndpoint[key] === endpoint[key]);
 };
 
 export const LinkUser = (props: LinkUserProps) => {
@@ -31,14 +39,15 @@ export const LinkUser = (props: LinkUserProps) => {
   const isLoading = () => loading() || actionLoading();
 
   // On mount, find an existing endpoint: prefer endpointIdentifier prop, then discover by
-  // listing endpoints and matching type + slackUserId for idempotency.
+  // listing endpoints and matching type + endpoint for idempotency.
   createResource(
     () => ({
       endpointIdentifier: props.endpointIdentifier,
       integrationIdentifier: props.integrationIdentifier,
-      slackUserId: props.slackUserId,
+      type: props.type,
+      endpoint: props.endpoint,
     }),
-    async ({ endpointIdentifier, integrationIdentifier, slackUserId }) => {
+    async ({ endpointIdentifier, integrationIdentifier, type, endpoint }) => {
       setLoading(true);
 
       try {
@@ -46,12 +55,10 @@ export const LinkUser = (props: LinkUserProps) => {
           const response = await novuAccessor().channelEndpoints.get({ identifier: endpointIdentifier });
           setEndpoint(response.data ?? null);
         } else {
-          // Discover whether an endpoint already exists for this slackUserId to avoid
-          // creating duplicates (parity with POC demo's idempotency check).
+          // Discover whether an endpoint already exists for this type+endpoint combination
+          // to avoid creating duplicates.
           const response = await novuAccessor().channelEndpoints.list({ integrationIdentifier });
-          const existing = response.data?.find(
-            (ep) => ep.type === 'slack_user' && (ep.endpoint as { userId?: string }).userId === slackUserId
-          );
+          const existing = response.data?.find((ep) => endpointMatches(ep, type, endpoint));
           setEndpoint(existing ?? null);
         }
       } catch {
@@ -68,7 +75,7 @@ export const LinkUser = (props: LinkUserProps) => {
     const cleanupCreateResolved = currentNovu.on('channel-endpoint.create.resolved', ({ data }) => {
       if (data) {
         const ep = data as ChannelEndpointResponse;
-        if (ep.type === 'slack_user' && (ep.endpoint as { userId?: string }).userId === props.slackUserId) {
+        if (endpointMatches(ep, props.type, props.endpoint)) {
           setEndpoint(ep);
         }
       }
@@ -108,8 +115,8 @@ export const LinkUser = (props: LinkUserProps) => {
         connectionIdentifier: props.connectionIdentifier,
         subscriberId: props.subscriberId,
         context: props.context,
-        type: 'slack_user',
-        endpoint: { userId: props.slackUserId },
+        type: props.type,
+        endpoint: props.endpoint,
       });
       setActionLoading(false);
 
