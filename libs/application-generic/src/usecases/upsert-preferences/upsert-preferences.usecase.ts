@@ -15,7 +15,6 @@ import {
 import { FilterQuery } from 'mongoose';
 import { Instrument } from '../../instrumentation';
 import { FeatureFlagsService } from '../../services/feature-flags/feature-flags.service';
-import { InMemoryLRUCacheService, InMemoryLRUCacheStore } from '../../services/in-memory-lru-cache';
 import { deepMerge } from '../../utils';
 import { UpsertSubscriberGlobalPreferencesCommand } from './upsert-subscriber-global-preferences.command';
 import { UpsertSubscriberWorkflowPreferencesCommand } from './upsert-subscriber-workflow-preferences.command';
@@ -46,8 +45,7 @@ type UpsertPreferencesCommand = Omit<
 export class UpsertPreferences {
   constructor(
     private preferencesRepository: PreferencesRepository,
-    private featureFlagsService: FeatureFlagsService,
-    private inMemoryLRUCacheService: InMemoryLRUCacheService
+    private featureFlagsService: FeatureFlagsService
   ) {}
 
   @Instrument()
@@ -158,34 +156,11 @@ export class UpsertPreferences {
   private async upsert(command: UpsertPreferencesCommand): Promise<PreferencesEntity | undefined> {
     const foundPreference = await this.getPreference(command);
 
-    let result: PreferencesEntity | undefined;
     if (foundPreference) {
-      result = await this.updatePreferences(foundPreference, command);
-    } else {
-      result = await this.createPreferences(command);
+      return this.updatePreferences(foundPreference, command);
     }
 
-    this.invalidateWorkflowPreferencesCacheIfNeeded(command);
-
-    return result;
-  }
-
-  private invalidateWorkflowPreferencesCacheIfNeeded(command: UpsertPreferencesCommand): void {
-    if (!command.templateId) {
-
-      return;
-    }
-
-    if (
-      command.type !== PreferencesTypeEnum.WORKFLOW_RESOURCE &&
-      command.type !== PreferencesTypeEnum.USER_WORKFLOW
-    ) {
-
-      return;
-    }
-
-    const cacheKey = `${command.environmentId}:${command.templateId}`;
-    this.inMemoryLRUCacheService.invalidate(InMemoryLRUCacheStore.WORKFLOW_PREFERENCES, cacheKey);
+    return this.createPreferences(command);
   }
 
   private async createPreferences(command: UpsertPreferencesCommand): Promise<PreferencesEntity> {

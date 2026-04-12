@@ -1,7 +1,5 @@
 import 'reflect-metadata';
 
-import { loadNewRelicOrNoopInCiTest } from '../services/load-newrelic-ci-test-safe';
-
 function copyMetadata(source: any, target: any): void {
   const result = Reflect.getMetadataKeys(source);
 
@@ -43,9 +41,10 @@ function instrumentationWrapper({
 
     const transactionIdentifierBase = `${instrumentationType}/${target?.constructor?.name}/${methodName}`;
 
-    let nr: ReturnType<typeof loadNewRelicOrNoopInCiTest> | null = null;
+    let nr: any = null;
     try {
-      nr = loadNewRelicOrNoopInCiTest();
+      // Dynamically load newrelic
+      nr = require('newrelic');
     } catch {
       return descriptor;
     }

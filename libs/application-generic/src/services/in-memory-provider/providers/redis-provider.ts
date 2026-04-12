@@ -1,10 +1,8 @@
 import Redis, { RedisOptions, ScanStream } from 'ioredis';
+import newrelic from 'newrelic';
 import { ConnectionOptions } from 'tls';
 
-import { loadNewRelicOrNoopInCiTest } from '../../load-newrelic-ci-test-safe';
 import { convertStringValues } from './variable-mappers';
-
-const newrelic = loadNewRelicOrNoopInCiTest();
 
 export { Redis, RedisOptions, ScanStream };
 

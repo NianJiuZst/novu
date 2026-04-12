@@ -190,14 +190,8 @@ function printShardSummary(shardIndex, totalShards, shard) {
   console.log(`Running Novu V2 E2E shard ${shardIndex}/${totalShards} with ${shard.files.length} files (weight ${shard.weight}).`);
 }
 
-function getNodeMajor() {
-  return Number.parseInt(process.versions.node.split('.')[0], 10);
-}
-
 function runMocha(filePaths) {
-  const nodeFlags = getNodeMajor() >= 22 ? ['--no-experimental-strip-types'] : [];
-
-  return spawnSync(process.execPath, [...nodeFlags, require.resolve('mocha/bin/mocha'), ...MOCHA_ARGS, ...filePaths], {
+  return spawnSync(process.execPath, [require.resolve('mocha/bin/mocha'), ...MOCHA_ARGS, ...filePaths], {
     cwd: ROOT,
     env: process.env,
     stdio: 'inherit',

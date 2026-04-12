@@ -6,11 +6,10 @@ import {
   TimezoneEnum,
 } from '@novu/shared';
 import { captureException } from '@sentry/node';
-import { loadNewRelicOrNoopInCiTest } from '../load-newrelic-ci-test-safe';
 import { MetricsService } from '../metrics';
 import { CronJobData, CronJobProcessor, CronMetrics, CronMetricsEventEnum, CronOptions } from './cron.types';
 
-const nr = loadNewRelicOrNoopInCiTest();
+const nr = require('newrelic');
 
 const LOG_CONTEXT = 'CronService';
 const DEFAULT_CRON_OPTIONS: CronOptions = {
