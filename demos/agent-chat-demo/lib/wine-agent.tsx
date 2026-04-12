@@ -14,7 +14,7 @@ export const wineAgent = agent('wine-bot', {
     return generateWineReply([], message.text, greeting, message.attachments);
   },
 
-  onMessage: async ({ message, history, novu }) => {
+  onMessage: async ({ message, history, novu, subscriber }) => {
     const response = await generateWineReply(history, message.text, undefined, message.attachments);
 
     if (/\b(cheers|thanks|thank you)\b/i.test(message.text)) {

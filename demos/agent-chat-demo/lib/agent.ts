@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { createGoogleChatAdapter, type ServiceAccountCredentials } from '@chat-adapter/gchat';
 import { createGitHubAdapter } from '@chat-adapter/github';
 import { createSlackAdapter } from '@chat-adapter/slack';
@@ -6,17 +8,15 @@ import { createWhatsAppAdapter } from '@chat-adapter/whatsapp';
 import type { Novu } from '@novu/api';
 import { createResendAdapter } from '@resend/chat-sdk-adapter';
 import {
-  Chat,
   type ActionHandler,
   type Attachment,
+  Chat,
   type ChatElement,
+  emoji,
   type Message,
   type SentMessage,
   type Thread,
-  emoji,
 } from 'chat';
-import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { after } from 'next/server';
 
 import {
@@ -329,14 +329,14 @@ function detectPlatform(threadId: string): string {
  * Loads Google Chat service account JSON. Multi-line `GOOGLE_CHAT_CREDENTIALS` in `.env` is unreliable
  * (dotenv ends the string at the first `"` inside the JSON). Prefer `GOOGLE_CHAT_CREDENTIALS_FILE`.
  */
-function createGoogleChatAdapterFromEnv(): ReturnType<typeof createGoogleChatAdapter> {
+function createGoogleChatAdapterFromEnv(): ReturnType<typeof createGoogleChatAdapter> | undefined {
   const filePath = process.env.GOOGLE_CHAT_CREDENTIALS_FILE?.trim();
 
   if (filePath) {
     const abs = resolve(process.cwd(), filePath);
 
     if (!existsSync(abs)) {
-      throw new Error(`GOOGLE_CHAT_CREDENTIALS_FILE not found: ${abs}`);
+      return;
     }
 
     const credentials = JSON.parse(readFileSync(abs, 'utf8')) as ServiceAccountCredentials;
@@ -384,7 +384,7 @@ function buildDefaultAdapters(platforms?: string[]): ChatAdapters {
       });
     }
     if (platform === 'gchat') {
-      map.gchat = createGoogleChatAdapterFromEnv();
+      // map.gchat = createGoogleChatAdapterFromEnv();
     }
   }
 
@@ -641,10 +641,7 @@ export function serveAgents(options: ServeAgentsOptions) {
       }
     }
 
-    async function addThinkingReactionToMentionMessage(
-      thread: Thread,
-      message: Message
-    ): Promise<SentMessage | null> {
+    async function addThinkingReactionToMentionMessage(thread: Thread, message: Message): Promise<SentMessage | null> {
       const platform = detectPlatform(thread.id);
 
       if (platform === 'gchat' || platform === 'slack') {
