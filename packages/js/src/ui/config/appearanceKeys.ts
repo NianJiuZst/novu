@@ -337,4 +337,24 @@ export const subscriptionAppearanceKeys = [
   'subscriptionPreferenceGroupWorkflowLabel',
 ] as const;
 
-export const appearanceKeys = [...commonAppearanceKeys, ...inboxAppearanceKeys, ...subscriptionAppearanceKeys];
+export const connectChatAppearanceKeys = [
+  'connectChatContainer',
+  'connectChatButton',
+  'connectChatButtonContainer',
+  'connectChatButtonLabel',
+] as const;
+
+export const linkUserAppearanceKeys = [
+  'linkUserContainer',
+  'linkUserButton',
+  'linkUserButtonContainer',
+  'linkUserButtonLabel',
+] as const;
+
+export const appearanceKeys = [
+  ...commonAppearanceKeys,
+  ...inboxAppearanceKeys,
+  ...subscriptionAppearanceKeys,
+  ...connectChatAppearanceKeys,
+  ...linkUserAppearanceKeys,
+];

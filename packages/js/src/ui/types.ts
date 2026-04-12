@@ -4,7 +4,13 @@ import { Schedule } from '../preferences';
 import type { Preference } from '../preferences/preference';
 import { SubscriptionPreference, TopicSubscription } from '../subscriptions';
 import { type NotificationFilter, type NovuOptions, type UnreadCount, WorkflowCriticalityEnum } from '../types';
-import { commonAppearanceKeys, inboxAppearanceKeys, subscriptionAppearanceKeys } from './config';
+import {
+  commonAppearanceKeys,
+  connectChatAppearanceKeys,
+  inboxAppearanceKeys,
+  linkUserAppearanceKeys,
+  subscriptionAppearanceKeys,
+} from './config';
 import { AllLocalization } from './context/LocalizationContext';
 
 export type NotificationClickHandler = (notification: Notification) => void;
@@ -316,6 +322,8 @@ export type SubscriptionAppearanceCallbackKeys = keyof SubscriptionAppearanceCal
 export type SubscriptionAppearanceCallbackFunction<K extends SubscriptionAppearanceCallbackKeys> =
   SubscriptionAppearanceCallback[K];
 export type SubscriptionAppearanceKey = (typeof subscriptionAppearanceKeys)[number];
+export type ConnectChatAppearanceKey = (typeof connectChatAppearanceKeys)[number];
+export type LinkUserAppearanceKey = (typeof linkUserAppearanceKeys)[number];
 export type SubscriptionElements = Partial<
   { [K in CommonAppearanceKey]: ElementStyles } & {
     [K in Exclude<SubscriptionAppearanceKey, SubscriptionAppearanceCallbackKeys>]: ElementStyles;
@@ -344,7 +352,12 @@ export type AllAppearanceCallbackFunction<K extends AllAppearanceCallbackKeys> =
   : K extends SubscriptionAppearanceCallbackKeys
     ? SubscriptionAppearanceCallbackFunction<K>
     : never;
-export type AllAppearanceKey = CommonAppearanceKey | InboxAppearanceKey | SubscriptionAppearanceKey;
+export type AllAppearanceKey =
+  | CommonAppearanceKey
+  | InboxAppearanceKey
+  | SubscriptionAppearanceKey
+  | ConnectChatAppearanceKey
+  | LinkUserAppearanceKey;
 export type AllElements = Partial<
   {
     [K in CommonAppearanceKey]: ElementStyles;

@@ -1,7 +1,9 @@
 export type { Notification } from '../notifications';
 export type {
+  ConnectChatProps,
   InboxPage,
   InboxProps,
+  LinkUserProps,
   SubscriptionButtonWrapperProps,
   SubscriptionPreferencesWrapperProps,
   SubscriptionProps,

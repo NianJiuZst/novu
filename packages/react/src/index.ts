@@ -34,8 +34,10 @@ export type {
 } from '@novu/js/ui';
 export type {
   BellProps,
+  ConnectChatProps,
   InboxContentProps,
   InboxProps,
+  LinkUserProps,
   NotificationProps,
   NovuProviderProps,
   SubscriptionButtonProps,
@@ -44,8 +46,10 @@ export type {
 } from './components';
 export {
   Bell,
+  ConnectChat,
   Inbox,
   InboxContent,
+  LinkUser,
   Notifications,
   NovuProvider,
   Preferences,
@@ -54,16 +58,28 @@ export {
   SubscriptionPreferences,
 } from './components';
 export type {
+  UseChannelConnectionProps,
+  UseChannelConnectionResult,
+  UseChannelEndpointProps,
+  UseChannelEndpointResult,
   UseCountsProps,
   UseCountsResult,
+  UseCreateChannelEndpointProps,
+  UseCreateChannelEndpointResult,
+  UseDeleteChannelEndpointProps,
+  UseDeleteChannelEndpointResult,
   UseNotificationsProps,
   UseNotificationsResult,
   UsePreferencesResult,
   UseScheduleProps as UsePreferencesProps,
 } from './hooks';
 export {
+  useChannelConnection,
+  useChannelEndpoint,
   useCounts,
+  useCreateChannelEndpoint,
   useCreateSubscription,
+  useDeleteChannelEndpoint,
   useNotifications,
   useNovu,
   usePreferences,

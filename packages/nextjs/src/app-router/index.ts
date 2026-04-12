@@ -4,7 +4,9 @@
 export type * from '@novu/react';
 export {
   Bell,
+  ConnectChat,
   InboxContent,
+  LinkUser,
   Notifications,
   NovuProvider,
   PreferenceLevel,

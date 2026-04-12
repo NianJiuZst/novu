@@ -23,8 +23,10 @@ import type {
   RouterPush,
   Tab,
 } from '../types';
+import { ConnectChat } from './connect-chat/ConnectChat';
 import { Bell, Root } from './elements';
 import { Inbox, InboxContent, InboxContentProps, InboxPage } from './Inbox';
+import { LinkUser } from './link-user/LinkUser';
 import { Subscription } from './subscription/Subscription';
 import { SubscriptionButtonWrapper as SubscriptionButton } from './subscription/SubscriptionButtonWrapper';
 import { SubscriptionPreferencesWrapper as SubscriptionPreferences } from './subscription/SubscriptionPreferencesWrapper';
@@ -60,9 +62,12 @@ export const novuComponents = {
   Subscription,
   SubscriptionButton,
   SubscriptionPreferences,
+  ConnectChat,
+  LinkUser,
 };
 
 const SUBSCRIPTION_COMPONENTS = ['Subscription', 'SubscriptionButton', 'SubscriptionPreferences'];
+const CHANNEL_COMPONENTS = ['ConnectChat', 'LinkUser'];
 
 export type NovuComponent = { name: NovuComponentName; props?: any };
 
@@ -148,6 +153,30 @@ const SubscriptionComponentsRenderer = (props: {
   );
 };
 
+const ChannelComponentsRenderer = (props: {
+  elements: MountableElement[];
+  nodes: Map<MountableElement, NovuComponent>;
+}) => {
+  return (
+    <Show when={props.elements.length > 0}>
+      <For each={props.elements}>
+        {(node) => {
+          const novuComponent = () => props.nodes.get(node)!;
+          const Component = novuComponents[novuComponent().name];
+
+          return (
+            <Portal mount={node}>
+              <Root>
+                <Component {...novuComponent().props} />
+              </Root>
+            </Portal>
+          );
+        }}
+      </For>
+    </Show>
+  );
+};
+
 type RendererProps = {
   novuUI: NovuUI;
   appearance?: AllAppearance;
@@ -166,12 +195,17 @@ type RendererProps = {
 export const Renderer = (props: RendererProps) => {
   const inboxComponents = createMemo(() =>
     [...props.nodes.entries()]
-      .filter(([_, node]) => !SUBSCRIPTION_COMPONENTS.includes(node.name))
+      .filter(([_, node]) => !SUBSCRIPTION_COMPONENTS.includes(node.name) && !CHANNEL_COMPONENTS.includes(node.name))
       .map(([element, _]) => element)
   );
   const subscriptionComponents = createMemo(() =>
     [...props.nodes.entries()]
       .filter(([_, node]) => SUBSCRIPTION_COMPONENTS.includes(node.name))
+      .map(([element, _]) => element)
+  );
+  const channelComponents = createMemo(() =>
+    [...props.nodes.entries()]
+      .filter(([_, node]) => CHANNEL_COMPONENTS.includes(node.name))
       .map(([element, _]) => element)
   );
 
@@ -210,6 +244,7 @@ export const Renderer = (props: RendererProps) => {
             >
               <InboxComponentsRenderer elements={inboxComponents()} nodes={props.nodes} />
               <SubscriptionComponentsRenderer elements={subscriptionComponents()} nodes={props.nodes} />
+              <ChannelComponentsRenderer elements={channelComponents()} nodes={props.nodes} />
             </InboxProvider>
           </FocusManagerProvider>
         </AppearanceProvider>

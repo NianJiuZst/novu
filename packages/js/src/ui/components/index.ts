@@ -1,5 +1,7 @@
+export * from './connect-chat/ConnectChat';
 export * from './elements';
 export * from './Inbox';
+export * from './link-user/LinkUser';
 export * from './primitives';
 export * from './subscription/Subscription';
 export * from './subscription/SubscriptionButtonWrapper';
