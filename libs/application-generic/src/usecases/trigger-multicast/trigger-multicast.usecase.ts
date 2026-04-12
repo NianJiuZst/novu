@@ -62,7 +62,11 @@ export class TriggerMulticast extends TriggerBase {
 
       await this.validateTopicExist(command, topics, topicKeys);
 
-      const topicIds = topics.map((topic) => topic._id);
+      const validTopics = topics.filter(
+        (topic): topic is Pick<TopicEntity, '_id' | 'key'> => topic != null && topic._id != null && topic.key != null
+      );
+
+      const topicIds = validTopics.map((topic) => String(topic._id));
       const singleSubscriberIds = Array.from(singleSubscribers.keys());
       const allTopicExcludedSubscribers = Array.from(
         new Set([...Array.from(topicExclusions.values()).flatMap((set) => Array.from(set))])
@@ -98,16 +102,34 @@ export class TriggerMulticast extends TriggerBase {
       >();
 
       for await (const subscription of getTopicDistinctSubscribersGenerator) {
+        if (
+          subscription == null ||
+          subscription._id == null ||
+          subscription.subscriberId == null ||
+          subscription._topicId == null
+        ) {
+          this.logger.warn(
+            {
+              organizationId,
+              environmentId,
+              transactionId: command.transactionId,
+            },
+            'Skipping topic subscription row with missing _id, subscriberId, or _topicId'
+          );
+
+          continue;
+        }
+
         const externalSubscriberId = subscription.subscriberId;
-        const internalSubscriptionId = subscription._id.toString();
+        const internalSubscriptionId = String(subscription._id);
         const subscriptionId = subscription.identifier;
-        const topicId = subscription._topicId.toString();
+        const topicId = String(subscription._topicId);
 
         if (actor && actor.subscriberId === externalSubscriberId) {
           continue;
         }
 
-        const topic = topics.find((t) => t._id === topicId);
+        const topic = findTopicBySubscriptionTopicId(validTopics, topicId);
         if (!topic) {
           continue;
         }
@@ -162,7 +184,7 @@ export class TriggerMulticast extends TriggerBase {
           totalSubscribers: totalProcessed,
           singleSubscribers: subscribersToProcess.length,
           topicSubscribers: totalProcessed - subscribersToProcess.length,
-          topicsUsed: topics.length,
+          topicsUsed: validTopics.length,
         }
       );
     } catch (e) {
@@ -279,6 +301,13 @@ export class TriggerMulticast extends TriggerBase {
       });
     }
   }
+}
+
+export function findTopicBySubscriptionTopicId(
+  topics: Pick<TopicEntity, '_id' | 'key'>[],
+  subscriptionTopicId: string
+): Pick<TopicEntity, '_id' | 'key'> | undefined {
+  return topics.find((t) => String(t._id) === subscriptionTopicId);
 }
 
 export const splitByRecipientType = (
