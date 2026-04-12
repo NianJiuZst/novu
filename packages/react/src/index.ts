@@ -60,6 +60,8 @@ export {
 export type {
   UseChannelConnectionProps,
   UseChannelConnectionResult,
+  UseChannelConnectionsProps,
+  UseChannelConnectionsResult,
   UseChannelEndpointProps,
   UseChannelEndpointResult,
   UseCountsProps,
@@ -75,6 +77,7 @@ export type {
 } from './hooks';
 export {
   useChannelConnection,
+  useChannelConnections,
   useChannelEndpoint,
   useCounts,
   useCreateChannelEndpoint,
