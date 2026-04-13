@@ -26,6 +26,7 @@ import {
   ExecutionDetailsSourceEnum,
   ExecutionDetailsStatusEnum,
   ResourceOriginEnum,
+  safeJsonStringify,
 } from '@novu/shared';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
@@ -370,7 +371,8 @@ function tryParseJson(text: string): unknown {
 }
 
 function truncateRaw(obj: unknown, maxSize: number = MAX_RAW_SIZE): string {
-  const serialized = JSON.stringify(obj);
+  const serialized = safeJsonStringify(obj);
+
   if (serialized.length <= maxSize) {
     return serialized;
   }

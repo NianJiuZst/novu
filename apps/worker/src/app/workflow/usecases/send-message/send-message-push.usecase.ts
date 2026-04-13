@@ -88,6 +88,19 @@ export function serializePushProviderError(error: unknown): string {
   return JSON.stringify({ message: String(error ?? '') });
 }
 
+/** Persists MESSAGE_SENT execution details; provider `result` may include non-JSON values. */
+export function serializePushSendSuccessRaw(params: {
+  providerId: ProvidersIdEnum;
+  result: unknown;
+  deviceToken: string;
+}): string {
+  return safeJsonStringify({
+    providerId: params.providerId,
+    result: params.result,
+    deviceToken: params.deviceToken,
+  });
+}
+
 interface IPushProviderOverride {
   providerId: PushProviderIdEnum;
   overrides: Record<string, unknown>;
@@ -230,7 +243,7 @@ export class SendMessagePush extends SendMessageBase {
             isTest: false,
             isRetry: false,
             providerId: channel.providerId,
-            raw: JSON.stringify(channel),
+            raw: safeJsonStringify(channel),
           })
         );
 
@@ -637,7 +650,11 @@ export class SendMessagePush extends SendMessageBase {
           status: ExecutionDetailsStatusEnum.SUCCESS,
           isTest: false,
           isRetry: false,
-          raw: JSON.stringify({ providerId: integration.providerId, result, deviceToken }),
+          raw: serializePushSendSuccessRaw({
+            providerId: integration.providerId,
+            result,
+            deviceToken,
+          }),
         })
       );
 

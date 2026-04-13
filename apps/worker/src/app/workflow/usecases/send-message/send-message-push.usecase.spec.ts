@@ -1,5 +1,11 @@
+import { PushProviderIdEnum } from '@novu/shared';
 import { expect } from 'chai';
-import { isSubscriberError, SUBSCRIBER_ERROR_PATTERNS, serializePushProviderError } from './send-message-push.usecase';
+import {
+  isSubscriberError,
+  SUBSCRIBER_ERROR_PATTERNS,
+  serializePushProviderError,
+  serializePushSendSuccessRaw,
+} from './send-message-push.usecase';
 
 describe('isSubscriberError', () => {
   for (const pattern of SUBSCRIBER_ERROR_PATTERNS) {
@@ -41,5 +47,23 @@ describe('serializePushProviderError', () => {
 
     expect(parsed.message).to.equal('boom');
     expect(parsed.name).to.equal('Error');
+  });
+});
+
+describe('serializePushSendSuccessRaw', () => {
+  it('does not throw when provider result contains circular references', () => {
+    const circular: Record<string, unknown> = { id: 'ok' };
+    circular.self = circular;
+
+    const serialized = serializePushSendSuccessRaw({
+      providerId: PushProviderIdEnum.FCM,
+      result: circular,
+      deviceToken: 'token-1',
+    });
+    const parsed = JSON.parse(serialized) as { providerId: string; result: { id: string; self: string } };
+
+    expect(parsed.providerId).to.equal(PushProviderIdEnum.FCM);
+    expect(parsed.result.id).to.equal('ok');
+    expect(parsed.result.self).to.equal('[Circular]');
   });
 });
