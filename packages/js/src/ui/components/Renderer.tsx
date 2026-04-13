@@ -27,6 +27,7 @@ import { ConnectChat } from './connect-chat/ConnectChat';
 import { Bell, Root } from './elements';
 import { Inbox, InboxContent, InboxContentProps, InboxPage } from './Inbox';
 import { LinkUser } from './link-user/LinkUser';
+import { SlackConnectButton } from './slack-connect-button/SlackConnectButton';
 import { Subscription } from './subscription/Subscription';
 import { SubscriptionButtonWrapper as SubscriptionButton } from './subscription/SubscriptionButtonWrapper';
 import { SubscriptionPreferencesWrapper as SubscriptionPreferences } from './subscription/SubscriptionPreferencesWrapper';
@@ -64,10 +65,11 @@ export const novuComponents = {
   SubscriptionPreferences,
   ConnectChat,
   LinkUser,
+  SlackConnectButton,
 };
 
 const SUBSCRIPTION_COMPONENTS = ['Subscription', 'SubscriptionButton', 'SubscriptionPreferences'];
-const CHANNEL_COMPONENTS = ['ConnectChat', 'LinkUser'];
+const CHANNEL_COMPONENTS = ['ConnectChat', 'LinkUser', 'SlackConnectButton'];
 
 export type NovuComponent = { name: NovuComponentName; props?: any };
 

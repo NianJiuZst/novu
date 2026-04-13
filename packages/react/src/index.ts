@@ -34,25 +34,25 @@ export type {
 } from '@novu/js/ui';
 export type {
   BellProps,
-  ConnectChatProps,
   InboxContentProps,
   InboxProps,
   LinkUserProps,
   NotificationProps,
   NovuProviderProps,
+  SlackConnectButtonProps,
   SubscriptionButtonProps,
   SubscriptionPreferencesProps,
   SubscriptionProps,
 } from './components';
 export {
   Bell,
-  ConnectChat,
   Inbox,
   InboxContent,
   LinkUser,
   Notifications,
   NovuProvider,
   Preferences,
+  SlackConnectButton,
   Subscription,
   SubscriptionButton,
   SubscriptionPreferences,

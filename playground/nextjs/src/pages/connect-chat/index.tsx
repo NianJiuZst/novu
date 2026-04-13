@@ -1,5 +1,4 @@
-import { ConnectChat, LinkUser, NovuProvider } from '@novu/nextjs';
-import { Info } from 'lucide-react';
+import { LinkUser, NovuProvider, SlackConnectButton } from '@novu/nextjs';
 import { useState } from 'react';
 import Title from '@/components/Title';
 import { novuConfig } from '@/utils/config';
@@ -90,13 +89,13 @@ export default function ConnectChatPage() {
       <Title title="Connect Chat Components" />
       <div className="flex flex-col gap-8 p-4 max-w-xl">
         <section className="flex flex-col gap-3">
-          <h4 className="text-sm font-semibold">Step 1 — ConnectChat: OAuth with endpoint configuration</h4>
+          <h4 className="text-sm font-semibold">Step 1 — SlackConnectButton: OAuth with endpoint configuration</h4>
           <p className="text-xs text-muted-foreground">
-            Same Slack user ID as the section above. With <code>endpointType</code> and <code>endpointData</code>, OAuth
-            also creates the <code>ChannelEndpoint</code> — the Step 2 Link User flow is optional in that case.
+            With <code>endpointType</code> and <code>endpointData</code>, OAuth also creates the{' '}
+            <code>ChannelEndpoint</code> — the Step 2 Link User flow is optional in that case.
           </p>
           <NovuProvider {...novuConfig}>
-            <ConnectChat
+            <SlackConnectButton
               integrationIdentifier={INTEGRATION_IDENTIFIER}
               connectionIdentifier={CONNECTION_IDENTIFIER}
               // endpointType="slack_user"
@@ -105,6 +104,7 @@ export default function ConnectChatPage() {
               onConnectError={(err) => console.error('connect error:', err)}
               onDisconnectSuccess={() => console.log('disconnect success')}
               onDisconnectError={(err) => console.error('disconnect error:', err)}
+              context={{ key: 'value1' }}
             />
           </NovuProvider>
         </section>

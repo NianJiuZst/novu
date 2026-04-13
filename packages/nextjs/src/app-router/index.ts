@@ -4,7 +4,6 @@
 export type * from '@novu/react';
 export {
   Bell,
-  ConnectChat,
   InboxContent,
   LinkUser,
   Notifications,
@@ -12,6 +11,7 @@ export {
   PreferenceLevel,
   Preferences,
   SeverityLevelEnum,
+  SlackConnectButton,
   SubscriptionButton,
   SubscriptionPreferences,
   useNovu,

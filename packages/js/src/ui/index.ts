@@ -4,6 +4,7 @@ export type {
   InboxPage,
   InboxProps,
   LinkUserProps,
+  SlackConnectButtonProps,
   SubscriptionButtonWrapperProps,
   SubscriptionPreferencesWrapperProps,
   SubscriptionProps,
