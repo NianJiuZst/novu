@@ -26,12 +26,16 @@ export type ChannelEndpointResponse = {
   updatedAt: string;
 };
 
+export type OAuthMode = 'connect' | 'link_user';
+
 export type GenerateChatOAuthUrlArgs = {
   integrationIdentifier: string;
   connectionIdentifier?: string;
   subscriberId?: string;
   context?: Context;
   scope?: string[];
+  userScope?: string[];
+  mode?: OAuthMode;
 };
 
 export type ListChannelConnectionsArgs = {

@@ -920,6 +920,8 @@ export class InboxController {
         connectionIdentifier: body.connectionIdentifier,
         context: body.context,
         scope: body.scope,
+        userScope: body.userScope,
+        mode: body.mode,
       })
     );
 

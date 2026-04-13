@@ -359,11 +359,19 @@ export const linkUserAppearanceKeys = [
   'linkUserButtonLabel',
 ] as const;
 
+export const linkSlackUserAppearanceKeys = [
+  'linkSlackUserContainer',
+  'linkSlackUserButton',
+  'linkSlackUserButtonContainer',
+  'linkSlackUserButtonLabel',
+] as const;
+
 export const appearanceKeys = [
   ...commonAppearanceKeys,
   ...inboxAppearanceKeys,
   ...subscriptionAppearanceKeys,
   ...connectChatAppearanceKeys,
   ...linkUserAppearanceKeys,
+  ...linkSlackUserAppearanceKeys,
   ...slackConnectButtonAppearanceKeys,
 ];

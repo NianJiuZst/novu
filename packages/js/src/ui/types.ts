@@ -8,6 +8,7 @@ import {
   commonAppearanceKeys,
   connectChatAppearanceKeys,
   inboxAppearanceKeys,
+  linkSlackUserAppearanceKeys,
   linkUserAppearanceKeys,
   slackConnectButtonAppearanceKeys,
   subscriptionAppearanceKeys,
@@ -325,6 +326,7 @@ export type SubscriptionAppearanceCallbackFunction<K extends SubscriptionAppeara
 export type SubscriptionAppearanceKey = (typeof subscriptionAppearanceKeys)[number];
 export type ConnectChatAppearanceKey = (typeof connectChatAppearanceKeys)[number];
 export type LinkUserAppearanceKey = (typeof linkUserAppearanceKeys)[number];
+export type LinkSlackUserAppearanceKey = (typeof linkSlackUserAppearanceKeys)[number];
 export type SlackConnectButtonAppearanceKey = (typeof slackConnectButtonAppearanceKeys)[number];
 export type SubscriptionElements = Partial<
   { [K in CommonAppearanceKey]: ElementStyles } & {
@@ -360,6 +362,7 @@ export type AllAppearanceKey =
   | SubscriptionAppearanceKey
   | ConnectChatAppearanceKey
   | LinkUserAppearanceKey
+  | LinkSlackUserAppearanceKey
   | SlackConnectButtonAppearanceKey;
 export type AllElements = Partial<
   {
@@ -372,7 +375,8 @@ export type AllElements = Partial<
     [K in Extract<AllAppearanceKey, AllAppearanceCallbackKeys>]: ElementStyles | AllAppearanceCallbackFunction<K>;
   }
 >;
-export type AllIconKey = CommonIconKey | InboxIconKey | SubscriptionIconKey;
+export type SlackConnectButtonIconKey = 'slackConnect' | 'slackConnected';
+export type AllIconKey = CommonIconKey | InboxIconKey | SubscriptionIconKey | SlackConnectButtonIconKey;
 export type AllIconOverrides = {
   [key in AllIconKey]?: IconRenderer;
 };

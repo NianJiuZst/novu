@@ -14,6 +14,8 @@ export type DefaultSlackConnectButtonProps = Pick<
   | 'onConnectError'
   | 'onDisconnectSuccess'
   | 'onDisconnectError'
+  | 'connectLabel'
+  | 'connectedLabel'
 >;
 
 export const DefaultSlackConnectButton = (props: DefaultSlackConnectButtonProps) => {
@@ -27,6 +29,8 @@ export const DefaultSlackConnectButton = (props: DefaultSlackConnectButtonProps)
     onConnectError,
     onDisconnectSuccess,
     onDisconnectError,
+    connectLabel,
+    connectedLabel,
   } = props;
   const { novuUI } = useNovuUI();
 
@@ -44,6 +48,8 @@ export const DefaultSlackConnectButton = (props: DefaultSlackConnectButtonProps)
           onConnectError,
           onDisconnectSuccess,
           onDisconnectError,
+          connectLabel,
+          connectedLabel,
         },
         element,
       });
@@ -59,6 +65,8 @@ export const DefaultSlackConnectButton = (props: DefaultSlackConnectButtonProps)
       onConnectError,
       onDisconnectSuccess,
       onDisconnectError,
+      connectLabel,
+      connectedLabel,
     ]
   );
 

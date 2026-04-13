@@ -1,7 +1,8 @@
 import { IsValidContextPayload } from '@novu/application-generic';
 import { ContextPayload } from '@novu/shared';
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { EnvironmentCommand } from '../../../shared/commands/project.command';
+import { OAuthMode } from './generate-slack-oath-url/generate-slack-oauth-url.usecase';
 
 export class GenerateChatOauthUrlCommand extends EnvironmentCommand {
   @IsNotEmpty()
@@ -24,4 +25,14 @@ export class GenerateChatOauthUrlCommand extends EnvironmentCommand {
   @IsArray()
   @IsString({ each: true })
   readonly scope?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  readonly userScope?: string[];
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['connect', 'link_user'])
+  readonly mode?: OAuthMode;
 }

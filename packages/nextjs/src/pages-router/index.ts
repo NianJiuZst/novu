@@ -5,7 +5,7 @@ export type * from '@novu/react';
 export {
   Bell,
   InboxContent,
-  LinkUser,
+  LinkSlackUser,
   Notifications,
   NovuProvider,
   PreferenceLevel,

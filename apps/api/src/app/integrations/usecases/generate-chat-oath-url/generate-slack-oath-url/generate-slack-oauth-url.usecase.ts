@@ -5,6 +5,8 @@ import { ChatProviderIdEnum, ContextPayload } from '@novu/shared';
 import { CHAT_OAUTH_CALLBACK_PATH } from '../chat-oauth.constants';
 import { GenerateSlackOauthUrlCommand } from './generate-slack-oauth-url.command';
 
+export type OAuthMode = 'connect' | 'link_user';
+
 export type StateData = {
   identifier?: string;
   subscriberId?: string;
@@ -14,6 +16,7 @@ export type StateData = {
   integrationIdentifier: string;
   providerId: ChatProviderIdEnum;
   timestamp: number;
+  mode?: OAuthMode;
 };
 
 export const SLACK_DEFAULT_OAUTH_SCOPES = [
@@ -24,6 +27,8 @@ export const SLACK_DEFAULT_OAUTH_SCOPES = [
   'users:read',
   'users:read.email',
 ] as const;
+
+export const SLACK_LINK_USER_OAUTH_SCOPES = ['identity.basic'] as const;
 
 @Injectable()
 export class GenerateSlackOauthUrl {
@@ -44,10 +49,11 @@ export class GenerateSlackOauthUrl {
       command.integration,
       command.subscriberId,
       command.context,
-      command.connectionIdentifier
+      command.connectionIdentifier,
+      command.mode
     );
 
-    return this.getOAuthUrl(clientId!, secureState, command.scope);
+    return this.getOAuthUrl(clientId!, secureState, command.scope, command.userScope, command.mode);
   }
 
   private validateSubscriberIdOrContext(command: GenerateSlackOauthUrlCommand): void {
@@ -82,13 +88,25 @@ export class GenerateSlackOauthUrl {
     return;
   }
 
-  private async getOAuthUrl(clientId: string, secureState: string, scope?: string[]): Promise<string> {
+  private async getOAuthUrl(
+    clientId: string,
+    secureState: string,
+    scope?: string[],
+    userScope?: string[],
+    mode?: OAuthMode
+  ): Promise<string> {
+    const isLinkUser = mode === 'link_user';
     const oauthParams = new URLSearchParams({
       state: secureState,
       client_id: clientId,
-      scope: scope?.join(',') ?? SLACK_DEFAULT_OAUTH_SCOPES.join(','),
       redirect_uri: GenerateSlackOauthUrl.buildRedirectUri(),
     });
+
+    if (isLinkUser) {
+      oauthParams.set('user_scope', userScope?.join(',') ?? SLACK_LINK_USER_OAUTH_SCOPES.join(','));
+    } else {
+      oauthParams.set('scope', scope?.join(',') ?? SLACK_DEFAULT_OAUTH_SCOPES.join(','));
+    }
 
     return `${this.SLACK_OAUTH_URL}${oauthParams.toString()}`;
   }
@@ -97,7 +115,8 @@ export class GenerateSlackOauthUrl {
     integration: IntegrationEntity,
     subscriberId?: string,
     context?: ContextPayload,
-    connectionIdentifier?: string
+    connectionIdentifier?: string,
+    mode?: OAuthMode
   ): Promise<string> {
     const { _environmentId, _organizationId, identifier, providerId } = integration;
 
@@ -110,6 +129,7 @@ export class GenerateSlackOauthUrl {
       integrationIdentifier: identifier,
       providerId: providerId as ChatProviderIdEnum,
       timestamp: Date.now(),
+      mode,
     };
 
     const payload = JSON.stringify(stateData);

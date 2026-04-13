@@ -1,18 +1,13 @@
-import { LinkUser, NovuProvider, SlackConnectButton } from '@novu/nextjs';
+import { LinkSlackUser, NovuProvider, SlackConnectButton } from '@novu/nextjs';
 import { useState } from 'react';
 import Title from '@/components/Title';
 import { novuConfig } from '@/utils/config';
 
 const INTEGRATION_IDENTIFIER = process.env.NEXT_PUBLIC_NOVU_SLACK_INTEGRATION_IDENTIFIER ?? 'slack';
 const CONNECTION_IDENTIFIER = 'slack-workspace-connection';
-const SLACK_USER_ID_DEFAULT = 'C03FDHMURU0';
 const SLACK_TEST_WORKFLOW_ID = process.env.NEXT_PUBLIC_NOVU_SLACK_TEST_WORKFLOW_ID ?? '';
 
 export default function ConnectChatPage() {
-  const [slackUserIdInput, setSlackUserIdInput] = useState('');
-  const slackUserIdForLink =
-    slackUserIdInput.trim() || (process.env.NEXT_PUBLIC_SLACK_USER_ID?.trim() ?? '') || SLACK_USER_ID_DEFAULT;
-
   const [dmStatus, setDmStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [dmLoading, setDmLoading] = useState(false);
   const [triggerWorkflowId, setTriggerWorkflowId] = useState(SLACK_TEST_WORKFLOW_ID);
@@ -108,18 +103,17 @@ export default function ConnectChatPage() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h4 className="text-sm font-semibold">Step 2 — LinkUser: Link subscriber to a Slack user ID</h4>
+          <h4 className="text-sm font-semibold">Step 2 — LinkSlackUser: Link subscriber via Slack OAuth</h4>
           <p className="text-xs text-muted-foreground">
-            Creates a <code>ChannelEndpoint</code> of type <code>slack_user</code> linking the subscriber to a Slack
-            user. Requires an active workspace connection from Step 1.
+            Starts a Slack OAuth flow (<code>user_scope=identity.basic</code>) to automatically resolve the
+            subscriber&apos;s Slack user ID and create a <code>ChannelEndpoint</code> of type <code>slack_user</code>.
+            Requires an active workspace connection from Step 1.
           </p>
           <NovuProvider {...novuConfig}>
-            <LinkUser
+            <LinkSlackUser
               integrationIdentifier={INTEGRATION_IDENTIFIER}
               connectionIdentifier={CONNECTION_IDENTIFIER}
               subscriberId={novuConfig.subscriberId}
-              type="slack_user"
-              endpoint={{ userId: slackUserIdForLink }}
               onLinkSuccess={(ep) => console.log('link success, endpoint:', ep.identifier)}
               onLinkError={(err) => console.error('link error:', err)}
               onUnlinkSuccess={() => console.log('unlink success')}

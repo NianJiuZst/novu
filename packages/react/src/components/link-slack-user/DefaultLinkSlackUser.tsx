@@ -1,55 +1,52 @@
-import { LinkUserProps } from '@novu/js/ui';
+import { LinkSlackUserProps } from '@novu/js/ui';
 import { useCallback } from 'react';
 import { useNovuUI } from '../../context/NovuUIContext';
 import { Mounter } from '../Mounter';
 
-export type DefaultLinkUserProps = Pick<
-  LinkUserProps,
+export type DefaultLinkSlackUserProps = Pick<
+  LinkSlackUserProps,
   | 'integrationIdentifier'
   | 'connectionIdentifier'
   | 'subscriberId'
-  | 'type'
-  | 'endpoint'
-  | 'endpointIdentifier'
   | 'context'
   | 'onLinkSuccess'
   | 'onLinkError'
   | 'onUnlinkSuccess'
   | 'onUnlinkError'
+  | 'linkLabel'
+  | 'unlinkLabel'
 >;
 
-export const DefaultLinkUser = (props: DefaultLinkUserProps) => {
+export const DefaultLinkSlackUser = (props: DefaultLinkSlackUserProps) => {
   const {
     integrationIdentifier,
     connectionIdentifier,
     subscriberId,
-    type,
-    endpoint,
-    endpointIdentifier,
     context,
     onLinkSuccess,
     onLinkError,
     onUnlinkSuccess,
     onUnlinkError,
+    linkLabel,
+    unlinkLabel,
   } = props;
   const { novuUI } = useNovuUI();
 
   const mount = useCallback(
     (element: HTMLElement) => {
       return novuUI.mountComponent({
-        name: 'LinkUser',
+        name: 'LinkSlackUser',
         props: {
           integrationIdentifier,
           connectionIdentifier,
           subscriberId,
-          type,
-          endpoint,
-          endpointIdentifier,
           context,
           onLinkSuccess,
           onLinkError,
           onUnlinkSuccess,
           onUnlinkError,
+          linkLabel,
+          unlinkLabel,
         },
         element,
       });
@@ -59,14 +56,13 @@ export const DefaultLinkUser = (props: DefaultLinkUserProps) => {
       integrationIdentifier,
       connectionIdentifier,
       subscriberId,
-      type,
-      endpoint,
-      endpointIdentifier,
       context,
       onLinkSuccess,
       onLinkError,
       onUnlinkSuccess,
       onUnlinkError,
+      linkLabel,
+      unlinkLabel,
     ]
   );
 

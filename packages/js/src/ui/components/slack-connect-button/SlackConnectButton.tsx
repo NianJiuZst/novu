@@ -1,11 +1,13 @@
-import { Show } from 'solid-js';
+import { createSignal, onCleanup, Show } from 'solid-js';
 import type { Context } from '../../../types';
 import { useChannelConnection } from '../../api/hooks/useChannelConnection';
+import { useNovu } from '../../context';
 import { useStyle } from '../../helpers/useStyle';
 import { CheckCircleFill } from '../../icons/CheckCircleFill';
 import { Loader } from '../../icons/Loader';
 import { SlackColored } from '../../icons/SlackColored';
-import { Button } from '../primitives';
+import { Button, Motion } from '../primitives';
+import { IconRendererWrapper } from '../shared/IconRendererWrapper';
 
 export type SlackConnectButtonProps = {
   integrationIdentifier?: string;
@@ -17,21 +19,62 @@ export type SlackConnectButtonProps = {
   onConnectError?: (error: unknown) => void;
   onDisconnectSuccess?: () => void;
   onDisconnectError?: (error: unknown) => void;
+  connectLabel?: string;
+  connectedLabel?: string;
 };
 
 const DEFAULT_INTEGRATION_IDENTIFIER = 'slack';
+const POLL_INTERVAL_MS = 2500;
+const POLL_TIMEOUT_MS = 120_000;
 
 export const SlackConnectButton = (props: SlackConnectButtonProps) => {
   const style = useStyle();
+  const novuAccessor = useNovu();
   const integrationIdentifier = () => props.integrationIdentifier ?? DEFAULT_INTEGRATION_IDENTIFIER;
 
-  const { connection, loading, connect, disconnect } = useChannelConnection({
+  const { connection, loading, connect, disconnect, mutate } = useChannelConnection({
     integrationIdentifier: integrationIdentifier(),
     connectionIdentifier: props.connectionIdentifier,
     subscriberId: props.subscriberId,
   });
 
+  const [actionLoading, setActionLoading] = createSignal(false);
+
   const isConnected = () => !!connection();
+  const isLoading = () => loading() || actionLoading();
+
+  const startPolling = () => {
+    const startedAt = Date.now();
+
+    const intervalId = setInterval(async () => {
+      try {
+        if (!props.connectionIdentifier) return;
+
+        const response = await novuAccessor().channelConnections.get({
+          identifier: props.connectionIdentifier,
+        });
+
+        if (response.data) {
+          clearInterval(intervalId);
+          setActionLoading(false);
+          mutate(response.data);
+          props.onConnectSuccess?.(props.connectionIdentifier);
+
+          return;
+        }
+      } catch {
+        // ignore transient errors during polling
+      }
+
+      if (Date.now() - startedAt >= POLL_TIMEOUT_MS) {
+        clearInterval(intervalId);
+        setActionLoading(false);
+        props.onConnectError?.(new Error('Slack OAuth timed out. Please try again.'));
+      }
+    }, POLL_INTERVAL_MS);
+
+    onCleanup(() => clearInterval(intervalId));
+  };
 
   const handleClick = async () => {
     if (isConnected()) {
@@ -45,6 +88,8 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
         props.onDisconnectSuccess?.();
       }
     } else {
+      setActionLoading(true);
+
       const result = await connect({
         integrationIdentifier: integrationIdentifier(),
         connectionIdentifier: props.connectionIdentifier,
@@ -54,12 +99,15 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
       });
 
       if (result.error) {
+        setActionLoading(false);
         props.onConnectError?.(result.error);
-      } else if (result.data?.url) {
+
+        return;
+      }
+
+      if (result.data?.url) {
         window.open(result.data.url, '_blank', 'noopener,noreferrer');
-        if (props.connectionIdentifier) {
-          props.onConnectSuccess?.(props.connectionIdentifier);
-        }
+        startPolling();
       }
     }
   };
@@ -79,6 +127,7 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
           })}
           variant="secondary"
           onClick={handleClick}
+          disabled={isLoading()}
         >
           <span
             class={style({
@@ -86,32 +135,70 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
               className: 'nt-relative nt-overflow-hidden nt-inline-flex nt-items-center nt-justify-center nt-gap-1',
             })}
           >
-            {isConnected() ? (
+            <Motion.span
+              initial={{ opacity: 1 }}
+              animate={{ opacity: actionLoading() ? 0 : 1 }}
+              transition={{ easing: 'ease-in-out', duration: 0.2 }}
+              class="nt-inline-flex nt-items-center nt-gap-1"
+            >
+              {isConnected() ? (
+                <IconRendererWrapper
+                  iconKey="slackConnected"
+                  class={style({
+                    key: 'slackConnectButtonIcon',
+                    className:
+                      'nt-inline-flex nt-items-center nt-justify-center nt-size-4 nt-shrink-0 nt-rounded-full nt-bg-white nt-shadow-[0_1px_2px_0_rgba(10,13,20,0.03)]',
+                    iconKey: 'slackConnected',
+                  })}
+                  fallback={
+                    <span
+                      class={style({
+                        key: 'slackConnectButtonIcon',
+                        className:
+                          'nt-inline-flex nt-items-center nt-justify-center nt-size-4 nt-shrink-0 nt-rounded-full nt-bg-white nt-shadow-[0_1px_2px_0_rgba(10,13,20,0.03)]',
+                        iconKey: 'slackConnected',
+                      })}
+                    >
+                      <CheckCircleFill class="nt-size-full" />
+                    </span>
+                  }
+                />
+              ) : (
+                <IconRendererWrapper
+                  iconKey="slackConnect"
+                  class={style({
+                    key: 'slackConnectButtonIcon',
+                    className: 'nt-size-4 nt-shrink-0',
+                    iconKey: 'slackConnect',
+                  })}
+                  fallback={
+                    <SlackColored
+                      class={style({
+                        key: 'slackConnectButtonIcon',
+                        className: 'nt-size-4 nt-shrink-0',
+                        iconKey: 'slackConnect',
+                      })}
+                    />
+                  }
+                />
+              )}
               <span
                 class={style({
-                  key: 'slackConnectButtonIcon',
-                  className:
-                    'nt-inline-flex nt-items-center nt-justify-center nt-size-4 nt-shrink-0 nt-rounded-full nt-bg-white nt-shadow-[0_1px_2px_0_rgba(10,13,20,0.03)]',
+                  key: 'slackConnectButtonLabel',
+                  className: '[line-height:16px]',
                 })}
               >
-                <CheckCircleFill class="nt-size-full" />
+                {isConnected() ? (props.connectedLabel ?? 'Connected') : (props.connectLabel ?? 'Connect Slack')}
               </span>
-            ) : (
-              <SlackColored
-                class={style({
-                  key: 'slackConnectButtonIcon',
-                  className: 'nt-size-4 nt-shrink-0',
-                })}
-              />
-            )}
-            <span
-              class={style({
-                key: 'slackConnectButtonLabel',
-                className: '[line-height:16px]',
-              })}
+            </Motion.span>
+            <Motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: actionLoading() ? 1 : 0 }}
+              transition={{ easing: 'ease-in-out', duration: 0.2 }}
+              class="nt-absolute nt-left-0 nt-inline-flex nt-items-center"
             >
-              {isConnected() ? 'Connected' : 'Connect Slack'}
-            </span>
+              <Loader class="nt-text-foreground-alpha-600 nt-size-3.5 nt-animate-spin" />
+            </Motion.span>
           </span>
         </Button>
       </div>

@@ -2,7 +2,7 @@ export * from '../hooks/NovuProvider';
 export * from './Bell';
 export * from './Inbox';
 export * from './InboxContent';
-export * from './link-user/LinkUser';
+export * from './link-slack-user/LinkSlackUser';
 export * from './Notifications';
 export * from './Preferences';
 export * from './slack-connect-button/SlackConnectButton';
