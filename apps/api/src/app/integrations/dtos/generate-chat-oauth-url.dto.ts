@@ -1,7 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ApiContextPayload, IsValidContextPayload } from '@novu/application-generic';
-import { ContextPayload } from '@novu/shared';
-import { IsArray, IsDefined, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ChannelEndpointType, ContextPayload, ENDPOINT_TYPES } from '@novu/shared';
+import { IsArray, IsDefined, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 import { SLACK_DEFAULT_OAUTH_SCOPES } from '../usecases/generate-chat-oath-url/generate-slack-oath-url/generate-slack-oauth-url.usecase';
 
 export class GenerateChatOauthUrlRequestDto {
@@ -65,4 +65,33 @@ export class GenerateChatOauthUrlRequestDto {
   @IsArray()
   @IsString({ each: true })
   scope?: string[];
+
+  @ApiPropertyOptional({
+    enum: Object.values(ENDPOINT_TYPES),
+    description:
+      'The type of channel endpoint to automatically create after the OAuth connection is established. ' +
+      'When provided together with `endpointData`, eliminates the need for a separate create-endpoint call.',
+    example: ENDPOINT_TYPES.SLACK_CHANNEL,
+  })
+  @IsOptional()
+  @IsEnum(Object.values(ENDPOINT_TYPES))
+  endpointType?: ChannelEndpointType;
+
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: true,
+    description:
+      'The endpoint payload to use when auto-creating the channel endpoint. ' +
+      'Shape depends on `endpointType`: ' +
+      '`slack_channel` → `{ channelId }`, ' +
+      '`slack_user` → `{ userId }`, ' +
+      '`webhook` → `{ url, channel? }`, ' +
+      '`ms_teams_channel` → `{ teamId, channelId }`, ' +
+      '`ms_teams_user` → `{ userId }`, ' +
+      '`phone` → `{ phoneNumber }`.',
+    example: { channelId: 'C0123456789' },
+  })
+  @IsOptional()
+  @IsObject()
+  endpointData?: Record<string, string>;
 }

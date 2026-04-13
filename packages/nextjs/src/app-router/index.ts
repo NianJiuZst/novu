@@ -14,6 +14,7 @@ export {
   SeverityLevelEnum,
   SubscriptionButton,
   SubscriptionPreferences,
+  useNovu,
   WorkflowCriticalityEnum,
 } from '@novu/react';
 export { Inbox } from './Inbox';

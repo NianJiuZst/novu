@@ -11,7 +11,7 @@ import {
   IntegrationEntity,
   IntegrationRepository,
 } from '@novu/dal';
-import { ChatProviderIdEnum, ENDPOINT_TYPES } from '@novu/shared';
+import { ChannelEndpointByType, ChatProviderIdEnum, ENDPOINT_TYPES } from '@novu/shared';
 import axios from 'axios';
 import { CreateChannelConnectionCommand } from '../../../../channel-connections/usecases/create-channel-connection/create-channel-connection.command';
 import { CreateChannelConnection } from '../../../../channel-connections/usecases/create-channel-connection/create-channel-connection.usecase';
@@ -60,7 +60,7 @@ export class SlackOauthCallback {
        */
       await this.createIncomingWebhookEndpoint(stateData, integration, authData);
     } else {
-      await this.createChannelConnection.execute(
+      const connection = await this.createChannelConnection.execute(
         CreateChannelConnectionCommand.create({
           identifier: stateData.identifier,
           organizationId: stateData.organizationId,
@@ -77,6 +77,21 @@ export class SlackOauthCallback {
           },
         })
       );
+
+      if (stateData.endpointType && stateData.endpointData && stateData.subscriberId) {
+        await this.createChannelEndpoint.execute(
+          CreateChannelEndpointCommand.create({
+            organizationId: stateData.organizationId,
+            environmentId: stateData.environmentId,
+            integrationIdentifier: integration.identifier,
+            connectionIdentifier: connection.identifier,
+            subscriberId: stateData.subscriberId,
+            context: stateData.context,
+            type: stateData.endpointType,
+            endpoint: stateData.endpointData as ChannelEndpointByType[typeof stateData.endpointType],
+          })
+        );
+      }
     }
 
     if (credentials.redirectUrl) {

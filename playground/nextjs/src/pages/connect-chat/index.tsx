@@ -90,15 +90,17 @@ export default function ConnectChatPage() {
       <Title title="Connect Chat Components" />
       <div className="flex flex-col gap-8 p-4 max-w-xl">
         <section className="flex flex-col gap-3">
-          <h4 className="text-sm font-semibold">ConnectChat — Connect Slack workspace via OAuth</h4>
+          <h4 className="text-sm font-semibold">Step 1 — ConnectChat: OAuth with endpoint configuration</h4>
           <p className="text-xs text-muted-foreground">
-            Clicking &quot;Connect&quot; opens the Slack OAuth flow in a new window. The workspace token is stored as a{' '}
-            <code>ChannelConnection</code>.
+            Same Slack user ID as the section above. With <code>endpointType</code> and <code>endpointData</code>, OAuth
+            also creates the <code>ChannelEndpoint</code> — the Step 2 Link User flow is optional in that case.
           </p>
           <NovuProvider {...novuConfig}>
             <ConnectChat
               integrationIdentifier={INTEGRATION_IDENTIFIER}
               connectionIdentifier={CONNECTION_IDENTIFIER}
+              // endpointType="slack_user"
+              // endpointData={{ userId: slackUserIdForLink }}
               onConnectSuccess={(id) => console.log('connect success, identifier:', id)}
               onConnectError={(err) => console.error('connect error:', err)}
               onDisconnectSuccess={() => console.log('disconnect success')}
@@ -108,45 +110,18 @@ export default function ConnectChatPage() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h4 className="text-sm font-semibold">LinkUser — Link subscriber to a Slack user ID</h4>
+          <h4 className="text-sm font-semibold">Step 2 — LinkUser: Link subscriber to a Slack user ID</h4>
           <p className="text-xs text-muted-foreground">
             Creates a <code>ChannelEndpoint</code> of type <code>slack_user</code> linking the subscriber to a Slack
-            user. Requires an active workspace connection.
+            user. Requires an active workspace connection from Step 1.
           </p>
-          <label className="flex flex-col gap-1.5 text-xs">
-            <span className="flex items-center gap-1.5 font-medium text-foreground">
-              Slack user ID
-              <span className="group relative inline-flex">
-                <button
-                  type="button"
-                  className="inline-flex cursor-help border-0 bg-transparent p-0 text-muted-foreground hover:text-foreground"
-                  aria-label="Slack member ID info"
-                >
-                  <Info className="size-3.5 shrink-0" aria-hidden />
-                </button>
-                <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded bg-popover px-2 py-1 text-xs text-popover-foreground shadow-md opacity-0 transition-opacity group-hover:opacity-100">
-                  Slack member ID (U…); optional if <code className="font-mono">NEXT_PUBLIC_SLACK_USER_ID</code> or
-                  default is set
-                </span>
-              </span>
-            </span>
-            <input
-              type="text"
-              value={slackUserIdInput}
-              onChange={(e) => setSlackUserIdInput(e.target.value)}
-              placeholder="Slack member ID (e.g. U0123…)"
-              className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-            <span className="text-muted-foreground">
-              Effective ID for link: <code className="text-foreground">{slackUserIdForLink}</code>
-            </span>
-          </label>
           <NovuProvider {...novuConfig}>
             <LinkUser
               integrationIdentifier={INTEGRATION_IDENTIFIER}
               connectionIdentifier={CONNECTION_IDENTIFIER}
               subscriberId={novuConfig.subscriberId}
-              slackUserId={slackUserIdForLink}
+              type="slack_user"
+              endpoint={{ userId: slackUserIdForLink }}
               onLinkSuccess={(ep) => console.log('link success, endpoint:', ep.identifier)}
               onLinkError={(err) => console.error('link error:', err)}
               onUnlinkSuccess={() => console.log('unlink success')}

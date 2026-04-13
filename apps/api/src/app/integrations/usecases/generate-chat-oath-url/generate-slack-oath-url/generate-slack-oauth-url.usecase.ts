@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { createHash, GetNovuProviderCredentials, GetNovuProviderCredentialsCommand } from '@novu/application-generic';
 import { EnvironmentRepository, ICredentialsEntity, IntegrationEntity, SubscriberRepository } from '@novu/dal';
-import { ChatProviderIdEnum, ContextPayload } from '@novu/shared';
+import { ChannelEndpointType, ChatProviderIdEnum, ContextPayload } from '@novu/shared';
 import { CHAT_OAUTH_CALLBACK_PATH } from '../chat-oauth.constants';
 import { GenerateSlackOauthUrlCommand } from './generate-slack-oauth-url.command';
 
@@ -14,6 +14,9 @@ export type StateData = {
   integrationIdentifier: string;
   providerId: ChatProviderIdEnum;
   timestamp: number;
+  /** Optional endpoint to auto-create after the connection is established */
+  endpointType?: ChannelEndpointType;
+  endpointData?: Record<string, unknown>;
 };
 
 export const SLACK_DEFAULT_OAUTH_SCOPES = [
@@ -44,7 +47,9 @@ export class GenerateSlackOauthUrl {
       command.integration,
       command.subscriberId,
       command.context,
-      command.connectionIdentifier
+      command.connectionIdentifier,
+      command.endpointType,
+      command.endpointData
     );
 
     return this.getOAuthUrl(clientId!, secureState, command.scope);
@@ -97,7 +102,9 @@ export class GenerateSlackOauthUrl {
     integration: IntegrationEntity,
     subscriberId?: string,
     context?: ContextPayload,
-    connectionIdentifier?: string
+    connectionIdentifier?: string,
+    endpointType?: ChannelEndpointType,
+    endpointData?: Record<string, string>
   ): Promise<string> {
     const { _environmentId, _organizationId, identifier, providerId } = integration;
 
@@ -110,6 +117,8 @@ export class GenerateSlackOauthUrl {
       integrationIdentifier: identifier,
       providerId: providerId as ChatProviderIdEnum,
       timestamp: Date.now(),
+      endpointType,
+      endpointData,
     };
 
     const payload = JSON.stringify(stateData);
@@ -153,7 +162,8 @@ export class GenerateSlackOauthUrl {
     }
 
     const baseUrl = process.env.API_ROOT_URL.replace(/\/$/, ''); // Remove trailing slash
-    return `${baseUrl}${CHAT_OAUTH_CALLBACK_PATH}`;
+    return `https://9f36-84-110-187-162.ngrok-free.app${CHAT_OAUTH_CALLBACK_PATH}`;
+    // return `${baseUrl}${CHAT_OAUTH_CALLBACK_PATH}`;
   }
 
   private async getIntegrationCredentials(integration: IntegrationEntity): Promise<ICredentialsEntity> {

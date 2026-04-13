@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { createHash } from '@novu/application-generic';
 import { EnvironmentRepository, ICredentialsEntity, IntegrationEntity, SubscriberRepository } from '@novu/dal';
-import { ChatProviderIdEnum, ContextPayload } from '@novu/shared';
+import { ChannelEndpointType, ChatProviderIdEnum, ContextPayload } from '@novu/shared';
 import { CHAT_OAUTH_CALLBACK_PATH } from '../chat-oauth.constants';
 import { GenerateMsTeamsOauthUrlCommand } from './generate-msteams-oauth-url.command';
 
@@ -14,6 +14,9 @@ export type StateData = {
   integrationIdentifier: string;
   providerId: ChatProviderIdEnum;
   timestamp: number;
+  /** Optional endpoint to auto-create after the connection is established */
+  endpointType?: ChannelEndpointType;
+  endpointData?: Record<string, string>;
 };
 
 @Injectable()
@@ -49,7 +52,9 @@ export class GenerateMsTeamsOauthUrl {
       command.integration,
       command.subscriberId,
       command.context,
-      command.connectionIdentifier
+      command.connectionIdentifier,
+      command.endpointType,
+      command.endpointData
     );
 
     return this.getOAuthUrl(clientId, secureState);
@@ -96,7 +101,9 @@ export class GenerateMsTeamsOauthUrl {
     integration: IntegrationEntity,
     subscriberId?: string,
     context?: ContextPayload,
-    connectionIdentifier?: string
+    connectionIdentifier?: string,
+    endpointType?: ChannelEndpointType,
+    endpointData?: Record<string, string>
   ): Promise<string> {
     const { _environmentId, _organizationId, identifier, providerId } = integration;
 
@@ -109,6 +116,8 @@ export class GenerateMsTeamsOauthUrl {
       integrationIdentifier: identifier,
       providerId: providerId as ChatProviderIdEnum,
       timestamp: Date.now(),
+      endpointType,
+      endpointData,
     };
 
     const payload = JSON.stringify(stateData);

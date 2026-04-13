@@ -1,7 +1,7 @@
 import { IsValidContextPayload } from '@novu/application-generic';
 import { IntegrationEntity } from '@novu/dal';
-import { ContextPayload } from '@novu/shared';
-import { IsOptional, IsString } from 'class-validator';
+import { ChannelEndpointType, ContextPayload } from '@novu/shared';
+import { IsObject, IsOptional, IsString } from 'class-validator';
 import { EnvironmentCommand } from '../../../../shared/commands/project.command';
 
 export class GenerateMsTeamsOauthUrlCommand extends EnvironmentCommand {
@@ -18,4 +18,12 @@ export class GenerateMsTeamsOauthUrlCommand extends EnvironmentCommand {
   @IsOptional()
   @IsValidContextPayload({ maxCount: 5 })
   context?: ContextPayload;
+
+  @IsOptional()
+  @IsString()
+  readonly endpointType?: ChannelEndpointType;
+
+  @IsOptional()
+  @IsObject()
+  readonly endpointData?: Record<string, string>;
 }
