@@ -49,6 +49,7 @@ jobs:
       test-providers: ${{ steps.get-projects-arrays.outputs.test-providers }}
       test-packages: ${{ steps.get-projects-arrays.outputs.test-packages }}
       test-libs: ${{ steps.get-projects-arrays.outputs.test-libs }}
+      test-unit-libs: ${{ steps.get-projects-arrays.outputs.test-unit-libs }}
     permissions:
       contents: read
       packages: write
@@ -101,6 +102,7 @@ jobs:
             echo "test-providers=$(pnpm run get-affected test --all providers | tail -n +5)" >> $GITHUB_OUTPUT
             echo "test-packages=$(pnpm run get-affected test --all packages | tail -n +5)" >> $GITHUB_OUTPUT
             echo "test-libs=$(pnpm run get-affected test --all libs | tail -n +5)" >> $GITHUB_OUTPUT
+            echo "test-unit-libs=$(pnpm run get-affected test:unit --all libs | tail -n +5)" >> $GITHUB_OUTPUT
           else
             echo "Running PR origin/${{steps.get-base-branch-name.outputs.branch}}"
             echo "test-unit=$(pnpm run get-affected test origin/${{steps.get-base-branch-name.outputs.branch}} | tail -n +5)" >> $GITHUB_OUTPUT
@@ -110,6 +112,7 @@ jobs:
             echo "test-providers=$(pnpm run get-affected test origin/${{steps.get-base-branch-name.outputs.branch}} providers | tail -n +5)" >> $GITHUB_OUTPUT
             echo "test-packages=$(pnpm run get-affected test origin/${{steps.get-base-branch-name.outputs.branch}} packages | tail -n +5)" >> $GITHUB_OUTPUT
             echo "test-libs=$(pnpm run get-affected test origin/${{steps.get-base-branch-name.outputs.branch}} libs | tail -n +5)" >> $GITHUB_OUTPUT
+            echo "test-unit-libs=$(pnpm run get-affected test:unit origin/${{steps.get-base-branch-name.outputs.branch}} libs | tail -n +5)" >> $GITHUB_OUTPUT
           fi
 
   test_unit_providers:
@@ -196,7 +199,7 @@ jobs:
     name: Unit test @novu/application-generic
     runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: [get-affected]
-    if: ${{ contains(fromJson(needs.get-affected.outputs.test-libs), '@novu/application-generic') }}
+    if: ${{ contains(fromJson(needs.get-affected.outputs.test-unit-libs), '@novu/application-generic') }}
     timeout-minutes: 30
     steps:
       - name: Affected libs
@@ -207,8 +210,16 @@ jobs:
         with:
           slim: 'true'
 
+      - name: Build dependencies
+        uses: mansagroup/nrwl-nx-action@v3
+        env:
+          NX_NO_CLOUD: ${{ secrets.NX_CLOUD_ACCESS_TOKEN == '' && 'true' || 'false' }}
+        with:
+          targets: build
+          projects: '@novu/application-generic'
+
       - name: Run unit tests
-        run: cd libs/application-generic && pnpm test
+        run: cd libs/application-generic && pnpm test:unit
 
   test_unit_services:
     name: Unit test backend services

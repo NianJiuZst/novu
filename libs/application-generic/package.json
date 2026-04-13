@@ -18,7 +18,7 @@
     "check": "biome check .",
     "check:fix": "biome check --write .",
     "watch:build": "tsc -p tsconfig.json -w",
-    "test": "jest --config jest.config.js --forceExit src",
+    "test:unit": "jest --config jest.config.js --forceExit src",
     "watch:test": "jest src --watch",
     "reset-hard": "git clean -dfx && git reset --hard && pnpm install"
   },
