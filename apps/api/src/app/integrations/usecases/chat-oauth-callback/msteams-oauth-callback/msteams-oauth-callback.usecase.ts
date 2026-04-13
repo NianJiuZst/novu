@@ -7,11 +7,9 @@ import {
   IntegrationEntity,
   IntegrationRepository,
 } from '@novu/dal';
-import { ChannelEndpointByType, ChatProviderIdEnum } from '@novu/shared';
+import { ChatProviderIdEnum } from '@novu/shared';
 import { CreateChannelConnectionCommand } from '../../../../channel-connections/usecases/create-channel-connection/create-channel-connection.command';
 import { CreateChannelConnection } from '../../../../channel-connections/usecases/create-channel-connection/create-channel-connection.usecase';
-import { CreateChannelEndpointCommand } from '../../../../channel-endpoints/usecases/create-channel-endpoint/create-channel-endpoint.command';
-import { CreateChannelEndpoint } from '../../../../channel-endpoints/usecases/create-channel-endpoint/create-channel-endpoint.usecase';
 import {
   GenerateMsTeamsOauthUrl,
   StateData,
@@ -27,7 +25,6 @@ export class MsTeamsOauthCallback {
     private integrationRepository: IntegrationRepository,
     private environmentRepository: EnvironmentRepository,
     private createChannelConnection: CreateChannelConnection,
-    private createChannelEndpoint: CreateChannelEndpoint,
     private logger: PinoLogger
   ) {
     this.logger.setContext(MsTeamsOauthCallback.name);
@@ -62,7 +59,7 @@ export class MsTeamsOauthCallback {
       id: command.tenant,
     };
 
-    const connection = await this.createChannelConnection.execute(
+    await this.createChannelConnection.execute(
       CreateChannelConnectionCommand.create({
         identifier: stateData.identifier,
         organizationId: stateData.organizationId,
@@ -74,21 +71,6 @@ export class MsTeamsOauthCallback {
         workspace: workspaceData,
       })
     );
-
-    if (stateData.endpointType && stateData.endpointData && stateData.subscriberId) {
-      await this.createChannelEndpoint.execute(
-        CreateChannelEndpointCommand.create({
-          organizationId: stateData.organizationId,
-          environmentId: stateData.environmentId,
-          integrationIdentifier: integration.identifier,
-          connectionIdentifier: connection.identifier,
-          subscriberId: stateData.subscriberId,
-          context: stateData.context,
-          type: stateData.endpointType,
-          endpoint: stateData.endpointData as ChannelEndpointByType[typeof stateData.endpointType],
-        })
-      );
-    }
 
     if (credentials.redirectUrl) {
       return { type: ResponseTypeEnum.URL, result: credentials.redirectUrl };

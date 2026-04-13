@@ -13,8 +13,6 @@ export type SlackConnectButtonProps = {
   subscriberId?: string;
   context?: Context;
   scope?: string[];
-  endpointType?: string;
-  endpointData?: Record<string, string>;
   onConnectSuccess?: (connectionIdentifier: string) => void;
   onConnectError?: (error: unknown) => void;
   onDisconnectSuccess?: () => void;
@@ -27,7 +25,7 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
   const style = useStyle();
   const integrationIdentifier = () => props.integrationIdentifier ?? DEFAULT_INTEGRATION_IDENTIFIER;
 
-  const { connection, loading, connect, connectAndLink, disconnect } = useChannelConnection({
+  const { connection, loading, connect, disconnect } = useChannelConnection({
     integrationIdentifier: integrationIdentifier(),
     connectionIdentifier: props.connectionIdentifier,
     subscriberId: props.subscriberId,
@@ -45,25 +43,6 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
         props.onDisconnectError?.(result.error);
       } else {
         props.onDisconnectSuccess?.();
-      }
-    } else if (props.endpointType && props.endpointData) {
-      const result = await connectAndLink({
-        integrationIdentifier: integrationIdentifier(),
-        connectionIdentifier: props.connectionIdentifier,
-        subscriberId: props.subscriberId,
-        context: props.context,
-        scope: props.scope,
-        endpointType: props.endpointType,
-        endpointData: props.endpointData,
-      });
-
-      if (result.error) {
-        props.onConnectError?.(result.error);
-      } else if (result.data?.url) {
-        window.open(result.data.url, '_blank', 'noopener,noreferrer');
-        if (props.connectionIdentifier) {
-          props.onConnectSuccess?.(props.connectionIdentifier);
-        }
       }
     } else {
       const result = await connect({

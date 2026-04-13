@@ -1,6 +1,6 @@
 import { IsValidContextPayload } from '@novu/application-generic';
-import { ChannelEndpointType, ContextPayload } from '@novu/shared';
-import { IsArray, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
+import { ContextPayload } from '@novu/shared';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { EnvironmentCommand } from '../../../shared/commands/project.command';
 
 export class GenerateChatOauthUrlCommand extends EnvironmentCommand {
@@ -24,12 +24,4 @@ export class GenerateChatOauthUrlCommand extends EnvironmentCommand {
   @IsArray()
   @IsString({ each: true })
   readonly scope?: string[];
-
-  @IsOptional()
-  @IsString()
-  readonly endpointType?: ChannelEndpointType;
-
-  @IsOptional()
-  @IsObject()
-  readonly endpointData?: Record<string, string>;
 }

@@ -11,7 +11,7 @@ import {
   IntegrationEntity,
   IntegrationRepository,
 } from '@novu/dal';
-import { ChannelEndpointByType, ChatProviderIdEnum, ENDPOINT_TYPES } from '@novu/shared';
+import { ChatProviderIdEnum, ENDPOINT_TYPES } from '@novu/shared';
 import axios from 'axios';
 import { CreateChannelConnectionCommand } from '../../../../channel-connections/usecases/create-channel-connection/create-channel-connection.command';
 import { CreateChannelConnection } from '../../../../channel-connections/usecases/create-channel-connection/create-channel-connection.usecase';
@@ -78,7 +78,7 @@ export class SlackOauthCallback {
         })
       );
 
-      if (stateData.endpointType && stateData.endpointData && stateData.subscriberId) {
+      if (stateData.subscriberId && authData.authed_user?.id) {
         await this.createChannelEndpoint.execute(
           CreateChannelEndpointCommand.create({
             organizationId: stateData.organizationId,
@@ -87,8 +87,8 @@ export class SlackOauthCallback {
             connectionIdentifier: connection.identifier,
             subscriberId: stateData.subscriberId,
             context: stateData.context,
-            type: stateData.endpointType,
-            endpoint: stateData.endpointData as ChannelEndpointByType[typeof stateData.endpointType],
+            type: ENDPOINT_TYPES.SLACK_USER,
+            endpoint: { userId: authData.authed_user.id },
           })
         );
       }

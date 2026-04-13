@@ -98,13 +98,11 @@ export default function ConnectChatPage() {
             <SlackConnectButton
               integrationIdentifier={INTEGRATION_IDENTIFIER}
               connectionIdentifier={CONNECTION_IDENTIFIER}
-              // endpointType="slack_user"
-              // endpointData={{ userId: slackUserIdForLink }}
               onConnectSuccess={(id) => console.log('connect success, identifier:', id)}
               onConnectError={(err) => console.error('connect error:', err)}
               onDisconnectSuccess={() => console.log('disconnect success')}
               onDisconnectError={(err) => console.error('disconnect error:', err)}
-              context={{ key: 'value1' }}
+              // context={{ key: 'value1' }}
             />
           </NovuProvider>
         </section>

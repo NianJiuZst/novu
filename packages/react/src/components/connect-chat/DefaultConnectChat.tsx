@@ -10,8 +10,6 @@ export type DefaultConnectChatProps = Pick<
   | 'subscriberId'
   | 'context'
   | 'scope'
-  | 'endpointType'
-  | 'endpointData'
   | 'onConnectSuccess'
   | 'onConnectError'
   | 'onDisconnectSuccess'
@@ -25,8 +23,6 @@ export const DefaultConnectChat = (props: DefaultConnectChatProps) => {
     subscriberId,
     context,
     scope,
-    endpointType,
-    endpointData,
     onConnectSuccess,
     onConnectError,
     onDisconnectSuccess,
@@ -44,8 +40,6 @@ export const DefaultConnectChat = (props: DefaultConnectChatProps) => {
           subscriberId,
           context,
           scope,
-          endpointType,
-          endpointData,
           onConnectSuccess,
           onConnectError,
           onDisconnectSuccess,
@@ -61,8 +55,6 @@ export const DefaultConnectChat = (props: DefaultConnectChatProps) => {
       subscriberId,
       context,
       scope,
-      endpointType,
-      endpointData,
       onConnectSuccess,
       onConnectError,
       onDisconnectSuccess,

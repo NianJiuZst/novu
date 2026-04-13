@@ -32,22 +32,6 @@ export type GenerateChatOAuthUrlArgs = {
   subscriberId?: string;
   context?: Context;
   scope?: string[];
-  /**
-   * The type of channel endpoint to automatically create after the OAuth connection is established.
-   * When provided together with `endpointData`, eliminates the need for a separate create-endpoint call.
-   */
-  endpointType?: string;
-  /**
-   * The endpoint payload to use when auto-creating the channel endpoint.
-   * Shape depends on `endpointType`:
-   * - `slack_channel` → `{ channelId }`
-   * - `slack_user` → `{ userId }`
-   * - `webhook` → `{ url, channel? }`
-   * - `ms_teams_channel` → `{ teamId, channelId }`
-   * - `ms_teams_user` → `{ userId }`
-   * - `phone` → `{ phoneNumber }`
-   */
-  endpointData?: Record<string, string>;
 };
 
 export type ListChannelConnectionsArgs = {

@@ -30,8 +30,6 @@ export class GenerateChatOauthUrl {
             integration,
             context: command.context,
             scope: command.scope,
-            endpointType: command.endpointType,
-            endpointData: command.endpointData,
           })
         );
 
@@ -44,8 +42,6 @@ export class GenerateChatOauthUrl {
             subscriberId: command.subscriberId,
             integration,
             context: command.context,
-            endpointType: command.endpointType,
-            endpointData: command.endpointData,
           })
         );
 

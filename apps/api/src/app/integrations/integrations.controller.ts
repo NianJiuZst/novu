@@ -432,8 +432,6 @@ export class IntegrationsController {
         connectionIdentifier: body.connectionIdentifier,
         context: body.context,
         scope: body.scope,
-        endpointType: body.endpointType,
-        endpointData: body.endpointData,
       })
     );
 
