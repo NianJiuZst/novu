@@ -10,4 +10,10 @@ jest.mock('newrelic', () => ({
     end: jest.fn(),
   })),
   noticeError: jest.fn(),
+  startSegment: jest.fn((name, record, handler) => {
+    if (typeof handler === 'function') {
+      return handler();
+    }
+  }),
+  recordMetric: jest.fn(),
 }));

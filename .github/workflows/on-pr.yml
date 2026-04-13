@@ -192,6 +192,24 @@ jobs:
           targets: lint,build,test
           projects: ${{join(fromJson(needs.get-affected.outputs.test-libs), ',')}}
 
+  test_unit_application_generic:
+    name: Unit test @novu/application-generic
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    needs: [get-affected]
+    if: ${{ contains(fromJson(needs.get-affected.outputs.test-libs), '@novu/application-generic') }}
+    timeout-minutes: 30
+    steps:
+      - name: Affected libs
+        run: echo '${{ needs.get-affected.outputs.test-libs }}'
+      - uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup-project
+        with:
+          slim: 'true'
+
+      - name: Run unit tests
+        run: cd libs/application-generic && pnpm test
+
   test_unit_services:
     name: Unit test backend services
     runs-on: blacksmith-4vcpu-ubuntu-2404
