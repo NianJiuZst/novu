@@ -15,6 +15,20 @@ export type ContentMenuProps = {
   editor: Editor;
 };
 
+function isValidNodePos(doc: Node, pos: number): boolean {
+  if (pos < 0 || pos >= doc.content.size) {
+    return false;
+  }
+
+  try {
+    const resolved = doc.resolve(pos);
+
+    return resolved.nodeAfter !== null;
+  } catch {
+    return false;
+  }
+}
+
 export function ContentMenu(props: ContentMenuProps) {
   const { editor } = props;
 
@@ -43,6 +57,12 @@ export function ContentMenu(props: ContentMenuProps) {
 
   function duplicateNode() {
     const nodePos = prevNodePosRef.current;
+    if (!isValidNodePos(editor.state.doc, nodePos)) {
+      setMenuOpen(false);
+
+      return;
+    }
+
     editor.commands.setNodeSelection(nodePos);
     const { $anchor } = editor.state.selection;
     const selectedNode = $anchor.node(1) || (editor.state.selection as NodeSelection).node;
@@ -56,6 +76,12 @@ export function ContentMenu(props: ContentMenuProps) {
   }
 
   function deleteCurrentNode() {
+    if (!isValidNodePos(editor.state.doc, currentNodePos)) {
+      setMenuOpen(false);
+
+      return;
+    }
+
     editor.chain().setMeta('hideDragHandle', true).setNodeSelection(currentNodePos).deleteSelection().run();
 
     setMenuOpen(false);
@@ -63,29 +89,34 @@ export function ContentMenu(props: ContentMenuProps) {
 
   function handleAddNewNode() {
     const nodePos = prevNodePosRef.current;
-    if (nodePos !== -1) {
-      const currentNodeSize = currentNode?.nodeSize || 0;
-      const insertPos = nodePos + currentNodeSize;
-      const currentNodeIsEmptyParagraph = currentNode?.type.name === 'paragraph' && currentNode?.content?.size === 0;
-      const focusPos = currentNodeIsEmptyParagraph ? nodePos + 2 : insertPos + 2;
-      editor
-        .chain()
-        .command(({ dispatch, tr, state }: any) => {
-          if (dispatch) {
-            if (currentNodeIsEmptyParagraph) {
-              tr.insertText('/', nodePos, nodePos + 1);
-            } else {
-              tr.insert(insertPos, state.schema.nodes.paragraph.create(null, [state.schema.text('/')]));
-            }
+    if (nodePos === -1 || !isValidNodePos(editor.state.doc, nodePos)) {
+      return;
+    }
 
-            return dispatch(tr);
+    const docSize = editor.state.doc.content.size;
+    const currentNodeSize = currentNode?.nodeSize || 0;
+    const insertPos = nodePos + currentNodeSize;
+    const currentNodeIsEmptyParagraph = currentNode?.type.name === 'paragraph' && currentNode?.content?.size === 0;
+    const focusPos = currentNodeIsEmptyParagraph ? nodePos + 2 : insertPos + 2;
+    editor
+      .chain()
+      .command(({ dispatch, tr, state }: any) => {
+        if (dispatch) {
+          if (currentNodeIsEmptyParagraph && nodePos + 1 <= docSize) {
+            tr.insertText('/', nodePos, nodePos + 1);
+          } else if (insertPos <= docSize) {
+            tr.insert(insertPos, state.schema.nodes.paragraph.create(null, [state.schema.text('/')]));
+          } else {
+            return false;
           }
 
-          return true;
-        })
-        .focus(focusPos)
-        .run();
-    }
+          return dispatch(tr);
+        }
+
+        return true;
+      })
+      .focus(focusPos)
+      .run();
   }
 
   useEffect(() => {
@@ -139,7 +170,9 @@ export function ContentMenu(props: ContentMenuProps) {
                       e.preventDefault();
                       setMenuOpen(true);
                       const nodePos = prevNodePosRef.current;
-                      editor.commands.setNodeSelection(nodePos);
+                      if (isValidNodePos(editor.state.doc, nodePos)) {
+                        editor.commands.setNodeSelection(nodePos);
+                      }
                     }}
                     type="button"
                   >
