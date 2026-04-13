@@ -82,6 +82,8 @@ function mergeTagsMongoFragment<MessageQueryT extends MessageQuery & EnforceEnvI
 
 export class MessageRepository extends BaseRepository<MessageDBModel, MessageEntity, EnforceEnvId> {
   private static readonly BATCH_SIZE = 100;
+  /** Larger chunks for status updates: pairs of updateMany are merged via bulkWrite per chunk. */
+  private static readonly STATUS_UPDATE_CHUNK_SIZE = 1000;
   private feedRepository = new FeedRepository();
   constructor() {
     super(Message, MessageEntity);
@@ -618,8 +620,7 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     // Extract IDs for targeted update
     const documentIds = documentsToUpdate.map((doc) => doc._id);
 
-    // Perform the update using document IDs in batches
-    const chunks = this.chunkArray(documentIds);
+    const chunks = this.chunkArray(documentIds, MessageRepository.STATUS_UPDATE_CHUNK_SIZE);
 
     for (const chunk of chunks) {
       await this.update(
@@ -934,17 +935,28 @@ export class MessageRepository extends BaseRepository<MessageDBModel, MessageEnt
     // Handle firstSeenDate logic separately for operations that mark as seen
     const shouldMarkAsSeen = isUpdatingArchived || isUpdatingRead || (isUpdatingSeen && seen) || isUpdatingSnoozed;
 
-    // Batch the updates
-    const chunks = this.chunkArray(documentIds);
+    const chunks = this.chunkArray(documentIds, MessageRepository.STATUS_UPDATE_CHUNK_SIZE);
 
     for (const chunk of chunks) {
       const chunkQuery = { _id: { $in: chunk }, _environmentId: query._environmentId };
 
       if (shouldMarkAsSeen) {
-        await this.update(chunkQuery, { $set: updatePayload }, { writeConcern: { w: 1 } });
-        await this.update(
-          { ...chunkQuery, firstSeenDate: { $exists: false } },
-          { $set: { firstSeenDate: new Date() } },
+        await this.bulkWrite(
+          [
+            {
+              updateMany: {
+                filter: chunkQuery,
+                update: { $set: updatePayload },
+              },
+            },
+            {
+              updateMany: {
+                filter: { ...chunkQuery, firstSeenDate: { $exists: false } },
+                update: { $set: { firstSeenDate: new Date() } },
+              },
+            },
+          ],
+          true,
           { writeConcern: { w: 1 } }
         );
       } else {

@@ -73,7 +73,7 @@ export class MarkNotificationsAsSeen {
     const updatedMessages: MessageEntity[] = [];
     // If notificationIds are provided, use them; otherwise use filters
     if (notificationIds && notificationIds.length > 0) {
-      const BATCH_SIZE = 50;
+      const BATCH_SIZE = 500;
       const notificationIdChunks = this.chunkArray(notificationIds, BATCH_SIZE);
 
       for (const idChunk of notificationIdChunks) {

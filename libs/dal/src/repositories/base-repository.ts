@@ -452,8 +452,12 @@ export class BaseRepository<T_DBModel, T_MappedEntity, T_Enforcement> {
     });
   }
 
-  async bulkWrite(bulkOperations: any, ordered = false): Promise<any> {
-    return await this.MongooseModel.bulkWrite(bulkOperations, { ordered });
+  async bulkWrite(
+    bulkOperations: any,
+    ordered = false,
+    options?: Pick<mongo.BulkWriteOptions, 'writeConcern' | 'session'>
+  ): Promise<any> {
+    return await this.MongooseModel.bulkWrite(bulkOperations, { ordered, ...options });
   }
 
   protected mapEntity<TData>(data: TData): TData extends null ? null : T_MappedEntity {
