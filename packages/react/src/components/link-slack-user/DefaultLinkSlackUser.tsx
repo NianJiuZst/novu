@@ -7,7 +7,6 @@ export type DefaultLinkSlackUserProps = Pick<
   LinkSlackUserProps,
   | 'integrationIdentifier'
   | 'connectionIdentifier'
-  | 'subscriberId'
   | 'context'
   | 'onLinkSuccess'
   | 'onLinkError'
@@ -21,7 +20,6 @@ export const DefaultLinkSlackUser = (props: DefaultLinkSlackUserProps) => {
   const {
     integrationIdentifier,
     connectionIdentifier,
-    subscriberId,
     context,
     onLinkSuccess,
     onLinkError,
@@ -39,7 +37,6 @@ export const DefaultLinkSlackUser = (props: DefaultLinkSlackUserProps) => {
         props: {
           integrationIdentifier,
           connectionIdentifier,
-          subscriberId,
           context,
           onLinkSuccess,
           onLinkError,
@@ -55,7 +52,6 @@ export const DefaultLinkSlackUser = (props: DefaultLinkSlackUserProps) => {
       novuUI,
       integrationIdentifier,
       connectionIdentifier,
-      subscriberId,
       context,
       onLinkSuccess,
       onLinkError,

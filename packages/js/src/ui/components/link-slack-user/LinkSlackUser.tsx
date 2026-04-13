@@ -9,7 +9,7 @@ import { Button, Motion } from '../primitives';
 export type LinkSlackUserProps = {
   integrationIdentifier: string;
   connectionIdentifier: string;
-  subscriberId: string;
+  subscriberId?: string;
   context?: Context;
   onLinkSuccess?: (endpoint: { identifier: string }) => void;
   onLinkError?: (error: unknown) => void;
@@ -121,7 +121,7 @@ export const LinkSlackUser = (props: LinkSlackUserProps) => {
       const result = await novuAccessor().channelConnections.generateOAuthUrl({
         integrationIdentifier: props.integrationIdentifier,
         connectionIdentifier: props.connectionIdentifier,
-        subscriberId: props.subscriberId,
+        subscriberId: props.subscriberId ?? novuAccessor().subscriberId,
         context: props.context,
         mode: 'link_user',
         userScope: ['identity.basic'],

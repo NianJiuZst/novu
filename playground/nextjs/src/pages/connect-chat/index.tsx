@@ -6,6 +6,7 @@ import { novuConfig } from '@/utils/config';
 const INTEGRATION_IDENTIFIER = process.env.NEXT_PUBLIC_NOVU_SLACK_INTEGRATION_IDENTIFIER ?? 'slack';
 const CONNECTION_IDENTIFIER = 'slack-workspace-connection';
 const SLACK_TEST_WORKFLOW_ID = process.env.NEXT_PUBLIC_NOVU_SLACK_TEST_WORKFLOW_ID ?? '';
+const context = { key: 'value1' };
 
 export default function ConnectChatPage() {
   const [dmStatus, setDmStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -60,6 +61,7 @@ export default function ConnectChatPage() {
           name: triggerWorkflowId.trim(),
           to: { subscriberId: novuConfig.subscriberId },
           payload: { message: 'Test message from connect-chat playground' },
+          context: context,
         }),
       });
 
@@ -97,7 +99,7 @@ export default function ConnectChatPage() {
               onConnectError={(err) => console.error('connect error:', err)}
               onDisconnectSuccess={() => console.log('disconnect success')}
               onDisconnectError={(err) => console.error('disconnect error:', err)}
-              // context={{ key: 'value1' }}
+              context={context}
             />
           </NovuProvider>
         </section>
@@ -113,11 +115,11 @@ export default function ConnectChatPage() {
             <LinkSlackUser
               integrationIdentifier={INTEGRATION_IDENTIFIER}
               connectionIdentifier={CONNECTION_IDENTIFIER}
-              subscriberId={novuConfig.subscriberId}
               onLinkSuccess={(ep) => console.log('link success, endpoint:', ep.identifier)}
               onLinkError={(err) => console.error('link error:', err)}
               onUnlinkSuccess={() => console.log('unlink success')}
               onUnlinkError={(err) => console.error('unlink error:', err)}
+              context={context}
             />
           </NovuProvider>
         </section>
