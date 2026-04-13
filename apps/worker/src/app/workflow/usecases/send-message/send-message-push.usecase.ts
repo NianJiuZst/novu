@@ -90,7 +90,7 @@ export function serializePushProviderError(error: unknown): string {
 
 /** Persists MESSAGE_SENT execution details; provider `result` may include non-JSON values. */
 export function serializePushSendSuccessRaw(params: {
-  providerId: ProvidersIdEnum;
+  providerId: string;
   result: unknown;
   deviceToken: string;
 }): string {
