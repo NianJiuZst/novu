@@ -7,6 +7,7 @@ import { useStyle } from '../../helpers/useStyle';
 import { CheckCircleFill } from '../../icons/CheckCircleFill';
 import { Loader } from '../../icons/Loader';
 import { SlackColored } from '../../icons/SlackColored';
+import type { ChannelConnectButtonAppearanceCallback } from '../../types';
 import { Button, Motion } from '../primitives';
 import { IconRendererWrapper } from '../shared/IconRendererWrapper';
 import { DEFAULT_CONNECTION_IDENTIFIER, DEFAULT_INTEGRATION_IDENTIFIER } from '../slack-constants';
@@ -134,14 +135,20 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
     <Show when={!loading()} fallback={<Loader class="nt-text-foreground-alpha-600 nt-size-4 nt-animate-spin" />}>
       <div
         class={style({
-          key: 'slackConnectButtonContainer',
+          key: 'channelConnectButtonContainer',
           className: 'nt-flex nt-items-center nt-gap-2',
+          context: { connected: isConnected() } satisfies Parameters<
+            ChannelConnectButtonAppearanceCallback['channelConnectButtonContainer']
+          >[0],
         })}
       >
         <Button
           class={style({
-            key: 'slackConnectButton',
+            key: 'channelConnectButton',
             className: 'nt-transition-[width] nt-duration-800 nt-will-change-[width]',
+            context: { connected: isConnected() } satisfies Parameters<
+              ChannelConnectButtonAppearanceCallback['channelConnectButton']
+            >[0],
           })}
           variant="secondary"
           onClick={handleClick}
@@ -149,8 +156,11 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
         >
           <span
             class={style({
-              key: 'slackConnectButtonInner',
+              key: 'channelConnectButtonInner',
               className: 'nt-relative nt-overflow-hidden nt-inline-flex nt-items-center nt-justify-center nt-gap-1',
+              context: { connected: isConnected() } satisfies Parameters<
+                ChannelConnectButtonAppearanceCallback['channelConnectButtonInner']
+              >[0],
             })}
           >
             <Motion.span
@@ -161,20 +171,26 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
             >
               {isConnected() ? (
                 <IconRendererWrapper
-                  iconKey="slackConnected"
+                  iconKey="channelConnected"
                   class={style({
-                    key: 'slackConnectButtonIcon',
+                    key: 'channelConnectButtonIcon',
                     className:
                       'nt-inline-flex nt-items-center nt-justify-center nt-size-4 nt-shrink-0 nt-rounded-full nt-bg-white nt-shadow-[0_1px_2px_0_rgba(10,13,20,0.03)]',
-                    iconKey: 'slackConnected',
+                    iconKey: 'channelConnected',
+                    context: { connected: true } satisfies Parameters<
+                      ChannelConnectButtonAppearanceCallback['channelConnectButtonIcon']
+                    >[0],
                   })}
                   fallback={
                     <span
                       class={style({
-                        key: 'slackConnectButtonIcon',
+                        key: 'channelConnectButtonIcon',
                         className:
                           'nt-inline-flex nt-items-center nt-justify-center nt-size-4 nt-shrink-0 nt-rounded-full nt-bg-white nt-shadow-[0_1px_2px_0_rgba(10,13,20,0.03)]',
-                        iconKey: 'slackConnected',
+                        iconKey: 'channelConnected',
+                        context: { connected: true } satisfies Parameters<
+                          ChannelConnectButtonAppearanceCallback['channelConnectButtonIcon']
+                        >[0],
                       })}
                     >
                       <CheckCircleFill class="nt-size-full" />
@@ -183,18 +199,24 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
                 />
               ) : (
                 <IconRendererWrapper
-                  iconKey="slackConnect"
+                  iconKey="channelConnect"
                   class={style({
-                    key: 'slackConnectButtonIcon',
+                    key: 'channelConnectButtonIcon',
                     className: 'nt-size-4 nt-shrink-0',
-                    iconKey: 'slackConnect',
+                    iconKey: 'channelConnect',
+                    context: { connected: false } satisfies Parameters<
+                      ChannelConnectButtonAppearanceCallback['channelConnectButtonIcon']
+                    >[0],
                   })}
                   fallback={
                     <SlackColored
                       class={style({
-                        key: 'slackConnectButtonIcon',
+                        key: 'channelConnectButtonIcon',
                         className: 'nt-size-4 nt-shrink-0',
-                        iconKey: 'slackConnect',
+                        iconKey: 'channelConnect',
+                        context: { connected: false } satisfies Parameters<
+                          ChannelConnectButtonAppearanceCallback['channelConnectButtonIcon']
+                        >[0],
                       })}
                     />
                   }
@@ -202,8 +224,11 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
               )}
               <span
                 class={style({
-                  key: 'slackConnectButtonLabel',
+                  key: 'channelConnectButtonLabel',
                   className: '[line-height:16px]',
+                  context: { connected: isConnected() } satisfies Parameters<
+                    ChannelConnectButtonAppearanceCallback['channelConnectButtonLabel']
+                  >[0],
                 })}
               >
                 {isConnected() ? (props.connectedLabel ?? 'Connected') : (props.connectLabel ?? 'Connect Slack')}

@@ -199,7 +199,7 @@ export class GenerateSlackOauthUrl {
     }
 
     const baseUrl = process.env.API_ROOT_URL.replace(/\/$/, ''); // Remove trailing slash
-    return `https://b50f-84-110-187-162.ngrok-free.app${CHAT_OAUTH_CALLBACK_PATH}`;
+    return `https://536c-84-110-187-162.ngrok-free.app${CHAT_OAUTH_CALLBACK_PATH}`;
     // return `${baseUrl}${CHAT_OAUTH_CALLBACK_PATH}`;
   }
 

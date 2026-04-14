@@ -97,12 +97,51 @@ export default function ConnectChatPage() {
               integrationIdentifier={INTEGRATION_IDENTIFIER}
               connectLabel="Connect to Slack AAA"
               connectedLabel="Connected to Slack AAA"
+              appearance={{
+                elements: {
+                  // Static: hide the icon in both states
+                  // channelConnectButtonIcon: { display: 'none' },
+                  // Callback: hide only when connected, show when not connected
+                  channelConnectButtonIcon: ({ connected }) => (connected ? 'nt-hidden' : ''),
+                  // channelConnectButtonIcon: ({ connected }) => (connected ? '' : 'nt-hidden'),
+                },
+              }}
               // connectionIdentifier={CONNECTION_IDENTIFIER}
               // connectionStrategy: 'subscriber' | 'shared' DEFAULT 'subscriber'
 
               // in NovuProvider
               // subscriberId: string // redundant
               // ...(context && { context: context }),
+            />
+          </NovuProvider>
+
+          <NovuProvider {...novuConfig}>
+            <SlackConnectButton
+              integrationIdentifier={INTEGRATION_IDENTIFIER}
+              connectLabel="Connect to Slack BBB"
+              connectedLabel="Connected to Slack BBB"
+              appearance={{
+                icons: {
+                  channelConnect: ({ class: cls }) => (
+                    <svg className={cls} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M5 8h6M8 5v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                  ),
+                  channelConnected: ({ class: cls }) => (
+                    <svg className={cls} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
+                      <path
+                        d="M5.5 8l2 2 3-3"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  ),
+                },
+              }}
             />
           </NovuProvider>
         </section>

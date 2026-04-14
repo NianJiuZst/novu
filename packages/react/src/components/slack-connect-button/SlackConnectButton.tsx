@@ -4,18 +4,19 @@ import { NovuUI, NovuUIOptions } from '../NovuUI';
 import { withRenderer } from '../Renderer';
 import { DefaultSlackConnectButton, DefaultSlackConnectButtonProps } from './DefaultSlackConnectButton';
 
-export type SlackConnectButtonProps = DefaultSlackConnectButtonProps & Pick<NovuUIOptions, 'container'>;
+export type SlackConnectButtonProps = DefaultSlackConnectButtonProps & Pick<NovuUIOptions, 'container' | 'appearance'>;
 
 const SlackConnectButtonInternal = withRenderer<SlackConnectButtonProps>((props) => {
-  const { container, ...defaultProps } = props;
+  const { container, appearance, ...defaultProps } = props;
   const novu = useNovu();
 
   const options: NovuUIOptions = useMemo(() => {
     return {
       container,
+      appearance,
       options: novu.options,
     };
-  }, [container, novu.options]);
+  }, [container, appearance, novu.options]);
 
   return (
     <NovuUI options={options} novu={novu}>

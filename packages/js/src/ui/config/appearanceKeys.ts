@@ -344,12 +344,12 @@ export const connectChatAppearanceKeys = [
   'connectChatButtonLabel',
 ] as const;
 
-export const slackConnectButtonAppearanceKeys = [
-  'slackConnectButtonContainer',
-  'slackConnectButton',
-  'slackConnectButtonInner',
-  'slackConnectButtonIcon',
-  'slackConnectButtonLabel',
+export const channelConnectButtonAppearanceKeys = [
+  'channelConnectButtonContainer',
+  'channelConnectButton',
+  'channelConnectButtonInner',
+  'channelConnectButtonIcon',
+  'channelConnectButtonLabel',
 ] as const;
 
 export const linkUserAppearanceKeys = [
@@ -373,5 +373,5 @@ export const appearanceKeys = [
   ...connectChatAppearanceKeys,
   ...linkUserAppearanceKeys,
   ...linkSlackUserAppearanceKeys,
-  ...slackConnectButtonAppearanceKeys,
+  ...channelConnectButtonAppearanceKeys,
 ];

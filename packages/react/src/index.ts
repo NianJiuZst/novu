@@ -4,6 +4,7 @@ export { PreferenceLevel, SeverityLevelEnum, WorkflowCriticalityEnum } from '@no
 export type {
   AllLocalization,
   AllLocalizationKey,
+  ChannelConnectButtonIconKey,
   ElementStyles,
   InboxAppearance,
   InboxAppearanceCallback,
@@ -102,6 +103,7 @@ export type {
   NoRendererProps,
   NotificationRendererProps,
   NotificationsRenderer,
+  ReactAllAppearance,
   ReactInboxAppearance,
   ReactInboxTheme,
   ReactSubscriptionAppearance,
