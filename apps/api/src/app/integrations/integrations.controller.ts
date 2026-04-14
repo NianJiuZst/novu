@@ -434,6 +434,7 @@ export class IntegrationsController {
         scope: body.scope,
         userScope: body.userScope,
         mode: body.mode,
+        connectionMode: body.connectionMode,
       })
     );
 

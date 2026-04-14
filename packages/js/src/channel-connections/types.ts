@@ -28,6 +28,8 @@ export type ChannelEndpointResponse = {
 
 export type OAuthMode = 'connect' | 'link_user';
 
+export type ConnectionMode = 'subscriber' | 'shared';
+
 export type GenerateChatOAuthUrlArgs = {
   integrationIdentifier: string;
   connectionIdentifier?: string;
@@ -36,6 +38,7 @@ export type GenerateChatOAuthUrlArgs = {
   scope?: string[];
   userScope?: string[];
   mode?: OAuthMode;
+  connectionMode?: ConnectionMode;
 };
 
 export type ListChannelConnectionsArgs = {

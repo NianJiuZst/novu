@@ -95,6 +95,8 @@ export default function ConnectChatPage() {
           <NovuProvider {...novuConfig}>
             <SlackConnectButton
               integrationIdentifier={INTEGRATION_IDENTIFIER}
+              connectLabel="Connect to Slack AAA"
+              connectedLabel="Connected to Slack AAA"
               // connectionIdentifier={CONNECTION_IDENTIFIER}
               // connectionStrategy: 'subscriber' | 'shared' DEFAULT 'subscriber'
 

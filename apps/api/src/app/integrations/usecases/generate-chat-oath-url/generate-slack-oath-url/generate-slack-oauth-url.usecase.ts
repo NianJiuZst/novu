@@ -1,11 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { createHash, GetNovuProviderCredentials, GetNovuProviderCredentialsCommand } from '@novu/application-generic';
 import { EnvironmentRepository, ICredentialsEntity, IntegrationEntity, SubscriberRepository } from '@novu/dal';
-import { ChatProviderIdEnum, ContextPayload } from '@novu/shared';
+import { ChatProviderIdEnum, ConnectionMode, ContextPayload } from '@novu/shared';
 import { CHAT_OAUTH_CALLBACK_PATH } from '../chat-oauth.constants';
 import { GenerateSlackOauthUrlCommand } from './generate-slack-oauth-url.command';
 
 export type OAuthMode = 'connect' | 'link_user';
+
+export type { ConnectionMode } from '@novu/shared';
 
 export type StateData = {
   identifier?: string;
@@ -17,6 +19,7 @@ export type StateData = {
   providerId: ChatProviderIdEnum;
   timestamp: number;
   mode?: OAuthMode;
+  connectionMode?: ConnectionMode;
 };
 
 export const SLACK_DEFAULT_OAUTH_SCOPES = [
@@ -50,19 +53,40 @@ export class GenerateSlackOauthUrl {
       command.subscriberId,
       command.context,
       command.connectionIdentifier,
-      command.mode
+      command.mode,
+      command.connectionMode
     );
 
     return this.getOAuthUrl(clientId!, secureState, command.scope, command.userScope, command.mode);
   }
 
   private validateSubscriberIdOrContext(command: GenerateSlackOauthUrlCommand): void {
-    const { subscriberId, context, scope } = command;
+    const { subscriberId, context, scope, connectionMode } = command;
 
     if (scope?.includes('incoming-webhook')) {
       if (!subscriberId) {
         throw new BadRequestException('subscriberId is required for incoming webhook');
       }
+    }
+
+    if (connectionMode === 'shared') {
+      if (!context) {
+        throw new BadRequestException('context is required when connectionMode is "shared"');
+      }
+
+      if (subscriberId) {
+        throw new BadRequestException('subscriberId must not be provided when connectionMode is "shared"');
+      }
+
+      return;
+    }
+
+    if (connectionMode === 'subscriber') {
+      if (!subscriberId) {
+        throw new BadRequestException('subscriberId is required when connectionMode is "subscriber"');
+      }
+
+      return;
     }
 
     if (!subscriberId && !context) {
@@ -116,7 +140,8 @@ export class GenerateSlackOauthUrl {
     subscriberId?: string,
     context?: ContextPayload,
     connectionIdentifier?: string,
-    mode?: OAuthMode
+    mode?: OAuthMode,
+    connectionMode?: ConnectionMode
   ): Promise<string> {
     const { _environmentId, _organizationId, identifier, providerId } = integration;
 
@@ -130,6 +155,7 @@ export class GenerateSlackOauthUrl {
       providerId: providerId as ChatProviderIdEnum,
       timestamp: Date.now(),
       mode,
+      connectionMode,
     };
 
     const payload = JSON.stringify(stateData);

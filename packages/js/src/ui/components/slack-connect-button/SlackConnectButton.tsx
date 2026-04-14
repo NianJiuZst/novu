@@ -1,4 +1,5 @@
 import { createSignal, onCleanup, Show } from 'solid-js';
+import type { ConnectionMode } from '../../../channel-connections/types';
 import type { Context } from '../../../types';
 import { useChannelConnection } from '../../api/hooks/useChannelConnection';
 import { useNovu } from '../../context';
@@ -16,6 +17,7 @@ export type SlackConnectButtonProps = {
   subscriberId?: string;
   context?: Context;
   scope?: string[];
+  connectionMode?: ConnectionMode;
   onConnectSuccess?: (connectionIdentifier: string) => void;
   onConnectError?: (error: unknown) => void;
   onDisconnectSuccess?: () => void;
@@ -89,12 +91,29 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
     } else {
       setActionLoading(true);
 
+      const connectionMode = props.connectionMode ?? 'subscriber';
+      const resolvedContext = props.context;
+      const resolvedSubscriberId =
+        connectionMode === 'subscriber' ? (props.subscriberId ?? novuAccessor().subscriberId) : undefined;
+
+      if (connectionMode === 'shared' && !resolvedContext) {
+        setActionLoading(false);
+        props.onConnectError?.(
+          new Error(
+            'context is required when connectionMode is "shared". Provide it on SlackConnectButton or NovuProvider.'
+          )
+        );
+
+        return;
+      }
+
       const result = await connect({
         integrationIdentifier: integrationIdentifier(),
         connectionIdentifier: connectionIdentifier(),
-        subscriberId: props.subscriberId,
-        context: props.context,
+        subscriberId: resolvedSubscriberId,
+        context: resolvedContext,
         scope: props.scope,
+        connectionMode,
       });
 
       if (result.error) {

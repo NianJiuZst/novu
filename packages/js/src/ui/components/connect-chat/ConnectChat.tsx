@@ -1,5 +1,7 @@
+import type { ConnectionMode } from '../../../channel-connections/types';
 import type { Context } from '../../../types';
 import { useChannelConnection } from '../../api/hooks/useChannelConnection';
+import { useNovu } from '../../context';
 import { useStyle } from '../../helpers/useStyle';
 import { Loader } from '../../icons/Loader';
 import { Button, Motion } from '../primitives';
@@ -10,6 +12,7 @@ export type ConnectChatProps = {
   subscriberId?: string;
   context?: Context;
   scope?: string[];
+  connectionMode?: ConnectionMode;
   onConnectSuccess?: (connectionIdentifier: string) => void;
   onConnectError?: (error: unknown) => void;
   onDisconnectSuccess?: () => void;
@@ -18,6 +21,7 @@ export type ConnectChatProps = {
 
 export const ConnectChat = (props: ConnectChatProps) => {
   const style = useStyle();
+  const novuAccessor = useNovu();
   const { connection, loading, connect, disconnect } = useChannelConnection({
     integrationIdentifier: props.integrationIdentifier,
     connectionIdentifier: props.connectionIdentifier,
@@ -38,12 +42,26 @@ export const ConnectChat = (props: ConnectChatProps) => {
         props.onDisconnectSuccess?.();
       }
     } else {
+      const connectionMode = props.connectionMode ?? 'subscriber';
+      const resolvedContext = props.context;
+      const resolvedSubscriberId =
+        connectionMode === 'subscriber' ? (props.subscriberId ?? novuAccessor().subscriberId) : undefined;
+
+      if (connectionMode === 'shared' && !resolvedContext) {
+        props.onConnectError?.(
+          new Error('context is required when connectionMode is "shared". Provide it on ConnectChat or NovuProvider.')
+        );
+
+        return;
+      }
+
       const result = await connect({
         integrationIdentifier: props.integrationIdentifier,
         connectionIdentifier: props.connectionIdentifier,
-        subscriberId: props.subscriberId,
-        context: props.context,
+        subscriberId: resolvedSubscriberId,
+        context: resolvedContext,
         scope: props.scope,
+        connectionMode,
       });
 
       if (result.error) {

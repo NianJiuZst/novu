@@ -61,14 +61,16 @@ export class SlackOauthCallback {
        */
       await this.createIncomingWebhookEndpoint(stateData, integration, authData);
     } else {
+      const isSharedMode = stateData.connectionMode === 'shared';
       const connection = await this.createChannelConnection.execute(
         CreateChannelConnectionCommand.create({
           identifier: stateData.identifier,
           organizationId: stateData.organizationId,
           environmentId: stateData.environmentId,
           integrationIdentifier: integration.identifier,
-          subscriberId: stateData.subscriberId,
+          subscriberId: isSharedMode ? undefined : stateData.subscriberId,
           context: stateData.context,
+          connectionMode: stateData.connectionMode,
           auth: {
             accessToken: authData.access_token,
           },

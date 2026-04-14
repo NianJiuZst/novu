@@ -1,6 +1,6 @@
 import { IsValidContextPayload } from '@novu/application-generic';
 import { IntegrationEntity } from '@novu/dal';
-import { ContextPayload } from '@novu/shared';
+import { ConnectionMode, ContextPayload } from '@novu/shared';
 import { IsArray, IsIn, IsOptional, IsString } from 'class-validator';
 import { EnvironmentCommand } from '../../../../shared/commands/project.command';
 import { OAuthMode } from './generate-slack-oauth-url.usecase';
@@ -34,4 +34,9 @@ export class GenerateSlackOauthUrlCommand extends EnvironmentCommand {
   @IsString()
   @IsIn(['connect', 'link_user'])
   readonly mode?: OAuthMode;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['subscriber', 'shared'])
+  readonly connectionMode?: ConnectionMode;
 }

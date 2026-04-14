@@ -50,7 +50,27 @@ export class CreateChannelConnection {
   }
 
   private validateResourceOrContext(command: CreateChannelConnectionCommand) {
-    const { subscriberId, context } = command;
+    const { subscriberId, context, connectionMode } = command;
+
+    if (connectionMode === 'shared') {
+      if (!context) {
+        throw new BadRequestException('context is required when connectionMode is "shared"');
+      }
+
+      if (subscriberId) {
+        throw new BadRequestException('subscriberId must not be provided when connectionMode is "shared"');
+      }
+
+      return;
+    }
+
+    if (connectionMode === 'subscriber') {
+      if (!subscriberId) {
+        throw new BadRequestException('subscriberId is required when connectionMode is "subscriber"');
+      }
+
+      return;
+    }
 
     if (!subscriberId && !context) {
       throw new BadRequestException('Either subscriberId or context must be provided');

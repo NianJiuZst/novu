@@ -10,6 +10,7 @@ export type DefaultSlackConnectButtonProps = Pick<
   | 'subscriberId'
   | 'context'
   | 'scope'
+  | 'connectionMode'
   | 'onConnectSuccess'
   | 'onConnectError'
   | 'onDisconnectSuccess'
@@ -25,6 +26,7 @@ export const DefaultSlackConnectButton = (props: DefaultSlackConnectButtonProps)
     subscriberId,
     context,
     scope,
+    connectionMode,
     onConnectSuccess,
     onConnectError,
     onDisconnectSuccess,
@@ -44,6 +46,7 @@ export const DefaultSlackConnectButton = (props: DefaultSlackConnectButtonProps)
           subscriberId,
           context,
           scope,
+          connectionMode,
           onConnectSuccess,
           onConnectError,
           onDisconnectSuccess,
@@ -61,6 +64,7 @@ export const DefaultSlackConnectButton = (props: DefaultSlackConnectButtonProps)
       subscriberId,
       context,
       scope,
+      connectionMode,
       onConnectSuccess,
       onConnectError,
       onDisconnectSuccess,

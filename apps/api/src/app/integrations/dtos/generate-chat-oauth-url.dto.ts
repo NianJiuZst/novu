@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ApiContextPayload, IsValidContextPayload } from '@novu/application-generic';
-import { ContextPayload } from '@novu/shared';
+import { ConnectionMode, ContextPayload } from '@novu/shared';
 import { IsArray, IsDefined, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import {
   OAuthMode,
@@ -97,4 +97,20 @@ export class GenerateChatOauthUrlRequestDto {
   @IsString()
   @IsIn(['connect', 'link_user'])
   mode?: OAuthMode;
+
+  @ApiPropertyOptional({
+    type: String,
+    description:
+      'Connection mode that determines how the channel connection is scoped. ' +
+      'Use "subscriber" (default) to associate the connection with a specific subscriber. ' +
+      'Use "shared" to associate the connection with a context instead of a subscriber — ' +
+      'subscriberId will not be stored on the connection.',
+    enum: ['subscriber', 'shared'],
+    example: 'shared',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['subscriber', 'shared'])
+  connectionMode?: ConnectionMode;
 }

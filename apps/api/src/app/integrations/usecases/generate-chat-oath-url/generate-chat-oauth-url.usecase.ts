@@ -32,6 +32,7 @@ export class GenerateChatOauthUrl {
             scope: command.scope,
             userScope: command.userScope,
             mode: command.mode,
+            connectionMode: command.connectionMode,
           })
         );
 
