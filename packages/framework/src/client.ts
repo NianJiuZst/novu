@@ -414,12 +414,12 @@ export class Client {
   }
 
   public async executeWorkflow(event: Event): Promise<ExecuteOutput> {
-    const actionMessages = {
+    const actionMessages: Record<string, string> = {
       [PostActionEnum.EXECUTE]: 'Executing',
       [PostActionEnum.PREVIEW]: 'Previewing',
-    } as const;
+    };
 
-    const actionMessage = actionMessages[event.action];
+    const actionMessage = actionMessages[event.action] || event.action;
 
     const actionMessageFormatted = `${actionMessage} workflowId:`;
     this.log(`\n${log.bold(log.underline(actionMessageFormatted))} '${event.workflowId}'`);
@@ -507,11 +507,11 @@ export class Client {
     const elapsedTimeInMilliseconds = elapsedSeconds * 1_000 + elapsedNanoseconds / 1_000_000;
 
     const emoji = executionError ? EMOJI.ERROR : EMOJI.SUCCESS;
-    const resultMessages = {
+    const resultMessages: Record<string, string> = {
       [PostActionEnum.EXECUTE]: 'Executed',
       [PostActionEnum.PREVIEW]: 'Previewed',
-    } as const;
-    const resultMessage = resultMessages[event.action];
+    };
+    const resultMessage = resultMessages[event.action] || event.action;
 
     this.log(`${emoji} ${resultMessage} workflowId: \`${event.workflowId}\``);
 
@@ -559,11 +559,11 @@ export class Client {
     if (!this.verbose) return;
 
     const successPrefix = error ? EMOJI.ERROR : EMOJI.SUCCESS;
-    const actionMessages = {
+    const actionMessages: Record<string, string> = {
       [PostActionEnum.EXECUTE]: 'Executed',
       [PostActionEnum.PREVIEW]: 'Previewed',
-    } as const;
-    const actionMessage = actionMessages[event.action];
+    };
+    const actionMessage = actionMessages[event.action] || event.action;
     const message = error ? 'Failed to execute' : actionMessage;
     const executionLog = error ? log.error : log.success;
     const logMessage = `${successPrefix} ${message} workflowId: '${event.workflowId}`;
