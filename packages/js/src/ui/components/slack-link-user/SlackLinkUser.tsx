@@ -6,6 +6,7 @@ import { useStyle } from '../../helpers/useStyle';
 import { CheckCircleFill } from '../../icons/CheckCircleFill';
 import { Loader } from '../../icons/Loader';
 import { SlackColored } from '../../icons/SlackColored';
+import type { SlackLinkUserAppearanceCallback } from '../../types';
 import { Button, Motion } from '../primitives';
 import { IconRendererWrapper } from '../shared/IconRendererWrapper';
 import { DEFAULT_CONNECTION_IDENTIFIER, DEFAULT_INTEGRATION_IDENTIFIER } from '../slack-constants';
@@ -155,12 +156,18 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
       class={style({
         key: 'linkSlackUserContainer',
         className: 'nt-flex nt-items-center nt-gap-2',
+        context: { linked: isLinked() } satisfies Parameters<
+          SlackLinkUserAppearanceCallback['linkSlackUserContainer']
+        >[0],
       })}
     >
       <Button
         class={style({
           key: 'linkSlackUserButton',
           className: 'nt-transition-[width] nt-duration-800 nt-will-change-[width]',
+          context: { linked: isLinked() } satisfies Parameters<
+            SlackLinkUserAppearanceCallback['linkSlackUserButton']
+          >[0],
         })}
         variant="secondary"
         onClick={handleClick}
@@ -170,6 +177,9 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
           class={style({
             key: 'linkSlackUserButtonContainer',
             className: 'nt-relative nt-overflow-hidden nt-inline-flex nt-items-center nt-justify-center nt-gap-1',
+            context: { linked: isLinked() } satisfies Parameters<
+              SlackLinkUserAppearanceCallback['linkSlackUserButtonContainer']
+            >[0],
           })}
         >
           <Motion.span
@@ -187,6 +197,9 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
                     key: 'linkSlackUserButtonIcon',
                     className: 'nt-size-4 nt-shrink-0',
                     iconKey: 'channelConnect',
+                    context: { linked: false } satisfies Parameters<
+                      SlackLinkUserAppearanceCallback['linkSlackUserButtonIcon']
+                    >[0],
                   })}
                   fallback={
                     <SlackColored
@@ -194,6 +207,9 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
                         key: 'linkSlackUserButtonIcon',
                         className: 'nt-size-4 nt-shrink-0',
                         iconKey: 'channelConnect',
+                        context: { linked: false } satisfies Parameters<
+                          SlackLinkUserAppearanceCallback['linkSlackUserButtonIcon']
+                        >[0],
                       })}
                     />
                   }
@@ -207,6 +223,9 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
                   className:
                     'nt-inline-flex nt-items-center nt-justify-center nt-size-4 nt-shrink-0 nt-rounded-full nt-bg-white nt-shadow-[0_1px_2px_0_rgba(10,13,20,0.03)]',
                   iconKey: 'channelConnected',
+                  context: { linked: true } satisfies Parameters<
+                    SlackLinkUserAppearanceCallback['linkSlackUserButtonIcon']
+                  >[0],
                 })}
                 fallback={
                   <span
@@ -215,6 +234,9 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
                       className:
                         'nt-inline-flex nt-items-center nt-justify-center nt-size-4 nt-shrink-0 nt-rounded-full nt-bg-white nt-shadow-[0_1px_2px_0_rgba(10,13,20,0.03)]',
                       iconKey: 'channelConnected',
+                      context: { linked: true } satisfies Parameters<
+                        SlackLinkUserAppearanceCallback['linkSlackUserButtonIcon']
+                      >[0],
                     })}
                   >
                     <CheckCircleFill class="nt-size-full" />
@@ -226,6 +248,9 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
               class={style({
                 key: 'linkSlackUserButtonLabel',
                 className: '[line-height:16px]',
+                context: { linked: isLinked() } satisfies Parameters<
+                  SlackLinkUserAppearanceCallback['linkSlackUserButtonLabel']
+                >[0],
               })}
             >
               {isLinked() ? (props.unlinkLabel ?? 'Unlink') : (props.linkLabel ?? 'Link User')}

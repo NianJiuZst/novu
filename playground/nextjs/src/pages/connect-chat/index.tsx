@@ -156,7 +156,40 @@ export default function ConnectChatPage() {
           <NovuProvider {...novuConfig}>
             <SlackLinkUser
               integrationIdentifier={INTEGRATION_IDENTIFIER}
+              appearance={{
+                elements: {
+                  linkSlackUserButtonIcon: ({ linked }) => (linked ? '' : 'nt-hidden'),
+                },
+              }}
               // connectionIdentifier={CONNECTION_IDENTIFIER}
+            />
+          </NovuProvider>
+
+          <NovuProvider {...novuConfig}>
+            <SlackLinkUser
+              integrationIdentifier={INTEGRATION_IDENTIFIER}
+              appearance={{
+                icons: {
+                  channelConnect: ({ class: cls }) => (
+                    <svg className={cls} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M5 8h6M8 5v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                  ),
+                  channelConnected: ({ class: cls }) => (
+                    <svg className={cls} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
+                      <path
+                        d="M5.5 8l2 2 3-3"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  ),
+                },
+              }}
             />
           </NovuProvider>
         </section>

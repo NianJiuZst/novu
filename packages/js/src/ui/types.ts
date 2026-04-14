@@ -329,6 +329,18 @@ export type LinkUserAppearanceKey = (typeof linkUserAppearanceKeys)[number];
 export type SlackLinkUserAppearanceKey = (typeof linkSlackUserAppearanceKeys)[number];
 export type ChannelConnectButtonAppearanceKey = (typeof channelConnectButtonAppearanceKeys)[number];
 
+// SLACK LINK USER APPEARANCE
+export type SlackLinkUserAppearanceCallback = {
+  linkSlackUserContainer: (context: { linked: boolean }) => string;
+  linkSlackUserButton: (context: { linked: boolean }) => string;
+  linkSlackUserButtonContainer: (context: { linked: boolean }) => string;
+  linkSlackUserButtonIcon: (context: { linked: boolean }) => string;
+  linkSlackUserButtonLabel: (context: { linked: boolean }) => string;
+};
+export type SlackLinkUserAppearanceCallbackKeys = keyof SlackLinkUserAppearanceCallback;
+export type SlackLinkUserAppearanceCallbackFunction<K extends SlackLinkUserAppearanceCallbackKeys> =
+  SlackLinkUserAppearanceCallback[K];
+
 // CHANNEL CONNECT BUTTON APPEARANCE
 export type ChannelConnectButtonAppearanceCallback = {
   channelConnectButtonContainer: (context: { connected: boolean }) => string;
@@ -365,14 +377,17 @@ export type SubscriptionAppearance = SubscriptionTheme & { baseTheme?: Subscript
 export type AllAppearanceCallbackKeys =
   | InboxAppearanceCallbackKeys
   | SubscriptionAppearanceCallbackKeys
+  | SlackLinkUserAppearanceCallbackKeys
   | ChannelConnectButtonAppearanceCallbackKeys;
 export type AllAppearanceCallbackFunction<K extends AllAppearanceCallbackKeys> = K extends InboxAppearanceCallbackKeys
   ? InboxAppearanceCallbackFunction<K>
   : K extends SubscriptionAppearanceCallbackKeys
     ? SubscriptionAppearanceCallbackFunction<K>
-    : K extends ChannelConnectButtonAppearanceCallbackKeys
-      ? ChannelConnectButtonAppearanceCallbackFunction<K>
-      : never;
+    : K extends SlackLinkUserAppearanceCallbackKeys
+      ? SlackLinkUserAppearanceCallbackFunction<K>
+      : K extends ChannelConnectButtonAppearanceCallbackKeys
+        ? ChannelConnectButtonAppearanceCallbackFunction<K>
+        : never;
 export type AllAppearanceKey =
   | CommonAppearanceKey
   | InboxAppearanceKey
