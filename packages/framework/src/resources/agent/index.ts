@@ -1,6 +1,8 @@
+export { AgentContextImpl } from './agent.context';
 export { agent } from './agent.resource';
 export type {
   Agent,
+  AgentBridgeRequest,
   AgentContext,
   AgentConversation,
   AgentHandlers,
@@ -8,5 +10,6 @@ export type {
   AgentMessage,
   AgentMessageAuthor,
   AgentPlatformContext,
+  AgentReplyPayload,
   AgentSubscriber,
 } from './agent.types';

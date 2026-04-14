@@ -18,6 +18,7 @@ import {
   StepNotFoundError,
   WorkflowNotFoundError,
 } from './errors';
+import type { Agent } from './resources/agent';
 import { mockSchema } from './jsonSchemaFaker';
 import { prettyPrintDiscovery } from './resources/workflow/pretty-print-discovery';
 import type {
@@ -52,6 +53,7 @@ function isRuntimeInDevelopment() {
 export class Client {
   private discoveredWorkflows = new Map<string, DiscoverWorkflowOutput>();
   private discoverWorkflowPromises = new Map<string, Promise<void>>();
+  private registeredAgents = new Map<string, Agent>();
 
   private templateEngine: Liquid;
 
@@ -126,6 +128,16 @@ export class Client {
 
       await workflowPromise;
     }
+  }
+
+  public addAgents(agents: Array<Agent>): void {
+    for (const a of agents) {
+      this.registeredAgents.set(a.id, a);
+    }
+  }
+
+  public getAgent(agentId: string): Agent | undefined {
+    return this.registeredAgents.get(agentId);
   }
 
   private async addWorkflow(workflow: Workflow): Promise<void> {

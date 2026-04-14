@@ -21,18 +21,21 @@ import {
   SigningKeyNotFoundError,
 } from './errors';
 import { isPlatformError } from './errors/guard.errors';
+import type { Agent } from './resources/agent';
 import type { Awaitable, EventTriggerParams, Workflow } from './types';
 import { createHmacSubtle, initApiClient } from './utils';
 
 export type ServeHandlerOptions = {
   client?: Client;
-  workflows: Array<Workflow>;
+  workflows?: Array<Workflow>;
+  agents?: Array<Agent>;
 };
 
 export type INovuRequestHandlerOptions<Input extends any[] = any[], Output = any> = ServeHandlerOptions & {
   frameworkName: string;
   client?: Client;
-  workflows: Array<Workflow>;
+  workflows?: Array<Workflow>;
+  agents?: Array<Agent>;
   handler: Handler<Input, Output>;
 };
 
@@ -62,14 +65,17 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
   private readonly hmacEnabled: boolean;
   private readonly http;
   private readonly workflows: Array<Workflow>;
+  private readonly agents: Array<Agent>;
 
   constructor(options: INovuRequestHandlerOptions<Input, Output>) {
     this.handler = options.handler;
     this.client = options.client ? options.client : new Client();
-    this.workflows = options.workflows;
+    this.workflows = options.workflows || [];
+    this.agents = options.agents || [];
     this.http = initApiClient(this.client.secretKey, this.client.apiUrl);
     this.frameworkName = options.frameworkName;
     this.hmacEnabled = this.client.strictAuthentication;
+    this.client.addAgents(this.agents);
   }
 
   public createHandler(): (...args: Input) => Promise<Output> {
