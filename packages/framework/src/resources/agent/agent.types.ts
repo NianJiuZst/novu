@@ -1,3 +1,8 @@
+export enum AgentEventEnum {
+  ON_MESSAGE = 'onMessage',
+  ON_RESOLVE = 'onResolve',
+}
+
 // ---------------------------------------------------------------------------
 // User-facing types (visible on ctx properties)
 // ---------------------------------------------------------------------------

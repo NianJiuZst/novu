@@ -13,3 +13,4 @@ export type {
   AgentReplyPayload,
   AgentSubscriber,
 } from './agent.types';
+export { AgentEventEnum } from './agent.types';
