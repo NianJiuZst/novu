@@ -1,4 +1,4 @@
-import { FeatureFlagsKeysEnum, ResourceOriginEnum, StepTypeEnum } from '@novu/shared';
+import { EnvironmentTypeEnum, FeatureFlagsKeysEnum, ResourceOriginEnum, StepTypeEnum } from '@novu/shared';
 import { useCallback, useMemo } from 'react';
 import { ChatEditor } from '@/components/workflow-editor/steps/chat/chat-editor';
 import { useStepEditor } from '@/components/workflow-editor/steps/context/step-editor-context';
@@ -12,16 +12,43 @@ import { StepResolverNotPublished } from '@/components/workflow-editor/steps/sha
 import { SmsEditor } from '@/components/workflow-editor/steps/sms/sms-editor';
 import { ThrottleEditor } from '@/components/workflow-editor/steps/throttle/throttle-editor';
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
+import { useEnvironment } from '@/context/environment/hooks';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { useStepResolverPolling } from '@/hooks/use-step-resolver-polling';
-import { INLINE_CONFIGURABLE_STEP_TYPES, STEP_RESOLVER_SUPPORTED_STEP_TYPES, STEP_TYPE_LABELS } from '@/utils/constants';
+import {
+  INLINE_CONFIGURABLE_STEP_TYPES,
+  STEP_RESOLVER_SUPPORTED_STEP_TYPES,
+  STEP_TYPE_LABELS,
+} from '@/utils/constants';
+
+const PREVIEW_SUPPORTED_STEP_TYPES = new Set<StepTypeEnum>([
+  StepTypeEnum.EMAIL,
+  StepTypeEnum.IN_APP,
+  StepTypeEnum.SMS,
+  StepTypeEnum.PUSH,
+  StepTypeEnum.CHAT,
+  StepTypeEnum.HTTP_REQUEST,
+]);
 
 function NoEditorAvailable({ message }: { message: string }) {
   return <div className="flex h-full items-center justify-center text-sm text-neutral-500">{message}</div>;
 }
 
+function ReadOnlyStepContentPlaceholder() {
+  return (
+    <div className="text-text-sub flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
+      <p className="text-label-sm text-text-strong">Content is read-only in this environment</p>
+      <p className="text-paragraph-xs max-w-sm">
+        Step content cannot be edited outside of development. Use the preview on the right to see how this step will
+        look when sent.
+      </p>
+    </div>
+  );
+}
+
 export function StepEditorFactory() {
   const { workflow, step, isStepEditable, isPendingResolverActivation } = useStepEditor();
+  const { currentEnvironment } = useEnvironment();
   const { refetch } = useWorkflow();
   const isStepResolverEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_STEP_RESOLVER_ENABLED);
   const isActionStepResolverEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_ACTION_STEP_RESOLVER_ENABLED);
@@ -46,6 +73,16 @@ export function StepEditorFactory() {
 
   if (isPendingResolverActivation) {
     return <StepResolverNotPublished workflowId={step.workflowId} stepId={step.stepId} />;
+  }
+
+  const isNonDevEnvironment = currentEnvironment?.type !== EnvironmentTypeEnum.DEV;
+  const canShowPreviewWithoutNativeEditor =
+    isNonDevEnvironment &&
+    PREVIEW_SUPPORTED_STEP_TYPES.has(step.type) &&
+    workflow.origin !== ResourceOriginEnum.EXTERNAL;
+
+  if (!isStepEditable && canShowPreviewWithoutNativeEditor) {
+    return <ReadOnlyStepContentPlaceholder />;
   }
 
   if (!isStepEditable) {
