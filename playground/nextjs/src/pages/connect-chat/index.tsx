@@ -1,4 +1,4 @@
-import { LinkSlackUser, NovuProvider, SlackConnectButton } from '@novu/nextjs';
+import { NovuProvider, SlackConnectButton, SlackLinkUser } from '@novu/nextjs';
 import { useState } from 'react';
 import Title from '@/components/Title';
 import { novuConfig } from '@/utils/config';
@@ -94,32 +94,27 @@ export default function ConnectChatPage() {
           <NovuProvider {...novuConfig}>
             <SlackConnectButton
               integrationIdentifier={INTEGRATION_IDENTIFIER}
-              connectionIdentifier={CONNECTION_IDENTIFIER}
-              onConnectSuccess={(id) => console.log('connect success, identifier:', id)}
-              onConnectError={(err) => console.error('connect error:', err)}
-              onDisconnectSuccess={() => console.log('disconnect success')}
-              onDisconnectError={(err) => console.error('disconnect error:', err)}
-              context={context}
+              // connectionIdentifier={CONNECTION_IDENTIFIER}
+              // connectionStrategy: 'subscriber' | 'shared' DEFAULT 'subscriber'
+
+              // in NovuProvider
+              // subscriberId: string // redundant
+              // context: Context
             />
           </NovuProvider>
         </section>
 
         <section className="flex flex-col gap-3">
-          <h4 className="text-sm font-semibold">Step 2 — LinkSlackUser: Link subscriber via Slack OAuth</h4>
+          <h4 className="text-sm font-semibold">Step 2 — SlackLinkUser: Link subscriber via Slack OAuth</h4>
           <p className="text-xs text-muted-foreground">
             Starts a Slack OAuth flow (<code>user_scope=identity.basic</code>) to automatically resolve the
             subscriber&apos;s Slack user ID and create a <code>ChannelEndpoint</code> of type <code>slack_user</code>.
             Requires an active workspace connection from Step 1.
           </p>
           <NovuProvider {...novuConfig}>
-            <LinkSlackUser
+            <SlackLinkUser
               integrationIdentifier={INTEGRATION_IDENTIFIER}
               connectionIdentifier={CONNECTION_IDENTIFIER}
-              onLinkSuccess={(ep) => console.log('link success, endpoint:', ep.identifier)}
-              onLinkError={(err) => console.error('link error:', err)}
-              onUnlinkSuccess={() => console.log('unlink success')}
-              onUnlinkError={(err) => console.error('unlink error:', err)}
-              context={context}
             />
           </NovuProvider>
         </section>

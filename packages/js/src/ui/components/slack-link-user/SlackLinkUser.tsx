@@ -6,7 +6,7 @@ import { useStyle } from '../../helpers/useStyle';
 import { Loader } from '../../icons/Loader';
 import { Button, Motion } from '../primitives';
 
-export type LinkSlackUserProps = {
+export type SlackLinkUserProps = {
   integrationIdentifier: string;
   connectionIdentifier: string;
   subscriberId?: string;
@@ -22,7 +22,7 @@ export type LinkSlackUserProps = {
 const POLL_INTERVAL_MS = 2500;
 const POLL_TIMEOUT_MS = 120_000;
 
-export const LinkSlackUser = (props: LinkSlackUserProps) => {
+export const SlackLinkUser = (props: SlackLinkUserProps) => {
   const style = useStyle();
   const novuAccessor = useNovu();
 

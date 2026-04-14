@@ -1,10 +1,10 @@
-import { LinkSlackUserProps } from '@novu/js/ui';
+import { SlackLinkUserProps } from '@novu/js/ui';
 import { useCallback } from 'react';
 import { useNovuUI } from '../../context/NovuUIContext';
 import { Mounter } from '../Mounter';
 
-export type DefaultLinkSlackUserProps = Pick<
-  LinkSlackUserProps,
+export type DefaultSlackLinkUserProps = Pick<
+  SlackLinkUserProps,
   | 'integrationIdentifier'
   | 'connectionIdentifier'
   | 'context'
@@ -16,7 +16,7 @@ export type DefaultLinkSlackUserProps = Pick<
   | 'unlinkLabel'
 >;
 
-export const DefaultLinkSlackUser = (props: DefaultLinkSlackUserProps) => {
+export const DefaultSlackLinkUser = (props: DefaultSlackLinkUserProps) => {
   const {
     integrationIdentifier,
     connectionIdentifier,
@@ -33,7 +33,7 @@ export const DefaultLinkSlackUser = (props: DefaultLinkSlackUserProps) => {
   const mount = useCallback(
     (element: HTMLElement) => {
       return novuUI.mountComponent({
-        name: 'LinkSlackUser',
+        name: 'SlackLinkUser',
         props: {
           integrationIdentifier,
           connectionIdentifier,

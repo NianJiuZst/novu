@@ -326,7 +326,7 @@ export type SubscriptionAppearanceCallbackFunction<K extends SubscriptionAppeara
 export type SubscriptionAppearanceKey = (typeof subscriptionAppearanceKeys)[number];
 export type ConnectChatAppearanceKey = (typeof connectChatAppearanceKeys)[number];
 export type LinkUserAppearanceKey = (typeof linkUserAppearanceKeys)[number];
-export type LinkSlackUserAppearanceKey = (typeof linkSlackUserAppearanceKeys)[number];
+export type SlackLinkUserAppearanceKey = (typeof linkSlackUserAppearanceKeys)[number];
 export type SlackConnectButtonAppearanceKey = (typeof slackConnectButtonAppearanceKeys)[number];
 export type SubscriptionElements = Partial<
   { [K in CommonAppearanceKey]: ElementStyles } & {
@@ -362,7 +362,7 @@ export type AllAppearanceKey =
   | SubscriptionAppearanceKey
   | ConnectChatAppearanceKey
   | LinkUserAppearanceKey
-  | LinkSlackUserAppearanceKey
+  | SlackLinkUserAppearanceKey
   | SlackConnectButtonAppearanceKey;
 export type AllElements = Partial<
   {
