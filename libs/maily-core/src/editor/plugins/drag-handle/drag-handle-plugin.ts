@@ -458,8 +458,9 @@ export function DragHandlePlugin(options: DragHandlePluginOptions): Plugin<{ loc
             let o = e.nodeDOM(lastNodePos) as HTMLElement;
             if (((o = getOuterNodePos(e, o)), o === e.dom)) return;
             if (1 !== (null == o ? undefined : o.nodeType)) return;
-            const r = e.posAtDOM(o, 0),
-              s = getAncestorNodeAtDepth(editor.state.doc, r);
+            const r = e.posAtDOM(o, 0);
+            if (r < 0 || r > editor.state.doc.content.size) return;
+            const s = getAncestorNodeAtDepth(editor.state.doc, r);
             if (s !== currentNode) {
               const t = getPreviousNodeStartPosition(editor.state.doc, r);
               (currentNode = s),
@@ -497,8 +498,9 @@ export function DragHandlePlugin(options: DragHandlePluginOptions): Plugin<{ loc
           let o = n.resultElement;
           if (((o = getOuterNodePos(e, o)), o === e.dom)) return false;
           if (1 !== (null == o ? undefined : o.nodeType)) return false;
-          const r = e.posAtDOM(o, 0),
-            s = getAncestorNodeAtDepth(editor.state.doc, r);
+          const r = e.posAtDOM(o, 0);
+          if (r < 0 || r > editor.state.doc.content.size) return false;
+          const s = getAncestorNodeAtDepth(editor.state.doc, r);
           if (s !== currentNode) {
             const t = getPreviousNodeStartPosition(editor.state.doc, r);
             (currentNode = s),
