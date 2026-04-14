@@ -49,6 +49,7 @@ type HandlerResponse<Output = any> = {
   queryString?: (key: string, url: URL) => Awaitable<string | null | undefined>;
   url: () => Awaitable<URL>;
   transformResponse: (res: IActionResponse<string>) => Output;
+  waitUntil?: (promise: Promise<unknown>) => void;
 };
 
 export type IActionResponse<TBody extends string = string> = {
@@ -154,7 +155,7 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
         await this.validateHmac(body, signatureHeader);
       }
 
-      const postActionMap = this.getPostActionMap(body, workflowId, stepId, action, agentId, agentEvent);
+      const postActionMap = this.getPostActionMap(body, workflowId, stepId, action, agentId, agentEvent, actions.waitUntil);
       const getActionMap = this.getGetActionMap(workflowId, stepId);
 
       if (method === HttpMethodEnum.POST) {
@@ -182,7 +183,8 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
     stepId: string,
     action: string,
     agentId: string,
-    agentEvent: string
+    agentEvent: string,
+    waitUntil?: (promise: Promise<unknown>) => void
   ): Record<PostActionEnum, () => Promise<IActionResponse>> {
     return {
       [PostActionEnum.TRIGGER]: this.triggerAction({ workflowId, ...body }),
@@ -215,9 +217,13 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
 
         const ctx = new AgentContextImpl(body as AgentBridgeRequest, this.client.secretKey);
 
-        this.runAgentHandler(registeredAgent, agentEvent, ctx).catch((err) => {
+        const handlerPromise = this.runAgentHandler(registeredAgent, agentEvent, ctx).catch((err) => {
           console.error(`[agent:${agentId}] Handler error:`, err);
         });
+
+        if (waitUntil) {
+          waitUntil(handlerPromise);
+        }
 
         return this.createResponse(HttpStatusEnum.OK, { status: 'ack' });
       },
