@@ -72,6 +72,5 @@ app.use(
 
 app.listen(PORT, () => {
   console.log(`\nAgent Handler (using @novu/framework) running on http://localhost:${PORT}/api/novu`);
-  console.log(`Secret Key: ${NOVU_SECRET_KEY.slice(0, 10)}...`);
   console.log('\nWaiting for bridge calls...\n');
 });

@@ -66,7 +66,7 @@ describe('agent dispatch via NovuRequestHandler', () => {
   beforeEach(() => {
     client = new Client({ secretKey: 'test-secret-key', strictAuthentication: false });
     fetchMock = vi.fn().mockResolvedValue({ ok: true, text: () => Promise.resolve('{}') });
-    global.fetch = fetchMock;
+    global.fetch = fetchMock as typeof fetch;
   });
 
   it('should ACK immediately and run onMessage handler in background', async () => {

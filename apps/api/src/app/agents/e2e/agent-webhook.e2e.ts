@@ -67,7 +67,7 @@ describe('Agent Webhook - inbound flow #novu-v2', () => {
     });
   });
 
-  async function invokeInbound(threadId: string, message: ReturnType<typeof mockMessage>, event = AgentEventEnum.ON_START) {
+  async function invokeInbound(threadId: string, message: ReturnType<typeof mockMessage>, event = AgentEventEnum.ON_MESSAGE) {
     const config = await credentialService.resolve(ctx.agentId, ctx.integrationIdentifier);
     const thread = mockThread(threadId);
     await inboundHandler.handle(ctx.agentId, config, thread as any, message as any, event);
