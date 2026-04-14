@@ -1,4 +1,4 @@
-import { createResource, createSignal, onMount } from 'solid-js';
+import { createResource, createSignal, onCleanup, onMount } from 'solid-js';
 import type { ChannelEndpointResponse } from '../../../channel-connections/types';
 import type { Context } from '../../../types';
 import { useNovu } from '../../context';
@@ -93,10 +93,10 @@ export const LinkUser = (props: LinkUserProps) => {
       }
     });
 
-    return () => {
+    onCleanup(() => {
       cleanupCreateResolved();
       cleanupDeleteResolved();
-    };
+    });
   });
 
   const handleClick = async () => {

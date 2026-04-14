@@ -72,9 +72,9 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
       }
     });
 
-    return () => {
+    onCleanup(() => {
       cleanupDelete();
-    };
+    });
   });
 
   const startPolling = () => {
