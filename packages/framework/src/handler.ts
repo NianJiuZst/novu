@@ -295,8 +295,10 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
       if (registeredAgent.handlers.onResolve) {
         await registeredAgent.handlers.onResolve(ctx);
       }
-    } else {
+    } else if (event === AgentEventEnum.ON_MESSAGE) {
       await registeredAgent.handlers.onMessage(ctx);
+    } else {
+      throw new InvalidActionError(event, AgentEventEnum);
     }
 
     await ctx.flush();
