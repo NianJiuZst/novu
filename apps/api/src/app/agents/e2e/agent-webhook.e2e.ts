@@ -220,7 +220,7 @@ describe('Agent Webhook - inbound flow #novu-v2', () => {
       expect(bridgeCalls.length).to.equal(1);
       const call = bridgeCalls[0];
 
-      expect(call.event).to.equal(AgentEventEnum.ON_START);
+      expect(call.event).to.equal(AgentEventEnum.ON_MESSAGE);
       expect(call.config.agentIdentifier).to.equal(ctx.agentIdentifier);
       expect(call.config.integrationIdentifier).to.equal(ctx.integrationIdentifier);
       expect(call.config.platform).to.equal('slack');
