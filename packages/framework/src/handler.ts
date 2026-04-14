@@ -26,11 +26,11 @@ import type { Agent, AgentBridgeRequest } from './resources/agent';
 import type { Awaitable, EventTriggerParams, Workflow } from './types';
 import { createHmacSubtle, initApiClient } from './utils';
 
-export type ServeHandlerOptions = {
+export interface ServeHandlerOptions {
   client?: Client;
   workflows?: Array<Workflow>;
   agents?: Array<Agent>;
-};
+}
 
 export type INovuRequestHandlerOptions<Input extends any[] = any[], Output = any> = ServeHandlerOptions & {
   frameworkName: string;

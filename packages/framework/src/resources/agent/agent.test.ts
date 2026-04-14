@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Client } from '../../client';
 import { PostActionEnum } from '../../constants';
@@ -62,11 +62,16 @@ describe('agent()', () => {
 describe('agent dispatch via NovuRequestHandler', () => {
   let client: Client;
   let fetchMock: ReturnType<typeof vi.fn>;
+  const originalFetch = global.fetch;
 
   beforeEach(() => {
     client = new Client({ secretKey: 'test-secret-key', strictAuthentication: false });
-    fetchMock = vi.fn().mockResolvedValue({ ok: true, text: () => Promise.resolve('{}') });
+    fetchMock = vi.fn().mockResolvedValue({ ok: true, text: () => Promise.resolve('{}'), json: () => Promise.resolve({ status: 'ok' }) });
     global.fetch = fetchMock as typeof fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
   });
 
   it('should ACK immediately and run onMessage handler in background', async () => {
@@ -217,11 +222,15 @@ describe('agent dispatch via NovuRequestHandler', () => {
       (call: any[]) => call[0] === 'https://api.novu.co/v1/agents/test-bot/reply'
     );
 
-    const updateBody = JSON.parse(replyCalls[0][1].body);
+    const parsedBodies = replyCalls.map(([, init]: any[]) => JSON.parse(init.body));
+    const updateBody = parsedBodies.find((body: any) => body.update);
+    const replyBody = parsedBodies.find((body: any) => body.reply);
+
+    expect(updateBody).toBeDefined();
     expect(updateBody.update.text).toBe('Thinking...');
     expect(updateBody.signals).toBeUndefined();
 
-    const replyBody = JSON.parse(replyCalls[1][1].body);
+    expect(replyBody).toBeDefined();
     expect(replyBody.reply.text).toBe('Done thinking');
     expect(replyBody.signals).toHaveLength(1);
   });
