@@ -5,10 +5,11 @@ import { useNovu } from '../../context';
 import { useStyle } from '../../helpers/useStyle';
 import { Loader } from '../../icons/Loader';
 import { Button, Motion } from '../primitives';
+import { DEFAULT_CONNECTION_IDENTIFIER, DEFAULT_INTEGRATION_IDENTIFIER } from '../slack-constants';
 
 export type SlackLinkUserProps = {
-  integrationIdentifier: string;
-  connectionIdentifier: string;
+  integrationIdentifier?: string;
+  connectionIdentifier?: string;
   subscriberId?: string;
   context?: Context;
   onLinkSuccess?: (endpoint: { identifier: string }) => void;
@@ -25,6 +26,8 @@ const POLL_TIMEOUT_MS = 120_000;
 export const SlackLinkUser = (props: SlackLinkUserProps) => {
   const style = useStyle();
   const novuAccessor = useNovu();
+  const integrationIdentifier = () => props.integrationIdentifier ?? DEFAULT_INTEGRATION_IDENTIFIER;
+  const connectionIdentifier = () => props.connectionIdentifier ?? DEFAULT_CONNECTION_IDENTIFIER;
 
   const [endpoint, setEndpoint] = createSignal<ChannelEndpointResponse | null>(null);
   const [loading, setLoading] = createSignal(true);
@@ -35,14 +38,17 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
 
   createResource(
     () => ({
-      integrationIdentifier: props.integrationIdentifier,
-      connectionIdentifier: props.connectionIdentifier,
+      integrationIdentifier: integrationIdentifier(),
+      connectionIdentifier: connectionIdentifier(),
     }),
-    async ({ integrationIdentifier, connectionIdentifier }) => {
+    async ({ integrationIdentifier: intId, connectionIdentifier: connId }) => {
       setLoading(true);
 
       try {
-        const response = await novuAccessor().channelEndpoints.list({ integrationIdentifier, connectionIdentifier });
+        const response = await novuAccessor().channelEndpoints.list({
+          integrationIdentifier: intId,
+          connectionIdentifier: connId,
+        });
         const existing = response.data?.find((ep) => ep.type === 'slack_user') ?? null;
         setEndpoint(existing);
       } catch {
@@ -73,8 +79,8 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
     const intervalId = setInterval(async () => {
       try {
         const response = await novuAccessor().channelEndpoints.list({
-          integrationIdentifier: props.integrationIdentifier,
-          connectionIdentifier: props.connectionIdentifier,
+          integrationIdentifier: integrationIdentifier(),
+          connectionIdentifier: connectionIdentifier(),
         });
         const found = response.data?.find((ep) => ep.type === 'slack_user') ?? null;
 
@@ -119,8 +125,8 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
       setActionLoading(true);
 
       const result = await novuAccessor().channelConnections.generateOAuthUrl({
-        integrationIdentifier: props.integrationIdentifier,
-        connectionIdentifier: props.connectionIdentifier,
+        integrationIdentifier: integrationIdentifier(),
+        connectionIdentifier: connectionIdentifier(),
         subscriberId: props.subscriberId ?? novuAccessor().subscriberId,
         context: props.context,
         mode: 'link_user',

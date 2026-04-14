@@ -8,6 +8,7 @@ import { Loader } from '../../icons/Loader';
 import { SlackColored } from '../../icons/SlackColored';
 import { Button, Motion } from '../primitives';
 import { IconRendererWrapper } from '../shared/IconRendererWrapper';
+import { DEFAULT_CONNECTION_IDENTIFIER, DEFAULT_INTEGRATION_IDENTIFIER } from '../slack-constants';
 
 export type SlackConnectButtonProps = {
   integrationIdentifier?: string;
@@ -23,7 +24,6 @@ export type SlackConnectButtonProps = {
   connectedLabel?: string;
 };
 
-const DEFAULT_INTEGRATION_IDENTIFIER = 'slack';
 const POLL_INTERVAL_MS = 2500;
 const POLL_TIMEOUT_MS = 120_000;
 
@@ -31,10 +31,11 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
   const style = useStyle();
   const novuAccessor = useNovu();
   const integrationIdentifier = () => props.integrationIdentifier ?? DEFAULT_INTEGRATION_IDENTIFIER;
+  const connectionIdentifier = () => props.connectionIdentifier ?? DEFAULT_CONNECTION_IDENTIFIER;
 
   const { connection, loading, connect, disconnect, mutate } = useChannelConnection({
     integrationIdentifier: integrationIdentifier(),
-    connectionIdentifier: props.connectionIdentifier,
+    connectionIdentifier: connectionIdentifier(),
     subscriberId: props.subscriberId,
   });
 
@@ -48,17 +49,15 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
 
     const intervalId = setInterval(async () => {
       try {
-        if (!props.connectionIdentifier) return;
-
         const response = await novuAccessor().channelConnections.get({
-          identifier: props.connectionIdentifier,
+          identifier: connectionIdentifier(),
         });
 
         if (response.data) {
           clearInterval(intervalId);
           setActionLoading(false);
           mutate(response.data);
-          props.onConnectSuccess?.(props.connectionIdentifier);
+          props.onConnectSuccess?.(connectionIdentifier());
 
           return;
         }
@@ -92,7 +91,7 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
 
       const result = await connect({
         integrationIdentifier: integrationIdentifier(),
-        connectionIdentifier: props.connectionIdentifier,
+        connectionIdentifier: connectionIdentifier(),
         subscriberId: props.subscriberId,
         context: props.context,
         scope: props.scope,

@@ -6,7 +6,8 @@ import { novuConfig } from '@/utils/config';
 const INTEGRATION_IDENTIFIER = process.env.NEXT_PUBLIC_NOVU_SLACK_INTEGRATION_IDENTIFIER ?? 'slack';
 const CONNECTION_IDENTIFIER = 'slack-workspace-connection';
 const SLACK_TEST_WORKFLOW_ID = process.env.NEXT_PUBLIC_NOVU_SLACK_TEST_WORKFLOW_ID ?? '';
-const context = { key: 'value1' };
+// const context = { key: 'value1' };
+const context = undefined;
 
 export default function ConnectChatPage() {
   const [dmStatus, setDmStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -61,7 +62,7 @@ export default function ConnectChatPage() {
           name: triggerWorkflowId.trim(),
           to: { subscriberId: novuConfig.subscriberId },
           payload: { message: 'Test message from connect-chat playground' },
-          context: context,
+          ...(context && { context: context }),
         }),
       });
 
@@ -99,7 +100,7 @@ export default function ConnectChatPage() {
 
               // in NovuProvider
               // subscriberId: string // redundant
-              // context: Context
+              // ...(context && { context: context }),
             />
           </NovuProvider>
         </section>
@@ -114,7 +115,7 @@ export default function ConnectChatPage() {
           <NovuProvider {...novuConfig}>
             <SlackLinkUser
               integrationIdentifier={INTEGRATION_IDENTIFIER}
-              connectionIdentifier={CONNECTION_IDENTIFIER}
+              // connectionIdentifier={CONNECTION_IDENTIFIER}
             />
           </NovuProvider>
         </section>
