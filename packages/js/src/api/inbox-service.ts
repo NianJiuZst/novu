@@ -562,7 +562,7 @@ export class InboxService {
     if (before) searchParams.append('before', before);
     const query = searchParams.size ? `?${searchParams.toString()}` : '';
 
-    return this.#httpClient.get(`${CHANNEL_CONNECTIONS_ROUTE}${query}`);
+    return this.#httpClient.get(`${CHANNEL_CONNECTIONS_ROUTE}${query}`, undefined, false);
   }
 
   getChannelConnection(identifier: string): Promise<ChannelConnectionResponse> {
@@ -622,7 +622,7 @@ export class InboxService {
     if (before) searchParams.append('before', before);
     const query = searchParams.size ? `?${searchParams.toString()}` : '';
 
-    return this.#httpClient.get(`${CHANNEL_ENDPOINTS_ROUTE}${query}`);
+    return this.#httpClient.get(`${CHANNEL_ENDPOINTS_ROUTE}${query}`, undefined, false);
   }
 
   getChannelEndpoint(identifier: string): Promise<ChannelEndpointResponse> {

@@ -95,8 +95,8 @@ export default function ConnectChatPage() {
           <NovuProvider {...novuConfig}>
             <SlackConnectButton
               integrationIdentifier={INTEGRATION_IDENTIFIER}
-              connectLabel="Connect to Slack AAA"
-              connectedLabel="Connected to Slack AAA"
+              // connectLabel="Connect to Slack AAA"
+              // connectedLabel="Connected to Slack AAA"
               appearance={{
                 elements: {
                   // Static: hide the icon in both states
