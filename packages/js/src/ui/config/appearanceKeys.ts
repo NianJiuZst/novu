@@ -363,6 +363,7 @@ export const linkSlackUserAppearanceKeys = [
   'linkSlackUserContainer',
   'linkSlackUserButton',
   'linkSlackUserButtonContainer',
+  'linkSlackUserButtonIcon',
   'linkSlackUserButtonLabel',
 ] as const;
 

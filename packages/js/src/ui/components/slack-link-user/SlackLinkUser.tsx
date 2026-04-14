@@ -1,10 +1,13 @@
-import { createResource, createSignal, onCleanup, onMount } from 'solid-js';
+import { createResource, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import type { ChannelEndpointResponse } from '../../../channel-connections/types';
 import type { Context } from '../../../types';
 import { useNovu } from '../../context';
 import { useStyle } from '../../helpers/useStyle';
+import { CheckCircleFill } from '../../icons/CheckCircleFill';
 import { Loader } from '../../icons/Loader';
+import { SlackColored } from '../../icons/SlackColored';
 import { Button, Motion } from '../primitives';
+import { IconRendererWrapper } from '../shared/IconRendererWrapper';
 import { DEFAULT_CONNECTION_IDENTIFIER, DEFAULT_INTEGRATION_IDENTIFIER } from '../slack-constants';
 
 export type SlackLinkUserProps = {
@@ -173,8 +176,52 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
             initial={{ opacity: 1 }}
             animate={{ opacity: isLoading() ? 0 : 1 }}
             transition={{ easing: 'ease-in-out', duration: 0.2 }}
-            class="nt-inline-flex nt-items-center"
+            class="nt-inline-flex nt-items-center nt-gap-1"
           >
+            <Show
+              when={isLinked()}
+              fallback={
+                <IconRendererWrapper
+                  iconKey="channelConnect"
+                  class={style({
+                    key: 'linkSlackUserButtonIcon',
+                    className: 'nt-size-4 nt-shrink-0',
+                    iconKey: 'channelConnect',
+                  })}
+                  fallback={
+                    <SlackColored
+                      class={style({
+                        key: 'linkSlackUserButtonIcon',
+                        className: 'nt-size-4 nt-shrink-0',
+                        iconKey: 'channelConnect',
+                      })}
+                    />
+                  }
+                />
+              }
+            >
+              <IconRendererWrapper
+                iconKey="channelConnected"
+                class={style({
+                  key: 'linkSlackUserButtonIcon',
+                  className:
+                    'nt-inline-flex nt-items-center nt-justify-center nt-size-4 nt-shrink-0 nt-rounded-full nt-bg-white nt-shadow-[0_1px_2px_0_rgba(10,13,20,0.03)]',
+                  iconKey: 'channelConnected',
+                })}
+                fallback={
+                  <span
+                    class={style({
+                      key: 'linkSlackUserButtonIcon',
+                      className:
+                        'nt-inline-flex nt-items-center nt-justify-center nt-size-4 nt-shrink-0 nt-rounded-full nt-bg-white nt-shadow-[0_1px_2px_0_rgba(10,13,20,0.03)]',
+                      iconKey: 'channelConnected',
+                    })}
+                  >
+                    <CheckCircleFill class="nt-size-full" />
+                  </span>
+                }
+              />
+            </Show>
             <span
               class={style({
                 key: 'linkSlackUserButtonLabel',

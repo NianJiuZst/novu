@@ -169,7 +169,7 @@ export const LinkUser = (props: LinkUserProps) => {
                 className: '[line-height:16px]',
               })}
             >
-              {isLinked() ? 'Unlink' : 'Link User'}
+              {isLinked() ? 'Connected' : 'Connect your Slack account'}
             </span>
           </Motion.span>
           <Motion.span
