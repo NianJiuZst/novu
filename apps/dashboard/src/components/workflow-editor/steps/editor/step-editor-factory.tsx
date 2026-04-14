@@ -14,10 +14,24 @@ import { ThrottleEditor } from '@/components/workflow-editor/steps/throttle/thro
 import { useWorkflow } from '@/components/workflow-editor/workflow-provider';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
 import { useStepResolverPolling } from '@/hooks/use-step-resolver-polling';
-import { INLINE_CONFIGURABLE_STEP_TYPES, STEP_RESOLVER_SUPPORTED_STEP_TYPES, STEP_TYPE_LABELS } from '@/utils/constants';
+import {
+  INLINE_CONFIGURABLE_STEP_TYPES,
+  STEP_RESOLVER_SUPPORTED_STEP_TYPES,
+  STEP_TYPE_LABELS,
+  TEMPLATE_CONFIGURABLE_STEP_TYPES,
+} from '@/utils/constants';
 
 function NoEditorAvailable({ message }: { message: string }) {
   return <div className="flex h-full items-center justify-center text-sm text-neutral-500">{message}</div>;
+}
+
+function ReadOnlyLiveStepPlaceholder() {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
+      <p className="text-sm text-neutral-500">Step content cannot be edited in this environment.</p>
+      <p className="text-sm text-neutral-400">Use the preview panel to see how this step renders.</p>
+    </div>
+  );
 }
 
 export function StepEditorFactory() {
@@ -49,6 +63,13 @@ export function StepEditorFactory() {
   }
 
   if (!isStepEditable) {
+    const isPreviewSupportedTemplateStep =
+      workflow.origin !== ResourceOriginEnum.EXTERNAL && TEMPLATE_CONFIGURABLE_STEP_TYPES.includes(step.type);
+
+    if (isPreviewSupportedTemplateStep) {
+      return <ReadOnlyLiveStepPlaceholder />;
+    }
+
     return <NoEditorAvailable message="No editor available for this step configuration" />;
   }
 
