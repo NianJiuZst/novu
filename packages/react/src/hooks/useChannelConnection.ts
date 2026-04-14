@@ -54,6 +54,10 @@ export const useChannelConnection = (props: UseChannelConnectionProps): UseChann
     [novu]
   );
 
+  // props.identifier triggers a re-fetch and re-registration whenever the
+  // caller switches to a different identifier; fetchConnection reads it from
+  // propsRef at call-time so it doesn't appear in the callback body directly.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: props.identifier is an intentional trigger dependency
   useEffect(() => {
     const cleanupGetPending = novu.on('channel-connection.get.pending', () => {
       setIsFetching(true);
@@ -87,7 +91,7 @@ export const useChannelConnection = (props: UseChannelConnectionProps): UseChann
       cleanupGetResolved();
       cleanupDeleteResolved();
     };
-  }, [novu, fetchConnection]);
+  }, [novu, fetchConnection, props.identifier]);
 
   const refetch = useCallback(() => fetchConnection({ refetch: true }), [fetchConnection]);
 

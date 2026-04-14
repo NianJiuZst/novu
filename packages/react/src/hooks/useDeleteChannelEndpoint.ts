@@ -25,22 +25,29 @@ export const useDeleteChannelEndpoint = (props: UseDeleteChannelEndpointProps = 
 
   const remove = useCallback(
     async (identifier: string) => {
-      const { onSuccess, onError } = propsRef.current;
       setError(undefined);
       setIsDeleting(true);
 
-      const response = await novu.channelEndpoints.delete({ identifier });
+      try {
+        const response = await novu.channelEndpoints.delete({ identifier });
 
-      setIsDeleting(false);
+        if (response.error) {
+          setError(response.error as NovuError);
+          propsRef.current.onError?.(response.error as NovuError);
+        } else {
+          propsRef.current.onSuccess?.();
+        }
 
-      if (response.error) {
-        setError(response.error as NovuError);
-        onError?.(response.error as NovuError);
-      } else {
-        onSuccess?.();
+        return response as { data?: undefined; error?: NovuError };
+      } catch (err) {
+        const novuError = err as NovuError;
+        setError(novuError);
+        propsRef.current.onError?.(novuError);
+
+        return { error: novuError };
+      } finally {
+        setIsDeleting(false);
       }
-
-      return response as { data?: undefined; error?: NovuError };
     },
     [novu]
   );

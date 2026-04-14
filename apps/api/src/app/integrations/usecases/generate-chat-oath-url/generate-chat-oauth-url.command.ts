@@ -2,7 +2,7 @@ import { IsValidContextPayload } from '@novu/application-generic';
 import { ConnectionMode, ContextPayload } from '@novu/shared';
 import { IsArray, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { EnvironmentCommand } from '../../../shared/commands/project.command';
-import { OAuthMode } from './generate-slack-oath-url/generate-slack-oauth-url.usecase';
+import type { OAuthMode } from './generate-slack-oath-url/generate-slack-oauth-url.usecase';
 
 export class GenerateChatOauthUrlCommand extends EnvironmentCommand {
   @IsNotEmpty()

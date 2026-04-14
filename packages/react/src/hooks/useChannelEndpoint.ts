@@ -54,6 +54,7 @@ export const useChannelEndpoint = (props: UseChannelEndpointProps): UseChannelEn
     [novu]
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: props.identifier is needed to re-run the effect and initial fetch when the identifier changes
   useEffect(() => {
     const cleanupGetPending = novu.on('channel-endpoint.get.pending', () => {
       setIsFetching(true);
@@ -96,7 +97,7 @@ export const useChannelEndpoint = (props: UseChannelEndpointProps): UseChannelEn
       cleanupCreateResolved();
       cleanupDeleteResolved();
     };
-  }, [novu, fetchEndpoint]);
+  }, [novu, fetchEndpoint, props.identifier]);
 
   const refetch = useCallback(() => fetchEndpoint({ refetch: true }), [fetchEndpoint]);
 

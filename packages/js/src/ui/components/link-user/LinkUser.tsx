@@ -1,5 +1,9 @@
 import { createResource, createSignal, onCleanup, onMount } from 'solid-js';
-import type { ChannelEndpointResponse } from '../../../channel-connections/types';
+import type {
+  ChannelEndpointResponse,
+  CreateChannelEndpointArgs,
+  DeleteChannelEndpointArgs,
+} from '../../../channel-connections/types';
 import type { Context } from '../../../types';
 import { useNovu } from '../../context';
 import { useStyle } from '../../helpers/useStyle';
@@ -52,7 +56,19 @@ export const LinkUser = (props: LinkUserProps) => {
       type: props.type,
       endpoint: props.endpoint,
     }),
-    async ({ endpointIdentifier, integrationIdentifier, contextKeys, type, endpoint }) => {
+    async ({
+      endpointIdentifier,
+      integrationIdentifier,
+      contextKeys,
+      type,
+      endpoint,
+    }: {
+      endpointIdentifier: string | undefined;
+      integrationIdentifier: string;
+      contextKeys: string[] | undefined;
+      type: string;
+      endpoint: Record<string, string>;
+    }) => {
       setLoading(true);
 
       try {
@@ -64,7 +80,7 @@ export const LinkUser = (props: LinkUserProps) => {
           // to avoid creating duplicates. Pass contextKeys when provided so the search is
           // scoped to the same context.
           const response = await novuAccessor().channelEndpoints.list({ integrationIdentifier, contextKeys });
-          const existing = response.data?.find((ep) => endpointMatches(ep, type, endpoint));
+          const existing = response.data?.find((ep: ChannelEndpointResponse) => endpointMatches(ep, type, endpoint));
           setEndpoint(existing ?? null);
         }
       } catch {
@@ -78,20 +94,23 @@ export const LinkUser = (props: LinkUserProps) => {
   onMount(() => {
     const currentNovu = novuAccessor();
 
-    const cleanupCreateResolved = currentNovu.on('channel-endpoint.create.resolved', ({ data }) => {
-      if (data) {
-        const ep = data as ChannelEndpointResponse;
-        if (endpointMatches(ep, props.type, props.endpoint)) {
-          setEndpoint(ep);
+    const cleanupCreateResolved = currentNovu.on(
+      'channel-endpoint.create.resolved',
+      ({ data }: { args: CreateChannelEndpointArgs; data?: ChannelEndpointResponse; error?: unknown }) => {
+        if (data && endpointMatches(data, props.type, props.endpoint)) {
+          setEndpoint(data);
         }
       }
-    });
+    );
 
-    const cleanupDeleteResolved = currentNovu.on('channel-endpoint.delete.resolved', ({ args }) => {
-      if (args?.identifier && args.identifier === endpoint()?.identifier) {
-        setEndpoint(null);
+    const cleanupDeleteResolved = currentNovu.on(
+      'channel-endpoint.delete.resolved',
+      ({ args }: { args: DeleteChannelEndpointArgs; data?: undefined; error?: unknown }) => {
+        if (args?.identifier && args.identifier === endpoint()?.identifier) {
+          setEndpoint(null);
+        }
       }
-    });
+    );
 
     onCleanup(() => {
       cleanupCreateResolved();

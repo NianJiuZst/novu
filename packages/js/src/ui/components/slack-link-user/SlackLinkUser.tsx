@@ -37,6 +37,12 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
   const [loading, setLoading] = createSignal(true);
   const [actionLoading, setActionLoading] = createSignal(false);
 
+  let pollingIntervalId: ReturnType<typeof setInterval> | undefined;
+
+  onCleanup(() => {
+    clearInterval(pollingIntervalId);
+  });
+
   const isLinked = () => !!endpoint();
   const isLoading = () => loading() || actionLoading();
 
@@ -80,7 +86,7 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
   const startPolling = () => {
     const startedAt = Date.now();
 
-    const intervalId = setInterval(async () => {
+    pollingIntervalId = setInterval(async () => {
       try {
         const response = await novuAccessor().channelEndpoints.list({
           integrationIdentifier: integrationIdentifier(),
@@ -89,7 +95,7 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
         const found = response.data?.find((ep) => ep.type === 'slack_user') ?? null;
 
         if (found) {
-          clearInterval(intervalId);
+          clearInterval(pollingIntervalId);
           setActionLoading(false);
           setEndpoint(found);
           props.onLinkSuccess?.({ identifier: found.identifier });
@@ -101,13 +107,11 @@ export const SlackLinkUser = (props: SlackLinkUserProps) => {
       }
 
       if (Date.now() - startedAt >= POLL_TIMEOUT_MS) {
-        clearInterval(intervalId);
+        clearInterval(pollingIntervalId);
         setActionLoading(false);
         props.onLinkError?.(new Error('Slack OAuth timed out. Please try again.'));
       }
     }, POLL_INTERVAL_MS);
-
-    onCleanup(() => clearInterval(intervalId));
   };
 
   const handleClick = async () => {

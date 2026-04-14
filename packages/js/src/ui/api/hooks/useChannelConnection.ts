@@ -1,5 +1,10 @@
 import { createEffect, createResource, createSignal, onCleanup, onMount } from 'solid-js';
-import type { ChannelConnectionResponse, GenerateChatOAuthUrlArgs } from '../../../channel-connections/types';
+import type {
+  ChannelConnectionResponse,
+  DeleteChannelConnectionArgs,
+  GenerateChatOAuthUrlArgs,
+  GetChannelConnectionArgs,
+} from '../../../channel-connections/types';
 import { useNovu } from '../../context';
 
 export type UseChannelConnectionOptions = {
@@ -50,29 +55,47 @@ export const useChannelConnection = (options: UseChannelConnectionOptions) => {
   onMount(() => {
     const currentNovu = novuAccessor();
 
-    const cleanupGetPending = currentNovu.on('channel-connection.get.pending', () => {
-      setLoading(true);
-    });
-
-    const cleanupGetResolved = currentNovu.on('channel-connection.get.resolved', ({ data }) => {
-      mutate((data as ChannelConnectionResponse) ?? null);
-      setLoading(false);
-    });
-
-    const cleanupDeletePending = currentNovu.on('channel-connection.delete.pending', ({ args }) => {
-      if (!args || args.identifier !== options.connectionIdentifier) {
-        return;
+    const cleanupGetPending = currentNovu.on(
+      'channel-connection.get.pending',
+      ({ args }: { args: GetChannelConnectionArgs }) => {
+        if (!args || args.identifier !== options.connectionIdentifier) {
+          return;
+        }
+        setLoading(true);
       }
-      setLoading(true);
-    });
+    );
 
-    const cleanupDeleteResolved = currentNovu.on('channel-connection.delete.resolved', ({ args }) => {
-      if (!args || args.identifier !== options.connectionIdentifier) {
-        return;
+    const cleanupGetResolved = currentNovu.on(
+      'channel-connection.get.resolved',
+      ({ args, data }: { args: GetChannelConnectionArgs; data?: ChannelConnectionResponse }) => {
+        if (!args || args.identifier !== options.connectionIdentifier) {
+          return;
+        }
+        mutate((data as ChannelConnectionResponse) ?? null);
+        setLoading(false);
       }
-      mutate(null);
-      setLoading(false);
-    });
+    );
+
+    const cleanupDeletePending = currentNovu.on(
+      'channel-connection.delete.pending',
+      ({ args }: { args: DeleteChannelConnectionArgs }) => {
+        if (!args || args.identifier !== options.connectionIdentifier) {
+          return;
+        }
+        setLoading(true);
+      }
+    );
+
+    const cleanupDeleteResolved = currentNovu.on(
+      'channel-connection.delete.resolved',
+      ({ args }: { args: DeleteChannelConnectionArgs }) => {
+        if (!args || args.identifier !== options.connectionIdentifier) {
+          return;
+        }
+        mutate(null);
+        setLoading(false);
+      }
+    );
 
     onCleanup(() => {
       cleanupGetPending();

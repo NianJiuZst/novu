@@ -47,17 +47,35 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
   const isConnected = () => !!connection();
   const isLoading = () => loading() || actionLoading();
 
+  const intervalIdRef: { current: ReturnType<typeof setInterval> | null } = { current: null };
+
+  onCleanup(() => {
+    if (intervalIdRef.current !== null) {
+      clearInterval(intervalIdRef.current);
+      intervalIdRef.current = null;
+    }
+  });
+
   const startPolling = () => {
+    if (intervalIdRef.current !== null) {
+      clearInterval(intervalIdRef.current);
+      intervalIdRef.current = null;
+    }
+
     const startedAt = Date.now();
 
-    const intervalId = setInterval(async () => {
+    intervalIdRef.current = setInterval(async () => {
       try {
         const response = await novuAccessor().channelConnections.get({
           identifier: connectionIdentifier(),
         });
 
         if (response.data) {
-          clearInterval(intervalId);
+          if (intervalIdRef.current !== null) {
+            clearInterval(intervalIdRef.current);
+            intervalIdRef.current = null;
+          }
+
           setActionLoading(false);
           mutate(response.data);
           props.onConnectSuccess?.(connectionIdentifier());
@@ -69,13 +87,15 @@ export const SlackConnectButton = (props: SlackConnectButtonProps) => {
       }
 
       if (Date.now() - startedAt >= POLL_TIMEOUT_MS) {
-        clearInterval(intervalId);
+        if (intervalIdRef.current !== null) {
+          clearInterval(intervalIdRef.current);
+          intervalIdRef.current = null;
+        }
+
         setActionLoading(false);
         props.onConnectError?.(new Error('Slack OAuth timed out. Please try again.'));
       }
     }, POLL_INTERVAL_MS);
-
-    onCleanup(() => clearInterval(intervalId));
   };
 
   const handleClick = async () => {

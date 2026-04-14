@@ -61,24 +61,6 @@ export const useChannelConnections = (props: UseChannelConnectionsProps = {}): U
   );
 
   useEffect(() => {
-    const cleanupListPending = novu.on('channel-connections.list.pending', () => {
-      setIsFetching(true);
-    });
-
-    const cleanupListResolved = novu.on('channel-connections.list.resolved', ({ data, error: resolvedError }) => {
-      const { onSuccess, onError } = propsRef.current;
-
-      if (resolvedError) {
-        setError(resolvedError as NovuError);
-        onError?.(resolvedError as NovuError);
-      } else if (data) {
-        setConnections(data as ChannelConnectionResponse[]);
-        onSuccess?.(data as ChannelConnectionResponse[]);
-      }
-
-      setIsFetching(false);
-    });
-
     const cleanupDeleteResolved = novu.on('channel-connection.delete.resolved', () => {
       void fetchConnections({ refetch: true });
     });
@@ -86,8 +68,6 @@ export const useChannelConnections = (props: UseChannelConnectionsProps = {}): U
     void fetchConnections({ refetch: true });
 
     return () => {
-      cleanupListPending();
-      cleanupListResolved();
       cleanupDeleteResolved();
     };
   }, [novu, fetchConnections]);

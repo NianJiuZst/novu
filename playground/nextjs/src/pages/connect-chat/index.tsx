@@ -89,8 +89,7 @@ export default function ConnectChatPage() {
         <section className="flex flex-col gap-3">
           <h4 className="text-sm font-semibold">Step 1 — SlackConnectButton: OAuth with endpoint configuration</h4>
           <p className="text-xs text-muted-foreground">
-            With <code>endpointType</code> and <code>endpointData</code>, OAuth also creates the{' '}
-            <code>ChannelEndpoint</code> — the Step 2 Link User flow is optional in that case.
+            OAuth can create the <code>ChannelEndpoint</code> automatically — the Step 2 Link User flow is optional.
           </p>
           <NovuProvider {...novuConfig}>
             <SlackConnectButton
