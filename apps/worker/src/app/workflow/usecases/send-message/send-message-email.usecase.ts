@@ -45,8 +45,8 @@ import {
   WebhookObjectTypeEnum,
 } from '@novu/shared';
 import inlineCss from 'inline-css';
-
 import { PlatformException } from '../../../shared/utils';
+import { getUnknownErrorMessage, getUnknownErrorName } from './get-unknown-error-message';
 import { SendMessageBase } from './send-message.base';
 import { SendMessageChannelCommand } from './send-message-channel.command';
 import { SendMessageResult, SendMessageStatus } from './send-message-type.usecase';
@@ -102,10 +102,11 @@ export class SendMessageEmail extends SendMessageBase {
           tenant: command.job.tenant,
         },
       });
-    } catch (e) {
+    } catch (e: unknown) {
       let detailEnum = DetailEnum.LIMIT_PASSED_NOVU_INTEGRATION;
+      const integrationErrorMessage = getUnknownErrorMessage(e);
 
-      if (e.message.includes('does not match the current logged-in user')) {
+      if (integrationErrorMessage.includes('does not match the current logged-in user')) {
         detailEnum = DetailEnum.SUBSCRIBER_NOT_MEMBER_OF_ORGANIZATION;
       }
 
@@ -115,7 +116,7 @@ export class SendMessageEmail extends SendMessageBase {
           detail: detailEnum,
           source: ExecutionDetailsSourceEnum.INTERNAL,
           status: ExecutionDetailsStatusEnum.FAILED,
-          raw: JSON.stringify({ message: e.message }),
+          raw: JSON.stringify({ message: integrationErrorMessage }),
           isTest: false,
           isRetry: false,
         })
@@ -264,13 +265,13 @@ export class SendMessageEmail extends SendMessageBase {
           });
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       Logger.error(
         { payload, error },
         'Compiling the email template or storing it or inlining it has failed',
         LOG_CONTEXT
       );
-      await this.sendErrorHandlebars(command.job, error.message);
+      await this.sendErrorHandlebars(command.job, getUnknownErrorMessage(error));
 
       return {
         status: SendMessageStatus.FAILED,
@@ -535,12 +536,15 @@ export class SendMessageEmail extends SendMessageBase {
       return {
         status: SendMessageStatus.SUCCESS,
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      const providerErrorMessage = getUnknownErrorMessage(error);
+      const providerErrorName = getUnknownErrorName(error);
+
       await this.sendErrorStatus(
         message,
         'error',
         'mail_unexpected_error',
-        error.message || error.name || 'Error while sending email with provider',
+        providerErrorMessage || providerErrorName || 'Error while sending email with provider',
         command,
         error
       );
@@ -549,8 +553,10 @@ export class SendMessageEmail extends SendMessageBase {
        * Axios Error, to provide better readability, otherwise stringify ignores response object
        * TODO: Handle this at the handler level globally
        */
-      if (error?.isAxiosError && error.response) {
-        error = error.response;
+      let webhookErrorPayload: unknown = error;
+      const maybeAxios = error as { isAxiosError?: boolean; response?: unknown };
+      if (maybeAxios?.isAxiosError && maybeAxios.response) {
+        webhookErrorPayload = maybeAxios.response;
       }
 
       await this.sendWebhookMessage.execute({
@@ -559,7 +565,10 @@ export class SendMessageEmail extends SendMessageBase {
         payload: {
           object: messageWebhookMapper(message, command.subscriberId),
           error: {
-            message: error.message || error.name || 'Error while sending email with provider',
+            message:
+              getUnknownErrorMessage(webhookErrorPayload) ||
+              providerErrorName ||
+              'Error while sending email with provider',
           },
         },
         organizationId: command.organizationId,
@@ -576,7 +585,9 @@ export class SendMessageEmail extends SendMessageBase {
           isTest: false,
           isRetry: false,
           raw:
-            safeJsonStringify(error) === '{}' ? JSON.stringify({ message: error.message }) : safeJsonStringify(error),
+            safeJsonStringify(webhookErrorPayload) === '{}'
+              ? JSON.stringify({ message: getUnknownErrorMessage(webhookErrorPayload) })
+              : safeJsonStringify(webhookErrorPayload),
         })
       );
 
@@ -636,7 +647,7 @@ export class SendMessageEmail extends SendMessageBase {
       );
 
       return layout._id;
-    } catch (error) {
+    } catch (error: unknown) {
       await this.createExecutionDetails.execute(
         CreateExecutionDetailsCommand.create({
           ...CreateExecutionDetailsCommand.getDetailsFromJob(command.job),
@@ -648,7 +659,7 @@ export class SendMessageEmail extends SendMessageBase {
           raw: JSON.stringify({
             layoutId,
             overrideSource,
-            error: error.message,
+            error: getUnknownErrorMessage(error),
           }),
         })
       );
