@@ -104,6 +104,7 @@ export interface AgentAction {
 // ---------------------------------------------------------------------------
 
 export interface AgentReaction {
+  messageId: string;
   emoji: { name: string };
   added: boolean;
   message: AgentMessage | null;

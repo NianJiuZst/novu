@@ -20,6 +20,7 @@ export interface InboundReactionEvent {
   messageId: string;
   message?: Message;
   thread?: Thread;
+  user?: { userId: string; fullName?: string; userName?: string };
 }
 
 @Injectable()
@@ -184,7 +185,7 @@ export class AgentInboundHandler {
       return;
     }
 
-    const platformUserId = event.message?.author?.userId;
+    const platformUserId = event.user?.userId;
 
     const subscriberId = platformUserId
       ? await this.subscriberResolver

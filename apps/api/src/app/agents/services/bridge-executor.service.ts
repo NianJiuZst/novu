@@ -94,6 +94,7 @@ interface BridgeHistoryEntry {
 }
 
 interface BridgeReactionPayload {
+  messageId: string;
   emoji: { name: string };
   added: boolean;
   message: BridgeMessage | null;
@@ -320,6 +321,7 @@ export class BridgeExecutorService {
 
   private mapReaction(reaction: BridgeReaction): BridgeReactionPayload {
     return {
+      messageId: reaction.messageId,
       emoji: { name: reaction.emoji },
       added: reaction.added,
       message: reaction.sourceMessage ? this.mapMessage(reaction.sourceMessage) : null,

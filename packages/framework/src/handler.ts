@@ -297,18 +297,18 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
   }
 
   private async runAgentHandler(registeredAgent: Agent, event: string, ctx: AgentContextImpl): Promise<void> {
-    const handlerMap: Record<string, ((ctx: AgentContextImpl) => Promise<void>) | undefined> = {
+    const handlerMap: Partial<Record<AgentEventEnum, (ctx: AgentContextImpl) => Promise<void>>> = {
       [AgentEventEnum.ON_MESSAGE]: registeredAgent.handlers.onMessage,
       [AgentEventEnum.ON_REACTION]: registeredAgent.handlers.onReaction,
       [AgentEventEnum.ON_ACTION]: registeredAgent.handlers.onAction,
       [AgentEventEnum.ON_RESOLVE]: registeredAgent.handlers.onResolve,
     };
 
-    if (!(event in handlerMap)) {
+    if (!Object.prototype.hasOwnProperty.call(handlerMap, event)) {
       throw new InvalidActionError(event, AgentEventEnum);
     }
 
-    const handler = handlerMap[event];
+    const handler = handlerMap[event as AgentEventEnum];
     if (handler) {
       await handler(ctx);
     }

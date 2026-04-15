@@ -675,6 +675,7 @@ describe('agent dispatch via NovuRequestHandler', () => {
           event: 'onReaction',
           message: null,
           reaction: {
+            messageId: 'msg-123',
             emoji: { name: 'thumbs_up' },
             added: true,
             message: null,
@@ -717,6 +718,7 @@ describe('agent dispatch via NovuRequestHandler', () => {
           event: 'onReaction',
           message: null,
           reaction: {
+            messageId: 'msg-reacted',
             emoji: { name: 'thumbs_up' },
             added: true,
             message: {
@@ -744,6 +746,7 @@ describe('agent dispatch via NovuRequestHandler', () => {
 
     expect(capturedCtx.event).toBe('onReaction');
     expect(capturedCtx.reaction).toBeDefined();
+    expect(capturedCtx.reaction.messageId).toBe('msg-reacted');
     expect(capturedCtx.reaction.emoji.name).toBe('thumbs_up');
     expect(capturedCtx.reaction.added).toBe(true);
     expect(capturedCtx.reaction.message).toBeDefined();
@@ -777,6 +780,7 @@ describe('agent dispatch via NovuRequestHandler', () => {
           event: 'onReaction',
           message: null,
           reaction: {
+            messageId: 'msg-456',
             emoji: { name: 'heart' },
             added: false,
             message: null,

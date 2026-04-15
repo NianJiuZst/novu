@@ -304,6 +304,7 @@ export class ChatSdkService implements OnModuleDestroy {
           messageId: event.messageId,
           message: event.message,
           thread: event.thread,
+          user: event.user,
         });
       } catch (err) {
         this.logger.error(err, `[agent:${agentId}] Error handling reaction`);
