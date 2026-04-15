@@ -7,7 +7,7 @@ import { AgentEventEnum } from '../dtos/agent-event.enum';
 import { AgentPlatformEnum } from '../dtos/agent-platform.enum';
 import type { ReplyContentDto } from '../dtos/agent-reply-payload.dto';
 import { sendWebResponse, toWebRequest } from '../utils/express-to-web-request';
-import { AgentCredentialService, ResolvedPlatformConfig } from './agent-credential.service';
+import { AgentConfigResolver, ResolvedAgentConfig } from './agent-config-resolver.service';
 import { AgentInboundHandler } from './agent-inbound-handler.service';
 
 /**
@@ -41,7 +41,7 @@ export class ChatSdkService implements OnModuleDestroy {
 
   constructor(
     private readonly logger: PinoLogger,
-    private readonly agentCredentialService: AgentCredentialService,
+    private readonly agentConfigResolver: AgentConfigResolver,
     private readonly inboundHandler: AgentInboundHandler
   ) {
     this.instances = new LRUCache<string, Chat>({
@@ -56,7 +56,7 @@ export class ChatSdkService implements OnModuleDestroy {
   }
 
   async handleWebhook(agentId: string, integrationIdentifier: string, req: ExpressRequest, res: ExpressResponse) {
-    const config = await this.agentCredentialService.resolve(agentId, integrationIdentifier);
+    const config = await this.agentConfigResolver.resolve(agentId, integrationIdentifier);
     const { platform } = config;
     const instanceKey = `${agentId}:${integrationIdentifier}`;
 
@@ -103,7 +103,7 @@ export class ChatSdkService implements OnModuleDestroy {
     serializedThread: Record<string, unknown>,
     content: ReplyContentDto
   ): Promise<void> {
-    const config = await this.agentCredentialService.resolve(agentId, integrationIdentifier);
+    const config = await this.agentConfigResolver.resolve(agentId, integrationIdentifier);
     const instanceKey = `${agentId}:${integrationIdentifier}`;
     const chat = await this.getOrCreate(instanceKey, agentId, config.platform, config);
 
@@ -120,11 +120,43 @@ export class ChatSdkService implements OnModuleDestroy {
     }
   }
 
+  async removeReaction(
+    agentId: string,
+    integrationIdentifier: string,
+    platform: string,
+    platformThreadId: string,
+    platformMessageId: string,
+    emoji: string
+  ): Promise<void> {
+    const config = await this.agentConfigResolver.resolve(agentId, integrationIdentifier);
+    const instanceKey = `${agentId}:${integrationIdentifier}`;
+    const chat = await this.getOrCreate(instanceKey, agentId, config.platform, config);
+
+    const adapter = chat.getAdapter(platform);
+    await adapter.removeReaction(platformThreadId, platformMessageId, emoji);
+  }
+
+  async reactToMessage(
+    agentId: string,
+    integrationIdentifier: string,
+    platform: string,
+    platformThreadId: string,
+    platformMessageId: string,
+    emoji: string
+  ): Promise<void> {
+    const config = await this.agentConfigResolver.resolve(agentId, integrationIdentifier);
+    const instanceKey = `${agentId}:${integrationIdentifier}`;
+    const chat = await this.getOrCreate(instanceKey, agentId, config.platform, config);
+
+    const adapter = chat.getAdapter(platform);
+    await adapter.addReaction(platformThreadId, platformMessageId, emoji);
+  }
+
   private async getOrCreate(
     instanceKey: string,
     agentId: string,
     platform: AgentPlatformEnum,
-    config: ResolvedPlatformConfig
+    config: ResolvedAgentConfig
   ): Promise<Chat> {
     const existing = this.instances.get(instanceKey);
     if (existing) return existing;
@@ -146,7 +178,7 @@ export class ChatSdkService implements OnModuleDestroy {
     instanceKey: string,
     agentId: string,
     platform: AgentPlatformEnum,
-    config: ResolvedPlatformConfig
+    config: ResolvedAgentConfig
   ): Promise<Chat> {
     const chat = await this.createChatInstance(instanceKey, platform, config);
     this.registerEventHandlers(agentId, chat, config);
@@ -158,7 +190,7 @@ export class ChatSdkService implements OnModuleDestroy {
   private async createChatInstance(
     instanceKey: string,
     platform: AgentPlatformEnum,
-    config: ResolvedPlatformConfig
+    config: ResolvedAgentConfig
   ): Promise<Chat> {
     const [{ Chat }, { createRedisState }] = await Promise.all([
       esmImport('chat'),
@@ -185,7 +217,7 @@ export class ChatSdkService implements OnModuleDestroy {
 
   private async buildAdapters(
     platform: AgentPlatformEnum,
-    config: ResolvedPlatformConfig
+    config: ResolvedAgentConfig
   ): Promise<Record<string, unknown>> {
     const { credentials, connectionAccessToken } = config;
 
@@ -228,7 +260,7 @@ export class ChatSdkService implements OnModuleDestroy {
     }
   }
 
-  private registerEventHandlers(agentId: string, chat: Chat, config: ResolvedPlatformConfig) {
+  private registerEventHandlers(agentId: string, chat: Chat, config: ResolvedAgentConfig) {
     chat.onNewMention(async (thread: Thread, message: Message) => {
       try {
         await thread.subscribe();

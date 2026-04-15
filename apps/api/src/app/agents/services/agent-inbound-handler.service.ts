@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from '@novu/application-generic';
-import { ConversationActivitySenderTypeEnum, ConversationParticipantTypeEnum, SubscriberRepository } from '@novu/dal';
+import { ConversationActivitySenderTypeEnum, ConversationParticipantTypeEnum, ConversationRepository, SubscriberRepository } from '@novu/dal';
 import type { Message, Thread } from 'chat';
 import { AgentEventEnum } from '../dtos/agent-event.enum';
+import { ResolvedAgentConfig } from './agent-config-resolver.service';
 import { AgentConversationService } from './agent-conversation.service';
-import { ResolvedPlatformConfig } from './agent-credential.service';
 import { AgentSubscriberResolver } from './agent-subscriber-resolver.service';
 import { type BridgeAction, BridgeExecutorService } from './bridge-executor.service';
 
@@ -14,13 +14,14 @@ export class AgentInboundHandler {
     private readonly logger: PinoLogger,
     private readonly subscriberResolver: AgentSubscriberResolver,
     private readonly conversationService: AgentConversationService,
+    private readonly conversationRepository: ConversationRepository,
     private readonly bridgeExecutor: BridgeExecutorService,
     private readonly subscriberRepository: SubscriberRepository
   ) {}
 
   async handle(
     agentId: string,
-    config: ResolvedPlatformConfig,
+    config: ResolvedAgentConfig,
     thread: Thread,
     message: Message,
     event: AgentEventEnum
@@ -75,6 +76,21 @@ export class AgentInboundHandler {
       organizationId: config.organizationId,
     });
 
+    const channel = conversation.channels[0];
+    const isFirstMessage = !channel?.firstPlatformMessageId;
+
+    if (isFirstMessage && config.reactionOnMessageReceived && message.id) {
+      thread.createSentMessageFromMessage(message).addReaction(config.reactionOnMessageReceived).catch((err) => {
+        this.logger.warn(err, `[agent:${agentId}] Failed to add ack reaction to first message`);
+      });
+
+      this.conversationRepository
+        .setFirstPlatformMessageId(config.environmentId, config.organizationId, conversation._id, thread.id, message.id)
+        .catch((err) => {
+          this.logger.warn(err, `[agent:${agentId}] Failed to store firstPlatformMessageId`);
+        });
+    }
+
     if (config.thinkingIndicatorEnabled) {
       await thread.startTyping('Thinking...');
     }
@@ -112,7 +128,7 @@ export class AgentInboundHandler {
 
   async handleAction(
     agentId: string,
-    config: ResolvedPlatformConfig,
+    config: ResolvedAgentConfig,
     thread: Thread,
     action: BridgeAction,
     userId: string
