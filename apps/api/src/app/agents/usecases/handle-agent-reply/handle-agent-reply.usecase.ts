@@ -1,6 +1,14 @@
-import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PinoLogger, shortId } from '@novu/application-generic';
 import {
+  AgentRepository,
   ConversationActivityRepository,
   ConversationActivityTypeEnum,
   ConversationChannel,
@@ -10,11 +18,11 @@ import {
   SubscriberRepository,
 } from '@novu/dal';
 import { AgentEventEnum } from '../../dtos/agent-event.enum';
+import type { ReplyContentDto } from '../../dtos/agent-reply-payload.dto';
 import { AgentConfigResolver, ResolvedAgentConfig } from '../../services/agent-config-resolver.service';
 import { AgentConversationService } from '../../services/agent-conversation.service';
 import { BridgeExecutorService } from '../../services/bridge-executor.service';
 import { ChatSdkService } from '../../services/chat-sdk.service';
-import type { ReplyContentDto } from '../../dtos/agent-reply-payload.dto';
 import { HandleAgentReplyCommand } from './handle-agent-reply.command';
 
 @Injectable()
@@ -23,6 +31,7 @@ export class HandleAgentReply {
     private readonly conversationRepository: ConversationRepository,
     private readonly activityRepository: ConversationActivityRepository,
     private readonly subscriberRepository: SubscriberRepository,
+    private readonly agentRepository: AgentRepository,
     @Inject(forwardRef(() => ChatSdkService))
     private readonly chatSdkService: ChatSdkService,
     private readonly bridgeExecutor: BridgeExecutorService,
@@ -54,7 +63,16 @@ export class HandleAgentReply {
     const channel = this.getPrimaryChannel(conversation);
 
     if (command.update) {
-      await this.deliverMessage(command, conversation, channel, command.update, ConversationActivityTypeEnum.UPDATE);
+      const agentName = await this.resolveValidatedAgentNameForDelivery(command, conversation);
+
+      await this.deliverMessage(
+        command,
+        conversation,
+        channel,
+        command.update,
+        ConversationActivityTypeEnum.UPDATE,
+        agentName
+      );
 
       return { status: 'update_sent' };
     }
@@ -65,7 +83,16 @@ export class HandleAgentReply {
       : null;
 
     if (command.reply) {
-      await this.deliverMessage(command, conversation, channel, command.reply, ConversationActivityTypeEnum.MESSAGE);
+      const agentName = await this.resolveValidatedAgentNameForDelivery(command, conversation);
+
+      await this.deliverMessage(
+        command,
+        conversation,
+        channel,
+        command.reply,
+        ConversationActivityTypeEnum.MESSAGE,
+        agentName
+      );
 
       this.removeAckReaction(config!, conversation, channel).catch((err) => {
         this.logger.warn(err, `[agent:${command.agentIdentifier}] Failed to remove ack reaction`);
@@ -83,6 +110,30 @@ export class HandleAgentReply {
     return { status: 'ok' };
   }
 
+  private async resolveValidatedAgentNameForDelivery(
+    command: HandleAgentReplyCommand,
+    conversation: ConversationEntity
+  ): Promise<string | undefined> {
+    const agent = await this.agentRepository.findOne(
+      {
+        _environmentId: command.environmentId,
+        _organizationId: command.organizationId,
+        identifier: command.agentIdentifier,
+      },
+      { _id: 1, name: 1, identifier: 1 }
+    );
+
+    if (!agent) {
+      throw new NotFoundException('Agent not found');
+    }
+
+    if (String(agent._id) !== conversation._agentId) {
+      throw new ForbiddenException('Agent identifier does not match this conversation');
+    }
+
+    return agent.name;
+  }
+
   private getPrimaryChannel(conversation: ConversationEntity): ConversationChannel {
     const channel = conversation.channels[0];
     if (!channel?.serializedThread) {
@@ -97,7 +148,8 @@ export class HandleAgentReply {
     conversation: ConversationEntity,
     channel: ConversationChannel,
     content: ReplyContentDto,
-    type: ConversationActivityTypeEnum
+    type: ConversationActivityTypeEnum,
+    agentName?: string
   ): Promise<void> {
     const textFallback = this.extractTextFallback(content);
 
@@ -116,8 +168,9 @@ export class HandleAgentReply {
         integrationId: channel._integrationId,
         platformThreadId: channel.platformThreadId,
         agentId: command.agentIdentifier,
+        senderName: agentName,
         content: textFallback,
-        richContent: (content.card || content.files?.length) ? (content as Record<string, unknown>) : undefined,
+        richContent: content.card || content.files?.length ? (content as Record<string, unknown>) : undefined,
         type,
         environmentId: command.environmentId,
         organizationId: command.organizationId,
@@ -150,7 +203,8 @@ export class HandleAgentReply {
     signals: HandleAgentReplyCommand['signals']
   ): Promise<void> {
     const metadataSignals = (signals ?? []).filter(
-      (s): s is Extract<NonNullable<HandleAgentReplyCommand['signals']>[number], { type: 'metadata' }> => s.type === 'metadata'
+      (s): s is Extract<NonNullable<HandleAgentReplyCommand['signals']>[number], { type: 'metadata' }> =>
+        s.type === 'metadata'
     );
 
     if (metadataSignals.length) {
