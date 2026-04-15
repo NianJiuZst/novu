@@ -1,5 +1,3 @@
-import type { DomainRegionEnum } from '@novu/shared';
-
 import type { ChangePropsValueType } from '../../types/helpers';
 import type { EnvironmentId } from '../environment';
 import type { OrganizationId } from '../organization';
@@ -8,8 +6,6 @@ export class DomainEntity {
   _id: string;
 
   name: string;
-
-  region: DomainRegionEnum;
 
   _environmentId: EnvironmentId;
 

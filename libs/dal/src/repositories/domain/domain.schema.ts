@@ -9,10 +9,6 @@ const domainSchema = new Schema<DomainDBModel>(
       type: Schema.Types.String,
       required: true,
     },
-    region: {
-      type: Schema.Types.String,
-      required: true,
-    },
     _organizationId: {
       type: Schema.Types.ObjectId,
       ref: 'Organization',
