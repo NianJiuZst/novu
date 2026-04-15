@@ -15,9 +15,5 @@ export function agent(agentId: string, handlers: AgentHandlers): Agent {
     throw new Error(`agent('${agentId}') requires an onMessage handler`);
   }
 
-  if (!handlers?.onReaction) {
-    throw new Error(`agent('${agentId}') requires an onReaction handler`);
-  }
-
   return { id: agentId, handlers };
 }

@@ -131,7 +131,7 @@ export interface AgentContext {
 
 export interface AgentHandlers {
   onMessage: (ctx: AgentContext) => Promise<void>;
-  onReaction: (ctx: AgentContext) => Promise<void>;
+  onReaction?: (ctx: AgentContext) => Promise<void>;
   onAction?: (ctx: AgentContext) => Promise<void>;
   onResolve?: (ctx: AgentContext) => Promise<void>;
 }
