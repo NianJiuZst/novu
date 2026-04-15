@@ -45,6 +45,7 @@ import { ContextsPage } from './pages/contexts';
 import { CreateContextPage } from './pages/create-context';
 import { CreateSubscriberPage } from './pages/create-subscriber';
 import { CreateTopicPage } from './pages/create-topic';
+import { DemoPage } from './pages/demo-page';
 import { DuplicateLayoutPage } from './pages/duplicate-layout-page';
 import { EditContextPage } from './pages/edit-context';
 import { EditLayoutPage } from './pages/edit-layout';
@@ -162,6 +163,10 @@ const router = createBrowserRouter([
               {
                 path: ROUTES.WELCOME,
                 element: <WelcomePage />,
+              },
+              {
+                path: ROUTES.DEMO,
+                element: <DemoPage />,
               },
               {
                 path: ROUTES.WORKFLOWS,
