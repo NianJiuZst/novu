@@ -41,6 +41,8 @@ export const initializeSentry = () => {
         /forbidden/i, // 403
         /not found/i, // 404
         /unprocessable entity/i, // 422
+        'signal is aborted without reason',
+        /AbortError/i,
       ],
       /*
        * This sets the sample rate to be 10%. You may want this to be 100% while
