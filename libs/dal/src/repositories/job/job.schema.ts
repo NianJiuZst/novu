@@ -214,12 +214,13 @@ jobSchema.virtual('environment', {
  *           'step.uuid': filter.step,
  *        })
  *
- * Path : apps/api/src/app/events/usecases/trigger-event/trigger-event.usecase.ts
+ * Path : libs/application-generic/src/usecases/trigger-event/trigger-event.usecase.ts
  *    Context : validateTransactionIdProperty()
  *       Query : findOne(
  *          {
  *            transactionId,
  *            _environmentId: environmentId,
+ *            status: { $in: [pending, queued, running, delayed] },
  *          },
  *          '_id'
  *        )

@@ -30,6 +30,7 @@ import { TriggerBroadcast } from '../trigger-broadcast/trigger-broadcast.usecase
 import { TriggerMulticast, TriggerMulticastCommand } from '../trigger-multicast';
 import { VerifyPayload, VerifyPayloadCommand } from '../verify-payload';
 import { TriggerEventCommand } from './trigger-event.command';
+import { ACTIVE_JOB_STATUSES_FOR_TRANSACTION_ID_UNIQUENESS } from './trigger-event-transaction-id.constants';
 
 function getActiveWorker() {
   return process.env.ACTIVE_WORKER;
@@ -392,6 +393,7 @@ export class TriggerEvent {
       {
         transactionId,
         _environmentId: environmentId,
+        status: { $in: ACTIVE_JOB_STATUSES_FOR_TRANSACTION_ID_UNIQUENESS },
       },
       '_id'
     )) as Pick<JobEntity, '_id'>;
