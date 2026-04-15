@@ -3,7 +3,7 @@ import { useFormContext } from 'react-hook-form';
 import { SidebarContent } from '@/components/side-navigation/sidebar';
 import { TabsSection } from '@/components/workflow-editor/steps/tabs-section';
 import { useEnvironment } from '@/context/environment/hooks';
-import { StepEditorUnavailable } from '../step-editor-unavailable';
+import { WorkflowReadOnlyStepEditor } from '../read-only-step-editor';
 import { canMethodHaveBody } from './curl-utils';
 import { KeyValuePairList } from './key-value-pair-list';
 import { RequestEndpoint } from './request-endpoint';
@@ -23,11 +23,7 @@ export function HttpRequestEditor({ uiSchema }: HttpRequestEditorProps) {
     return null;
   }
 
-  if (currentEnvironment?.type !== EnvironmentTypeEnum.DEV) {
-    return <StepEditorUnavailable />;
-  }
-
-  return (
+  const httpRequestFields = (
     <div className="flex h-full flex-col overflow-y-auto">
       <TabsSection className="gap-2 p-0">
         <RequestEndpoint />
@@ -57,4 +53,10 @@ export function HttpRequestEditor({ uiSchema }: HttpRequestEditorProps) {
       </SidebarContent>
     </div>
   );
+
+  if (currentEnvironment?.type !== EnvironmentTypeEnum.DEV) {
+    return <WorkflowReadOnlyStepEditor>{httpRequestFields}</WorkflowReadOnlyStepEditor>;
+  }
+
+  return httpRequestFields;
 }

@@ -1,11 +1,9 @@
 import { EnvironmentTypeEnum } from '@novu/shared';
 import { useState } from 'react';
-import { RiArrowRightSLine, RiCodeBlock, RiEdit2Line, RiEyeLine, RiLockLine, RiSettings4Line } from 'react-icons/ri';
-import { useNavigate } from 'react-router-dom';
+import { RiCodeBlock, RiEdit2Line, RiEyeLine, RiSettings4Line } from 'react-icons/ri';
 import { useEnvironment } from '@/context/environment/hooks';
 import { useIsTranslationEnabled } from '@/hooks/use-is-translation-enabled';
 import { LocalizationResourceEnum } from '@/types/translations';
-import { buildRoute, ROUTES } from '@/utils/routes';
 import { useFetchTranslationGroup } from '../../hooks/use-fetch-translation-group';
 import { IssuesPanel } from '../issues-panel';
 import { Button } from '../primitives/button';
@@ -19,10 +17,10 @@ import { useLayoutEditor } from './layout-editor-provider';
 import { LayoutEditorSettingsDrawer } from './layout-editor-settings-drawer';
 import { LayoutPreviewContextPanel } from './layout-preview-context-panel';
 import { LayoutPreviewFactory } from './layout-preview-factory';
+import { LayoutReadOnlyEditorFrame } from './layout-read-only-editor-frame';
 
 export const LayoutEditor = () => {
-  const navigate = useNavigate();
-  const { currentEnvironment, oppositeEnvironment } = useEnvironment();
+  const { currentEnvironment } = useEnvironment();
   const { layout, isPreviewPending, isPending, hasUnsavedChanges, isUpdating, selectedLocale, issues, onLocaleChange } =
     useLayoutEditor();
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
@@ -39,21 +37,6 @@ export const LayoutEditor = () => {
 
   // Extract available locales from translations
   const availableLocales = translationGroup?.locales || [];
-
-  const handleSwitchToDevelopment = () => {
-    const developmentEnvironment = oppositeEnvironment?.name === 'Development' ? oppositeEnvironment : null;
-
-    if (developmentEnvironment?.slug) {
-      navigate(
-        buildRoute(ROUTES.LAYOUTS_EDIT, {
-          environmentSlug: developmentEnvironment.slug ?? '',
-          layoutSlug: layout?.layoutId ?? '',
-        })
-      );
-    }
-  };
-
-  const developmentEnvironment = oppositeEnvironment?.name === 'Development' ? oppositeEnvironment : null;
 
   return (
     <div className="flex h-full w-full">
@@ -96,35 +79,9 @@ export const LayoutEditor = () => {
                     {currentEnvironment?.type === EnvironmentTypeEnum.DEV ? (
                       <LayoutEditorFactory />
                     ) : (
-                      <div className="flex h-full items-center justify-center p-6">
-                        <div className="max-w-md space-y-4 text-center">
-                          <div className="flex justify-center">
-                            <div className="bg-neutral-alpha-50 rounded-full p-3">
-                              <RiLockLine className="text-neutral-alpha-400 h-8 w-8" />
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <h3 className="text-base font-medium text-neutral-600">Step editor unavailable</h3>
-                            <p className="text-sm leading-relaxed text-neutral-500">
-                              Step editing is only available in development environments. Switch to a development
-                              environment to modify this step.
-                            </p>
-                          </div>
-                          {developmentEnvironment && (
-                            <div className="flex justify-center pt-2">
-                              <Button
-                                variant="secondary"
-                                size="xs"
-                                mode="gradient"
-                                onClick={handleSwitchToDevelopment}
-                                trailingIcon={RiArrowRightSLine}
-                              >
-                                Switch to {developmentEnvironment.name}
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      <LayoutReadOnlyEditorFrame>
+                        <LayoutEditorFactory />
+                      </LayoutReadOnlyEditorFrame>
                     )}
                   </div>
                 </div>

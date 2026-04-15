@@ -5,7 +5,7 @@ import { EmailPreviewHeader } from '@/components/workflow-editor/steps/email/ema
 import { SenderConfigDrawer } from '@/components/workflow-editor/steps/email/sender-config-drawer';
 import { useEnvironment } from '@/context/environment/hooks';
 import { cn } from '../../../../utils/ui';
-import { StepEditorUnavailable } from '../step-editor-unavailable';
+import { WorkflowReadOnlyStepEditor } from '../read-only-step-editor';
 
 type EmailEditorProps = { uiSchema: UiSchema; isEditorV2?: boolean };
 
@@ -20,33 +20,39 @@ export const EmailEditor = (props: EmailEditorProps) => {
 
   const { body, subject, disableOutputSanitization, editorType, layoutId } = uiSchema.properties ?? {};
 
+  const emailFields = (
+    <>
+      <div className={cn('px-4 pb-0 pt-4', isEditorV2 && 'px-0 pt-0')}>
+        <div className={cn(isEditorV2 && 'border-b border-neutral-200 px-3 py-2')}>
+          <EmailPreviewHeader minimalHeader={isEditorV2} onEditSenderClick={() => setSenderDrawerOpen(true)}>
+            {disableOutputSanitization &&
+              getComponentByType({
+                component: disableOutputSanitization.component,
+              })}
+            {getComponentByType({ component: editorType?.component ?? UiComponentEnum.EMAIL_EDITOR_SELECT })}
+          </EmailPreviewHeader>
+        </div>
+
+        {subject && (
+          <div className={cn(isEditorV2 && 'px-3 py-0')}>{getComponentByType({ component: subject.component })}</div>
+        )}
+        {layoutId && (
+          <div className="flex items-center gap-0.5 border-b border-t border-neutral-100 px-1 py-1">
+            {getComponentByType({ component: layoutId.component ?? UiComponentEnum.LAYOUT_SELECT })}
+          </div>
+        )}
+      </div>
+      {getComponentByType({ component: body.component })}
+    </>
+  );
+
   return (
     <>
       <div className="flex h-full flex-col">
-        <div className={cn('px-4 pb-0 pt-4', isEditorV2 && 'px-0 pt-0')}>
-          <div className={cn(isEditorV2 && 'border-b border-neutral-200 px-3 py-2')}>
-            <EmailPreviewHeader minimalHeader={isEditorV2} onEditSenderClick={() => setSenderDrawerOpen(true)}>
-              {disableOutputSanitization &&
-                getComponentByType({
-                  component: disableOutputSanitization.component,
-                })}
-              {getComponentByType({ component: editorType?.component ?? UiComponentEnum.EMAIL_EDITOR_SELECT })}
-            </EmailPreviewHeader>
-          </div>
-
-          {subject && (
-            <div className={cn(isEditorV2 && 'px-3 py-0')}>{getComponentByType({ component: subject.component })}</div>
-          )}
-          {layoutId && (
-            <div className="flex items-center gap-0.5 border-b border-t border-neutral-100 px-1 py-1">
-              {getComponentByType({ component: layoutId.component ?? UiComponentEnum.LAYOUT_SELECT })}
-            </div>
-          )}
-        </div>
         {currentEnvironment?.type === EnvironmentTypeEnum.DEV ? (
-          getComponentByType({ component: body.component })
+          emailFields
         ) : (
-          <StepEditorUnavailable />
+          <WorkflowReadOnlyStepEditor>{emailFields}</WorkflowReadOnlyStepEditor>
         )}
       </div>
 

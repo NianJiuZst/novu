@@ -2,7 +2,7 @@ import { EnvironmentTypeEnum, type UiSchema } from '@novu/shared';
 import { getComponentByType } from '@/components/workflow-editor/steps/component-utils';
 import { TabsSection } from '@/components/workflow-editor/steps/tabs-section';
 import { useEnvironment } from '@/context/environment/hooks';
-import { StepEditorUnavailable } from '../step-editor-unavailable';
+import { WorkflowReadOnlyStepEditor } from '../read-only-step-editor';
 
 type ChatEditorProps = { uiSchema: UiSchema };
 
@@ -11,11 +11,7 @@ export const ChatEditor = (props: ChatEditorProps) => {
   const { uiSchema } = props;
   const { body } = uiSchema?.properties ?? {};
 
-  if (currentEnvironment?.type !== EnvironmentTypeEnum.DEV) {
-    return <StepEditorUnavailable />;
-  }
-
-  return (
+  const chatFields = (
     <div className="flex h-full flex-col">
       <TabsSection className="p-0 pb-3">
         <div className="rounded-12 flex flex-col gap-2 border border-neutral-100 p-2 bg-bg-weak">
@@ -24,4 +20,10 @@ export const ChatEditor = (props: ChatEditorProps) => {
       </TabsSection>
     </div>
   );
+
+  if (currentEnvironment?.type !== EnvironmentTypeEnum.DEV) {
+    return <WorkflowReadOnlyStepEditor>{chatFields}</WorkflowReadOnlyStepEditor>;
+  }
+
+  return chatFields;
 };

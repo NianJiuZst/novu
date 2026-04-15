@@ -1,13 +1,10 @@
 import { EnvironmentTypeEnum, type UiSchema, UiSchemaGroupEnum } from '@novu/shared';
 import { RiInstanceLine } from 'react-icons/ri';
-import { Notification5Fill } from '@/components/icons';
 import { Separator } from '@/components/primitives/separator';
 import { getComponentByType } from '@/components/workflow-editor/steps/component-utils';
 import { InAppTabsSection } from '@/components/workflow-editor/steps/in-app/in-app-tabs-section';
 import { useEnvironment } from '@/context/environment/hooks';
-
-import { cn } from '../../../../utils/ui';
-import { StepEditorUnavailable } from '../step-editor-unavailable';
+import { WorkflowReadOnlyStepEditor } from '../read-only-step-editor';
 
 const avatarKey = 'avatar';
 const subjectKey = 'subject';
@@ -36,11 +33,7 @@ export const InAppEditor = ({ uiSchema }: { uiSchema: UiSchema }) => {
     [dataObjectKey]: dataObject,
   } = uiSchema.properties ?? {};
 
-  if (currentEnvironment?.type !== EnvironmentTypeEnum.DEV) {
-    return <StepEditorUnavailable />;
-  }
-
-  return (
+  const inAppFields = (
     <div className="flex flex-col">
       <InAppTabsSection className="flex flex-col gap-3 p-0 pb-3">
         <div className="flex flex-col gap-2 rounded-xl border border-neutral-100 p-2 bg-bg-weak">
@@ -89,4 +82,10 @@ export const InAppEditor = ({ uiSchema }: { uiSchema: UiSchema }) => {
       )}
     </div>
   );
+
+  if (currentEnvironment?.type !== EnvironmentTypeEnum.DEV) {
+    return <WorkflowReadOnlyStepEditor>{inAppFields}</WorkflowReadOnlyStepEditor>;
+  }
+
+  return inAppFields;
 };

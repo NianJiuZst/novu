@@ -4,8 +4,7 @@ import { getComponentByType } from '@/components/workflow-editor/steps/component
 import { TabsSection } from '@/components/workflow-editor/steps/tabs-section';
 import { useEnvironment } from '@/context/environment/hooks';
 
-import { cn } from '../../../../utils/ui';
-import { StepEditorUnavailable } from '../step-editor-unavailable';
+import { WorkflowReadOnlyStepEditor } from '../read-only-step-editor';
 
 type PushEditorProps = { uiSchema: UiSchema };
 
@@ -14,11 +13,7 @@ export const PushEditor = (props: PushEditorProps) => {
   const { uiSchema } = props;
   const { body, subject } = uiSchema?.properties ?? {};
 
-  if (currentEnvironment?.type !== EnvironmentTypeEnum.DEV) {
-    return <StepEditorUnavailable />;
-  }
-
-  return (
+  const pushFields = (
     <div className="flex h-full flex-col">
       <TabsSection className="p-0 pb-3">
         <div className="rounded-12 flex flex-col gap-2 border border-neutral-100 p-2 bg-bg-weak">
@@ -28,4 +23,10 @@ export const PushEditor = (props: PushEditorProps) => {
       </TabsSection>
     </div>
   );
+
+  if (currentEnvironment?.type !== EnvironmentTypeEnum.DEV) {
+    return <WorkflowReadOnlyStepEditor>{pushFields}</WorkflowReadOnlyStepEditor>;
+  }
+
+  return pushFields;
 };
