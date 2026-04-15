@@ -298,6 +298,12 @@ export class ChatSdkService implements OnModuleDestroy {
 
     chat.onReaction(async (event: any) => {
       try {
+        if (!event.thread) {
+          this.logger.warn(`[agent:${agentId}] Reaction received without thread context, skipping`);
+
+          return;
+        }
+
         await this.inboundHandler.handleReaction(agentId, config, {
           emoji: event.emoji,
           added: event.added,
