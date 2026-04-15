@@ -1,14 +1,14 @@
 import type { InboxService } from '../api';
-import type { ChannelEndpointResponse } from '../channel-connections/types';
-import type { NovuEventEmitter } from '../event-emitter';
-import type { Result } from '../types';
-import { NovuError } from '../utils/errors';
 import type {
+  ChannelEndpointResponse,
   CreateChannelEndpointArgs,
   DeleteChannelEndpointArgs,
   GetChannelEndpointArgs,
   ListChannelEndpointsArgs,
-} from './types';
+} from '../channel-connections/types';
+import type { NovuEventEmitter } from '../event-emitter';
+import type { Result } from '../types';
+import { NovuError } from '../utils/errors';
 
 export const listChannelEndpoints = async ({
   emitter,

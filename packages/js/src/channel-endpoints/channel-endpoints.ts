@@ -1,15 +1,15 @@
 import { InboxService } from '../api';
 import { BaseModule } from '../base-module';
-import type { ChannelEndpointResponse } from '../channel-connections/types';
-import { NovuEventEmitter } from '../event-emitter';
-import type { Result } from '../types';
-import { createChannelEndpoint, deleteChannelEndpoint, getChannelEndpoint, listChannelEndpoints } from './helpers';
 import type {
+  ChannelEndpointResponse,
   CreateChannelEndpointArgs,
   DeleteChannelEndpointArgs,
   GetChannelEndpointArgs,
   ListChannelEndpointsArgs,
-} from './types';
+} from '../channel-connections/types';
+import { NovuEventEmitter } from '../event-emitter';
+import type { Result } from '../types';
+import { createChannelEndpoint, deleteChannelEndpoint, getChannelEndpoint, listChannelEndpoints } from './helpers';
 
 export class ChannelEndpoints extends BaseModule {
   constructor({

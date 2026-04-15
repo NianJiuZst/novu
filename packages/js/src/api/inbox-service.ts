@@ -36,6 +36,41 @@ const CHAT_OAUTH_ROUTE = `${INBOX_ROUTE}/chat/oauth`;
 const CHANNEL_CONNECTIONS_ROUTE = `${INBOX_ROUTE}/channel-connections`;
 const CHANNEL_ENDPOINTS_ROUTE = `${INBOX_ROUTE}/channel-endpoints`;
 
+type ChannelListBaseArgs = {
+  subscriberId?: string;
+  integrationIdentifier?: string;
+  connectionIdentifier?: string;
+  channel?: string;
+  providerId?: string;
+  contextKeys?: string[];
+  limit?: number;
+  after?: string;
+  before?: string;
+};
+
+function buildChannelListSearchParams(args: ChannelListBaseArgs): string {
+  const searchParams = new URLSearchParams();
+  if (args.subscriberId) searchParams.append('subscriberId', args.subscriberId);
+  if (args.integrationIdentifier) searchParams.append('integrationIdentifier', args.integrationIdentifier);
+  if (args.connectionIdentifier) searchParams.append('connectionIdentifier', args.connectionIdentifier);
+  if (args.channel) searchParams.append('channel', args.channel);
+  if (args.providerId) searchParams.append('providerId', args.providerId);
+  if (args.contextKeys !== undefined) {
+    if (args.contextKeys.length === 0) {
+      searchParams.append('contextKeys', '');
+    } else {
+      for (const key of args.contextKeys) {
+        searchParams.append('contextKeys', key);
+      }
+    }
+  }
+  if (args.limit) searchParams.append('limit', String(args.limit));
+  if (args.after) searchParams.append('after', args.after);
+  if (args.before) searchParams.append('before', args.before);
+
+  return searchParams.size ? `?${searchParams.toString()}` : '';
+}
+
 function appendTagsToSearchParams(searchParams: URLSearchParams, tags: TagsFilter | undefined): void {
   if (tags === undefined) {
     return;
@@ -529,38 +564,12 @@ export class InboxService {
     });
   }
 
-  listChannelConnections({
-    subscriberId,
-    integrationIdentifier,
-    channel,
-    providerId,
-    contextKeys,
-    limit,
-    after,
-    before,
-  }: ListChannelConnectionsArgs = {}): Promise<{
+  listChannelConnections(args: ListChannelConnectionsArgs = {}): Promise<{
     data: ChannelConnectionResponse[];
     next?: string;
     previous?: string;
   }> {
-    const searchParams = new URLSearchParams();
-    if (subscriberId) searchParams.append('subscriberId', subscriberId);
-    if (integrationIdentifier) searchParams.append('integrationIdentifier', integrationIdentifier);
-    if (channel) searchParams.append('channel', channel);
-    if (providerId) searchParams.append('providerId', providerId);
-    if (contextKeys !== undefined) {
-      if (contextKeys.length === 0) {
-        searchParams.append('contextKeys', '');
-      } else {
-        for (const key of contextKeys) {
-          searchParams.append('contextKeys', key);
-        }
-      }
-    }
-    if (limit) searchParams.append('limit', String(limit));
-    if (after) searchParams.append('after', after);
-    if (before) searchParams.append('before', before);
-    const query = searchParams.size ? `?${searchParams.toString()}` : '';
+    const query = buildChannelListSearchParams(args);
 
     return this.#httpClient.get(`${CHANNEL_CONNECTIONS_ROUTE}${query}`, undefined, false);
   }
@@ -591,36 +600,12 @@ export class InboxService {
     return this.#httpClient.delete(`${CHANNEL_CONNECTIONS_ROUTE}/${identifier}`);
   }
 
-  listChannelEndpoints({
-    subscriberId,
-    integrationIdentifier,
-    connectionIdentifier,
-    channel,
-    providerId,
-    contextKeys,
-    limit,
-    after,
-    before,
-  }: ListChannelEndpointsArgs = {}): Promise<{ data: ChannelEndpointResponse[]; next?: string; previous?: string }> {
-    const searchParams = new URLSearchParams();
-    if (subscriberId) searchParams.append('subscriberId', subscriberId);
-    if (integrationIdentifier) searchParams.append('integrationIdentifier', integrationIdentifier);
-    if (connectionIdentifier) searchParams.append('connectionIdentifier', connectionIdentifier);
-    if (channel) searchParams.append('channel', channel);
-    if (providerId) searchParams.append('providerId', providerId);
-    if (contextKeys !== undefined) {
-      if (contextKeys.length === 0) {
-        searchParams.append('contextKeys', '');
-      } else {
-        for (const key of contextKeys) {
-          searchParams.append('contextKeys', key);
-        }
-      }
-    }
-    if (limit) searchParams.append('limit', String(limit));
-    if (after) searchParams.append('after', after);
-    if (before) searchParams.append('before', before);
-    const query = searchParams.size ? `?${searchParams.toString()}` : '';
+  listChannelEndpoints(args: ListChannelEndpointsArgs = {}): Promise<{
+    data: ChannelEndpointResponse[];
+    next?: string;
+    previous?: string;
+  }> {
+    const query = buildChannelListSearchParams(args);
 
     return this.#httpClient.get(`${CHANNEL_ENDPOINTS_ROUTE}${query}`, undefined, false);
   }

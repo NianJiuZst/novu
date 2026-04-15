@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InstrumentUsecase, shortId } from '@novu/application-generic';
 import {
   ChannelConnectionEntity,
@@ -8,6 +8,7 @@ import {
   IntegrationRepository,
   SubscriberRepository,
 } from '@novu/dal';
+import { validateConnectionMode } from '../channel-connection.utils';
 import { CreateChannelConnectionCommand } from './create-channel-connection.command';
 
 @Injectable()
@@ -50,31 +51,11 @@ export class CreateChannelConnection {
   }
 
   private validateResourceOrContext(command: CreateChannelConnectionCommand) {
-    const { subscriberId, context, connectionMode } = command;
-
-    if (connectionMode === 'shared') {
-      if (!context) {
-        throw new BadRequestException('context is required when connectionMode is "shared"');
-      }
-
-      if (subscriberId) {
-        throw new BadRequestException('subscriberId must not be provided when connectionMode is "shared"');
-      }
-
-      return;
-    }
-
-    if (connectionMode === 'subscriber') {
-      if (!subscriberId) {
-        throw new BadRequestException('subscriberId is required when connectionMode is "subscriber"');
-      }
-
-      return;
-    }
-
-    if (!subscriberId && !context) {
-      throw new BadRequestException('Either subscriberId or context must be provided');
-    }
+    validateConnectionMode({
+      connectionMode: command.connectionMode,
+      subscriberId: command.subscriberId,
+      context: command.context,
+    });
   }
 
   private async resolveContexts(command: CreateChannelConnectionCommand): Promise<string[]> {

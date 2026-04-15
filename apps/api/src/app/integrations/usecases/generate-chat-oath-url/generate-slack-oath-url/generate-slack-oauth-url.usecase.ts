@@ -2,12 +2,11 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { createHash, GetNovuProviderCredentials, GetNovuProviderCredentialsCommand } from '@novu/application-generic';
 import { EnvironmentRepository, ICredentialsEntity, IntegrationEntity, SubscriberRepository } from '@novu/dal';
 import { ChatProviderIdEnum, ConnectionMode, ContextPayload } from '@novu/shared';
+import { validateConnectionMode } from '../../../../channel-connections/usecases/channel-connection.utils';
 import { CHAT_OAUTH_CALLBACK_PATH } from '../chat-oauth.constants';
 import { GenerateSlackOauthUrlCommand } from './generate-slack-oauth-url.command';
 
 export type OAuthMode = 'connect' | 'link_user';
-
-export type { ConnectionMode } from '@novu/shared';
 
 export type StateData = {
   identifier?: string;
@@ -61,7 +60,7 @@ export class GenerateSlackOauthUrl {
   }
 
   private validateSubscriberIdOrContext(command: GenerateSlackOauthUrlCommand): void {
-    const { subscriberId, context, scope, connectionMode } = command;
+    const { subscriberId, scope, connectionMode, context } = command;
 
     if (scope?.includes('incoming-webhook')) {
       if (!subscriberId) {
@@ -69,29 +68,7 @@ export class GenerateSlackOauthUrl {
       }
     }
 
-    if (connectionMode === 'shared') {
-      if (!context) {
-        throw new BadRequestException('context is required when connectionMode is "shared"');
-      }
-
-      if (subscriberId) {
-        throw new BadRequestException('subscriberId must not be provided when connectionMode is "shared"');
-      }
-
-      return;
-    }
-
-    if (connectionMode === 'subscriber') {
-      if (!subscriberId) {
-        throw new BadRequestException('subscriberId is required when connectionMode is "subscriber"');
-      }
-
-      return;
-    }
-
-    if (!subscriberId && !context) {
-      throw new BadRequestException('Either subscriberId or context must be provided');
-    }
+    validateConnectionMode({ connectionMode, subscriberId, context });
   }
 
   private async assertResourceExists(command: GenerateSlackOauthUrlCommand) {

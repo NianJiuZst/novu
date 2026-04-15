@@ -10,7 +10,6 @@ import {
   connectChatAppearanceKeys,
   inboxAppearanceKeys,
   linkSlackUserAppearanceKeys,
-  linkUserAppearanceKeys,
   subscriptionAppearanceKeys,
 } from './config';
 import { AllLocalization } from './context/LocalizationContext';
@@ -325,7 +324,6 @@ export type SubscriptionAppearanceCallbackFunction<K extends SubscriptionAppeara
   SubscriptionAppearanceCallback[K];
 export type SubscriptionAppearanceKey = (typeof subscriptionAppearanceKeys)[number];
 export type ConnectChatAppearanceKey = (typeof connectChatAppearanceKeys)[number];
-export type LinkUserAppearanceKey = (typeof linkUserAppearanceKeys)[number];
 export type SlackLinkUserAppearanceKey = (typeof linkSlackUserAppearanceKeys)[number];
 export type ChannelConnectButtonAppearanceKey = (typeof channelConnectButtonAppearanceKeys)[number];
 
@@ -393,7 +391,6 @@ export type AllAppearanceKey =
   | InboxAppearanceKey
   | SubscriptionAppearanceKey
   | ConnectChatAppearanceKey
-  | LinkUserAppearanceKey
   | SlackLinkUserAppearanceKey
   | ChannelConnectButtonAppearanceKey;
 export type AllElements = Partial<

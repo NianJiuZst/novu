@@ -131,31 +131,7 @@ const InboxComponentsRenderer = (props: {
   );
 };
 
-const SubscriptionComponentsRenderer = (props: {
-  elements: MountableElement[];
-  nodes: Map<MountableElement, NovuComponent>;
-}) => {
-  return (
-    <Show when={props.elements.length > 0}>
-      <For each={props.elements}>
-        {(node) => {
-          const novuComponent = () => props.nodes.get(node)!;
-          const Component = novuComponents[novuComponent().name];
-
-          return (
-            <Portal mount={node}>
-              <Root>
-                <Component {...novuComponent().props} />
-              </Root>
-            </Portal>
-          );
-        }}
-      </For>
-    </Show>
-  );
-};
-
-const ChannelComponentsRenderer = (props: {
+const SimpleComponentsRenderer = (props: {
   elements: MountableElement[];
   nodes: Map<MountableElement, NovuComponent>;
 }) => {
@@ -245,8 +221,8 @@ export const Renderer = (props: RendererProps) => {
               routerPush={props.routerPush}
             >
               <InboxComponentsRenderer elements={inboxComponents()} nodes={props.nodes} />
-              <SubscriptionComponentsRenderer elements={subscriptionComponents()} nodes={props.nodes} />
-              <ChannelComponentsRenderer elements={channelComponents()} nodes={props.nodes} />
+              <SimpleComponentsRenderer elements={subscriptionComponents()} nodes={props.nodes} />
+              <SimpleComponentsRenderer elements={channelComponents()} nodes={props.nodes} />
             </InboxProvider>
           </FocusManagerProvider>
         </AppearanceProvider>
