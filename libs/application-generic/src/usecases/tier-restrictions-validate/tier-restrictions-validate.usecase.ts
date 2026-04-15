@@ -168,7 +168,12 @@ export class TierRestrictionsValidateUsecase {
   }
 
   private isCronDeltaDeferDurationExceededTier(cron: string, maxDelayMs: number): boolean {
-    const cronExpression = parseCronExpression(cron);
+    let cronExpression: ReturnType<typeof parseCronExpression>;
+    try {
+      cronExpression = parseCronExpression(cron);
+    } catch {
+      return false;
+    }
     const firstDate = cronExpression.next().toDate();
     const twoYearsFromFirst = addYears(firstDate, 2);
     let previousDate = firstDate;
