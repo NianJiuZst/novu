@@ -38,25 +38,25 @@ export function WhatsAppAgentIntegrationGuide({
     >
       <AgentIntegrationGuideSection title="Overview">
         <p>
-          Connect WhatsApp Business so this agent can send and receive messages through your business phone number.
-          Ensure the integration is configured and active in the integration store for this environment.
+          This agent sends and receives messages through your WhatsApp Business phone number. If you need to update
+          credentials or reconfigure the webhook, follow the steps below.
         </p>
       </AgentIntegrationGuideSection>
       <div className="flex flex-col gap-3">
         <p className="text-text-strong text-label-sm font-medium">Steps</p>
         <AgentIntegrationGuideStep
           step={1}
-          title="Configure credentials"
-          description="Add the Access Token, Phone Number ID, App Secret, and Verify Token from the Meta Developer portal into the integration store."
+          title="Create a Meta app and get credentials"
+          description="Go to developers.facebook.com/apps, create a Business-type app, and add the WhatsApp product. Copy the Access Token and Phone Number ID from WhatsApp > API Setup, and the App Secret from App Settings > Basic. For production, generate a permanent System User Token instead of the temporary access token."
         />
         <AgentIntegrationGuideStep
           step={2}
-          title="Set up the webhook"
-          description="Paste the agent's webhook URL into your Meta app's WhatsApp webhook configuration and subscribe to the messages field."
+          title="Configure the webhook"
+          description="In your Meta app go to WhatsApp > Configuration. Set the Callback URL to the webhook URL shown above and the Verify Token to the same secret you entered in the credentials. Subscribe to the 'messages' webhook field so the agent receives inbound messages."
         />
         <AgentIntegrationGuideStep
           step={3}
-          title="Test from the agent"
+          title="Verify the connection"
           description="Send a WhatsApp message to your business phone number and confirm the agent receives and responds."
         />
       </div>

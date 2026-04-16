@@ -180,7 +180,7 @@ function buildAgentWebhookUrl(agentId: string, integrationIdentifier: string): s
 
 function WebhookUrlSection({ webhookUrl }: { webhookUrl: string }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex w-full max-w-[320px] flex-col gap-1.5">
       <p className="text-text-sub text-label-xs font-medium leading-5">Webhook URL</p>
       <div className="border-stroke-soft bg-bg-white flex h-7 items-center overflow-hidden rounded-md border shadow-xs">
         <input
@@ -251,20 +251,43 @@ export function WhatsAppSetupGuide({
       <SetupStep
         index={base}
         status={deriveStepStatus(base, firstIncompleteStep)}
-        title="Configure WhatsApp credentials"
+        title="Create a Meta app and get credentials"
         description={
           <span>
-            {'Paste the Access Token, Phone Number ID, App Secret and Verify Token from your '}
+            {'Go to the '}
             <a
               href="https://developers.facebook.com/apps/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-text-sub underline"
             >
-              Meta Developer portal
+              Meta Developer Portal
             </a>
-            {' into the integration.'}
+            {', click '}
+            <strong className="text-text-sub">Create App</strong>
+            {' and select the '}
+            <strong className="text-text-sub">Business</strong>
+            {
+              ' type. Add the WhatsApp product to your app, then copy these values from your app dashboard into the credentials form:'
+            }
           </span>
+        }
+        extraContent={
+          <ul className="text-text-soft text-label-xs mt-1.5 list-inside list-disc space-y-0.5 font-medium leading-4">
+            <li>
+              <strong className="text-text-sub">Access Token</strong> — WhatsApp &gt; API Setup
+            </li>
+            <li>
+              <strong className="text-text-sub">Phone Number ID</strong> — WhatsApp &gt; API Setup
+            </li>
+            <li>
+              <strong className="text-text-sub">App Secret</strong> — App Settings &gt; Basic
+            </li>
+            <li>
+              <strong className="text-text-sub">Verify Token</strong> — a secret string of your choice (you'll reuse it
+              in the next step)
+            </li>
+          </ul>
         }
         rightContent={
           <div className="flex flex-col gap-3">
@@ -295,13 +318,21 @@ export function WhatsAppSetupGuide({
       <SetupStep
         index={base + 1}
         status={deriveStepStatus(base + 1, firstIncompleteStep)}
-        title="Set the webhook URL in Meta"
-        description="In your Meta app's WhatsApp configuration, paste this webhook URL and set the Verify Token to the same value you entered in the credentials step."
+        title="Configure the webhook in Meta"
+        description={
+          <span>
+            {'In your Meta app, go to '}
+            <strong className="text-text-sub">WhatsApp &gt; Configuration</strong>
+            {
+              '. Paste the webhook URL below as the Callback URL, and set the Verify Token to the same secret string you entered in the previous step.'
+            }
+          </span>
+        }
         extraContent={
           <InlineToast
             className="mt-2 w-full"
             variant="tip"
-            title="Tip:"
+            title="Important:"
             description="Subscribe to the 'messages' webhook field so your agent receives inbound messages."
           />
         }
@@ -313,6 +344,14 @@ export function WhatsAppSetupGuide({
         status={deriveStepStatus(base + 2, firstIncompleteStep)}
         title="Verify by sending a message"
         description="Send a WhatsApp message to your business phone number to confirm the webhook is connected and the agent responds."
+        extraContent={
+          <InlineToast
+            className="mt-2 w-full"
+            variant="tip"
+            title="Production tip:"
+            description="The access token from API Setup is temporary. For production, generate a permanent System User Token in your Meta Business Settings."
+          />
+        }
       />
     </>
   );
