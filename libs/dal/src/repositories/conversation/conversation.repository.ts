@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { DirectionEnum } from '@novu/shared';
+import { FilterQuery } from 'mongoose';
 import { EnforceEnvOrOrgIds } from '../../types';
+import { SortOrder } from '../../types/sort-order';
 import { BaseRepositoryV2 } from '../base-repository-v2';
 import {
   ConversationDBModel,
@@ -9,6 +12,17 @@ import {
   ConversationStatusEnum,
 } from './conversation.entity';
 import { Conversation } from './conversation.schema';
+
+const LIST_CONVERSATIONS_SORT_FIELDS = ['_id', 'createdAt', 'lastActivityAt'] as const;
+type ListConversationsSortField = (typeof LIST_CONVERSATIONS_SORT_FIELDS)[number];
+
+function resolveListConversationsSortBy(sortBy?: string): ListConversationsSortField {
+  if (sortBy && (LIST_CONVERSATIONS_SORT_FIELDS as readonly string[]).includes(sortBy)) {
+    return sortBy as ListConversationsSortField;
+  }
+
+  return '_id';
+}
 
 @Injectable()
 export class ConversationRepository extends BaseRepositoryV2<
@@ -145,5 +159,91 @@ export class ConversationRepository extends BaseRepositoryV2<
       },
       { $set: { 'channels.$.firstPlatformMessageId': firstPlatformMessageId } }
     );
+  }
+
+  async listConversations({
+    organizationId,
+    environmentId,
+    limit = 10,
+    after,
+    before,
+    sortBy = '_id',
+    sortDirection = 1,
+    includeCursor = false,
+    status,
+    subscriberId,
+  }: {
+    organizationId: string;
+    environmentId: string;
+    limit?: number;
+    after?: string;
+    before?: string;
+    sortBy?: string;
+    sortDirection?: SortOrder;
+    includeCursor?: boolean;
+    status?: ConversationStatusEnum;
+    subscriberId?: string;
+  }): Promise<{
+    data: ConversationEntity[];
+    next: string | null;
+    previous: string | null;
+    totalCount: number;
+    totalCountCapped: boolean;
+  }> {
+    if (before && after) {
+      throw new Error('Cannot specify both "before" and "after" cursors at the same time.');
+    }
+
+    const validatedSortBy = resolveListConversationsSortBy(sortBy);
+
+    let conversation: ConversationEntity | null = null;
+    const id = before || after;
+
+    if (id) {
+      conversation = await this.findOne(
+        { _environmentId: environmentId, _organizationId: organizationId, _id: id },
+        '*'
+      );
+
+      if (!conversation) {
+        return { data: [], next: null, previous: null, totalCount: 0, totalCountCapped: false };
+      }
+    }
+
+    const afterCursor =
+      after && conversation
+        ? { sortBy: conversation[validatedSortBy], paginateField: conversation._id }
+        : undefined;
+    const beforeCursor =
+      before && conversation
+        ? { sortBy: conversation[validatedSortBy], paginateField: conversation._id }
+        : undefined;
+
+    const query: FilterQuery<ConversationDBModel> & EnforceEnvOrOrgIds = {
+      _environmentId: environmentId,
+      _organizationId: organizationId,
+    };
+
+    if (status) {
+      query.status = status;
+    }
+
+    if (subscriberId) {
+      query.participants = {
+        $elemMatch: { id: subscriberId, type: ConversationParticipantTypeEnum.SUBSCRIBER },
+      };
+    }
+
+    return this.findWithCursorBasedPagination({
+      after: afterCursor,
+      before: beforeCursor,
+      paginateField: '_id',
+      limit,
+      sortDirection: sortDirection === 1 ? DirectionEnum.ASC : DirectionEnum.DESC,
+      sortBy: validatedSortBy,
+      includeCursor,
+      query,
+      select: '*',
+    });
   }
 }
