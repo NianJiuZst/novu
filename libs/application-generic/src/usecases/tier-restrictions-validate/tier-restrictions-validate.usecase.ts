@@ -9,7 +9,7 @@ import {
   getFeatureForTierAsNumber,
   StepTypeEnum,
 } from '@novu/shared';
-import { parseExpression as parseCronExpression } from 'cron-parser';
+import { type CronExpression, parseExpression as parseCronExpression } from 'cron-parser';
 import { addYears, differenceInMilliseconds, isAfter } from 'date-fns';
 import { InstrumentUsecase } from '../../instrumentation';
 import { FeatureFlagsService } from '../../services';
@@ -168,9 +168,9 @@ export class TierRestrictionsValidateUsecase {
   }
 
   private isCronDeltaDeferDurationExceededTier(cron: string, maxDelayMs: number): boolean {
-    let cronExpression: ReturnType<typeof parseCronExpression>;
+    let cronExpression: CronExpression<false>;
     try {
-      cronExpression = parseCronExpression(cron);
+      cronExpression = parseCronExpression<false>(cron);
     } catch {
       return false;
     }
