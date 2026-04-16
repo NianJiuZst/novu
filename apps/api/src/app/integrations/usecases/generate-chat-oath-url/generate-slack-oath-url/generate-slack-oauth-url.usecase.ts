@@ -1,5 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { createHash, GetNovuProviderCredentials, GetNovuProviderCredentialsCommand } from '@novu/application-generic';
+import {
+  createHash,
+  GetNovuProviderCredentials,
+  GetNovuProviderCredentialsCommand,
+  PinoLogger,
+} from '@novu/application-generic';
 import { EnvironmentRepository, ICredentialsEntity, IntegrationEntity, SubscriberRepository } from '@novu/dal';
 import { ChatProviderIdEnum, ContextPayload } from '@novu/shared';
 import { CHAT_OAUTH_CALLBACK_PATH } from '../chat-oauth.constants';
@@ -32,8 +37,11 @@ export class GenerateSlackOauthUrl {
   constructor(
     private environmentRepository: EnvironmentRepository,
     private getNovuProviderCredentials: GetNovuProviderCredentials,
-    private subscriberRepository: SubscriberRepository
-  ) {}
+    private subscriberRepository: SubscriberRepository,
+    private logger: PinoLogger
+  ) {
+    this.logger.setContext(GenerateSlackOauthUrl.name);
+  }
 
   async execute(command: GenerateSlackOauthUrlCommand): Promise<string> {
     this.validateSubscriberIdOrContext(command);
@@ -120,7 +128,11 @@ export class GenerateSlackOauthUrl {
       throw new BadRequestException('Failed to create OAuth state signature');
     }
 
-    return Buffer.from(`${payload}.${signature}`).toString('base64url');
+    const base64EncodedState = Buffer.from(`${payload}.${signature}`).toString('base64url');
+
+    this.logger.info({ stateData, base64EncodedState }, 'Slack OAuth secure state generated');
+
+    return base64EncodedState;
   }
 
   static async validateAndDecodeState(state: string, environmentApiKey: string): Promise<StateData> {
