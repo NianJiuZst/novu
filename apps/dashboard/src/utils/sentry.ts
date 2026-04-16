@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/react';
 import { useEffect } from 'react';
 import { createRoutesFromChildren, matchRoutes, useLocation, useNavigationType } from 'react-router-dom';
 import { MODE, SENTRY_DSN } from '@/config';
+import { NovuApiError } from '@/api/api.client';
 
 export const initializeSentry = () => {
   if (SENTRY_DSN) {
@@ -41,7 +42,32 @@ export const initializeSentry = () => {
         /forbidden/i, // 403
         /not found/i, // 404
         /unprocessable entity/i, // 422
+        /AbortError/i,
+        /signal is aborted without reason/i,
+        /Failed to load Clerk/i,
+        /Workflow limit exceeded/i,
+        /limit exceeded/i,
+        /Failed to fetch/i,
+        /Fetch error: Failed to fetch/i,
+        /removeChild on Node/i,
+        /insertBefore on Node/i,
+        /Invalid change range/i,
       ],
+      beforeSend(event, hint) {
+        const error = hint?.originalException;
+
+        if (error instanceof NovuApiError && error.status >= 400 && error.status < 500) {
+          return null;
+        }
+
+        const consoleBreadcrumb = event.logger === 'console';
+        const message = event.message || '';
+        if (consoleBreadcrumb && /Clerk|clerk/i.test(message)) {
+          return null;
+        }
+
+        return event;
+      },
       /*
        * This sets the sample rate to be 10%. You may want this to be 100% while
        * in development and sample at a lower rate in production

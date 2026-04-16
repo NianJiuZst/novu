@@ -56,7 +56,10 @@ export function handleIntegrationError(error: any, operation: 'update' | 'create
       return;
     }
 
-    Sentry.captureException(error);
+    const isExpectedApiError = error?.status >= 400 && error?.status < 500;
+    if (!isExpectedApiError) {
+      Sentry.captureException(error);
+    }
 
     showErrorToast(
       error?.message || `There was an error ${operation}ing the integration.`,
