@@ -52,6 +52,8 @@ export const ROUTES = {
   EDIT_SUBSCRIBER: '/env/:environmentSlug/subscribers/:subscriberId',
   CREATE_SUBSCRIBER: '/env/:environmentSlug/subscribers/create',
   PARTNER_INTEGRATIONS_VERCEL: '/partner-integrations/vercel',
+  DOMAINS: '/env/:environmentSlug/domains',
+  DOMAIN_DETAIL: '/env/:environmentSlug/domains/:domainId',
   WEBHOOKS: '/env/:environmentSlug/webhooks',
   WEBHOOKS_ENDPOINTS: '/env/:environmentSlug/webhooks/endpoints',
   WEBHOOKS_EVENT_CATALOG: '/env/:environmentSlug/webhooks/event-catalog',
@@ -86,7 +88,6 @@ export type AgentDetailsTab = (typeof AGENT_DETAILS_TABS)[number];
 
 export function parseAgentDetailsTab(tab: string | undefined): AgentDetailsTab {
   if (tab && (AGENT_DETAILS_TABS as readonly string[]).includes(tab)) {
-
     return tab as AgentDetailsTab;
   }
 

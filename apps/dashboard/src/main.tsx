@@ -41,10 +41,14 @@ import { UpdateIntegrationSidebar } from './components/integrations/components/u
 import { ChannelPreferences } from './components/workflow-editor/channel-preferences';
 import { IS_ENTERPRISE, IS_SELF_HOSTED } from './config';
 import { FeatureFlagsProvider } from './context/feature-flags-provider';
+import { AgentDetailsPage } from './pages/agent-details';
+import { AgentsPage } from './pages/agents';
 import { ContextsPage } from './pages/contexts';
 import { CreateContextPage } from './pages/create-context';
 import { CreateSubscriberPage } from './pages/create-subscriber';
 import { CreateTopicPage } from './pages/create-topic';
+import { DomainDetailPage } from './pages/domain-detail';
+import { DomainsPage } from './pages/domains';
 import { DuplicateLayoutPage } from './pages/duplicate-layout-page';
 import { EditContextPage } from './pages/edit-context';
 import { EditLayoutPage } from './pages/edit-layout';
@@ -62,8 +66,6 @@ import { ResetPasswordPage } from './pages/reset-password';
 import { TestWorkflowDrawerPage } from './pages/test-workflow-drawer-page';
 import { TestWorkflowRouteHandler } from './pages/test-workflow-route-handler';
 import { TopicsPage } from './pages/topics';
-import { AgentDetailsPage } from './pages/agent-details';
-import { AgentsPage } from './pages/agents';
 import { UpsertVariablePage } from './pages/upsert-variable';
 import { VariablesPage } from './pages/variables';
 import { VercelIntegrationPage } from './pages/vercel-integration-page';
@@ -378,6 +380,14 @@ const router = createBrowserRouter([
                     <AgentDetailsPage />
                   </ProtectedRoute>
                 ),
+              },
+              {
+                path: ROUTES.DOMAINS,
+                element: <DomainsPage />,
+              },
+              {
+                path: ROUTES.DOMAIN_DETAIL,
+                element: <DomainDetailPage />,
               },
               {
                 path: ROUTES.API_KEYS,
