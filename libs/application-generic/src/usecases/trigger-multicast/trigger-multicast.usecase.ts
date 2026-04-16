@@ -20,6 +20,7 @@ import { RequestTraceInput } from '../../services/analytic-logs/trace-log';
 import { SubscriberProcessQueueService } from '../../services/queues/subscriber-process-queue.service';
 import { TriggerBase } from '../trigger-base';
 import { TriggerMulticastCommand } from './trigger-multicast.command';
+import { topicIdToComparableString } from './trigger-multicast-topic-id';
 
 const QUEUE_CHUNK_SIZE = Number(process.env.MULTICAST_QUEUE_CHUNK_SIZE) || 100;
 const SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE = Number(process.env.SUBSCRIBER_TOPIC_DISTINCT_BATCH_SIZE) || 100;
@@ -107,7 +108,7 @@ export class TriggerMulticast extends TriggerBase {
           continue;
         }
 
-        const topic = topics.find((t) => t._id === topicId);
+        const topic = topics.find((t) => topicIdToComparableString(t._id) === topicId);
         if (!topic) {
           continue;
         }
