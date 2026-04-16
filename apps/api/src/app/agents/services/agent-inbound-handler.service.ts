@@ -8,6 +8,7 @@ import {
 } from '@novu/dal';
 import type { Message, Thread } from 'chat';
 import { AgentEventEnum } from '../dtos/agent-event.enum';
+import { PLATFORMS_WITHOUT_TYPING_INDICATOR } from '../dtos/agent-platform.enum';
 import { HandleAgentReplyCommand } from '../usecases/handle-agent-reply/handle-agent-reply.command';
 import { HandleAgentReply } from '../usecases/handle-agent-reply/handle-agent-reply.usecase';
 import { ResolvedAgentConfig } from './agent-config-resolver.service';
@@ -89,6 +90,18 @@ export class AgentInboundHandler {
       ? ConversationActivitySenderTypeEnum.SUBSCRIBER
       : ConversationActivitySenderTypeEnum.PLATFORM_USER;
 
+    const richContent = message.attachments?.length
+      ? {
+          attachments: message.attachments.map((a) => ({
+            type: a.type,
+            url: a.url,
+            name: a.name,
+            mimeType: a.mimeType,
+            size: a.size,
+          })),
+        }
+      : undefined;
+
     await this.conversationService.persistInboundMessage({
       conversationId: conversation._id,
       platform: config.platform,
@@ -98,6 +111,7 @@ export class AgentInboundHandler {
       senderId: participantId,
       senderName: message.author.fullName,
       content: message.text,
+      richContent,
       platformMessageId: message.id,
       environmentId: config.environmentId,
       organizationId: config.organizationId,
@@ -121,7 +135,7 @@ export class AgentInboundHandler {
         });
     }
 
-    if (config.thinkingIndicatorEnabled) {
+    if (config.thinkingIndicatorEnabled && !PLATFORMS_WITHOUT_TYPING_INDICATOR.has(config.platform)) {
       await thread.startTyping('Thinking...');
     }
 
