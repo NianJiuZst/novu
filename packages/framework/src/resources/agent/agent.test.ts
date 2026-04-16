@@ -3,9 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Client } from '../../client';
 import { PostActionEnum } from '../../constants';
 import { NovuRequestHandler } from '../../handler';
-import { Card, CardText, Button } from './index';
 import { agent } from './agent.resource';
 import type { AgentBridgeRequest } from './agent.types';
+import { Button, Card, CardText } from './index';
 
 function createMockBridgeRequest(overrides?: Partial<AgentBridgeRequest>): AgentBridgeRequest {
   return {
@@ -421,10 +421,7 @@ describe('agent dispatch via NovuRequestHandler', () => {
         await ctx.reply(
           Card({
             title: 'Order #123',
-            children: [
-              CardText('Your order is ready'),
-              Button({ id: 'confirm', label: 'Confirm', style: 'primary' }),
-            ],
+            children: [CardText('Your order is ready'), Button({ id: 'confirm', label: 'Confirm', style: 'primary' })],
           })
         );
       },
