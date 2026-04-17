@@ -27,6 +27,10 @@ export const cacheInMemoryProviderService = {
   },
 };
 
+// Nest injects the same CacheInMemoryProviderService instance registered as cacheInMemoryProviderService.
+// Previously this factory called cacheInMemoryProviderService.useFactory() internally, which created a
+// second in-memory provider (and Redis connection) unrelated to the one ChatSdkService and other
+// injectors receive via DI.
 export const cacheService = {
   provide: CacheService,
   useFactory: async (inMemoryProvider: CacheInMemoryProviderService): Promise<CacheService> => {
