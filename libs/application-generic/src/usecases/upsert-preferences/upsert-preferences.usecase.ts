@@ -199,7 +199,7 @@ export class UpsertPreferences {
       if (isDuplicateKeyError) {
         const existingPreference = await this.getPreference(command);
         if (existingPreference) {
-          return existingPreference;
+          return this.updatePreferences(existingPreference, command);
         }
       }
 
