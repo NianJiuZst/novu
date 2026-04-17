@@ -1,15 +1,22 @@
 {
   "name": "novu-cloudflare-agent-example",
   "main": "src/index.ts",
-  "compatibility_date": "2025-01-01",
+  "compatibility_date": "2025-04-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
+  },
   "ai": {
     "binding": "AI"
   },
   "durable_objects": {
     "bindings": [
       {
-        "name": "WineBot",
-        "class_name": "WineBot"
+        "name": "CleaningBot",
+        "class_name": "CleaningBot"
       }
     ]
   },
@@ -17,6 +24,10 @@
     {
       "tag": "v1",
       "new_sqlite_classes": ["WineBot"]
+    },
+    {
+      "tag": "v2",
+      "renamed_classes": [{ "from": "WineBot", "to": "CleaningBot" }]
     }
   ]
 }

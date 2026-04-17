@@ -7,11 +7,8 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "@cloudflare/ai-chat": "latest",
-    "@novu/framework": "latest",
-    "agents": "latest",
-    "ai": "latest",
-    "workers-ai-provider": "latest"
+    "@novu/framework": "file:../../packages/framework",
+    "agents": "latest"
   },
   "devDependencies": {
     "wrangler": "latest",

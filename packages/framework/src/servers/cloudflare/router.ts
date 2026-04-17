@@ -1,3 +1,4 @@
+import { Client } from '../../client';
 import { NovuRequestHandler, type ServeHandlerOptions } from '../../handler';
 import type { Workflow } from '../../types';
 import type { SupportedFrameworkName } from '../../types/server.types';
@@ -7,10 +8,17 @@ export const frameworkName: SupportedFrameworkName = 'cloudflare';
 
 interface NovuAgentClass {
   novuAgentId: string;
+  // biome-ignore lint/suspicious/noExplicitAny: Agent constructors vary
   new (...args: any[]): any;
 }
 
-export interface CreateNovuRouterOptions extends ServeHandlerOptions {
+interface CloudflareExecutionContext {
+  waitUntil(promise: Promise<unknown>): void;
+  passThroughOnException(): void;
+}
+
+export interface CreateNovuRouterOptions {
+  client?: ServeHandlerOptions['client'];
   agents: Record<string, NovuAgentClass>;
   workflows?: Workflow[];
   /**
@@ -18,7 +26,8 @@ export interface CreateNovuRouterOptions extends ServeHandlerOptions {
    * Typically `routeAgentRequest` from the `agents` package so the
    * Cloudflare Agents SDK's `/agents/*` routing keeps working.
    */
-  fallthrough?: (request: Request, env: any, ctx?: ExecutionContext) => Promise<Response | undefined | null>;
+  // biome-ignore lint/suspicious/noExplicitAny: env shape is user-defined
+  fallthrough?: (request: Request, env: any, ctx?: CloudflareExecutionContext) => Promise<Response | undefined | null>;
 }
 
 /**
@@ -48,30 +57,57 @@ export function createNovuRouter(options: CreateNovuRouterOptions) {
     }
   }
 
-  const novuHandler = new NovuRequestHandler({
-    frameworkName,
-    ...options,
-    handler: (request: Request, _env: unknown, ctx: ExecutionContext) => ({
-      body: () => request.clone().json(),
-      headers: (key: string) => request.headers.get(key),
-      method: () => request.method,
-      url: () => new URL(request.url),
-      queryString: (key: string, url: URL) => url.searchParams.get(key),
-      waitUntil: ctx?.waitUntil?.bind(ctx),
-      transformResponse: ({ status, headers, body }) => new Response(body, { status, headers }),
-    }),
-  });
-
-  const baseHandler = novuHandler.createHandler();
+  let cachedHandler: ((...args: [Request, unknown, CloudflareExecutionContext]) => Promise<Response>) | null = null;
+  let cachedClient: { secretKey: string; strictAuthentication: boolean } | null = null;
 
   // biome-ignore lint/suspicious/noExplicitAny: env shape is user-defined
-  return async (request: Request, env: any, ctx: ExecutionContext): Promise<Response> => {
+  function getOrCreateHandler(env: any) {
+    if (cachedHandler && cachedClient) {
+      return { baseHandler: cachedHandler, client: cachedClient };
+    }
+
+    const secretKey = env.NOVU_SECRET_KEY as string | undefined;
+    const client = options.client ?? new Client({
+      secretKey,
+      strictAuthentication: Boolean(secretKey),
+    });
+
+    const novuHandler = new NovuRequestHandler({
+      frameworkName,
+      client,
+      workflows: options.workflows,
+      handler: (request: Request, _env: unknown, ctx: CloudflareExecutionContext) => ({
+        body: () => request.clone().json(),
+        headers: (key: string) => request.headers.get(key),
+        method: () => request.method,
+        url: () => new URL(request.url),
+        queryString: (key: string, url: URL) => url.searchParams.get(key),
+        waitUntil: ctx?.waitUntil?.bind(ctx),
+        transformResponse: ({ status, headers, body }) => new Response(body, { status, headers }),
+      }),
+    });
+
+    cachedHandler = novuHandler.createHandler();
+    cachedClient = novuHandler.client;
+
+    return { baseHandler: cachedHandler, client: cachedClient };
+  }
+
+  // biome-ignore lint/suspicious/noExplicitAny: env shape is user-defined
+  return async (request: Request, env: any, ctx: CloudflareExecutionContext): Promise<Response> => {
     const url = new URL(request.url);
     const action = url.searchParams.get('action') || '';
 
     if (request.method === 'POST' && action === 'agent-event') {
-      return handleAgentEvent(request, url, env, agentIdToBinding, novuHandler.client);
+      const secretKey = env.NOVU_SECRET_KEY as string | undefined;
+
+      return handleAgentEvent(request, url, env, agentIdToBinding, {
+        secretKey: secretKey || '',
+        strictAuthentication: Boolean(secretKey),
+      });
     }
+
+    const { baseHandler } = getOrCreateHandler(env);
 
     if (request.method === 'OPTIONS') {
       return baseHandler(request, env, ctx);
@@ -98,6 +134,7 @@ export function createNovuRouter(options: CreateNovuRouterOptions) {
 async function handleAgentEvent(
   request: Request,
   url: URL,
+  // biome-ignore lint/suspicious/noExplicitAny: env shape is user-defined
   env: any,
   agentIdToBinding: Map<string, string>,
   client: { secretKey: string; strictAuthentication: boolean }
@@ -136,15 +173,26 @@ async function handleAgentEvent(
     const doId = binding.idFromName(conversationId);
     const stub = binding.get(doId);
 
+    const headers = new Headers(request.headers);
+    headers.set('x-novu-agent-namespace', bindingName);
+    headers.set('x-novu-agent-room', conversationId);
+    if (!headers.has('x-partykit-namespace')) {
+      headers.set('x-partykit-namespace', bindingName);
+    }
+    if (!headers.has('x-partykit-room')) {
+      headers.set('x-partykit-room', conversationId);
+    }
+
     const forwardedRequest = new Request(request.url, {
       method: 'POST',
-      headers: request.headers,
+      headers,
       body: bodyText,
     });
 
     return stub.fetch(forwardedRequest);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Internal error';
+    // biome-ignore lint/suspicious/noExplicitAny: error shape varies
     const status = (err as any)?.statusCode ?? 500;
 
     return Response.json({ error: message }, { status });
