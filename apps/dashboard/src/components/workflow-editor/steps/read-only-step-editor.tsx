@@ -20,17 +20,20 @@ export function ReadOnlyStepEditorFrame(props: ReadOnlyStepEditorFrameProps) {
 
   return (
     <div className={cn('flex h-full min-h-0 flex-col', className)}>
-      <div className="shrink-0 px-3 py-2.5">
+      <div className="shrink-0 py-2.5">
         <InlineToast
-          variant="info"
-          className="w-full"
+          variant="tip"
+          className="w-full shadow-none"
           title="Read-only"
           description="Editing is available in development."
           ctaLabel={switchAction?.label}
           onCtaClick={switchAction?.onClick}
+          ctaClassName="text-foreground-600 hover:text-foreground-950"
         />
       </div>
-      <div className="pointer-events-none min-h-0 flex-1 select-text overflow-auto">{children}</div>
+      <div className="min-h-0 flex-1 select-text overflow-auto" inert>
+        {children}
+      </div>
     </div>
   );
 }
