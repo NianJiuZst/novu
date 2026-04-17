@@ -41,7 +41,27 @@ export const initializeSentry = () => {
         /forbidden/i, // 403
         /not found/i, // 404
         /unprocessable entity/i, // 422
+        /AbortError/i,
+        /signal is aborted/i,
+        /The user aborted a request/i,
+        'Failed to fetch',
+        /Fetch error: Failed to fetch/i,
+        /The object can not be found here/i,
+        /removeChild on Node/i,
+        /insertBefore on Node/i,
+        /Failed to execute 'removeChild'/i,
+        /Failed to execute 'insertBefore'/i,
+        /Workflow limit exceeded/i,
+        /Resource limit exceeded/i,
       ],
+      beforeSend(event) {
+        const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+        if (frames?.some((frame) => frame.filename?.includes('clerk-js') || frame.filename?.includes('@clerk'))) {
+          return null;
+        }
+
+        return event;
+      },
       /*
        * This sets the sample rate to be 10%. You may want this to be 100% while
        * in development and sample at a lower rate in production
