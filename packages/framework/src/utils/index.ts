@@ -5,4 +5,5 @@ export * from './liquid.utils';
 export * from './log.utils';
 export * from './options.utils';
 export * from './sanitize.utils';
+export * from './signature.utils';
 export * from './string.utils';

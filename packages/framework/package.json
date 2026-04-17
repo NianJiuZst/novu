@@ -26,6 +26,7 @@
     "remix",
     "step-resolver",
     "sveltekit",
+    "cloudflare",
     "jsx-runtime",
     "jsx-dev-runtime",
     "validators",
@@ -60,7 +61,9 @@
     "next",
     "nuxt",
     "h3",
-    "express"
+    "express",
+    "cloudflare",
+    "durable-objects"
   ],
   "author": "Novu Team <engineering@novu.co>",
   "license": "ISC",
@@ -204,6 +207,26 @@
         "types": "./dist/esm/validators.d.ts",
         "default": "./dist/esm/validators.js"
       }
+    },
+    "./cloudflare": {
+      "require": {
+        "types": "./dist/cjs/servers/cloudflare/index.d.cts",
+        "default": "./dist/cjs/servers/cloudflare/index.cjs"
+      },
+      "import": {
+        "types": "./dist/esm/servers/cloudflare/index.d.ts",
+        "default": "./dist/esm/servers/cloudflare/index.js"
+      }
+    },
+    "./cloudflare/helpers": {
+      "require": {
+        "types": "./dist/cjs/servers/cloudflare/helpers.d.cts",
+        "default": "./dist/cjs/servers/cloudflare/helpers.cjs"
+      },
+      "import": {
+        "types": "./dist/esm/servers/cloudflare/helpers.d.ts",
+        "default": "./dist/esm/servers/cloudflare/helpers.js"
+      }
     }
   },
   "peerDependencies": {
@@ -214,6 +237,8 @@
     "express": ">=4.19.2",
     "h3": ">=1.8.1",
     "next": ">=12.0.0",
+    "agents": ">=0.1.0",
+    "@cloudflare/ai-chat": ">=0.1.0",
     "zod": ">=3.0.0",
     "zod-to-json-schema": ">=3.0.0"
   },
@@ -246,6 +271,12 @@
       "optional": true
     },
     "zod-to-json-schema": {
+      "optional": true
+    },
+    "agents": {
+      "optional": true
+    },
+    "@cloudflare/ai-chat": {
       "optional": true
     }
   },

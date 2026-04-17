@@ -11,7 +11,7 @@ export type {
   TextInputElement,
 } from 'chat';
 export { Actions, Button, Card, CardLink, CardText, Divider, Select, SelectOption, TextInput } from 'chat';
-export { AgentContextImpl } from './agent.context';
+export { AgentContextImpl, serializeContent } from './agent.context';
 export { agent } from './agent.resource';
 export type {
   Agent,
@@ -31,6 +31,7 @@ export type {
   FileRef,
   MessageContent,
   MetadataSignal,
+  NovuConversationRef,
   ReplyContent,
   Signal,
   TriggerSignal,

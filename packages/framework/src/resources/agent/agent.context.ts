@@ -11,6 +11,7 @@ import type {
   AgentReplyPayload,
   AgentSubscriber,
   MessageContent,
+  NovuConversationRef,
   ReplyContent,
   Signal,
 } from './agent.types';
@@ -19,7 +20,7 @@ function isCardElement(content: object): content is import('chat').CardElement {
   return 'type' in content && (content as { type: string }).type === 'card';
 }
 
-function serializeContent(content: MessageContent): ReplyContent {
+export function serializeContent(content: MessageContent): ReplyContent {
   if (typeof content === 'string') {
     return { text: content };
   }
@@ -126,6 +127,14 @@ export class AgentContextImpl implements AgentContext {
 
   trigger(workflowId: string, opts?: { to?: string; payload?: Record<string, unknown> }): void {
     this._signals.push({ type: 'trigger', workflowId, ...opts });
+  }
+
+  serialize(): NovuConversationRef {
+    return {
+      replyUrl: this._replyUrl,
+      conversationId: this._conversationId,
+      integrationIdentifier: this._integrationIdentifier,
+    };
   }
 
   /**

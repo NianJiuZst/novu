@@ -6,25 +6,13 @@ import {
   HttpQueryKeysEnum,
   HttpStatusEnum,
   PostActionEnum,
-  SIGNATURE_TIMESTAMP_TOLERANCE,
 } from './constants';
-import {
-  BridgeError,
-  FrameworkError,
-  InvalidActionError,
-  isFrameworkError,
-  MethodNotAllowedError,
-  SignatureExpiredError,
-  SignatureInvalidError,
-  SignatureMismatchError,
-  SignatureNotFoundError,
-  SigningKeyNotFoundError,
-} from './errors';
+import { BridgeError, FrameworkError, InvalidActionError, isFrameworkError, MethodNotAllowedError } from './errors';
 import { isPlatformError } from './errors/guard.errors';
 import type { Agent, AgentBridgeRequest } from './resources/agent';
 import { AgentContextImpl, AgentEventEnum } from './resources/agent';
 import type { Awaitable, EventTriggerParams, Workflow } from './types';
-import { createHmacSubtle, initApiClient } from './utils';
+import { initApiClient, validateNovuSignature } from './utils';
 
 export interface ServeHandlerOptions {
   client?: Client;
@@ -346,34 +334,6 @@ export class NovuRequestHandler<Input extends any[] = any[], Output = any> {
   }
 
   private async validateHmac(payload: unknown, hmacHeader: string | null): Promise<void> {
-    if (!this.hmacEnabled) return;
-    if (!hmacHeader) {
-      throw new SignatureNotFoundError();
-    }
-
-    if (!this.client.secretKey) {
-      throw new SigningKeyNotFoundError();
-    }
-
-    const [timestampPart, signaturePart] = hmacHeader.split(',');
-    if (!timestampPart || !signaturePart) {
-      throw new SignatureInvalidError();
-    }
-
-    const [timestamp, timestampPayload] = timestampPart.split('=');
-
-    const [signatureVersion, signaturePayload] = signaturePart.split('=');
-
-    if (Number(timestamp) < Date.now() - SIGNATURE_TIMESTAMP_TOLERANCE) {
-      throw new SignatureExpiredError();
-    }
-
-    const localHash = await createHmacSubtle(this.client.secretKey, `${timestampPayload}.${JSON.stringify(payload)}`);
-
-    const isMatching = localHash === signaturePayload;
-
-    if (!isMatching) {
-      throw new SignatureMismatchError();
-    }
+    return validateNovuSignature(payload, hmacHeader, this.client.secretKey, this.hmacEnabled);
   }
 }

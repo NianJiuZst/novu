@@ -117,6 +117,13 @@ export interface AgentReaction {
   message: AgentMessage | null;
 }
 
+/** Serializable handle for replying to a conversation outside a live bridge request. */
+export interface NovuConversationRef {
+  replyUrl: string;
+  conversationId: string;
+  integrationIdentifier: string;
+}
+
 export interface AgentContext {
   readonly event: string;
   readonly action: AgentAction | null;
@@ -135,6 +142,9 @@ export interface AgentContext {
     set(key: string, value: unknown): void;
   };
   trigger(workflowId: string, opts?: { to?: string; payload?: Record<string, unknown> }): void;
+
+  /** Return a JSON-safe ref that can be passed to schedule payloads, setState, etc. */
+  serialize(): NovuConversationRef;
 }
 
 export interface AgentHandlers {

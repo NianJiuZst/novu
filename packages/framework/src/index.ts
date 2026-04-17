@@ -21,6 +21,7 @@ export type {
   FileRef,
   MessageContent,
   MetadataSignal,
+  NovuConversationRef,
   ReplyContent,
   Signal,
   TriggerSignal,
