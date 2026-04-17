@@ -1,5 +1,9 @@
 import { Test } from '@nestjs/testing';
-import { CacheService, cacheInMemoryProviderService, cacheService } from '@novu/application-generic';
+import {
+  CacheService,
+  cacheInMemoryProviderService,
+  cacheService as cacheServiceFactory,
+} from '@novu/application-generic';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { v4 as uuid } from 'uuid';
@@ -357,7 +361,7 @@ describe('EvaluateTokenBucketRateLimit', () => {
 
                 before(async () => {
                   const inMemoryProvider = await cacheInMemoryProviderService.useFactory();
-                  const cacheServiceInitialized = await cacheService.useFactory(inMemoryProvider);
+                  const cacheServiceInitialized = await cacheServiceFactory.useFactory(inMemoryProvider);
                   testContext = {
                     redis: EvaluateTokenBucketRateLimit.getCacheClient(cacheServiceInitialized),
                   };
