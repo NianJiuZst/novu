@@ -1,6 +1,6 @@
 import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RiArrowLeftSLine, RiRobot2Line } from 'react-icons/ri';
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AGENTS_LIST_QUERY_KEY, type AgentResponse, deleteAgent, getAgent, getAgentDetailQueryKey } from '@/api/agents';
@@ -25,6 +25,8 @@ import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/primitives/tabs';
 import { requireEnvironment, useEnvironment } from '@/context/environment/hooks';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
+import { useTelemetry } from '@/hooks/use-telemetry';
+import { TelemetryEvent } from '@/utils/telemetry';
 import {
   AGENT_DETAILS_DEFAULT_TAB,
   AGENT_DETAILS_TABS,
@@ -79,6 +81,17 @@ export function AgentDetailsPage() {
   const { currentEnvironment } = useEnvironment();
   const isConversationalAgentsEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_CONVERSATIONAL_AGENTS_ENABLED, false);
   const [agentToDelete, setAgentToDelete] = useState<AgentResponse | null>(null);
+  const track = useTelemetry();
+
+  useEffect(() => {
+    if (!isConversationalAgentsEnabled || !agentIdentifier) {
+      return;
+    }
+
+    track(TelemetryEvent.AGENT_DETAILS_PAGE_VISIT, {
+      agentIdentifier,
+    });
+  }, [track, agentIdentifier, isConversationalAgentsEnabled]);
 
   const agentsListPath = buildRoute(ROUTES.AGENTS, {
     environmentSlug: currentEnvironment?.slug ?? '',
@@ -93,8 +106,12 @@ export function AgentDetailsPage() {
   const deleteMutation = useMutation({
     mutationFn: (identifier: string) =>
       deleteAgent(requireEnvironment(currentEnvironment, 'No environment selected'), identifier),
-    onSuccess: async () => {
+    onSuccess: async (_data, identifier) => {
       setAgentToDelete(null);
+      track(TelemetryEvent.AGENT_DELETED, {
+        agentIdentifier: identifier,
+        source: 'details',
+      });
       showSuccessToast('Agent deleted', 'The agent was removed.');
       await queryClient.invalidateQueries({ queryKey: [AGENTS_LIST_QUERY_KEY] });
       navigate(agentsListPath);
@@ -151,6 +168,11 @@ export function AgentDetailsPage() {
     if (!agent || !currentEnvironment?.slug) {
       return;
     }
+
+    track(TelemetryEvent.AGENT_DETAILS_TAB_CHANGED, {
+      agentIdentifier: agent.identifier,
+      tab: value,
+    });
 
     navigate(
       `${buildRoute(ROUTES.AGENT_DETAILS_TAB, {

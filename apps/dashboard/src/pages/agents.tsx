@@ -2,7 +2,7 @@ import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { CaretSortIcon } from '@radix-ui/react-icons';
 import { useMutation } from '@tanstack/react-query';
 import type { FormEvent, ReactElement, ReactNode } from 'react';
-import { useCallback, useId, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import {
   RiArrowRightSLine,
   RiChat3Line,
@@ -38,6 +38,8 @@ import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner
 import { DismissButton, Icon as TagIcon, Root as TagRoot } from '@/components/primitives/tag';
 import { Textarea } from '@/components/primitives/textarea';
 import { useFeatureFlag } from '@/hooks/use-feature-flag';
+import { useTelemetry } from '@/hooks/use-telemetry';
+import { TelemetryEvent } from '@/utils/telemetry';
 import { cn } from '@/utils/ui';
 
 const slackIcon = '/images/providers/light/square/slack.svg';
@@ -153,6 +155,7 @@ function AgentsEarlyAccessDialog({ open, onOpenChange }: AgentsEarlyAccessDialog
   const agentRunFieldId = `${formId}-agent-run`;
   const providersLabelId = `${formId}-providers`;
   const descriptionFieldId = `${formId}-description`;
+  const track = useTelemetry();
 
   const [agentRun, setAgentRun] = useState<AgentRunValue>('building');
   const [providerIds, setProviderIds] = useState<ProviderId[]>([]);
@@ -234,6 +237,11 @@ function AgentsEarlyAccessDialog({ open, onOpenChange }: AgentsEarlyAccessDialog
 
     try {
       await earlyAccessMutation.mutateAsync(payload);
+      track(TelemetryEvent.AGENTS_EARLY_ACCESS_REQUESTED, {
+        howAgentRunsToday: agentRun,
+        providersCount: providerIds.length,
+        providers: providerIds,
+      });
       showSuccessToast('We received your request and will be in touch.', 'Early access');
       handleOpenChange(false);
     } catch (err) {
@@ -429,6 +437,18 @@ function AgentsEarlyAccessDialog({ open, onOpenChange }: AgentsEarlyAccessDialog
 export function AgentsPage() {
   const [earlyAccessOpen, setEarlyAccessOpen] = useState(false);
   const isConversationalAgentsEnabled = useFeatureFlag(FeatureFlagsKeysEnum.IS_CONVERSATIONAL_AGENTS_ENABLED, false);
+  const track = useTelemetry();
+
+  useEffect(() => {
+    track(TelemetryEvent.AGENTS_PAGE_VISIT, {
+      conversationalAgentsEnabled: isConversationalAgentsEnabled,
+    });
+  }, [track, isConversationalAgentsEnabled]);
+
+  const handleRequestEarlyAccess = useCallback(() => {
+    track(TelemetryEvent.AGENTS_EARLY_ACCESS_OPENED);
+    setEarlyAccessOpen(true);
+  }, [track]);
 
   return (
     <>
@@ -526,7 +546,7 @@ export function AgentsPage() {
                     size="xs"
                     trailingIcon={RiArrowRightSLine}
                     type="button"
-                    onClick={() => setEarlyAccessOpen(true)}
+                    onClick={handleRequestEarlyAccess}
                   >
                     Request early access
                   </Button>

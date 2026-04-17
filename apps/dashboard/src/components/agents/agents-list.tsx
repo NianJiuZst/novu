@@ -21,6 +21,8 @@ import { PermissionButton } from '@/components/primitives/permission-button';
 import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner-helpers';
 import { requireEnvironment, useEnvironment } from '@/context/environment/hooks';
 import { useHasPermission } from '@/hooks/use-has-permission';
+import { useTelemetry } from '@/hooks/use-telemetry';
+import { TelemetryEvent } from '@/utils/telemetry';
 
 const PAGE_SIZE_OPTIONS = [10, 12, 20, 50];
 
@@ -29,6 +31,7 @@ export function AgentsList() {
   const { currentEnvironment } = useEnvironment();
   const has = useHasPermission();
   const canReadAgents = has({ permission: PermissionsEnum.AGENT_READ });
+  const track = useTelemetry();
 
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -79,8 +82,12 @@ export function AgentsList() {
   const createMutation = useMutation({
     mutationFn: (body: CreateAgentBody) =>
       createAgent(requireEnvironment(currentEnvironment, 'No environment selected'), body),
-    onSuccess: async () => {
+    onSuccess: async (_data, body) => {
       await queryClient.invalidateQueries({ queryKey: [AGENTS_LIST_QUERY_KEY] });
+      track(TelemetryEvent.AGENT_CREATED, {
+        agentIdentifier: body.identifier,
+        hasDescription: Boolean(body.description),
+      });
       showSuccessToast('Agent created', 'Your agent is ready to use.');
     },
     onError: (err: Error) => {
@@ -93,8 +100,12 @@ export function AgentsList() {
   const deleteMutation = useMutation({
     mutationFn: (identifier: string) =>
       deleteAgent(requireEnvironment(currentEnvironment, 'No environment selected'), identifier),
-    onSuccess: async () => {
+    onSuccess: async (_data, identifier) => {
       setAgentToDelete(null);
+      track(TelemetryEvent.AGENT_DELETED, {
+        agentIdentifier: identifier,
+        source: 'list',
+      });
       showSuccessToast('Agent deleted', 'The agent was removed.');
 
       const environment = requireEnvironment(currentEnvironment, 'No environment selected');
@@ -168,6 +179,11 @@ export function AgentsList() {
     [createMutation]
   );
 
+  const handleOpenCreateDialog = useCallback(() => {
+    track(TelemetryEvent.AGENT_CREATE_DIALOG_OPENED);
+    setCreateOpen(true);
+  }, [track]);
+
   if (!canReadAgents) {
     return (
       <div className="text-text-soft text-label-sm border-stroke-soft rounded-lg border border-dashed p-8 text-center">
@@ -201,7 +217,7 @@ export function AgentsList() {
           mode="gradient"
           className="gap-1.5"
           leadingIcon={RiRobot2Line}
-          onClick={() => setCreateOpen(true)}
+          onClick={handleOpenCreateDialog}
         >
           Add Agent
         </PermissionButton>
@@ -224,7 +240,7 @@ export function AgentsList() {
             mode="gradient"
             className="gap-1"
             leadingIcon={RiRobot2Line}
-            onClick={() => setCreateOpen(true)}
+            onClick={handleOpenCreateDialog}
           >
             Add Agent
           </PermissionButton>

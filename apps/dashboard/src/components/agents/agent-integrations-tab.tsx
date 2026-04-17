@@ -17,7 +17,9 @@ import { Skeleton } from '@/components/primitives/skeleton';
 import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner-helpers';
 import { requireEnvironment, useEnvironment } from '@/context/environment/hooks';
 import { useHasPermission } from '@/hooks/use-has-permission';
+import { useTelemetry } from '@/hooks/use-telemetry';
 import { buildRoute, ROUTES } from '@/utils/routes';
+import { TelemetryEvent } from '@/utils/telemetry';
 import { cn } from '@/utils/ui';
 import { ResolveAgentIntegrationGuide } from './agent-integration-guides/resolve-agent-integration-guide';
 import { ProviderDropdown } from './provider-dropdown';
@@ -220,6 +222,7 @@ export function AgentIntegrationsTab({ agent, integrationIdentifier }: AgentInte
   const queryClient = useQueryClient();
   const { currentEnvironment } = useEnvironment();
   const has = useHasPermission();
+  const track = useTelemetry();
 
   const canRemoveAgentIntegration = has({ permission: PermissionsEnum.AGENT_WRITE });
 
@@ -235,6 +238,11 @@ export function AgentIntegrationsTab({ agent, integrationIdentifier }: AgentInte
     if (!currentEnvironment?.slug) {
       return;
     }
+
+    track(TelemetryEvent.AGENT_INTEGRATION_GUIDE_VIEWED, {
+      agentIdentifier: agent.identifier,
+      integrationIdentifier: nextIntegrationIdentifier,
+    });
 
     navigate(
       `${buildRoute(ROUTES.AGENT_DETAILS_INTEGRATIONS_DETAIL, {
@@ -331,6 +339,12 @@ export function AgentIntegrationsTab({ agent, integrationIdentifier }: AgentInte
       const removed = rows.find((row) => row._id === agentIntegrationId);
       const name = removed?.integration.name ?? 'Integration';
 
+      track(TelemetryEvent.AGENT_INTEGRATION_REMOVED, {
+        agentIdentifier: agent.identifier,
+        integrationIdentifier: removed?.integration.identifier,
+        providerId: removed?.integration.providerId,
+        channel: removed?.integration.channel,
+      });
       showSuccessToast('Integration removed', `${name} was unlinked from this agent.`);
       await queryClient.invalidateQueries({
         queryKey: getAgentIntegrationsQueryKey(currentEnvironment?._id, agent.identifier),

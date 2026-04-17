@@ -16,6 +16,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives
 import { TimeDisplayHoverCard } from '@/components/time-display-hover-card';
 import { requireEnvironment, useEnvironment } from '@/context/environment/hooks';
 import { useHasPermission } from '@/hooks/use-has-permission';
+import { useTelemetry } from '@/hooks/use-telemetry';
+import { TelemetryEvent } from '@/utils/telemetry';
 import { cn } from '@/utils/ui';
 
 type AgentSidebarWidgetProps = {
@@ -111,6 +113,7 @@ export function AgentSidebarWidget({ agent }: AgentSidebarWidgetProps) {
   const { currentEnvironment } = useEnvironment();
   const has = useHasPermission();
   const canWrite = has({ permission: PermissionsEnum.AGENT_WRITE });
+  const track = useTelemetry();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [name, setName] = useState(agent.name);
@@ -123,9 +126,18 @@ export function AgentSidebarWidget({ agent }: AgentSidebarWidgetProps) {
   const { isPending: isUpdatePending, mutateAsync: updateAgentAsync } = useMutation({
     mutationFn: (body: UpdateAgentBody) =>
       updateAgent(requireEnvironment(currentEnvironment, 'No environment selected'), agent.identifier, body),
-    onSuccess: async () => {
+    onSuccess: async (_data, body) => {
       await queryClient.invalidateQueries({
         queryKey: getAgentDetailQueryKey(currentEnvironment?._id, agent.identifier),
+      });
+
+      track(TelemetryEvent.AGENT_UPDATED, {
+        agentIdentifier: agent.identifier,
+        nameChanged: body.name !== undefined,
+        descriptionChanged: body.description !== undefined,
+        activeChanged: body.active !== undefined,
+        active: body.active,
+        devBridgeActiveChanged: body.devBridgeActive !== undefined,
       });
 
       showSuccessToast('Your changes were saved.', 'Agent updated');
