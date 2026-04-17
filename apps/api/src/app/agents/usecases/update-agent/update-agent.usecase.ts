@@ -1,15 +1,18 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { AnalyticsService } from '@novu/application-generic';
 import { AgentRepository, EnvironmentRepository } from '@novu/dal';
 import { EnvironmentTypeEnum } from '@novu/shared';
 import type { AgentResponseDto } from '../../dtos';
 import { toAgentResponse } from '../../mappers/agent-response.mapper';
+import { AgentAnalyticsEventsEnum } from '../../utils/analytics';
 import { UpdateAgentCommand } from './update-agent.command';
 
 @Injectable()
 export class UpdateAgent {
   constructor(
     private readonly agentRepository: AgentRepository,
-    private readonly environmentRepository: EnvironmentRepository
+    private readonly environmentRepository: EnvironmentRepository,
+    private readonly analyticsService: AnalyticsService
   ) {}
 
   async execute(command: UpdateAgentCommand): Promise<AgentResponseDto> {
@@ -111,6 +114,32 @@ export class UpdateAgent {
     if (!updated) {
       throw new NotFoundException(`Agent with identifier "${command.identifier}" was not found.`);
     }
+
+    const isBridgeOnlyUpdate = !hasGeneralFields && hasBridgeFields;
+    const eventName = isBridgeOnlyUpdate
+      ? AgentAnalyticsEventsEnum.AGENT_BRIDGE_CONFIGURED
+      : AgentAnalyticsEventsEnum.AGENT_UPDATED;
+
+    this.analyticsService.track(eventName, command.userId, {
+      _agent: updated._id,
+      agentIdentifier: updated.identifier,
+      ...(isBridgeOnlyUpdate
+        ? {
+            bridgeUrlChanged: command.bridgeUrl !== undefined,
+            devBridgeUrlChanged: command.devBridgeUrl !== undefined,
+            devBridgeActive: command.devBridgeActive,
+          }
+        : {
+            nameChanged: command.name !== undefined,
+            descriptionChanged: command.description !== undefined,
+            activeChanged: command.active !== undefined,
+            active: updated.active,
+            behaviorChanged: hasBehaviorFields,
+            bridgeChanged: hasBridgeFields,
+          }),
+      _environment: command.environmentId,
+      _organization: command.organizationId,
+    });
 
     return toAgentResponse(updated);
   }

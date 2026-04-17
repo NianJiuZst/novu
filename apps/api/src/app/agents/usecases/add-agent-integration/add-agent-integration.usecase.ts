@@ -1,8 +1,10 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { AnalyticsService } from '@novu/application-generic';
 import { AgentIntegrationRepository, AgentRepository, IntegrationRepository } from '@novu/dal';
 
 import { toAgentIntegrationResponse } from '../../mappers/agent-response.mapper';
 import type { AgentIntegrationResponseDto } from '../../dtos';
+import { AgentAnalyticsEventsEnum } from '../../utils/analytics';
 import { AddAgentIntegrationCommand } from './add-agent-integration.command';
 
 @Injectable()
@@ -10,7 +12,8 @@ export class AddAgentIntegration {
   constructor(
     private readonly agentRepository: AgentRepository,
     private readonly integrationRepository: IntegrationRepository,
-    private readonly agentIntegrationRepository: AgentIntegrationRepository
+    private readonly agentIntegrationRepository: AgentIntegrationRepository,
+    private readonly analyticsService: AnalyticsService
   ) {}
 
   async execute(command: AddAgentIntegrationCommand): Promise<AgentIntegrationResponseDto> {
@@ -61,6 +64,18 @@ export class AddAgentIntegration {
       _integrationId: integration._id,
       _environmentId: command.environmentId,
       _organizationId: command.organizationId,
+    });
+
+    this.analyticsService.track(AgentAnalyticsEventsEnum.AGENT_INTEGRATION_ADDED, command.userId, {
+      _agent: agent._id,
+      _integration: integration._id,
+      _agentIntegration: link._id,
+      agentIdentifier: command.agentIdentifier,
+      integrationIdentifier: integration.identifier,
+      providerId: integration.providerId,
+      channel: integration.channel,
+      _environment: command.environmentId,
+      _organization: command.organizationId,
     });
 
     return toAgentIntegrationResponse(link, integration);

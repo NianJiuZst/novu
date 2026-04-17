@@ -6,7 +6,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PinoLogger, shortId } from '@novu/application-generic';
+import { AnalyticsService, PinoLogger, shortId } from '@novu/application-generic';
 import {
   AgentRepository,
   ConversationActivityRepository,
@@ -23,6 +23,7 @@ import { AgentConfigResolver, ResolvedAgentConfig } from '../../services/agent-c
 import { AgentConversationService } from '../../services/agent-conversation.service';
 import { BridgeExecutorService } from '../../services/bridge-executor.service';
 import { ChatSdkService } from '../../services/chat-sdk.service';
+import { AgentAnalyticsEventsEnum } from '../../utils/analytics';
 import { HandleAgentReplyCommand } from './handle-agent-reply.command';
 
 @Injectable()
@@ -37,6 +38,7 @@ export class HandleAgentReply {
     private readonly bridgeExecutor: BridgeExecutorService,
     private readonly agentConfigResolver: AgentConfigResolver,
     private readonly conversationService: AgentConversationService,
+    private readonly analyticsService: AnalyticsService,
     private readonly logger: PinoLogger
   ) {}
 
@@ -74,6 +76,13 @@ export class HandleAgentReply {
         agentName
       );
 
+      this.trackReplyHandled(command, conversation, {
+        hasReply: false,
+        hasUpdate: true,
+        hasResolve: false,
+        signalsCount: 0,
+      });
+
       return { status: 'update_sent' };
     }
 
@@ -107,7 +116,35 @@ export class HandleAgentReply {
       await this.executeResolveSignal(command, config!, conversation, channel, command.resolve);
     }
 
+    this.trackReplyHandled(command, conversation, {
+      hasReply: Boolean(command.reply),
+      hasUpdate: false,
+      hasResolve: Boolean(command.resolve),
+      signalsCount: command.signals?.length ?? 0,
+    });
+
     return { status: 'ok' };
+  }
+
+  private trackReplyHandled(
+    command: HandleAgentReplyCommand,
+    conversation: ConversationEntity,
+    summary: { hasReply: boolean; hasUpdate: boolean; hasResolve: boolean; signalsCount: number }
+  ): void {
+    try {
+      this.analyticsService.track(AgentAnalyticsEventsEnum.AGENT_REPLY_HANDLED, command.userId, {
+        _agent: conversation._agentId,
+        _conversation: conversation._id,
+        agentIdentifier: command.agentIdentifier,
+        integrationIdentifier: command.integrationIdentifier,
+        channel: conversation.channels[0]?.platform,
+        ...summary,
+        _environment: command.environmentId,
+        _organization: command.organizationId,
+      });
+    } catch (err) {
+      this.logger.warn(err, `[agent:${command.agentIdentifier}] Failed to emit reply analytics`);
+    }
   }
 
   private async resolveValidatedAgentNameForDelivery(
