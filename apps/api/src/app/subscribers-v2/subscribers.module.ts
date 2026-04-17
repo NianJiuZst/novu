@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import {
   analyticsService,
-  CacheInMemoryProviderService,
   CreateOrUpdateSubscriberUseCase,
+  cacheInMemoryProviderService,
   cacheService,
   featureFlagsService,
   GetPreferences,
@@ -49,7 +49,6 @@ const USE_CASES = [
   IntegrationRepository,
   CreateOrUpdateSubscriberUseCase,
   UpdateSubscriber,
-  CacheInMemoryProviderService,
   GetSubscriber,
   PatchSubscriber,
   RemoveSubscriber,
@@ -82,6 +81,7 @@ const DAL_MODELS = [
   providers: [
     ...USE_CASES,
     ...DAL_MODELS,
+    cacheInMemoryProviderService,
     cacheService,
     InvalidateCacheService,
     analyticsService,

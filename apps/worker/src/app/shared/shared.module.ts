@@ -8,6 +8,7 @@ import {
   CreateNotificationJobs,
   CreateOrUpdateSubscriberUseCase,
   CreateTenant,
+  cacheInMemoryProviderService,
   cacheService,
   clickHouseBatchService,
   clickHouseService,
@@ -109,6 +110,7 @@ const ANALYTICS_PROVIDERS = [
 const PROVIDERS = [
   analyticsService,
   BulkCreateExecutionDetails,
+  cacheInMemoryProviderService,
   cacheService,
   CloudflareSchedulerService,
   ComputeJobWaitDurationService,

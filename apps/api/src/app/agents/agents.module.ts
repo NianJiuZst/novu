@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { cacheInMemoryProviderService } from '@novu/application-generic';
 import {
   ChannelConnectionRepository,
   ChannelEndpointRepository,
@@ -33,7 +32,6 @@ import { USE_CASES } from './usecases';
     AgentConversationService,
     AgentInboundHandler,
     BridgeExecutorService,
-    cacheInMemoryProviderService,
     ChatSdkService,
   ],
   exports: [...USE_CASES, ChatSdkService],

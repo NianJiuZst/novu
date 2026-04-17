@@ -3,7 +3,7 @@ import { ForwardReference } from '@nestjs/common/interfaces/modules/forward-refe
 import { Type } from '@nestjs/common/interfaces/type.interface';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ApiExcludeController } from '@nestjs/swagger';
-import { cacheService, TracingModule } from '@novu/application-generic';
+import { cacheInMemoryProviderService, cacheService, TracingModule } from '@novu/application-generic';
 import { Client, NovuModule } from '@novu/framework/nest';
 import { usageLimitsWorkflow, usageReportWorkflow } from '@novu/notifications';
 import { isClerkEnabled } from '@novu/shared';
@@ -184,6 +184,7 @@ const providers: Provider[] = [
     provide: APP_INTERCEPTOR,
     useClass: AnalyticsLogsInterceptor,
   },
+  cacheInMemoryProviderService,
   cacheService,
 ];
 

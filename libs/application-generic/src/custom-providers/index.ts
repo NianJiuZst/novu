@@ -29,15 +29,14 @@ export const cacheInMemoryProviderService = {
 
 export const cacheService = {
   provide: CacheService,
-  useFactory: async (): Promise<CacheService> => {
-    const factoryCacheInMemoryProviderService = cacheInMemoryProviderService.useFactory();
-
-    const service = new CacheService(factoryCacheInMemoryProviderService);
+  useFactory: async (inMemoryProvider: CacheInMemoryProviderService): Promise<CacheService> => {
+    const service = new CacheService(inMemoryProvider);
 
     await service.initialize();
 
     return service;
   },
+  inject: [CacheInMemoryProviderService],
 };
 
 export const dalService = {

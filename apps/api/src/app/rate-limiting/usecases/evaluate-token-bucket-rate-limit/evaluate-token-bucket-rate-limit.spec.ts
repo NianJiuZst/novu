@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { CacheService, cacheService as inMemoryCacheService } from '@novu/application-generic';
+import { CacheService, cacheInMemoryProviderService, cacheService } from '@novu/application-generic';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { v4 as uuid } from 'uuid';
@@ -356,7 +356,8 @@ describe('EvaluateTokenBucketRateLimit', () => {
                 const refillPerWindow = (maxTokens * mockProportionRefill) / mockWindowDuration;
 
                 before(async () => {
-                  const cacheServiceInitialized = await inMemoryCacheService.useFactory();
+                  const inMemoryProvider = await cacheInMemoryProviderService.useFactory();
+                  const cacheServiceInitialized = await cacheService.useFactory(inMemoryProvider);
                   testContext = {
                     redis: EvaluateTokenBucketRateLimit.getCacheClient(cacheServiceInitialized),
                   };
