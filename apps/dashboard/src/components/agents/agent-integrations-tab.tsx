@@ -424,7 +424,7 @@ export function AgentIntegrationsTab({ agent, integrationIdentifier }: AgentInte
                       const int = link.integration;
                       const providerMeta = novuProviders.find((p) => p.id === int.providerId);
                       const isSelected = integrationIdentifier === int.identifier;
-                      const showActionNeeded = !int.active;
+                      const showActionNeeded = !link.connectedAt;
 
                       return (
                         <button
@@ -449,7 +449,7 @@ export function AgentIntegrationsTab({ agent, integrationIdentifier }: AgentInte
                           <span className="flex shrink-0 items-center gap-1">
                             {showActionNeeded ? (
                               <RiErrorWarningFill
-                                className="text-error-base size-3 shrink-0"
+                                className="text-warning-base size-3 shrink-0"
                                 aria-label="Action needed"
                               />
                             ) : (
