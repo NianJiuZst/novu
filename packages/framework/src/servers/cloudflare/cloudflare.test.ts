@@ -301,8 +301,8 @@ describe('helpers: rememberLastRef / replyToLastConversation', () => {
 });
 
 describe('toMessageList()', () => {
-  it('should map history + current message into LLM messages', () => {
-    const { toMessageList } = require('./convert-history');
+  it('should map history + current message into LLM messages', async () => {
+    const { toMessageList } = await import('./convert-history');
 
     const body = createMockBridgeRequest({
       history: [
@@ -327,8 +327,8 @@ describe('toMessageList()', () => {
     ]);
   });
 
-  it('should handle empty history with only current message', () => {
-    const { toMessageList } = require('./convert-history');
+  it('should handle empty history with only current message', async () => {
+    const { toMessageList } = await import('./convert-history');
 
     const body = createMockBridgeRequest({ history: [] });
     const ctx = new AgentContextImpl(body, 'test-secret');
@@ -338,8 +338,8 @@ describe('toMessageList()', () => {
     expect(messages).toEqual([{ role: 'user', content: 'Hello bot!' }]);
   });
 
-  it('should handle history only (no current message)', () => {
-    const { toMessageList } = require('./convert-history');
+  it('should handle history only (no current message)', async () => {
+    const { toMessageList } = await import('./convert-history');
 
     const body = createMockBridgeRequest({
       message: null,
@@ -354,8 +354,8 @@ describe('toMessageList()', () => {
     expect(messages).toEqual([{ role: 'user', content: 'Previous msg' }]);
   });
 
-  it('should map system role entries', () => {
-    const { toMessageList } = require('./convert-history');
+  it('should map system role entries', async () => {
+    const { toMessageList } = await import('./convert-history');
 
     const body = createMockBridgeRequest({
       message: null,
