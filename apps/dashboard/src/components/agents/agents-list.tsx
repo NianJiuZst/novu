@@ -84,10 +84,6 @@ export function AgentsList() {
       createAgent(requireEnvironment(currentEnvironment, 'No environment selected'), body),
     onSuccess: async (_data, body) => {
       await queryClient.invalidateQueries({ queryKey: [AGENTS_LIST_QUERY_KEY] });
-      track(TelemetryEvent.AGENT_CREATED, {
-        agentIdentifier: body.identifier,
-        hasDescription: Boolean(body.description),
-      });
       showSuccessToast('Agent created', 'Your agent is ready to use.');
     },
     onError: (err: Error) => {
@@ -100,12 +96,8 @@ export function AgentsList() {
   const deleteMutation = useMutation({
     mutationFn: (identifier: string) =>
       deleteAgent(requireEnvironment(currentEnvironment, 'No environment selected'), identifier),
-    onSuccess: async (_data, identifier) => {
+    onSuccess: async () => {
       setAgentToDelete(null);
-      track(TelemetryEvent.AGENT_DELETED, {
-        agentIdentifier: identifier,
-        source: 'list',
-      });
       showSuccessToast('Agent deleted', 'The agent was removed.');
 
       const environment = requireEnvironment(currentEnvironment, 'No environment selected');

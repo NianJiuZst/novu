@@ -115,6 +115,22 @@ export class UpdateAgent {
       throw new NotFoundException(`Agent with identifier "${command.identifier}" was not found.`);
     }
 
+    const hadUsableBridgeBefore = Boolean(
+      existing.bridgeUrl || (existing.devBridgeActive && existing.devBridgeUrl)
+    );
+    const hasUsableBridgeAfter = Boolean(updated.bridgeUrl || (updated.devBridgeActive && updated.devBridgeUrl));
+
+    if (!hadUsableBridgeBefore && hasUsableBridgeAfter) {
+      this.analyticsService.track(AgentAnalyticsEventsEnum.AGENT_BRIDGE_CONNECTED, command.userId, {
+        _agent: updated._id,
+        agentIdentifier: updated.identifier,
+        hasProductionBridge: Boolean(updated.bridgeUrl),
+        hasActiveDevBridge: Boolean(updated.devBridgeActive && updated.devBridgeUrl),
+        _environment: command.environmentId,
+        _organization: command.organizationId,
+      });
+    }
+
     const isBridgeOnlyUpdate = !hasGeneralFields && hasBridgeFields;
     const eventName = isBridgeOnlyUpdate
       ? AgentAnalyticsEventsEnum.AGENT_BRIDGE_CONFIGURED

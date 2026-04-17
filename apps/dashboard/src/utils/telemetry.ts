@@ -115,12 +115,7 @@ export enum TelemetryEvent {
   AGENTS_EARLY_ACCESS_OPENED = 'Agents early access opened - [Agents]',
   AGENTS_EARLY_ACCESS_REQUESTED = 'Agents early access requested - [Agents]',
   AGENT_CREATE_DIALOG_OPENED = 'Agent create dialog opened - [Agents]',
-  AGENT_CREATED = 'Agent created - [Agents]',
   AGENT_DETAILS_PAGE_VISIT = 'Agent details page visit - [Agents]',
   AGENT_DETAILS_TAB_CHANGED = 'Agent details tab changed - [Agents]',
-  AGENT_UPDATED = 'Agent updated - [Agents]',
-  AGENT_DELETED = 'Agent deleted - [Agents]',
-  AGENT_INTEGRATION_ADDED = 'Agent integration added - [Agents]',
-  AGENT_INTEGRATION_REMOVED = 'Agent integration removed - [Agents]',
   AGENT_INTEGRATION_GUIDE_VIEWED = 'Agent integration guide viewed - [Agents]',
 }

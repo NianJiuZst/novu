@@ -24,9 +24,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/primitives
 import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner-helpers';
 import { requireEnvironment, useEnvironment } from '@/context/environment/hooks';
 import { useFetchIntegrations } from '@/hooks/use-fetch-integrations';
-import { useTelemetry } from '@/hooks/use-telemetry';
 import { QueryKeys } from '@/utils/query-keys';
-import { TelemetryEvent } from '@/utils/telemetry';
 import { cn } from '@/utils/ui';
 
 type DropdownItem = {
@@ -130,7 +128,6 @@ export function ProviderDropdown({
   const { integrations } = useFetchIntegrations();
   const { currentEnvironment } = useEnvironment();
   const queryClient = useQueryClient();
-  const track = useTelemetry();
 
   const { supported: allSupported, comingSoon } = useMemo(
     () => buildDropdownItems(CONVERSATIONAL_PROVIDERS, integrations),
@@ -240,12 +237,6 @@ export function ProviderDropdown({
         if (!alreadyLinked) {
           try {
             await addAgentIntegrationMutation.mutateAsync(item.integration.identifier);
-            track(TelemetryEvent.AGENT_INTEGRATION_ADDED, {
-              agentIdentifier,
-              integrationIdentifier: item.integration.identifier,
-              providerId: item.providerId,
-              flow: 'existing_integration',
-            });
             showSuccessToast('Integration linked', `${item.integration.name} was added to this agent.`);
           } catch (linkErr) {
             if (!isAlreadyLinkedToAgentConflict(linkErr)) {
@@ -265,12 +256,6 @@ export function ProviderDropdown({
           name: uniqueName,
         });
         await addAgentIntegrationMutation.mutateAsync(created.identifier);
-        track(TelemetryEvent.AGENT_INTEGRATION_ADDED, {
-          agentIdentifier,
-          integrationIdentifier: created.identifier,
-          providerId: item.providerId,
-          flow: 'new_integration',
-        });
         showSuccessToast('Integration linked', `${created.name} was added to this agent.`);
         onSelect(item.providerId, created);
         setOpen(false);

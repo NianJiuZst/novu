@@ -339,12 +339,6 @@ export function AgentIntegrationsTab({ agent, integrationIdentifier }: AgentInte
       const removed = rows.find((row) => row._id === agentIntegrationId);
       const name = removed?.integration.name ?? 'Integration';
 
-      track(TelemetryEvent.AGENT_INTEGRATION_REMOVED, {
-        agentIdentifier: agent.identifier,
-        integrationIdentifier: removed?.integration.identifier,
-        providerId: removed?.integration.providerId,
-        channel: removed?.integration.channel,
-      });
       showSuccessToast('Integration removed', `${name} was unlinked from this agent.`);
       await queryClient.invalidateQueries({
         queryKey: getAgentIntegrationsQueryKey(currentEnvironment?._id, agent.identifier),

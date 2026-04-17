@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { decryptCredentials, FeatureFlagsService, PinoLogger } from '@novu/application-generic';
+import { AnalyticsService, decryptCredentials, FeatureFlagsService, PinoLogger } from '@novu/application-generic';
 import {
   AgentIntegrationRepository,
   AgentRepository,
@@ -9,6 +9,7 @@ import {
 } from '@novu/dal';
 import { FeatureFlagsKeysEnum } from '@novu/shared';
 import { AgentPlatformEnum } from '../dtos/agent-platform.enum';
+import { AgentAnalyticsEventsEnum } from '../utils/analytics';
 import { resolveAgentPlatform } from '../utils/provider-to-platform';
 
 export interface ResolvedAgentConfig {
@@ -50,6 +51,7 @@ export class AgentConfigResolver {
     private readonly agentIntegrationRepository: AgentIntegrationRepository,
     private readonly integrationRepository: IntegrationRepository,
     private readonly channelConnectionRepository: ChannelConnectionRepository,
+    private readonly analyticsService: AnalyticsService,
     private readonly logger: PinoLogger
   ) {}
 
@@ -121,6 +123,18 @@ export class AgentConfigResolver {
         },
         { $set: { connectedAt: new Date() } }
       );
+
+      this.analyticsService.track(AgentAnalyticsEventsEnum.AGENT_INTEGRATION_CONNECTED, '', {
+        _agent: agentId,
+        agentIdentifier: agent.identifier,
+        _integration: integration._id,
+        integrationIdentifier,
+        providerId: integration.providerId,
+        channel: integration.channel,
+        hasChannelConnection: Boolean(connection),
+        _environment: environmentId,
+        _organization: organizationId,
+      });
     }
 
     return {

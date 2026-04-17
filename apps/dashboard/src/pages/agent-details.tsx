@@ -106,12 +106,8 @@ export function AgentDetailsPage() {
   const deleteMutation = useMutation({
     mutationFn: (identifier: string) =>
       deleteAgent(requireEnvironment(currentEnvironment, 'No environment selected'), identifier),
-    onSuccess: async (_data, identifier) => {
+    onSuccess: async () => {
       setAgentToDelete(null);
-      track(TelemetryEvent.AGENT_DELETED, {
-        agentIdentifier: identifier,
-        source: 'details',
-      });
       showSuccessToast('Agent deleted', 'The agent was removed.');
       await queryClient.invalidateQueries({ queryKey: [AGENTS_LIST_QUERY_KEY] });
       navigate(agentsListPath);
