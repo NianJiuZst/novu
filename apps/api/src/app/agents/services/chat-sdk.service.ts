@@ -1,5 +1,5 @@
-import { BadRequestException, forwardRef, Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
-import { PinoLogger } from '@novu/application-generic';
+import { BadRequestException, forwardRef, Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { CacheInMemoryProviderService, PinoLogger } from '@novu/application-generic';
 import type { SentMessageInfo } from '@novu/framework';
 import type { AdapterPostableMessage, Chat, EmojiValue, Message, ReactionEvent, Thread } from 'chat';
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
@@ -50,13 +50,14 @@ interface CachedChat {
 }
 
 @Injectable()
-export class ChatSdkService implements OnModuleDestroy {
+export class ChatSdkService implements OnModuleInit, OnModuleDestroy {
   private readonly instances: LRUCache<string, CachedChat>;
   private readonly pendingCreations = new Map<string, Promise<Chat>>();
 
   constructor(
     private readonly logger: PinoLogger,
     private readonly agentConfigResolver: AgentConfigResolver,
+    private readonly cacheInMemoryProviderService: CacheInMemoryProviderService,
     @Inject(forwardRef(() => AgentInboundHandler))
     private readonly inboundHandler: AgentInboundHandler
   ) {
@@ -69,6 +70,10 @@ export class ChatSdkService implements OnModuleDestroy {
         });
       },
     });
+  }
+
+  async onModuleInit() {
+    await this.cacheInMemoryProviderService.initialize();
   }
 
   async handleWebhook(agentId: string, integrationIdentifier: string, req: ExpressRequest, res: ExpressResponse) {
@@ -304,23 +309,22 @@ export class ChatSdkService implements OnModuleDestroy {
     platform: AgentPlatformEnum,
     config: ResolvedAgentConfig
   ): Promise<Chat> {
-    const [{ Chat }, { createRedisState }] = await Promise.all([
+    const [{ Chat }, { createIORedisState }] = await Promise.all([
       esmImport('chat'),
-      esmImport('@chat-adapter/state-redis'),
+      esmImport('@chat-adapter/state-ioredis'),
     ]);
 
     const adapters = await this.buildAdapters(platform, config);
-    const redisHost = process.env.REDIS_HOST || 'localhost';
-    const redisPort = process.env.REDIS_PORT || '6379';
-    const redisScheme = process.env.REDIS_TLS_ENABLED === 'true' ? 'rediss' : 'redis';
-    const redisPassword = process.env.REDIS_PASSWORD;
-    const redisAuth = redisPassword ? `:${encodeURIComponent(redisPassword)}@` : '';
+    const client = this.cacheInMemoryProviderService.getClient();
+    if (!client) {
+      throw new Error('In-memory provider client is not available for the chat SDK state adapter');
+    }
 
     return new Chat({
       userName: `novu-agent-${instanceKey}`,
       adapters,
-      state: createRedisState({
-        url: `${redisScheme}://${redisAuth}${redisHost}:${redisPort}`,
+      state: createIORedisState({
+        client,
         keyPrefix: `novu:agent:${instanceKey}`,
       }),
       logger: 'silent',
@@ -350,7 +354,9 @@ export class ChatSdkService implements OnModuleDestroy {
       }
       case AgentPlatformEnum.TEAMS: {
         if (!credentials.clientId || !credentials.secretKey || !credentials.tenantId) {
-          throw new BadRequestException('Teams agent integration requires appId, appPassword, and appTenantId credentials');
+          throw new BadRequestException(
+            'Teams agent integration requires appId, appPassword, and appTenantId credentials'
+          );
         }
 
         const { createTeamsAdapter } = await esmImport('@chat-adapter/teams');
@@ -364,7 +370,12 @@ export class ChatSdkService implements OnModuleDestroy {
         };
       }
       case AgentPlatformEnum.WHATSAPP: {
-        if (!credentials.apiToken || !credentials.secretKey || !credentials.token || !credentials.phoneNumberIdentification) {
+        if (
+          !credentials.apiToken ||
+          !credentials.secretKey ||
+          !credentials.token ||
+          !credentials.phoneNumberIdentification
+        ) {
           throw new BadRequestException(
             'WhatsApp agent integration requires accessToken, appSecret, verifyToken, and phoneNumberId credentials'
           );
