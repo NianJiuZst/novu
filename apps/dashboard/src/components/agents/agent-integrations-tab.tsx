@@ -231,12 +231,6 @@ export function AgentIntegrationsTab({ agent, integrationIdentifier }: AgentInte
 
   const integrationsStorePath = ROUTES.INTEGRATIONS;
 
-  const activityTabPath = `${buildRoute(ROUTES.AGENT_DETAILS_TAB, {
-    environmentSlug: currentEnvironment?.slug ?? '',
-    agentIdentifier: encodeURIComponent(agent.identifier),
-    agentTab: 'activity',
-  })}${location.search}`;
-
   const navigateToGuide = (nextIntegrationIdentifier: string) => {
     if (!currentEnvironment?.slug) {
       return;
@@ -507,12 +501,6 @@ export function AgentIntegrationsTab({ agent, integrationIdentifier }: AgentInte
           <div className="border-stroke-soft border-t pt-3">
             <p className="text-text-soft text-label-xs font-medium leading-4">Quick actions</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link
-                to={activityTabPath}
-                className="border-stroke-soft text-text-strong hover:bg-bg-weak text-label-xs inline-flex h-7 items-center rounded-md border bg-transparent px-3 font-medium transition-colors"
-              >
-                View activity
-              </Link>
               <Link
                 to={integrationsStorePath}
                 className="border-stroke-soft text-text-strong hover:bg-bg-weak text-label-xs inline-flex h-7 items-center rounded-md border bg-transparent px-3 font-medium transition-colors"

@@ -1,12 +1,4 @@
-import { RiArrowRightLine, RiRobot2Line } from 'react-icons/ri';
-import { Link, useLocation } from 'react-router-dom';
-import type { AgentResponse } from '@/api/agents';
-import { useEnvironment } from '@/context/environment/hooks';
-import { buildRoute, ROUTES } from '@/utils/routes';
-
-type RecentConversationsSectionProps = {
-  agent: AgentResponse;
-};
+import { RiRobot2Line } from 'react-icons/ri';
 
 function SkeletonBar({ className }: { className?: string }) {
   return (
@@ -75,29 +67,13 @@ function EmptyStateIllustration() {
   );
 }
 
-export function RecentConversationsSection({ agent }: RecentConversationsSectionProps) {
-  const { currentEnvironment } = useEnvironment();
-  const location = useLocation();
-
-  const activityTabPath = `${buildRoute(ROUTES.AGENT_DETAILS_TAB, {
-    environmentSlug: currentEnvironment?.slug ?? '',
-    agentIdentifier: encodeURIComponent(agent.identifier),
-    agentTab: 'activity',
-  })}${location.search}`;
-
+export function RecentConversationsSection() {
   return (
     <div className="bg-bg-weak flex flex-col rounded-[10px] p-1">
       <div className="flex items-center justify-between px-2 py-1.5">
         <span className="text-text-soft font-code text-[11px] font-medium uppercase leading-4 tracking-wider">
           Recent conversations
         </span>
-        <Link
-          to={activityTabPath}
-          className="text-text-sub hover:text-text-strong flex items-center gap-0.5 rounded-lg p-1.5 text-label-xs font-medium transition-colors"
-        >
-          View all activity
-          <RiArrowRightLine className="size-4" />
-        </Link>
       </div>
 
       <div className="bg-bg-white flex h-[300px] flex-col items-center justify-center overflow-hidden rounded-md shadow-[0px_0px_0px_1px_rgba(25,28,33,0.04),0px_1px_2px_0px_rgba(25,28,33,0.06),0px_0px_2px_0px_rgba(0,0,0,0.08)]">
