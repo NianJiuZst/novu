@@ -86,7 +86,7 @@ describe('validateNovuSignature()', () => {
     const timestamp = Date.now();
     const hash = await createHmacSubtle(secret, `${timestamp}.${JSON.stringify(body)}`);
 
-    return `${timestamp}=${timestamp},v1=${hash}`;
+    return `t=${timestamp},v1=${hash}`;
   }
 
   it('should pass for a valid signature', async () => {
@@ -126,9 +126,17 @@ describe('validateNovuSignature()', () => {
   it('should throw SignatureExpiredError for old timestamps', async () => {
     const oldTimestamp = Date.now() - 1000 * 60 * 60;
     const hash = await createHmacSubtle(secretKey, `${oldTimestamp}.${JSON.stringify(payload)}`);
-    const header = `${oldTimestamp}=${oldTimestamp},v1=${hash}`;
+    const header = `t=${oldTimestamp},v1=${hash}`;
 
     await expect(validateNovuSignature(payload, header, secretKey, true)).rejects.toThrow('Signature expired');
+  });
+
+  it('should throw SignatureVersionInvalidError for wrong version', async () => {
+    const timestamp = Date.now();
+    const hash = await createHmacSubtle(secretKey, `${timestamp}.${JSON.stringify(payload)}`);
+    const header = `t=${timestamp},v2=${hash}`;
+
+    await expect(validateNovuSignature(payload, header, secretKey, true)).rejects.toThrow('Signature version is invalid');
   });
 });
 
@@ -252,13 +260,13 @@ describe('helpers: rememberLastRef / replyToLastConversation', () => {
   it('round-trips a ref through setState / state', async () => {
     const { rememberLastRef, replyToLastConversation } = await import('./helpers');
 
-    let storedState: Record<string, unknown> = {};
+    let storedState: Record<string, unknown> = { other: 'keep-me' };
 
     const fakeAgent = {
       env: { NOVU_SECRET_KEY: 'test-key' },
       state: storedState,
-      setState(patch: Record<string, unknown>) {
-        Object.assign(storedState, patch);
+      setState(newState: Record<string, unknown>) {
+        storedState = newState;
         this.state = storedState;
       },
     };
@@ -273,6 +281,7 @@ describe('helpers: rememberLastRef / replyToLastConversation', () => {
       conversationId: 'conv-456',
       integrationIdentifier: 'slack-main',
     });
+    expect(storedState.other).toBe('keep-me');
 
     await replyToLastConversation(fakeAgent, 'ping');
 

@@ -165,10 +165,13 @@ export function withNovuAgent<TBase extends Constructor>(Base: TBase) {
         };
 
         const handler = handlerMap[event as AgentEventEnum];
-        if (handler) {
-          await handler(ctx);
+        if (!handler) {
+          console.warn(`[novu-agent] Unknown event: ${event}`);
+
+          return Response.json({ error: `Unknown event: ${event}` }, { status: 400 });
         }
 
+        await handler(ctx);
         await ctx.flush();
 
         return Response.json({ status: 'ok' });
@@ -183,5 +186,5 @@ export function withNovuAgent<TBase extends Constructor>(Base: TBase) {
     }
   }
 
-  return NovuAgentMixin as unknown as TBase & NovuAgentStatics;
+  return NovuAgentMixin as unknown as TBase & NovuAgentStatics & (new (...args: any[]) => NovuAgentInstance);
 }

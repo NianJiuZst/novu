@@ -35,7 +35,7 @@ interface StatefulAgent {
  * Call this inside `onNovuMessage` / `onNovuAction` / etc.
  */
 export function rememberLastRef(agent: StatefulAgent, ctx: AgentContext): void {
-  agent.setState({ [STATE_KEY]: ctx.serialize() });
+  agent.setState({ ...agent.state, [STATE_KEY]: ctx.serialize() });
 }
 
 /**
