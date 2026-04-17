@@ -49,9 +49,6 @@ export const initializeSentry = () => {
         /limit exceeded/i,
         /Failed to fetch/i,
         /Fetch error: Failed to fetch/i,
-        /removeChild on Node/i,
-        /insertBefore on Node/i,
-        /Invalid change range/i,
       ],
       beforeSend(event, hint) {
         const error = hint?.originalException;
