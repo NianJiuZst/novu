@@ -1,5 +1,6 @@
 import { MiddlewareConsumer, ModuleMetadata } from '@nestjs/common';
 import {
+  cacheInMemoryProviderService,
   cacheService,
   featureFlagsService,
   InMemoryLRUCacheService,
@@ -27,6 +28,7 @@ export function getEEModuleConfig(): ModuleMetadata {
       ApiKeyStrategy,
       JwtSubscriberStrategy,
       AuthService,
+      cacheInMemoryProviderService,
       cacheService,
       featureFlagsService,
       InMemoryLRUCacheService,
