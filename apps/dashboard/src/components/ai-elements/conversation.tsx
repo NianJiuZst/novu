@@ -25,13 +25,13 @@ export const ConversationContent = ({ className, ...props }: ConversationContent
   <StickToBottom.Content className={cn('flex flex-col gap-8 p-4', className)} {...props} />
 );
 
-export type ConversationEmptyStateProps = ComponentProps<'div'> & {
+type ConversationEmptyStateProps = ComponentProps<'div'> & {
   title?: string;
   description?: string;
   icon?: React.ReactNode;
 };
 
-export const ConversationEmptyState = ({
+const ConversationEmptyState = ({
   className,
   title = 'No messages yet',
   description = 'Start a conversation to see messages here',

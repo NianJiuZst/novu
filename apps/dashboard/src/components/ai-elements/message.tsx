@@ -47,20 +47,20 @@ export const MessageContent = ({ children, className, ...props }: MessageContent
   </div>
 );
 
-export type MessageActionsProps = ComponentProps<'div'>;
+type MessageActionsProps = ComponentProps<'div'>;
 
-export const MessageActions = ({ className, children, ...props }: MessageActionsProps) => (
+const MessageActions = ({ className, children, ...props }: MessageActionsProps) => (
   <div className={cn('flex items-center gap-1', className)} {...props}>
     {children}
   </div>
 );
 
-export type MessageActionProps = ComponentProps<typeof Button> & {
+type MessageActionProps = ComponentProps<typeof Button> & {
   tooltip?: string;
   label?: string;
 };
 
-export const MessageAction = ({
+const MessageAction = ({
   tooltip,
   children,
   label,
@@ -113,12 +113,12 @@ const useMessageBranch = () => {
   return context;
 };
 
-export type MessageBranchProps = HTMLAttributes<HTMLDivElement> & {
+type MessageBranchProps = HTMLAttributes<HTMLDivElement> & {
   defaultBranch?: number;
   onBranchChange?: (branchIndex: number) => void;
 };
 
-export const MessageBranch = ({ defaultBranch = 0, onBranchChange, className, ...props }: MessageBranchProps) => {
+const MessageBranch = ({ defaultBranch = 0, onBranchChange, className, ...props }: MessageBranchProps) => {
   const [currentBranch, setCurrentBranch] = useState(defaultBranch);
   const [branches, setBranches] = useState<ReactElement[]>([]);
 
@@ -153,9 +153,9 @@ export const MessageBranch = ({ defaultBranch = 0, onBranchChange, className, ..
   );
 };
 
-export type MessageBranchContentProps = HTMLAttributes<HTMLDivElement>;
+type MessageBranchContentProps = HTMLAttributes<HTMLDivElement>;
 
-export const MessageBranchContent = ({ children, ...props }: MessageBranchContentProps) => {
+const MessageBranchContent = ({ children, ...props }: MessageBranchContentProps) => {
   const { currentBranch, setBranches, branches } = useMessageBranch();
   const childrenArray = Array.isArray(children) ? children : [children];
 
@@ -177,11 +177,11 @@ export const MessageBranchContent = ({ children, ...props }: MessageBranchConten
   ));
 };
 
-export type MessageBranchSelectorProps = HTMLAttributes<HTMLDivElement> & {
+type MessageBranchSelectorProps = HTMLAttributes<HTMLDivElement> & {
   from: UIMessage['role'];
 };
 
-export const MessageBranchSelector = ({ className, from, ...props }: MessageBranchSelectorProps) => {
+const MessageBranchSelector = ({ className, from, ...props }: MessageBranchSelectorProps) => {
   const { totalBranches } = useMessageBranch();
 
   // Don't render if there's only one branch
@@ -194,9 +194,9 @@ export const MessageBranchSelector = ({ className, from, ...props }: MessageBran
   );
 };
 
-export type MessageBranchPreviousProps = ComponentProps<typeof Button>;
+type MessageBranchPreviousProps = ComponentProps<typeof Button>;
 
-export const MessageBranchPrevious = ({ children, ...props }: MessageBranchPreviousProps) => {
+const MessageBranchPrevious = ({ children, ...props }: MessageBranchPreviousProps) => {
   const { goToPrevious, totalBranches } = useMessageBranch();
 
   return (
@@ -215,9 +215,9 @@ export const MessageBranchPrevious = ({ children, ...props }: MessageBranchPrevi
   );
 };
 
-export type MessageBranchNextProps = ComponentProps<typeof Button>;
+type MessageBranchNextProps = ComponentProps<typeof Button>;
 
-export const MessageBranchNext = ({ children, ...props }: MessageBranchNextProps) => {
+const MessageBranchNext = ({ children, ...props }: MessageBranchNextProps) => {
   const { goToNext, totalBranches } = useMessageBranch();
 
   return (
@@ -236,9 +236,9 @@ export const MessageBranchNext = ({ children, ...props }: MessageBranchNextProps
   );
 };
 
-export type MessageBranchPageProps = HTMLAttributes<HTMLSpanElement>;
+type MessageBranchPageProps = HTMLAttributes<HTMLSpanElement>;
 
-export const MessageBranchPage = ({ className, ...props }: MessageBranchPageProps) => {
+const MessageBranchPage = ({ className, ...props }: MessageBranchPageProps) => {
   const { currentBranch, totalBranches } = useMessageBranch();
 
   return (
@@ -266,9 +266,9 @@ export const MessageResponse = memo(
 
 MessageResponse.displayName = 'MessageResponse';
 
-export type MessageToolbarProps = ComponentProps<'div'>;
+type MessageToolbarProps = ComponentProps<'div'>;
 
-export const MessageToolbar = ({ className, children, ...props }: MessageToolbarProps) => (
+const MessageToolbar = ({ className, children, ...props }: MessageToolbarProps) => (
   <div className={cn('mt-4 flex w-full items-center justify-between gap-4', className)} {...props}>
     {children}
   </div>
