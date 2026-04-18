@@ -26,7 +26,9 @@ const VARIABLE_PREFIXES = {
 } as const;
 
 /**
- * Parse a variable path to determine its type and extract the key
+ * Parse a variable path to determine its type and extract the key.
+ * Normalizes the key by collapsing consecutive dots and trimming leading/trailing dots
+ * to prevent empty path segments from reaching the schema editor.
  */
 function parseVariablePath(variablePath: string): VariableInfo | null {
   const prefixMap: Array<{ prefix: string; type: VariableType }> = [
@@ -37,9 +39,18 @@ function parseVariablePath(variablePath: string): VariableInfo | null {
 
   for (const { prefix, type } of prefixMap) {
     if (variablePath.startsWith(prefix)) {
+      const rawKey = variablePath.replace(prefix, '');
+      const normalizedKey = rawKey
+        .replace(/\.{2,}/g, '.')
+        .replace(/^\.+|\.+$/g, '');
+
+      if (!normalizedKey) {
+        return null;
+      }
+
       return {
         type,
-        key: variablePath.replace(prefix, ''),
+        key: normalizedKey,
         fullPath: variablePath,
       };
     }
