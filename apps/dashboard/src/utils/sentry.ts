@@ -41,6 +41,11 @@ export const initializeSentry = () => {
         /forbidden/i, // 403
         /not found/i, // 404
         /unprocessable entity/i, // 422
+        /Unexpected end of JSON input/i,
+        /Failed to execute 'json' on 'Response'/i,
+        /Clerk: Failed to load Clerk/i,
+        'Load failed',
+        /The object can not be found here/i,
       ],
       /*
        * This sets the sample rate to be 10%. You may want this to be 100% while
