@@ -31,6 +31,7 @@ export const initializeSentry = () => {
       ignoreErrors: [
         'Network Error',
         'network error (Error)',
+        'NetworkError when attempting to fetch resource',
         'ResizeObserver loop limit exceeded',
         'ResizeObserver loop completed with undelivered notifications',
         'Non-Error exception captured',
@@ -41,6 +42,17 @@ export const initializeSentry = () => {
         /forbidden/i, // 403
         /not found/i, // 404
         /unprocessable entity/i, // 422
+        'Chat API Error',
+        /Blocked by AdGuard/,
+        /Clerk: Failed to load Clerk/,
+        'Load failed',
+        'Unexpected end of JSON input',
+        "Failed to execute 'json' on 'Response'",
+        "The object can not be found here",
+        /EditorView\.update are not allowed/,
+        'signal is aborted without reason',
+        /The user aborted a request/,
+        /Promise was rejected because the browsing context is going away/,
       ],
       /*
        * This sets the sample rate to be 10%. You may want this to be 100% while

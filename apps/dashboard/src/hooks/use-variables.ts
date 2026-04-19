@@ -32,44 +32,60 @@ export function useVariables(viewRef: React.RefObject<EditorView | null>, onChan
     (newValue: string) => {
       if (!selectedVariable || !viewRef.current || isUpdatingRef.current) return;
 
-      try {
-        isUpdatingRef.current = true;
-        const { from, to } = selectedVariable;
-        const view = viewRef.current;
-        const docLength = view.state.doc.length;
+      isUpdatingRef.current = true;
+      const { from, to } = selectedVariable;
+      const view = viewRef.current;
+      const docLength = view.state.doc.length;
 
-        if (from > docLength) return;
-
-        const parsedVariable = parseVariable(newValue);
-        let newVariableText = parsedVariable?.liquidVariable ?? '';
-
-        if (!parsedVariable?.name) {
-          newVariableText = '';
-        }
-
-        const currentContent = view.state.doc.toString();
-        const contentAfterFrom = currentContent.slice(from);
-
-        const closingBracketsPos = contentAfterFrom.indexOf('}}');
-        const actualEnd = closingBracketsPos > -1 ? from + closingBracketsPos + 2 : to;
-        const clampedEnd = Math.min(actualEnd, docLength);
-
-        const changes = {
-          from,
-          to: clampedEnd,
-          insert: newVariableText,
-        };
-
-        view.dispatch({
-          changes,
-          selection: { anchor: from + newVariableText.length },
-        });
-
-        onChangeRef.current(view.state.doc.toString());
-
-        setSelectedVariable({ value: newValue, from, to: clampedEnd });
-      } finally {
+      if (from > docLength) {
         isUpdatingRef.current = false;
+
+        return;
+      }
+
+      const parsedVariable = parseVariable(newValue);
+      let newVariableText = parsedVariable?.liquidVariable ?? '';
+
+      if (!parsedVariable?.name) {
+        newVariableText = '';
+      }
+
+      const currentContent = view.state.doc.toString();
+      const contentAfterFrom = currentContent.slice(from);
+
+      const closingBracketsPos = contentAfterFrom.indexOf('}}');
+      const actualEnd = closingBracketsPos > -1 ? from + closingBracketsPos + 2 : to;
+      const clampedEnd = Math.min(actualEnd, docLength);
+
+      const changes = {
+        from,
+        to: clampedEnd,
+        insert: newVariableText,
+      };
+
+      const applyChanges = () => {
+        try {
+          view.dispatch({
+            changes,
+            selection: { anchor: from + newVariableText.length },
+          });
+
+          onChangeRef.current(view.state.doc.toString());
+          setSelectedVariable({ value: newValue, from, to: clampedEnd });
+        } finally {
+          isUpdatingRef.current = false;
+        }
+      };
+
+      try {
+        applyChanges();
+      } catch (e) {
+        if (e instanceof Error && e.message.includes('update is in progress')) {
+          isUpdatingRef.current = true;
+          requestAnimationFrame(applyChanges);
+        } else {
+          throw e;
+        }
       }
     },
     [selectedVariable, onChangeRef, viewRef]
