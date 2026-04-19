@@ -1,6 +1,15 @@
 import { DomainStatusEnum } from '@novu/shared';
 import { formatDistanceToNow } from 'date-fns';
-import { RiAlertFill, RiInformationLine, RiMore2Fill, RiRefreshLine, RiShieldCheckLine } from 'react-icons/ri';
+import { useState } from 'react';
+import {
+  RiAlertFill,
+  RiContractUpDownLine,
+  RiExpandUpDownLine,
+  RiInformationLine,
+  RiMore2Fill,
+  RiRefreshLine,
+  RiShieldCheckLine,
+} from 'react-icons/ri';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { DomainRouting } from '@/components/domains/domain-routing';
@@ -75,6 +84,7 @@ export function DomainDetailPage() {
   const { data: domain, isLoading, isFetching } = useFetchDomain(domainId);
   const { refresh: refreshDomain } = useRefreshDomain(domainId);
   const deleteDomain = useDeleteDomain();
+  const [isDnsCollapsed, setIsDnsCollapsed] = useState(false);
 
   const domainsHref = currentEnvironment?.slug
     ? buildRoute(ROUTES.DOMAINS, { environmentSlug: currentEnvironment.slug })
@@ -209,83 +219,100 @@ export function DomainDetailPage() {
 
               {/* DNS Records */}
               <div className="rounded-lg bg-neutral-alpha-50 p-1 space-y-1">
-                <p className="font-mono text-xs font-medium tracking-tight text-foreground-500 uppercase px-2 py-1">
-                  DNS Records
-                </p>
-
-                <div className="rounded-lg border bg-white p-3 space-y-3">
-                  {/* Card header row */}
-                  <div className="flex items-center gap-1 justify-between">
-                    <div className="flex items-center gap-1">
-                      <p className="text-sm font-medium text-foreground-900">
-                        Receiving emails <span className="font-normal text-foreground-400">(MX)</span>
-                      </p>
-                      <RiInformationLine className="size-4 shrink-0 text-foreground-400" />
-                    </div>
-                    <button
-                      className="text-foreground-500 hover:text-foreground-900 flex items-center gap-1 text-xs transition-colors"
-                      onClick={handleVerify}
-                      disabled={isFetching}
-                      type="button"
-                    >
-                      <RiRefreshLine className="size-3" />
-                      Refresh status
-                    </button>
-                  </div>
-
-                  <p className="text-xs font-medium text-foreground-400">
-                    Update your DNS records on Cloudflare to match the following:
+                <div className="flex items-center justify-between px-2 py-1">
+                  <p className="font-mono text-xs font-medium tracking-tight text-foreground-500 uppercase">
+                    DNS Records
                   </p>
+                  <button
+                    type="button"
+                    className="text-foreground-400 hover:text-foreground-900 transition-colors"
+                    onClick={() => setIsDnsCollapsed((prev) => !prev)}
+                    aria-expanded={!isDnsCollapsed}
+                    aria-label={isDnsCollapsed ? 'Expand DNS records' : 'Collapse DNS records'}
+                  >
+                    {isDnsCollapsed ? (
+                      <RiExpandUpDownLine className="size-3" />
+                    ) : (
+                      <RiContractUpDownLine className="size-3" />
+                    )}
+                  </button>
+                </div>
 
-                  <div className="rounded-lg overflow-hidden border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-xs w-[60px]">Type</TableHead>
-                          <TableHead className="text-xs">Name</TableHead>
-                          <TableHead className="text-xs">Content</TableHead>
-                          <TableHead className="text-xs w-[75px]">TTL</TableHead>
-                          <TableHead className="text-xs w-[75px]">Priority</TableHead>
-                          <TableHead className="text-xs w-[150px]">Status</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {isLoading ? (
+                {!isDnsCollapsed && (
+                  <div className="rounded-lg border bg-white p-3 space-y-3">
+                    {/* Card header row */}
+                    <div className="flex items-center gap-1 justify-between">
+                      <div className="flex items-center gap-1">
+                        <p className="text-sm font-medium text-foreground-900">
+                          Receiving emails <span className="font-normal text-foreground-400">(MX)</span>
+                        </p>
+                        <RiInformationLine className="size-4 shrink-0 text-foreground-400" />
+                      </div>
+                      <button
+                        className="text-foreground-500 hover:text-foreground-900 flex items-center gap-1 text-xs transition-colors"
+                        onClick={handleVerify}
+                        disabled={isFetching}
+                        type="button"
+                      >
+                        <RiRefreshLine className="size-3" />
+                        Refresh status
+                      </button>
+                    </div>
+
+                    <p className="text-xs font-medium text-foreground-400">
+                      Update your DNS records on Cloudflare to match the following:
+                    </p>
+
+                    <div className="rounded-lg overflow-hidden border">
+                      <Table>
+                        <TableHeader>
                           <TableRow>
-                            <TableCell colSpan={6}>
-                              <Skeleton className="h-8 w-full" />
-                            </TableCell>
+                            <TableHead className="text-xs w-[60px]">Type</TableHead>
+                            <TableHead className="text-xs">Name</TableHead>
+                            <TableHead className="text-xs">Content</TableHead>
+                            <TableHead className="text-xs w-[75px]">TTL</TableHead>
+                            <TableHead className="text-xs w-[75px]">Priority</TableHead>
+                            <TableHead className="text-xs w-[150px]">Status</TableHead>
                           </TableRow>
-                        ) : domain?.expectedDnsRecords?.length ? (
-                          domain.expectedDnsRecords.map((record, i) => (
-                            <TableRow key={i}>
-                              <TableCell className="font-mono text-xs font-medium text-foreground-500">
-                                {record.type}
-                              </TableCell>
-                              <TableCell className="font-mono text-xs font-medium text-foreground-500">
-                                {record.name}
-                              </TableCell>
-                              <TableCell className="max-w-[200px] truncate font-mono text-xs font-medium text-foreground-500">
-                                {record.content}
-                              </TableCell>
-                              <TableCell className="text-xs text-foreground-500">{record.ttl}</TableCell>
-                              <TableCell className="text-xs text-foreground-500">{record.priority}</TableCell>
-                              <TableCell>
-                                <MxRecordStatusBadge configured={domain.mxRecordConfigured} />
+                        </TableHeader>
+                        <TableBody>
+                          {isLoading ? (
+                            <TableRow>
+                              <TableCell colSpan={6}>
+                                <Skeleton className="h-8 w-full" />
                               </TableCell>
                             </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={6} className="text-foreground-400 text-center text-sm">
-                              No DNS records available.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
+                          ) : domain?.expectedDnsRecords?.length ? (
+                            domain.expectedDnsRecords.map((record, i) => (
+                              <TableRow key={i}>
+                                <TableCell className="font-mono text-xs font-medium text-foreground-500">
+                                  {record.type}
+                                </TableCell>
+                                <TableCell className="font-mono text-xs font-medium text-foreground-500">
+                                  {record.name}
+                                </TableCell>
+                                <TableCell className="max-w-[200px] truncate font-mono text-xs font-medium text-foreground-500">
+                                  {record.content}
+                                </TableCell>
+                                <TableCell className="text-xs text-foreground-500">{record.ttl}</TableCell>
+                                <TableCell className="text-xs text-foreground-500">{record.priority}</TableCell>
+                                <TableCell>
+                                  <MxRecordStatusBadge configured={domain.mxRecordConfigured} />
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={6} className="text-foreground-400 text-center text-sm">
+                                No DNS records available.
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Routing section */}
