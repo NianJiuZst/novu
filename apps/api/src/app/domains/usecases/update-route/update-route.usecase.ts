@@ -3,6 +3,7 @@ import { DomainRepository } from '@novu/dal';
 
 import { DomainResponseDto } from '../../dtos/domain-response.dto';
 import { toDomainResponse } from '../../mappers/domain-response.mapper';
+import { buildExpectedDnsRecords } from '../../utils/dns-records';
 import { UpdateRouteCommand } from './update-route.command';
 
 @Injectable()
@@ -51,6 +52,9 @@ export class UpdateRoute {
       command.organizationId
     );
 
-    return toDomainResponse(updated!);
+    return {
+      ...toDomainResponse(updated!),
+      expectedDnsRecords: buildExpectedDnsRecords(updated!.name),
+    };
   }
 }
