@@ -20,6 +20,7 @@ export type DomainResponse = {
   name: string;
   status: DomainStatusEnum;
   mxRecordConfigured: boolean;
+  dnsProvider?: string;
   routes: DomainRouteResponse[];
   _environmentId: string;
   _organizationId: string;

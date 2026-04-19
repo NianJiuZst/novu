@@ -21,6 +21,8 @@ export class DomainEntity {
 
   mxRecordConfigured: boolean;
 
+  dnsProvider?: string;
+
   routes: DomainRoute[];
 
   _environmentId: EnvironmentId;

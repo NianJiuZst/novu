@@ -21,6 +21,9 @@ const domainSchema = new Schema<DomainDBModel>(
       type: Schema.Types.Boolean,
       default: false,
     },
+    dnsProvider: {
+      type: Schema.Types.String,
+    },
     routes: [
       {
         address: { type: Schema.Types.String, required: true },

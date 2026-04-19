@@ -26,6 +26,9 @@ export class DomainResponseDto {
   @ApiProperty()
   mxRecordConfigured: boolean;
 
+  @ApiPropertyOptional()
+  dnsProvider?: string;
+
   @ApiProperty({ type: [DomainRouteResponseDto] })
   routes: DomainRouteResponseDto[];
 

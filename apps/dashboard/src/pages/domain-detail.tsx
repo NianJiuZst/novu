@@ -38,11 +38,29 @@ import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/primitives/table';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';
 import { useEnvironment } from '@/context/environment/hooks';
+import { DEFAULT_REGION, REGIONS } from '@/context/region/region-config';
 import { useFetchDomain, useRefreshDomain } from '@/hooks/use-domain';
 import { useDeleteDomain } from '@/hooks/use-domains';
 import { buildRoute, ROUTES } from '@/utils/routes';
 
 const DEMO_DOMAIN_SUFFIX = 'novu.co';
+
+function RegionCell() {
+  const region = REGIONS.find((r) => r.code === DEFAULT_REGION) ?? REGIONS[0];
+
+  if (!region) {
+    return null;
+  }
+
+  const regionLabel = region.awsRegion ? `${region.name} (${region.awsRegion})` : region.name;
+
+  return (
+    <div className="flex items-center justify-end gap-1.5">
+      <span className="text-base leading-none">{region.flag}</span>
+      <span className="text-sm">{regionLabel}</span>
+    </div>
+  );
+}
 
 function isDemoDomain(domainName: string): boolean {
   return domainName.endsWith(`.${DEMO_DOMAIN_SUFFIX}`) || domainName === DEMO_DOMAIN_SUFFIX;
@@ -203,6 +221,14 @@ export function DomainDetailPage() {
               <MetaRow label="Domain">
                 {isLoading ? <Skeleton className="h-4 w-32" /> : <span className="text-sm">{domain?.name}</span>}
               </MetaRow>
+              <MetaRow label="Provider">
+                {isLoading ? (
+                  <Skeleton className="h-4 w-24" />
+                ) : (
+                  <span className="text-sm">{domain?.dnsProvider ?? 'Unknown'}</span>
+                )}
+              </MetaRow>
+              <MetaRow label="Region">{isLoading ? <Skeleton className="h-4 w-32" /> : <RegionCell />}</MetaRow>
               <MetaRow label="Created on">
                 {isLoading ? (
                   <Skeleton className="h-4 w-28" />
@@ -213,15 +239,6 @@ export function DomainDetailPage() {
                       day: 'numeric',
                       year: 'numeric',
                     })}
-                  </span>
-                ) : null}
-              </MetaRow>
-              <MetaRow label="Last updated">
-                {isLoading ? (
-                  <Skeleton className="h-4 w-28" />
-                ) : domain ? (
-                  <span className="text-sm">
-                    {formatDistanceToNow(new Date(domain.updatedAt), { addSuffix: true })}
                   </span>
                 ) : null}
               </MetaRow>
