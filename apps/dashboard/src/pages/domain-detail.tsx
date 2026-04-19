@@ -4,6 +4,7 @@ import { RiMore2Fill, RiRefreshLine, RiShieldCheckLine } from 'react-icons/ri';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { DomainRouting } from '@/components/domains/domain-routing';
+import { RetryVerificationIcon } from '@/components/icons/retry-verification';
 import { PageMeta } from '@/components/page-meta';
 import { Badge } from '@/components/primitives/badge';
 import {
@@ -131,9 +132,12 @@ export function DomainDetailPage() {
               size="sm"
               onClick={handleVerify}
               disabled={isFetching || isLoading}
+              className="text-[12px] leading-[16px]"
             >
-              <RiRefreshLine className="size-4" />
-              Retry verification
+              <div className="flex h-4 items-center">
+                <RetryVerificationIcon className="size-3 mr-2" />
+                Retry verification
+              </div>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
