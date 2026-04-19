@@ -15,6 +15,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/primitives/breadcrumb';
 import { Button } from '@/components/primitives/button';
+import { CompactButton } from '@/components/primitives/button-compact';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -136,9 +137,7 @@ export function DomainDetailPage() {
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button mode="ghost" variant="secondary" size="xs" className="size-8">
-                  <RiMore2Fill className="size-4" />
-                </Button>
+                <CompactButton icon={RiMore2Fill} variant="ghost" className="z-10 h-8 w-8 p-0" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem

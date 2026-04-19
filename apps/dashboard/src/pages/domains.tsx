@@ -10,6 +10,7 @@ import { DomainsPaywallBanner } from '@/components/domains/domains-paywall-banne
 import { PageMeta } from '@/components/page-meta';
 import { Badge } from '@/components/primitives/badge';
 import { Button } from '@/components/primitives/button';
+import { CompactButton } from '@/components/primitives/button-compact';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -111,9 +112,7 @@ function DomainRow({ domain, environmentSlug }: { domain: DomainResponse; enviro
       <TableCell className="w-12 text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <Button mode="ghost" variant="secondary" size="xs" className="text-foreground-500 size-8">
-              <RiMore2Fill className="size-4" />
-            </Button>
+            <CompactButton icon={RiMore2Fill} variant="ghost" className="z-10 h-8 w-8 p-0" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
             {isDemo ? (
