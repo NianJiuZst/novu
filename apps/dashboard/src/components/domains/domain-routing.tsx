@@ -156,9 +156,6 @@ function InlineRouteForm({
         </Select>
       </TableCell>
 
-      {/* Status placeholder */}
-      <TableCell />
-
       {/* Actions */}
       <TableCell>
         <div className="flex items-center gap-1">
@@ -177,6 +174,9 @@ function InlineRouteForm({
           </Button>
         </div>
       </TableCell>
+
+      {/* Menu column placeholder */}
+      <TableCell />
     </TableRow>
   );
 }
