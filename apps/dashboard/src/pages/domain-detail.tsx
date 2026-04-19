@@ -137,7 +137,7 @@ export function DomainDetailPage() {
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <CompactButton icon={RiMore2Fill} variant="ghost" className="z-10 h-8 w-8 p-0" />
+                <CompactButton icon={RiMore2Fill} variant="stroke" className="h-8 w-8 p-0" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
