@@ -1,6 +1,6 @@
 import { DomainStatusEnum } from '@novu/shared';
 import { formatDistanceToNow } from 'date-fns';
-import { RiMore2Fill, RiRefreshLine, RiShieldCheckLine } from 'react-icons/ri';
+import { RiAlertFill, RiInformationLine, RiMore2Fill, RiRefreshLine, RiShieldCheckLine } from 'react-icons/ri';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { DomainRouting } from '@/components/domains/domain-routing';
@@ -24,7 +24,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/primitives/dropdown-menu';
 import { InlineToast } from '@/components/primitives/inline-toast';
-import { Separator } from '@/components/primitives/separator';
 import { Skeleton } from '@/components/primitives/skeleton';
 import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner-helpers';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/primitives/table';
@@ -53,14 +52,16 @@ function DomainStatusBadge({ status }: { status: DomainStatusEnum }) {
 function MxRecordStatusBadge({ configured }: { configured: boolean }) {
   if (configured) {
     return (
-      <Badge variant="light" color="green">
+      <Badge variant="lighter" color="green" size="md">
+        <RiShieldCheckLine className="size-4" />
         Verified
       </Badge>
     );
   }
 
   return (
-    <Badge variant="light" color="orange">
+    <Badge variant="lighter" color="orange" size="md">
+      <RiAlertFill className="size-4" />
       Pending
     </Badge>
   );
@@ -158,124 +159,138 @@ export function DomainDetailPage() {
 
         {/* Body */}
         <div className="flex-1 overflow-auto">
-          <div className="mx-auto max-w-5xl space-y-8 px-6 py-8">
-            {/* Pending warning */}
-            {!isLoading && domain?.status === DomainStatusEnum.PENDING && (
-              <InlineToast
-                variant="warning"
-                title="Warning:"
-                description="Domain isn't fully verified yet. Emails won't be received until MX records are configured."
-              />
-            )}
-
-            {/* Two column layout: metadata + DNS records */}
-            <div className="flex gap-8">
-              {/* Left: metadata */}
-              <div className="w-56 shrink-0 space-y-4">
-                <MetaRow label="Status">
-                  {isLoading ? (
-                    <Skeleton className="h-5 w-20" />
-                  ) : domain ? (
-                    <DomainStatusBadge status={domain.status} />
-                  ) : null}
-                </MetaRow>
-                <MetaRow label="Domain">
-                  {isLoading ? <Skeleton className="h-4 w-32" /> : <span className="text-sm">{domain?.name}</span>}
-                </MetaRow>
-                <MetaRow label="Created on">
-                  {isLoading ? (
-                    <Skeleton className="h-4 w-28" />
-                  ) : domain ? (
-                    <span className="text-sm">
-                      {new Date(domain.createdAt).toLocaleDateString('en-US', {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </span>
-                  ) : null}
-                </MetaRow>
-                <MetaRow label="Last updated">
-                  {isLoading ? (
-                    <Skeleton className="h-4 w-28" />
-                  ) : domain ? (
-                    <span className="text-sm">
-                      {formatDistanceToNow(new Date(domain.updatedAt), { addSuffix: true })}
-                    </span>
-                  ) : null}
-                </MetaRow>
-              </div>
-
-              {/* Right: DNS records */}
-              <div className="flex-1 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-foreground-900 text-sm font-semibold uppercase tracking-wide">DNS Records</h2>
-                  <button
-                    className="text-foreground-500 hover:text-foreground-900 flex items-center gap-1 text-xs transition-colors"
-                    onClick={handleVerify}
-                    disabled={isFetching}
-                    type="button"
-                  >
-                    <RiRefreshLine className="size-3" />
-                    Refresh status
-                  </button>
-                </div>
-
-                <div className="rounded-lg border">
-                  <div className="border-b px-4 py-3">
-                    <p className="text-foreground-700 text-sm font-medium">
-                      Receiving emails <span className="text-foreground-400 font-normal">(MX)</span>
-                    </p>
-                    <p className="text-foreground-400 mt-1 text-xs">Update your DNS records to match the following:</p>
-                  </div>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="text-xs">Type</TableHead>
-                        <TableHead className="text-xs">Name</TableHead>
-                        <TableHead className="text-xs">Content</TableHead>
-                        <TableHead className="text-xs">TTL</TableHead>
-                        <TableHead className="text-xs">Priority</TableHead>
-                        <TableHead className="text-xs">Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {isLoading ? (
-                        <TableRow>
-                          <TableCell colSpan={6}>
-                            <Skeleton className="h-8 w-full" />
-                          </TableCell>
-                        </TableRow>
-                      ) : domain?.expectedDnsRecords?.length ? (
-                        domain.expectedDnsRecords.map((record, i) => (
-                          <TableRow key={i}>
-                            <TableCell className="text-sm font-mono">{record.type}</TableCell>
-                            <TableCell className="text-sm font-mono">{record.name}</TableCell>
-                            <TableCell className="max-w-[200px] truncate text-sm font-mono">{record.content}</TableCell>
-                            <TableCell className="text-sm">{record.ttl}</TableCell>
-                            <TableCell className="text-sm">{record.priority}</TableCell>
-                            <TableCell>
-                              <MxRecordStatusBadge configured={domain.mxRecordConfigured} />
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-foreground-400 text-center text-sm">
-                            No DNS records available.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
+          <div className="flex gap-0 h-full">
+            {/* Left: metadata */}
+            <div className="w-72 shrink-0 px-6 py-8 space-y-3">
+              <MetaRow label="Status">
+                {isLoading ? (
+                  <Skeleton className="h-5 w-20" />
+                ) : domain ? (
+                  <DomainStatusBadge status={domain.status} />
+                ) : null}
+              </MetaRow>
+              <MetaRow label="Domain">
+                {isLoading ? <Skeleton className="h-4 w-32" /> : <span className="text-sm">{domain?.name}</span>}
+              </MetaRow>
+              <MetaRow label="Created on">
+                {isLoading ? (
+                  <Skeleton className="h-4 w-28" />
+                ) : domain ? (
+                  <span className="text-sm">
+                    {new Date(domain.createdAt).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </span>
+                ) : null}
+              </MetaRow>
+              <MetaRow label="Last updated">
+                {isLoading ? (
+                  <Skeleton className="h-4 w-28" />
+                ) : domain ? (
+                  <span className="text-sm">
+                    {formatDistanceToNow(new Date(domain.updatedAt), { addSuffix: true })}
+                  </span>
+                ) : null}
+              </MetaRow>
             </div>
 
-            <Separator />
+            {/* Right: warning + DNS records + routing */}
+            <div className="flex-1 overflow-auto px-6 py-8 space-y-6">
+              {/* Pending warning */}
+              {!isLoading && domain?.status === DomainStatusEnum.PENDING && (
+                <InlineToast
+                  variant="warning"
+                  title="Warning:"
+                  description="Domain isn't fully verified yet. Emails won't be received until MX records are configured."
+                />
+              )}
 
-            {/* Routing section */}
-            {domain && <DomainRouting domain={domain} />}
+              {/* DNS Records */}
+              <div className="space-y-3">
+                <p className="font-mono text-xs font-medium tracking-tight text-foreground-500 uppercase">
+                  DNS Records
+                </p>
+
+                <div className="rounded-lg border p-3 space-y-3">
+                  {/* Card header row */}
+                  <div className="flex items-center gap-1 justify-between">
+                    <div className="flex items-center gap-1">
+                      <p className="text-sm font-medium text-foreground-900">
+                        Receiving emails <span className="font-normal text-foreground-400">(MX)</span>
+                      </p>
+                      <RiInformationLine className="size-4 shrink-0 text-foreground-400" />
+                    </div>
+                    <button
+                      className="text-foreground-500 hover:text-foreground-900 flex items-center gap-1 text-xs transition-colors"
+                      onClick={handleVerify}
+                      disabled={isFetching}
+                      type="button"
+                    >
+                      <RiRefreshLine className="size-3" />
+                      Refresh status
+                    </button>
+                  </div>
+
+                  <p className="text-xs font-medium text-foreground-400">
+                    Update your DNS records on Cloudflare to match the following:
+                  </p>
+
+                  <div className="rounded-lg overflow-hidden border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-xs w-[60px]">Type</TableHead>
+                          <TableHead className="text-xs">Name</TableHead>
+                          <TableHead className="text-xs">Content</TableHead>
+                          <TableHead className="text-xs w-[75px]">TTL</TableHead>
+                          <TableHead className="text-xs w-[75px]">Priority</TableHead>
+                          <TableHead className="text-xs w-[150px]">Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {isLoading ? (
+                          <TableRow>
+                            <TableCell colSpan={6}>
+                              <Skeleton className="h-8 w-full" />
+                            </TableCell>
+                          </TableRow>
+                        ) : domain?.expectedDnsRecords?.length ? (
+                          domain.expectedDnsRecords.map((record, i) => (
+                            <TableRow key={i}>
+                              <TableCell className="font-mono text-xs font-medium text-foreground-500">
+                                {record.type}
+                              </TableCell>
+                              <TableCell className="font-mono text-xs font-medium text-foreground-500">
+                                {record.name}
+                              </TableCell>
+                              <TableCell className="max-w-[200px] truncate font-mono text-xs font-medium text-foreground-500">
+                                {record.content}
+                              </TableCell>
+                              <TableCell className="text-xs text-foreground-500">{record.ttl}</TableCell>
+                              <TableCell className="text-xs text-foreground-500">{record.priority}</TableCell>
+                              <TableCell>
+                                <MxRecordStatusBadge configured={domain.mxRecordConfigured} />
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-foreground-400 text-center text-sm">
+                              No DNS records available.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </div>
+
+              {/* Routing section */}
+              {domain && <DomainRouting domain={domain} />}
+            </div>
           </div>
         </div>
       </div>
@@ -285,9 +300,9 @@ export function DomainDetailPage() {
 
 function MetaRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-1">
-      <p className="text-foreground-400 text-xs">{label}</p>
-      <div className="text-foreground-900">{children}</div>
+    <div className="flex items-center justify-between gap-4 py-1">
+      <p className="text-foreground-400 shrink-0 text-sm">{label}</p>
+      <div className="text-foreground-900 text-right">{children}</div>
     </div>
   );
 }
