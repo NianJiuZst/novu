@@ -36,8 +36,6 @@ import { GetDomainsCommand } from './usecases/get-domains/get-domains.command';
 import { GetDomains } from './usecases/get-domains/get-domains.usecase';
 import { UpdateRouteCommand } from './usecases/update-route/update-route.command';
 import { UpdateRoute } from './usecases/update-route/update-route.usecase';
-import { VerifyDomainCommand } from './usecases/verify-domain/verify-domain.command';
-import { VerifyDomain } from './usecases/verify-domain/verify-domain.usecase';
 
 @ThrottlerCategory(ApiRateLimitCategoryEnum.CONFIGURATION)
 @ApiCommonResponses()
@@ -52,7 +50,6 @@ export class DomainsController {
     private readonly getDomainsUsecase: GetDomains,
     private readonly getDomainUsecase: GetDomain,
     private readonly deleteDomainUsecase: DeleteDomain,
-    private readonly verifyDomainUsecase: VerifyDomain,
     private readonly createRouteUsecase: CreateRoute,
     private readonly updateRouteUsecase: UpdateRoute,
     private readonly deleteRouteUsecase: DeleteRoute
@@ -109,23 +106,6 @@ export class DomainsController {
   async deleteDomain(@Param('domainId') domainId: string, @UserSession() user: UserSessionData): Promise<void> {
     return this.deleteDomainUsecase.execute(
       DeleteDomainCommand.create({
-        environmentId: user.environmentId,
-        organizationId: user.organizationId,
-        userId: user._id,
-        domainId,
-      })
-    );
-  }
-
-  @Post('/:domainId/verify')
-  @ApiOperation({ summary: 'Trigger MX record verification for a domain' })
-  @ApiResponse(DomainResponseDto, 200)
-  async verifyDomain(
-    @Param('domainId') domainId: string,
-    @UserSession() user: UserSessionData
-  ): Promise<DomainResponseDto> {
-    return this.verifyDomainUsecase.execute(
-      VerifyDomainCommand.create({
         environmentId: user.environmentId,
         organizationId: user.organizationId,
         userId: user._id,

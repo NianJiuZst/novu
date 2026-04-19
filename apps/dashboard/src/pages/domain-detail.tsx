@@ -27,7 +27,7 @@ import { Skeleton } from '@/components/primitives/skeleton';
 import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner-helpers';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/primitives/table';
 import { useEnvironment } from '@/context/environment/hooks';
-import { useFetchDomain, useVerifyDomain } from '@/hooks/use-domain';
+import { useFetchDomain, useRefreshDomain } from '@/hooks/use-domain';
 import { useDeleteDomain } from '@/hooks/use-domains';
 import { buildRoute, ROUTES } from '@/utils/routes';
 
@@ -69,21 +69,17 @@ export function DomainDetailPage() {
   const { currentEnvironment } = useEnvironment();
   const navigate = useNavigate();
 
-  const { data: domain, isLoading } = useFetchDomain(domainId);
-  const verifyDomain = useVerifyDomain(domainId);
+  const { data: domain, isLoading, isFetching } = useFetchDomain(domainId);
+  const { refresh: refreshDomain } = useRefreshDomain(domainId);
   const deleteDomain = useDeleteDomain();
 
   const domainsHref = currentEnvironment?.slug
     ? buildRoute(ROUTES.DOMAINS, { environmentSlug: currentEnvironment.slug })
     : ROUTES.DOMAINS;
 
-  const handleVerify = async () => {
-    try {
-      await verifyDomain.mutateAsync();
-      showSuccessToast('Verification status refreshed.');
-    } catch {
-      showErrorToast('Failed to verify domain.');
-    }
+  const handleVerify = () => {
+    refreshDomain();
+    showSuccessToast('Verification status refreshed.');
   };
 
   const handleDelete = async () => {
@@ -133,7 +129,7 @@ export function DomainDetailPage() {
               variant="secondary"
               size="sm"
               onClick={handleVerify}
-              disabled={verifyDomain.isPending || isLoading}
+              disabled={isFetching || isLoading}
             >
               <RiRefreshLine className="size-4" />
               Retry verification
@@ -214,7 +210,7 @@ export function DomainDetailPage() {
                   <button
                     className="text-foreground-500 hover:text-foreground-900 flex items-center gap-1 text-xs transition-colors"
                     onClick={handleVerify}
-                    disabled={verifyDomain.isPending}
+                    disabled={isFetching}
                     type="button"
                   >
                     <RiRefreshLine className="size-3" />

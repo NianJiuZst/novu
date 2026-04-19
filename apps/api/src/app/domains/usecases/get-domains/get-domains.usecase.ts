@@ -37,9 +37,6 @@ export class GetDomains {
       return null;
     }
 
-    // const orgSlug = slugify(organization.name, { separator: '-', lowercase: true });
-    // const demoDomainName = `${orgSlug}.${mailServerDomain}`;
-
     const demoDomainName = mailServerDomain;
 
     const existing = await this.domainRepository.findOne(

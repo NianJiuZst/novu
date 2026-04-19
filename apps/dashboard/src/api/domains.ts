@@ -53,12 +53,6 @@ export const createDomain = async (body: CreateDomainBody, environment: IEnviron
 export const deleteDomain = (domainId: string, environment: IEnvironment): Promise<void> =>
   del(`/domains/${domainId}`, { environment });
 
-export const verifyDomain = async (domainId: string, environment: IEnvironment): Promise<DomainResponse> => {
-  const { data } = await post<{ data: DomainResponse }>(`/domains/${domainId}/verify`, { environment });
-
-  return data;
-};
-
 export const createRoute = async (
   domainId: string,
   body: CreateRouteBody,
