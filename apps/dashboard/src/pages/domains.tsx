@@ -115,7 +115,7 @@ function DomainRow({ domain, environmentSlug }: { domain: DomainResponse; enviro
               <RiMore2Fill className="size-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
             {isDemo ? (
               <Tooltip>
                 <TooltipTrigger asChild>
