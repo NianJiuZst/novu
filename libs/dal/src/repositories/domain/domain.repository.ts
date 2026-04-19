@@ -32,14 +32,22 @@ export class DomainRepository extends BaseRepositoryV2<DomainDBModel, DomainEnti
    * Domain names are globally unique, so no environment/org filter is needed —
    * the cast bypasses the EnforceEnvOrOrgIds constraint intentionally.
    */
-  async findByRouteAddress(address: string): Promise<DomainEntity | null> {
+  async findByRouteAddress(
+    address: string
+  ): Promise<Pick<DomainEntity, '_id' | 'name' | 'status' | 'mxRecordConfigured' | 'routes'> | null> {
     const domainName = address.split('@')[1];
 
     if (!domainName) {
       return null;
     }
 
-    return this.findOne({ name: domainName } as unknown as FilterQuery<DomainDBModel> & EnforceEnvOrOrgIds, '*');
+    return this.findOne({ name: domainName } as unknown as FilterQuery<DomainDBModel> & EnforceEnvOrOrgIds, [
+      '_id',
+      'name',
+      'status',
+      'mxRecordConfigured',
+      'routes',
+    ]);
   }
 
   async findByEnvironment(environmentId: string, organizationId: string): Promise<DomainEntity[]> {
@@ -85,13 +93,15 @@ export class DomainRepository extends BaseRepositoryV2<DomainDBModel, DomainEnti
     const id = before || after;
 
     if (id) {
+      const cursorFields = sortBy === '_id' ? ['_id'] : ['_id', sortBy];
+
       domain = await this.findOne(
         {
           _environmentId: environmentId,
           _organizationId: organizationId,
           _id: id,
         },
-        '*'
+        cursorFields as (keyof DomainEntity)[]
       );
 
       if (!domain) {
