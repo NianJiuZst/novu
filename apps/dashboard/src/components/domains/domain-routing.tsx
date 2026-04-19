@@ -1,6 +1,6 @@
 import { DomainRouteTypeEnum } from '@novu/shared';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import { RiAddLine, RiMore2Fill, RiRobot2Line, RiWebhookLine } from 'react-icons/ri';
 import { listAgents } from '@/api/agents';
 import type { DomainResponse, DomainRouteResponse } from '@/api/domains';
@@ -33,6 +33,10 @@ const DEFAULT_ROUTE_FORM: RouteFormState = {
 
 type DomainRoutingProps = {
   domain: DomainResponse;
+};
+
+export type DomainRoutingHandle = {
+  startAdding: () => void;
 };
 
 function useAgents() {
@@ -236,7 +240,10 @@ function ExistingRouteRow({
   );
 }
 
-export function DomainRouting({ domain }: DomainRoutingProps) {
+export const DomainRouting = forwardRef<DomainRoutingHandle, DomainRoutingProps>(function DomainRouting(
+  { domain },
+  ref
+) {
   const { data: agents = [] } = useAgents();
   const createRoute = useCreateRoute(domain._id);
   const updateRoute = useUpdateRoute(domain._id);
@@ -244,6 +251,13 @@ export function DomainRouting({ domain }: DomainRoutingProps) {
 
   const [isAdding, setIsAdding] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  const startAdding = () => {
+    setIsAdding(true);
+    setEditingIndex(null);
+  };
+
+  useImperativeHandle(ref, () => ({ startAdding }));
 
   const handleCreate = async (values: RouteFormState) => {
     try {
@@ -274,98 +288,74 @@ export function DomainRouting({ domain }: DomainRoutingProps) {
   const agentOptions = agents.map((a) => ({ _id: a._id, name: a.name, identifier: a.identifier }));
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-foreground-900 text-sm font-semibold uppercase tracking-wide">Routing</h2>
-        <Button
-          size="sm"
-          mode="outline"
-          variant="secondary"
-          onClick={() => {
-            setIsAdding(true);
-            setEditingIndex(null);
-          }}
-        >
-          <RiAddLine className="size-4" />
-          Add new route
-        </Button>
-      </div>
-
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Address</TableHead>
-              <TableHead>Destination</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {domain.routes.map((route, index) =>
-              editingIndex === index ? (
-                <InlineRouteForm
-                  key={index}
-                  domainName={domain.name}
-                  initialValues={{ address: route.address, destination: route.destination, type: route.type }}
-                  agentOptions={agentOptions}
-                  onSave={(values) => handleUpdate(index, values)}
-                  onCancel={() => setEditingIndex(null)}
-                  isSaving={updateRoute.isPending}
-                />
-              ) : (
-                <ExistingRouteRow
-                  key={index}
-                  route={route}
-                  routeIndex={index}
-                  domainName={domain.name}
-                  agentOptions={agentOptions}
-                  onDelete={handleDelete}
-                  onEdit={setEditingIndex}
-                  isDeleting={deleteRoute.isPending}
-                />
-              )
-            )}
-
-            {isAdding && (
+    <div className="rounded-lg border bg-white">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Address</TableHead>
+            <TableHead>Destination</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {domain.routes.map((route, index) =>
+            editingIndex === index ? (
               <InlineRouteForm
+                key={index}
+                domainName={domain.name}
+                initialValues={{ address: route.address, destination: route.destination, type: route.type }}
+                agentOptions={agentOptions}
+                onSave={(values) => handleUpdate(index, values)}
+                onCancel={() => setEditingIndex(null)}
+                isSaving={updateRoute.isPending}
+              />
+            ) : (
+              <ExistingRouteRow
+                key={index}
+                route={route}
+                routeIndex={index}
                 domainName={domain.name}
                 agentOptions={agentOptions}
-                onSave={handleCreate}
-                onCancel={() => setIsAdding(false)}
-                isSaving={createRoute.isPending}
+                onDelete={handleDelete}
+                onEdit={setEditingIndex}
+                isDeleting={deleteRoute.isPending}
               />
-            )}
+            )
+          )}
 
-            {domain.routes.length === 0 && !isAdding && (
-              <TableRow>
-                <TableCell colSpan={5} className="py-16 text-center">
-                  <div className="flex flex-col items-center gap-6">
-                    <RoutingEmptyIllustration />
-                    <div className="space-y-1 text-center">
-                      <p className="text-foreground-600 text-sm font-medium">No routes configured</p>
-                      <p className="text-foreground-400 text-xs">
-                        Configure routes to route the incoming emails to relevant agents and webhooks.
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      mode="outline"
-                      variant="secondary"
-                      className="mx-auto"
-                      onClick={() => setIsAdding(true)}
-                    >
-                      <RiAddLine className="size-4" />
-                      Add new route
-                    </Button>
+          {isAdding && (
+            <InlineRouteForm
+              domainName={domain.name}
+              agentOptions={agentOptions}
+              onSave={handleCreate}
+              onCancel={() => setIsAdding(false)}
+              isSaving={createRoute.isPending}
+            />
+          )}
+
+          {domain.routes.length === 0 && !isAdding && (
+            <TableRow>
+              <TableCell colSpan={5} className="py-16 text-center">
+                <div className="flex flex-col items-center gap-6">
+                  <RoutingEmptyIllustration />
+                  <div className="space-y-1 text-center">
+                    <p className="text-foreground-600 text-sm font-medium">No routes configured</p>
+                    <p className="text-foreground-400 text-xs">
+                      Configure routes to route the incoming emails to relevant agents and webhooks.
+                    </p>
                   </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                  <Button size="sm" mode="outline" variant="secondary" className="mx-auto" onClick={startAdding}>
+                    <RiAddLine className="size-4" />
+                    Add new route
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
-}
+});
