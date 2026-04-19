@@ -208,12 +208,12 @@ export function DomainDetailPage() {
               )}
 
               {/* DNS Records */}
-              <div className="space-y-3">
-                <p className="font-mono text-xs font-medium tracking-tight text-foreground-500 uppercase">
+              <div className="rounded-lg bg-neutral-alpha-50 p-1 space-y-1">
+                <p className="font-mono text-xs font-medium tracking-tight text-foreground-500 uppercase px-2 py-1">
                   DNS Records
                 </p>
 
-                <div className="rounded-lg border p-3 space-y-3">
+                <div className="rounded-lg border bg-white p-3 space-y-3">
                   {/* Card header row */}
                   <div className="flex items-center gap-1 justify-between">
                     <div className="flex items-center gap-1">
