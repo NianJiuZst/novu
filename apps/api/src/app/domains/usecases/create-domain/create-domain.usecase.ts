@@ -1,4 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
+import { ResourceValidatorService } from '@novu/application-generic';
 import { DomainRepository } from '@novu/dal';
 import { DomainStatusEnum } from '@novu/shared';
 
@@ -8,9 +9,14 @@ import { CreateDomainCommand } from './create-domain.command';
 
 @Injectable()
 export class CreateDomain {
-  constructor(private readonly domainRepository: DomainRepository) {}
+  constructor(
+    private readonly domainRepository: DomainRepository,
+    private readonly resourceValidatorService: ResourceValidatorService
+  ) {}
 
   async execute(command: CreateDomainCommand): Promise<DomainResponseDto> {
+    await this.resourceValidatorService.validateDomainsLimit(command.organizationId);
+
     const existing = await this.domainRepository.findOne(
       {
         name: command.name,
