@@ -5,6 +5,7 @@ import { RiAddLine, RiMore2Fill, RiRobot2Line, RiWebhookLine } from 'react-icons
 import { listAgents } from '@/api/agents';
 import type { DomainResponse, DomainRouteResponse } from '@/api/domains';
 import { Button } from '@/components/primitives/button';
+import { CompactButton } from '@/components/primitives/button-compact';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -175,8 +176,9 @@ function InlineRouteForm({
         </div>
       </TableCell>
 
-      {/* Menu column placeholder */}
-      <TableCell />
+      <TableCell className="w-12 text-right">
+        <CompactButton icon={RiMore2Fill} variant="ghost" className="h-8 w-8 p-0" disabled />
+      </TableCell>
     </TableRow>
   );
 }
@@ -220,9 +222,7 @@ function ExistingRouteRow({
       <TableCell className="w-12 text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button mode="ghost" variant="secondary" size="xs" className="text-foreground-500 size-8">
-              <RiMore2Fill className="size-4" />
-            </Button>
+            <CompactButton icon={RiMore2Fill} variant="ghost" className="h-8 w-8 p-0" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onSelect={() => onEdit(routeIndex)}>Edit</DropdownMenuItem>
