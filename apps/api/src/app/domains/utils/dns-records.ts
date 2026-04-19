@@ -1,7 +1,11 @@
 import { ExpectedDnsRecordDto } from '../dtos/expected-dns-record.dto';
 
+export function getMailServerDomain(): string | undefined {
+  return process.env.MAIL_SERVER_DOMAIN?.replace('https://', '').replace('/', '') || undefined;
+}
+
 export function buildExpectedDnsRecords(domainName: string): ExpectedDnsRecordDto[] {
-  const mailServerDomain = process.env.MAIL_SERVER_DOMAIN?.replace('https://', '').replace('/', '') ?? '';
+  const mailServerDomain = getMailServerDomain() ?? '';
 
   return [
     {

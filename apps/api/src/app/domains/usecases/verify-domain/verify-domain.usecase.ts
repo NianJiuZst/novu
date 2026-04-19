@@ -5,7 +5,7 @@ import { DomainStatusEnum } from '@novu/shared';
 
 import { DomainResponseDto } from '../../dtos/domain-response.dto';
 import { toDomainResponse } from '../../mappers/domain-response.mapper';
-import { buildExpectedDnsRecords } from '../../utils/dns-records';
+import { buildExpectedDnsRecords, getMailServerDomain } from '../../utils/dns-records';
 import { VerifyDomainCommand } from './verify-domain.command';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class VerifyDomain {
       throw new NotFoundException(`Domain with id "${command.domainId}" not found.`);
     }
 
-    const INBOUND_DOMAIN = process.env.MAIL_SERVER_DOMAIN?.replace('https://', '').replace('/', '');
+    const INBOUND_DOMAIN = getMailServerDomain();
     if (!INBOUND_DOMAIN) {
       throw new BadRequestException('MAIL_SERVER_DOMAIN is not defined as an environment variable');
     }

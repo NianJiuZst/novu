@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { DomainRepository, OrganizationRepository } from '@novu/dal';
-import { DomainStatusEnum, slugify } from '@novu/shared';
+import { DomainStatusEnum } from '@novu/shared';
 
 import { DomainResponseDto } from '../../dtos/domain-response.dto';
 import { toDomainResponse } from '../../mappers/domain-response.mapper';
+import { getMailServerDomain } from '../../utils/dns-records';
 import { GetDomainsCommand } from './get-domains.command';
 
 @Injectable()
@@ -27,8 +28,8 @@ export class GetDomains {
   }
 
   private async getOrCreateDemoDomain(command: GetDomainsCommand) {
-    const mailServerDomain = process.env.MAIL_SERVER_DOMAIN?.replace('https://', '').replace('/', '');
-    if (!mailServerDomain) {
+    const demoDomainName = getMailServerDomain();
+    if (!demoDomainName) {
       return null;
     }
 
@@ -37,13 +38,10 @@ export class GetDomains {
       return null;
     }
 
-    const demoDomainName = mailServerDomain;
-
     const existing = await this.domainRepository.findOne(
       {
         name: demoDomainName,
         _organizationId: command.organizationId,
-        _environmentId: command.environmentId,
       },
       '*'
     );
@@ -57,7 +55,6 @@ export class GetDomains {
       status: DomainStatusEnum.VERIFIED,
       mxRecordConfigured: true,
       routes: [],
-      _environmentId: command.environmentId,
       _organizationId: command.organizationId,
     });
   }

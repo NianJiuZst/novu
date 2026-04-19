@@ -4,6 +4,8 @@ import mongoose, { Schema } from 'mongoose';
 import { schemaOptions } from '../schema-default.options';
 import { DomainDBModel } from './domain.entity';
 
+const NOVU_DEMO_DOMAIN = process.env.MAIL_SERVER_DOMAIN?.replace('https://', '').replace('/', '');
+
 const domainSchema = new Schema<DomainDBModel>(
   {
     name: {
@@ -39,10 +41,22 @@ const domainSchema = new Schema<DomainDBModel>(
 );
 
 /*
- * Globally unique: a DNS domain name is a global resource and cannot be claimed
- * by more than one account across all environments.
+ * Custom domains are globally unique — a DNS name cannot be claimed by more
+ * than one organisation. The demo/Novu domain is excluded so every org can
+ * share it.
+ *
+ * Note: For self-hosted installations, there is no need to handle the demo domain index,
+ * as the concept of a global demo/Novu domain is only relevant for cloud deployments.
  */
-domainSchema.index({ name: 1 }, { unique: true });
+if (NOVU_DEMO_DOMAIN) {
+  domainSchema.index({ name: 1 }, { unique: true, partialFilterExpression: { name: { $ne: NOVU_DEMO_DOMAIN } } });
+  domainSchema.index(
+    { name: 1, _organizationId: 1 },
+    { unique: true, partialFilterExpression: { name: NOVU_DEMO_DOMAIN } }
+  );
+} else {
+  domainSchema.index({ name: 1 }, { unique: true });
+}
 
 domainSchema.index({ _environmentId: 1 });
 
