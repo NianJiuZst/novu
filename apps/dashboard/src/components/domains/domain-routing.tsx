@@ -17,6 +17,7 @@ import { showErrorToast } from '@/components/primitives/sonner-helpers';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/primitives/table';
 import { useEnvironment } from '@/context/environment/hooks';
 import { useCreateRoute, useDeleteRoute, useUpdateRoute } from '@/hooks/use-domain-routes';
+import { RoutingEmptyIllustration } from './routing-empty-illustration';
 
 type RouteFormState = {
   address: string;
@@ -27,7 +28,7 @@ type RouteFormState = {
 const DEFAULT_ROUTE_FORM: RouteFormState = {
   address: '',
   destination: '',
-  type: DomainRouteTypeEnum.WEBHOOK,
+  type: DomainRouteTypeEnum.AGENT,
 };
 
 type DomainRoutingProps = {
@@ -145,8 +146,8 @@ function InlineRouteForm({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={DomainRouteTypeEnum.WEBHOOK}>Webhook</SelectItem>
             <SelectItem value={DomainRouteTypeEnum.AGENT}>Agent</SelectItem>
+            <SelectItem value={DomainRouteTypeEnum.WEBHOOK}>Webhook</SelectItem>
           </SelectContent>
         </Select>
       </TableCell>
@@ -340,16 +341,19 @@ export function DomainRouting({ domain }: DomainRoutingProps) {
             {domain.routes.length === 0 && !isAdding && (
               <TableRow>
                 <TableCell colSpan={5} className="py-16 text-center">
-                  <div className="space-y-2">
-                    <p className="text-foreground-600 text-sm font-medium">No routes configured</p>
-                    <p className="text-foreground-400 text-xs">
-                      Configure routes to route the incoming emails to relevant agents and webhooks.
-                    </p>
+                  <div className="flex flex-col items-center gap-6">
+                    <RoutingEmptyIllustration />
+                    <div className="space-y-1 text-center">
+                      <p className="text-foreground-600 text-sm font-medium">No routes configured</p>
+                      <p className="text-foreground-400 text-xs">
+                        Configure routes to route the incoming emails to relevant agents and webhooks.
+                      </p>
+                    </div>
                     <Button
                       size="sm"
                       mode="outline"
                       variant="secondary"
-                      className="mt-2"
+                      className="mx-auto"
                       onClick={() => setIsAdding(true)}
                     >
                       <RiAddLine className="size-4" />

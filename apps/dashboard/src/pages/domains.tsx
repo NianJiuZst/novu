@@ -1,4 +1,4 @@
-import { DomainStatusEnum } from '@novu/shared';
+import { ApiServiceLevelEnum, DomainStatusEnum, FeatureNameEnum, getFeatureForTierAsBoolean } from '@novu/shared';
 import { formatDistanceToNow } from 'date-fns';
 import { useState } from 'react';
 import { RiAddLine, RiMore2Fill, RiSearchLine } from 'react-icons/ri';
@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import type { DomainResponse } from '@/api/domains';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import { AddDomainDialog } from '@/components/domains/add-domain-dialog';
+import { DomainsPaywallBanner } from '@/components/domains/domains-paywall-banner';
 import { PageMeta } from '@/components/page-meta';
 import { Badge } from '@/components/primitives/badge';
 import { Button } from '@/components/primitives/button';
@@ -18,9 +19,18 @@ import {
 import { Input } from '@/components/primitives/input';
 import { showErrorToast, showSuccessToast } from '@/components/primitives/sonner-helpers';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/primitives/table';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/primitives/tooltip';
 import { useEnvironment } from '@/context/environment/hooks';
+import { DEFAULT_REGION, REGIONS } from '@/context/region/region-config';
 import { useDeleteDomain, useFetchDomains } from '@/hooks/use-domains';
+import { useFetchSubscription } from '@/hooks/use-fetch-subscription';
 import { buildRoute, ROUTES } from '@/utils/routes';
+
+const DEMO_DOMAIN_SUFFIX = 'novu.co';
+
+function isDemoDomain(domainName: string): boolean {
+  return domainName.endsWith(`.${DEMO_DOMAIN_SUFFIX}`) || domainName === DEMO_DOMAIN_SUFFIX;
+}
 
 function DomainStatusBadge({ status }: { status: DomainStatusEnum }) {
   if (status === DomainStatusEnum.VERIFIED) {
@@ -38,9 +48,27 @@ function DomainStatusBadge({ status }: { status: DomainStatusEnum }) {
   );
 }
 
+function RegionCell() {
+  const region = REGIONS.find((r) => r.code === DEFAULT_REGION) ?? REGIONS[0];
+
+  if (!region) {
+    return null;
+  }
+
+  const regionLabel = region.awsRegion ? `${region.name} (${region.awsRegion})` : region.name;
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-base leading-none">{region.flag}</span>
+      <span>{regionLabel}</span>
+    </div>
+  );
+}
+
 function DomainRow({ domain, environmentSlug }: { domain: DomainResponse; environmentSlug: string }) {
   const navigate = useNavigate();
   const deleteDomain = useDeleteDomain();
+  const isDemo = isDemoDomain(domain.name);
 
   const handleDelete = async (e: Event) => {
     e.stopPropagation();
@@ -58,9 +86,21 @@ function DomainRow({ domain, environmentSlug }: { domain: DomainResponse; enviro
 
   return (
     <TableRow className="hover:bg-neutral-alpha-50 cursor-pointer" onClick={handleRowClick}>
-      <TableCell className="font-medium">{domain.name}</TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <span className="font-code text-sm font-medium">{domain.name}</span>
+          {isDemo && (
+            <Badge variant="light" color="orange" size="sm">
+              DEMO
+            </Badge>
+          )}
+        </div>
+      </TableCell>
       <TableCell>
         <DomainStatusBadge status={domain.status} />
+      </TableCell>
+      <TableCell className="text-foreground-500 text-sm">
+        <RegionCell />
       </TableCell>
       <TableCell className="text-foreground-500 text-sm">
         {formatDistanceToNow(new Date(domain.createdAt), { addSuffix: true })}
@@ -76,13 +116,26 @@ function DomainRow({ domain, environmentSlug }: { domain: DomainResponse; enviro
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onSelect={handleDelete}
-              disabled={deleteDomain.isPending}
-            >
-              Delete domain
-            </DropdownMenuItem>
+            {isDemo ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="block">
+                    <DropdownMenuItem disabled className="text-destructive focus:text-destructive">
+                      Delete domain
+                    </DropdownMenuItem>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>The demo domain cannot be deleted.</TooltipContent>
+              </Tooltip>
+            ) : (
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={handleDelete}
+                disabled={deleteDomain.isPending}
+              >
+                Delete domain
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
@@ -93,8 +146,14 @@ function DomainRow({ domain, environmentSlug }: { domain: DomainResponse; enviro
 export function DomainsPage() {
   const { currentEnvironment } = useEnvironment();
   const { data: domains, isLoading } = useFetchDomains();
+  const { subscription } = useFetchSubscription();
   const [search, setSearch] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
+  const domainsEnabled = getFeatureForTierAsBoolean(
+    FeatureNameEnum.DOMAINS_BOOLEAN,
+    subscription?.apiServiceLevel || ApiServiceLevelEnum.FREE
+  );
 
   const filtered = (domains ?? []).filter((d) => d.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -106,21 +165,25 @@ export function DomainsPage() {
           <h1 className="text-xl font-semibold">Domains</h1>
         </div>
 
-        <div className="flex items-center gap-3 px-6 py-4">
-          <div className="relative flex-1 max-w-xs">
-            <RiSearchLine className="text-foreground-400 absolute left-3 top-1/2 size-4 -translate-y-1/2" />
-            <Input
-              className="pl-9"
-              placeholder="Search domains..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+        {!domainsEnabled && <DomainsPaywallBanner />}
+
+        {domainsEnabled && (
+          <div className="flex items-center gap-3 px-6 py-4">
+            <div className="relative max-w-xs flex-1">
+              <RiSearchLine className="text-foreground-400 absolute left-3 top-1/2 size-4 -translate-y-1/2" />
+              <Input
+                className="pl-9"
+                placeholder="Search domains..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <Button onClick={() => setIsAddDialogOpen(true)}>
+              <RiAddLine className="size-4" />
+              Add domain
+            </Button>
           </div>
-          <Button onClick={() => setIsAddDialogOpen(true)}>
-            <RiAddLine className="size-4" />
-            Add domain
-          </Button>
-        </div>
+        )}
 
         <div className="flex-1 overflow-auto px-6 pb-6">
           <Table isLoading={isLoading} loadingRowsCount={3}>
@@ -128,6 +191,7 @@ export function DomainsPage() {
               <TableRow>
                 <TableHead>Domain</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Region</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead>Last updated</TableHead>
                 <TableHead />
@@ -137,7 +201,7 @@ export function DomainsPage() {
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-foreground-400 py-16 text-center">
+                    <TableCell colSpan={6} className="text-foreground-400 py-16 text-center">
                       {search
                         ? 'No domains match your search.'
                         : 'No domains yet. Add your first domain to get started.'}
@@ -154,7 +218,7 @@ export function DomainsPage() {
         </div>
       </div>
 
-      <AddDomainDialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
+      {domainsEnabled && <AddDomainDialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />}
     </DashboardLayout>
   );
 }
